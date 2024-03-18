@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
+using Avalonia.Media;
 
 namespace pluginVerilog.NavigatePanel
 {
@@ -29,6 +30,14 @@ namespace pluginVerilog.NavigatePanel
             get
             {
                 return Item as Data.VerilogHeaderInstance;
+            }
+        }
+
+        public override IImage? Image
+        {
+            get
+            {
+                return AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap("CodeEditor2VerilogPlugin/Assets/Icons/verilogHeaderPaper.svg");
             }
         }
 

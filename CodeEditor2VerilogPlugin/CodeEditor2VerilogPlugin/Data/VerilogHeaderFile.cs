@@ -40,7 +40,7 @@ namespace pluginVerilog.Data
         {
             get
             {
-                if (document != null && document as CodeEditor2.CodeEditor.CodeDocument == null) System.Diagnostics.Debugger.Break();
+                if (document != null && document as CodeEditor.CodeDocument == null) System.Diagnostics.Debugger.Break();
                 if (document == null)
                 {
                     try
@@ -59,8 +59,8 @@ namespace pluginVerilog.Data
             }
             protected set
             {
-                if (value != null && value as CodeEditor2.CodeEditor.CodeDocument == null) System.Diagnostics.Debugger.Break();
-                document = value as CodeEditor2.CodeEditor.CodeDocument;
+                if (value != null && value as CodeEditor.CodeDocument == null) System.Diagnostics.Debugger.Break();
+                document = value as CodeEditor.CodeDocument;
             }
         }
 
@@ -76,7 +76,7 @@ namespace pluginVerilog.Data
             {
                 using (System.IO.StreamReader sr = new System.IO.StreamReader(Project.GetAbsolutePath(RelativePath)))
                 {
-                    document = new CodeEditor2.CodeEditor.CodeDocument(this);
+                    document = new CodeEditor.CodeDocument(this);
                     string text = sr.ReadToEnd();
                     document.Replace(0, 0, 0, text);
                     document.ClearHistory();

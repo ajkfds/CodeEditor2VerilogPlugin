@@ -31,6 +31,7 @@ namespace pluginVerilog
                     Avalonia.Media.Colors.Black,                     // 14
                     Avalonia.Media.Colors.Black                      // 15
             };
+
         }
 
         public static byte ColorIndex(ColorType colorType)

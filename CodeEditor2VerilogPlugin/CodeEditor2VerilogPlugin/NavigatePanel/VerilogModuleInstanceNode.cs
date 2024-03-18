@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
 using pluginVerilog.Verilog.BuildingBlocks;
+using Avalonia.Media;
 
 namespace pluginVerilog.NavigatePanel
 {
@@ -69,6 +70,14 @@ namespace pluginVerilog.NavigatePanel
             {
                 Data.VerilogModuleInstance instance = Item as Data.VerilogModuleInstance;
                 return instance.Name + " - " + instance.ModuleName;
+            }
+        }
+
+        public override IImage? Image
+        {
+            get
+            {
+                return AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap("CodeEditor2VerilogPlugin/Assets/Icons/verilogPaper.svg");
             }
         }
 

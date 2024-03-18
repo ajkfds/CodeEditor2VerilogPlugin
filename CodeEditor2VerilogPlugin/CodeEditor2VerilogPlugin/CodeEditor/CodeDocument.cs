@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Avalonia.Media;
+using AvaloniaEdit.Document;
+using CodeEditor2.CodeEditor;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,6 +20,24 @@ namespace pluginVerilog.CodeEditor
         public Data.IVerilogRelatedFile VerilogFile
         {
             get { return TextFile as Data.IVerilogRelatedFile; }
+        }
+
+        public override void SetColorAt(int index, byte value)
+        {
+            if (TextDocument == null) return;
+            DocumentLine line = TextDocument.GetLineByOffset(index);
+            LineInfomation lineInfo;
+            if (LineInfomations.ContainsKey(line.LineNumber))
+            {
+                lineInfo = LineInfomations[line.LineNumber];
+            }
+            else
+            {
+                lineInfo = new LineInfomation();
+                LineInfomations.Add(line.LineNumber, lineInfo);
+            }
+            Color color = Global.CodeDrawStyle.ColorPallet[value];
+            lineInfo.Colors.Add(new LineInfomation.Color(index, 1, color));
         }
 
         // get word boundery for editor word selection

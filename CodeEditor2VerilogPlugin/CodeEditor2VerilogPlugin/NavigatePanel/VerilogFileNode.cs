@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
 using pluginVerilog.Verilog.BuildingBlocks;
+using Avalonia.Media;
 
 namespace pluginVerilog.NavigatePanel
 {
@@ -38,6 +39,14 @@ namespace pluginVerilog.NavigatePanel
             get {
                 if (FileItem == null) return "-";
                 return FileItem.Name;
+            }
+        }
+
+        public override IImage? Image
+        {
+            get
+            {
+                return AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap("CodeEditor2VerilogPlugin/Assets/Icons/verilogPaper.svg");
             }
         }
 
@@ -88,10 +97,10 @@ namespace pluginVerilog.NavigatePanel
                 }
             }
 
-            foreach (BuildingBlock module in VerilogFile.VerilogParsedDocument.Root.BuldingBlocks.Values)
-            {
-//                VerilogFile.CodeDocument.ExpandBlock(VerilogFile.CodeDocument.GetLineAt(module.BeginIndexReference.Indexs.Last() ));
-            }
+            //foreach (BuildingBlock module in VerilogFile.VerilogParsedDocument.Root.BuldingBlocks.Values)
+            //{
+            //    VerilogFile.CodeDocument.ExpandBlock(VerilogFile.CodeDocument.GetLineAt(module.BeginIndexReference.Indexs.Last() ));
+            //}
 
             if (NodeSelected != null) NodeSelected();
         }

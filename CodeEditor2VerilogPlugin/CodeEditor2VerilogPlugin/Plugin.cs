@@ -50,7 +50,7 @@ namespace pluginVerilog
             //}
 
             // register project property creator
-            //CodeEditor2.Data.Project.Created += projectCreated;
+            CodeEditor2.Data.Project.Created += projectCreated;
 
             return true;
         }

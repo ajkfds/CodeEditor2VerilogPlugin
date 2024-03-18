@@ -351,6 +351,8 @@ namespace pluginVerilog.Verilog
             }
             if(wordPointer.ParsedDocument.Item != null) wordPointer.ParsedDocument.Item.Update();
 
+            wordPointer.Document.UnlockThread();
+
             //wordPointer.Dispose(); keep document & parsedData
             wordPointer = stock.Last();
             stock.Remove(stock.Last());
@@ -1017,6 +1019,8 @@ namespace pluginVerilog.Verilog
                 wordPointer.AddError("illegal file");
                 return;
             }
+            RootParsedDocument.LockedDocument.Add(vhInstance.CodeDocument);
+            vhInstance.CodeDocument.LockThead();
 
             vhInstance.Parent = wordPointer.ParsedDocument.File as CodeEditor2.Data.Item;
             
