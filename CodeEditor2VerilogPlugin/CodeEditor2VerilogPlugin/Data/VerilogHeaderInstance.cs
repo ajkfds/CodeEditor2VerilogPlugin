@@ -76,12 +76,53 @@ namespace pluginVerilog.Data
             return true;
         }
 
+
+        private ulong casheVersion = ulong.MaxValue;
+        CodeDocument casheDocument = null;
         public override CodeEditor2.CodeEditor.CodeDocument CodeDocument
         {
             get
             {
                 if (SourceVerilogFile == null) return null;
-                return SourceVerilogFile.CodeDocument;
+
+                lock (this)
+                {
+                    try
+                    {
+                        SourceTextFile.CodeDocument.TextDocument.BeginUpdate();
+                        SourceTextFile.CodeDocument.TextDocument.EndUpdate();
+                        return SourceTextFile.CodeDocument;
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        if (SourceTextFile.CodeDocument.Version != casheVersion)
+                        {
+                            casheDocument = pluginVerilog.CodeEditor.CodeDocument.SnapShotFrom(SourceTextFile.CodeDocument as pluginVerilog.CodeEditor.CodeDocument);
+                            return casheDocument;
+                        }
+                        else
+                        {
+                            return casheDocument;
+                        }
+                    }
+
+                    //if (SourceTextFile.CodeDocument.TextDocument.ownerThread != System.Threading.Thread.CurrentThread)
+                    //{
+                    //    if (SourceTextFile.CodeDocument.Version != casheVersion)
+                    //    {
+                    //        casheDocument = pluginVerilog.CodeEditor.CodeDocument.SnapShotFrom(SourceTextFile.CodeDocument as pluginVerilog.CodeEditor.CodeDocument);
+                    //        return casheDocument;
+                    //    }
+                    //    else
+                    //    {
+                    //        return casheDocument;
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    return SourceVerilogFile.CodeDocument;
+                    //}
+                }
             }
         }
         public override void Dispose()

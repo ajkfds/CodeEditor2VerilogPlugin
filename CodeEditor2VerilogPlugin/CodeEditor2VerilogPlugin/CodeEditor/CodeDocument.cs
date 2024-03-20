@@ -17,6 +17,14 @@ namespace pluginVerilog.CodeEditor
 
         }
 
+        public static CodeDocument SnapShotFrom(CodeDocument codeDocument)
+        {
+            CodeDocument document = new CodeDocument(codeDocument.VerilogFile);
+            document.textDocument.Text = codeDocument.textDocument.CreateSnapshot().Text;
+            document.textFileRef = codeDocument.textFileRef;
+            return document;
+        }
+
         public Data.IVerilogRelatedFile VerilogFile
         {
             get { return TextFile as Data.IVerilogRelatedFile; }
@@ -26,18 +34,32 @@ namespace pluginVerilog.CodeEditor
         {
             if (TextDocument == null) return;
             DocumentLine line = TextDocument.GetLineByOffset(index);
-            LineInfomation lineInfo;
-            if (LineInfomations.ContainsKey(line.LineNumber))
+            LineInfomation lineInfo = GetLineInfomation(line.LineNumber);
+            Color color = Global.CodeDrawStyle.ColorPallet[value];
+            lineInfo.Colors.Add(new LineInfomation.Color(index, 1, color));
+        }
+
+        public override void SetColorAt(int index, byte value, int length)
+        {
+            if (TextDocument == null) return;
+
+            DocumentLine lineStart = TextDocument.GetLineByOffset(index);
+            DocumentLine lineLast = TextDocument.GetLineByOffset(index + index);
+            Color color = Global.CodeDrawStyle.ColorPallet[value];
+
+            if (lineStart == lineLast)
             {
-                lineInfo = LineInfomations[line.LineNumber];
+                LineInfomation lineInfo = GetLineInfomation(lineStart.LineNumber);
+                lineInfo.Colors.Add(new LineInfomation.Color(index, length, color));
             }
             else
             {
-                lineInfo = new LineInfomation();
-                LineInfomations.Add(line.LineNumber, lineInfo);
+                for (int line = lineStart.LineNumber; line <= lineLast.LineNumber; line++)
+                {
+                    LineInfomation lineInfo = GetLineInfomation(line);
+                    lineInfo.Colors.Add(new LineInfomation.Color(index, index + length, color));
+                }
             }
-            Color color = Global.CodeDrawStyle.ColorPallet[value];
-            lineInfo.Colors.Add(new LineInfomation.Color(index, 1, color));
         }
 
         // get word boundery for editor word selection
