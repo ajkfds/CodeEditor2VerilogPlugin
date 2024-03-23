@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Drawing;
 using pluginVerilog.Verilog.BuildingBlocks;
 using Avalonia.Media;
+using Avalonia.Threading;
 
 namespace pluginVerilog.NavigatePanel
 {
@@ -92,8 +93,7 @@ namespace pluginVerilog.NavigatePanel
             {
                 if (!CodeEditor2.Global.StopParse)
                 {
-                    CodeEditor2.Tools.ParseHierarchyForm pform = new CodeEditor2.Tools.ParseHierarchyForm(this);
-                    CodeEditor2.Controller.ShowDialogForm(pform);
+                    CodeEditor2.Tools.ParseHierarchy.Run(this);
                 }
             }
 
@@ -114,6 +114,12 @@ namespace pluginVerilog.NavigatePanel
             }
             VerilogFile.Update();
 
+            UpdateVisual();
+
+        }
+
+        public override void UpdateVisual()
+        {
             List<CodeEditor2.Data.Item> targetDataItems = new List<CodeEditor2.Data.Item>();
             List<CodeEditor2.Data.Item> addDataItems = new List<CodeEditor2.Data.Item>();
             foreach (CodeEditor2.Data.Item item in VerilogFile.Items.Values)
@@ -135,7 +141,6 @@ namespace pluginVerilog.NavigatePanel
                 }
             }
 
-
             foreach (CodeEditor2.NavigatePanel.NavigatePanelNode node in removeNodes)
             {
                 Nodes.Remove(node);
@@ -152,7 +157,6 @@ namespace pluginVerilog.NavigatePanel
                 }
                 treeIndex++;
             }
-
         }
 
     }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CodeEditor2.CodeEditor;
 using CodeEditor2.Data;
+using static CodeEditor2.Controller;
 
 namespace pluginVerilog.Data
 {
@@ -84,50 +85,8 @@ namespace pluginVerilog.Data
             get
             {
                 if (SourceVerilogFile == null) return null;
-
-                lock (this)
-                {
-                    try
-                    {
-                        SourceTextFile.CodeDocument.TextDocument.BeginUpdate();
-                        SourceTextFile.CodeDocument.TextDocument.EndUpdate();
-                        return SourceTextFile.CodeDocument;
-                    }
-                    catch (InvalidOperationException ex)
-                    {
-                        if (SourceTextFile.CodeDocument.Version != casheVersion)
-                        {
-                            casheDocument = pluginVerilog.CodeEditor.CodeDocument.SnapShotFrom(SourceTextFile.CodeDocument as pluginVerilog.CodeEditor.CodeDocument);
-                            return casheDocument;
-                        }
-                        else
-                        {
-                            return casheDocument;
-                        }
-                    }
-
-                    //if (SourceTextFile.CodeDocument.TextDocument.ownerThread != System.Threading.Thread.CurrentThread)
-                    //{
-                    //    if (SourceTextFile.CodeDocument.Version != casheVersion)
-                    //    {
-                    //        casheDocument = pluginVerilog.CodeEditor.CodeDocument.SnapShotFrom(SourceTextFile.CodeDocument as pluginVerilog.CodeEditor.CodeDocument);
-                    //        return casheDocument;
-                    //    }
-                    //    else
-                    //    {
-                    //        return casheDocument;
-                    //    }
-                    //}
-                    //else
-                    //{
-                    //    return SourceVerilogFile.CodeDocument;
-                    //}
-                }
+                return SourceVerilogFile.CodeDocument;
             }
-        }
-        public override void Dispose()
-        {
-            disposeItems();
         }
 
         private void disposeItems()

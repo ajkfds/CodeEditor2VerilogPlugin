@@ -28,7 +28,6 @@ namespace pluginVerilog.Parser
                 parsedDocument.SystemVerilog = true;
             }
              word = new Verilog.WordScanner(VerilogDocument, parsedDocument, parsedDocument.SystemVerilog);
-            this.document.UnlockThread();
         }
 
         // create parser with parameter override
@@ -56,7 +55,6 @@ namespace pluginVerilog.Parser
             parsedDocument.ParameterOverrides = parameterOverrides;
             parsedDocument.TargetBuldingBlockName = moduleName;
             word = new Verilog.WordScanner(VerilogDocument, parsedDocument, parsedDocument.SystemVerilog);
-            this.document.UnlockThread();
         }
 
 
@@ -145,11 +143,11 @@ namespace pluginVerilog.Parser
 
         public override void Parse()
         {
-            document.LockThead();
             word.GetFirst();
 
             Root root = Root.ParseCreate(word,VerilogParsedDocument,File as Data.VerilogFile);
 
+            word.Document.LockThreadToUI();
             word.Dispose();
             word = null;
         }

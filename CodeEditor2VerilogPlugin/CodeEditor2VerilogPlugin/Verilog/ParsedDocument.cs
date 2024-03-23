@@ -449,11 +449,11 @@ namespace pluginVerilog.Verilog
             }
             public MessageType Type { get; protected set; }
 
-            //public override CodeEditor2.MessageView.MessageNode CreateMessageNode()
-            //{
-            //    MessageView.MessageNode node = new MessageView.MessageNode(File,this);
-            //    return node;
-            //}
+            public override CodeEditor2.MessageView.MessageNode CreateMessageNode()
+            {
+                MessageView.MessageNode node = new MessageView.MessageNode(File, this);
+                return node;
+            }
 
         }
     }

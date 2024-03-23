@@ -62,6 +62,16 @@ namespace pluginVerilog.CodeEditor
             }
         }
 
+        public override void SetMarkAt(int index, byte value)
+        {
+            if (index >= Length) return;
+            if (TextDocument == null) return;
+            DocumentLine line = TextDocument.GetLineByOffset(index);
+            LineInfomation lineInfo = GetLineInfomation(line.LineNumber);
+            Color color = Global.CodeDrawStyle.MarkColor[value];
+            lineInfo.Effects.Add(new LineInfomation.Effect(index, 1, color, null));
+        }
+
         // get word boundery for editor word selection
 
         public override void GetWord(int index, out int headIndex, out int length)

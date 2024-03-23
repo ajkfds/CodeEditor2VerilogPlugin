@@ -120,8 +120,7 @@ namespace pluginVerilog.NavigatePanel
             {
                 if (!CodeEditor2.Global.StopParse)
                 {
-                    CodeEditor2.Tools.ParseHierarchyForm pform = new CodeEditor2.Tools.ParseHierarchyForm(this);
-                    CodeEditor2.Controller.ShowDialogForm(pform);
+                    CodeEditor2.Tools.ParseHierarchy.Run(this); 
                 }
             }
 

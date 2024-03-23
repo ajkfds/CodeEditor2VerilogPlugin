@@ -1,4 +1,5 @@
-﻿using System;
+﻿using pluginVerilog.CodeEditor;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -349,9 +350,10 @@ namespace pluginVerilog.Verilog
             {
                 error = false;
             }
+
             if(wordPointer.ParsedDocument.Item != null) wordPointer.ParsedDocument.Item.Update();
 
-            wordPointer.Document.UnlockThread();
+            wordPointer.Document.LockThreadToUI();
 
             //wordPointer.Dispose(); keep document & parsedData
             wordPointer = stock.Last();
@@ -1019,8 +1021,6 @@ namespace pluginVerilog.Verilog
                 wordPointer.AddError("illegal file");
                 return;
             }
-            RootParsedDocument.LockedDocument.Add(vhInstance.CodeDocument);
-            vhInstance.CodeDocument.LockThead();
 
             vhInstance.Parent = wordPointer.ParsedDocument.File as CodeEditor2.Data.Item;
             
@@ -1064,9 +1064,14 @@ namespace pluginVerilog.Verilog
             }
             if (!prototype) wordPointer.ParsedDocument.ParsedDocumentIndexDictionary.Add(wordPointer.Index, newParsedDocument);
 
-            WordPointer newPointer = new WordPointer(vhInstance.CodeDocument as CodeEditor.CodeDocument, vhInstance.ParsedDocument as Verilog.ParsedDocument);
+
+            CodeDocument doc = CodeDocument.SnapShotFrom(vhInstance.CodeDocument as CodeEditor.CodeDocument);
+
+            WordPointer newPointer = new WordPointer(doc, vhInstance.ParsedDocument as Verilog.ParsedDocument);
             stock.Add(wordPointer);
             wordPointer = newPointer;
+            wordPointer.Document._tag = "diveInto";
+
 
             // activate coloring when code editor opened the target node
             wordPointer.InitibitColor = true;

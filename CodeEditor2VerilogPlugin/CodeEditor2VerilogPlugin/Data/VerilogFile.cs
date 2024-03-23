@@ -5,8 +5,10 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using Avalonia.Threading;
 using CodeEditor2.CodeEditor;
 using CodeEditor2.Data;
+using CodeEditor2.Tools;
 using pluginVerilog.Verilog.BuildingBlocks;
 
 namespace pluginVerilog.Data
@@ -88,9 +90,6 @@ namespace pluginVerilog.Data
             ParsedDocument = null;
 
             // copy include files
-
-
-
             if (oldParsedDocument != null) oldParsedDocument.Dispose();
 
             ParsedDocument = newParsedDocument;
@@ -129,6 +128,7 @@ namespace pluginVerilog.Data
             }
             Update();
         }
+
         public override void LoadFormFile()
         {
             loadDoumentFromFile();
@@ -136,6 +136,7 @@ namespace pluginVerilog.Data
             Project.AddReparseTarget(this);
             if (NavigatePanelNode != null) NavigatePanelNode.Update();
         }
+
         private void loadDoumentFromFile()
         {
             try
@@ -162,9 +163,7 @@ namespace pluginVerilog.Data
         public ParsedDocument GetInstancedParsedDocument(string parameterId)
         {
             cleanWeakRef();
-
             ParsedDocument ret;
-
             if(parameterId == "")
             {
                 return ParsedDocument;
@@ -251,7 +250,6 @@ namespace pluginVerilog.Data
             }
         }
 
-
         public override void Dispose()
         {
             if(ParsedDocument != null)
@@ -264,7 +262,6 @@ namespace pluginVerilog.Data
             moduleInstanceRefs.Clear();
             base.Dispose();
         }
-
 
         public Verilog.ParsedDocument VerilogParsedDocument
         {
@@ -305,6 +302,13 @@ namespace pluginVerilog.Data
         public override void Update()
         {
             VerilogCommon.Updater.Update(this);
+            Dispatcher.UIThread.Post(
+                new Action(() =>
+                {
+                    NavigatePanelNode.UpdateVisual();
+                })
+                );
+
         }
 
         // Auto Complete Handler
