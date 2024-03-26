@@ -107,95 +107,97 @@ namespace pluginVerilog.Verilog
         public int NoticeCount = 0;
 
 
-        //public List<CodeEditor2.CodeEditor.PopupItem> GetPopupItems(int index,string text)
-        //{
-        //    IndexReference iref = IndexReference.Create(this.IndexReference, index);
-        //    if (iref.RootParsedDocument == null) return null;
+        public CodeEditor2.CodeEditor.PopupItem GetPopupItem(int index, string text)
+        {
+            IndexReference iref = IndexReference.Create(this.IndexReference, index);
+            if (iref.RootParsedDocument == null) return null;
 
 
-        //    List<CodeEditor2.CodeEditor.PopupItem> ret = new List<CodeEditor2.CodeEditor.PopupItem>();
+            var ret = new CodeEditor2.CodeEditor.PopupItem();
 
-        //    // add messages
-        //    foreach (Message message in Messages)
-        //    {
-        //        if (index < message.Index) continue;
-        //        if (index > message.Index + message.Length) continue;
-        //        switch (message.Type)
-        //        {
-        //            case Message.MessageType.Error:
-        //                ret.Add(new CodeEditor2.CodeEditor.PopupItem(message.Text, System.Drawing.Color.Pink, Global.Icons.ExclamationBox, ajkControls.Primitive.IconImage.ColorStyle.Red));
-        //                break;
-        //            case Message.MessageType.Warning:
-        //                ret.Add(new CodeEditor2.CodeEditor.PopupItem(message.Text, System.Drawing.Color.Orange, Global.Icons.ExclamationBox, ajkControls.Primitive.IconImage.ColorStyle.Orange));
-        //                break;
-        //            case Message.MessageType.Notice:
-        //                ret.Add(new CodeEditor2.CodeEditor.PopupItem(message.Text, System.Drawing.Color.LimeGreen, Global.Icons.ExclamationBox, ajkControls.Primitive.IconImage.ColorStyle.Green));
-        //                break;
-        //            case Message.MessageType.Hint:
-        //                ret.Add(new CodeEditor2.CodeEditor.PopupItem(message.Text, System.Drawing.Color.LightCyan, Global.Icons.ExclamationBox, ajkControls.Primitive.IconImage.ColorStyle.Blue));
-        //                break;
-        //        }
-        //    }
+            // add messages
+            foreach (Message message in Messages)
+            {
+                if (index < message.Index) continue;
+                if (index > message.Index + message.Length) continue;
+                switch (message.Type)
+                {
+                    case Message.MessageType.Error:
+                        ret.AppendText(message.Text, Avalonia.Media.Colors.Pink);
+                        break;
+                    case Message.MessageType.Warning:
+                        ret.AppendText(message.Text, Avalonia.Media.Colors.Orange);
+                        break;
+                    case Message.MessageType.Notice:
+                        ret.AppendText(message.Text, Avalonia.Media.Colors.LimeGreen);
+                        break;
+                    case Message.MessageType.Hint:
+                        ret.AppendText(message.Text, Avalonia.Media.Colors.LightCyan);
+                        break;
+                }
+            }
 
-        //    NameSpace space = iref.RootParsedDocument.Root;
+            NameSpace space = iref.RootParsedDocument.Root;
 
-        //    foreach (BuildingBlock module in iref.RootParsedDocument.Root.BuldingBlocks.Values)
-        //    {
-        //        if (iref.IsSmallerThan(module.BeginIndexReference)) continue;
-        //        if (iref.IsGreaterThan(module.LastIndexReference)) continue;
-        //        space = module.GetHierNameSpace(index);
-        //        break;
-        //    }
+            foreach (BuildingBlock module in iref.RootParsedDocument.Root.BuldingBlocks.Values)
+            {
+                if (iref.IsSmallerThan(module.BeginIndexReference)) continue;
+                if (iref.IsGreaterThan(module.LastIndexReference)) continue;
+                space = module.GetHierNameSpace(index);
+                break;
+            }
 
-        //    if(text.StartsWith(".") && space is IModuleOrGeneratedBlock)
-        //    {
-        //        IModuleOrGeneratedBlock block = space as IModuleOrGeneratedBlock;
-        //        ModuleItems.ModuleInstantiation inst = null;
-        //        foreach (ModuleItems.ModuleInstantiation i in block.ModuleInstantiations.Values)
-        //        {
-        //            if (iref.IsSmallerThan(i.BeginIndexReference)) continue;
-        //            if (iref.IsGreaterThan(i.LastIndexReference)) continue;
-        //            inst = i;
-        //            break;
-        //        }
-        //        if (inst != null)
-        //        {
-        //            string portName = text.Substring(1);
-        //            Module originalModule = ProjectProperty.GetBuildingBlock(inst.SourceName) as Module;
-        //            if (originalModule == null) return ret;
-        //            if (!originalModule.Ports.ContainsKey(portName)) return ret;
-        //            Verilog.DataObjects.Port port = originalModule.Ports[portName];
-        //            ret.Add(new Popup.PortPopup(port));
-        //        }
-        //    }
+            if (text.StartsWith(".") && space is IModuleOrGeneratedBlock)
+            {
+                IModuleOrGeneratedBlock block = space as IModuleOrGeneratedBlock;
+                ModuleItems.ModuleInstantiation inst = null;
+                foreach (ModuleItems.ModuleInstantiation i in block.ModuleInstantiations.Values)
+                {
+                    if (iref.IsSmallerThan(i.BeginIndexReference)) continue;
+                    if (iref.IsGreaterThan(i.LastIndexReference)) continue;
+                    inst = i;
+                    break;
+                }
+                if (inst != null)
+                {
+                    string portName = text.Substring(1);
+                    Module originalModule = ProjectProperty.GetBuildingBlock(inst.SourceName) as Module;
+                    if (originalModule == null) return ret;
+                    if (!originalModule.Ports.ContainsKey(portName)) return ret;
+                    Verilog.DataObjects.Port port = originalModule.Ports[portName];
+                    ret.AppendLabel(port.GetLabel());
+                }
+            }
 
-        //    if (space.DataObjects.ContainsKey(text))
-        //    {
-        //        ret.Add(new Popup.VariablePopup(space.DataObjects[text]));
-        //    }
+            if (space.DataObjects.ContainsKey(text))
+            {
+                space.DataObjects[text].AppendLabel(ret);
+                //                ret.Add(space.DataObjects[text]   new Popup.VariablePopup(space.DataObjects[text]));
+            }
 
-        //    {
-        //        DataObjects.Constants.Constants param = space.GetConstants(text);
-        //        if(param != null)
-        //        {
-        //            ret.Add(new Popup.ParameterPopup(param));
-        //        }
-        //    }
+            {
+                DataObjects.Constants.Constants param = space.GetConstants(text);
+                if (param != null)
+                {
+                    param.AppendLabel(ret);
+//                    ret.Add(new Popup.ParameterPopup(param));
+                }
+            }
 
-        //    if (text.StartsWith("`") && iref.RootParsedDocument.Macros.ContainsKey(text.Substring(1)))
-        //    {
-        //        ret.Add(new Popup.MacroPopup(text.Substring(1), iref.RootParsedDocument.Macros[text.Substring(1)].MacroText));
-        //    }
-        //    if (space.BuildingBlock.Functions.ContainsKey(text))
-        //    {
-        //        ret.Add(new Popup.FunctionPopup(space.BuildingBlock.Functions[text]));
-        //    }
-        //    if (space.BuildingBlock.Tasks.ContainsKey(text))
-        //    {
-        //        ret.Add(new Popup.TaskPopup(space.BuildingBlock.Tasks[text]));
-        //    }
-        //    return ret;
-        //}
+            if (text.StartsWith("`") && iref.RootParsedDocument.Macros.ContainsKey(text.Substring(1)))
+            {
+//                ret.Add(new Popup.MacroPopup(text.Substring(1), iref.RootParsedDocument.Macros[text.Substring(1)].MacroText));
+            }
+            if (space.BuildingBlock.Functions.ContainsKey(text))
+            {
+//                ret.Add(new Popup.FunctionPopup(space.BuildingBlock.Functions[text]));
+            }
+            if (space.BuildingBlock.Tasks.ContainsKey(text))
+            {
+//                ret.Add(new Popup.TaskPopup(space.BuildingBlock.Tasks[text]));
+            }
+            return ret;
+        }
 
         public BuildingBlock GetBuidingBlockAt(int index)
         {

@@ -35,22 +35,22 @@ namespace pluginVerilog.Verilog.DataObjects
             return sb.ToString();
         }
 
-        //public void AppendLabel(ajkControls.ColorLabel.ColorLabel label)
-        //{
-        //    label.AppendText("[");
-        //    label.AppendLabel(MsbBitExpression.GetLabel());
-        //    label.AppendText(":");
-        //    label.AppendLabel(LsbBitExpression.GetLabel());
-        //    label.AppendText("]");
-        //}
+        public void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        {
+            label.AppendText("[");
+            label.AppendLabel(MsbBitExpression.GetLabel());
+            label.AppendText(":");
+            label.AppendLabel(LsbBitExpression.GetLabel());
+            label.AppendText("]");
+        }
 
 
-        //public ajkControls.ColorLabel.ColorLabel GetLabel()
-        //{
-        //    ajkControls.ColorLabel.ColorLabel label = new ajkControls.ColorLabel.ColorLabel();
-        //    AppendLabel(label);
-        //    return label;
-        //}
+        public AjkAvaloniaLibs.Contorls.ColorLabel GetLabel()
+        {
+            AjkAvaloniaLibs.Contorls.ColorLabel label = new AjkAvaloniaLibs.Contorls.ColorLabel();
+            AppendLabel(label);
+            return label;
+        }
 
         /*
         A.2.5 Declaration ranges

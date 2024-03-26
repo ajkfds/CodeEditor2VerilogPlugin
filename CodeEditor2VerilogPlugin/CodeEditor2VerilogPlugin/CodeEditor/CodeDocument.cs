@@ -1,4 +1,5 @@
 ﻿using Avalonia.Media;
+using AvaloniaEdit;
 using AvaloniaEdit.Document;
 using CodeEditor2.CodeEditor;
 using System;
@@ -11,10 +12,12 @@ namespace pluginVerilog.CodeEditor
 {
     public class CodeDocument : CodeEditor2.CodeEditor.CodeDocument
     {
-        public CodeDocument(Data.IVerilogRelatedFile file) :base(file as CodeEditor2.Data.TextFile) { }
+        public CodeDocument(Data.IVerilogRelatedFile file) :base(file as CodeEditor2.Data.TextFile) 
+        { 
+        }
+
         public CodeDocument(string text) : base(null,text)
         {
-
         }
 
         public static CodeDocument SnapShotFrom(CodeDocument codeDocument)
@@ -24,6 +27,7 @@ namespace pluginVerilog.CodeEditor
             document.textFileRef = codeDocument.textFileRef;
             return document;
         }
+
 
         public Data.IVerilogRelatedFile VerilogFile
         {
@@ -44,7 +48,7 @@ namespace pluginVerilog.CodeEditor
             if (TextDocument == null) return;
 
             DocumentLine lineStart = TextDocument.GetLineByOffset(index);
-            DocumentLine lineLast = TextDocument.GetLineByOffset(index + index);
+            DocumentLine lineLast = TextDocument.GetLineByOffset(index + length);
             Color color = Global.CodeDrawStyle.ColorPallet[value];
 
             if (lineStart == lineLast)

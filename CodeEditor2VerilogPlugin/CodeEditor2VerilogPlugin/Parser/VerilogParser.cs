@@ -145,9 +145,11 @@ namespace pluginVerilog.Parser
         {
             word.GetFirst();
 
+            word.RootParsedDocument.LockedDocument.Add(word.Document);
             Root root = Root.ParseCreate(word,VerilogParsedDocument,File as Data.VerilogFile);
 
-            word.Document.LockThreadToUI();
+            word.RootParsedDocument.UnlockDocument();
+//            word.Document.LockThreadToUI();
             word.Dispose();
             word = null;
         }

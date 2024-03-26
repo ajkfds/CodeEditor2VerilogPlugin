@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -353,7 +354,10 @@ namespace pluginVerilog.Verilog
 
             if(wordPointer.ParsedDocument.Item != null) wordPointer.ParsedDocument.Item.Update();
 
-            wordPointer.Document.LockThreadToUI();
+            if (!RootParsedDocument.LockedDocument.Contains(wordPointer.Document))
+            {
+                RootParsedDocument.LockedDocument.Add(wordPointer.Document);
+            }
 
             //wordPointer.Dispose(); keep document & parsedData
             wordPointer = stock.Last();

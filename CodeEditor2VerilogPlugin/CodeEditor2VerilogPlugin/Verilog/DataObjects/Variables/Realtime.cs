@@ -27,11 +27,11 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             return val;
         }
 
-        //public override void AppendTypeLabel(ColorLabel label)
-        //{
-        //    label.AppendText("realtime ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-        //    label.AppendText(" ");
-        //}
+        public override void AppendTypeLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        {
+            label.AppendText("realtime ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+            label.AppendText(" ");
+        }
 
     }
 }

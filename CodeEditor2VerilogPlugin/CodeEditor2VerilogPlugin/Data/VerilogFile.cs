@@ -333,10 +333,10 @@ namespace pluginVerilog.Data
         //    VerilogCommon.AutoComplete.BeforeKeyDown(this, e);
         //}
 
-        //public override List<CodeEditor2.CodeEditor.PopupItem> GetPopupItems(ulong version, int index)
-        //{
-        //    return VerilogCommon.AutoComplete.GetPopupItems(this,VerilogParsedDocument, version, index);
-        //}
+        public override CodeEditor2.CodeEditor.PopupItem GetPopupItem(ulong version, int index)
+        {
+            return VerilogCommon.AutoComplete.GetPopupItem(this, VerilogParsedDocument, version, index);
+        }
 
         //public override List<CodeEditor2.CodeEditor.ToolItem> GetToolItems(int index)
         //{

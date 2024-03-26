@@ -42,35 +42,35 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         }
 
 
-        //public override void AppendTypeLabel(ColorLabel label)
-        //{
-        //    switch (DataType)
-        //    {
-        //        case DataTypeEnum.Bit:
-        //            label.AppendText("bit ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-        //            break;
-        //        case DataTypeEnum.Logic:
-        //            label.AppendText("logic ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-        //            break;
-        //        case DataTypeEnum.Reg:
-        //            label.AppendText("reg ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-        //            break;
-        //        default:
-        //            System.Diagnostics.Debugger.Break();
-        //            break;
-        //    }
-        //    label.AppendText(" ");
-        //    if (Signed)
-        //    {
-        //        label.AppendText("signed ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-        //    }
+        public override void AppendTypeLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        {
+            switch (DataType)
+            {
+                case DataTypeEnum.Bit:
+                    label.AppendText("bit ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    break;
+                case DataTypeEnum.Logic:
+                    label.AppendText("logic ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    break;
+                case DataTypeEnum.Reg:
+                    label.AppendText("reg ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    break;
+                default:
+                    System.Diagnostics.Debugger.Break();
+                    break;
+            }
+            label.AppendText(" ");
+            if (Signed)
+            {
+                label.AppendText("signed ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+            }
 
-        //    foreach(Range dimension in PackedDimensions)
-        //    {
-        //        label.AppendLabel(dimension.GetLabel());
-        //        label.AppendText(" ");
-        //    }
-        //}
+            foreach (Range dimension in PackedDimensions)
+            {
+                label.AppendLabel(dimension.GetLabel());
+                label.AppendText(" ");
+            }
+        }
 
     }
 }

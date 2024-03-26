@@ -96,15 +96,15 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
 
 
-        //public override void AppendLabel(ajkControls.ColorLabel.ColorLabel label)
-        //{
-        //    label.AppendText(Name);
-        //}
+        public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        {
+            label.AppendText(Name);
+        }
 
-        //public override void AppendTypeLabel(ajkControls.ColorLabel.ColorLabel label)
-        //{
+        public override void AppendTypeLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        {
 
-        //}
+        }
 
         public virtual Variable Clone()
         {

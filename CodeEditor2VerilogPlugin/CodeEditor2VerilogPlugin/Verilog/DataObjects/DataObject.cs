@@ -49,15 +49,15 @@ namespace pluginVerilog.Verilog.DataObjects
         public List<WordReference> AssignedReferences { set; get; } = new List<WordReference>();
         public int DisposedIndex = -1;
 
-        //public virtual void AppendLabel(ajkControls.ColorLabel.ColorLabel label)
-        //{
-        //    label.AppendText(Name);
-        //}
+        public virtual void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        {
+            label.AppendText(Name);
+        }
 
-        //public virtual void AppendTypeLabel(ajkControls.ColorLabel.ColorLabel label)
-        //{
+        public virtual void AppendTypeLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        {
 
-        //}
+        }
 
         public virtual DataObject Clone()
         {

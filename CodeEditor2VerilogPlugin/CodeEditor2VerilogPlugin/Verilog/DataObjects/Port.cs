@@ -93,58 +93,58 @@ namespace pluginVerilog.Verilog.DataObjects
             return port;
         }
 
-        //public ajkControls.ColorLabel.ColorLabel GetLabel()
-        //{
-        //    ajkControls.ColorLabel.ColorLabel label = new ajkControls.ColorLabel.ColorLabel();
+        public AjkAvaloniaLibs.Contorls.ColorLabel GetLabel()
+        {
+            AjkAvaloniaLibs.Contorls.ColorLabel label = new AjkAvaloniaLibs.Contorls.ColorLabel();
 
-        //    switch (Direction)
-        //    {
-        //        case DirectionEnum.Input:
-        //            label.AppendText("input ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-        //            break;
-        //        case DirectionEnum.Output:
-        //            label.AppendText("output ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-        //            break;
-        //        case DirectionEnum.Inout:
-        //            label.AppendText("inout ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-        //            break;
-        //        case DirectionEnum.Ref:
-        //            label.AppendText("ref ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-        //            break;
-        //        default:
-        //            break;
-        //    }
+            switch (Direction)
+            {
+                case DirectionEnum.Input:
+                    label.AppendText("input ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    break;
+                case DirectionEnum.Output:
+                    label.AppendText("output ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    break;
+                case DirectionEnum.Inout:
+                    label.AppendText("inout ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    break;
+                case DirectionEnum.Ref:
+                    label.AppendText("ref ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    break;
+                default:
+                    break;
+            }
 
-        //    if (DataObject is Variables.Reg)
-        //    {
-        //        label.AppendText("reg ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-        //    }
+            if (DataObject is Variables.Reg)
+            {
+                label.AppendText("reg ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+            }
 
 
-        //    if (Range != null)
-        //    {
-        //        label.AppendLabel(Range.GetLabel());
-        //        label.AppendText(" ");
-        //    }
+            if (Range != null)
+            {
+                label.AppendLabel(Range.GetLabel());
+                label.AppendText(" ");
+            }
 
-        //    if (DataObject != null)
-        //    {
-        //        if (DataObject is Net)
-        //        {
-        //            label.AppendText(Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Net));
-        //        }
-        //        else if (DataObject is Variables.Reg)
-        //        {
-        //            label.AppendText(Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Register));
-        //        }
-        //        else
-        //        {
-        //            label.AppendText(Name);
-        //        }
-        //    }
+            if (DataObject != null)
+            {
+                if (DataObject is Net)
+                {
+                    label.AppendText(Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Net));
+                }
+                else if (DataObject is Variables.Reg)
+                {
+                    label.AppendText(Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Register));
+                }
+                else
+                {
+                    label.AppendText(Name);
+                }
+            }
 
-        //    return label;
-        //}
+            return label;
+        }
 
         public static void SyncParser(
             CodeEditor2.CodeEditor.CodeDocument document,

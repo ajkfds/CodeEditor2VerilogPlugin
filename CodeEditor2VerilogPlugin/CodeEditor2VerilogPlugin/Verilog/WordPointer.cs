@@ -78,10 +78,12 @@ namespace pluginVerilog.Verilog
         public void Color(CodeDrawStyle.ColorType colorType)
         {
             if (InitibitColor) return;
-            for (int i = index; i < index + length; i++)
-            {
-                Document.SetColorAt(i, CodeDrawStyle.ColorIndex(colorType));
-            }
+            Document.SetColorAt(index, CodeDrawStyle.ColorIndex(colorType),length);
+
+            //for (int i = index; i < index + length; i++)
+            //{
+            //    Document.SetColorAt(i, CodeDrawStyle.ColorIndex(colorType));
+            //}
         }
 
         public void Color(CodeDrawStyle.ColorType colorType,int start,int last)
