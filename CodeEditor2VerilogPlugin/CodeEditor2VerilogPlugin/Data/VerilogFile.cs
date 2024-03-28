@@ -343,10 +343,10 @@ namespace pluginVerilog.Data
         //    return VerilogCommon.AutoComplete.GetToolItems(this, index);
         //}
 
-        //public override List<CodeEditor2.CodeEditor.AutocompleteItem> GetAutoCompleteItems(int index, out string cantidateWord)
-        //{
-        //    return VerilogCommon.AutoComplete.GetAutoCompleteItems(this, VerilogParsedDocument, index, out cantidateWord);
-        //}
+        public override List<CodeEditor2.CodeEditor.AutocompleteItem> GetAutoCompleteItems(int index, out string cantidateWord)
+        {
+            return VerilogCommon.AutoComplete.GetAutoCompleteItems(this, VerilogParsedDocument, index, out cantidateWord);
+        }
 
     }
 }

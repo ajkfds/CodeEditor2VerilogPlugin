@@ -62,33 +62,33 @@ namespace pluginVerilog.Data.VerilogCommon
         //        return toolItems;
         //    }
 
-        //    public static List<CodeEditor2.CodeEditor.AutocompleteItem> GetAutoCompleteItems(IVerilogRelatedFile item,Verilog.ParsedDocument parsedDocument, int index, out string cantidateWord)
-        //    {
-        //        cantidateWord = null;
+        public static List<CodeEditor2.CodeEditor.AutocompleteItem> GetAutoCompleteItems(IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, int index, out string cantidateWord)
+        {
+            cantidateWord = null;
 
-        //        if (item.VerilogParsedDocument == null) return null;
-        //        int line = item.CodeDocument.GetLineAt(index);
-        //        int lineStartIndex = item.CodeDocument.GetLineStartIndex(line);
-        //        bool endWithDot;
-        //        List<string> words = ((pluginVerilog.CodeEditor.CodeDocument)item.CodeDocument).GetHierWords(index, out endWithDot);
-        //        if (endWithDot)
-        //        {
-        //            cantidateWord = "";
-        //        }
-        //        else
-        //        {
-        //            cantidateWord = words.LastOrDefault();
-        //            if (words.Count > 0)
-        //            {
-        //                words.RemoveAt(words.Count - 1);
-        //            }
-        //        }
-        //        if (cantidateWord == null) cantidateWord = "";
+            if (item.VerilogParsedDocument == null) return null;
+            int line = item.CodeDocument.GetLineAt(index);
+            int lineStartIndex = item.CodeDocument.GetLineStartIndex(line);
+            bool endWithDot;
+            List<string> words = ((pluginVerilog.CodeEditor.CodeDocument)item.CodeDocument).GetHierWords(index, out endWithDot);
+            if (endWithDot)
+            {
+                cantidateWord = "";
+            }
+            else
+            {
+                cantidateWord = words.LastOrDefault();
+                if (words.Count > 0)
+                {
+                    words.RemoveAt(words.Count - 1);
+                }
+            }
+            if (cantidateWord == null) cantidateWord = "";
 
-        //        List<CodeEditor2.CodeEditor.AutocompleteItem> items = parsedDocument.GetAutoCompleteItems(words, lineStartIndex, line, (CodeEditor.CodeDocument)item.CodeDocument, cantidateWord);
+            List<CodeEditor2.CodeEditor.AutocompleteItem> items = parsedDocument.GetAutoCompleteItems(words, lineStartIndex, line, (CodeEditor.CodeDocument)item.CodeDocument, cantidateWord);
 
-        //        return items;
-        //    }
+            return items;
+        }
 
 
 
