@@ -79,7 +79,7 @@ namespace pluginVerilog.NavigatePanel
         //    }
         //}
 
-        public override void OnSelected()
+        public override async void OnSelected()
         {
             // activate navigate panel context menu
             //var menu = CodeEditor2.Controller.NavigatePanel.GetContextMenuStrip();
@@ -93,7 +93,7 @@ namespace pluginVerilog.NavigatePanel
             {
                 if (!CodeEditor2.Global.StopParse)
                 {
-                    CodeEditor2.Tools.ParseHierarchy.Run(this);
+                    await CodeEditor2.Tools.ParseHierarchy.Run(this);
                 }
             }
 
@@ -122,40 +122,43 @@ namespace pluginVerilog.NavigatePanel
         {
             List<CodeEditor2.Data.Item> targetDataItems = new List<CodeEditor2.Data.Item>();
             List<CodeEditor2.Data.Item> addDataItems = new List<CodeEditor2.Data.Item>();
-            foreach (CodeEditor2.Data.Item item in VerilogFile.Items.Values)
+            lock (VerilogFile.Items)
             {
-                targetDataItems.Add(item);
-                addDataItems.Add(item);
-            }
-
-            List<CodeEditor2.NavigatePanel.NavigatePanelNode> removeNodes = new List<CodeEditor2.NavigatePanel.NavigatePanelNode>();
-            foreach (CodeEditor2.NavigatePanel.NavigatePanelNode node in Nodes)
-            {
-                if (node.Item != null && targetDataItems.Contains(node.Item))
+                foreach (CodeEditor2.Data.Item item in VerilogFile.Items.Values)
                 {
-                    addDataItems.Remove(node.Item);
+                    targetDataItems.Add(item);
+                    addDataItems.Add(item);
                 }
-                else
-                {
-                    removeNodes.Add(node);
-                }
-            }
 
-            foreach (CodeEditor2.NavigatePanel.NavigatePanelNode node in removeNodes)
-            {
-                Nodes.Remove(node);
-                node.Dispose();
-            }
-
-            int treeIndex = 0;
-            foreach (CodeEditor2.Data.Item item in targetDataItems)
-            {
-                if (item == null) continue;
-                if (addDataItems.Contains(item))
+                List<CodeEditor2.NavigatePanel.NavigatePanelNode> removeNodes = new List<CodeEditor2.NavigatePanel.NavigatePanelNode>();
+                foreach (CodeEditor2.NavigatePanel.NavigatePanelNode node in Nodes)
                 {
-                    Nodes.Insert(treeIndex, item.NavigatePanelNode);
+                    if (node.Item != null && targetDataItems.Contains(node.Item))
+                    {
+                        addDataItems.Remove(node.Item);
+                    }
+                    else
+                    {
+                        removeNodes.Add(node);
+                    }
                 }
-                treeIndex++;
+
+                foreach (CodeEditor2.NavigatePanel.NavigatePanelNode node in removeNodes)
+                {
+                    Nodes.Remove(node);
+                    node.Dispose();
+                }
+
+                int treeIndex = 0;
+                foreach (CodeEditor2.Data.Item item in targetDataItems)
+                {
+                    if (item == null) continue;
+                    if (addDataItems.Contains(item))
+                    {
+                        Nodes.Insert(treeIndex, item.NavigatePanelNode);
+                    }
+                    treeIndex++;
+                }
             }
         }
 

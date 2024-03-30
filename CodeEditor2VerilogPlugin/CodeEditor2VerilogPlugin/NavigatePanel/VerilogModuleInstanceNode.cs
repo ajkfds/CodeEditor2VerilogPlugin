@@ -109,7 +109,7 @@ namespace pluginVerilog.NavigatePanel
         //    }
         //}
 
-        public override void OnSelected()
+        public override async void OnSelected()
         {
             //var menu = CodeEditor2.Controller.NavigatePanel.GetContextMenuStrip();
             //if (menu.Items.ContainsKey("openWithExploererTsmi")) menu.Items["openWithExploererTsmi"].Visible = true;
@@ -120,7 +120,7 @@ namespace pluginVerilog.NavigatePanel
             {
                 if (!CodeEditor2.Global.StopParse)
                 {
-                    CodeEditor2.Tools.ParseHierarchy.Run(this); 
+                    await CodeEditor2.Tools.ParseHierarchy.Run(this); 
                 }
             }
 
