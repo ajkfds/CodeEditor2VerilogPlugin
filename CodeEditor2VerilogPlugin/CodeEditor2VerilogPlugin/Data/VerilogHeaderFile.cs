@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using CodeEditor2.CodeEditor;
 using CodeEditor2.Data;
 using pluginVerilog.Verilog;
+using static CodeEditor2.Controller;
 
 namespace pluginVerilog.Data
 {
@@ -155,6 +156,10 @@ namespace pluginVerilog.Data
             return parentFile.CreateDocumentParser(parseMode);
         }
 
+        public override List<CodeEditor2.CodeEditor.ToolItem> GetToolItems(int index)
+        {
+            return VerilogCommon.AutoComplete.GetToolItems(this, index);
+        }
 
         //public new void AfterKeyPressed(KeyPressEventArgs e)
         //{

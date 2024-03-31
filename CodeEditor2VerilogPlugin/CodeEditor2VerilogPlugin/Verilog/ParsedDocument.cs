@@ -348,8 +348,8 @@ namespace pluginVerilog.Verilog
                 return items;
             }
 
-//            bool endWithDot;
-//            List<string> words = document.GetHierWords(index,out endWithDot);
+            //bool endWithDot;
+            //List<string> words = document.GetHierWords(index,out endWithDot);
             //if(words.Count == 0)
             //{
             //    return new List<CodeEditor2.CodeEditor.AutocompleteItem>();

@@ -51,16 +51,16 @@ namespace pluginVerilog.Data.VerilogCommon
         }
 
 
-        //    public static List<CodeEditor2.CodeEditor.ToolItem> GetToolItems(IVerilogRelatedFile item, int index)
-        //    {
-        //        List<CodeEditor2.CodeEditor.ToolItem> toolItems = new List<CodeEditor2.CodeEditor.ToolItem>();
-        //        toolItems.Add(new Verilog.Snippets.AlwaysFFSnippet());
-        //        toolItems.Add(new Verilog.Snippets.AutoConnectSnippet());
-        //        //            toolItems.Add(new Verilog.Snippets.ConnectionCheckSnippet());
-        //        toolItems.Add(new Verilog.Snippets.AutoFormatSnippet());
-        //        toolItems.Add(new Verilog.Snippets.ModuleInstanceSnippet());
-        //        return toolItems;
-        //    }
+        public static List<CodeEditor2.CodeEditor.ToolItem> GetToolItems(IVerilogRelatedFile item, int index)
+        {
+            List<CodeEditor2.CodeEditor.ToolItem> toolItems = new List<CodeEditor2.CodeEditor.ToolItem>();
+//            toolItems.Add(new Verilog.Snippets.AlwaysFFSnippet());
+//            toolItems.Add(new Verilog.Snippets.AutoConnectSnippet());
+            //            toolItems.Add(new Verilog.Snippets.ConnectionCheckSnippet());
+//            toolItems.Add(new Verilog.Snippets.AutoFormatSnippet());
+//            toolItems.Add(new Verilog.Snippets.ModuleInstanceSnippet());
+            return toolItems;
+        }
 
         public static List<CodeEditor2.CodeEditor.AutocompleteItem> GetAutoCompleteItems(IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, int index, out string cantidateWord)
         {
