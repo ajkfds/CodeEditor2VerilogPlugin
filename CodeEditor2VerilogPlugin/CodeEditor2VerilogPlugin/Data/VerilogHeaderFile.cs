@@ -114,13 +114,13 @@ namespace pluginVerilog.Data
         }
 
 
-        //public override ajkControls.CodeTextbox.CodeDrawStyle DrawStyle
-        //{
-        //    get
-        //    {
-        //        return Global.CodeDrawStyle;
-        //    }
-        //}
+        public override CodeEditor2.CodeEditor.CodeDrawStyle DrawStyle
+        {
+            get
+            {
+                return Global.CodeDrawStyle;
+            }
+        }
 
         public Verilog.ParsedDocument VerilogParsedDocument
         {

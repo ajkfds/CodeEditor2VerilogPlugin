@@ -206,7 +206,7 @@ namespace pluginVerilog.Data
         {
             get
             {
-                return Global.CodeDrawStyle;
+                return SourceTextFile.DrawStyle;
             }
         }
 
@@ -261,10 +261,10 @@ namespace pluginVerilog.Data
         //    return VerilogCommon.AutoComplete.GetPopupItems(this,VerilogParsedDocument, version, index);
         //}
 
-        //public override List<CodeEditor2.CodeEditor.ToolItem> GetToolItems(int index)
-        //{
-        //    return VerilogCommon.AutoComplete.GetToolItems(this, index);
-        //}
+        public override List<CodeEditor2.CodeEditor.ToolItem> GetToolItems(int index)
+        {
+            return VerilogCommon.AutoComplete.GetToolItems(this, index);
+        }
 
         public override List<CodeEditor2.CodeEditor.AutocompleteItem> GetAutoCompleteItems(int index, out string cantidateWord)
         {

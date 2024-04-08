@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Avalonia.Input;
 using CodeEditor2.CodeEditor;
 using CodeEditor2.Data;
 
@@ -10,33 +11,33 @@ namespace pluginVerilog.Data.VerilogCommon
 {
     public static class AutoComplete
     {
-        //    public static void AfterKeyDown(IVerilogRelatedFile item, System.Windows.Forms.KeyEventArgs e)
-        //    {
-        //        if (item.VerilogParsedDocument == null) return;
-        //        switch (e.KeyCode)
-        //        {
-        //            case System.Windows.Forms.Keys.Return:
-        //                applyAutoInput(item);
-        //                break;
-        //            case System.Windows.Forms.Keys.Space:
-        //                break;
-        //            default:
-        //                break;
-        //        }
-        //    }
+        public static void AfterKeyDown(IVerilogRelatedFile item, Avalonia.Input.KeyEventArgs e)
+        {
+            if (item.VerilogParsedDocument == null) return;
+            switch (e.Key)
+            {
+                case Key.Return:
+                    applyAutoInput(item);
+                    break;
+                case Key.Space:
+                    break;
+                default:
+                    break;
+            }
+        }
 
-        //    public static void AfterKeyPressed(IVerilogRelatedFile item, System.Windows.Forms.KeyPressEventArgs e)
-        //    {
-        //        if (item.VerilogParsedDocument == null) return;
-        //    }
+        public static void AfterKeyPressed(IVerilogRelatedFile item, Avalonia.Input.KeyEventArgs e)
+        {
+            if (item.VerilogParsedDocument == null) return;
+        }
 
-        //    public static void BeforeKeyPressed(IVerilogRelatedFile item, System.Windows.Forms.KeyPressEventArgs e)
-        //    {
-        //    }
+        public static void BeforeKeyPressed(IVerilogRelatedFile item, Avalonia.Input.KeyEventArgs e)
+        {
+        }
 
-        //    public static void BeforeKeyDown(IVerilogRelatedFile item, System.Windows.Forms.KeyEventArgs e)
-        //    {
-        //    }
+        public static void BeforeKeyDown(IVerilogRelatedFile item, Avalonia.Input.KeyEventArgs e)
+        {
+        }
 
 
         public static CodeEditor2.CodeEditor.PopupItem GetPopupItem(IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, ulong version, int index)
@@ -54,7 +55,7 @@ namespace pluginVerilog.Data.VerilogCommon
         public static List<CodeEditor2.CodeEditor.ToolItem> GetToolItems(IVerilogRelatedFile item, int index)
         {
             List<CodeEditor2.CodeEditor.ToolItem> toolItems = new List<CodeEditor2.CodeEditor.ToolItem>();
-//            toolItems.Add(new Verilog.Snippets.AlwaysFFSnippet());
+            toolItems.Add(new Verilog.Snippets.AlwaysFFSnippet());
 //            toolItems.Add(new Verilog.Snippets.AutoConnectSnippet());
             //            toolItems.Add(new Verilog.Snippets.ConnectionCheckSnippet());
 //            toolItems.Add(new Verilog.Snippets.AutoFormatSnippet());
@@ -92,116 +93,116 @@ namespace pluginVerilog.Data.VerilogCommon
 
 
 
-        //    private static void applyAutoInput(IVerilogRelatedFile item)
-        //    {
-        //        int index = item.CodeDocument.CaretIndex;
-        //        int line = item.CodeDocument.GetLineAt(index);
-        //        if (line == 0) return;
+        private static void applyAutoInput(IVerilogRelatedFile item)
+        {
+            int index = item.CodeDocument.CaretIndex;
+            int line = item.CodeDocument.GetLineAt(index);
+            if (line == 0) return;
 
-        //        int lineHeadIndex = item.CodeDocument.GetLineStartIndex(line);
+            int lineHeadIndex = item.CodeDocument.GetLineStartIndex(line);
 
-        //        int prevTabs = 0;
-        //        if (line != 1)
-        //        {
-        //            int prevLine = line - 1;
-        //            int prevLineHeadIndex = item.CodeDocument.GetLineStartIndex(prevLine);
-        //            for (int i = prevLineHeadIndex; i < lineHeadIndex; i++)
-        //            {
-        //                char ch = item.CodeDocument.GetCharAt(i);
-        //                if (ch == '\t')
-        //                {
-        //                    prevTabs++;
-        //                }
-        //                else
-        //                {
-        //                    break;
-        //                }
-        //            }
-        //        }
+            int prevTabs = 0;
+            if (line != 1)
+            {
+                int prevLine = line - 1;
+                int prevLineHeadIndex = item.CodeDocument.GetLineStartIndex(prevLine);
+                for (int i = prevLineHeadIndex; i < lineHeadIndex; i++)
+                {
+                    char ch = item.CodeDocument.GetCharAt(i);
+                    if (ch == '\t')
+                    {
+                        prevTabs++;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
 
-        //        int indentLength = 0;
-        //        for (int i = lineHeadIndex; i < item.CodeDocument.Length; i++)
-        //        {
-        //            char ch = item.CodeDocument.GetCharAt(i);
-        //            if (ch == '\t')
-        //            {
-        //                indentLength++;
-        //            }
-        //            else if (ch == ' ')
-        //            {
-        //                indentLength++;
-        //            }
-        //            else
-        //            {
-        //                break;
-        //            }
-        //        }
+            int indentLength = 0;
+            for (int i = lineHeadIndex; i < item.CodeDocument.Length; i++)
+            {
+                char ch = item.CodeDocument.GetCharAt(i);
+                if (ch == '\t')
+                {
+                    indentLength++;
+                }
+                else if (ch == ' ')
+                {
+                    indentLength++;
+                }
+                else
+                {
+                    break;
+                }
+            }
 
 
-        //        bool prevBegin = isPrevBegin(item,lineHeadIndex);
-        //        bool nextEnd = isNextEnd(item, lineHeadIndex);
+            bool prevBegin = isPrevBegin(item, lineHeadIndex);
+            bool nextEnd = isNextEnd(item, lineHeadIndex);
 
-        //        if (prevBegin)
-        //        {
-        //            if (nextEnd) // caret is sandwiched beteen begin and end
-        //            {
-        //                // BEFORE
-        //                // begin[enter] end
+            if (prevBegin)
+            {
+                if (nextEnd) // caret is sandwiched beteen begin and end
+                {
+                    // BEFORE
+                    // begin[enter] end
 
-        //                // AFTER
-        //                // begin
-        //                //     [caret]
-        //                // end
-        //                item.CodeDocument.Replace(lineHeadIndex, indentLength, 0, new String('\t', prevTabs + 1) + "\r\n" + new String('\t', prevTabs));
-        //                item.CodeDocument.CaretIndex = item.CodeDocument.CaretIndex + prevTabs + 1 + 1 - indentLength;
-        //                return;
-        //            }
-        //            else
-        //            {   // add indent
-        //                prevTabs++;
-        //            }
-        //        }
+                    // AFTER
+                    // begin
+                    //     [caret]
+                    // end
+                    item.CodeDocument.Replace(lineHeadIndex, indentLength, 0, new String('\t', prevTabs + 1) + "\r\n" + new String('\t', prevTabs));
+                    item.CodeDocument.CaretIndex = item.CodeDocument.CaretIndex + prevTabs + 1 + 1 - indentLength;
+                    return;
+                }
+                else
+                {   // add indent
+                    prevTabs++;
+                }
+            }
 
-        //        if (prevTabs != 0) item.CodeDocument.Replace(lineHeadIndex, indentLength, 0, new String('\t', prevTabs));
-        //        item.CodeDocument.CaretIndex = item.CodeDocument.CaretIndex + prevTabs - indentLength;
-        //    }
+            if (prevTabs != 0) item.CodeDocument.Replace(lineHeadIndex, indentLength, 0, new String('\t', prevTabs));
+            item.CodeDocument.CaretIndex = item.CodeDocument.CaretIndex + prevTabs - indentLength;
+        }
 
-        //    private static bool isPrevBegin(IVerilogRelatedFile item, int index)
-        //    {
-        //        int prevInex = index;
-        //        if (prevInex > 0) prevInex--;
+        private static bool isPrevBegin(IVerilogRelatedFile item, int index)
+        {
+            int prevInex = index;
+            if (prevInex > 0) prevInex--;
 
-        //        if (prevInex > 0 && item.CodeDocument.GetCharAt(prevInex) == '\n') prevInex--;
-        //        if (prevInex > 0 && item.CodeDocument.GetCharAt(prevInex) == '\r') prevInex--;
+            if (prevInex > 0 && item.CodeDocument.GetCharAt(prevInex) == '\n') prevInex--;
+            if (prevInex > 0 && item.CodeDocument.GetCharAt(prevInex) == '\r') prevInex--;
 
-        //        if (prevInex == 0 || item.CodeDocument.GetCharAt(prevInex) != 'n') return false;
-        //        prevInex--;
-        //        if (prevInex == 0 || item.CodeDocument.GetCharAt(prevInex) != 'i') return false;
-        //        prevInex--;
-        //        if (prevInex == 0 || item.CodeDocument.GetCharAt(prevInex) != 'g') return false;
-        //        prevInex--;
-        //        if (prevInex == 0 || item.CodeDocument.GetCharAt(prevInex) != 'e') return false;
-        //        prevInex--;
-        //        if (item.CodeDocument.GetCharAt(prevInex) != 'b') return false;
-        //        return true;
-        //    }
+            if (prevInex == 0 || item.CodeDocument.GetCharAt(prevInex) != 'n') return false;
+            prevInex--;
+            if (prevInex == 0 || item.CodeDocument.GetCharAt(prevInex) != 'i') return false;
+            prevInex--;
+            if (prevInex == 0 || item.CodeDocument.GetCharAt(prevInex) != 'g') return false;
+            prevInex--;
+            if (prevInex == 0 || item.CodeDocument.GetCharAt(prevInex) != 'e') return false;
+            prevInex--;
+            if (item.CodeDocument.GetCharAt(prevInex) != 'b') return false;
+            return true;
+        }
 
-        //    private static bool isNextEnd(IVerilogRelatedFile item, int index)
-        //    {
-        //        int prevInex = index;
-        //        if (prevInex < item.CodeDocument.Length &&
-        //            (
-        //                item.CodeDocument.GetCharAt(prevInex) == ' ' || item.CodeDocument.GetCharAt(prevInex) == '\t'
-        //            )
-        //        ) prevInex++;
+        private static bool isNextEnd(IVerilogRelatedFile item, int index)
+        {
+            int prevInex = index;
+            if (prevInex < item.CodeDocument.Length &&
+                (
+                    item.CodeDocument.GetCharAt(prevInex) == ' ' || item.CodeDocument.GetCharAt(prevInex) == '\t'
+                )
+            ) prevInex++;
 
-        //        if (prevInex >= item.CodeDocument.Length || item.CodeDocument.GetCharAt(prevInex) != 'e') return false;
-        //        prevInex++;
-        //        if (prevInex >= item.CodeDocument.Length || item.CodeDocument.GetCharAt(prevInex) != 'n') return false;
-        //        prevInex++;
-        //        if (item.CodeDocument.GetCharAt(prevInex) != 'd') return false;
-        //        return true;
-        //    }
+            if (prevInex >= item.CodeDocument.Length || item.CodeDocument.GetCharAt(prevInex) != 'e') return false;
+            prevInex++;
+            if (prevInex >= item.CodeDocument.Length || item.CodeDocument.GetCharAt(prevInex) != 'n') return false;
+            prevInex++;
+            if (item.CodeDocument.GetCharAt(prevInex) != 'd') return false;
+            return true;
+        }
 
     }
 }

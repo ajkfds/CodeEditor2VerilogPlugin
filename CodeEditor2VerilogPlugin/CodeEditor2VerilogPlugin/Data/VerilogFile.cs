@@ -279,13 +279,13 @@ namespace pluginVerilog.Data
             }
         }
 
-        //public override ajkControls.CodeTextbox.CodeDrawStyle DrawStyle
-        //{
-        //    get
-        //    {
-        //        return Global.CodeDrawStyle;
-        //    }
-        //}
+        public override CodeEditor2.CodeEditor.CodeDrawStyle DrawStyle
+        {
+            get
+            {
+                return Global.CodeDrawStyle;
+            }
+        }
 
         protected override CodeEditor2.NavigatePanel.NavigatePanelNode createNode()
         {
@@ -343,6 +343,10 @@ namespace pluginVerilog.Data
         //    return VerilogCommon.AutoComplete.GetToolItems(this, index);
         //}
 
+        public override List<CodeEditor2.CodeEditor.ToolItem> GetToolItems(int index)
+        {
+            return VerilogCommon.AutoComplete.GetToolItems(this, index);
+        }
         public override List<CodeEditor2.CodeEditor.AutocompleteItem> GetAutoCompleteItems(int index, out string cantidateWord)
         {
             return VerilogCommon.AutoComplete.GetAutoCompleteItems(this, VerilogParsedDocument, index, out cantidateWord);

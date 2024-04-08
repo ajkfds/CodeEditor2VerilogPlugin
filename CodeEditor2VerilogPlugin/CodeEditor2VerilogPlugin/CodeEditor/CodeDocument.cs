@@ -39,7 +39,7 @@ namespace pluginVerilog.CodeEditor
             if (TextDocument == null) return;
             DocumentLine line = TextDocument.GetLineByOffset(index);
             LineInfomation lineInfo = GetLineInfomation(line.LineNumber);
-            Color color = Global.CodeDrawStyle.ColorPallet[value];
+            Color color = TextFile.DrawStyle.ColorPallet[value];
             lineInfo.Colors.Add(new LineInfomation.Color(index, 1, color));
         }
 
@@ -49,7 +49,7 @@ namespace pluginVerilog.CodeEditor
 
             DocumentLine lineStart = TextDocument.GetLineByOffset(index);
             DocumentLine lineLast = TextDocument.GetLineByOffset(index + length);
-            Color color = Global.CodeDrawStyle.ColorPallet[value];
+            Color color = TextFile.DrawStyle.ColorPallet[value];
 
             if (lineStart == lineLast)
             {
@@ -72,7 +72,7 @@ namespace pluginVerilog.CodeEditor
             if (TextDocument == null) return;
             DocumentLine line = TextDocument.GetLineByOffset(index);
             LineInfomation lineInfo = GetLineInfomation(line.LineNumber);
-            Color color = Global.CodeDrawStyle.MarkColor[value];
+            Color color = TextFile.DrawStyle.MarkColor[value];
             lineInfo.Effects.Add(new LineInfomation.Effect(index, 1, color, null));
         }
 
