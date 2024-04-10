@@ -87,13 +87,17 @@ namespace pluginVerilog.NavigatePanel
             //if (menu.Items.ContainsKey("icarusVerilogTsmi")) menu.Items["icarusVerilogTsmi"].Visible = true;
             //if (menu.Items.ContainsKey("VerilogDebugTsmi")) menu.Items["VerilogDebugTsmi"].Visible = true;
 
+            System.Diagnostics.Debug.Print("##### Launch SetTextFile");
             CodeEditor2.Controller.CodeEditor.SetTextFile(TextFile);
+            System.Diagnostics.Debug.Print("##### parseHier " + TextFile.Name);
 
             if (!TextFile.ParseValid | TextFile.ReparseRequested)
             {
                 if (!CodeEditor2.Global.StopParse)
                 {
-                    await CodeEditor2.Tools.ParseHierarchy.Run(this);
+                    System.Diagnostics.Debug.Print("##### Hier parse");
+                    var _ = CodeEditor2.Tools.ParseHierarchy.Run(this);
+                    System.Diagnostics.Debug.Print("##### Hier parse exit");
                 }
             }
 
@@ -102,6 +106,7 @@ namespace pluginVerilog.NavigatePanel
             //    VerilogFile.CodeDocument.ExpandBlock(VerilogFile.CodeDocument.GetLineAt(module.BeginIndexReference.Indexs.Last() ));
             //}
 
+            System.Diagnostics.Debug.Print("##### Call NodeSelected");
             if (NodeSelected != null) NodeSelected();
         }
 

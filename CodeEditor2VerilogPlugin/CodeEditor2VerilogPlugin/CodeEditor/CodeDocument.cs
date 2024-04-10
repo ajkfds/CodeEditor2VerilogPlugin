@@ -2,6 +2,7 @@
 using AvaloniaEdit;
 using AvaloniaEdit.Document;
 using CodeEditor2.CodeEditor;
+using Microsoft.VisualBasic.FileIO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,47 +35,49 @@ namespace pluginVerilog.CodeEditor
             get { return TextFile as Data.IVerilogRelatedFile; }
         }
 
-        public override void SetColorAt(int index, byte value)
-        {
-            if (TextDocument == null) return;
-            DocumentLine line = TextDocument.GetLineByOffset(index);
-            LineInfomation lineInfo = GetLineInfomation(line.LineNumber);
-            Color color = TextFile.DrawStyle.ColorPallet[value];
-            lineInfo.Colors.Add(new LineInfomation.Color(index, 1, color));
-        }
+        //public override void SetColorAt(int index, byte value)
+        //{
+        //    if (TextDocument == null) return;
+        //    if (TextFile == null) return;
+        //    DocumentLine line = TextDocument.GetLineByOffset(index);
+        //    LineInfomation lineInfo = GetLineInfomation(line.LineNumber);
+        //    Color color = TextFile.DrawStyle.ColorPallet[value];
+        //    lineInfo.Colors.Add(new LineInfomation.Color(index, 1, color));
+        //}
 
-        public override void SetColorAt(int index, byte value, int length)
-        {
-            if (TextDocument == null) return;
+        //public override void SetColorAt(int index, byte value, int length)
+        //{
+        //    if (TextDocument == null) return;
+        //    if (TextFile == null) return;
 
-            DocumentLine lineStart = TextDocument.GetLineByOffset(index);
-            DocumentLine lineLast = TextDocument.GetLineByOffset(index + length);
-            Color color = TextFile.DrawStyle.ColorPallet[value];
+        //    DocumentLine lineStart = TextDocument.GetLineByOffset(index);
+        //    DocumentLine lineLast = TextDocument.GetLineByOffset(index + length);
+        //    Color color = TextFile.DrawStyle.ColorPallet[value];
 
-            if (lineStart == lineLast)
-            {
-                LineInfomation lineInfo = GetLineInfomation(lineStart.LineNumber);
-                lineInfo.Colors.Add(new LineInfomation.Color(index, length, color));
-            }
-            else
-            {
-                for (int line = lineStart.LineNumber; line <= lineLast.LineNumber; line++)
-                {
-                    LineInfomation lineInfo = GetLineInfomation(line);
-                    lineInfo.Colors.Add(new LineInfomation.Color(index, index + length, color));
-                }
-            }
-        }
+        //    if (lineStart == lineLast)
+        //    {
+        //        LineInfomation lineInfo = GetLineInfomation(lineStart.LineNumber);
+        //        lineInfo.Colors.Add(new LineInfomation.Color(index, length, color));
+        //    }
+        //    else
+        //    {
+        //        for (int line = lineStart.LineNumber; line <= lineLast.LineNumber; line++)
+        //        {
+        //            LineInfomation lineInfo = GetLineInfomation(line);
+        //            lineInfo.Colors.Add(new LineInfomation.Color(index, index + length, color));
+        //        }
+        //    }
+        //}
 
-        public override void SetMarkAt(int index, byte value)
-        {
-            if (index >= Length) return;
-            if (TextDocument == null) return;
-            DocumentLine line = TextDocument.GetLineByOffset(index);
-            LineInfomation lineInfo = GetLineInfomation(line.LineNumber);
-            Color color = TextFile.DrawStyle.MarkColor[value];
-            lineInfo.Effects.Add(new LineInfomation.Effect(index, 1, color, null));
-        }
+        //public override void SetMarkAt(int index, byte value)
+        //{
+        //    if (index >= Length) return;
+        //    if (TextDocument == null) return;
+        //    DocumentLine line = TextDocument.GetLineByOffset(index);
+        //    LineInfomation lineInfo = GetLineInfomation(line.LineNumber);
+        //    Color color = TextFile.DrawStyle.MarkColor[value];
+        //    lineInfo.Effects.Add(new LineInfomation.Effect(index, 1, color, null));
+        //}
 
         // get word boundery for editor word selection
 

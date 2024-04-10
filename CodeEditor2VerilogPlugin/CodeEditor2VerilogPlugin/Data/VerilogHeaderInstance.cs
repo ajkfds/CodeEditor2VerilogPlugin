@@ -29,9 +29,9 @@ namespace pluginVerilog.Data
             VerilogHeaderInstance instance = new VerilogHeaderInstance(fileItem as VerilogHeaderFile);
             instance.Project = project;
             instance.RelativePath = relativePath;
-            if (instance.RelativePath.Contains('\\'))
+            if (instance.RelativePath.Contains(System.IO.Path.DirectorySeparatorChar))
             {
-                instance.Name = relativePath.Substring(relativePath.LastIndexOf('\\') + 1);
+                instance.Name = relativePath.Substring(relativePath.LastIndexOf(System.IO.Path.DirectorySeparatorChar) + 1);
             }
             else
             {

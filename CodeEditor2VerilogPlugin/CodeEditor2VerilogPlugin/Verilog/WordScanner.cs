@@ -801,10 +801,10 @@ namespace pluginVerilog.Verilog
                 System.Diagnostics.Debugger.Break();
             }
             string sameFolderPath = file.RelativePath;
-            if (sameFolderPath.Contains('\\'))
+            if (sameFolderPath.Contains(System.IO.Path.DirectorySeparatorChar))
             {
-                sameFolderPath = sameFolderPath.Substring(0, sameFolderPath.LastIndexOf('\\'));
-                sameFolderPath = sameFolderPath + '\\' + filePath;
+                sameFolderPath = sameFolderPath.Substring(0, sameFolderPath.LastIndexOf(System.IO.Path.DirectorySeparatorChar));
+                sameFolderPath = sameFolderPath + System.IO.Path.DirectorySeparatorChar + filePath;
 
                 List<CodeEditor2.Data.Item> items = wordPointer.ParsedDocument.Project.FindItems(
                     (item) =>
