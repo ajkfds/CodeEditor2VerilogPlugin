@@ -78,25 +78,25 @@ namespace pluginVerilog.Verilog.Snippets
         private List<int> startIndexs = new List<int>();
         private List<int> lastIndexs = new List<int>();
 
-        public override void BeforeKeyDown(object sender, KeyEventArgs e, CodeEditor2.Views.PopupMenuView popupMenuView)
+        public override void BeforeKeyDown(object sender, TextInputEventArgs e, CodeEditor2.Views.PopupMenuView popupMenuView)
         {
             // overrider return & escape
             if (popupMenuView == null || !popupMenuView.IsVisible)
             {
-                if (e.Key == Key.Return || e.Key == Key.Escape)
-                {
-                    bool moved;
-                    moveToNextHighlight(out moved);
-                    if (!moved) CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
-                    e.Handled = true;
-                }
+                //if (e.Key == Key.Return || e.Key == Key.Escape)
+                //{
+                //    bool moved;
+                //    moveToNextHighlight(out moved);
+                //    if (!moved) CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
+                //    e.Handled = true;
+                //}
             }
         }
-        public override void AfterKeyDown(object sender, KeyEventArgs e, CodeEditor2.Views.PopupMenuView popupMenuView)
+        public override void AfterKeyDown(object sender, TextInputEventArgs e, CodeEditor2.Views.PopupMenuView popupMenuView)
         {
 
         }
-        public override void AfterAutoCompleteHandled(object sender, KeyEventArgs e, CodeEditor2.Views.PopupMenuView popupMenuView)
+        public override void AfterAutoCompleteHandled(object sender, TextInputEventArgs e, CodeEditor2.Views.PopupMenuView popupMenuView)
         {
             if (e.Handled) // closed
             {

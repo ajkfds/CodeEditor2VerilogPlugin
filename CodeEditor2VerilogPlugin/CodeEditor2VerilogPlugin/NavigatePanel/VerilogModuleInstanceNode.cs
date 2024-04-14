@@ -77,7 +77,20 @@ namespace pluginVerilog.NavigatePanel
         {
             get
             {
-                return AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap("CodeEditor2VerilogPlugin/Assets/Icons/verilogPaper.svg");
+                if (VerilogFile.SystemVerilog)
+                {
+                    return AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
+                        "CodeEditor2VerilogPlugin/Assets/Icons/systemVerilogDocument.svg",
+                        Avalonia.Media.Color.FromArgb(100, 200, 240, 240)
+                        );
+                }
+                else
+                {
+                    return AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
+                        "CodeEditor2VerilogPlugin/Assets/Icons/verilogDocument.svg",
+                        Avalonia.Media.Color.FromArgb(100, 200, 240, 240)
+                        );
+                }
             }
         }
 

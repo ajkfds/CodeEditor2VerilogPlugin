@@ -33,7 +33,10 @@ namespace pluginVerilog.NavigatePanel
         {
             get
             {
-                return AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap("CodeEditor2VerilogPlugin/Assets/Icons/verilogHeaderPaper.svg");
+                return AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
+                    "CodeEditor2VerilogPlugin/Assets/Icons/verilogHeaderDocument.svg",
+                    Avalonia.Media.Color.FromArgb(100,255,255,255)
+                    );
             }
         }
 

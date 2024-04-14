@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--?xml version="1.0" encoding="utf-8"?-->
+
+<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+
+<svg
+   version="1.1"
+   id="_x32_"
+   x="0px"
+   y="0px"
+   viewBox="0 0 512 512"
+   style="width: 256px; height: 256px; opacity: 1;"
+   xml:space="preserve"
+   sodipodi:docname="VerilogHeaderDocument.svg"
+   inkscape:version="1.3.2 (091e20e, 2023-11-25, custom)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+   id="defs1" /><sodipodi:namedview
+   id="namedview1"
+   pagecolor="#ffffff"
+   bordercolor="#000000"
+   borderopacity="0.25"
+   inkscape:showpageshadow="2"
+   inkscape:pageopacity="0.0"
+   inkscape:pagecheckerboard="0"
+   inkscape:deskcolor="#d1d1d1"
+   inkscape:zoom="1.5481772"
+   inkscape:cx="359.13202"
+   inkscape:cy="240.60553"
+   inkscape:window-width="2256"
+   inkscape:window-height="1398"
+   inkscape:window-x="-11"
+   inkscape:window-y="-11"
+   inkscape:window-maximized="1"
+   inkscape:current-layer="_x32_" />
+<style
+   type="text/css"
+   id="style1">
+	.st0{fill:#4B4B4B;}
+</style>
+<path
+   d="M 133.31641,0.9140625 C 119.67016,0.77299947 100.60897,8.8080508 90.958984,18.457031 L 17.693359,91.722656 C 8.043379,101.37264 0.1503906,120.4331 0.1503906,134.08008 v 354.02148 c 0,13.64698 11.1635744,24.8125 24.8105464,24.8125 H 313.57812 l 114.48047,3.65235 h 58.73047 c 13.64698,0 24.8125,-11.16357 24.8125,-24.81055 V 433.02344 383.40039 29.378906 C 511.60056,15.731934 500.43531,4.7074693 486.78906,4.5664062 Z M 270.58594,128.11133 h 51.05859 V 239.7793 c 12.68979,-30.50555 34.93329,-45.75782 66.73242,-45.75782 46.42972,0 69.64453,24.97727 69.64453,74.9336 V 414.62695 H 406.96484 V 275.88086 c 0,-14.9729 -3.43336,-25.46722 -10.30078,-31.48438 -6.71813,-6.15708 -14.63149,-9.23632 -23.73828,-9.23632 -14.48129,0 -26.6487,5.38916 -36.50195,16.16406 -9.85325,10.77489 -14.7793,28.54619 -14.7793,53.31445 V 414.62695 H 270.58594 Z M 39.482422,202.62695 H 92.779297 L 145.62891,346.4082 197.13477,202.62695 h 40.08398 l -76.81055,212 h -42.32422 z"
+   style="fill:#4b4b4b"
+   id="path1" />
+</svg>
