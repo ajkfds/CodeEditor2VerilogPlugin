@@ -17,11 +17,11 @@ namespace pluginVerilog.Verilog.Expressions
             Constant = false;
         }
         
-        public virtual bool Constant { get; protected set; }
-        public virtual double? Value { get; protected set; }
-        public virtual int? BitWidth { get; protected set; }
+//        public virtual bool Constant { get; protected set; }
+//        public virtual double? Value { get; protected set; }
+//        public virtual int? BitWidth { get; protected set; }
         //        public bool Signed { get; protected set; }
-        public WordReference Reference { get; protected set; }
+//        public WordReference Reference { get; protected set; }
 
         public static Primary Create(bool constant, double? value, int? bitWidth)
         {
@@ -39,20 +39,20 @@ namespace pluginVerilog.Verilog.Expressions
         //    return label;
         //}
 
-        public virtual string CreateString()
-        {
-            return "";
-        }
+        //public virtual string CreateString()
+        //{
+        //    return "";
+        //}
         
         /*        public virtual void AppendLabel(ajkControls.ColorLabel.ColorLabel label)
                 {
 
                 }
         */
-        public virtual void AppendString( StringBuilder stringBuilder )
-        {
+        //public virtual void AppendString( StringBuilder stringBuilder )
+        //{
 
-        }
+        //}
         /*
          * 
          * 

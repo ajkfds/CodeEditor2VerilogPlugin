@@ -10,13 +10,6 @@ namespace pluginVerilog.Verilog.Expressions
     {
         protected Number() { }
 
-        public override bool Constant
-        {
-            get
-            {
-                return true;
-            }
-        }
 
         // A.8.7 Numbers
         // number           ::= decimal_number
@@ -92,9 +85,11 @@ namespace pluginVerilog.Verilog.Expressions
             
 
             Number number = new Number();
+            number.Constant = true;
             int index = 0;
             int apostropheIndex = -1;
             number.Text = word.Text;
+            number.Constant = true;
             number.Reference = word.GetReference();
             StringBuilder sb = new StringBuilder();
 
@@ -142,7 +137,11 @@ namespace pluginVerilog.Verilog.Expressions
 
                 if (!word.Text.StartsWith("\'")) return number;
                 Number number2 = Number.ParseCreate(word);
-                if(number2 != null && number != null) number2.BitWidth = number.BitWidth;
+                if (number2 != null && number != null)
+                {
+                    number2.BitWidth = number.BitWidth;
+                    number2.Constant = true;
+                }
                 return number2;
             }
             else
