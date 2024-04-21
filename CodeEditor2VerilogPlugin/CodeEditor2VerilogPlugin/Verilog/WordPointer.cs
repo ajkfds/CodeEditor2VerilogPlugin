@@ -653,13 +653,10 @@ namespace pluginVerilog.Verilog
             if (docLength > nextIndex + 1 && document.GetCharAt(nextIndex) == '/' && document.GetCharAt(nextIndex + 1) == '*') // "/*"
             { // comment block
                 int commentStart = nextIndex;
-//                if(colorComment) document.SetColorAt(nextIndex, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Comment));
                 nextIndex++;
-//                if (colorComment) document.SetColorAt(nextIndex, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Comment));
                 nextIndex++;
                 while (docLength > nextIndex)
                 {
- //                   if (colorComment) document.SetColorAt(nextIndex, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Comment));
                     if (document.GetCharAt(nextIndex) == '/' && document.GetCharAt(nextIndex - 1) == '*')
                     {
                         nextIndex++;
@@ -686,9 +683,7 @@ namespace pluginVerilog.Verilog
             if (docLength > nextIndex + 1 && document.GetCharAt(nextIndex) == '/' && document.GetCharAt(nextIndex + 1) == '/') // "//"
             { // line comment
                 int commentStart = nextIndex;
-//                if (colorComment) document.SetColorAt(nextIndex, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Comment));
                 nextIndex++;
-//                if (colorComment) document.SetColorAt(nextIndex, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Comment));
                 nextIndex++;
                 while (docLength > nextIndex && document.GetCharAt(nextIndex) != '\n')
                 {
@@ -697,12 +692,10 @@ namespace pluginVerilog.Verilog
                         ParseInLineComments(document, ref nextIndex, ref wordType,ref sectionName);
                         continue;
                     }
-//                    if (colorComment) document.SetColorAt(nextIndex, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Comment));
                     nextIndex++;
                 }
                 if (docLength > nextIndex && document.GetCharAt(nextIndex) == '\n')
                 {
- //                   if (colorComment) document.SetColorAt(nextIndex, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Comment));
                     nextIndex++;
                 }
                 if (colorComment)

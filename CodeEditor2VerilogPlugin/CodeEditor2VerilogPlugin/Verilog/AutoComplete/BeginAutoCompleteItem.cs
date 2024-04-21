@@ -11,10 +11,7 @@ namespace pluginVerilog.Verilog.AutoComplete
         public BeginAutoCompleteItem(string text, byte colorIndex, Avalonia.Media.Color color) : base(text,colorIndex,color)
         {
         }
-        public BeginAutoCompleteItem(string text, byte colorIndex, Avalonia.Media.Color color, Avalonia.Media.IImage icon, AjkAvaloniaLibs.Libs.Icons.ColorStyle iconColorStyle) : base(text,colorIndex,color,icon,iconColorStyle)
-        {
-        }
-
+ 
         public override void Apply(CodeEditor2.CodeEditor.CodeDocument codeDocument)
         {
             int prevIndex = codeDocument.CaretIndex;

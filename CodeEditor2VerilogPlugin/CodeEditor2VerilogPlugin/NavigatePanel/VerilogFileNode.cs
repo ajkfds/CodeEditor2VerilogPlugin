@@ -7,6 +7,7 @@ using System.Drawing;
 using pluginVerilog.Verilog.BuildingBlocks;
 using Avalonia.Media;
 using Avalonia.Threading;
+using System.ComponentModel;
 
 namespace pluginVerilog.NavigatePanel
 {
@@ -14,6 +15,7 @@ namespace pluginVerilog.NavigatePanel
     {
         public VerilogFileNode(Data.VerilogFile verilogFile) : base(verilogFile)
         {
+            UpdateVisual();
             if (NodeCreated != null) NodeCreated(this);
         }
         public static Action<VerilogFileNode> NodeCreated;
@@ -43,26 +45,20 @@ namespace pluginVerilog.NavigatePanel
             }
         }
 
-        public override IImage? Image
-        {
-            get
-            {
-                if (VerilogFile.SystemVerilog)
-                {
-                    return AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
-                        "CodeEditor2VerilogPlugin/Assets/Icons/systemVerilogDocument.svg",
-                        Avalonia.Media.Color.FromArgb(100, 200, 240, 240)
-                        );
-                }
-                else
-                {
-                    return AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
-                        "CodeEditor2VerilogPlugin/Assets/Icons/verilogDocument.svg",
-                        Avalonia.Media.Color.FromArgb(100, 200, 240, 240)
-                        );
-                }
-            }
-        }
+
+        //private IImage image;
+        //public override IImage? Image
+        //{
+        //    get
+        //    {
+        //        return image;
+        //    }
+        //    set
+        //    {
+        //        image = value;
+        //    }
+        //}
+
 
         //public override void DrawNode(Graphics graphics, int x, int y, Font font, Color color, Color backgroundColor, Color selectedColor, int lineHeight, bool selected)
         //{
@@ -121,6 +117,9 @@ namespace pluginVerilog.NavigatePanel
 
             System.Diagnostics.Debug.Print("##### Call NodeSelected");
             if (NodeSelected != null) NodeSelected();
+            Refresh();
+
+            
         }
 
 
@@ -132,12 +131,6 @@ namespace pluginVerilog.NavigatePanel
             }
             VerilogFile.Update();
 
-            UpdateVisual();
-
-        }
-
-        public override void UpdateVisual()
-        {
             List<CodeEditor2.Data.Item> targetDataItems = new List<CodeEditor2.Data.Item>();
             List<CodeEditor2.Data.Item> addDataItems = new List<CodeEditor2.Data.Item>();
             lock (VerilogFile.Items)
@@ -178,6 +171,41 @@ namespace pluginVerilog.NavigatePanel
                     treeIndex++;
                 }
             }
+
+            UpdateVisual();
+
+        }
+
+        public override void UpdateVisual()
+        {
+
+            if (VerilogFile.SystemVerilog)
+            {
+                Image = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
+                    "CodeEditor2VerilogPlugin/Assets/Icons/systemVerilogDocument.svg",
+                    Avalonia.Media.Color.FromArgb(100, 200, 240, 240)
+                    );
+            }
+            else
+            {
+                if (TextFile.CodeDocument.IsDirty)
+                {
+                    Image = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
+                        "CodeEditor2VerilogPlugin/Assets/Icons/verilogDocument.svg",
+                        Avalonia.Media.Color.FromArgb(100, 200, 240, 240),
+                        "CodeEditor2/Assets/Icons/shine.svg",
+                        Avalonia.Media.Color.FromArgb(255, 255, 255, 200)
+                        );
+                }
+                else
+                {
+                    Image = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
+                        "CodeEditor2VerilogPlugin/Assets/Icons/verilogDocument.svg",
+                        Avalonia.Media.Color.FromArgb(100, 200, 240, 240)
+                        );
+                }
+            }
+
         }
 
     }
