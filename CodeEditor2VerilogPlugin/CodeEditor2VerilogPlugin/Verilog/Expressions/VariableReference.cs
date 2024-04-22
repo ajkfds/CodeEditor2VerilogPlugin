@@ -16,32 +16,32 @@ namespace pluginVerilog.Verilog.Expressions
         public DataObjects.DataObject Variable = null;
 
 
-        //public override void AppendLabel(ajkControls.ColorLabel.ColorLabel label)
-        //{
-        //    if (Variable is DataObjects.Variables.Reg)
-        //    {
-        //        label.AppendText(VariableName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Register));
-        //    }
-        //    else if (Variable is Net)
-        //    {
-        //        label.AppendText(VariableName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Net));
-        //    }
-        //    else
-        //    {
-        //        label.AppendText(VariableName);
-        //    }
-        //    if (RangeExpression != null)
-        //    {
-        //        label.AppendText(" ");
-        //        label.AppendLabel(RangeExpression.GetLabel());
-        //    }
-        //    foreach (Expression expression in Dimensions)
-        //    {
-        //        label.AppendText(" [");
-        //        label.AppendLabel(expression.GetLabel());
-        //        label.AppendText("]");
-        //    }
-        //}
+        public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        {
+            if (Variable is DataObjects.Variables.Reg)
+            {
+                label.AppendText(VariableName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Register));
+            }
+            else if (Variable is Net)
+            {
+                label.AppendText(VariableName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Net));
+            }
+            else
+            {
+                label.AppendText(VariableName);
+            }
+            if (RangeExpression != null)
+            {
+                label.AppendText(" ");
+                label.AppendLabel(RangeExpression.GetLabel());
+            }
+            foreach (Expression expression in Dimensions)
+            {
+                label.AppendText(" [");
+                label.AppendLabel(expression.GetLabel());
+                label.AppendText("]");
+            }
+        }
 
         public override void AppendString(StringBuilder stringBuilder)
         {

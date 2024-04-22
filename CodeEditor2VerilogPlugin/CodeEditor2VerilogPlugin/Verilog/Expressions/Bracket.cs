@@ -18,14 +18,14 @@ namespace pluginVerilog.Verilog.Expressions
             Expression.DisposeSubRefrence(false);
         }
 
-        //public override ajkControls.ColorLabel.ColorLabel GetLabel()
-        //{
-        //    ajkControls.ColorLabel.ColorLabel label = new ajkControls.ColorLabel.ColorLabel();
-        //    label.AppendText("(");
-        //    if (Expression != null) label.AppendLabel(Expression.GetLabel());
-        //    label.AppendText(")");
-        //    return label;
-        //}
+        public override AjkAvaloniaLibs.Contorls.ColorLabel GetLabel()
+        {
+            AjkAvaloniaLibs.Contorls.ColorLabel label = new AjkAvaloniaLibs.Contorls.ColorLabel();
+            label.AppendText("(");
+            if (Expression != null) label.AppendLabel(Expression.GetLabel());
+            label.AppendText(")");
+            return label;
+        }
 
         public static Primary ParseCreateBracketOrMinTypMax(WordScanner word, NameSpace nameSpace)
         {

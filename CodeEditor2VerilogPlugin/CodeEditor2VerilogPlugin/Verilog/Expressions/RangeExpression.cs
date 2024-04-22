@@ -14,16 +14,16 @@ namespace pluginVerilog.Verilog.Expressions
     public class RangeExpression
     {
         public int BitWidth;
-        //public virtual ajkControls.ColorLabel.ColorLabel GetLabel()
-        //{
-        //    ajkControls.ColorLabel.ColorLabel label = new ajkControls.ColorLabel.ColorLabel();
-        //    AppendLabel(label);
-        //    return label;
-        //}
+        public virtual AjkAvaloniaLibs.Contorls.ColorLabel GetLabel()
+        {
+            AjkAvaloniaLibs.Contorls.ColorLabel label = new AjkAvaloniaLibs.Contorls.ColorLabel();
+            AppendLabel(label);
+            return label;
+        }
 
-        //public virtual void AppendLabel(ajkControls.ColorLabel.ColorLabel label)
-        //{
-        //}
+        public virtual void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        {
+        }
     }
     public class SingleBitRangeExpression : RangeExpression
     {
@@ -34,12 +34,12 @@ namespace pluginVerilog.Verilog.Expressions
             BitWidth = 1;
         }
         public Expression Expression;
-        //public override void AppendLabel(ajkControls.ColorLabel.ColorLabel label)
-        //{
-        //    label.AppendText("[");
-        //    label.AppendLabel(Expression.GetLabel());
-        //    label.AppendText("]");
-        //}
+        public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        {
+            label.AppendText("[");
+            label.AppendLabel(Expression.GetLabel());
+            label.AppendText("]");
+        }
     }
     public class AbsoluteRangeExpression : RangeExpression
     {
@@ -56,15 +56,16 @@ namespace pluginVerilog.Verilog.Expressions
         }
         public Expression MsbExpression;
         public Expression LsbExpression;
-        //public override void AppendLabel(ajkControls.ColorLabel.ColorLabel label)
-        //{
-        //    if (LsbExpression == null || MsbExpression == null) return;
-        //    label.AppendText("[");
-        //    label.AppendLabel(MsbExpression.GetLabel());
-        //    label.AppendText(":");
-        //    label.AppendLabel(LsbExpression.GetLabel());
-        //    label.AppendText("]");
-        //}
+
+        public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        {
+            if (LsbExpression == null || MsbExpression == null) return;
+            label.AppendText("[");
+            label.AppendLabel(MsbExpression.GetLabel());
+            label.AppendText(":");
+            label.AppendLabel(LsbExpression.GetLabel());
+            label.AppendText("]");
+        }
     }
     public class RelativePlusRangeExpression : RangeExpression
     {
@@ -81,15 +82,15 @@ namespace pluginVerilog.Verilog.Expressions
         public Expression BaseExpression;
         public Expression WidthExpression;
 
-        //public override void AppendLabel(ajkControls.ColorLabel.ColorLabel label)
-        //{
-        //    if (BaseExpression == null || WidthExpression == null) return;
-        //    label.AppendText("[");
-        //    label.AppendLabel(BaseExpression.GetLabel());
-        //    label.AppendText("+:");
-        //    label.AppendLabel(WidthExpression.GetLabel());
-        //    label.AppendText("]");
-        //}
+        public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        {
+            if (BaseExpression == null || WidthExpression == null) return;
+            label.AppendText("[");
+            label.AppendLabel(BaseExpression.GetLabel());
+            label.AppendText("+:");
+            label.AppendLabel(WidthExpression.GetLabel());
+            label.AppendText("]");
+        }
     }
     public class RelativeMinusRangeExpression : RangeExpression
     {
@@ -106,14 +107,14 @@ namespace pluginVerilog.Verilog.Expressions
         public Expression BaseExpression;
         public Expression WidthExpression;
 
-        //public override void AppendLabel(ajkControls.ColorLabel.ColorLabel label)
-        //{
-        //    if (BaseExpression == null || WidthExpression == null) return;
-        //    label.AppendText("[");
-        //    label.AppendLabel(BaseExpression.GetLabel());
-        //    label.AppendText("-:");
-        //    label.AppendLabel(WidthExpression.GetLabel());
-        //    label.AppendText("]");
-        //}
+        public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        {
+            if (BaseExpression == null || WidthExpression == null) return;
+            label.AppendText("[");
+            label.AppendLabel(BaseExpression.GetLabel());
+            label.AppendText("-:");
+            label.AppendLabel(WidthExpression.GetLabel());
+            label.AppendText("]");
+        }
     }
 }

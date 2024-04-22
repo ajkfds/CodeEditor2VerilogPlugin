@@ -36,39 +36,39 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             return null;
         }
 
-    //    public override void AppendTypeLabel(ColorLabel label)
-    //    {
-    //        switch (DataType)
-    //        {
-    //            case DataTypeEnum.Byte:
-    //                label.AppendText("byte ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-    //                break;
-    //            case DataTypeEnum.Shortint:
-    //                label.AppendText("shortint ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-    //                break;
-    //            case DataTypeEnum.Int:
-    //                label.AppendText("int ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-    //                break;
-    //            case DataTypeEnum.Longint:
-    //                label.AppendText("longint ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-    //                break;
-    //            case DataTypeEnum.Integer:
-    //                label.AppendText("integer ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-    //                break;
-    //            case DataTypeEnum.Time:
-    //                label.AppendText("time ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-    //                break;
-    //            default:
-    //                System.Diagnostics.Debugger.Break();
-    //                break;
-    //        }
-    //        label.AppendText(" ");
-    //        if (Signed)
-    //        {
-    //            label.AppendText("signed ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-    //        }
+        public override void AppendTypeLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        {
+            switch (DataType)
+            {
+                case DataTypeEnum.Byte:
+                    label.AppendText("byte ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    break;
+                case DataTypeEnum.Shortint:
+                    label.AppendText("shortint ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    break;
+                case DataTypeEnum.Int:
+                    label.AppendText("int ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    break;
+                case DataTypeEnum.Longint:
+                    label.AppendText("longint ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    break;
+                case DataTypeEnum.Integer:
+                    label.AppendText("integer ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    break;
+                case DataTypeEnum.Time:
+                    label.AppendText("time ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    break;
+                default:
+                    System.Diagnostics.Debugger.Break();
+                    break;
+            }
+            label.AppendText(" ");
+            if (Signed)
+            {
+                label.AppendText("signed ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+            }
 
-    //    }
+        }
 
     }
 }

@@ -11,16 +11,16 @@ namespace pluginVerilog.Verilog.Expressions
         protected ParameterReference() { }
         public string ParameterName { get; protected set; }
 
-        //public override ajkControls.ColorLabel.ColorLabel GetLabel()
-        //{
-        //    ajkControls.ColorLabel.ColorLabel label = new ajkControls.ColorLabel.ColorLabel();
-        //    AppendLabel(label);
-        //    return label;
-        //}
-        //public override void AppendLabel(ajkControls.ColorLabel.ColorLabel label)
-        //{
-        //    label.AppendText(ParameterName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Paramater));
-        //}
+        public override AjkAvaloniaLibs.Contorls.ColorLabel GetLabel()
+        {
+            AjkAvaloniaLibs.Contorls.ColorLabel label = new AjkAvaloniaLibs.Contorls.ColorLabel();
+            AppendLabel(label);
+            return label;
+        }
+        public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        {
+            label.AppendText(ParameterName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Paramater));
+        }
 
         public new static ParameterReference ParseCreate(WordScanner word, NameSpace nameSpace)
         {

@@ -69,15 +69,16 @@ namespace pluginVerilog.Verilog.Expressions
         {
             return Text;
         }
-        //public override void AppendLabel(ajkControls.ColorLabel.ColorLabel label)
-        //{
-        //    label.AppendText(Text, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Number));
-        //}
 
-        //public override void AppendString(StringBuilder stringBuilder)
-        //{
-        //    stringBuilder.Append(Text);
-        //}
+        public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        {
+            label.AppendText(Text, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Number));
+        }
+
+        public override void AppendString(StringBuilder stringBuilder)
+        {
+            stringBuilder.Append(Text);
+        }
 
         public static Number ParseCreate(WordScanner word)
         {

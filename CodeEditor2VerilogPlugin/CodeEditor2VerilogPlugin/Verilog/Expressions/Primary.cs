@@ -32,19 +32,19 @@ namespace pluginVerilog.Verilog.Expressions
             return primary;
         }
 
-        //public virtual ajkControls.ColorLabel.ColorLabel GetLabel()
-        //{
-        //    ajkControls.ColorLabel.ColorLabel label = new ajkControls.ColorLabel.ColorLabel();
-        //    AppendLabel(label);
-        //    return label;
-        //}
+        public virtual AjkAvaloniaLibs.Contorls.ColorLabel GetLabel()
+        {
+            AjkAvaloniaLibs.Contorls.ColorLabel label = new AjkAvaloniaLibs.Contorls.ColorLabel();
+            AppendLabel(label);
+            return label;
+        }
 
-        //public virtual string CreateString()
-        //{
-        //    return "";
-        //}
-        
-        /*        public virtual void AppendLabel(ajkControls.ColorLabel.ColorLabel label)
+        public virtual string CreateString()
+        {
+            return "";
+        }
+
+        /*        public virtual void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
                 {
 
                 }

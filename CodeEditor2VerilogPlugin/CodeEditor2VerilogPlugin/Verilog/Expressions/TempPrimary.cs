@@ -14,12 +14,12 @@ namespace pluginVerilog.Verilog.Expressions
         }
 
         private string text;
-        //public override ajkControls.ColorLabel.ColorLabel GetLabel()
-        //{
-        //    ajkControls.ColorLabel.ColorLabel label = new ajkControls.ColorLabel.ColorLabel();
-        //    AppendLabel(label);
-        //    return label;
-        //}
+        public override AjkAvaloniaLibs.Contorls.ColorLabel GetLabel()
+        {
+            AjkAvaloniaLibs.Contorls.ColorLabel label = new AjkAvaloniaLibs.Contorls.ColorLabel();
+            AppendLabel(label);
+            return label;
+        }
 
         public override string CreateString()
         {
@@ -27,10 +27,10 @@ namespace pluginVerilog.Verilog.Expressions
 //            return GetLabel().CreateString();
         }
 
-        //public override void AppendLabel(ajkControls.ColorLabel.ColorLabel label)
-        //{
-        //    label.AppendText(text);
-        //}
+        public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        {
+            label.AppendText(text);
+        }
 
     }
 }

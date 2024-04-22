@@ -80,7 +80,7 @@ namespace pluginVerilog.Verilog.DataObjects
 
             if(word.Text != ";")
             {
-                word.AddError("; expedted");
+                word.AddError("; expected");
                 return true;
             }
             word.MoveNext();    // ;

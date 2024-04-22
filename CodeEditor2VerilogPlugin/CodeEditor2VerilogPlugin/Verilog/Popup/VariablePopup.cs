@@ -15,7 +15,7 @@ namespace pluginVerilog.Verilog.Popup
     //        variable.AppendLabel(label);
     //    }
 
-    //    ajkControls.ColorLabel.ColorLabel label = new ajkControls.ColorLabel.ColorLabel();
+    //    AjkAvaloniaLibs.Contorls.ColorLabel label = new AjkAvaloniaLibs.Contorls.ColorLabel();
 
     //    public override Size GetSize(Graphics graphics, Font font)
     //    {

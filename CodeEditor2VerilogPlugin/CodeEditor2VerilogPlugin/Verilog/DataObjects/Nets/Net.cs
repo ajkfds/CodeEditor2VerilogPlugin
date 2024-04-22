@@ -42,82 +42,82 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             Wor
         }
 
-        //public override void AppendTypeLabel(ColorLabel label)
-        //{
-        //    switch (NetType)
-        //    {
-        //        case NetTypeEnum.Supply0:
-        //            label.AppendText("supply0", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-        //            break;
-        //        case NetTypeEnum.Supply1:
-        //            label.AppendText("supply1", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-        //            break;
-        //        case NetTypeEnum.Tri:
-        //            label.AppendText("tri", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-        //            break;
-        //        case NetTypeEnum.Triand:
-        //            label.AppendText("triand", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-        //            break;
-        //        case NetTypeEnum.Trior:
-        //            label.AppendText("trior", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-        //            break;
-        //        case NetTypeEnum.Trireg:
-        //            label.AppendText("trireg", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-        //            break;
-        //        case NetTypeEnum.Tri0:
-        //            label.AppendText("tri0", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-        //            break;
-        //        case NetTypeEnum.Tri1:
-        //            label.AppendText("tri1", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-        //            break;
-        //        case NetTypeEnum.Uwire:
-        //            label.AppendText("uwire", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-        //            break;
-        //        case NetTypeEnum.Wire:
-        //            label.AppendText("wire", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-        //            break;
-        //        case NetTypeEnum.Wand:
-        //            label.AppendText("wand", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-        //            break;
-        //        case NetTypeEnum.Wor:
-        //            label.AppendText("wor", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-        //            break;
-        //    }
+        public override void AppendTypeLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        {
+            switch (NetType)
+            {
+                case NetTypeEnum.Supply0:
+                    label.AppendText("supply0", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    break;
+                case NetTypeEnum.Supply1:
+                    label.AppendText("supply1", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    break;
+                case NetTypeEnum.Tri:
+                    label.AppendText("tri", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    break;
+                case NetTypeEnum.Triand:
+                    label.AppendText("triand", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    break;
+                case NetTypeEnum.Trior:
+                    label.AppendText("trior", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    break;
+                case NetTypeEnum.Trireg:
+                    label.AppendText("trireg", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    break;
+                case NetTypeEnum.Tri0:
+                    label.AppendText("tri0", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    break;
+                case NetTypeEnum.Tri1:
+                    label.AppendText("tri1", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    break;
+                case NetTypeEnum.Uwire:
+                    label.AppendText("uwire", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    break;
+                case NetTypeEnum.Wire:
+                    label.AppendText("wire", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    break;
+                case NetTypeEnum.Wand:
+                    label.AppendText("wand", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    break;
+                case NetTypeEnum.Wor:
+                    label.AppendText("wor", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    break;
+            }
 
-        //    label.AppendText(" ");
-        //    if (Signed)
-        //    {
-        //        label.AppendText("signed ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-        //    }
+            label.AppendText(" ");
+            if (Signed)
+            {
+                label.AppendText("signed ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+            }
 
-        //    if (Range != null)
-        //    {
-        //        label.AppendLabel(Range.GetLabel());
-        //        label.AppendText(" ");
-        //    }
-        //}
+            if (Range != null)
+            {
+                label.AppendLabel(Range.GetLabel());
+                label.AppendText(" ");
+            }
+        }
 
-        //public override void AppendLabel(ColorLabel label)
-        //{
-        //    AppendTypeLabel(label);
-        //    if (Name == null) return;
+        public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        {
+            AppendTypeLabel(label);
+            if (Name == null) return;
 
-        //    label.AppendText(Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Net));
+            label.AppendText(Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Net));
 
-        //    foreach (DataObjects.Range dimension in Dimensions)
-        //    {
-        //        label.AppendText(" ");
-        //        label.AppendLabel(dimension.GetLabel());
-        //    }
+            foreach (DataObjects.Range dimension in Dimensions)
+            {
+                label.AppendText(" ");
+                label.AppendLabel(dimension.GetLabel());
+            }
 
-        //    if (Comment != "")
-        //    {
-        //        label.AppendText(" ");
-        //        label.AppendText(Comment.Trim(new char[] { '\r', '\n', '\t', ' ' }), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Comment));
-        //    }
+            if (Comment != "")
+            {
+                label.AppendText(" ");
+                label.AppendText(Comment.Trim(new char[] { '\r', '\n', '\t', ' ' }), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Comment));
+            }
 
-        //    label.AppendText("\r\n");
-        //}
+            label.AppendText("\r\n");
+        }
 
         public static Net Create(NetTypeEnum netType, DataObjects.DataTypes.DataType dataType)
         {

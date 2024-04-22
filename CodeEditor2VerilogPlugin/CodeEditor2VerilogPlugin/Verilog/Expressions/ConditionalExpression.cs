@@ -16,18 +16,18 @@ namespace pluginVerilog.Verilog.Expressions
         protected ConditionalExpression() { }
         // conditional_expression::= expression1 ? { attribute_instance } expression2: expression3
 
-        //public new ajkControls.ColorLabel.ColorLabel GetLabel()
-        //{
-        //    ajkControls.ColorLabel.ColorLabel label = new ajkControls.ColorLabel.ColorLabel();
+        public new AjkAvaloniaLibs.Contorls.ColorLabel GetLabel()
+        {
+            AjkAvaloniaLibs.Contorls.ColorLabel label = new AjkAvaloniaLibs.Contorls.ColorLabel();
 
-        //    label.AppendLabel(this.ConditionExpression.GetLabel());
-        //    label.AppendText(" ? ");
-        //    label.AppendLabel(TrueExpression.GetLabel());
-        //    label.AppendText(" : ");
-        //    label.AppendLabel(FalseExpression.GetLabel());
+            label.AppendLabel(this.ConditionExpression.GetLabel());
+            label.AppendText(" ? ");
+            label.AppendLabel(TrueExpression.GetLabel());
+            label.AppendText(" : ");
+            label.AppendLabel(FalseExpression.GetLabel());
 
-        //    return label;
-        //}
+            return label;
+        }
 
         public static ConditionalExpression ParseCreate(WordScanner word,NameSpace nameSpace,Expression conditionExpresstion)
         {
