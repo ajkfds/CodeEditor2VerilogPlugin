@@ -20,12 +20,12 @@ namespace pluginVerilog.Verilog.Expressions
         public readonly string Text = "";
         public readonly byte Precedence;
 
-        //public override AjkAvaloniaLibs.Contorls.ColorLabel GetLabel()
-        //{
-        //    AjkAvaloniaLibs.Contorls.ColorLabel label = new AjkAvaloniaLibs.Contorls.ColorLabel();
-        //    AppendLabel(label);
-        //    return label;
-        //}
+        public override AjkAvaloniaLibs.Contorls.ColorLabel GetLabel()
+        {
+            AjkAvaloniaLibs.Contorls.ColorLabel label = new AjkAvaloniaLibs.Contorls.ColorLabel();
+            AppendLabel(label);
+            return label;
+        }
 
         public override string CreateString()
         {
@@ -112,23 +112,23 @@ namespace pluginVerilog.Verilog.Expressions
             Primary2.DisposeSubRefrence(false);
         }
 
-        //public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
-        //{
-        //    Condition.AppendLabel(label);
-        //    label.AppendText("?");
-        //    Primary1.AppendLabel(label);
-        //    label.AppendText(":");
-        //    Primary2.AppendLabel(label);
-        //}
+        public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        {
+            Condition.AppendLabel(label);
+            label.AppendText("?");
+            Primary1.AppendLabel(label);
+            label.AppendText(":");
+            Primary2.AppendLabel(label);
+        }
 
-        //public override void AppendString(StringBuilder stringBuilder)
-        //{
-        //    Condition.AppendString(stringBuilder);
-        //    stringBuilder.Append("?");
-        //    Primary1.AppendString(stringBuilder);
-        //    stringBuilder.Append(":");
-        //    Primary2.AppendString(stringBuilder);
-        //}
+        public override void AppendString(StringBuilder stringBuilder)
+        {
+            Condition.AppendString(stringBuilder);
+            stringBuilder.Append("?");
+            Primary1.AppendString(stringBuilder);
+            stringBuilder.Append(":");
+            Primary2.AppendString(stringBuilder);
+        }
 
         public delegate void OperatedAction(TenaryOperator tenaryOperator);
         public static OperatedAction Operated;
@@ -200,17 +200,17 @@ namespace pluginVerilog.Verilog.Expressions
             Primary.DisposeSubRefrence(false);
         }
 
-        //public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
-        //{
-        //    label.AppendText(Text);
-        //    Primary.AppendLabel(label);
-        //}
+        public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        {
+            label.AppendText(Text);
+            Primary.AppendLabel(label);
+        }
 
-        //public override void AppendString(StringBuilder stringBuilder)
-        //{
-        //    stringBuilder.Append(Text);
-        //    Primary.AppendString(stringBuilder);
-        //}
+        public override void AppendString(StringBuilder stringBuilder)
+        {
+            stringBuilder.Append(Text);
+            Primary.AppendString(stringBuilder);
+        }
 
         public static IncDecOperator ParseCreate(WordScanner word)
         {
@@ -314,17 +314,17 @@ namespace pluginVerilog.Verilog.Expressions
             Primary.DisposeSubRefrence(false);
         }
 
-        //public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
-        //{
-        //    label.AppendText(Text);
-        //    Primary.AppendLabel(label);
-        //}
+        public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        {
+            label.AppendText(Text);
+            Primary.AppendLabel(label);
+        }
 
-        //public override void AppendString(StringBuilder stringBuilder)
-        //{
-        //    stringBuilder.Append(Text);
-        //    Primary.AppendString(stringBuilder);
-        //}
+        public override void AppendString(StringBuilder stringBuilder)
+        {
+            stringBuilder.Append(Text);
+            Primary.AppendString(stringBuilder);
+        }
 
         public static UnaryOperator ParseCreate(WordScanner word)
         {
@@ -562,12 +562,12 @@ namespace pluginVerilog.Verilog.Expressions
             }
         }
 
-        //public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
-        //{
-        //    Primary1.AppendLabel(label);
-        //    label.AppendText(Text);
-        //    Primary2.AppendLabel(label);
-        //}
+        public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        {
+            Primary1.AppendLabel(label);
+            label.AppendText(Text);
+            Primary2.AppendLabel(label);
+        }
 
         public override void AppendString(StringBuilder stringBuilder)
         {
@@ -759,4 +759,4 @@ namespace pluginVerilog.Verilog.Expressions
 
     }
 
-    }
+}
