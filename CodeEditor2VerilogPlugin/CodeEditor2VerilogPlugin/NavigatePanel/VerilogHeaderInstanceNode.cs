@@ -33,17 +33,6 @@ namespace pluginVerilog.NavigatePanel
             }
         }
 
-        public override IImage? Image
-        {
-            get
-            {
-                return AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
-                    "CodeEditor2VerilogPlugin/Assets/Icons/verilogHeaderDocument.svg",
-                    Avalonia.Media.Color.FromArgb(100, 255, 255, 255)
-                    );
-            }
-        }
-
         public override void OnSelected()
         {
             // activate navigate panel context menu
@@ -102,24 +91,28 @@ namespace pluginVerilog.NavigatePanel
                 treeIndex++;
             }
 
-
+            UpdateVisual();
         }
 
-        //public override void DrawNode(Graphics graphics, int x, int y, Font font, Color color, Color backgroundColor, Color selectedColor, int lineHeight, bool selected)
-        //{
-        //    graphics.DrawImage(Global.Icons.VerilogHeader.GetImage(lineHeight, ajkControls.Primitive.IconImage.ColorStyle.Blue), new Point(x, y));
-        //    Color bgColor = backgroundColor;
-        //    if (selected) bgColor = selectedColor;
-        //    System.Windows.Forms.TextRenderer.DrawText(
-        //        graphics,
-        //        Text,
-        //        font,
-        //        new Point(x + lineHeight + (lineHeight >> 2), y),
-        //        color,
-        //        bgColor,
-        //        System.Windows.Forms.TextFormatFlags.NoPadding
-        //        );
-        //}
+        public override void UpdateVisual()
+        {
+            if (TextFile.CodeDocument.IsDirty)
+            {
+                Image = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
+                    "CodeEditor2VerilogPlugin/Assets/Icons/verilogHeaderDocument.svg",
+                    Avalonia.Media.Color.FromArgb(100, 255, 255, 255),
+                    "CodeEditor2/Assets/Icons/shine.svg",
+                    Avalonia.Media.Color.FromArgb(255, 255, 255, 200)
+                    );
+            }
+            else
+            {
+                Image = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
+                    "CodeEditor2VerilogPlugin/Assets/Icons/verilogHeaderDocument.svg",
+                    Avalonia.Media.Color.FromArgb(100, 255, 255, 255)
+                    );
+            }
+        }
 
     }
 }

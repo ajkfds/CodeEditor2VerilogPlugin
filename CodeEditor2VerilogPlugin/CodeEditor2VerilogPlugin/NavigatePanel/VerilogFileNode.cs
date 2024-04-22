@@ -46,47 +46,6 @@ namespace pluginVerilog.NavigatePanel
         }
 
 
-        //private IImage image;
-        //public override IImage? Image
-        //{
-        //    get
-        //    {
-        //        return image;
-        //    }
-        //    set
-        //    {
-        //        image = value;
-        //    }
-        //}
-
-
-        //public override void DrawNode(Graphics graphics, int x, int y, Font font, Color color, Color backgroundColor, Color selectedColor, int lineHeight, bool selected)
-        //{
-        //    graphics.DrawImage(Global.Icons.Verilog.GetImage(lineHeight, ajkControls.Primitive.IconImage.ColorStyle.Blue), new Point(x, y));
-        //    Color bgColor = backgroundColor;
-        //    if (selected) bgColor = selectedColor;
-        //    System.Windows.Forms.TextRenderer.DrawText(
-        //        graphics,
-        //        Text,
-        //        font,
-        //        new Point(x + lineHeight + (lineHeight >> 2), y),
-        //        color,
-        //        bgColor,
-        //        System.Windows.Forms.TextFormatFlags.NoPadding
-        //        );
-
-        //    if (Link) graphics.DrawImage(CodeEditor2.Global.IconImages.Link.GetImage(lineHeight, ajkControls.Primitive.IconImage.ColorStyle.Blue), new Point(x, y));
-
-        //    if (VerilogFile != null && VerilogFile.ParsedDocument != null && VerilogFile.VerilogParsedDocument.ErrorCount != 0)
-        //    {
-        //        graphics.DrawImage(Global.Icons.Exclamation.GetImage(lineHeight, ajkControls.Primitive.IconImage.ColorStyle.Red), new Point(x, y));
-        //    }
-
-        //    if (VerilogFile != null && VerilogFile.Dirty)
-        //    {
-        //        graphics.DrawImage(Global.Icons.NewBadge.GetImage(lineHeight, ajkControls.Primitive.IconImage.ColorStyle.Orange), new Point(x, y));
-        //    }
-        //}
 
         public override async void OnSelected()
         {
@@ -130,7 +89,11 @@ namespace pluginVerilog.NavigatePanel
                 return;
             }
             VerilogFile.Update();
+            UpdateVisual();
+        }
 
+        public override void UpdateVisual()
+        {
             List<CodeEditor2.Data.Item> targetDataItems = new List<CodeEditor2.Data.Item>();
             List<CodeEditor2.Data.Item> addDataItems = new List<CodeEditor2.Data.Item>();
             lock (VerilogFile.Items)
@@ -172,12 +135,17 @@ namespace pluginVerilog.NavigatePanel
                 }
             }
 
-            UpdateVisual();
+            //    if (Link) graphics.DrawImage(CodeEditor2.Global.IconImages.Link.GetImage(lineHeight, ajkControls.Primitive.IconImage.ColorStyle.Blue), new Point(x, y));
 
-        }
+            //    if (VerilogFile != null && VerilogFile.ParsedDocument != null && VerilogFile.VerilogParsedDocument.ErrorCount != 0)
+            //    {
+            //        graphics.DrawImage(Global.Icons.Exclamation.GetImage(lineHeight, ajkControls.Primitive.IconImage.ColorStyle.Red), new Point(x, y));
+            //    }
 
-        public override void UpdateVisual()
-        {
+            //    if (VerilogFile != null && VerilogFile.Dirty)
+            //    {
+            //        graphics.DrawImage(Global.Icons.NewBadge.GetImage(lineHeight, ajkControls.Primitive.IconImage.ColorStyle.Orange), new Point(x, y));
+            //    }
 
             if (VerilogFile.SystemVerilog)
             {

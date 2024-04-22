@@ -32,8 +32,7 @@ namespace pluginVerilog.Verilog.AutoComplete
 
             codeDocument.Replace(headIndex, length, ColorIndex, Text + appendText );
             codeDocument.CaretIndex = headIndex + Text.Length + appendText.Length;
-            codeDocument.SelectionStart = headIndex + Text.Length;
-            codeDocument.SelectionLast = headIndex + Text.Length;
+            codeDocument.SetSelection(headIndex + Text.Length,headIndex + Text.Length);
         }
 
     }

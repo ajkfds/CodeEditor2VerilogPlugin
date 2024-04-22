@@ -1,4 +1,5 @@
 ﻿using Avalonia.Input;
+using CodeEditor2.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -54,8 +55,7 @@ namespace pluginVerilog.Verilog.Snippets
 
             codeDocument.Replace(index, 0, 0, replaceText);
             codeDocument.CaretIndex = startIndexs[0];
-            codeDocument.SelectionStart = startIndexs[0];
-            codeDocument.SelectionLast = lastIndexs[0] + 1;
+            codeDocument.SetSelection(startIndexs[0],lastIndexs[0]);
 
             // set highlights for {n} texts
             CodeEditor2.Controller.CodeEditor.ClearHighlight();
@@ -78,57 +78,57 @@ namespace pluginVerilog.Verilog.Snippets
         private List<int> startIndexs = new List<int>();
         private List<int> lastIndexs = new List<int>();
 
-        public override void BeforeKeyDown(object sender, TextInputEventArgs e, CodeEditor2.Views.PopupMenuView popupMenuView)
+        public override void KeyDown(object? sender, KeyEventArgs e, PopupMenuView popupMenuView)
         {
             // overrider return & escape
             if (popupMenuView == null || !popupMenuView.IsVisible)
             {
-                //if (e.Key == Key.Return || e.Key == Key.Escape)
-                //{
-                //    bool moved;
-                //    moveToNextHighlight(out moved);
-                //    if (!moved) CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
-                //    e.Handled = true;
-                //}
+                if (e.Key == Key.Return || e.Key == Key.Escape)
+                {
+                    bool moved;
+                    moveToNextHighlight(out moved);
+                    if (!moved) CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
+                    e.Handled = true;
+                }
             }
+        }
+        public override void BeforeKeyDown(object sender, TextInputEventArgs e, CodeEditor2.Views.PopupMenuView popupMenuView)
+        {
         }
         public override void AfterKeyDown(object sender, TextInputEventArgs e, CodeEditor2.Views.PopupMenuView popupMenuView)
         {
 
         }
-        public override void AfterAutoCompleteHandled(object sender, TextInputEventArgs e, CodeEditor2.Views.PopupMenuView popupMenuView)
+        public override void AfterAutoCompleteHandled(CodeEditor2.Views.PopupMenuView popupMenuView)
         {
-            if (e.Handled) // closed
+            int i = CodeEditor2.Controller.CodeEditor.GetHighlightIndex(document.CaretIndex);
+            switch (i)
             {
-                int i = CodeEditor2.Controller.CodeEditor.GetHighlightIndex(document.CaretIndex);
-                switch (i)
-                {
-                    case 0: // clock
-                        CodeEditor2.Controller.CodeEditor.SelectHighlight(1);    // move carlet to next highlight
-                        break;
-                    case 1: // reset
-                        // copy text from {1} to {2}
-                        int start, last;
-                        CodeEditor2.Controller.CodeEditor.GetHighlightPosition(1, out start, out last);
-                        string text = document.CreateString(start, last - start + 1);
-                        CodeEditor2.Controller.CodeEditor.GetHighlightPosition(2, out start, out last);
-                        document.Replace(start, last - start + 1, 0, text);
-                        CodeEditor2.Controller.CodeEditor.SelectHighlight(3);    // move carlet to next highlight
-                        CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
-                        CodeEditor2.Controller.CodeEditor.RequestReparse();
-                        break;
-                    case 2: // reset (skip this input)
-                        CodeEditor2.Controller.CodeEditor.SelectHighlight(3);
-                        CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
-                        CodeEditor2.Controller.CodeEditor.RequestReparse();
-                        break;
-                    case 3:
-                        CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
-                        break;
-                    default:
-                        CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
-                        break;
-                }
+                case 0: // clock
+                    CodeEditor2.Controller.CodeEditor.SelectHighlight(1);    // move carlet to next highlight
+                    break;
+                case 1: // reset
+                    // copy text from {1} to {2}
+                    int start, last;
+                    CodeEditor2.Controller.CodeEditor.GetHighlightPosition(1, out start, out last);
+                    string text = document.CreateString(start, last - start + 1);
+                    CodeEditor2.Controller.CodeEditor.GetHighlightPosition(2, out start, out last);
+                    document.Replace(start, last - start + 1, 0, text);
+                    CodeEditor2.Controller.CodeEditor.SelectHighlight(3);    // move carlet to next highlight
+                    CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
+                    CodeEditor2.Controller.CodeEditor.RequestReparse();
+                    break;
+                case 2: // reset (skip this input)
+                    CodeEditor2.Controller.CodeEditor.SelectHighlight(3);
+                    CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
+                    CodeEditor2.Controller.CodeEditor.RequestReparse();
+                    break;
+                case 3:
+                    CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
+                    break;
+                default:
+                    CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
+                    break;
             }
         }
 

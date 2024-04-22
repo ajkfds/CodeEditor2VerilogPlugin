@@ -82,7 +82,7 @@ namespace pluginVerilog.Data
                     document.Replace(0, 0, 0, text);
                     document.ClearHistory();
                     document._tag = "readFormFile";
-                    
+                    document.Clean();
                     return true;
                 }
             }

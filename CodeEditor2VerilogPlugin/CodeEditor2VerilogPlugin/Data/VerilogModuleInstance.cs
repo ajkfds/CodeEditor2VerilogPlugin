@@ -67,7 +67,7 @@ namespace pluginVerilog.Data
             if (Project != project) return false;
             if (ModuleName != moduleInstantiation.SourceName) return false;
 
-            if (ParameterId == moduleInstantiation.OverrideParameterID) return true;
+            if (ParameterId != moduleInstantiation.OverrideParameterID) return false;
 
             // re-register
             disposeItems();

@@ -99,8 +99,7 @@ namespace pluginVerilog.Verilog.AutoComplete
 
             codeDocument.Replace(headIndex, length, ColorIndex, Text + sb.ToString());
             codeDocument.CaretIndex = headIndex + carletOffset + instanceName.Length;
-            codeDocument.SelectionStart = headIndex + carletOffset;
-            codeDocument.SelectionLast = headIndex + carletOffset + instanceName.Length;
+            codeDocument.SetSelection(headIndex + carletOffset,headIndex + carletOffset + instanceName.Length);
 
 //            e.Handled = true;
 
