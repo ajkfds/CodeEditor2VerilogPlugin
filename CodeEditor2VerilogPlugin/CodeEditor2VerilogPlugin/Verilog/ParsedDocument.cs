@@ -123,16 +123,16 @@ namespace pluginVerilog.Verilog
                 switch (message.Type)
                 {
                     case Message.MessageType.Error:
-                        ret.AppendText(message.Text, Avalonia.Media.Colors.Pink);
+                        ret.AppendText(message.Text+"\n", Avalonia.Media.Colors.Pink);
                         break;
                     case Message.MessageType.Warning:
-                        ret.AppendText(message.Text, Avalonia.Media.Colors.Orange);
+                        ret.AppendText(message.Text + "\n", Avalonia.Media.Colors.Orange);
                         break;
                     case Message.MessageType.Notice:
-                        ret.AppendText(message.Text, Avalonia.Media.Colors.LimeGreen);
+                        ret.AppendText(message.Text + "\n", Avalonia.Media.Colors.LimeGreen);
                         break;
                     case Message.MessageType.Hint:
-                        ret.AppendText(message.Text, Avalonia.Media.Colors.LightCyan);
+                        ret.AppendText(message.Text + "\n", Avalonia.Media.Colors.LightCyan);
                         break;
                 }
             }

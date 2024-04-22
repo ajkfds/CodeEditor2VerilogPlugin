@@ -338,11 +338,6 @@ namespace pluginVerilog.Data
             return VerilogCommon.AutoComplete.GetPopupItem(this, VerilogParsedDocument, version, index);
         }
 
-        //public override List<CodeEditor2.CodeEditor.ToolItem> GetToolItems(int index)
-        //{
-        //    return VerilogCommon.AutoComplete.GetToolItems(this, index);
-        //}
-
         public override List<CodeEditor2.CodeEditor.ToolItem> GetToolItems(int index)
         {
             return VerilogCommon.AutoComplete.GetToolItems(this, index);
