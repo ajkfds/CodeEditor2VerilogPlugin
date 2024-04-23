@@ -224,6 +224,43 @@ namespace pluginVerilog.Verilog.Statements
             }
         }
 
+        private static IStatement ParseUniquePriority(WordScanner word, NameSpace nameSpace)
+        {
+            switch (word.Text)
+            {
+                case "unique":
+                case "unique0":
+                case "priority":
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+                    break;
+                default:
+                    throw new Exception();
+            }
+
+            if (word.Eof)
+            {
+                word.AddError("if or case required");
+                return null;
+            }
+
+            switch (word.Text)
+            {
+                // conditional_statement 
+                case "if":
+                    return ConditionalStatement.ParseCreate(word, nameSpace);
+
+                // case_statement 
+                case "case":
+                case "casex":
+                case "casez":
+                    return CaseStatement.ParseCreate(word, nameSpace);
+
+                default:
+                    word.AddError("if or case required");
+                    return null;
+            }
+        }
         private static NameSpace getSpace(string identifier, NameSpace nameSpace)
         {
             if (nameSpace.NameSpaces.ContainsKey(identifier))
