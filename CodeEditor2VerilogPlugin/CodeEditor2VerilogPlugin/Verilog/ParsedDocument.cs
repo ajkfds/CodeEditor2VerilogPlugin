@@ -349,13 +349,13 @@ namespace pluginVerilog.Verilog
             }
 
             //bool endWithDot;
-            //List<string> words = document.GetHierWords(index,out endWithDot);
-            //if(words.Count == 0)
+            //List<string> words = document.GetHierWords(index, out endWithDot);
+            //if (words.Count == 0)
             //{
             //    return new List<CodeEditor2.CodeEditor.AutocompleteItem>();
             //}
 
-            if(hierWords.Count == 0 && cantidateWord.StartsWith("$"))
+            if (hierWords.Count == 0 && cantidateWord.StartsWith("$"))
             {
                 items = new List<CodeEditor2.CodeEditor.AutocompleteItem>();
                 foreach (string key in ProjectProperty.SystemFunctions.Keys)

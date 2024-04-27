@@ -47,38 +47,42 @@ namespace pluginVerilog.Data.VerilogCommon
                     }
                 }
 
-                // include file
-                foreach (VerilogHeaderInstance vhFile in rootItem.VerilogParsedDocument.IncludeFiles.Values)
+                if(rootItem.VerilogParsedDocument != null)
                 {
-                    if (prevIncludes.ContainsKey(vhFile.ID))
+                    // include file
+                    foreach (VerilogHeaderInstance vhFile in rootItem.VerilogParsedDocument.IncludeFiles.Values)
                     {
-                        prevIncludes[vhFile.ID].ReplaceBy(vhFile);
-                        targetItems.Add(prevIncludes[vhFile.ID]);
-                    }
-                    else
-                    {
-                        string keyname = vhFile.Name;
+                        if (prevIncludes.ContainsKey(vhFile.ID))
                         {
-                            int i = 0;
-                            while (rootItem.Items.ContainsKey(keyname + "_" + i.ToString()))
-                            {
-                                i++;
-                            }
-                            keyname = keyname + "_" + i.ToString();
+                            prevIncludes[vhFile.ID].ReplaceBy(vhFile);
+                            targetItems.Add(prevIncludes[vhFile.ID]);
                         }
-                        newItems.Add(keyname, vhFile);
-                        targetItems.Add(vhFile);
-                        vhFile.Parent = rootItem as Item;
-                    }
-                }
-
-                // module instances
-                if (rootItem.VerilogParsedDocument.Root != null) {
-                    foreach (BuildingBlock module in rootItem.VerilogParsedDocument.Root.BuldingBlocks.Values)
-                    {
-                        if (moduleName == null || moduleName == module.Name)
+                        else
                         {
-                            UpdateModuleInstance(module, project, rootItem, targetItems, newItems);
+                            string keyname = vhFile.Name;
+                            {
+                                int i = 0;
+                                while (rootItem.Items.ContainsKey(keyname + "_" + i.ToString()))
+                                {
+                                    i++;
+                                }
+                                keyname = keyname + "_" + i.ToString();
+                            }
+                            newItems.Add(keyname, vhFile);
+                            targetItems.Add(vhFile);
+                            vhFile.Parent = rootItem as Item;
+                        }
+                    }
+
+                    // module instances
+                    if (rootItem.VerilogParsedDocument.Root != null)
+                    {
+                        foreach (BuildingBlock module in rootItem.VerilogParsedDocument.Root.BuldingBlocks.Values)
+                        {
+                            if (moduleName == null || moduleName == module.Name)
+                            {
+                                UpdateModuleInstance(module, project, rootItem, targetItems, newItems);
+                            }
                         }
                     }
                 }

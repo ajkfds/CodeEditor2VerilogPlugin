@@ -139,7 +139,11 @@ namespace pluginVerilog.Verilog.Snippets
             int i = CodeEditor2.Controller.CodeEditor.GetHighlightIndex(document.CaretIndex);
             if (i == -1) return;
             i++;
-            if (i >= initials.Count) return;
+            if (i >= initials.Count)
+            {
+                Aborted();
+                return;
+            }
 
             CodeEditor2.Controller.CodeEditor.SelectHighlight(i);
             moved = true;

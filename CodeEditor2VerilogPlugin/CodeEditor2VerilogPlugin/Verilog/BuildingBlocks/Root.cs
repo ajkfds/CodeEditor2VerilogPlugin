@@ -154,7 +154,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             if (!parsedDocument.Root.BuldingBlocks.ContainsKey(module.Name))
             {
                 parsedDocument.Root.BuldingBlocks.Add(module.Name, module);
-                if (module.ReperseRequested) parsedDocument.ReparseRequested = true;
+                //if (module.ReperseRequested) parsedDocument.ReparseRequested = true;
             }
             else
             {
