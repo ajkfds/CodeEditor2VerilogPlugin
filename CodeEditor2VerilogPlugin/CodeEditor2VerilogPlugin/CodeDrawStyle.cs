@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Avalonia.Media;
+using CodeEditor2.CodeEditor;
 
 
 namespace pluginVerilog
@@ -32,6 +33,71 @@ namespace pluginVerilog
                     Avalonia.Media.Colors.Black                      // 15
             };
 
+            markStyle = new CodeEditor2.CodeEditor.CodeDrawStyle.MarkInfo[]
+            {
+                // 0 error
+                new MarkInfo{
+                    Color = Avalonia.Media.Color.FromArgb(200,255,120,120),
+                    Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkInfo.MarkStyleEnum.WaveLine,
+                    DecorationHeight = 1,
+                    DecorationWidth = 4,
+                    Thickness = 2,
+                },
+                // 1 warning
+                new MarkInfo{
+                    Color = Avalonia.Media.Color.FromArgb(200,255,150,100),
+                    Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkInfo.MarkStyleEnum.WaveLine,
+                    DecorationHeight = -2,
+                    DecorationWidth = 4,
+                    Thickness = 2,
+                },
+                // 2 notice
+                new MarkInfo{
+                    Color = Avalonia.Media.Color.FromArgb(200,20,255,20),
+                    Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkInfo.MarkStyleEnum.WaveLine,
+                    DecorationHeight = 1.5,
+                    DecorationWidth = 6,
+                    Thickness = 2,
+                },
+                // 3 hint
+                new MarkInfo{
+                    Color = Avalonia.Media.Color.FromArgb(200,106,176,224),
+                    Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkInfo.MarkStyleEnum.WaveLine,
+                    DecorationHeight = -1.2,
+                    DecorationWidth = 3,
+                    Thickness = 2,
+                },
+                // 4
+                new MarkInfo{
+                    Color = Avalonia.Media.Color.FromRgb(  0,255,  0),
+                    Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkInfo.MarkStyleEnum.WaveLine,
+                    DecorationHeight = 4,
+                    DecorationWidth = 4
+                },
+                // 5
+                new MarkInfo{
+                    Color = Avalonia.Media.Color.FromRgb(  0,255,  0),
+                    Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkInfo.MarkStyleEnum.WaveLine,
+                    DecorationHeight = 4,
+                    DecorationWidth = 4
+                },
+                // 6
+                new MarkInfo{
+                    Color = Avalonia.Media.Color.FromRgb(  0,255,  0),
+                    Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkInfo.MarkStyleEnum.WaveLine,
+                    DecorationHeight = 4,
+                    DecorationWidth = 4
+                },
+                // 7
+                new MarkInfo{
+                    Color = Avalonia.Media.Color.FromRgb(  0,255,  0),
+                    Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkInfo.MarkStyleEnum.WaveLine,
+                    DecorationHeight = 4,
+                    DecorationWidth = 4
+                },
+            };
+
+
         }
 
         public static byte ColorIndex(ColorType colorType)
@@ -59,41 +125,6 @@ namespace pluginVerilog
             HighLightedComment = 10
         }
 
-        public override Color[] MarkColor
-        {
-            get
-            {
-                return new Avalonia.Media.Color[8]
-                    {
-                        Avalonia.Media.Color.FromArgb(200,255,120,120),    // 0 error
-                        Avalonia.Media.Color.FromArgb(200,255,150,100), // 1 warning
-                        Avalonia.Media.Color.FromArgb(200,20,255,20), // 2 notice
-                        Avalonia.Media.Color.FromArgb(200,106,176,224), // 3 hint
-                        Avalonia.Media.Colors.Red, // 4
-                        Avalonia.Media.Colors.Red, // 5
-                        Avalonia.Media.Colors.Red, // 6
-                        Avalonia.Media.Color.FromArgb(128,(int)(52*2),(int)(58*2),(int)(64*2))  // 7
-                    };
-            }
-        }
-
-        //public override ajkControls.CodeTextbox.CodeTextbox.MarkStyleEnum[] MarkStyle
-        //{
-        //    get
-        //    {
-        //        return new ajkControls.CodeTextbox.CodeTextbox.MarkStyleEnum[8]
-        //            {
-        //                ajkControls.CodeTextbox.CodeTextbox.MarkStyleEnum.wave,    // 0
-        //                ajkControls.CodeTextbox.CodeTextbox.MarkStyleEnum.wave,    // 1
-        //                ajkControls.CodeTextbox.CodeTextbox.MarkStyleEnum.wave_inv,
-        //                ajkControls.CodeTextbox.CodeTextbox.MarkStyleEnum.wave,
-        //                ajkControls.CodeTextbox.CodeTextbox.MarkStyleEnum.underLine,
-        //                ajkControls.CodeTextbox.CodeTextbox.MarkStyleEnum.underLine,
-        //                ajkControls.CodeTextbox.CodeTextbox.MarkStyleEnum.underLine,
-        //                ajkControls.CodeTextbox.CodeTextbox.MarkStyleEnum.fill
-        //            };
-        //    }
-        //}
 
     }
 }
