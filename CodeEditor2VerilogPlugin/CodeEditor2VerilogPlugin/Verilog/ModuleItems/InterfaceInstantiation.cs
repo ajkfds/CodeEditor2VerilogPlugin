@@ -104,7 +104,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                     {
                         bool error = false;
                         word.MoveNext();
-                        word.Color(CodeDrawStyle.ColorType.Paramater);
+                        word.Color(CodeDrawStyle.ColorType.Parameter);
                         string paramName = word.Text;
                         if (instancedInterface != null && !instancedInterface.PortParameterNameList.Contains(paramName)){
                             word.AddError("illegal parameter name");

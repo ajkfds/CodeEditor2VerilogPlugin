@@ -152,6 +152,8 @@ namespace pluginVerilog
         // module reference table
         private Dictionary<string, System.WeakReference<Data.IVerilogRelatedFile>> moduleFileRefs = new Dictionary<string, WeakReference<Data.IVerilogRelatedFile>>();
 
+
+
         public bool RegisterModule(string moduleName,Data.IVerilogRelatedFile file)
         {
             lock (moduleFileRefs)

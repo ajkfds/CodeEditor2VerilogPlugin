@@ -87,7 +87,7 @@ namespace pluginVerilog.Verilog
 
             foreach (DataObjects.Constants.Constants constants in BuildingBlock.Constants.Values)
             {
-                items.Add(newItem(constants.Name, CodeDrawStyle.ColorType.Paramater));
+                items.Add(newItem(constants.Name, CodeDrawStyle.ColorType.Parameter));
             }
 
             foreach (Function function in BuildingBlock.Functions.Values)

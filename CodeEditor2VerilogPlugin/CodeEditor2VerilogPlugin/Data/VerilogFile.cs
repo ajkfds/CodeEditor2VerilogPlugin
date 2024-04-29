@@ -87,10 +87,10 @@ namespace pluginVerilog.Data
         public override void AcceptParsedDocument(ParsedDocument newParsedDocument)
         {
             ParsedDocument oldParsedDocument = ParsedDocument;
+            if (oldParsedDocument != null) oldParsedDocument.Dispose();
             ParsedDocument = null;
 
             // copy include files
-            if (oldParsedDocument != null) oldParsedDocument.Dispose();
 
             ParsedDocument = newParsedDocument;
 
@@ -126,7 +126,10 @@ namespace pluginVerilog.Data
             {
                 ReparseRequested = (ParsedDocument as Verilog.ParsedDocument).ReparseRequested;
             }
-            Update();
+            Update(); // eliminated here
+            System.Diagnostics.Debug.Print("### Verilog File Parsed "+ID);
+
+
         }
 
         public override void LoadFormFile()
@@ -193,6 +196,7 @@ namespace pluginVerilog.Data
 
         public void RegisterInstanceParsedDocument(string id, ParsedDocument parsedDocument,VerilogModuleInstance moduleInstance)
         {
+            System.Diagnostics.Debug.Print("#### Try RegisterInstanceParsedDocument " + id);
             cleanWeakRef();
             if (id == "")
             {
@@ -205,11 +209,13 @@ namespace pluginVerilog.Data
                     if (instancedParsedDocumentRefs.ContainsKey(id))
                     {
                         instancedParsedDocumentRefs[id] = new WeakReference<ParsedDocument>(parsedDocument);
+                        System.Diagnostics.Debug.Print("#### Try RegisterInstanceParsedDocument.Update " + id);
                     }
                     else
                     {
                         instancedParsedDocumentRefs.Add(id, new WeakReference<ParsedDocument>(parsedDocument));
                         Project.AddReparseTarget(moduleInstance);
+                        System.Diagnostics.Debug.Print("#### Try RegisterInstanceParsedDocument.Add " + id);
                     }
                 }
             }

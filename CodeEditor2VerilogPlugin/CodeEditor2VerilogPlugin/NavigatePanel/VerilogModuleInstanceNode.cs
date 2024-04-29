@@ -82,15 +82,36 @@ namespace pluginVerilog.NavigatePanel
             //var menu = CodeEditor2.Controller.NavigatePanel.GetContextMenuStrip();
             //if (menu.Items.ContainsKey("openWithExploererTsmi")) menu.Items["openWithExploererTsmi"].Visible = true;
 
-            CodeEditor2.Controller.CodeEditor.SetTextFile(ModuleInstance);
 
-            if (!ModuleInstance.ParseValid || ModuleInstance.ReparseRequested)
+            System.Diagnostics.Debug.Print("## VerilogModuleInstanceNode.OnSelected");
+
+            if (ModuleInstance.ParseValid & !ModuleInstance.ReparseRequested)
             {
-                if (!CodeEditor2.Global.StopParse)
-                {
-                    await CodeEditor2.Tools.ParseHierarchy.Run(this); 
-                }
+                CodeEditor2.Controller.CodeEditor.SetTextFile(ModuleInstance, true);
+                Update();
             }
+            else if (CodeEditor2.Global.StopParse)
+            {
+                CodeEditor2.Controller.CodeEditor.SetTextFile(ModuleInstance, true);
+                Update();
+            }
+            else
+            {
+                var _ = parseHierarchy();
+                CodeEditor2.Controller.CodeEditor.SetTextFile(ModuleInstance, true);
+            }
+
+
+
+            //CodeEditor2.Controller.CodeEditor.SetTextFile(ModuleInstance);
+
+            //if (!ModuleInstance.ParseValid || ModuleInstance.ReparseRequested)
+            //{
+            //    if (!CodeEditor2.Global.StopParse)
+            //    {
+            //        await CodeEditor2.Tools.ParseHierarchy.Run(this); 
+            //    }
+            //}
 
             // TODO
             //Module targetModule = null;
@@ -133,6 +154,12 @@ namespace pluginVerilog.NavigatePanel
             //}
 
             //targetModule.
+        }
+
+        private async Task parseHierarchy()
+        {
+            System.Diagnostics.Debug.Print("## VerilogFileNode.OnSelected.PharseHier.Run");
+            await CodeEditor2.Tools.ParseHierarchy.Run(ModuleInstance.NavigatePanelNode);
         }
 
         public override void Update()

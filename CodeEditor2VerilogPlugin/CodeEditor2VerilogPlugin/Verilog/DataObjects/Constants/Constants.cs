@@ -115,7 +115,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                 if (!General.IsIdentifier(word.Text)) break;
                 string identifier = word.Text;
                 nameReference = word.GetReference();
-                word.Color(CodeDrawStyle.ColorType.Paramater);
+                word.Color(CodeDrawStyle.ColorType.Parameter);
                 word.MoveNext();
 
                 if (word.Text != "=") break;
@@ -284,7 +284,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
             {
                 if (!General.IsIdentifier(word.Text)) break;
                 string identifier = word.Text;
-                word.Color(CodeDrawStyle.ColorType.Paramater);
+                word.Color(CodeDrawStyle.ColorType.Parameter);
                 Constants constants;
                 switch (constantType)
                 {

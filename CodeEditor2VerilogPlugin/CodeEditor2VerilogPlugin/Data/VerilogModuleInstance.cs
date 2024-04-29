@@ -34,6 +34,11 @@ namespace pluginVerilog.Data
             if (file is Data.VerilogFile)
             {
                 Data.VerilogFile vfile = file as Data.VerilogFile;
+                //if(fileItem.parsedDocument == null)
+                //{
+                //    fileItem.parsedDocument = vfile.GetInstancedParsedDocument(moduleInstantiation.OverrideParameterID);
+                //}
+
                 vfile.RegisterModuleInstance(fileItem);
             }
 
@@ -70,7 +75,7 @@ namespace pluginVerilog.Data
             if (ParameterId != moduleInstantiation.OverrideParameterID) return false;
 
             // re-register
-            disposeItems();
+            //disposeItems();
 
             ParameterOverrides = moduleInstantiation.ParameterOverrides;
 
@@ -206,6 +211,7 @@ namespace pluginVerilog.Data
             }
             ReparseRequested = vParsedDocument.ReparseRequested;
             Update();
+            System.Diagnostics.Debug.Print("### Verilog Module Instance Parsed " + ID);
         }
 
 

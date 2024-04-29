@@ -36,7 +36,7 @@ namespace pluginVerilog.Data.VerilogCommon
                 List<Item> targetItems = new List<Item>();
                 Dictionary<string, Item> newItems = new Dictionary<string, Item>();
 
-                // include file
+                // include files on the top of the files
                 Dictionary<string, VerilogHeaderInstance> prevIncludes = new Dictionary<string, VerilogHeaderInstance>();
                 foreach (Item item in rootItem.Items.Values)
                 {
@@ -74,14 +74,14 @@ namespace pluginVerilog.Data.VerilogCommon
                         }
                     }
 
-                    // module instances
+                    // module
                     if (rootItem.VerilogParsedDocument.Root != null)
                     {
                         foreach (BuildingBlock module in rootItem.VerilogParsedDocument.Root.BuldingBlocks.Values)
                         {
-                            if (moduleName == null || moduleName == module.Name)
+                            if (moduleName == null || moduleName == module.Name) // matched module
                             {
-                                UpdateModuleInstance(module, project, rootItem, targetItems, newItems);
+                                UpdateModuleInstance(module, project, rootItem, targetItems, newItems); // targetItem.VerilogParsedDocument eliminated here
                             }
                         }
                     }
@@ -100,10 +100,10 @@ namespace pluginVerilog.Data.VerilogCommon
                     }
                 }
 
-                rootItem.Items.Clear();
+//                rootItem.Items.Clear();
                 foreach (Item item in targetItems)
                 {
-                    rootItem.Items.Add(item.Name, item);
+                    if(!rootItem.Items.ContainsValue(item)) rootItem.Items.Add(item.Name, item);
                 }
             }
         }
@@ -158,6 +158,7 @@ namespace pluginVerilog.Data.VerilogCommon
                         {
                             Data.VerilogModuleInstance moduleInstance = item as Data.VerilogModuleInstance;
 
+                            
                             if (moduleInstance.ParsedDocument == null)
                             {   // background reparse
                                 project.AddReparseTarget(item);

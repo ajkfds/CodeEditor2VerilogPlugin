@@ -81,7 +81,7 @@ namespace pluginVerilog.Verilog.Snippets
         public override void KeyDown(object? sender, KeyEventArgs e, PopupMenuView popupMenuView)
         {
             // overrider return & escape
-             if (!CodeEditor2.Controller.CodeEditor.IsPopupMenuOpened)
+            if (!CodeEditor2.Controller.CodeEditor.IsPopupMenuOpened)
             {
                 if (e.Key == Key.Return || e.Key == Key.Escape)
                 {

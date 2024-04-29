@@ -19,7 +19,7 @@ namespace pluginVerilog.Verilog.Expressions
         }
         public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
         {
-            label.AppendText(ParameterName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Paramater));
+            label.AppendText(ParameterName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Parameter));
         }
 
         public new static ParameterReference ParseCreate(WordScanner word, NameSpace nameSpace)
@@ -32,7 +32,7 @@ namespace pluginVerilog.Verilog.Expressions
             val.Constant = true;
             val.Reference = word.GetReference();
 
-            word.Color(CodeDrawStyle.ColorType.Paramater);
+            word.Color(CodeDrawStyle.ColorType.Parameter);
             word.MoveNext();
 
             if (parameter.Expression != null) val.Value = parameter.Expression.Value;

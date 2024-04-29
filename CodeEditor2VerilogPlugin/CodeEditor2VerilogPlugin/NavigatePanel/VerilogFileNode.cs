@@ -8,6 +8,7 @@ using pluginVerilog.Verilog.BuildingBlocks;
 using Avalonia.Media;
 using Avalonia.Threading;
 using System.ComponentModel;
+using CodeEditor2.Tools;
 
 namespace pluginVerilog.NavigatePanel
 {
@@ -46,7 +47,6 @@ namespace pluginVerilog.NavigatePanel
         }
 
 
-
         public override async void OnSelected()
         {
             // activate navigate panel context menu
@@ -55,30 +55,32 @@ namespace pluginVerilog.NavigatePanel
             //if (menu.Items.ContainsKey("icarusVerilogTsmi")) menu.Items["icarusVerilogTsmi"].Visible = true;
             //if (menu.Items.ContainsKey("VerilogDebugTsmi")) menu.Items["VerilogDebugTsmi"].Visible = true;
 
-            System.Diagnostics.Debug.Print("##### Launch SetTextFile");
-            CodeEditor2.Controller.CodeEditor.SetTextFile(TextFile);
-            System.Diagnostics.Debug.Print("##### parseHier " + TextFile.Name);
+            System.Diagnostics.Debug.Print("## VerilogFileNode.OnSelected");
 
-            if (!TextFile.ParseValid | TextFile.ReparseRequested)
+            if(TextFile.ParseValid & !TextFile.ReparseRequested)
             {
-                if (!CodeEditor2.Global.StopParse)
-                {
-                    System.Diagnostics.Debug.Print("##### Hier parse");
-                    var _ = CodeEditor2.Tools.ParseHierarchy.Run(this);
-                    System.Diagnostics.Debug.Print("##### Hier parse exit");
-                }
+                CodeEditor2.Controller.CodeEditor.SetTextFile(TextFile,true);
+                if (NodeSelected != null) NodeSelected();
+                Update();
             }
+            else if (CodeEditor2.Global.StopParse)
+            {
+                CodeEditor2.Controller.CodeEditor.SetTextFile(TextFile, true);
+                if (NodeSelected != null) NodeSelected();
+                Update();
+            }
+            else
+            {
+                var _ = parseHierarchy();
+            }
+        }
 
-            //foreach (BuildingBlock module in VerilogFile.VerilogParsedDocument.Root.BuldingBlocks.Values)
-            //{
-            //    VerilogFile.CodeDocument.ExpandBlock(VerilogFile.CodeDocument.GetLineAt(module.BeginIndexReference.Indexs.Last() ));
-            //}
-
-            System.Diagnostics.Debug.Print("##### Call NodeSelected");
+        private async Task parseHierarchy()
+        {
+            System.Diagnostics.Debug.Print("## VerilogFileNode.OnSelected.PharseHier.Run");
+            await CodeEditor2.Tools.ParseHierarchy.Run(this);
             if (NodeSelected != null) NodeSelected();
-            Refresh();
-
-            
+            CodeEditor2.Controller.CodeEditor.SetTextFile(TextFile, true);
         }
 
 

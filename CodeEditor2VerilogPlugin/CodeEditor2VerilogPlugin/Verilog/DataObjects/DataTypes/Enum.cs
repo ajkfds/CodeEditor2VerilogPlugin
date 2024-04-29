@@ -97,7 +97,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
             Item item = new Item();
             item.Identifier = word.Text;
-            word.Color(CodeDrawStyle.ColorType.Paramater);
+            word.Color(CodeDrawStyle.ColorType.Parameter);
 
             EnumConstants constants = EnumConstants.Create(enum_.BaseType);
             constants.Name = item.Identifier;

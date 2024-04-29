@@ -108,7 +108,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
             Member item = new Member();
             item.Identifier = word.Text;
-            word.Color(CodeDrawStyle.ColorType.Paramater);
+            word.Color(CodeDrawStyle.ColorType.Parameter);
 
             word.MoveNext();
 

@@ -110,6 +110,10 @@ namespace pluginVerilog
             return colors[(int)index];
         }
 
+        public Color GetColor(ColorType colorType)
+        {
+            return colors[(byte)colorType];
+        }
         public enum ColorType : byte
         {
             Normal = 0,
@@ -117,7 +121,7 @@ namespace pluginVerilog
             Register = 3,
             Net = 9,
             Variable = 11,
-            Paramater = 7,
+            Parameter = 7,
             Keyword = 4,
             Identifier = 6,
             Number = 8,
