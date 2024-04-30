@@ -71,7 +71,7 @@ namespace pluginVerilog
         {
             ContextMenu contextMenu = Controller.NavigatePanel.GetContextMenu();
             {
-                MenuItem menuItem_RunSimulation = new MenuItem { Header = "Run Simulation" };
+                MenuItem menuItem_RunSimulation = CodeEditor2.Global.CreateMenuItem("Run Simulation", "menuItem_RunSimulation");
                 contextMenu.Items.Add(menuItem_RunSimulation);
             }
             // register project property form tab
