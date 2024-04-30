@@ -199,10 +199,26 @@ namespace pluginVerilog.Verilog.Statements
 
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
+            /*
+            loop_statement ::=    forever statement_or_null 
+                                | repeat ( expression ) statement_or_null 
+                                | while ( expression ) statement_or_null 
+                                | for ( [ for_initialization ] ; [ expression ] ; [ for_step ] ) statement_or_null 
+                                | do statement_or_null while ( expression ) ;
+                                | foreach ( ps_or_hierarchical_array_identifier [ loop_variables ] ) statement 
+            for_initialization ::=    list_of_variable_assignments 
+                                    | for_variable_declaration { , for_variable_declaration } 
+            for_variable_declaration ::=
+                        [ var ] data_type variable_identifier = expression { , variable_identifier = expression }
+            for_step ::= for_step_assignment { , for_step_assignment } 
+            for_step_assignment ::=       operator_assignment 
+                                        | inc_or_dec_expression 
+                                        | function_subroutine_call 
+            loop_variables ::= [ index_variable_identifier ] { , [ index_variable_identifier ] } 
+             */
 
-            
 
-            if(word.Text == "(")
+            if (word.Text == "(")
             {
                 word.MoveNext();
             }
@@ -212,18 +228,34 @@ namespace pluginVerilog.Verilog.Statements
                 return null;
             }
 
-            Verilog.DataObjects.Variables.Variable.ParseDeclaration(word, forStatement);
+            // for_initialization
+            if(!Verilog.DataObjects.Variables.Variable.ParseDeclaration(word, forStatement))
+            {
+                Expressions.Expression expression = Expressions.Expression.ParseCreate(word, forStatement);
+                switch (word.Text)
+                {
+                    case "=":
+                        BlockingAssignment.ParseCreate(word, nameSpace, expression);
+                        break;
+                    case "<=":
+                        NonBlockingAssignment.ParseCreate(word, nameSpace, expression);
+                        break;
+                    default:
+                        word.AddError("illegal for_initialization");
+                        return null;
+                }
+                if (word.Text == ";")
+                {
+                    word.MoveNext();
+                }
+                else
+                {
+                    word.AddError("; expected");
+                    return null;
+                }
+            }
 
-            //if(word.Text == ";")
-            //{
-            //    word.MoveNext();
-            //}
-            //else
-            //{
-            //    word.AddError("; expected");
-            //    return null;
-            //}
-
+            // expression
             forStatement.Expression = Expressions.Expression.ParseCreate(word, forStatement);
 
             if (word.Text == ";")
@@ -236,6 +268,7 @@ namespace pluginVerilog.Verilog.Statements
                 return null;
             }
 
+            // for_step
             DataObjects.VariableAssignment assign = Verilog.DataObjects.VariableAssignment.ParseCreate(word, forStatement);
             if(assign == null)
             {
