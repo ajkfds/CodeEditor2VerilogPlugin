@@ -1,4 +1,6 @@
-﻿using CodeEditor2.FileTypes;
+﻿using Avalonia.Controls;
+using CodeEditor2;
+using CodeEditor2.FileTypes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,7 +34,12 @@ namespace pluginVerilog
                 CodeEditor2.Global.FileTypes.Add(fileType.ID, fileType);
             }
 
+
             // append navigate context menu items
+
+//            contextMenu.Items.Add()
+
+
             //System.Windows.Forms.ContextMenuStrip menu = CodeEditor.Controller.NavigatePanel.GetContextMenuStrip();
             //menu.Items.Insert(0,Global.SetupForm.IcarusVerilogTsmi);
             //menu.Items.Insert(0, Global.SetupForm.VerilogDebugTsmi);
@@ -62,8 +69,13 @@ namespace pluginVerilog
 
         public bool Initialize()
         {
+            ContextMenu contextMenu = Controller.NavigatePanel.GetContextMenu();
+            {
+                MenuItem menuItem_RunSimulation = new MenuItem { Header = "Run Simulation" };
+                contextMenu.Items.Add(menuItem_RunSimulation);
+            }
             // register project property form tab
-//            CodeEditor.Tools.ProjectPropertyForm.FormCreated += Tools.ProjectPropertyTab.ProjectPropertyFromCreated;
+            //            CodeEditor.Tools.ProjectPropertyForm.FormCreated += Tools.ProjectPropertyTab.ProjectPropertyFromCreated;
 
             return true;
         }
