@@ -193,7 +193,7 @@ namespace pluginVerilog.Verilog.Statements
         // operator_assignment          ::= variable_lvalue assignment_operator expression
         // assignment_operator          ::= = | += | -= | *= | /= | %= | &= | |= | ^= | <<= | >>= | <<<= | >>>=
 
-        public static ForStatememt ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static ForStatememt? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             ForStatememt forStatement = new ForStatememt(nameSpace.BuildingBlock,nameSpace);
 
