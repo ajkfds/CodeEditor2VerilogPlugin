@@ -579,6 +579,7 @@ namespace pluginVerilog.Verilog
                     }
                 }
 
+                if (docLength <= nextIndex) return;
                 ch = document.GetCharAt(nextIndex);
                 if (ch == 'e' || ch == 'E')
                 {
