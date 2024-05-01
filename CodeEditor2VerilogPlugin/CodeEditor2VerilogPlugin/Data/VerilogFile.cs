@@ -105,6 +105,8 @@ namespace pluginVerilog.Data
                 if (!ProjectProperty.IsRegisterableModule(buildingBlock.Name, this))
                 {
                     Module module = buildingBlock as Module;
+                    if (module == null) continue;
+
                     Module registeredModule = ProjectProperty.GetBuildingBlock(module.Name)as Module;
                     if (registeredModule.File.RelativePath == module.File.RelativePath) continue;
 

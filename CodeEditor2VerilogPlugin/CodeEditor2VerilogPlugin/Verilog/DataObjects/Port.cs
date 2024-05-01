@@ -514,6 +514,7 @@ ansi_port_declaration ::=
             {
                 word.MoveNext();
                 Expressions.Expression ex = Expressions.Expression.ParseCreate(word, nameSpace);
+                if (ex == null) return true;
                 if (!ex.Constant)
                 {
                     ex.Reference.AddError("should be constant");

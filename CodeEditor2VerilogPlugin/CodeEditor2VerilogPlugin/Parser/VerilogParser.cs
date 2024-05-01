@@ -23,7 +23,10 @@ namespace pluginVerilog.Parser
             File = verilogFile;
             parsedDocument = new Verilog.ParsedDocument(verilogFile,null, parseMode);
             parsedDocument.Version = verilogFile.CodeDocument.Version;
-            if (verilogFile is Data.VerilogFile && (verilogFile as Data.VerilogFile).SystemVerilog)
+            if (
+                (verilogFile is Data.VerilogFile && (verilogFile as Data.VerilogFile).SystemVerilog) ||
+                (verilogFile is Data.VerilogModuleInstance && (verilogFile as Data.VerilogModuleInstance).SystemVerilog)
+            )
             {
                 parsedDocument.SystemVerilog = true;
             }
@@ -46,7 +49,10 @@ namespace pluginVerilog.Parser
 
             File = verilogFile;
             parsedDocument = new Verilog.ParsedDocument(verilogFile,null, parseMode);
-            if (verilogFile is Data.VerilogFile && (verilogFile as Data.VerilogFile).SystemVerilog)
+            if(
+                (verilogFile is Data.VerilogFile && (verilogFile as Data.VerilogFile).SystemVerilog) ||
+                (verilogFile is Data.VerilogModuleInstance && (verilogFile as Data.VerilogModuleInstance).SystemVerilog)
+            )                
             {
                 parsedDocument.SystemVerilog = true;
             }

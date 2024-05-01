@@ -1080,11 +1080,10 @@ namespace pluginVerilog.Verilog
             // activate coloring when code editor opened the target node
             wordPointer.InitibitColor = true;
             {
-                CodeEditor2.NavigatePanel.NavigatePanelNode node;
-                CodeEditor2.Controller.NavigatePanel.GetSelectedNode(out node);
+                CodeEditor2.NavigatePanel.NavigatePanelNode? node = CodeEditor2.Controller.NavigatePanel.GetSelectedNode();
                 if (node != null)
                 {
-                    Data.VerilogHeaderInstance vh = node.Item as Data.VerilogHeaderInstance;
+                    Data.VerilogHeaderInstance? vh = node.Item as Data.VerilogHeaderInstance;
                     if (vh != null)
                     {
                         if (vh.ID == vhInstance.ID)

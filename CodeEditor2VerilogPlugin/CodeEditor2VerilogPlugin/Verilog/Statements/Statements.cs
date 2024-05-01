@@ -97,6 +97,12 @@ namespace pluginVerilog.Verilog.Statements
                     Attribute attribute = Attribute.ParseCreate(word);
                     return Statements.ParseCreateStatement(word, nameSpace);
 
+                // unique_priority
+                case "unique":
+                case "unique0":
+                case "priority":
+                    return ParseUniquePriority(word, nameSpace);
+
                 // conditional_statement 
                 case "if":
                     return ConditionalStatement.ParseCreate(word, nameSpace);

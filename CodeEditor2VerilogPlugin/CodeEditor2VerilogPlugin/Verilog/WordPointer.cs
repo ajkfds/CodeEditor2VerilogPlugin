@@ -577,6 +577,7 @@ namespace pluginVerilog.Verilog
                         if (ch == '_') { nextIndex++; continue; }
                         break;
                     }
+                    if (document.Length <= nextIndex) return;
                 }
 
                 if (docLength <= nextIndex) return;
