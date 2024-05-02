@@ -46,8 +46,7 @@ namespace pluginVerilog.Verilog.Expressions
             if (taskNameSpace.BuildingBlock.Tasks.ContainsKey(ret.TaskName))
             {
                 ret.Task = taskNameSpace.BuildingBlock.Tasks[ret.TaskName];
-            }
-            if (taskNameSpace.BuildingBlock.Functions.ContainsKey(ret.TaskName))
+            }else if (taskNameSpace.BuildingBlock.Functions.ContainsKey(ret.TaskName))
             {
                 Function function = taskNameSpace.BuildingBlock.Functions[ret.TaskName];
                 if(function.ReturnVariable != null)

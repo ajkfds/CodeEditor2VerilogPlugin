@@ -34,6 +34,23 @@ namespace pluginVerilog.Verilog.Statements
             function_case_item ::=      expression { , expression } : function_statement_or_null
                                         | default [ : ] function_statement_or_null  
             */
+
+            /* SystemVerilog
+            case_statement ::=  [ unique_priority ] case_keyword "(" case_expression ")"           case_item         { case_item }         "endcase"
+                              | [ unique_priority ] case_keyword "(" case_expression ")" "matches" case_pattern_item { case_pattern_item } "endcase"
+                              | [ unique_priority ] case         "(" case_expression ")" "inside"  case_inside_item  { case_inside_item }  "endcase"
+
+            case_keyword    ::= "case" | "casez" | "casex"
+            case_expression ::= expression 
+            case_item       ::= case_item_expression { , case_item_expression } : statement_or_null 
+                              | "default" [ : ] statement_or_null 
+            case_pattern_item ::= pattern  [ &&& expression ] : statement_or_null 
+                                | "default" [ : ] statement_or_null 
+            case_inside_item  ::= open_range_list : statement_or_null 
+                                | "default" [ : ] statement_or_null 
+            case_item_expression ::= expression  
+             
+             */
             switch (word.Text)
             {
                 case "case":
@@ -66,6 +83,13 @@ namespace pluginVerilog.Verilog.Statements
             else
             {
                 word.AddError(") expected");
+            }
+
+            if(word.Text == "matches" || word.Text == "inside")
+            {
+                word.AddSystemVerilogError();
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext();
             }
 
 

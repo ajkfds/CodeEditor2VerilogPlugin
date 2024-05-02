@@ -278,8 +278,10 @@ ansi_port_declaration ::=
             Port port = new Port();
             port.Name = word.Text;
             port.Direction = DirectionEnum.Undefined;
-            IModuleOrInterfaceOrProgram block = nameSpace.BuildingBlock as IModuleOrInterfaceOrProgram;
-            if (block.Ports.ContainsKey(port.Name))
+            IModuleOrInterfaceOrProgram? block = nameSpace.BuildingBlock as IModuleOrInterfaceOrProgram;
+            if (block == null) return true;
+
+            if (!block.Ports.ContainsKey(port.Name))
             {
                 block.Ports.Add(port.Name, port);
             }

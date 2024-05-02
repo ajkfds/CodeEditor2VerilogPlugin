@@ -254,9 +254,9 @@ namespace pluginVerilog.Verilog.Expressions
                     sb.Append(word.GetCharAt(index));
                     index++;
                 }
+                if (index >= word.Length) return false;
             }
 
-            if (index >= word.Length) return false;
             if (word.GetCharAt(index) == 'e' || word.GetCharAt(index) == 'E')
             { // real
                 sb.Append('e');

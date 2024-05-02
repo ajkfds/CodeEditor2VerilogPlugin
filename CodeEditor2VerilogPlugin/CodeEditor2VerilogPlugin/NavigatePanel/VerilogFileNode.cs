@@ -158,7 +158,7 @@ namespace pluginVerilog.NavigatePanel
             }
             else
             {
-                if (TextFile.CodeDocument.IsDirty)
+                if (TextFile.CodeDocument != null && TextFile.CodeDocument.IsDirty)
                 {
                     Image = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
                         "CodeEditor2VerilogPlugin/Assets/Icons/verilogDocument.svg",
