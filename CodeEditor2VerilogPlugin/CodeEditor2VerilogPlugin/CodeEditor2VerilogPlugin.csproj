@@ -4,6 +4,7 @@
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <RootNamespace>pluginVerilog</RootNamespace>
   </PropertyGroup>
 
   

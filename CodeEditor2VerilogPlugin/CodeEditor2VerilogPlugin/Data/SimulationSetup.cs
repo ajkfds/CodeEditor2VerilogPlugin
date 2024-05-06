@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CodeEditor2VerilogPlugin.Data
+namespace pluginVerilog.Data
 {
     public class SimulationSetup
     {
@@ -17,8 +17,11 @@ namespace CodeEditor2VerilogPlugin.Data
 
         public string TopName;
         public List<IVerilogRelatedFile> Files = new List<IVerilogRelatedFile>();
+
         public List<IVerilogRelatedFile> IncludeFiles = new List<IVerilogRelatedFile>();
         public List<string> IncludePaths = new List<string>();
+
+        public CodeEditor2.Data.Project Project;
 
         public static SimulationSetup? Create(pluginVerilog.Data.VerilogFile verilogFile)
         {
@@ -28,9 +31,11 @@ namespace CodeEditor2VerilogPlugin.Data
 
             if (verilogFile.VerilogParsedDocument == null) return null;
             if (verilogFile.VerilogParsedDocument.Root == null) return null;
-            BuildingBlock? buildingBlock = verilogFile.VerilogParsedDocument.Root.BuldingBlocks.Values.FirstOrDefault();
-            setup.TopName = buildingBlock.Name;
 
+            setup.Project = verilogFile.Project;
+            BuildingBlock? buildingBlock = verilogFile.VerilogParsedDocument.Root.BuldingBlocks.Values.FirstOrDefault();
+
+            setup.TopName = buildingBlock?.Name;
             searchHier(verilogFile,ids,setup);
 
             return setup;

@@ -72,23 +72,14 @@ namespace pluginVerilog
         {
             ContextMenu contextMenu = Controller.NavigatePanel.GetContextMenu();
             {
-                MenuItem menuItem_RunSimulation = CodeEditor2.Global.CreateMenuItem("Run Simulation", "menuItem_RunSimulation","play",Avalonia.Media.Colors.Red);
-                contextMenu.Items.Add(menuItem_RunSimulation);
-                menuItem_RunSimulation.Click += MenuItem_RunSimulation_Click;
+                //MenuItem menuItem_RunSimulation = CodeEditor2.Global.CreateMenuItem("Run Simulation", "menuItem_RunSimulation","play",Avalonia.Media.Colors.Red);
+                //contextMenu.Items.Add(menuItem_RunSimulation);
+                //menuItem_RunSimulation.Click += MenuItem_RunSimulation_Click;
             }
             // register project property form tab
             //            CodeEditor.Tools.ProjectPropertyForm.FormCreated += Tools.ProjectPropertyTab.ProjectPropertyFromCreated;
 
             return true;
-        }
-
-        private void MenuItem_RunSimulation_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
-        {
-            CodeEditor2.Views.CodeTabItem tab = CodeEditor2.Views.CodeTabItem.Create("newtab", null, null, true);
-            //            CodeTabItem tab = new CodeTabItem();
-            //            Avalonia.Controls.TabItem tab = new TabItem();
-//            CodeEditor2.Views.CodeTabItem tab = new CodeEditor2.Views.CodeTabItem("newtab", null, null, true);
-            CodeEditor2.Controller.Tabs.AddItem(tab);
         }
     }
 }
