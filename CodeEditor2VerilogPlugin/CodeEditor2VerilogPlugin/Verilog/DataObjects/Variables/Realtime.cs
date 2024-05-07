@@ -11,7 +11,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected Realtime() { }
 
-        public static new Realtime Create(DataType dataType)
+        public static new Realtime Create(IDataType dataType)
         {
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.Realtime);
 

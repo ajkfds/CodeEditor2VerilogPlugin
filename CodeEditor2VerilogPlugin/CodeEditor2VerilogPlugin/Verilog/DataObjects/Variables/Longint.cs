@@ -11,7 +11,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected Longint() { }
 
-        public static new Longint Create(DataType dataType)
+        public static new Longint Create(IDataType dataType)
         {
             if (dataType.Type == DataTypeEnum.Int) System.Diagnostics.Debugger.Break();
             DataTypes.IntegerAtomType dType = dataType as DataTypes.IntegerAtomType;

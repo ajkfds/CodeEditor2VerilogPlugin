@@ -12,7 +12,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected String() { }
 
-        public static new String Create(DataType dataType)
+        public static new String Create(IDataType dataType)
         {
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.String);
 

@@ -24,7 +24,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public List<Range> PackedDimensions = new List<Range>();
 
-        public new static IntegerVectorValueVariable Create(DataType dataType)
+        public new static IntegerVectorValueVariable Create(IDataType dataType)
         {
             switch (dataType.Type)
             {

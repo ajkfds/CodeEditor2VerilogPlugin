@@ -152,7 +152,7 @@ namespace pluginVerilog.Verilog
                         // skip data type definition
                     }else
                     {
-                        DataType dataType = DataType.ParseCreate(word, nameSpace, null);
+                        IDataType dataType = DataType.ParseCreate(word, nameSpace, null);
                         if (dataType != null)
                         {
                             retVal = Verilog.DataObjects.Variables.Variable.Create(dataType);

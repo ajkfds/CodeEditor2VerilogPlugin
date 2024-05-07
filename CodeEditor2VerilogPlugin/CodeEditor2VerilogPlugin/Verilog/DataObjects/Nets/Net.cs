@@ -119,7 +119,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             label.AppendText("\r\n");
         }
 
-        public static Net Create(NetTypeEnum netType, DataObjects.DataTypes.DataType dataType)
+        public static Net Create(NetTypeEnum netType, DataObjects.DataTypes.IDataType dataType)
         {
             Net net = new Net();
             net.NetType = netType;

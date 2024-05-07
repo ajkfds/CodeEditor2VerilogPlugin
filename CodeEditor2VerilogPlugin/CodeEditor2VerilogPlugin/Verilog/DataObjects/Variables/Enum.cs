@@ -77,7 +77,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         //{
         //}
 
-        public static new Enum Create(DataTypes.DataType dataType)
+        public static new Enum Create(DataTypes.IDataType dataType)
         {
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypes.DataTypeEnum.Enum);
             DataTypes.Enum dType = dataType as DataTypes.Enum;

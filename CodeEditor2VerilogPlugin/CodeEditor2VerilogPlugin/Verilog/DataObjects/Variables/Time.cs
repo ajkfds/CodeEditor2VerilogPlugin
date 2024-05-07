@@ -11,7 +11,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected Time() { }
 
-        public static new Time Create(DataType dataType)
+        public static new Time Create(IDataType dataType)
         {
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.Int);
             DataTypes.IntegerAtomType dType = dataType as DataTypes.IntegerAtomType;

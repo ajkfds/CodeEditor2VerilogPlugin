@@ -11,7 +11,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected Logic() { }
 
-        public static new Logic Create(DataType dataType)
+        public static new Logic Create(IDataType dataType)
         {
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.Logic);
             DataTypes.IntegerVectorType dType = dataType as DataTypes.IntegerVectorType;

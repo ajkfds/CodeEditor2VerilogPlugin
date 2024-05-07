@@ -12,7 +12,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected Shortreal() { }
 
-        public static new Shortreal Create(DataType dataType)
+        public static new Shortreal Create(IDataType dataType)
         {
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.Shortreal );
 

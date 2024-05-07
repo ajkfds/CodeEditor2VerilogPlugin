@@ -66,11 +66,11 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         InterfaceInstance,
         Event,
         CoverGroup,
-        Struct
+        Struct,
         //        TypeReference
     }
 
-    public class DataType
+    public class DataType :IDataType
     {
         //        protected List<Variables.Dimension> dimensions = new List<Variables.Dimension>();
         //        public IReadOnlyList<Variables.Dimension> Dimensions { get; }
@@ -101,7 +101,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         signing ::= "signed" | "unsigned"
         */
 
-        public static DataType ParseCreate(WordScanner word, NameSpace nameSpace, DataTypeEnum? defaultDataType)
+        public static IDataType ParseCreate(WordScanner word, NameSpace nameSpace, DataTypeEnum? defaultDataType)
         {
             /*
             data_type::=
@@ -177,7 +177,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     {
                         if (nameSpace.Typedefs.ContainsKey(word.Text))
                         {
-                            DataType dType = nameSpace.Typedefs[word.Text].VariableType;
+                            IDataType dType = nameSpace.Typedefs[word.Text].VariableType;
                             if (dType != null)
                             {
                                 word.Color(CodeDrawStyle.ColorType.Keyword);
@@ -187,7 +187,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                         }
                         else if(word.RootParsedDocument.Root != null && word.RootParsedDocument.Root.Typedefs.ContainsKey(word.Text))
                         {
-                            DataType dType = word.RootParsedDocument.Root.Typedefs[word.Text].VariableType;
+                            IDataType dType = word.RootParsedDocument.Root.Typedefs[word.Text].VariableType;
                             if (dType != null)
                             {
                                 word.Color(CodeDrawStyle.ColorType.Keyword);
@@ -226,7 +226,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             return dType;
         }
 
-        private static DataType parseTypeReference(WordScanner word, NameSpace nameSpace)
+        private static IDataType parseTypeReference(WordScanner word, NameSpace nameSpace)
         {
             //type_reference::= type(expression) | type(data_type)
             if (word.Text != "type") System.Diagnostics.Debugger.Break();
@@ -238,7 +238,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 return null;
             }
 
-            DataType dtype = ParseCreate(word, nameSpace,null);
+            IDataType dtype = ParseCreate(word, nameSpace,null);
             if (dtype == null)
             {
                 Expressions.Expression ex = Expressions.Expression.ParseCreate(word, nameSpace);

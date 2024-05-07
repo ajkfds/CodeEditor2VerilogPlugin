@@ -245,7 +245,7 @@ ansi_port_declaration ::=
 
         public static void ParsePortDeclarations(WordScanner word,NameSpace nameSpace)
         {
-            DataType prevDataType = null;
+            IDataType prevDataType = null;
             Net.NetTypeEnum? prevNetType = null;
             DirectionEnum? prevDirection = null;
 
@@ -291,7 +291,7 @@ ansi_port_declaration ::=
             return true;
         }
 
-        private static bool ParsePortDeclaration(WordScanner word, NameSpace nameSpace, bool firstPort, ref DataType prevDataType, ref Net.NetTypeEnum? prevNetType, ref DirectionEnum? prevDirection)
+        private static bool ParsePortDeclaration(WordScanner word, NameSpace nameSpace, bool firstPort, ref IDataType prevDataType, ref Net.NetTypeEnum? prevNetType, ref DirectionEnum? prevDirection)
         {
 
 
@@ -380,7 +380,7 @@ ansi_port_declaration ::=
 
             Net.NetTypeEnum? netType = Net.parseNetType(word, nameSpace);
 
-            DataType dataType = null;
+            IDataType dataType = null;
             if(netType == null)
             {
                 dataType = DataObjects.DataTypes.DataType.ParseCreate(word, nameSpace, null);
@@ -744,7 +744,7 @@ ansi_port_declaration ::=
                 word.MoveNext();
             }
 
-            DataType dataType = DataType.ParseCreate(word, nameSpace, null);
+            IDataType dataType = DataType.ParseCreate(word, nameSpace, null);
 
             // Each formal argument has a data type that can be explicitly declared or inherited from the previous argument.
             // If the data type is not explicitly declared, then the default data type is logic
@@ -817,7 +817,7 @@ ansi_port_declaration ::=
         public static void ParseTfPortItems(WordScanner word, NameSpace nameSpace, IPortNameSpace portNameSpace)
         {
             DirectionEnum? prevDirection = null;
-            DataType prevDataType = null;
+            IDataType prevDataType = null;
 
             bool firstPort = true;
             portNameSpace.Ports.Clear();
@@ -839,7 +839,7 @@ ansi_port_declaration ::=
 
         }
 
-        public static bool ParseTfPortItem(WordScanner word, NameSpace nameSpace, IPortNameSpace portNameSpace, bool first,ref DirectionEnum? prevDirection, ref DataType prevDataType)
+        public static bool ParseTfPortItem(WordScanner word, NameSpace nameSpace, IPortNameSpace portNameSpace, bool first,ref DirectionEnum? prevDirection, ref IDataType prevDataType)
         {
             // tf_port_item    ::= { attribute_instance } [ tf_port_direction ] [ var ] data_type_or_implicit [ port_identifier { variable_dimension } [ = expression ] ]
 
@@ -886,7 +886,7 @@ ansi_port_declaration ::=
                 word.MoveNext();
             }
 
-            DataType dataType = DataType.ParseCreate(word, nameSpace, null);
+            IDataType dataType = DataType.ParseCreate(word, nameSpace, null);
 
             // Each formal argument has a data type that can be explicitly declared or inherited from the previous argument.
             // If the data type is not explicitly declared, then the default data type is logic

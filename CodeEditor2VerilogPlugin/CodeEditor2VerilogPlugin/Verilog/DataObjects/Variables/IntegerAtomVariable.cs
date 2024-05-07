@@ -13,7 +13,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         //integer_atom_type::= byte | shortint | int | longint | integer | time
         public bool Signed { get; set; }
 
-        public new static IntegerAtomVariable Create(DataType dataType)
+        public new static IntegerAtomVariable Create(IDataType dataType)
         {
             switch (dataType.Type)
             {

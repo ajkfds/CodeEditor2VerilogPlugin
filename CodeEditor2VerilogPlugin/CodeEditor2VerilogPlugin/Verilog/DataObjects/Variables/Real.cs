@@ -12,7 +12,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected Real() { }
 
-        public static new Real Create(DataType dataType)
+        public static new Real Create(IDataType dataType)
         {
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.Real);
 

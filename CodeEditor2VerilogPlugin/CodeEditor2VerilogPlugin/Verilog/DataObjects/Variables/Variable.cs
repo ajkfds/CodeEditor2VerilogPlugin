@@ -45,7 +45,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         /// </summary>
         /// <param name="dataType"></param>
         /// <returns></returns>
-        public static Variable Create(DataType dataType)
+        public static Variable Create(IDataType dataType)
         {
             /* TODO
                 | struct_union["packed"[signing]] { struct_union_member { struct_union_member } } { packed_dimension }
@@ -126,7 +126,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             //                                  | class_variable_identifier                                                     [ = class_new]
 
 
-            DataType dataType = DataObjects.DataTypes.DataType.ParseCreate(word, nameSpace, null);
+            IDataType dataType = DataObjects.DataTypes.DataType.ParseCreate(word, nameSpace, null);
             if (dataType == null) return false;
 
             List<Variable> vars = new List<Variable>();

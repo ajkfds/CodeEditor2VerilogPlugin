@@ -9,7 +9,7 @@ namespace pluginVerilog.Verilog.DataObjects
 {
     public class Typedef
     {
-        public DataType VariableType;
+        public IDataType VariableType;
         public string Name;
 
         public static bool ParseDeclaration(WordScanner word, NameSpace nameSpace)

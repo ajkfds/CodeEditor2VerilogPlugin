@@ -1,4 +1,5 @@
-﻿using pluginVerilog.Verilog.ModuleItems;
+﻿using pluginVerilog.Verilog.DataObjects.DataTypes;
+using pluginVerilog.Verilog.ModuleItems;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
-    public class Class : BuildingBlock, IModuleOrInterface
+    public class Class : BuildingBlock, IModuleOrInterface, DataObjects.DataTypes.IDataType
     {
         protected Class() : base(null, null)
         {
@@ -49,19 +50,26 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             get { return cellDefine; }
         }
 
-
-        public static Class Create(WordScanner word, Attribute attribute, Data.IVerilogRelatedFile file, bool protoType)
+        public DataTypeEnum Type {
+            get { return DataTypeEnum.Class; }
+            set { } 
+        }
+        public static IDataType ParseCreate(WordScanner word, NameSpace nameSpace)
         {
-            return Create(word, null, attribute, file, protoType);
+            return Create(word, nameSpace);
+        }
+
+        public static Class Create(WordScanner word, NameSpace nameSpace)
+        {
+            return Create(word, nameSpace, null);
         }
         public static Class Create(
             WordScanner word,
-            Dictionary<string, Expressions.Expression> parameterOverrides,
-            Attribute attribute,
-            Data.IVerilogRelatedFile file,
-            bool protoType
+            NameSpace nameSpace,
+            Dictionary<string, Expressions.Expression> parameterOverrides
             )
         {
+            bool protoType = false;
             /*
             class_declaration ::=  
                     [ "virtual" ] "class" [ lifetime ] class_identifier [ parameter_port_list ]  
@@ -91,7 +99,6 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             class_.Parent = word.RootParsedDocument.Root;
 
             class_.BuildingBlock = class_;
-            class_.File = file;
             class_.BeginIndexReference = word.CreateIndexReference();
             if (word.CellDefine) class_.cellDefine = true;
             word.MoveNext();
@@ -159,11 +166,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             WordScanner word,
             //            string parameterOverrideModueName,
             Dictionary<string, Expressions.Expression> parameterOverrides,
-            Attribute attribute, Class module)
+            Attribute attribute, Class class_)
         {
 
             // module_identifier
-            module.Name = word.Text;
+            class_.Name = word.Text;
             word.Color(CodeDrawStyle.ColorType.Identifier);
             if (!General.IsIdentifier(word.Text))
             {
@@ -171,7 +178,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
             else
             {
-                module.NameReference = word.GetReference();
+                class_.NameReference = word.GetReference();
             }
             word.MoveNext();
 
@@ -194,7 +201,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         word.MoveNext();
                         while (!word.Eof)
                         {
-                            if (word.Text == "parameter") Verilog.DataObjects.Constants.Parameter.ParseCreateDeclarationForPort(word, module, null);
+                            if (word.Text == "parameter") Verilog.DataObjects.Constants.Parameter.ParseCreateDeclarationForPort(word, class_, null);
                             if (word.Text != ",")
                             {
                                 if (word.Text == ")") break;
@@ -222,19 +229,19 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 {
                     foreach (var vkp in parameterOverrides)
                     {
-                        if (module.Constants.ContainsKey(vkp.Key))
+                        if (class_.Constants.ContainsKey(vkp.Key))
                         {
-                            if (module.Constants[vkp.Key].DefinitionRefrecnce != null)
+                            if (class_.Constants[vkp.Key].DefinitionRefrecnce != null)
                             {
                                 //                                module.Parameters[vkp.Key].DefinitionRefrecnce.AddNotice("override " + vkp.Value.Value.ToString());
-                                module.Constants[vkp.Key].DefinitionRefrecnce.AddHint("override " + vkp.Value.Value.ToString());
+                                class_.Constants[vkp.Key].DefinitionRefrecnce.AddHint("override " + vkp.Value.Value.ToString());
                             }
 
-                            module.Constants.Remove(vkp.Key);
+                            class_.Constants.Remove(vkp.Key);
                             DataObjects.Constants.Parameter param = new DataObjects.Constants.Parameter();
                             param.Name = vkp.Key;
                             param.Expression = vkp.Value;
-                            module.Constants.Add(param.Name, param);
+                            class_.Constants.Add(param.Name, param);
                         }
                         else
                         {
@@ -262,7 +269,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                 while (!word.Eof)
                 {
-                    if (!Items.ClassItem.Parse(word, module))
+                    if (!Items.ClassItem.Parse(word, class_))
                     {
                         if (word.Text == "endclass") break;
                         word.AddError("illegal class item");
@@ -272,10 +279,10 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 break;
             }
 
-            if (!word.Prototype)
-            {
-                checkVariablesUseAndDriven(word, module);
-            }
+            //if (!word.Prototype)
+            //{
+            //    checkVariablesUseAndDriven(word, class_);
+            //}
 
             return;
         }
