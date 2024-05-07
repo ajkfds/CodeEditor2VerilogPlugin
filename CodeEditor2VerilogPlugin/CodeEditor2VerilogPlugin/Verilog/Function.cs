@@ -234,7 +234,7 @@ namespace pluginVerilog.Verilog
                 parse_function_items_ansi(word, nameSpace, function);
             }
 
-            if (word.Text == "endfunction")
+            if (!word.SystemVerilog && word.Text == "endfunction")
             {
                 word.AddError("statement required");
             }
@@ -262,7 +262,6 @@ namespace pluginVerilog.Verilog
                 }
                 else
                 {
-                    Statements.IStatement statement = Statements.Statements.ParseCreateFunctionStatement(word, function);
                     if (word.SystemVerilog)
                     {
                         while (!word.Eof && word.Text!="endfunction")
@@ -278,8 +277,12 @@ namespace pluginVerilog.Verilog
                                 default:
                                     break;
                             }
-                            Statements.IStatement statement1 = Statements.Statements.ParseCreateFunctionStatement(word, function);
+                            Statements.IStatement statement = Statements.Statements.ParseCreateFunctionStatement(word, function);
                         }
+                    }
+                    else
+                    {
+                        Statements.IStatement statement = Statements.Statements.ParseCreateFunctionStatement(word, function);
                     }
                 }
             }

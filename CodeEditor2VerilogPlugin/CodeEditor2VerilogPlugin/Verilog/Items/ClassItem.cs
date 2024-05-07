@@ -99,6 +99,20 @@ namespace pluginVerilog.Verilog.Items
                     return parseConst(word, nameSpace);
                 case "endclass":
                     return false;
+
+                // temporary TODO implemet
+                case "pure":
+                case "virtual":
+                case "rand":
+                case "randc":
+                case "static":
+                case "protected":
+                case "local":
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+                    Parse(word, nameSpace);
+                    return true;
+
                 default:
                     return NonPortModuleItem.Parse(word, nameSpace);
             }

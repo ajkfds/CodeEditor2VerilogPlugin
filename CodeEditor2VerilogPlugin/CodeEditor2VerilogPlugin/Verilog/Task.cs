@@ -146,7 +146,7 @@ namespace pluginVerilog.Verilog
                 parse_task_items_ansi(word, nameSpace, task);
             }
 
-            if (word.Text == "endtask")
+            if (!word.SystemVerilog && word.Text == "endtask")
             {
                 word.AddError("statement required");
             }
@@ -174,7 +174,6 @@ namespace pluginVerilog.Verilog
                 }
                 else
                 {
-                    Statements.IStatement statement = Statements.Statements.ParseCreateFunctionStatement(word, task);
                     if (word.SystemVerilog)
                     {
                         while(!word.Eof && word.Text != "endtask")
@@ -190,8 +189,12 @@ namespace pluginVerilog.Verilog
                                 default:
                                     break;
                             }
-                            Statements.IStatement statement1 = Statements.Statements.ParseCreateFunctionStatement(word, task);
+                            Statements.IStatement statement = Statements.Statements.ParseCreateFunctionStatement(word, task);
                         }
+                    }
+                    else
+                    {
+                        Statements.IStatement statement = Statements.Statements.ParseCreateFunctionStatement(word, task);
                     }
                 }
             }
