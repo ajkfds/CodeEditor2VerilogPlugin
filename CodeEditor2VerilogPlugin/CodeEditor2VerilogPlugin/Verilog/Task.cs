@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using pluginVerilog.Verilog.DataObjects.Variables;
+using Microsoft.CodeAnalysis.Emit;
 
 namespace pluginVerilog.Verilog
 {
@@ -159,6 +160,7 @@ namespace pluginVerilog.Verilog
                         switch (word.Text)
                         {
                             case "endmodule":
+                            case "endclass":
                             case "endfunction":
                             case "always":
                             case "initial":
@@ -173,6 +175,24 @@ namespace pluginVerilog.Verilog
                 else
                 {
                     Statements.IStatement statement = Statements.Statements.ParseCreateFunctionStatement(word, task);
+                    if (word.SystemVerilog)
+                    {
+                        while(!word.Eof && word.Text != "endtask")
+                        {
+                            switch (word.Text)
+                            {
+                                case "endmodule":
+                                case "endclass":
+                                case "endfunction":
+                                case "always":
+                                case "initial":
+                                    return;
+                                default:
+                                    break;
+                            }
+                            Statements.IStatement statement1 = Statements.Statements.ParseCreateFunctionStatement(word, task);
+                        }
+                    }
                 }
             }
 

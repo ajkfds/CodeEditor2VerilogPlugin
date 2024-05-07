@@ -93,7 +93,9 @@ namespace pluginVerilog.Verilog.Items
                 // TODO
 
                 // class_declaration
-                //BuildingBlocks.Class.P
+                case "class":
+                    BuildingBlocks.Class.Create(word, null, word.RootParsedDocument.File,false);
+                    break;
 
                 // class_constructor_declaration
                 

@@ -14,7 +14,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
         }
 
-        // IModuleOrInterfaceOrProfram
+        // IModuleOrInterfaceOrProgram
 
         // Port
         public Dictionary<string, DataObjects.Port> Ports { get; } = new Dictionary<string, DataObjects.Port>();

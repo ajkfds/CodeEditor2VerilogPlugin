@@ -34,8 +34,16 @@ namespace pluginVerilog.Verilog
             realtime,
             time
         }
-
         public static void Parse(WordScanner word, NameSpace nameSpace)
+        {
+            Parse(word,nameSpace, false);
+        }
+        public static void ParseFunctionOrConstructor(WordScanner word, NameSpace nameSpace)
+        {
+            Parse(word, nameSpace, true);
+        }
+
+        private static void Parse(WordScanner word, NameSpace nameSpace,bool acceptClassConstructor)
         {
             if(word.Text != "function")
             {
@@ -139,6 +147,10 @@ namespace pluginVerilog.Verilog
                     }
                     break;
                 default:
+                    if(acceptClassConstructor && word.Text == "new")
+                    {
+                        // skip data type definition
+                    }else
                     {
                         DataType dataType = DataType.ParseCreate(word, nameSpace, null);
                         if (dataType != null)
@@ -156,9 +168,16 @@ namespace pluginVerilog.Verilog
             }
 
             function.Name = word.Text;
-            if (retVal == null & !returnVoid) return;
+            if (acceptClassConstructor)
+            {
 
-            if(retVal != null) retVal.Name = function.Name;
+            }
+            else
+            {
+                if (retVal == null & !returnVoid) return;
+            }
+
+            if (retVal != null) retVal.Name = function.Name;
 
             function.ReturnVariable = retVal;
 
@@ -228,6 +247,7 @@ namespace pluginVerilog.Verilog
                         if (word.Text == "endfunction") break;
                         switch (word.Text)
                         {
+                            case "endclass":
                             case "endmodule":
                             case "endtask":
                             case "always":
@@ -243,6 +263,24 @@ namespace pluginVerilog.Verilog
                 else
                 {
                     Statements.IStatement statement = Statements.Statements.ParseCreateFunctionStatement(word, function);
+                    if (word.SystemVerilog)
+                    {
+                        while (!word.Eof && word.Text!="endfunction")
+                        {
+                            switch (word.Text)
+                            {
+                                case "endclass":
+                                case "endmodule":
+                                case "endtask":
+                                case "always":
+                                case "initial":
+                                    return;
+                                default:
+                                    break;
+                            }
+                            Statements.IStatement statement1 = Statements.Statements.ParseCreateFunctionStatement(word, function);
+                        }
+                    }
                 }
             }
 
