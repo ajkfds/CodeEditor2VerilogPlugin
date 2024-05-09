@@ -58,6 +58,9 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 case DataTypeEnum.Time:
                     label.AppendText("time ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
                     break;
+                case DataTypeEnum.Class:
+                    label.AppendText("class ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Identifier));
+                    break;
                 default:
                     System.Diagnostics.Debugger.Break();
                     break;

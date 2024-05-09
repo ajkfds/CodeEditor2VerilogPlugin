@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
-    public class Object : IntegerAtomVariable
+    public class Object : Variable
     {
         protected Object() { }
 
-        private BuildingBlocks.Class class_;
+        public BuildingBlocks.Class Class;
 
         public static new Object Create(IDataType dataType)
         {
@@ -20,7 +20,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
             Object val = new Object();
             val.DataType = DataTypeEnum.Class;
-            val.class_ = class_;
+            val.Class = class_;
             return val;
         }
 

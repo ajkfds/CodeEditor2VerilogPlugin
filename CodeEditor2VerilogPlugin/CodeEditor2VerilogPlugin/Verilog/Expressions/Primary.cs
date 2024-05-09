@@ -138,7 +138,19 @@ namespace pluginVerilog.Verilog.Expressions
                 case WordPointer.WordTypeEnum.Text:
                     {
                         var variable = VariableReference.ParseCreate(word, nameSpace, lValue);
-                        if (variable != null) return variable;
+                        if (variable != null)
+                        {
+                            if (variable.Variable is DataObjects.Variables.Object && word.Text == ".")
+                            {
+                                word.MoveNext();
+                                DataObjects.Variables.Object? obj = variable.Variable as DataObjects.Variables.Object;
+                                if (obj != null) return Primary.parseCreate(word, obj.Class, lValue);
+                                else throw new Exception();
+                            }
+
+
+                            return variable;
+                        }
 
                         var parameter = ParameterReference.ParseCreate(word, nameSpace);
                         if (parameter != null) return parameter;
@@ -158,7 +170,7 @@ namespace pluginVerilog.Verilog.Expressions
                             Primary primary = null;
                             parseHierNameSpace(word, nameSpace, ref space, ref primary,lValue);
 
-                            if(primary == null || space == null || space == nameSpace)
+                            if(primary == null || space == null)// || space == nameSpace || space is Class)
                             {
                                 if (word.Eof) return null;
                                 if (General.ListOfKeywords.Contains(word.Text)) return null;
@@ -174,7 +186,12 @@ namespace pluginVerilog.Verilog.Expressions
                                         nameSpace.DataObjects.Add(net.Name, net);
                                     }
                                     variable = VariableReference.ParseCreate(word, nameSpace, lValue);
-                                    if (variable != null) return variable;
+
+                                    if(variable != null)
+                                    {
+                                        return variable;
+                                    }
+
                                 }
                             }
                             else if(primary is TaskReference)

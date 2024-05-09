@@ -7,6 +7,7 @@ using System.Drawing;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.DataObjects;
 using System.Data;
+using pluginVerilog.Verilog.Statements;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
@@ -169,7 +170,15 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 if (word.Text == "=") 
                 {
                     word.MoveNext();    // =
-                    Expressions.Expression exp = Expressions.Expression.ParseCreate(word, nameSpace);
+                    if (word.Text == "new")
+                    {
+                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.MoveNext();
+                    }
+                    else
+                    {
+                        Expressions.Expression exp = Expressions.Expression.ParseCreate(word, nameSpace);
+                    }
                 }
 
                 if (word.Prototype)

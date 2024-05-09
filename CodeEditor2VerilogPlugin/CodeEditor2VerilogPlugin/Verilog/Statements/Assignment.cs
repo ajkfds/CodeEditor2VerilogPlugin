@@ -116,12 +116,30 @@ namespace pluginVerilog.Verilog.Statements
             }
             word.MoveNext();    // <=
 
-            if(word.GetCharAt(0) == '#')
+            if (word.GetCharAt(0) == '#')
             {
                 DelayControl delayControl = DelayControl.ParseCreate(word, nameSpace);
-            }else if(word.GetCharAt(0) == '@')
+            }
+            else if (word.GetCharAt(0) == '@')
             {
                 EventControl eventControl = EventControl.ParseCreate(word, nameSpace);
+            }
+
+            if (word.Text == "new")
+            {
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext();
+                if (word.Text != ";")
+                {
+                    word.AddError("; expected");
+                    return null;
+                }
+                BlockingAssignment assignment = new BlockingAssignment();
+                assignment.LValue = lExpression;
+                assignment.Expression = null; // new
+                if (Assigned != null) Assigned(word, nameSpace, assignment);
+                return assignment;
+
             }
 
             // delay or event control
@@ -137,8 +155,8 @@ namespace pluginVerilog.Verilog.Statements
             if (!word.Prototype)
             {
                 if (
-                    lExpression != null && 
-                    lExpression.BitWidth != null && 
+                    lExpression != null &&
+                    lExpression.BitWidth != null &&
                     expression.BitWidth != null &&
                     lExpression.BitWidth != expression.BitWidth
                     )
@@ -147,11 +165,13 @@ namespace pluginVerilog.Verilog.Statements
                 }
             }
 
-            BlockingAssignment assignment = new BlockingAssignment();
-            assignment.LValue = lExpression;
-            assignment.Expression = expression;
-            if (Assigned != null) Assigned(word, nameSpace, assignment);
-            return assignment;
+            {
+                BlockingAssignment assignment = new BlockingAssignment();
+                assignment.LValue = lExpression;
+                assignment.Expression = expression;
+                if (Assigned != null) Assigned(word, nameSpace, assignment);
+                return assignment;
+            }
         }
     }
 }

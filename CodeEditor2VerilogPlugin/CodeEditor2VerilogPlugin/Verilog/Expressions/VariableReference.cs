@@ -1,4 +1,5 @@
 ﻿using pluginVerilog.Verilog.DataObjects.Nets;
+using pluginVerilog.Verilog.DataObjects.Variables;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -216,6 +217,7 @@ namespace pluginVerilog.Verilog.Expressions
                     val.Constant = true;
                 }
             }
+
 
             return val;
         }
