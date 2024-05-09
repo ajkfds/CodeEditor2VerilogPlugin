@@ -24,6 +24,7 @@ namespace pluginVerilog.Verilog
         private Dictionary<string, DataObjects.DataObject> variables = new Dictionary<string, DataObjects.DataObject>();
         private Dictionary<string, Net> nets = new Dictionary<string, Net>();
         private Dictionary<string, DataObjects.Typedef> typedefs = new Dictionary<string, DataObjects.Typedef>();
+        private Dictionary<string, BuildingBlocks.Class> classes = new Dictionary<string, Class>();
 
         private Dictionary<string, NameSpace> nameSpaces = new Dictionary<string, NameSpace>();
 
@@ -36,6 +37,7 @@ namespace pluginVerilog.Verilog
         public Dictionary<string, DataObjects.Constants.Constants> Constants { get { return constants; } }
 
         public Dictionary<string, DataObjects.Typedef> Typedefs { get { return typedefs; } }
+        public Dictionary<string,BuildingBlocks.Class> Classes {  get { return classes; } }
         public BuildingBlocks.BuildingBlock BuildingBlock { get; protected set; }
         public Dictionary<string, NameSpace> NameSpaces { get { return nameSpaces;  } }
 

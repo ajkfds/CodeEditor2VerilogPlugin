@@ -54,9 +54,27 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             get { return DataTypeEnum.Class; }
             set { } 
         }
-        public static IDataType ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static void ParseDeclaration(WordScanner word, NameSpace nameSpace)
         {
-            return Create(word, nameSpace);
+            Class class_ = Create(word, nameSpace);
+            if (word.Prototype)
+            {
+                if (!nameSpace.Classes.ContainsKey(class_.Name))
+                {
+                    nameSpace.Classes.Add(class_.Name, class_);
+                }
+                else
+                {
+                    word.AddError("duplicate");
+                }
+            }
+            else
+            {
+                if (!nameSpace.Classes.ContainsKey(class_.Name))
+                {
+                    nameSpace.Classes.Add(class_.Name, class_);
+                }
+            }
         }
 
         public static Class Create(WordScanner word, NameSpace nameSpace)
@@ -117,18 +135,18 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 // prototype parse
                 WordScanner prototypeWord = word.Clone();
                 prototypeWord.Prototype = true;
-                parseClassItems(prototypeWord, parameterOverrides, null, class_);
+                parseClassItems(prototypeWord, nameSpace, parameterOverrides, null, class_);
                 prototypeWord.Dispose();
 
                 // parse
                 word.RootParsedDocument.Macros = macroKeep;
-                parseClassItems(word, parameterOverrides, null, class_);
+                parseClassItems(word, nameSpace, parameterOverrides, null, class_);
             }
             else
             {
                 // parse prototype only
                 word.Prototype = true;
-                parseClassItems(word, parameterOverrides, null, class_);
+                parseClassItems(word, nameSpace, parameterOverrides, null, class_);
                 word.Prototype = false;
             }
 
@@ -140,6 +158,12 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                 word.AppendBlock(class_.BeginIndexReference, class_.LastIndexReference);
                 word.MoveNext();
+
+                if (!nameSpace.BuildingBlock.Classes.ContainsKey(class_.Name))
+                {
+                    nameSpace.BuildingBlock.Classes.Add(class_.Name, class_);
+                }
+
                 return class_;
             }
 
@@ -164,6 +188,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         */
         protected static void parseClassItems(
             WordScanner word,
+            NameSpace nameSpace,
             //            string parameterOverrideModueName,
             Dictionary<string, Expressions.Expression> parameterOverrides,
             Attribute attribute, Class class_)
@@ -255,6 +280,42 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 //{
                 //    parseListOfPorts_ListOfPortsDeclarations(word, module);
                 //} // list_of_ports or list_of_posrt_declarations
+
+
+                // [ "extends" class_type[(list_of_arguments)] ]  
+                if(word.Text == "extends")
+                {
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+
+                    if (!nameSpace.Classes.ContainsKey(word.Text))
+                    {
+                        word.AddError("illegal class_type");
+                    }
+                    else
+                    {
+                        Class baseClass = nameSpace.Classes[word.Text];
+                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.MoveNext();
+
+                        foreach (var v in baseClass.Typedefs)
+                        {
+                            if (!class_.Typedefs.ContainsKey(v.Key)) class_.Typedefs.Add(v.Key, v.Value);
+                        }
+                        foreach (var v in baseClass.DataObjects)
+                        {
+                            if (!class_.DataObjects.ContainsKey(v.Key)) class_.DataObjects.Add(v.Key, v.Value);
+                        }
+                        foreach (var v in baseClass.Functions)
+                        {
+                            if (!class_.Functions.ContainsKey(v.Key)) class_.Functions.Add(v.Key, v.Value);
+                        }
+                        foreach (var v in baseClass.Tasks)
+                        {
+                            if (!class_.Tasks.ContainsKey(v.Key)) class_.Tasks.Add(v.Key, v.Value);
+                        }
+                    }
+                }
 
                 if (word.Eof || word.Text == "endclass") break;
 

@@ -87,6 +87,8 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                     return String.Create(dataType);
                 case DataTypeEnum.Enum:
                     return Enum.Create(dataType);
+                case DataTypeEnum.Class:
+                    return Object.Create(dataType);
                 default:
                     System.Diagnostics.Debugger.Break();
                     break;

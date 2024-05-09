@@ -94,7 +94,7 @@ namespace pluginVerilog.Verilog.Items
 
                 // class_declaration
                 case "class":
-                    BuildingBlocks.Class.Create(word, nameSpace);
+                    BuildingBlocks.Class.ParseDeclaration(word, nameSpace);
                     break;
 
                 // class_constructor_declaration

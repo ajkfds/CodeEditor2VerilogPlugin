@@ -173,6 +173,17 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     return parseTypeReference(word, nameSpace);
 
                 default:
+                    // class
+                    {
+                        if(nameSpace.BuildingBlock.Classes.ContainsKey(word.Text))
+                        {
+                            IDataType dType = nameSpace.BuildingBlock.Classes[word.Text];
+                            word.Color(CodeDrawStyle.ColorType.Keyword);
+                            word.MoveNext();
+                            return dType;
+                        }
+                    }
+
                     // [class_scope | package_scope] type_identifier { packed_dimension }
                     {
                         if (nameSpace.Typedefs.ContainsKey(word.Text))

@@ -90,26 +90,7 @@ namespace pluginVerilog.Verilog.Statements
 
                 while (!word.Eof && word.Text != "end")
                 {
-                    bool endFlag = false;
-                    switch (word.Text)
-                    {
-                        case "reg":
-                        case "integer":
-                        case "real":
-                        case "realtime":
-                        case "time":
-                        case "event":
-                            DataObjects.Variables.Variable.ParseDeclaration(word, nameSpace);
-                            break;
-                        case "parameter":
-                        case "localparam":
-                            Verilog.DataObjects.Constants.Parameter.ParseCreateDeclaration(word, namedBlock, null);
-                            break;
-                        default:
-                            endFlag = true;
-                            break;
-                    }
-                    if (endFlag) break;
+                    if (!Items.BlockItemDeclaration.Parse(word, namedBlock)) break;
                 }
 
 
@@ -145,6 +126,20 @@ namespace pluginVerilog.Verilog.Statements
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 namedBlock.LastIndexReference = word.CreateIndexReference();
                 word.MoveNext(); // end
+
+                if (word.Text == ":")
+                {
+                    word.MoveNext();
+                    if (namedBlock.Name != word.Text)
+                    {
+                        word.AddError("illegal block name");
+                    }
+                    else
+                    {
+                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.MoveNext();
+                    }
+                }
 
                 if (namedBlock.Name != null && !nameSpace.NameSpaces.ContainsKey(namedBlock.Name))
                 {
