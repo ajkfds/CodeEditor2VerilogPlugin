@@ -322,7 +322,7 @@ namespace pluginVerilog.Verilog.Expressions
                 InterfaceReference interfaceInstanceReference = new InterfaceReference(iinst);
                 primary = interfaceInstanceReference;
                 nameSpace = iinst.GetInstancedBuildingBlock();
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(CodeDrawStyle.ColorType.Variable);
                 word.MoveNext();
 
                 if (nameSpace == null) return true;
