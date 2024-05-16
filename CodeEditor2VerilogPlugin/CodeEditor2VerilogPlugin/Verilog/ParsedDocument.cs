@@ -302,7 +302,7 @@ namespace pluginVerilog.Verilog
         private NameSpace getSearchNameSpace(NameSpace nameSpace,List<string> hier)
         {
             IBuildingBlockWithModuleInstance buildingBlock = nameSpace.BuildingBlock as IBuildingBlockWithModuleInstance;
-            if (buildingBlock == null) System.Diagnostics.Debugger.Break();
+            if (buildingBlock == null) return null;
 
             if(nameSpace == null) return null;
             if (hier.Count == 0) return nameSpace;

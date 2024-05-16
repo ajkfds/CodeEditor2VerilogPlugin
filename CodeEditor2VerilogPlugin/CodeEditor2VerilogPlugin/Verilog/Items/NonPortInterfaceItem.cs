@@ -21,25 +21,24 @@ namespace pluginVerilog.Verilog.Items
         {
             switch (word.Text)
             {
-                // generate_region
+                // generate_region 
                 case "generate":
                     return GenerateRegion.Parse(word, nameSpace);
-                // specify_block
                 case "specify":
                     // TODO
                     word.MoveNext();
                     return true;
-                // { attribute_instance }specparam_declaration
-                // program_declaration
-                // module_declaration
-
-                // interface_declaration
-                // timeunits_declaration
-                // module_or_generate_item
+                // modport_declaration
+                case "modport":
+                    return ModPort.Parse(word, nameSpace);
+                // timeunits_declaration3
+                // interface_declaration 
+                // program_declaration 
                 default:
                     break;
 
             }
+            // interface_or_generate_item 
             if (InterfaceOrGenerateItem.Parse(word, nameSpace)) return true;
             return false;
         }

@@ -20,11 +20,12 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         public Dictionary<string, DataObjects.Port> Ports { get; } = new Dictionary<string, DataObjects.Port>();
         public List<DataObjects.Port> PortsList { get; } = new List<DataObjects.Port>();
 
-//        public WordReference NameReference;
-//        public List<string> PortParameterNameList { get; } = new List<string>();
+        public Dictionary<string, Items.ModPort> ModPorts { get; } = new Dictionary<string, Items.ModPort>();
+        //        public WordReference NameReference;
+        //        public List<string> PortParameterNameList { get; } = new List<string>();
 
         // Module
-//        public Dictionary<string, ModuleItems.IInstantiation> Instantiations { get; } = new Dictionary<string, ModuleItems.IInstantiation>();
+        //        public Dictionary<string, ModuleItems.IInstantiation> Instantiations { get; } = new Dictionary<string, ModuleItems.IInstantiation>();
 
 
         private WeakReference<Data.IVerilogRelatedFile> fileRef;
@@ -103,18 +104,18 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 // protptype parse
                 WordScanner prototypeWord = word.Clone();
                 prototypeWord.Prototype = true;
-                parseModuleItems(prototypeWord, parameterOverrides, null, interface_);
+                parseInterfaceItems(prototypeWord, parameterOverrides, null, interface_);
                 prototypeWord.Dispose();
 
                 // parse
                 word.RootParsedDocument.Macros = macroKeep;
-                parseModuleItems(word, parameterOverrides, null, interface_);
+                parseInterfaceItems(word, parameterOverrides, null, interface_);
             }
             else
             {
                 // parse prototype only
                 word.Prototype = true;
-                parseModuleItems(word, parameterOverrides, null, interface_);
+                parseInterfaceItems(word, parameterOverrides, null, interface_);
                 word.Prototype = false;
             }
 
@@ -159,7 +160,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                                     | interface_declaration 
                                     | timeunits_declaration3
         */
-        protected static void parseModuleItems(
+        protected static void parseInterfaceItems(
             WordScanner word,
             //            string parameterOverrideModueName,
             Dictionary<string, Expressions.Expression> parameterOverrides,
@@ -266,7 +267,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                 while (!word.Eof)
                 {
-                    if (!Items.ModuleItem.Parse(word, module))
+                    if (!Items.InterfaceItem.Parse(word, module))
                     {
                         if (word.Text == "endinterface") break;
                         word.AddError("illegal module item");
