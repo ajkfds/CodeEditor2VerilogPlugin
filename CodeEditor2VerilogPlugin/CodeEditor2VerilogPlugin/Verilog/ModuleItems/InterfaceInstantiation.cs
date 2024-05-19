@@ -449,10 +449,10 @@ namespace pluginVerilog.Verilog.ModuleItems
 
         public string CreateString()
         {
-            return CreateSrting("\t");
+            return CreateString("\t");
 
         }
-        public string CreateSrting(string indent)
+        public string CreateString(string indent)
         {
             Interface instancedModule = ProjectProperty.GetBuildingBlock(SourceName) as Interface;
             if (instancedModule == null) return null;

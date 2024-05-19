@@ -20,7 +20,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         public Dictionary<string, DataObjects.Port> Ports { get; } = new Dictionary<string, DataObjects.Port>();
         public List<DataObjects.Port> PortsList { get; } = new List<DataObjects.Port>();
 
-        public Dictionary<string, Items.ModPort> ModPorts { get; } = new Dictionary<string, Items.ModPort>();
+        public Dictionary<string, ModPort> ModPorts { get; } = new Dictionary<string, ModPort>();
         //        public WordReference NameReference;
         //        public List<string> PortParameterNameList { get; } = new List<string>();
 

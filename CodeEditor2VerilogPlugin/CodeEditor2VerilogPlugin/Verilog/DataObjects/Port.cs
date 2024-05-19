@@ -622,8 +622,21 @@ ansi_port_declaration ::=
             if (interface_ == null) return false;
 
             BuildingBlock buildingBlock = nameSpace.BuildingBlock;
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(CodeDrawStyle.ColorType.Identifier);
             word.MoveNext();
+
+            if (word.Text == ".")
+            {
+                word.MoveNext();
+
+                word.Color(CodeDrawStyle.ColorType.Identifier);
+                if(!interface_.ModPorts.ContainsKey(word.Text))
+                {
+                    word.AddError("illegal modport name");
+                }
+
+                word.MoveNext();
+            }
 
 
             string instance_name = word.Text;
@@ -635,7 +648,7 @@ ansi_port_declaration ::=
 
 
             InterfaceInstantiation iinst = InterfaceInstantiation.Create(instance_name, interface_.Name, word.Project);
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(CodeDrawStyle.ColorType.Variable);
             word.MoveNext();
 
             Port port = new Port();

@@ -8,10 +8,14 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace pluginVerilog.Verilog.Items
+namespace pluginVerilog.Verilog
 {
-    public class ModPort
+    public class ModPort : NameSpace
     {
+        protected ModPort(NameSpace parent) : base(parent.BuildingBlock, parent)
+        {
+        }
+
         /*
             modport_declaration     ::= modport modport_item { , modport_item } ; 
             modport_item            ::= modport_identifier ( modport_ports_declaration { , modport_ports_declaration } ) 
@@ -31,7 +35,8 @@ namespace pluginVerilog.Verilog.Items
                                 | tf_identifier 
             import_export ::= import | export 
          */
-//        modport_declaration::= modport modport_item { , modport_item };
+        //        modport_declaration::= modport modport_item { , modport_item };
+        
         public static bool Parse(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "modport") throw new Exception();
@@ -41,7 +46,7 @@ namespace pluginVerilog.Verilog.Items
             while (!word.Eof)
             {
                 if (!parse_modport_item(word, nameSpace)) break;
-                if(word.Text==";")
+                if (word.Text == ";")
                 {
                     word.MoveNext();
                     break;
@@ -58,22 +63,30 @@ namespace pluginVerilog.Verilog.Items
             return true;
         }
 
-//        modport_item::= modport_identifier(modport_ports_declaration { , modport_ports_declaration } ) 
-//        modport_ports_declaration::=  { attribute_instance } modport_simple_ports_declaration 
-//                                    | { attribute_instance } modport_tf_ports_declaration
-//                                    | { attribute_instance } modport_clocking_declaration
+        //        modport_item::= modport_identifier(modport_ports_declaration { , modport_ports_declaration } ) 
+        //        modport_ports_declaration::=  { attribute_instance } modport_simple_ports_declaration 
+        //                                    | { attribute_instance } modport_tf_ports_declaration
+        //                                    | { attribute_instance } modport_clocking_declaration
         private static bool parse_modport_item(WordScanner word, NameSpace nameSpace)
         {
             if (!General.IsIdentifier(word.Text)) return false;
-            ModPort modport = new ModPort { Name = word.Text };
+            Interface? interface_ = nameSpace.BuildingBlock as Interface;
+
+            if (interface_ == null) return false;
+
+            ModPort modport = new ModPort(interface_);
+            modport.Name = word.Text;
             word.Color(CodeDrawStyle.ColorType.Identifier);
             word.MoveNext();
-            Interface? interface_ = nameSpace.BuildingBlock as Interface;
             if (interface_ != null)
             {
                 if (!interface_.ModPorts.ContainsKey(modport.Name))
                 {
                     interface_.ModPorts.Add(modport.Name, modport);
+                }
+                if (!interface_.NameSpaces.ContainsKey(modport.Name))
+                {
+                    interface_.NameSpaces.Add(modport.Name, modport);
                 }
             }
 
@@ -153,12 +166,21 @@ namespace pluginVerilog.Verilog.Items
             return true;
         }
         //modport_simple_port::= port_identifier | "." port_identifier([expression] )
-        internal bool parse_modport_simple_port(WordScanner word, NameSpace nameSpace,Port.DirectionEnum direction)
+        internal bool parse_modport_simple_port(WordScanner word, NameSpace nameSpace, Port.DirectionEnum direction)
         {
             if (word.Text == ".") // modport expression
             {
                 word.MoveNext();
-                if(word.Text != "(")
+
+                if (!General.IsIdentifier(word.Text))
+                {
+                    return false;
+                }
+                string name = word.Text;
+                word.Color(CodeDrawStyle.ColorType.Variable);
+                word.MoveNext();
+
+                if (word.Text != "(")
                 {
                     return false;
                 }
@@ -171,7 +193,7 @@ namespace pluginVerilog.Verilog.Items
                     return false;
                 }
 
-                Port port = new Port { Direction = direction, Name = word.Text };
+                Port port = new Port { Direction = direction, Name = name };
                 port.Expression = expression;
 
                 if (!Ports.ContainsKey(port.Name))
@@ -179,15 +201,33 @@ namespace pluginVerilog.Verilog.Items
                     Ports.Add(port.Name, port);
                     return true;
                 }
+                if (DataObjects.ContainsKey(port.Name))
+                {
+                    if (direction == Port.DirectionEnum.Input)
+                    {
+                        Verilog.DataObjects.Nets.Net net = Verilog.DataObjects.Nets.Net.Create(Verilog.DataObjects.Nets.Net.NetTypeEnum.Wire, null);
+                        DataObjects.Add(net.Name,net);
+                    }
+                    else
+                    {
+                        DataObjects.DataTypes.IntegerVectorType dtype = Verilog.DataObjects.DataTypes.IntegerVectorType.Create(Verilog.DataObjects.DataTypes.DataTypeEnum.Logic, false, null);
+                        Verilog.DataObjects.Variables.Logic logic = Verilog.DataObjects.Variables.Logic.Create(dtype);
+                        DataObjects.Add(logic.Name, logic);
+                    }
+                }
             }
 
 
             if (!General.IsIdentifier(word.Text)) return false;
-
             {
                 Port port = new Port { Direction = direction, Name = word.Text };
-                word.Color(CodeDrawStyle.ColorType.Variable);
-                word.MoveNext();
+
+                Expressions.Expression expression = Expressions.Expression.ParseCreate(word, nameSpace);
+                if (expression == null) return false;
+
+                port.Expression = expression;
+                //word.Color(CodeDrawStyle.ColorType.Variable);
+                //word.MoveNext();
 
                 if (!Ports.ContainsKey(port.Name))
                 {
@@ -199,7 +239,6 @@ namespace pluginVerilog.Verilog.Items
             return false;
         }
 
-        public string Name { get; protected set; }
         public Dictionary<string, Port> Ports = new Dictionary<string, Port>();
 
         public class Port
@@ -217,7 +256,7 @@ namespace pluginVerilog.Verilog.Items
             public DirectionEnum Direction { get; internal set; } = DirectionEnum.Undefined;
             public Expressions.Expression Expression { get; internal set; } = null;
         }
-
+        
 
 
 

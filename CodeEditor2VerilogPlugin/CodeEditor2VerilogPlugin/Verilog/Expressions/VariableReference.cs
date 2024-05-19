@@ -99,6 +99,7 @@ namespace pluginVerilog.Verilog.Expressions
         {
             if (nameSpace == null) System.Diagnostics.Debugger.Break();
             DataObjects.DataObject variable = getDataObject(word, word.Text, nameSpace);
+
             if (variable == null) return null;
 
             VariableReference val = new VariableReference();

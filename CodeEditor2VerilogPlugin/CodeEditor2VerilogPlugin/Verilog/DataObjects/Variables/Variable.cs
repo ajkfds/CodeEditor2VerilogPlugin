@@ -117,10 +117,11 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public static bool ParseDeclaration(WordScanner word, NameSpace nameSpace)
         {
-            // data_declaration::=    [ const ] [var][lifetime] data_type_or_implicit list_of_variable_decl_assignments;
+            // data_declaration::=    [ "const" ] ["var"] [lifetime] data_type_or_implicit list_of_variable_decl_assignments;
             //                      | type_declaration
             //                      | package_import_declaration11
             //                      | net_type_declaration
+            // lifetime ::= static | automatic 
 
             // list_of_variable_decl_assignments ::= variable_decl_assignment { , variable_decl_assignment } 
 
@@ -128,9 +129,31 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             //                                  | dynamic_array_variable_identifier unsized_dimension   { variable_dimension }  [ = dynamic_array_new]
             //                                  | class_variable_identifier                                                     [ = class_new]
 
+            bool pointerMoved= false;
+
+            if (word.Text == "const")
+            {
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext();
+                pointerMoved = true;
+            }
+
+            if (word.Text == "var")
+            {
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext();
+                pointerMoved = true;
+            }
+
+            if (word.Text == "static" | word.Text=="automatic")
+            {
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext();
+                pointerMoved = true;
+            }
 
             IDataType dataType = DataObjects.DataTypes.DataType.ParseCreate(word, nameSpace, null);
-            if (dataType == null) return false;
+            if (dataType == null) return pointerMoved;
 
             List<Variable> vars = new List<Variable>();
 
