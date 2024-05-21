@@ -174,7 +174,11 @@ namespace pluginVerilog.Verilog
             }
             else
             {
-                if (retVal == null & !returnVoid) return;
+                if (!returnVoid)
+                {
+                    IDataType dat_type = Verilog.DataObjects.DataTypes.IntegerVectorType.Create(DataTypeEnum.Logic, false, null);
+                    retVal = Verilog.DataObjects.Variables.Logic.Create(dat_type);
+                }
             }
 
             if (retVal != null) retVal.Name = function.Name;
