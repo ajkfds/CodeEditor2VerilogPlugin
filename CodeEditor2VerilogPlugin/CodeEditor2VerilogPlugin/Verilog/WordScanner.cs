@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -312,7 +313,7 @@ namespace pluginVerilog.Verilog
                 }
                 else if (wordPointer.WordType == WordPointer.WordTypeEnum.CompilerDirective)
                 {
-                    parseCompilerDirctive();
+                    parseCompilerDirective();
                 }
                 else
                 {
@@ -464,7 +465,7 @@ namespace pluginVerilog.Verilog
         }
         private List<ifdefEnum> ifDefs = new List<ifdefEnum>();
 
-        private void parseCompilerDirctive()
+        private void parseCompilerDirective()
         {
             switch (wordPointer.Text)
             {
@@ -915,7 +916,7 @@ namespace pluginVerilog.Verilog
                 }
                 else if (wordPointer.WordType == WordPointer.WordTypeEnum.CompilerDirective)
                 {
-                    parseCompilerDirctive();
+                    parseCompilerDirective();
                     break;
                 }
                 else
@@ -931,7 +932,7 @@ namespace pluginVerilog.Verilog
             macroText = macro.MacroText;
             wordPointer.MoveNext();
 
-            List<string> wordAssingment = new List<string>();
+            List<string> wordAssignment = new List<string>();
             if (wordPointer.Text != "(")
             {
                 wordPointer.AddError("missing macro arguments");
@@ -971,7 +972,7 @@ namespace pluginVerilog.Verilog
                     sb.Append(wordPointer.Text);
                     wordPointer.MoveNext();
                 }
-                wordAssingment.Add(sb.ToString());
+                wordAssignment.Add(sb.ToString());
                 if (wordPointer.Text == ")")
                 {
                     break;
@@ -985,7 +986,7 @@ namespace pluginVerilog.Verilog
                 break;
             }
 
-            if (macro.Aurguments.Count != wordAssingment.Count)
+            if (macro.Aurguments.Count != wordAssignment.Count)
             {
                 wordPointer.AddError("macro arguments mismatch");
                 return;
@@ -998,7 +999,7 @@ namespace pluginVerilog.Verilog
                 }
                 for (int i = 0; i < macro.Aurguments.Count; i++)
                 {
-                    macroText = macroText.Replace("\0" + i.ToString("X4"), wordAssingment[i]);
+                    macroText = macroText.Replace("\0" + i.ToString("X4"), wordAssignment[i]);
                 }
             }
         }
@@ -1072,13 +1073,14 @@ namespace pluginVerilog.Verilog
             CodeDocument doc = CodeDocument.SnapShotFrom(vhInstance.CodeDocument as CodeEditor.CodeDocument);
 
             WordPointer newPointer = new WordPointer(doc, vhInstance.ParsedDocument as Verilog.ParsedDocument);
+
             stock.Add(wordPointer);
             wordPointer = newPointer;
             wordPointer.Document._tag = "diveInto";
 
 
             // activate coloring when code editor opened the target node
-            wordPointer.InitibitColor = true;
+//            wordPointer.InhibitColor = true;
             {
                 CodeEditor2.NavigatePanel.NavigatePanelNode? node = CodeEditor2.Controller.NavigatePanel.GetSelectedNode();
                 if (node != null)
@@ -1088,7 +1090,7 @@ namespace pluginVerilog.Verilog
                     {
                         if (vh.ID == vhInstance.ID)
                         {
-                            wordPointer.InitibitColor = false;
+                            wordPointer.InhibitColor = false;
                         }
                     }
                 }
@@ -1108,7 +1110,7 @@ namespace pluginVerilog.Verilog
                 }
                 else if (wordPointer.WordType == WordPointer.WordTypeEnum.CompilerDirective)
                 {
-                    parseCompilerDirctive();
+                    parseCompilerDirective();
                     break;
                 }
                 else

@@ -29,7 +29,7 @@ namespace pluginVerilog.Verilog
 
         public CodeEditor.CodeDocument Document { get; protected set; }
         public Verilog.ParsedDocument ParsedDocument { get; protected set; }
-        public bool InitibitColor = false;
+        public bool InhibitColor = false;
 
         public Data.IVerilogRelatedFile VerilogFile
         {
@@ -77,7 +77,7 @@ namespace pluginVerilog.Verilog
 
         public void Color(CodeDrawStyle.ColorType colorType)
         {
-            if (InitibitColor) return;
+            if (InhibitColor) return;
             Document.SetColorAt(index, CodeDrawStyle.ColorIndex(colorType),length);
 
             //for (int i = index; i < index + length; i++)
@@ -88,7 +88,7 @@ namespace pluginVerilog.Verilog
 
         public void Color(CodeDrawStyle.ColorType colorType,int start,int last)
         {
-            if (InitibitColor) return;
+            if (InhibitColor) return;
 //            if (last > length) System.Diagnostics.Debugger.Break();
 
             for (int i = index+start; i < index + last; i++)
