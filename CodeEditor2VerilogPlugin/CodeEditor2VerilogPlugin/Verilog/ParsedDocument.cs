@@ -3,6 +3,7 @@ using pluginVerilog.Verilog.ModuleItems;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -325,9 +326,17 @@ namespace pluginVerilog.Verilog
 
         public List<CodeEditor2.CodeEditor.AutocompleteItem> GetAutoCompleteItems(List<string> hierWords,int index,int line,CodeEditor.CodeDocument document,string cantidateWord)
         {
-            IndexReference iref = IndexReference.Create(this.IndexReference, index);
+
 
             List<CodeEditor2.CodeEditor.AutocompleteItem> items = null;
+
+            if (Root == null || Root.BuldingBlocks == null)
+            {
+                items = verilogKeywords.ToList();
+                return items;
+            }
+
+            IndexReference iref = IndexReference.Create(this.IndexReference, index);
 
             // get current nameSpace
             NameSpace space = null;
