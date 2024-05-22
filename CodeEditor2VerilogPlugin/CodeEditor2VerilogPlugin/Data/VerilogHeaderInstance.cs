@@ -24,9 +24,11 @@ namespace pluginVerilog.Data
         {
             ProjectProperty projectPropery = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
             CodeEditor2.Data.Item fileItem = project.GetItem(relativePath);
-            if ((fileItem as VerilogHeaderFile) == null) return null;
+            VerilogHeaderFile? vhFile = fileItem as VerilogHeaderFile;
 
-            VerilogHeaderInstance instance = new VerilogHeaderInstance(fileItem as VerilogHeaderFile);
+            if (vhFile == null) return null;
+
+            VerilogHeaderInstance instance = new VerilogHeaderInstance(vhFile);
             instance.Project = project;
             instance.RelativePath = relativePath;
             if (instance.RelativePath.Contains(System.IO.Path.DirectorySeparatorChar))
@@ -136,7 +138,7 @@ namespace pluginVerilog.Data
         public override void Close()
         {
             if (VerilogParsedDocument != null) VerilogParsedDocument.ReloadIncludeFiles();
-            SourceVerilogFile.Close();
+            //SourceVerilogFile.Close();
         }
 
         private CodeEditor2.CodeEditor.ParsedDocument parsedDocument = null;
@@ -200,15 +202,14 @@ namespace pluginVerilog.Data
         }
 
 
-
-
         public override CodeEditor2.CodeEditor.CodeDrawStyle DrawStyle
         {
             get
             {
-                return SourceTextFile.DrawStyle;
+                return Global.CodeDrawStyle;
             }
         }
+
 
         protected override CodeEditor2.NavigatePanel.NavigatePanelNode createNode()
         {
