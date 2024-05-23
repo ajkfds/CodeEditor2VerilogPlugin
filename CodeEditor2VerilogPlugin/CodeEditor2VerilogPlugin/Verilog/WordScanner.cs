@@ -168,7 +168,11 @@ namespace pluginVerilog.Verilog
         public void Color(CodeDrawStyle.ColorType colorType)
         {
             if (prototype) return;
-//            if (nonGeneratedCount != 0 || prototype) return;
+            //            if (nonGeneratedCount != 0 || prototype) return;
+            if (wordPointer.VerilogFile != null && wordPointer.VerilogFile.RelativePath.EndsWith(".vh"))
+            {
+                string s = "";
+            }
             wordPointer.Color(colorType);
         }
 
@@ -1041,13 +1045,13 @@ namespace pluginVerilog.Verilog
 
             if (!prototype)
             {
-                if (!wordPointer.ParsedDocument.IncludeFiles.ContainsKey(vhInstance.Name))
+                if (!wordPointer.ParsedDocument.IncludeFiles.ContainsKey(vhInstance.ID))
                 {
-                    wordPointer.ParsedDocument.IncludeFiles.Add(vhInstance.Name, vhInstance);
+                    wordPointer.ParsedDocument.IncludeFiles.Add(vhInstance.ID, vhInstance);
                 }
                 else
                 {
-                    vhInstance = wordPointer.ParsedDocument.IncludeFiles[vhInstance.Name];
+                    vhInstance = wordPointer.ParsedDocument.IncludeFiles[vhInstance.ID];
                 }
             }
 
@@ -1070,9 +1074,10 @@ namespace pluginVerilog.Verilog
             if (!prototype) wordPointer.ParsedDocument.ParsedDocumentIndexDictionary.Add(wordPointer.Index, newParsedDocument);
 
 
-            CodeDocument doc = CodeDocument.SnapShotFrom(vhInstance.CodeDocument as CodeEditor.CodeDocument);
+            //            CodeDocument doc = CodeDocument.SnapShotFrom(vhInstance.CodeDocument as CodeEditor.CodeDocument);
 
-            WordPointer newPointer = new WordPointer(doc, vhInstance.ParsedDocument as Verilog.ParsedDocument);
+            //            WordPointer newPointer = new WordPointer(doc, vhInstance.ParsedDocument as Verilog.ParsedDocument);
+            WordPointer newPointer = new WordPointer( vhInstance.CodeDocument as pluginVerilog.CodeEditor.CodeDocument, vhInstance.ParsedDocument as Verilog.ParsedDocument);
 
             stock.Add(wordPointer);
             wordPointer = newPointer;

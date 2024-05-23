@@ -60,18 +60,20 @@ namespace pluginVerilog.Verilog.Snippets
         {
             CodeEditor2.Data.Project project = codeDocument.TextFile.Project;
 
-            ProjectProperty projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+            ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+            if (projectProperty == null) return;
 
-            Data.VerilogFile targetFile = projectProperty.GetFileOfBuildingblock(Text) as Data.VerilogFile;
+            Data.VerilogFile? targetFile = projectProperty.GetFileOfBuildingBlock(Text) as Data.VerilogFile;
             if (targetFile == null) return;
 
             string instanceName = Text + "_";
             {
-                Data.IVerilogRelatedFile vfile = CodeEditor2.Controller.CodeEditor.GetTextFile() as Data.IVerilogRelatedFile;
+                Data.IVerilogRelatedFile? vfile = CodeEditor2.Controller.CodeEditor.GetTextFile() as Data.IVerilogRelatedFile;
                 if (vfile == null) return;
 
-                ParsedDocument parenetParsedDocument = vfile.VerilogParsedDocument;
-                BuildingBlock module = parenetParsedDocument.GetBuidingBlockAt(vfile.CodeDocument.CaretIndex);
+                ParsedDocument parentParsedDocument = vfile.VerilogParsedDocument;
+                BuildingBlock? module = parentParsedDocument.GetBuildingBlockAt(vfile.CodeDocument.CaretIndex);
+                if (module == null) return;
 
                 int instanceCount = 0;
                 while (module.Instantiations.ContainsKey(Text + "_" + instanceCount.ToString()))
@@ -81,10 +83,10 @@ namespace pluginVerilog.Verilog.Snippets
                 instanceName = Text + "_" + instanceCount.ToString();
             }
 
-            Verilog.ParsedDocument targetParsedDocument = targetFile.ParsedDocument as Verilog.ParsedDocument;
+            Verilog.ParsedDocument? targetParsedDocument = targetFile.ParsedDocument as Verilog.ParsedDocument;
             if (targetParsedDocument == null) return;
 
-            Module targetModule = targetParsedDocument.Root.BuldingBlocks[Text] as Module;
+            Module? targetModule = targetParsedDocument.Root.BuldingBlocks[Text] as Module;
             if (targetModule == null) return;
 
             string replaceText = getReplaceText(targetModule, instanceName);
@@ -167,6 +169,7 @@ namespace pluginVerilog.Verilog.Snippets
         private void moveToNextHighlight(out bool moved)
         {
             moved = false;
+            if (document == null) return;
             int i = CodeEditor2.Controller.CodeEditor.GetHighlightIndex(document.CaretIndex);
             if (i == -1) return;
             i++;

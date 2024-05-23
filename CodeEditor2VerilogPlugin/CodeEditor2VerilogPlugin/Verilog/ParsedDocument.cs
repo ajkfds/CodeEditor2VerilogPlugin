@@ -91,7 +91,7 @@ namespace pluginVerilog.Verilog
                     Data.VerilogFile verilogFile = file as Data.VerilogFile;
                     foreach (BuildingBlock module in Root.BuldingBlocks.Values)
                     {
-                        verilogFile.ProjectProperty.RemoveModule(module.Name, verilogFile);
+                        verilogFile.ProjectProperty.RemoveBuildingBlock(module.Name, verilogFile);
                     }
                 }
                 foreach (var includeFile in IncludeFiles.Values)
@@ -150,19 +150,23 @@ namespace pluginVerilog.Verilog
 
             if (text.StartsWith(".") && space is IModuleOrGeneratedBlock)
             {
-                IModuleOrGeneratedBlock block = space as IModuleOrGeneratedBlock;
-                ModuleItems.ModuleInstantiation inst = null;
-                foreach (ModuleItems.ModuleInstantiation i in block.ModuleInstantiations.Values)
+                IModuleOrGeneratedBlock? block = space as IModuleOrGeneratedBlock;
+                ModuleItems.ModuleInstantiation? inst = null;
+                if(block != null)
                 {
-                    if (iref.IsSmallerThan(i.BeginIndexReference)) continue;
-                    if (iref.IsGreaterThan(i.LastIndexReference)) continue;
-                    inst = i;
-                    break;
+                    foreach (ModuleItems.ModuleInstantiation i in block.ModuleInstantiations.Values)
+                    {
+                        if (iref.IsSmallerThan(i.BeginIndexReference)) continue;
+                        if (iref.IsGreaterThan(i.LastIndexReference)) continue;
+                        inst = i;
+                        break;
+                    }
                 }
+
                 if (inst != null)
                 {
                     string portName = text.Substring(1);
-                    Module originalModule = ProjectProperty.GetBuildingBlock(inst.SourceName) as Module;
+                    Module? originalModule = ProjectProperty.GetBuildingBlock(inst.SourceName) as Module;
                     if (originalModule == null) return ret;
                     if (!originalModule.Ports.ContainsKey(portName)) return ret;
                     Verilog.DataObjects.Port port = originalModule.Ports[portName];
@@ -200,7 +204,7 @@ namespace pluginVerilog.Verilog
             return ret;
         }
 
-        public BuildingBlock GetBuidingBlockAt(int index)
+        public BuildingBlock? GetBuildingBlockAt(int index)
         {
             IndexReference iref = IndexReference.Create(this.IndexReference, index);
             foreach (BuildingBlock module in Root.BuldingBlocks.Values)
@@ -260,6 +264,8 @@ namespace pluginVerilog.Verilog
             new CodeEditor2.CodeEditor.AutocompleteItem("join",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
             new CodeEditor2.CodeEditor.AutocompleteItem("localparam",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
             new AutoComplete.ModuleAutocompleteItem("module",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
+            new AutoComplete.InterfaceAutocompleteItem("interface",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
+
             new CodeEditor2.CodeEditor.AutocompleteItem("nand",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
 
             new CodeEditor2.CodeEditor.AutocompleteItem("negedge",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
@@ -300,9 +306,9 @@ namespace pluginVerilog.Verilog
             new AutoComplete.NonBlockingAssignmentAutoCompleteItem("<=",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Normal), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
         };
 
-        private NameSpace getSearchNameSpace(NameSpace nameSpace,List<string> hier)
+        private NameSpace? getSearchNameSpace(NameSpace nameSpace,List<string> hier)
         {
-            IBuildingBlockWithModuleInstance buildingBlock = nameSpace.BuildingBlock as IBuildingBlockWithModuleInstance;
+            IBuildingBlockWithModuleInstance? buildingBlock = nameSpace.BuildingBlock as IBuildingBlockWithModuleInstance;
             if (buildingBlock == null) return null;
 
             if(nameSpace == null) return null;
@@ -412,7 +418,7 @@ namespace pluginVerilog.Verilog
             }
 
             // get target autocomplete item
-            NameSpace target = getSearchNameSpace(space, hierWords);
+            NameSpace? target = getSearchNameSpace(space, hierWords);
             if(target != null) target.AppendAutoCompleteItem(items);
 
             return items;

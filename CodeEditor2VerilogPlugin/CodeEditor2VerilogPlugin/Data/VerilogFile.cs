@@ -102,7 +102,7 @@ namespace pluginVerilog.Data
 
             foreach (BuildingBlock buildingBlock in VerilogParsedDocument.Root.BuldingBlocks.Values)
             {
-                if (!ProjectProperty.IsRegisterableModule(buildingBlock.Name, this))
+                if (!ProjectProperty.IsRegisterableBuildingBlock(buildingBlock.Name, this))
                 {
                     Module module = buildingBlock as Module;
                     if (module == null) continue;
@@ -128,6 +128,23 @@ namespace pluginVerilog.Data
             {
                 ReparseRequested = (ParsedDocument as Verilog.ParsedDocument).ReparseRequested;
             }
+
+            Dictionary<string, Data.VerilogHeaderInstance> headerItems = new Dictionary<string, VerilogHeaderInstance>();
+            foreach(var item in Items.Values)
+            {
+                Data.VerilogHeaderInstance? vh = item as Data.VerilogHeaderInstance;
+                if (vh == null) continue;
+                headerItems.Add(item.ID, vh);
+            }
+
+            foreach(var includeFile in VerilogParsedDocument.IncludeFiles.Values)
+            {
+                if (!headerItems.ContainsKey(includeFile.ID)) continue;
+                Data.VerilogHeaderInstance item = headerItems[includeFile.ID];
+                item.CodeDocument.CopyColorMarkFrom(includeFile.CodeDocument);
+            }
+
+
             Update(); // eliminated here
             System.Diagnostics.Debug.Print("### Verilog File Parsed "+ID);
 

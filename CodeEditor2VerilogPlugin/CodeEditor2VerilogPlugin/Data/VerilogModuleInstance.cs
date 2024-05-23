@@ -20,7 +20,7 @@ namespace pluginVerilog.Data
             )
         {
             ProjectProperty projectPropery = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
-            Data.IVerilogRelatedFile file = projectPropery.GetFileOfBuildingblock(moduleInstantiation.SourceName);
+            Data.IVerilogRelatedFile file = projectPropery.GetFileOfBuildingBlock(moduleInstantiation.SourceName);
             if (file == null) return null;
 
             VerilogModuleInstance fileItem = new VerilogModuleInstance(file as CodeEditor2.Data.TextFile);
@@ -68,7 +68,7 @@ namespace pluginVerilog.Data
             )
         {
             ProjectProperty projectPropery = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
-            Data.IVerilogRelatedFile file = projectPropery.GetFileOfBuildingblock(moduleInstantiation.SourceName);
+            Data.IVerilogRelatedFile file = projectPropery.GetFileOfBuildingBlock(moduleInstantiation.SourceName);
             if (file == null) return false;
             if (!IsSameAs(file as File)) return false;
             if (Project != project) return false;
@@ -233,7 +233,7 @@ namespace pluginVerilog.Data
         {
             get
             {
-                return SourceTextFile.DrawStyle;
+                return Global.CodeDrawStyle;
             }
         }
 

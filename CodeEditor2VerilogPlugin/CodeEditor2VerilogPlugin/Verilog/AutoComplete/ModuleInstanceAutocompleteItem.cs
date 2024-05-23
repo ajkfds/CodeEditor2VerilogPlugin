@@ -38,10 +38,10 @@ namespace pluginVerilog.Verilog.AutoComplete
             ParsedDocument parsedDocument = vfile.VerilogParsedDocument;
             if (parsedDocument == null) return;
 
-            BuildingBlock module = parsedDocument.GetBuidingBlockAt(vfile.CodeDocument.GetLineStartIndex(vfile.CodeDocument.GetLineAt(vfile.CodeDocument.CaretIndex)));
+            BuildingBlock module = parsedDocument.GetBuildingBlockAt(vfile.CodeDocument.GetLineStartIndex(vfile.CodeDocument.GetLineAt(vfile.CodeDocument.CaretIndex)));
             if (module == null) return;
 
-            Data.VerilogFile instancedFile = projectProperty.GetFileOfBuildingblock(Text) as Data.VerilogFile;
+            Data.VerilogFile instancedFile = projectProperty.GetFileOfBuildingBlock(Text) as Data.VerilogFile;
             if (instancedFile == null) return;
             Verilog.ParsedDocument instancedParsedDocument = instancedFile.ParsedDocument as Verilog.ParsedDocument;
             if (instancedParsedDocument == null) return;

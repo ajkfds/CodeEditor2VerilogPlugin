@@ -89,12 +89,13 @@ namespace pluginVerilog.Verilog
         public void Color(CodeDrawStyle.ColorType colorType,int start,int last)
         {
             if (InhibitColor) return;
-//            if (last > length) System.Diagnostics.Debugger.Break();
+            //            if (last > length) System.Diagnostics.Debugger.Break();
 
-            for (int i = index+start; i < index + last; i++)
-            {
-                Document.SetColorAt(i, CodeDrawStyle.ColorIndex(colorType));
-            }
+            Document.SetColorAt(start, CodeDrawStyle.ColorIndex(colorType), last - start);
+            //for (int i = index+start; i < index + last; i++)
+            //{
+            //    Document.SetColorAt(i, CodeDrawStyle.ColorIndex(colorType));
+            //}
         }
 
         public void AppendBlock(int startIndex,int lastIndex)
