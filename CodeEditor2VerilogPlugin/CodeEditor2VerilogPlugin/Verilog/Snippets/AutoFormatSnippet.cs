@@ -17,22 +17,25 @@ namespace pluginVerilog.Verilog.Snippets
 
         public override void Apply(CodeDocument codeDocument)
         {
-            CodeEditor2.Data.ITextFile itext = CodeEditor2.Controller.CodeEditor.GetTextFile();
+            CodeEditor2.Data.ITextFile iText = CodeEditor2.Controller.CodeEditor.GetTextFile();
 
-            if (!(itext is Data.IVerilogRelatedFile)) return;
-            var vfile = itext as Data.IVerilogRelatedFile;
-            ParsedDocument parsedDocument = vfile.VerilogParsedDocument;
+            if (!(iText is Data.IVerilogRelatedFile)) return;
+            Data.IVerilogRelatedFile? vFile = iText as Data.IVerilogRelatedFile;
+            if (vFile == null) return;
+
+            ParsedDocument parsedDocument = vFile.VerilogParsedDocument;
             if (parsedDocument == null) return;
 
             int index = codeDocument.CaretIndex;
             IndexReference iref = IndexReference.Create(parsedDocument.IndexReference, index);
 
-            BuildingBlock buildingBlock = parsedDocument.GetBuildingBlockAt(index);
+            BuildingBlock? buildingBlock = parsedDocument.GetBuildingBlockAt(index);
+            if (buildingBlock == null) return;
 
-            foreach (var inst in
+            foreach (var instance in
                 buildingBlock.Instantiations.Values)
             {
-                ModuleInstantiation moduleInstantiation = inst as ModuleInstantiation;
+                ModuleInstantiation? moduleInstantiation = instance as ModuleInstantiation;
                 if (moduleInstantiation == null) continue;
 
                 if (iref.IsSmallerThan(moduleInstantiation.BeginIndexReference)) continue;
@@ -45,9 +48,12 @@ namespace pluginVerilog.Verilog.Snippets
 
         private void writeModuleInstance(CodeDocument codeDocument, int index, ModuleItems.ModuleInstantiation moduleInstantiation)
         {
-            string indent = (codeDocument as CodeEditor.CodeDocument).GetIndentString(index);
+            CodeEditor.CodeDocument? vCodeDocument = codeDocument as CodeEditor.CodeDocument;
+            if (vCodeDocument == null) return;
 
-            codeDocument.CaretIndex = moduleInstantiation.BeginIndexReference.Indexs.Last();
+            string indent = vCodeDocument.GetIndentString(index);
+
+            CodeEditor2.Controller.CodeEditor.SetCaretPosition(moduleInstantiation.BeginIndexReference.Indexs.Last());
             codeDocument.Replace(
                 moduleInstantiation.BeginIndexReference.Indexs.Last(),
                 moduleInstantiation.LastIndexReference.Indexs.Last() - moduleInstantiation.BeginIndexReference.Indexs.Last() + 1,

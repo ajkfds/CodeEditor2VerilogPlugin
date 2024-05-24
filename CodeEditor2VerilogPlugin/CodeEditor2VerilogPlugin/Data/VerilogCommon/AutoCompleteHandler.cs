@@ -154,7 +154,7 @@ namespace pluginVerilog.Data.VerilogCommon
                     //     [caret]
                     // end
                     item.CodeDocument.Replace(lineHeadIndex, indentLength, 0, new String('\t', prevTabs + 1) + "\r\n" + new String('\t', prevTabs));
-                    item.CodeDocument.CaretIndex = item.CodeDocument.CaretIndex + prevTabs + 1 + 1 - indentLength;
+                    CodeEditor2.Controller.CodeEditor.SetCaretPosition( item.CodeDocument.CaretIndex + prevTabs + 1 + 1 - indentLength);
                     return;
                 }
                 else
@@ -164,7 +164,7 @@ namespace pluginVerilog.Data.VerilogCommon
             }
 
             if (prevTabs != 0) item.CodeDocument.Replace(lineHeadIndex, indentLength, 0, new String('\t', prevTabs));
-            item.CodeDocument.CaretIndex = item.CodeDocument.CaretIndex + prevTabs - indentLength;
+            CodeEditor2.Controller.CodeEditor.SetCaretPosition(item.CodeDocument.CaretIndex + prevTabs - indentLength);
         }
 
         private static bool isPrevBegin(IVerilogRelatedFile item, int index)

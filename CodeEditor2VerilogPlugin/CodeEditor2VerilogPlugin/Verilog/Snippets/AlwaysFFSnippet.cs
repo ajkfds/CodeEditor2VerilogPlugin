@@ -54,8 +54,8 @@ namespace pluginVerilog.Verilog.Snippets
             }
 
             codeDocument.Replace(index, 0, 0, replaceText);
-            codeDocument.CaretIndex = startIndexs[0];
-            codeDocument.SetSelection(startIndexs[0],lastIndexs[0]);
+            CodeEditor2.Controller.CodeEditor.SetCaretPosition(startIndexs[0]);
+            CodeEditor2.Controller.CodeEditor.SetSelection(startIndexs[0],lastIndexs[0]);
 
             // set highlights for {n} texts
             CodeEditor2.Controller.CodeEditor.ClearHighlight();

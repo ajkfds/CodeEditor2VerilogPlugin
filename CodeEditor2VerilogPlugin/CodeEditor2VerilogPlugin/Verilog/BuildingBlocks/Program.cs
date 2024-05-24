@@ -13,7 +13,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
         }
 
-        // IModuleOrInterfaceOrProfram
+        // IModuleOrInterfaceOrProgram
         // Port
         private Dictionary<string, DataObjects.Port> ports = new Dictionary<string, DataObjects.Port>();
         public Dictionary<string, DataObjects.Port> Ports { get { return ports; } }

@@ -148,7 +148,7 @@ namespace pluginVerilog.Verilog
                 ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(Document.TextFile as Data.IVerilogRelatedFile, ">100 errors", Verilog.ParsedDocument.Message.MessageType.Error, 0, 0, 0, ParsedDocument.Project));
             }
 
-            Document.SetMarkAt(index, length, 0);
+            Document.Marks.SetMarkAt(index, length, 0);
             if (ParsedDocument is Verilog.ParsedDocument) (ParsedDocument as Verilog.ParsedDocument).ErrorCount++;
         }
 
@@ -175,7 +175,7 @@ namespace pluginVerilog.Verilog
                 ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(Document.TextFile as Data.IVerilogRelatedFile, ">100 warnings", Verilog.ParsedDocument.Message.MessageType.Warning, 0, 0, 0, ParsedDocument.Project));
             }
 
-            Document.SetMarkAt(index, length, 1);
+            Document.Marks.SetMarkAt(index, length, 1);
             if (ParsedDocument is Verilog.ParsedDocument) (ParsedDocument as Verilog.ParsedDocument).WarningCount++;
         }
 
@@ -203,7 +203,7 @@ namespace pluginVerilog.Verilog
                 ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(Document.TextFile as Data.IVerilogRelatedFile, ">100 notices", Verilog.ParsedDocument.Message.MessageType.Notice, 0, 0, 0, ParsedDocument.Project));
             }
 
-            Document.SetMarkAt(index, length, 2);
+            Document.Marks.SetMarkAt(index, length, 2);
             if (ParsedDocument is Verilog.ParsedDocument) (ParsedDocument as Verilog.ParsedDocument).WarningCount++;
         }
 
@@ -231,7 +231,7 @@ namespace pluginVerilog.Verilog
                 ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(Document.TextFile as Data.IVerilogRelatedFile, ">100 notices", Verilog.ParsedDocument.Message.MessageType.Hint, 0, 0, 0, ParsedDocument.Project));
             }
 
-            Document.SetMarkAt(index, length, 3);
+            Document.Marks.SetMarkAt(index, length, 3);
             if (ParsedDocument is Verilog.ParsedDocument) (ParsedDocument as Verilog.ParsedDocument).WarningCount++;
         }
 

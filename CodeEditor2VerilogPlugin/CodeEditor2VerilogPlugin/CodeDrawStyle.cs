@@ -33,65 +33,65 @@ namespace pluginVerilog
                     Avalonia.Media.Colors.Black                      // 15
             };
 
-            markStyle = new CodeEditor2.CodeEditor.CodeDrawStyle.MarkInfo[]
+            markStyle = new CodeEditor2.CodeEditor.CodeDrawStyle.MarkDetail[]
             {
                 // 0 error
-                new MarkInfo{
+                new MarkDetail{
                     Color = Avalonia.Media.Color.FromArgb(200,255,120,120),
-                    Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkInfo.MarkStyleEnum.WaveLine,
+                    Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkDetail.MarkStyleEnum.WaveLine,
                     DecorationHeight = 1,
                     DecorationWidth = 4,
                     Thickness = 2,
                 },
                 // 1 warning
-                new MarkInfo{
+                new MarkDetail{
                     Color = Avalonia.Media.Color.FromArgb(200,255,150,100),
-                    Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkInfo.MarkStyleEnum.WaveLine,
+                    Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkDetail.MarkStyleEnum.WaveLine,
                     DecorationHeight = -2,
                     DecorationWidth = 4,
                     Thickness = 2,
                 },
                 // 2 notice
-                new MarkInfo{
+                new MarkDetail{
                     Color = Avalonia.Media.Color.FromArgb(200,20,255,20),
-                    Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkInfo.MarkStyleEnum.WaveLine,
+                    Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkDetail.MarkStyleEnum.WaveLine,
                     DecorationHeight = 1.5,
                     DecorationWidth = 6,
                     Thickness = 2,
                 },
                 // 3 hint
-                new MarkInfo{
+                new MarkDetail{
                     Color = Avalonia.Media.Color.FromArgb(200,106,176,224),
-                    Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkInfo.MarkStyleEnum.WaveLine,
+                    Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkDetail.MarkStyleEnum.WaveLine,
                     DecorationHeight = -1.2,
                     DecorationWidth = 3,
                     Thickness = 2,
                 },
                 // 4
-                new MarkInfo{
+                new MarkDetail{
                     Color = Avalonia.Media.Color.FromRgb(  0,255,  0),
-                    Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkInfo.MarkStyleEnum.WaveLine,
+                    Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkDetail.MarkStyleEnum.WaveLine,
                     DecorationHeight = 4,
                     DecorationWidth = 4
                 },
                 // 5
-                new MarkInfo{
+                new MarkDetail{
                     Color = Avalonia.Media.Color.FromRgb(  0,255,  0),
-                    Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkInfo.MarkStyleEnum.WaveLine,
+                    Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkDetail.MarkStyleEnum.WaveLine,
                     DecorationHeight = 4,
                     DecorationWidth = 4
                 },
                 // 6
-                new MarkInfo{
+                new MarkDetail{
                     Color = Avalonia.Media.Color.FromRgb(  0,255,  0),
-                    Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkInfo.MarkStyleEnum.WaveLine,
+                    Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkDetail.MarkStyleEnum.WaveLine,
                     DecorationHeight = 4,
                     DecorationWidth = 4
                 },
                 // 7
-                new MarkInfo{
+                new MarkDetail{
                     Color = Avalonia.Media.Color.FromRgb(  0,255,  0),
-                    Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkInfo.MarkStyleEnum.WaveLine,
+                    Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkDetail.MarkStyleEnum.WaveLine,
                     DecorationHeight = 4,
                     DecorationWidth = 4
                 },

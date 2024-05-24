@@ -71,7 +71,7 @@ namespace pluginVerilog.Verilog
                 ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(Document.TextFile as Data.IVerilogRelatedFile, ">100 errors", Verilog.ParsedDocument.Message.MessageType.Error, 0, 0, 0, ParsedDocument.Project)); ;
             }
 
-            Document.SetMarkAt(Index,Length, 0);
+            Document.Marks.SetMarkAt(Index,Length, 0);
             if (ParsedDocument is Verilog.ParsedDocument) (ParsedDocument as Verilog.ParsedDocument).ErrorCount++;
         }
         public void AddWarning(string message)
@@ -89,7 +89,7 @@ namespace pluginVerilog.Verilog
                 ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(Document.TextFile as Data.IVerilogRelatedFile, ">100 warnings", Verilog.ParsedDocument.Message.MessageType.Warning, 0, 0, 0, ParsedDocument.Project));
             }
 
-            Document.SetMarkAt(Index, Length,1);
+            Document.Marks.SetMarkAt(Index, Length,1);
             if (ParsedDocument is Verilog.ParsedDocument) (ParsedDocument as Verilog.ParsedDocument).WarningCount++;
         }
         public void AddNotice(string message)
@@ -106,7 +106,7 @@ namespace pluginVerilog.Verilog
                 ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(Document.TextFile as Data.IVerilogRelatedFile, ">100 notices", Verilog.ParsedDocument.Message.MessageType.Notice, 0, 0, 0, ParsedDocument.Project));
             }
 
-            Document.SetMarkAt(Index,Length, 2);
+            Document.Marks.SetMarkAt(Index,Length, 2);
             if (ParsedDocument is Verilog.ParsedDocument) (ParsedDocument as Verilog.ParsedDocument).NoticeCount++;
         }
         public void AddHint(string message)
@@ -123,7 +123,7 @@ namespace pluginVerilog.Verilog
                 ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(Document.TextFile as Data.IVerilogRelatedFile, ">100 notices", Verilog.ParsedDocument.Message.MessageType.Hint, 0, 0, 0, ParsedDocument.Project));
             }
 
-            Document.SetMarkAt(Index, Length, 3);
+            Document.Marks.SetMarkAt(Index, Length, 3);
             if (ParsedDocument is Verilog.ParsedDocument) (ParsedDocument as Verilog.ParsedDocument).HintCount++;
         }
 

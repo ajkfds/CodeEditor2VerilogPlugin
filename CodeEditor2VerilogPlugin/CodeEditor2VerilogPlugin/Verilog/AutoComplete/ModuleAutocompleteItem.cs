@@ -28,8 +28,8 @@ namespace pluginVerilog.Verilog.AutoComplete
             int headIndex, length;
             codeDocument.GetWord(prevIndex, out headIndex, out length);
             codeDocument.Replace(headIndex, length, ColorIndex, Text + ";\r\n"+indent+"endmodule");
-            codeDocument.CaretIndex = headIndex + Text.Length;
-            codeDocument.SetSelection(headIndex + Text.Length,headIndex + Text.Length);
+            CodeEditor2.Controller.CodeEditor.SetCaretPosition(headIndex + Text.Length);
+            CodeEditor2.Controller.CodeEditor.SetSelection(headIndex + Text.Length,headIndex + Text.Length);
         }
     }
 }

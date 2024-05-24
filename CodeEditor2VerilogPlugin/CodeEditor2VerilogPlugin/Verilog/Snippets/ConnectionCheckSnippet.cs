@@ -43,7 +43,7 @@ namespace pluginVerilog.Verilog.Snippets
         //    }
 
         //    codeDocument.Replace(index, 0, 0, replaceText);
-        //    codeDocument.CaretIndex = startIndexs[0];
+        //    CodeEditor2.Controller.CodeEditor.SetCaretPosition(startIndexs[0];
         //    codeDocument.SelectionStart = startIndexs[0];
         //    codeDocument.SelectionLast = lastIndexs[0] + 1;
 

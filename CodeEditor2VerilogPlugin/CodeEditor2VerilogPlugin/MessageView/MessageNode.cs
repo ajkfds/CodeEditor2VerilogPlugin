@@ -54,8 +54,8 @@ namespace pluginVerilog.MessageView
             {
 //                File.CodeDocument.SelectionStart = index;
 //                File.CodeDocument.SelectionLast = index + length;
-                File.CodeDocument.CaretIndex = index;
-                File.CodeDocument .SetSelection(index, index + length-1);
+                CodeEditor2.Controller.CodeEditor.SetCaretPosition(index);
+                CodeEditor2.Controller.CodeEditor.SetSelection(index, index + length-1);
             }
             CodeEditor2.Controller.CodeEditor.ScrollToCaret();
         }
