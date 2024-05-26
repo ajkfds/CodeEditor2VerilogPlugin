@@ -30,30 +30,42 @@ namespace pluginVerilog.Verilog
         public int Index { get; protected set; }
         public int Length { get; protected set; }
 
-        private System.WeakReference<CodeEditor2.CodeEditor.ParsedDocument> parsedDocumentRef;
-        public CodeEditor2.CodeEditor.ParsedDocument ParsedDocument {
+        private System.WeakReference<CodeEditor2.CodeEditor.ParsedDocument>? parsedDocumentRef;
+        public CodeEditor2.CodeEditor.ParsedDocument? ParsedDocument {
             get
             {
-                CodeEditor2.CodeEditor.ParsedDocument ret;
+                if (parsedDocumentRef == null) return null;
+                CodeEditor2.CodeEditor.ParsedDocument? ret;
                 if (!parsedDocumentRef.TryGetTarget(out ret)) return null;
                 return ret;
             }
             protected set
             {
+                if(value == null)
+                {
+                    parsedDocumentRef = null;
+                    return;
+                }
                 parsedDocumentRef = new WeakReference<CodeEditor2.CodeEditor.ParsedDocument>(value);
             }
         }
-        private System.WeakReference<pluginVerilog.CodeEditor.CodeDocument> documentRef;
-        public pluginVerilog.CodeEditor.CodeDocument Document
+        private System.WeakReference<pluginVerilog.CodeEditor.CodeDocument>? documentRef;
+        public pluginVerilog.CodeEditor.CodeDocument? Document
         {
             get
             {
-                pluginVerilog.CodeEditor.CodeDocument ret;
+                if (documentRef == null) return null;
+                pluginVerilog.CodeEditor.CodeDocument? ret;
                 if (!documentRef.TryGetTarget(out ret)) return null;
                 return ret;
             }
             protected set
             {
+                if (value == null)
+                {
+                    documentRef = null;
+                    return;
+                }
                 documentRef = new WeakReference<pluginVerilog.CodeEditor.CodeDocument>(value);
             }
         }
@@ -61,70 +73,94 @@ namespace pluginVerilog.Verilog
         {
             if (ParsedDocument == null || Document == null) return;
 
-            if (ParsedDocument is Verilog.ParsedDocument && (ParsedDocument as Verilog.ParsedDocument).ErrorCount < 100)
+            Verilog.ParsedDocument? vParsedDocument = ParsedDocument as Verilog.ParsedDocument;
+            if (vParsedDocument == null) return;
+
+            Data.IVerilogRelatedFile? vFile = Document.TextFile as Data.IVerilogRelatedFile;
+            if (vFile == null) return;
+
+            if (ParsedDocument is Verilog.ParsedDocument && vParsedDocument.ErrorCount < 100)
             {
                 int lineNo = Document.GetLineAt(Index);
-                ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(Document.TextFile as Data.IVerilogRelatedFile, message, Verilog.ParsedDocument.Message.MessageType.Error, Index, lineNo, Length, ParsedDocument.Project));
+                ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(vFile, message, Verilog.ParsedDocument.Message.MessageType.Error, Index, lineNo, Length, ParsedDocument.Project));
             }
-            else if (ParsedDocument is Verilog.ParsedDocument && (ParsedDocument as Verilog.ParsedDocument).ErrorCount == 100)
+            else if (ParsedDocument is Verilog.ParsedDocument && vParsedDocument.ErrorCount == 100)
             {
-                ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(Document.TextFile as Data.IVerilogRelatedFile, ">100 errors", Verilog.ParsedDocument.Message.MessageType.Error, 0, 0, 0, ParsedDocument.Project)); ;
+                ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(vFile, ">100 errors", Verilog.ParsedDocument.Message.MessageType.Error, 0, 0, 0, ParsedDocument.Project)); ;
             }
 
             Document.Marks.SetMarkAt(Index,Length, 0);
-            if (ParsedDocument is Verilog.ParsedDocument) (ParsedDocument as Verilog.ParsedDocument).ErrorCount++;
+            if (ParsedDocument is Verilog.ParsedDocument) vParsedDocument.ErrorCount++;
         }
         public void AddWarning(string message)
         {
             if (ParsedDocument == null || Document == null) return;
             if (ParsedDocument.TextFile is Data.VerilogHeaderFile) return;
 
-            if (ParsedDocument is Verilog.ParsedDocument && (ParsedDocument as Verilog.ParsedDocument).WarningCount < 100)
+            Verilog.ParsedDocument? vParsedDocument = ParsedDocument as Verilog.ParsedDocument;
+            if (vParsedDocument == null) return;
+
+            Data.IVerilogRelatedFile? vFile = Document.TextFile as Data.IVerilogRelatedFile;
+            if (vFile == null) return;
+
+            if (vParsedDocument.WarningCount < 100)
             {
                 int lineNo = Document.GetLineAt(Index);
-                ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(Document.TextFile as Data.IVerilogRelatedFile, message, Verilog.ParsedDocument.Message.MessageType.Warning, Index, lineNo, Length, ParsedDocument.Project));
+                ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(vFile, message, Verilog.ParsedDocument.Message.MessageType.Warning, Index, lineNo, Length, ParsedDocument.Project));
             }
-            else if (ParsedDocument is Verilog.ParsedDocument && (ParsedDocument as Verilog.ParsedDocument).WarningCount == 100)
+            else if (ParsedDocument is Verilog.ParsedDocument && vParsedDocument.WarningCount == 100)
             {
-                ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(Document.TextFile as Data.IVerilogRelatedFile, ">100 warnings", Verilog.ParsedDocument.Message.MessageType.Warning, 0, 0, 0, ParsedDocument.Project));
+                ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(vFile, ">100 warnings", Verilog.ParsedDocument.Message.MessageType.Warning, 0, 0, 0, ParsedDocument.Project));
             }
 
             Document.Marks.SetMarkAt(Index, Length,1);
-            if (ParsedDocument is Verilog.ParsedDocument) (ParsedDocument as Verilog.ParsedDocument).WarningCount++;
+            if (ParsedDocument is Verilog.ParsedDocument) vParsedDocument.WarningCount++;
         }
         public void AddNotice(string message)
         {
             if (ParsedDocument == null || Document == null) return;
 
-            if (ParsedDocument is Verilog.ParsedDocument && (ParsedDocument as Verilog.ParsedDocument).NoticeCount < 100)
+            Verilog.ParsedDocument? vParsedDocument = ParsedDocument as Verilog.ParsedDocument;
+            if (vParsedDocument == null) return;
+
+            Data.IVerilogRelatedFile? vFile = Document.TextFile as Data.IVerilogRelatedFile;
+            if (vFile == null) return;
+
+            if (ParsedDocument is Verilog.ParsedDocument && vParsedDocument.NoticeCount < 100)
             {
                 int lineNo = Document.GetLineAt(Index);
-                ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(Document.TextFile as Data.IVerilogRelatedFile, message, Verilog.ParsedDocument.Message.MessageType.Notice, Index, lineNo, Length, ParsedDocument.Project));
+                ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(vFile, message, Verilog.ParsedDocument.Message.MessageType.Notice, Index, lineNo, Length, ParsedDocument.Project));
             }
-            else if (ParsedDocument is Verilog.ParsedDocument && (ParsedDocument as Verilog.ParsedDocument).NoticeCount == 100)
+            else if (ParsedDocument is Verilog.ParsedDocument && vParsedDocument.NoticeCount == 100)
             {
-                ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(Document.TextFile as Data.IVerilogRelatedFile, ">100 notices", Verilog.ParsedDocument.Message.MessageType.Notice, 0, 0, 0, ParsedDocument.Project));
+                ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(vFile, ">100 notices", Verilog.ParsedDocument.Message.MessageType.Notice, 0, 0, 0, ParsedDocument.Project));
             }
 
             Document.Marks.SetMarkAt(Index,Length, 2);
-            if (ParsedDocument is Verilog.ParsedDocument) (ParsedDocument as Verilog.ParsedDocument).NoticeCount++;
+            if (ParsedDocument is Verilog.ParsedDocument) vParsedDocument.NoticeCount++;
         }
         public void AddHint(string message)
         {
             if (ParsedDocument == null || Document == null) return;
 
-            if (ParsedDocument is Verilog.ParsedDocument && (ParsedDocument as Verilog.ParsedDocument).HintCount < 100)
+            Verilog.ParsedDocument? vParsedDocument = ParsedDocument as Verilog.ParsedDocument;
+            if (vParsedDocument == null) return;
+
+            Data.IVerilogRelatedFile? vFile = Document.TextFile as Data.IVerilogRelatedFile;
+            if (vFile == null) return;
+
+            if (ParsedDocument is Verilog.ParsedDocument && vParsedDocument.HintCount < 100)
             {
                 int lineNo = Document.GetLineAt(Index);
-                ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(Document.TextFile as Data.IVerilogRelatedFile, message, Verilog.ParsedDocument.Message.MessageType.Hint , Index, lineNo, Length, ParsedDocument.Project));
+                ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(vFile, message, Verilog.ParsedDocument.Message.MessageType.Hint , Index, lineNo, Length, ParsedDocument.Project));
             }
-            else if (ParsedDocument is Verilog.ParsedDocument && (ParsedDocument as Verilog.ParsedDocument).HintCount == 100)
+            else if (ParsedDocument is Verilog.ParsedDocument && vParsedDocument.HintCount == 100)
             {
-                ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(Document.TextFile as Data.IVerilogRelatedFile, ">100 notices", Verilog.ParsedDocument.Message.MessageType.Hint, 0, 0, 0, ParsedDocument.Project));
+                ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(vFile, ">100 notices", Verilog.ParsedDocument.Message.MessageType.Hint, 0, 0, 0, ParsedDocument.Project));
             }
 
             Document.Marks.SetMarkAt(Index, Length, 3);
-            if (ParsedDocument is Verilog.ParsedDocument) (ParsedDocument as Verilog.ParsedDocument).HintCount++;
+            if (ParsedDocument is Verilog.ParsedDocument) vParsedDocument.HintCount++;
         }
 
     }
