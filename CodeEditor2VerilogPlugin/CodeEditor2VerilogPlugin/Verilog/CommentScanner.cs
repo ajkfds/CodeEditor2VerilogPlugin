@@ -46,7 +46,7 @@ namespace pluginVerilog.Verilog
         {
             for (int i = index; i < indexEnd; i++)
             {
-                document.SetColorAt(i, CodeDrawStyle.ColorIndex(colorType));
+                document.TextColors.SetColorAt(i, CodeDrawStyle.ColorIndex(colorType));
             }
         }
         public string Text

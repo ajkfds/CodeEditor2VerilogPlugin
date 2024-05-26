@@ -157,7 +157,7 @@ namespace pluginVerilog.Verilog.DataObjects
             char ch;
             for (int j = nextIndex - "@section".Length; j < nextIndex; j++)
             {
-                document.SetColorAt(j, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.HighLightedComment));
+                document.TextColors.SetColorAt(j, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.HighLightedComment));
             }
             while (docLength > nextIndex)
             {
@@ -170,7 +170,7 @@ namespace pluginVerilog.Verilog.DataObjects
             {
                 ch = document.GetCharAt(nextIndex);
                 if (ch == '\n' || ch == '\r') break;
-                document.SetColorAt(nextIndex, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.HighLightedComment));
+                document.TextColors.SetColorAt(nextIndex, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.HighLightedComment));
                 sb.Append(ch);
                 nextIndex++;
             }

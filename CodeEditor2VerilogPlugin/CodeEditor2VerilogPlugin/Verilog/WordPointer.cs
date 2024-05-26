@@ -78,7 +78,7 @@ namespace pluginVerilog.Verilog
         public void Color(CodeDrawStyle.ColorType colorType)
         {
             if (InhibitColor) return;
-            Document.SetColorAt(index, CodeDrawStyle.ColorIndex(colorType),length);
+            Document.TextColors.SetColorAt(index, CodeDrawStyle.ColorIndex(colorType),length);
 
             //for (int i = index; i < index + length; i++)
             //{
@@ -91,7 +91,7 @@ namespace pluginVerilog.Verilog
             if (InhibitColor) return;
             //            if (last > length) System.Diagnostics.Debugger.Break();
 
-            Document.SetColorAt(start, CodeDrawStyle.ColorIndex(colorType), last - start);
+            Document.TextColors.SetColorAt(start, CodeDrawStyle.ColorIndex(colorType), last - start);
             //for (int i = index+start; i < index + last; i++)
             //{
             //    Document.SetColorAt(i, CodeDrawStyle.ColorIndex(colorType));
@@ -671,11 +671,11 @@ namespace pluginVerilog.Verilog
                 {
                     if (nextIndex > docLength)
                     {
-                        document.SetColorAt(commentStart, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Comment), docLength - commentStart);
+                        document.TextColors.SetColorAt(commentStart, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Comment), docLength - commentStart);
                     }
                     else
                     {
-                        document.SetColorAt(commentStart, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Comment), nextIndex - commentStart);
+                        document.TextColors.SetColorAt(commentStart, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Comment), nextIndex - commentStart);
                     }
                 }
                 wordType = WordTypeEnum.Comment;
@@ -705,11 +705,11 @@ namespace pluginVerilog.Verilog
                 {
                     if (nextIndex > docLength)
                     {
-                        document.SetColorAt(commentStart, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Comment), docLength - commentStart);
+                        document.TextColors.SetColorAt(commentStart, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Comment), docLength - commentStart);
                     }
                     else
                     {
-                        document.SetColorAt(commentStart, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Comment), nextIndex - commentStart);
+                        document.TextColors.SetColorAt(commentStart, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Comment), nextIndex - commentStart);
                     }
                 }
                 wordType = WordTypeEnum.Comment;
@@ -825,7 +825,7 @@ namespace pluginVerilog.Verilog
                 ch = document.GetCharAt(nextIndex);
                 if (ch == '\n') return;
                 if (ch != target[i]) return;
-                document.SetColorAt(nextIndex, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Comment));
+                document.TextColors.SetColorAt(nextIndex, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Comment));
                 nextIndex++;
                 i++;
 
@@ -834,7 +834,7 @@ namespace pluginVerilog.Verilog
 
             for (int j = nextIndex - i; j < nextIndex; j++)
             {
-                document.SetColorAt(j, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.HighLightedComment));
+                document.TextColors.SetColorAt(j, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.HighLightedComment));
             }
             while (docLength > nextIndex)
             {
@@ -847,7 +847,7 @@ namespace pluginVerilog.Verilog
             {
                 ch = document.GetCharAt(nextIndex);
                 if (ch == '\n' || ch == '\r') break;
-                document.SetColorAt(nextIndex, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.HighLightedComment));
+                document.TextColors.SetColorAt(nextIndex, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.HighLightedComment));
                 sb.Append(ch);
                 nextIndex++;
             }
