@@ -762,7 +762,7 @@ namespace pluginVerilog.Verilog
             else
             {
                 identifier = macroText.Substring(0, separatorIndex);
-                wordPointer.Color(CodeDrawStyle.ColorType.Identifier, 0, separatorIndex);
+                wordPointer.Color(CodeDrawStyle.ColorType.Identifier, wordPointer.Index, wordPointer.Index+separatorIndex);
                 macroText = macroText.Substring(separatorIndex);
             }
 
