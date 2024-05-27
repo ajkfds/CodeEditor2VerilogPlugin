@@ -1,7 +1,9 @@
 ﻿using pluginVerilog.Verilog.BuildingBlocks;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -335,19 +337,44 @@ namespace pluginVerilog.Verilog.ModuleItems
 
                             if (!word.Prototype)
                             {
-                                if (instancedModule != null && expression != null && expression.BitWidth != null && instancedModule.Ports.ContainsKey(pinName))
+                                if (instancedModule != null && expression != null && instancedModule.Ports.ContainsKey(pinName))
                                 {
-                                    if (instancedModule.Ports[pinName].Range == null)
+                                    if (expression.BitWidth != null) // value connection
                                     {
-                                        if (expression.BitWidth != null && expression.Reference != null && expression.BitWidth != 1)
+                                        if (instancedModule.Ports[pinName].Range == null)
                                         {
-                                            expression.Reference.AddWarning("bitwidth mismatch 1 vs " + expression.BitWidth);
+                                            if (expression.BitWidth != null && expression.Reference != null && expression.BitWidth != 1)
+                                            {
+                                                expression.Reference.AddWarning("bitwidth mismatch 1 vs " + expression.BitWidth);
+                                            }
+
+                                        }
+                                        else if (instancedModule.Ports[pinName].Range.BitWidth != expression.BitWidth && expression.Reference != null)
+                                        {
+                                            expression.Reference.AddWarning("bitwidth mismatch " + instancedModule.Ports[pinName].Range.BitWidth + " vs " + expression.BitWidth);
+                                        }
+                                    }else if(expression is Expressions.InterfaceReference) // interface connection
+                                    {
+                                        if(instancedModule.Ports[pinName].Instantiation == null)
+                                        {
+                                            expression.Reference.AddError("illegal interface connection");
+                                        }
+                                        else
+                                        {
+                                            Expressions.InterfaceReference? interfaceRef = expression as Expressions.InterfaceReference;
+                                            if(interfaceRef == null)
+                                            {
+                                                expression.Reference.AddError("should be "+ instancedModule.Ports[pinName].Instantiation.SourceName);
+                                            }else if(interfaceRef.interfaceInstantiation.SourceName != instancedModule.Ports[pinName].Instantiation.SourceName)
+                                            {
+                                                expression.Reference.AddError("should be " + instancedModule.Ports[pinName].Instantiation.SourceName);
+                                            }
+                                            else
+                                            {
+                                                // properly connected
+                                            }
                                         }
 
-                                    }
-                                    else if (instancedModule.Ports[pinName].Range.BitWidth != expression.BitWidth && expression.Reference != null)
-                                    {
-                                        expression.Reference.AddWarning("bitwidth mismatch " + instancedModule.Ports[pinName].Range.BitWidth + " vs " + expression.BitWidth);
                                     }
                                 }
                             }

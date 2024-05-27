@@ -296,10 +296,12 @@ namespace pluginVerilog.Verilog.Expressions
             IInstantiation instantiation = buildingBlock.Instantiations[word.Text];
             if(instantiation is ModuleInstantiation)
             {
-                ModuleInstantiation minst = instantiation as ModuleInstantiation;
-                ModuleInstanceReference moduleInstanceReference = new ModuleInstanceReference(minst);
+                ModuleInstantiation? mInst = instantiation as ModuleInstantiation;
+                if (mInst == null) throw new Exception();
+
+                ModuleInstanceReference moduleInstanceReference = new ModuleInstanceReference(mInst);
                 primary = moduleInstanceReference;
-                nameSpace = minst.GetInstancedBuildingBlock();
+                nameSpace = mInst.GetInstancedBuildingBlock();
                 word.Color(CodeDrawStyle.ColorType.Identifier);
                 word.MoveNext();
 
@@ -318,10 +320,13 @@ namespace pluginVerilog.Verilog.Expressions
             }
             else if(instantiation is InterfaceInstantiation)
             {
-                InterfaceInstantiation iinst = instantiation as InterfaceInstantiation;
-                InterfaceReference interfaceInstanceReference = new InterfaceReference(iinst);
+                InterfaceInstantiation? iInst = instantiation as InterfaceInstantiation;
+                if (iInst == null) throw new Exception();
+                InterfaceReference interfaceInstanceReference = new InterfaceReference(iInst);
+                interfaceInstanceReference.Reference = word.GetReference();
+
                 primary = interfaceInstanceReference;
-                nameSpace = iinst.GetInstancedBuildingBlock();
+                nameSpace = iInst.GetInstancedBuildingBlock();
                 word.Color(CodeDrawStyle.ColorType.Variable);
                 word.MoveNext();
 
@@ -347,7 +352,7 @@ namespace pluginVerilog.Verilog.Expressions
 
 
 
-        private static Primary subParseCreate(WordScanner word, NameSpace nameSpace,bool lValue)
+        private static Primary? subParseCreate(WordScanner word, NameSpace nameSpace,bool lValue)
         {
             if (nameSpace == null) System.Diagnostics.Debugger.Break();
             switch (word.WordType)
