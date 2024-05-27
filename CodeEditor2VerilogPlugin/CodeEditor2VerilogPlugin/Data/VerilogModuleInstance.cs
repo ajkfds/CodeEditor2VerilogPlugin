@@ -14,16 +14,19 @@ namespace pluginVerilog.Data
         {
 
         }
-        public static VerilogModuleInstance Create(
+        public static VerilogModuleInstance? Create(
             Verilog.ModuleItems.ModuleInstantiation moduleInstantiation,
             CodeEditor2.Data.Project project
             )
         {
-            ProjectProperty projectPropery = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
-            Data.IVerilogRelatedFile file = projectPropery.GetFileOfBuildingBlock(moduleInstantiation.SourceName);
+            ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+            if (projectProperty == null) throw new Exception();
+            Data.IVerilogRelatedFile? file = projectProperty.GetFileOfBuildingBlock(moduleInstantiation.SourceName);
             if (file == null) return null;
 
-            VerilogModuleInstance fileItem = new VerilogModuleInstance(file as CodeEditor2.Data.TextFile);
+            CodeEditor2.Data.TextFile? textFile = file as CodeEditor2.Data.TextFile;
+            if (textFile == null) throw new Exception();
+            VerilogModuleInstance fileItem = new VerilogModuleInstance(textFile);
             fileItem.ParameterOverrides = moduleInstantiation.ParameterOverrides;
             fileItem.Project = project;
             fileItem.RelativePath = file.RelativePath;
@@ -33,15 +36,16 @@ namespace pluginVerilog.Data
 
             if (file is Data.VerilogFile)
             {
-                Data.VerilogFile vfile = file as Data.VerilogFile;
+                Data.VerilogFile? vFile = file as Data.VerilogFile;
+                if (vFile == null) throw new Exception();
                 //if(fileItem.parsedDocument == null)
                 //{
-                //    fileItem.parsedDocument = vfile.GetInstancedParsedDocument(moduleInstantiation.OverrideParameterID);
+                //    fileItem.parsedDocument = vFile.GetInstancedParsedDocument(moduleInstantiation.OverrideParameterID);
                 //}
 
-                vfile.RegisterModuleInstance(fileItem);
+                vFile.RegisterModuleInstance(fileItem);
 
-                if (vfile.SystemVerilog) fileItem.SystemVerilog = true;
+                if (vFile.SystemVerilog) fileItem.SystemVerilog = true;
             }
             return fileItem;
         }
@@ -67,9 +71,11 @@ namespace pluginVerilog.Data
             CodeEditor2.Data.Project project
             )
         {
-            ProjectProperty projectPropery = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
-            Data.IVerilogRelatedFile file = projectPropery.GetFileOfBuildingBlock(moduleInstantiation.SourceName);
+            ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+            if (projectProperty == null) throw new Exception();
+            Data.IVerilogRelatedFile? file = projectProperty.GetFileOfBuildingBlock(moduleInstantiation.SourceName);
             if (file == null) return false;
+
             if (!IsSameAs(file as File)) return false;
             if (Project != project) return false;
             if (ModuleName != moduleInstantiation.SourceName) return false;
@@ -83,8 +89,9 @@ namespace pluginVerilog.Data
 
             if (file is Data.VerilogFile)
             {
-                Data.VerilogFile vfile = file as Data.VerilogFile;
-                vfile.RegisterModuleInstance(this);
+                Data.VerilogFile? vFile = file as Data.VerilogFile;
+                if (vFile == null) return false;
+                vFile.RegisterModuleInstance(this);
             }
 
             return true;
@@ -104,13 +111,17 @@ namespace pluginVerilog.Data
 
         private void disposeItems()
         {
-            if (ParsedDocument != null && ParameterOverrides.Count != 0)
+            if(VerilogParsedDocument != null)
             {
-                foreach (var incFile in VerilogParsedDocument.IncludeFiles.Values)
+                if (ParsedDocument != null && ParameterOverrides.Count != 0)
                 {
-                    incFile.Dispose();
+                    foreach (var incFile in VerilogParsedDocument.IncludeFiles.Values)
+                    {
+                        incFile.Dispose();
+                    }
                 }
             }
+
             parsedDocument = null;
             SourceVerilogFile.RemoveModuleInstance(this);
         }
@@ -150,9 +161,9 @@ namespace pluginVerilog.Data
             SourceVerilogFile.Close();
         }
 
-        private CodeEditor2.CodeEditor.ParsedDocument parsedDocument = null;
+        private CodeEditor2.CodeEditor.ParsedDocument? parsedDocument = null;
 
-        public override CodeEditor2.CodeEditor.ParsedDocument ParsedDocument
+        public override CodeEditor2.CodeEditor.ParsedDocument? ParsedDocument
         {
             get
             {
@@ -193,7 +204,7 @@ namespace pluginVerilog.Data
             }
         }
 
-        public Verilog.ParsedDocument VerilogParsedDocument
+        public Verilog.ParsedDocument? VerilogParsedDocument
         {
             get
             {
@@ -203,12 +214,17 @@ namespace pluginVerilog.Data
 
         public override void AcceptParsedDocument(ParsedDocument newParsedDocument)
         {
-            Verilog.ParsedDocument vParsedDocument = newParsedDocument as Verilog.ParsedDocument;
-            parsedDocument = vParsedDocument;
+            Verilog.ParsedDocument? vParsedDocument = VerilogParsedDocument;
+            if (vParsedDocument == null) return;
 
+            parsedDocument = vParsedDocument;
+            Data.VerilogFile source = SourceVerilogFile;
+            if (source == null) return;
+
+            if (ParameterOverrides.Count == 0)
             {
-                Data.VerilogFile source = SourceVerilogFile;
-                if (source == null) return;
+                source.AcceptParsedDocument(newParsedDocument);
+            }else{
                 source.RegisterInstanceParsedDocument(ModuleName+":"+ ParameterId, newParsedDocument, this);
             }
             ReparseRequested = vParsedDocument.ReparseRequested;
@@ -222,11 +238,11 @@ namespace pluginVerilog.Data
         {
             get
             {
-                return Project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+                ProjectProperty? projectProperty = Project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+                if (projectProperty == null) throw new Exception();
+                return projectProperty;
             }
         }
-
-
 
 
         public override CodeEditor2.CodeEditor.CodeDrawStyle DrawStyle

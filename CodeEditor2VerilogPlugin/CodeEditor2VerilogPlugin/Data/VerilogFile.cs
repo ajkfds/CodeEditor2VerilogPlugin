@@ -88,7 +88,6 @@ namespace pluginVerilog.Data
         {
             ParsedDocument oldParsedDocument = ParsedDocument;
             if (oldParsedDocument != null) oldParsedDocument.Dispose();
-            ParsedDocument = null;
 
             // copy include files
 
@@ -104,10 +103,12 @@ namespace pluginVerilog.Data
             {
                 if (!ProjectProperty.IsRegisterableBuildingBlock(buildingBlock.Name, this))
                 {
-                    Module module = buildingBlock as Module;
+                    Module? module = buildingBlock as Module;
                     if (module == null) continue;
 
-                    Module registeredModule = ProjectProperty.GetBuildingBlock(module.Name)as Module;
+                    Module? registeredModule = ProjectProperty.GetBuildingBlock(module.Name)as Module;
+                    if (registeredModule == null) continue;
+                    if (registeredModule.File == null) continue;
                     if (registeredModule.File.RelativePath == module.File.RelativePath) continue;
 
                     if (module.NameReference != null) {
@@ -116,17 +117,18 @@ namespace pluginVerilog.Data
                     continue;
                 }
 
-                bool suceed = ProjectProperty.RegisterModule(buildingBlock.Name, this);
-                if (!suceed)
+                bool succeed = ProjectProperty.RegisterModule(buildingBlock.Name, this);
+                if (!succeed)
                 {
                     System.Diagnostics.Debugger.Break();
                     // add module name error
                 }
             }
 
-            if (ParsedDocument is Verilog.ParsedDocument)
+            Verilog.ParsedDocument? vParsedDocument = ParsedDocument as Verilog.ParsedDocument;
+            if (vParsedDocument != null)
             {
-                ReparseRequested = (ParsedDocument as Verilog.ParsedDocument).ReparseRequested;
+                ReparseRequested = vParsedDocument.ReparseRequested;
             }
 
             Dictionary<string, Data.VerilogHeaderInstance> headerItems = new Dictionary<string, VerilogHeaderInstance>();
@@ -144,11 +146,8 @@ namespace pluginVerilog.Data
                 item.CodeDocument.CopyColorMarkFrom(includeFile.CodeDocument);
             }
 
-
             Update(); // eliminated here
             System.Diagnostics.Debug.Print("### Verilog File Parsed "+ID);
-
-
         }
 
         public override void LoadFormFile()
@@ -182,7 +181,7 @@ namespace pluginVerilog.Data
 
         private Dictionary<string, System.WeakReference<ParsedDocument>> instancedParsedDocumentRefs = new Dictionary<string, WeakReference<ParsedDocument>>();
 
-        public ParsedDocument GetInstancedParsedDocument(string parameterId)
+        public ParsedDocument? GetInstancedParsedDocument(string parameterId)
         {
             cleanWeakRef();
             ParsedDocument ret;
@@ -243,7 +242,7 @@ namespace pluginVerilog.Data
         private void cleanWeakRef()
         {
             List<string> removeKeys = new List<string>();
-            ParsedDocument ret;
+            ParsedDocument? ret;
             lock (instancedParsedDocumentRefs)
             {
                 foreach(var r in instancedParsedDocumentRefs)
@@ -269,7 +268,7 @@ namespace pluginVerilog.Data
         {
             for(int i = 0; i< moduleInstanceRefs.Count; i++)
             {
-                VerilogModuleInstance ret;
+                VerilogModuleInstance? ret;
                 if (!moduleInstanceRefs[i].TryGetTarget(out ret)) continue;
                 if (ret == verilogModuleInstance) moduleInstanceRefs.Remove(moduleInstanceRefs[i]);
             }
@@ -288,7 +287,7 @@ namespace pluginVerilog.Data
             base.Dispose();
         }
 
-        public Verilog.ParsedDocument VerilogParsedDocument
+        public Verilog.ParsedDocument? VerilogParsedDocument
         {
             get
             {
@@ -300,7 +299,9 @@ namespace pluginVerilog.Data
         {
             get
             {
-                return Project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+                ProjectProperty? projectProperty = Project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+                if (projectProperty == null) throw new Exception();
+                return projectProperty;
             }
         }
 

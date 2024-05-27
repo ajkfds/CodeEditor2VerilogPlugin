@@ -109,7 +109,9 @@ namespace pluginVerilog.Data
         {
             get
             {
-                return Project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+                ProjectProperty? projectProperty = Project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+                if (projectProperty == null) throw new Exception();
+                return projectProperty;
             }
         }
 
