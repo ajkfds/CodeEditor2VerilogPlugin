@@ -13,7 +13,7 @@ namespace pluginVerilog.Verilog.ModuleItems
         protected InterfaceInstantiation() { }
 
         public string SourceName { get; protected set; }
-
+        public string? ModPortName { get; set; }
         public Dictionary<string, Expressions.Expression> ParameterOverrides { get; set; } = new Dictionary<string, Expressions.Expression>();
 
         public Dictionary<string, Expressions.Expression> PortConnection { get; set; } = new Dictionary<string, Expressions.Expression>();
@@ -48,7 +48,7 @@ namespace pluginVerilog.Verilog.ModuleItems
 
 
         /*
-        nterface_instantiation  ::= interface_identifier [ parameter_value_assignment ] hierarchical_instance { , hierarchical_instance } ;
+        interface_instantiation  ::= interface_identifier [ parameter_value_assignment ] hierarchical_instance { , hierarchical_instance } ;
         parameter_value_assignment ::= # ( [ list_of_parameter_assignments ] )
         hierarchical_instance ::= name_of_instance ( [ list_of_port_connections ] )
          */
@@ -56,15 +56,14 @@ namespace pluginVerilog.Verilog.ModuleItems
         public IndexReference LastIndexReference;
         public static bool Parse(WordScanner word, NameSpace nameSpace)
         {
-            // interface instanciation can be placed only in module,or interface
-            IModuleOrInterface moduleOrInterface = nameSpace.BuildingBlock as IModuleOrInterface;
-            //            if (module == null) System.Diagnostics.Debugger.Break();
+            // interface instantiation can be placed only in module,or interface
+            IModuleOrInterface? moduleOrInterface = nameSpace.BuildingBlock as IModuleOrInterface;
             if (moduleOrInterface == null) return false;
 
             WordScanner moduleIdentifier = word.Clone();
             string interfaceName = word.Text;
             IndexReference beginIndexReference = word.CreateIndexReference();
-            Interface instancedInterface = word.ProjectProperty.GetBuildingBlock(interfaceName) as Interface;
+            Interface? instancedInterface = word.ProjectProperty.GetBuildingBlock(interfaceName) as Interface;
             if (instancedInterface == null)
             {
                 return false;

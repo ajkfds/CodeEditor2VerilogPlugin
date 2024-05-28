@@ -438,7 +438,8 @@ namespace pluginVerilog.Verilog
 
         private NameSpace? getSearchNameSpace(NameSpace nameSpace,List<string> hier)
         {
-            IBuildingBlockWithModuleInstance? buildingBlock = nameSpace.BuildingBlock as IBuildingBlockWithModuleInstance;
+            BuildingBlock? buildingBlock = nameSpace.BuildingBlock;
+//            IBuildingBlockWithModuleInstance? buildingBlock = nameSpace.BuildingBlock as IBuildingBlockWithModuleInstance;
             if (buildingBlock == null) return null;
 
             if(nameSpace == null) return null;
@@ -447,9 +448,22 @@ namespace pluginVerilog.Verilog
             if (buildingBlock.Instantiations.ContainsKey(hier[0]))
             {
                 IInstantiation inst = buildingBlock.Instantiations[hier[0]];
-                BuildingBlock module = ProjectProperty.GetInstancedBuildingBlock(inst);
+                NameSpace bBlock = ProjectProperty.GetInstancedBuildingBlock(inst);
+
+                if (inst is InterfaceInstantiation)
+                {
+                    InterfaceInstantiation? interfaceInstantiation = inst as InterfaceInstantiation;
+                    if (interfaceInstantiation == null) throw new Exception();
+                    if(interfaceInstantiation.ModPortName != null)
+                    {
+                        Interface? instance = bBlock as Interface;
+                        if (instance == null) throw new Exception();
+                        if (instance.ModPorts.ContainsKey(interfaceInstantiation.ModPortName)) bBlock = instance.ModPorts[interfaceInstantiation.ModPortName];
+                    }
+                }
+
                 hier.RemoveAt(0);
-                return getSearchNameSpace(module,hier);
+                return getSearchNameSpace(bBlock,hier);
             }
             else if(nameSpace.NameSpaces.ContainsKey(hier[0]))
             {

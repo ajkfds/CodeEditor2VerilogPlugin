@@ -227,7 +227,7 @@ namespace pluginVerilog.Verilog.Expressions
             }else if (word.NextText == "(")
             {
                 // task reference : for left side only
-                // function calll : for right side only
+                // function call : for right side only
                 if (assigned)
                 { // left value
                     TaskReference taskReference = TaskReference.ParseCreate(word, rootNameSpace, nameSpace);
@@ -326,10 +326,20 @@ namespace pluginVerilog.Verilog.Expressions
                 interfaceInstanceReference.Reference = word.GetReference();
 
                 primary = interfaceInstanceReference;
-                nameSpace = iInst.GetInstancedBuildingBlock();
+                BuildingBlock bBlock = iInst.GetInstancedBuildingBlock();
+                nameSpace = bBlock;
+
+                if (iInst.ModPortName != null)
+                {
+                    Interface? interface_ = bBlock as Interface;
+                    if(interface_ != null && interface_.ModPorts.ContainsKey(iInst.ModPortName))
+                    {
+                        nameSpace = interface_.ModPorts[iInst.ModPortName];
+                    }
+                }
+
                 word.Color(CodeDrawStyle.ColorType.Variable);
                 word.MoveNext();
-
                 if (nameSpace == null) return true;
 
                 if (word.Text == ".")

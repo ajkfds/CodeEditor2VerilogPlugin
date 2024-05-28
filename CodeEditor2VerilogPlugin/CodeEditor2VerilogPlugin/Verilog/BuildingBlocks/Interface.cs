@@ -1,4 +1,5 @@
-﻿using pluginVerilog.Verilog.ModuleItems;
+﻿using pluginVerilog.Verilog.DataObjects.Variables;
+using pluginVerilog.Verilog.ModuleItems;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -304,6 +305,12 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 if (inst.Name == null) System.Diagnostics.Debugger.Break();
                 items.Add(newItem(inst.Name, CodeDrawStyle.ColorType.Identifier));
             }
+
+            //foreach(ModPort modPort in ModPorts.Values)
+            //{
+            //    if (modPort.Name == null) System.Diagnostics.Debugger.Break();
+            //    items.Add(newItem(modPort.Name, CodeDrawStyle.ColorType.Identifier));
+            //}
         }
 
         protected static void checkVariablesUseAndDriven(WordScanner word, NameSpace nameSpace)

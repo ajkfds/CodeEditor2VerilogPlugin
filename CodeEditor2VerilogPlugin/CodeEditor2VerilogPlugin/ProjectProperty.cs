@@ -149,130 +149,36 @@ namespace pluginVerilog
         }
 
 
-        // module reference table
-        private Dictionary<string, System.WeakReference<Data.IVerilogRelatedFile>> buildingBlockFileRefs = new Dictionary<string, WeakReference<Data.IVerilogRelatedFile>>();
+        // BuildingBlock -> File Table
+        private WeakReferenceDictionary<string, Data.IVerilogRelatedFile> buildingBlockTable = new WeakReferenceDictionary<string, Data.IVerilogRelatedFile>();
 
 
 
-        public bool RegisterModule(string buildingBlockName,Data.IVerilogRelatedFile file)
+
+
+        public bool RegisterBuildingBlock(string buildingBlockName,Data.IVerilogRelatedFile file)
         {
-            lock (buildingBlockFileRefs)
-            {
-                if (buildingBlockFileRefs.ContainsKey(buildingBlockName))
-                {
-                    Data.IVerilogRelatedFile? prevFile;
-                    if(!buildingBlockFileRefs[buildingBlockName].TryGetTarget(out prevFile))
-                    {
-                        buildingBlockFileRefs[buildingBlockName] = new WeakReference<Data.IVerilogRelatedFile>(file);
-                        return true;
-                    }
-                    else
-                    {
-                        if(prevFile == file)
-                        {
-                            System.Diagnostics.Debugger.Break(); // duplicated register
-                            return true;
-                        }
-                        // other target registered
-                        return false;
-                    }
-                }
-                else
-                {
-                    buildingBlockFileRefs.Add(buildingBlockName, new WeakReference<Data.IVerilogRelatedFile>(file));
-                    return true;
-                }
-            }
+            return buildingBlockTable.Register(buildingBlockName, file);
         }
 
         public bool RemoveBuildingBlock(string moduleName, Data.IVerilogRelatedFile file)
         {
-            lock (buildingBlockFileRefs)
-            {
-                if (buildingBlockFileRefs.ContainsKey(moduleName))
-                {
-                    Data.IVerilogRelatedFile? prevFile;
-                    if (!buildingBlockFileRefs[moduleName].TryGetTarget(out prevFile))
-                    {
-                        System.Diagnostics.Debugger.Break(); // already disposed
-                        buildingBlockFileRefs.Remove(moduleName);
-                        return true;
-                    }
-                    else
-                    {
-                        if (prevFile == file)
-                        {
-                            buildingBlockFileRefs.Remove(moduleName);
-                            return true;
-                        }
-                        // unmatched target file
-                        return false;
-                    }
-                }
-                else
-                {
-                    // no target file
-                    return false;
-                }
-            }
+            return buildingBlockTable.Remove(moduleName);
         }
 
         public bool IsRegisterableBuildingBlock(string moduleName, Data.IVerilogRelatedFile file)
         {
-            lock (buildingBlockFileRefs) 
-            {
-                if (buildingBlockFileRefs.ContainsKey(moduleName))
-                {
-                    Data.IVerilogRelatedFile prevFile;
-                    if (!buildingBlockFileRefs[moduleName].TryGetTarget(out prevFile))
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        if (prevFile == file)
-                        {
-                            return false;
-                        }
-                        return false;
-                    }
-                }
-                else
-                {
-                    return true;
-                }
-            }
+            return !buildingBlockTable.HasItem(moduleName);
         }
 
         public Data.IVerilogRelatedFile? GetFileOfBuildingBlock(string buildingBlockName)
         {
-            lock (buildingBlockFileRefs)
-            {
-                if (buildingBlockFileRefs.ContainsKey(buildingBlockName))
-                {
-                    Data.IVerilogRelatedFile file;
-                    if (!buildingBlockFileRefs[buildingBlockName].TryGetTarget(out file))
-                    {
-                        return null;
-                    }
-                    else
-                    {
-                        return file;
-                    }
-                }
-                else
-                {
-                    return null;
-                }
-            }
+            return buildingBlockTable.GetItem(buildingBlockName);
         }
 
         public List<string> GetModuleNameList()
         {
-            lock (buildingBlockFileRefs)
-            {
-                return buildingBlockFileRefs.Keys.ToList<string>();
-            }
+            return buildingBlockTable.KeyList();
         }
 
         public BuildingBlock? GetBuildingBlock(string buildingBlockName)

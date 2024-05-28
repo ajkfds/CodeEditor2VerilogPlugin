@@ -184,6 +184,7 @@ namespace pluginVerilog.Verilog
                 {
                     return false;
                 }
+                word.MoveNext();
 
                 Expressions.Expression expression = Expressions.Expression.ParseCreate(word, nameSpace);
                 if (expression == null) return false;
@@ -192,28 +193,31 @@ namespace pluginVerilog.Verilog
                 {
                     return false;
                 }
+                word.MoveNext();
 
                 Port port = new Port { Direction = direction, Name = name };
                 port.Expression = expression;
 
-                if (!Ports.ContainsKey(port.Name))
-                {
-                    Ports.Add(port.Name, port);
-                    return true;
-                }
-                if (DataObjects.ContainsKey(port.Name))
+                if (!DataObjects.ContainsKey(port.Name))
                 {
                     if (direction == Port.DirectionEnum.Input)
                     {
                         Verilog.DataObjects.Nets.Net net = Verilog.DataObjects.Nets.Net.Create(Verilog.DataObjects.Nets.Net.NetTypeEnum.Wire, null);
-                        DataObjects.Add(net.Name,net);
+                        net.Name = name;
+                        DataObjects.Add(net.Name, net);
                     }
                     else
                     {
                         DataObjects.DataTypes.IntegerVectorType dtype = Verilog.DataObjects.DataTypes.IntegerVectorType.Create(Verilog.DataObjects.DataTypes.DataTypeEnum.Logic, false, null);
                         Verilog.DataObjects.Variables.Logic logic = Verilog.DataObjects.Variables.Logic.Create(dtype);
+                        logic.Name = name;
                         DataObjects.Add(logic.Name, logic);
                     }
+                }
+                if (!Ports.ContainsKey(port.Name))
+                {
+                    Ports.Add(port.Name, port);
+                    return true;
                 }
             }
 

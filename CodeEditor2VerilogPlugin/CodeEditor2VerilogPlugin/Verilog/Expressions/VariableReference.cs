@@ -29,7 +29,7 @@ namespace pluginVerilog.Verilog.Expressions
             }
             else
             {
-                label.AppendText(VariableName);
+                label.AppendText(VariableName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Variable));
             }
             if (RangeExpression != null)
             {
@@ -62,7 +62,14 @@ namespace pluginVerilog.Verilog.Expressions
                 if (nameSpace.Parent != null)
                 {
                     DataObjects.DataObject val = nameSpace.Parent.GetDataObject(identifier);
-                    if (val != null) word.AddWarning("external function reference");
+                    if(nameSpace.BuildingBlock is BuildingBlocks.Interface || nameSpace.BuildingBlock is BuildingBlocks.Program)
+                    {
+
+                    }
+                    else
+                    {
+                        if (val != null) word.AddWarning("external function reference");
+                    }
                     return val;
                 }
             }

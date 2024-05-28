@@ -1,4 +1,6 @@
-﻿using System;
+﻿using AjkAvaloniaLibs.Contorls;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,65 +8,42 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog
 {
-    public class WeakReferenceDictionary<T> where T : class
+    public class WeakReferenceDictionary<K,T> : IEnumerable<T> where K:notnull where T: class 
     {
-        private Dictionary<string, System.WeakReference<T>> itemRefs = new Dictionary<string, WeakReference<T>>();
+        private Dictionary<K, System.WeakReference<T>> itemRefs = new Dictionary<K, WeakReference<T>>();
 
-
-        public bool RegisterItem(string name, T item)
+        public bool Register(K key, T item)
         {
             lock (itemRefs)
             {
-                if (itemRefs.ContainsKey(name))
+                if (itemRefs.ContainsKey(key))
                 {
-                    T? prevFile;
-                    if (!itemRefs[name].TryGetTarget(out prevFile))
-                    {
-                        itemRefs[name] = new WeakReference<T>(item);
+                    T? prevItem;
+                    if (itemRefs[key].TryGetTarget(out prevItem))
+                    {   // replace item
+                        itemRefs[key] = new WeakReference<T>(item);
                         return true;
                     }
                     else
                     {
-                        if (prevFile == item)
-                        {
-                            System.Diagnostics.Debugger.Break(); // duplicated register
-                            return true;
-                        }
-                        // other target registered
-                        return false;
+                        // prevItem already lost
+                        itemRefs.Remove(key);  // remove lost reference 
                     }
                 }
-                else
-                {
-                    itemRefs.Add(name, new WeakReference<T>(item));
-                    return true;
-                }
+
+                itemRefs.Add(key, new WeakReference<T>(item));
+                return true;
             }
         }
 
-        public bool RemoveItem(string name, T file)
+        public bool Remove(K key)
         {
             lock (itemRefs)
             {
-                if (itemRefs.ContainsKey(name))
+                if (itemRefs.ContainsKey(key))
                 {
-                    T? prevFile;
-                    if (!itemRefs[name].TryGetTarget(out prevFile))
-                    {
-                        System.Diagnostics.Debugger.Break(); // already disposed
-                        itemRefs.Remove(name);
-                        return true;
-                    }
-                    else
-                    {
-                        if (prevFile == file)
-                        {
-                            itemRefs.Remove(name);
-                            return true;
-                        }
-                        // unmatched target file
-                        return false;
-                    }
+                    itemRefs.Remove(key);
+                    return true;
                 }
                 else
                 {
@@ -74,47 +53,44 @@ namespace pluginVerilog
             }
         }
 
-        public bool IsRegisterableItem(string name, T file)
+        public bool HasItem(K key)
         {
             lock (itemRefs)
             {
-                if (itemRefs.ContainsKey(name))
+                if (itemRefs.ContainsKey(key))
                 {
                     T? prevFile;
-                    if (!itemRefs[name].TryGetTarget(out prevFile))
+                    if (itemRefs[key].TryGetTarget(out prevFile))
                     {
                         return true;
                     }
                     else
                     {
-                        if (prevFile == file)
-                        {
-                            return false;
-                        }
+                        itemRefs.Remove(key);
                         return false;
                     }
                 }
                 else
                 {
-                    return true;
+                    return false;
                 }
             }
         }
 
-        public T? GetItem(string name)
+        public T? GetItem(K key)
         {
             lock (itemRefs)
             {
-                if (itemRefs.ContainsKey(name))
+                if (itemRefs.ContainsKey(key))
                 {
-                    T? file;
-                    if (!itemRefs[name].TryGetTarget(out file))
+                    T? item;
+                    if (itemRefs[key].TryGetTarget(out item))
                     {
-                        return null;
+                        return item;
                     }
                     else
                     {
-                        return file;
+                        return null;
                     }
                 }
                 else
@@ -123,5 +99,21 @@ namespace pluginVerilog
                 }
             }
         }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            return ((IEnumerable<T>)itemRefs).GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return ((IEnumerable)itemRefs).GetEnumerator();
+        }
+
+        public List<K> KeyList()
+        {
+            return itemRefs.Keys.ToList();
+        }
+
     }
 }

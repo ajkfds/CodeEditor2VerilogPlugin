@@ -616,10 +616,12 @@ ansi_port_declaration ::=
 
         private static bool parseInterfacePort(WordScanner word, NameSpace nameSpace)
         {
-            Interface interface_ = null;
             string identifier = word.Text;
+
+            Interface? interface_ = null;
             interface_ = word.ProjectProperty.GetBuildingBlock(identifier) as Interface;
             if (interface_ == null) return false;
+            string? modPortName = null;
 
             BuildingBlock buildingBlock = nameSpace.BuildingBlock;
             word.Color(CodeDrawStyle.ColorType.Identifier);
@@ -634,6 +636,10 @@ ansi_port_declaration ::=
                 {
                     word.AddError("illegal modport name");
                 }
+                else
+                {
+                    modPortName = word.Text;
+                }
 
                 word.MoveNext();
             }
@@ -647,16 +653,17 @@ ansi_port_declaration ::=
             }
 
 
-            InterfaceInstantiation iinst = InterfaceInstantiation.Create(instance_name, interface_.Name, word.Project);
+            InterfaceInstantiation iInst = InterfaceInstantiation.Create(instance_name, interface_.Name, word.Project);
+            iInst.ModPortName = modPortName;
             word.Color(CodeDrawStyle.ColorType.Variable);
             word.MoveNext();
 
             Port port = new Port();
             port.Name = instance_name;
-            port.Instantiation = iinst;
+            port.Instantiation = iInst;
 
             addPort(word, nameSpace, port);
-            addInstantiation(word, nameSpace, iinst);
+            addInstantiation(word, nameSpace, iInst);
 
             return true;
         }

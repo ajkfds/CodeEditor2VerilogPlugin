@@ -214,7 +214,7 @@ namespace pluginVerilog.Data
 
         public override void AcceptParsedDocument(ParsedDocument newParsedDocument)
         {
-            Verilog.ParsedDocument? vParsedDocument = VerilogParsedDocument;
+            Verilog.ParsedDocument? vParsedDocument = newParsedDocument as Verilog.ParsedDocument;
             if (vParsedDocument == null) return;
 
             parsedDocument = vParsedDocument;

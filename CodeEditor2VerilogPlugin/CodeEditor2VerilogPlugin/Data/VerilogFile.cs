@@ -117,7 +117,7 @@ namespace pluginVerilog.Data
                     continue;
                 }
 
-                bool succeed = ProjectProperty.RegisterModule(buildingBlock.Name, this);
+                bool succeed = ProjectProperty.RegisterBuildingBlock(buildingBlock.Name, this);
                 if (!succeed)
                 {
                     System.Diagnostics.Debugger.Break();
