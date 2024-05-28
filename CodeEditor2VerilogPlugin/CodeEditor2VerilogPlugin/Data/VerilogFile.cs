@@ -101,7 +101,7 @@ namespace pluginVerilog.Data
 
             foreach (BuildingBlock buildingBlock in VerilogParsedDocument.Root.BuldingBlocks.Values)
             {
-                if (!ProjectProperty.IsRegisterableBuildingBlock(buildingBlock.Name, this))
+                if (ProjectProperty.HasRegisteredBuildingBlock(buildingBlock.Name))
                 {
                     Module? module = buildingBlock as Module;
                     if (module == null) continue;
@@ -117,12 +117,7 @@ namespace pluginVerilog.Data
                     continue;
                 }
 
-                bool succeed = ProjectProperty.RegisterBuildingBlock(buildingBlock.Name, this);
-                if (!succeed)
-                {
-                    System.Diagnostics.Debugger.Break();
-                    // add module name error
-                }
+                ProjectProperty.RegisterBuildingBlock(buildingBlock.Name, buildingBlock, this);
             }
 
             Verilog.ParsedDocument? vParsedDocument = ParsedDocument as Verilog.ParsedDocument;

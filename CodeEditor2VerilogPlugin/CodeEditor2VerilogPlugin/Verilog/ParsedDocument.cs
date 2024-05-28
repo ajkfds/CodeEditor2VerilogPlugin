@@ -1,4 +1,5 @@
-﻿using pluginVerilog.Verilog.BuildingBlocks;
+﻿using Avalonia.Media.TextFormatting;
+using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.ModuleItems;
 using System;
 using System.Collections.Generic;
@@ -91,7 +92,7 @@ namespace pluginVerilog.Verilog
                     Data.VerilogFile verilogFile = file as Data.VerilogFile;
                     foreach (BuildingBlock module in Root.BuldingBlocks.Values)
                     {
-                        verilogFile.ProjectProperty.RemoveBuildingBlock(module.Name, verilogFile);
+                        verilogFile.ProjectProperty.RemoveBuildingBlock(module.Name);
                     }
                 }
                 foreach (var includeFile in IncludeFiles.Values)
@@ -144,7 +145,7 @@ namespace pluginVerilog.Verilog
             {
                 if (iref.IsSmallerThan(module.BeginIndexReference)) continue;
                 if (iref.IsGreaterThan(module.LastIndexReference)) continue;
-                space = module.GetHierNameSpace(index);
+                space = module.GetHierarchyNameSpace(index);
                 break;
             }
 
@@ -494,7 +495,7 @@ namespace pluginVerilog.Verilog
             {
                 if (iref.IsSmallerThan(module.BeginIndexReference)) continue;
                 if (iref.IsGreaterThan(module.LastIndexReference)) continue;
-                space = module.GetHierNameSpace(index);
+                space = module.GetHierarchyNameSpace(index);
                 break;
             }
 
@@ -541,8 +542,18 @@ namespace pluginVerilog.Verilog
                 items = new List<CodeEditor2.CodeEditor.AutocompleteItem>();
             }
 
+            if (hierWords.Count == 0)
+            {
+                List<string> objectList = ProjectProperty.GetObjectsNameList();
+                foreach(var name in objectList) 
+                {
+                    items.Add(
+                        new CodeEditor2.CodeEditor.AutocompleteItem(name, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Identifier), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Identifier))
+                    );
+                }
+            }
 
-            // parse macro in hier words
+            // parse macro in hierarchy words
             for (int i = 0; i < hierWords.Count;i++)
             {
                 if (!hierWords[i].StartsWith("`")) continue;

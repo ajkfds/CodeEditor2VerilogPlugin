@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AjkAvaloniaLibs.Libs.Json;
+using Avalonia.Controls.Platform;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.ModuleItems;
 
@@ -150,35 +151,48 @@ namespace pluginVerilog
 
 
         // BuildingBlock -> File Table
-        private WeakReferenceDictionary<string, Data.IVerilogRelatedFile> buildingBlockTable = new WeakReferenceDictionary<string, Data.IVerilogRelatedFile>();
+        private WeakReferenceDictionary<string, Data.IVerilogRelatedFile> buildingBlockFileTable = new WeakReferenceDictionary<string, Data.IVerilogRelatedFile>();
+        private WeakReferenceDictionary<string, BuildingBlock> buildingBlockTable = new WeakReferenceDictionary<string, BuildingBlock>();
 
-
-
-
-
-        public bool RegisterBuildingBlock(string buildingBlockName,Data.IVerilogRelatedFile file)
+        public void RegisterBuildingBlock(string buildingBlockName,BuildingBlock buildingBlock, Data.IVerilogRelatedFile file)
         {
-            return buildingBlockTable.Register(buildingBlockName, file);
+            buildingBlockTable.Register(buildingBlockName, buildingBlock);
+            buildingBlockFileTable.Register(buildingBlockName, file);
         }
 
-        public bool RemoveBuildingBlock(string moduleName, Data.IVerilogRelatedFile file)
+        public bool RemoveBuildingBlock(string moduleName)
         {
-            return buildingBlockTable.Remove(moduleName);
+            buildingBlockTable.Remove(moduleName);
+            return buildingBlockFileTable.Remove(moduleName);
         }
 
-        public bool IsRegisterableBuildingBlock(string moduleName, Data.IVerilogRelatedFile file)
+        public bool HasRegisteredBuildingBlock(string moduleName)
         {
-            return !buildingBlockTable.HasItem(moduleName);
+            buildingBlockTable.HasItem(moduleName);
+            return buildingBlockFileTable.HasItem(moduleName);
         }
 
         public Data.IVerilogRelatedFile? GetFileOfBuildingBlock(string buildingBlockName)
         {
-            return buildingBlockTable.GetItem(buildingBlockName);
+            return buildingBlockFileTable.GetItem(buildingBlockName);
+        }
+
+        public List<string> GetBuildingBlockNameList()
+        {
+            buildingBlockTable.CleanDictionary();
+            return buildingBlockTable.KeyList();
         }
 
         public List<string> GetModuleNameList()
         {
-            return buildingBlockTable.KeyList();
+            return buildingBlockTable.GetMatchedKeyList((x) => { return (x is Module); });
+        }
+
+        public List<string> GetObjectsNameList()
+        {
+            return buildingBlockTable.GetMatchedKeyList(
+                (x) => { return (x is Object)|| (x is Interface)||(x is Program); 
+                });
         }
 
         public BuildingBlock? GetBuildingBlock(string buildingBlockName)

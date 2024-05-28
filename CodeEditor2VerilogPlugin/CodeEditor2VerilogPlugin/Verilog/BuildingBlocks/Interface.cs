@@ -300,17 +300,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
             base.AppendAutoCompleteItem(items);
 
-            foreach (IInstantiation inst in Instantiations.Values)
+            foreach (IInstantiation instantiation in Instantiations.Values)
             {
-                if (inst.Name == null) System.Diagnostics.Debugger.Break();
-                items.Add(newItem(inst.Name, CodeDrawStyle.ColorType.Identifier));
+                if (instantiation.Name == null) continue;
+                items.Add(newItem(instantiation.Name, CodeDrawStyle.ColorType.Identifier));
             }
-
-            //foreach(ModPort modPort in ModPorts.Values)
-            //{
-            //    if (modPort.Name == null) System.Diagnostics.Debugger.Break();
-            //    items.Add(newItem(modPort.Name, CodeDrawStyle.ColorType.Identifier));
-            //}
         }
 
         protected static void checkVariablesUseAndDriven(WordScanner word, NameSpace nameSpace)
@@ -319,7 +313,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
                 if (variable.DefinedReference == null) continue;
 
-                DataObjects.Variables.ValueVariable valueVar = variable as DataObjects.Variables.ValueVariable;
+                DataObjects.Variables.ValueVariable? valueVar = variable as DataObjects.Variables.ValueVariable;
                 if (valueVar == null) continue;
 
                 if (valueVar.AssignedReferences.Count == 0)

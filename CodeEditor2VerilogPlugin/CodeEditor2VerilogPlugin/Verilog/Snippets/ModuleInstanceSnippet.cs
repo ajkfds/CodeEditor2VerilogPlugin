@@ -18,7 +18,7 @@ namespace pluginVerilog.Verilog.Snippets
         {
         }
 
-        private CodeDocument document;
+        private CodeDocument? document;
 
         // initial value for {n}
         private List<string> initials = new List<string> { };
@@ -30,10 +30,11 @@ namespace pluginVerilog.Verilog.Snippets
             List<ToolItem> items = new List<ToolItem>();
 
             CodeEditor2.Data.Project project = codeDocument.TextFile.Project;
-            ProjectProperty projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+            ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+            if (projectProperty == null) throw new Exception();
 
-            List<string> moduleNmaes = projectProperty.GetModuleNameList();
-            foreach (string moduleName in moduleNmaes)
+            List<string> moduleNames = projectProperty.GetModuleNameList();
+            foreach (string moduleName in moduleNames)
             {
                 items.Add(new ModuleInstanceSelectionItem(moduleName, this));
             }
@@ -52,6 +53,7 @@ namespace pluginVerilog.Verilog.Snippets
             private ModuleInstanceSnippet snippet;
             public override void Apply(CodeDocument codeDocument)
             {
+                if (Text == null) return;
                 snippet.ApplyModuleInstance(codeDocument, Text);
             }
         }
@@ -68,11 +70,11 @@ namespace pluginVerilog.Verilog.Snippets
 
             string instanceName = Text + "_";
             {
-                Data.IVerilogRelatedFile? vfile = CodeEditor2.Controller.CodeEditor.GetTextFile() as Data.IVerilogRelatedFile;
-                if (vfile == null) return;
+                Data.IVerilogRelatedFile? vFile = CodeEditor2.Controller.CodeEditor.GetTextFile() as Data.IVerilogRelatedFile;
+                if (vFile == null) return;
 
-                ParsedDocument parentParsedDocument = vfile.VerilogParsedDocument;
-                BuildingBlock? module = parentParsedDocument.GetBuildingBlockAt(vfile.CodeDocument.CaretIndex);
+                ParsedDocument parentParsedDocument = vFile.VerilogParsedDocument;
+                BuildingBlock? module = parentParsedDocument.GetBuildingBlockAt(vFile.CodeDocument.CaretIndex);
                 if (module == null) return;
 
                 int instanceCount = 0;
@@ -105,19 +107,19 @@ namespace pluginVerilog.Verilog.Snippets
                 {
                     string target = "{" + i.ToString() + "}";
                     if (!replaceText.Contains(target)) break;
-                    startIndexs.Add(index + replaceText.IndexOf(target));
-                    lastIndexs.Add(index + replaceText.IndexOf(target) + initials[i].Length - 1);
+                    startIndexes.Add(index + replaceText.IndexOf(target));
+                    lastIndexes.Add(index + replaceText.IndexOf(target) + initials[i].Length - 1);
                     replaceText = replaceText.Replace(target, initials[i]);
                 }
 
                 codeDocument.Replace(index, 0, 0, replaceText);
-                CodeEditor2.Controller.CodeEditor.SetCaretPosition(startIndexs[0]);
-                CodeEditor2.Controller.CodeEditor.SetSelection( startIndexs[0],lastIndexs[0] + 1);
+                CodeEditor2.Controller.CodeEditor.SetCaretPosition(startIndexes[0]);
+                CodeEditor2.Controller.CodeEditor.SetSelection( startIndexes[0],lastIndexes[0] + 1);
 
                 CodeEditor2.Controller.CodeEditor.ClearHighlight();
-                for (int i = 0; i < startIndexs.Count; i++)
+                for (int i = 0; i < startIndexes.Count; i++)
                 {
-                    CodeEditor2.Controller.CodeEditor.AppendHighlight(startIndexs[i], lastIndexs[i]);
+                    CodeEditor2.Controller.CodeEditor.AppendHighlight(startIndexes[i], lastIndexes[i]);
                 }
             }
 
@@ -132,8 +134,8 @@ namespace pluginVerilog.Verilog.Snippets
             base.Aborted();
         }
 
-        private List<int> startIndexs = new List<int>();
-        private List<int> lastIndexs = new List<int>();
+        private List<int> startIndexes = new List<int>();
+        private List<int> lastIndexes = new List<int>();
 
         public override void KeyDown(object? sender, KeyEventArgs e, PopupMenuView popupMenuView)
         {
@@ -150,13 +152,14 @@ namespace pluginVerilog.Verilog.Snippets
             }
         }
 
-        public override void AfterKeyDown(object sender, TextInputEventArgs e, CodeEditor2.Views.PopupMenuView popupMenuView)
+        public override void AfterKeyDown(object? sender, TextInputEventArgs e, CodeEditor2.Views.PopupMenuView popupMenuView)
         {
 
         }
 
         public override void AfterAutoCompleteHandled(CodeEditor2.Views.PopupMenuView popupMenuView)
         {
+            if (document == null) return;
             int i = CodeEditor2.Controller.CodeEditor.GetHighlightIndex(document.CaretIndex);
             switch (i)
             {

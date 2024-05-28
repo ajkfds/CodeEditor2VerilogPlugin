@@ -41,15 +41,9 @@ namespace pluginVerilog.Verilog
         public BuildingBlocks.BuildingBlock BuildingBlock { get; protected set; }
         public Dictionary<string, NameSpace> NameSpaces { get { return nameSpaces;  } }
 
-        public NameSpace GetHierNameSpace(int index)
+        public NameSpace GetHierarchyNameSpace(int index)
         {
-/*            foreach(NameSpace subSpace in NameSpaces.Values)
-            {
-                if (index < subSpace.BeginIndex) continue;
-                if (index > subSpace.LastIndex) continue;
-                return subSpace.GetHierNameSpace(index);
-            }
-*/            return this;
+            return this;
         }
         
 
@@ -59,14 +53,6 @@ namespace pluginVerilog.Verilog
         }
         public virtual void AppendAutoCompleteItem( List<CodeEditor2.CodeEditor.AutocompleteItem> items)
         {
-            //foreach (Net net in Nets.Values)
-            //{
-            //    if (net is Net)
-            //    {
-            //        items.Add(newItem(net.Name, CodeDrawStyle.ColorType.Net));
-            //    }
-            //}
-
             foreach (DataObjects.DataObject variable in DataObjects.Values)
             {
                 if(variable is DataObjects.Nets.Net)
@@ -109,6 +95,7 @@ namespace pluginVerilog.Verilog
             foreach (NameSpace space in NameSpaces.Values)
             {
                 if (space.Name == null) System.Diagnostics.Debugger.Break();
+                if (space.Name == null) continue;
                 items.Add(newItem(space.Name, CodeDrawStyle.ColorType.Identifier));
             }
 

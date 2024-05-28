@@ -25,6 +25,7 @@ namespace pluginVerilog.Verilog
             if (fromReference == null) return this;
             if (fromReference.ParsedDocument != ParsedDocument) return this;
             if (Document != fromReference.Document) return this;
+            if (ParsedDocument == null || Document == null) return this;
             return new WordReference(fromReference.Index, Index + Length - fromReference.Index, ParsedDocument,Document);
         }
         public int Index { get; protected set; }

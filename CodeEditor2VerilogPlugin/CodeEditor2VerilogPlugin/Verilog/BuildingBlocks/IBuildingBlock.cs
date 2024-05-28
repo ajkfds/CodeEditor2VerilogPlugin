@@ -13,7 +13,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         NameSpace Parent { get; }
         Dictionary<string, DataObjects.Constants.Constants> Constants { get; }
         Dictionary<string, NameSpace> NameSpaces { get; }
-        NameSpace GetHierNameSpace(int index);
+        NameSpace GetHierarchyNameSpace(int index);
         DataObjects.DataObject GetDataObject(string identifier);
         DataObjects.Constants.Constants GetConstants(string identifier);
 
