@@ -7,6 +7,7 @@ using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static pluginVerilog.Verilog.DataObjects.Nets.Net;
 
 namespace pluginVerilog.Verilog.DataObjects.Constants
 {
@@ -25,6 +26,39 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
             enum_
         }
         public ConstantTypeEnum ConstantType = ConstantTypeEnum.parameter;
+
+        public override void AppendTypeLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        {
+            switch (ConstantType)
+            {
+                case ConstantTypeEnum.parameter:
+                    label.AppendText("parameter", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    break;
+                case ConstantTypeEnum.localparam:
+                    label.AppendText("localparam", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    break;
+                case ConstantTypeEnum.specparam:
+                    label.AppendText("specparam", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    break;
+                case ConstantTypeEnum.enum_:
+                    label.AppendText("enum", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    break;
+            }
+
+        }
+
+        public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        {
+            AppendTypeLabel(label);
+            label.AppendText(" ");
+
+            label.AppendText(Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Parameter));
+
+            label.AppendText(" = ");
+
+            if (Expression != null) Expression.AppendLabel(label);
+        }
+
 
         public static void ParseCreateDeclarationForPort(WordScanner word, IModuleOrInterfaceOrProgram module, Attribute attribute)
         {

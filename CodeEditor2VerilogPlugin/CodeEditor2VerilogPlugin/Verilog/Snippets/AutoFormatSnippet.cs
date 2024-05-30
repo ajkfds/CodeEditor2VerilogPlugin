@@ -58,7 +58,7 @@ namespace pluginVerilog.Verilog.Snippets
                 moduleInstantiation.BeginIndexReference.Indexs.Last(),
                 moduleInstantiation.LastIndexReference.Indexs.Last() - moduleInstantiation.BeginIndexReference.Indexs.Last() + 1,
                 0,
-                moduleInstantiation.CreateSrting("\t")
+                moduleInstantiation.CreateString("\t")
                 );
             CodeEditor2.Controller.CodeEditor.SetSelection(codeDocument.CaretIndex, codeDocument.CaretIndex);
         }
