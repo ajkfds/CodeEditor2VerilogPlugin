@@ -42,14 +42,14 @@ namespace pluginVerilog.Verilog.ModuleItems
         public IndexReference LastIndexReference;
         public static bool Parse(WordScanner word, NameSpace nameSpace)
         {
-            // interface instanciation can be placed only in module
+            // interface instantiation can be placed only in module
             BuildingBlock buildingBlock = nameSpace.BuildingBlock as BuildingBlock;
             if (buildingBlock == null) return false;
 
             WordScanner moduleIdentifier = word.Clone();
             string moduleName = word.Text;
             IndexReference beginIndexReference = word.CreateIndexReference();
-            Module instancedModule = word.ProjectProperty.GetBuildingBlock(moduleName) as Module;
+            Module? instancedModule = word.ProjectProperty.GetBuildingBlock(moduleName) as Module;
             if (instancedModule == null)
             {
                 return false;
@@ -125,7 +125,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                             }
                             else
                             {
-                                moduleInstantiation.ParameterOverrides.Add(paramName, expression);
+                                if(expression != null) moduleInstantiation.ParameterOverrides.Add(paramName, expression);
                             }
                         }
 
@@ -148,7 +148,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                     }
                 }
                 else
-                { // ordered paramater assignment
+                { // ordered parameter assignment
                     int i = 0;
                     while (!word.Eof && word.Text != ")")
                     {
@@ -247,8 +247,12 @@ namespace pluginVerilog.Verilog.ModuleItems
                     {   // duplicated
                         if (buildingBlock.Instantiations[moduleInstantiation.Name].Prototype)
                         {
-                            moduleInstantiation = buildingBlock.Instantiations[moduleInstantiation.Name] as ModuleInstantiation;
-                            moduleInstantiation.Prototype = false;
+                            ModuleInstantiation? mod = buildingBlock.Instantiations[moduleInstantiation.Name] as ModuleInstantiation;
+                            if(mod != null)
+                            {
+                                moduleInstantiation = mod;
+                                moduleInstantiation.Prototype = false;
+                            }
                         }
                         else
                         {
@@ -261,6 +265,16 @@ namespace pluginVerilog.Verilog.ModuleItems
                 }
 
                 word.MoveNext();
+
+                List<string> notWrittenPortName;
+                if (instancedModule == null)
+                {
+                    notWrittenPortName = new List<string>();
+                }
+                else
+                {
+                    notWrittenPortName = instancedModule.Ports.Keys.ToList();
+                }
 
                 if (word.Text != "(")
                 {
@@ -277,8 +291,11 @@ namespace pluginVerilog.Verilog.ModuleItems
                     {
                         word.MoveNext();
                         string pinName = word.Text;
+                        if (notWrittenPortName.Contains(pinName)) notWrittenPortName.Remove(pinName);
+
                         bool outPort = false;
                         word.Color(CodeDrawStyle.ColorType.Identifier);
+
                         if (instancedModule != null && !word.Prototype) {
                             if (instancedModule.Ports.ContainsKey(pinName))
                             {
@@ -306,6 +323,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                         {
                             word.MoveNext();
                         }
+
                         if (outPort)
                         {
                             Expressions.Expression expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace);
@@ -396,9 +414,14 @@ namespace pluginVerilog.Verilog.ModuleItems
                             word.MoveNext();
                         }
                     }
+
+                    if(notWrittenPortName.Count != 0)
+                    {
+                        moduleIdentifier.AddWarning("missing port " + notWrittenPortName[0]);
+                    }
                 }
                 else
-                { // ordered paramater assignment
+                { // ordered parameter assignment
                     int i = 0;
                     while (!word.Eof && word.Text != ")")
                     {
@@ -437,6 +460,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                 word.MoveNext();
             }
 
+
             if (word.Text != ";")
             {
                 word.AddError("; expected");
@@ -461,12 +485,12 @@ namespace pluginVerilog.Verilog.ModuleItems
 
         public string CreateString()
         {
-            return CreateSrting("\t");
+            return CreateString("\t");
 
         }
-        public string CreateSrting(string indent)
+        public string CreateString(string indent)
         {
-            Module instancedModule = ProjectProperty.GetBuildingBlock(SourceName) as Module;
+            Module? instancedModule = ProjectProperty.GetBuildingBlock(SourceName) as Module;
             if (instancedModule == null) return null;
 
             StringBuilder sb = new StringBuilder();
