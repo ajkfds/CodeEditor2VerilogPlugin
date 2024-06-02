@@ -49,6 +49,7 @@ namespace pluginVerilog.Verilog.DataObjects
         public List<WordReference> AssignedReferences { set; get; } = new List<WordReference>();
         public int DisposedIndex = -1;
 
+
         public virtual void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
         {
             label.AppendText(Name);

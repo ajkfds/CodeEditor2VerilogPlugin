@@ -10,25 +10,16 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
         }
 
-        // IModuleOrInterfaceOrProfram
-
-
         // Port
         public Dictionary<string, DataObjects.Port> Ports { get; } = new Dictionary<string, DataObjects.Port>();
         public List<DataObjects.Port> PortsList { get; } = new List<DataObjects.Port>();
 
-//        public WordReference NameReference;
-//        public List<string> PortParameterNameList { get; } = new List<string>();
-
-        // Module
-//        public Dictionary<string, ModuleItems.IInstantiation> Instantiations { get; } = new Dictionary<string, ModuleItems.IInstantiation>();
-
         private WeakReference<Data.IVerilogRelatedFile> fileRef;
-        public override Data.IVerilogRelatedFile File
+        public override Data.IVerilogRelatedFile? File
         {
             get
             {
-                Data.IVerilogRelatedFile ret;
+                Data.IVerilogRelatedFile? ret;
                 if (!fileRef.TryGetTarget(out ret)) return null;
                 return ret;
             }
@@ -53,7 +44,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         }
         public static Module Create(
             WordScanner word,
-            Dictionary<string, Expressions.Expression> parameterOverrides,
+            Dictionary<string, Expressions.Expression>? parameterOverrides,
             Attribute attribute,
             Data.IVerilogRelatedFile file,
             bool protoType
@@ -88,15 +79,15 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
             // parse definitions
             Dictionary<string, Macro> macroKeep = new Dictionary<string, Macro>();
-            foreach (var kvpair in word.RootParsedDocument.Macros)
+            foreach (var kvPair in word.RootParsedDocument.Macros)
             {
-                macroKeep.Add(kvpair.Key, kvpair.Value);
+                macroKeep.Add(kvPair.Key, kvPair.Value);
             }
 
 
             if (!word.CellDefine && !protoType)
             {
-                // protptype parse
+                // prototype parse
                 WordScanner prototypeWord = word.Clone();
                 prototypeWord.Prototype = true;
                 parseModuleItems(prototypeWord, parameterOverrides, null, module);
@@ -133,7 +124,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         }
 
         /*
-        module_declaration  ::= { attribute_instance } module_keyword module_identifier [ module_parameter_port_list ]Foverride
+        module_declaration  ::= { attribute_instance } module_keyword module_identifier [ module_parameter_port_list ]override
                                     [ list_of_ports ] ; { module_item }
                                     endmodule
                                 | { attribute_instance } module_keyword module_identifier [ module_parameter_port_list ]
@@ -147,7 +138,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         */
         protected static void parseModuleItems(
             WordScanner word,
-            //            string parameterOverrideModueName,
+            //            string parameterOverrideModuleName,
             Dictionary<string, Expressions.Expression> parameterOverrides,
             Attribute attribute, Module module)
         {

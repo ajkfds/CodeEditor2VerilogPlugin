@@ -87,6 +87,9 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         parseInterface(word, parsedDocument, file);
                         break;
                     // program_declaration
+                    case "program":
+                        parseProgram(word, parsedDocument, file);
+                        break;
                     // bind_directive
                     // config_declaration
                     // package_declaration
@@ -155,6 +158,63 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
                 parsedDocument.Root.BuldingBlocks.Add(module.Name, module);
                 if (module.ReperseRequested) parsedDocument.ReparseRequested = true;
+            }
+            else
+            {
+                word.AddError("duplicated module name");
+            }
+        }
+
+        private static void parseProgram(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
+        {
+            if (word.Text != "program") System.Diagnostics.Debugger.Break();
+
+            if (parsedDocument.TargetBuldingBlockName != null)
+            {
+                string moduleName = word.NextText;
+                if (moduleName != parsedDocument.TargetBuldingBlockName)
+                {
+                    word.SkipToKeyword("endprogram");
+                    word.MoveNext();
+                    return;
+                }
+            }
+
+
+            Program program;
+            IndexReference iref = IndexReference.Create(parsedDocument);
+
+            if (parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse)
+            {
+                if (parsedDocument.ParameterOverrides == null)
+                {
+                    program = Program.Create(word, null, file, true);
+                }
+                else
+                {
+                    program = Program.Create(word, parsedDocument.ParameterOverrides, null, file, true);
+                }
+                if (program.Instantiations.Count != 0) // prepare reparse (instanced module could have un-referenced link)
+                {
+                    program.ReperseRequested = true;
+                }
+            }
+            else
+            {
+                if (parsedDocument.ParameterOverrides == null)
+                {
+                    program = Program.Create(word, null, file, false);
+                }
+                else
+                {
+                    program = Program.Create(word, parsedDocument.ParameterOverrides, null, file, false);
+                }
+            }
+
+            if (!parsedDocument.Root.BuldingBlocks.ContainsKey(program.Name))
+            {
+                parsedDocument.Root.BuldingBlocks.Add(program.Name, program);
+                if (program.ReperseRequested) parsedDocument.ReparseRequested = true;
             }
             else
             {

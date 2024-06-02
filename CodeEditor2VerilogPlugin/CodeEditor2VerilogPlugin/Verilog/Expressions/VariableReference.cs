@@ -12,9 +12,9 @@ namespace pluginVerilog.Verilog.Expressions
     {
         protected VariableReference() { }
         public string VariableName { get; protected set; }
-        public RangeExpression RangeExpression { get; protected set; }
+        public RangeExpression? RangeExpression { get; protected set; }
         public List<Expression> Dimensions = new List<Expression>();
-        public DataObjects.DataObject Variable = null;
+        public DataObjects.DataObject? Variable = null;
 
 
         public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
@@ -49,6 +49,22 @@ namespace pluginVerilog.Verilog.Expressions
             stringBuilder.Append(CreateString());
         }
 
+        public override string CreateString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(VariableName);
+            if (RangeExpression != null)
+            {
+                sb.Append(RangeExpression.CreateString());
+            }
+            foreach (Expression expression in Dimensions)
+            {
+                sb.Append(" [");
+                sb.Append(expression.CreateString());
+                sb.Append("]");
+            }
+            return sb.ToString();
+        }
 
         private static DataObjects.DataObject getDataObject(WordScanner word, string identifier, NameSpace nameSpace)
         {

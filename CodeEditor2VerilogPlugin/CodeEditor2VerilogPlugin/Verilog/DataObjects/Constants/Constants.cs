@@ -60,7 +60,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
         }
 
 
-        public static void ParseCreateDeclarationForPort(WordScanner word, IModuleOrInterfaceOrProgram module, Attribute attribute)
+        public static void ParseCreateDeclarationForPort(WordScanner word, IModuleOrInterfaceOrProgram module, Attribute? attribute)
         {
             /*
             local_parameter_declaration ::=  (From Annex A - A.2.1.1)  

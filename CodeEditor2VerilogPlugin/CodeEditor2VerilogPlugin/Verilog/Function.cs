@@ -387,7 +387,7 @@ namespace pluginVerilog.Verilog
 
         private static void parse_function_items_ansi(WordScanner word, NameSpace nameSpace, Function function)
         {
-            if (word.Text != "(") System.Diagnostics.Debugger.Break();
+            if (word.Text != "(") //System.Diagnostics.Debugger.Break();
             word.MoveNext();
 
             Port.ParseTfPortItems(word, nameSpace,function);

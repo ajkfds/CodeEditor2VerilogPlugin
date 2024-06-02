@@ -1,4 +1,5 @@
-﻿using pluginVerilog.CodeEditor;
+﻿using Avalonia.Remote.Protocol;
+using pluginVerilog.CodeEditor;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -811,12 +812,18 @@ namespace pluginVerilog.Verilog
                 sameFolderPath = sameFolderPath.Substring(0, sameFolderPath.LastIndexOf(System.IO.Path.DirectorySeparatorChar));
                 sameFolderPath = sameFolderPath + System.IO.Path.DirectorySeparatorChar + filePath;
 
+                if (wordPointer.ParsedDocument == null) return;
+                if (wordPointer.ParsedDocument.Project == null) return;
+
                 List<CodeEditor2.Data.Item> items = wordPointer.ParsedDocument.Project.FindItems(
                     (item) =>
                     {
+                        if (item == null) return false;
                         if(item is CodeEditor2.Data.TextFile)
                         {
-                            if((item as CodeEditor2.Data.TextFile).RelativePath == sameFolderPath)
+                            var textFile = item as CodeEditor2.Data.TextFile;
+                            if (textFile == null) throw new Exception();
+                            if(textFile.RelativePath == sameFolderPath)
                             {
                                 return true;
                             }
@@ -837,7 +844,7 @@ namespace pluginVerilog.Verilog
             }
 
             // search same filename in full project
-            {
+            if(wordPointer.ParsedDocument!= null && wordPointer.ParsedDocument.Project !=null) {
 
                 CodeEditor2.Data.File ffile = wordPointer.ParsedDocument.Project.SearchFile(
                     (f)=> {

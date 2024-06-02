@@ -291,7 +291,7 @@ namespace pluginVerilog.Verilog
         // ( [ tf_port_list ] ) ; { block_item_declaration }
         private static void parse_task_items_ansi(WordScanner word, NameSpace nameSpace, Task function)
         {
-            if (word.Text != "(") System.Diagnostics.Debugger.Break();
+            if (word.Text != "(") //System.Diagnostics.Debugger.Break();
             word.MoveNext();
 
             Port.ParseTfPortItems(word, nameSpace, function);

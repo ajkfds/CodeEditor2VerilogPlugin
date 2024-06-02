@@ -24,7 +24,7 @@ namespace pluginVerilog.Verilog.Items
             | always_construct 
             | loop_generate_construct 
             | conditional_generate_construct
-            | elaboration_system_task                 
+            | elaboration_system_task
         */
 
         public static bool Parse(WordScanner word,NameSpace nameSpace)

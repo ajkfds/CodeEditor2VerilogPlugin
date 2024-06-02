@@ -39,7 +39,7 @@ namespace pluginVerilog.Verilog.Expressions
             return label;
         }
 
-        public virtual string CreateString()
+        public override string CreateString()
         {
             return "";
         }

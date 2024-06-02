@@ -24,6 +24,11 @@ namespace pluginVerilog.Verilog.Expressions
         public virtual void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
         {
         }
+        public virtual string CreateString()
+        {
+            return "";
+        }
+
     }
     public class SingleBitRangeExpression : RangeExpression
     {
@@ -33,12 +38,18 @@ namespace pluginVerilog.Verilog.Expressions
             Expression = expression;
             BitWidth = 1;
         }
-        public Expression Expression;
+        public Expression? Expression;
         public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
         {
+            if (Expression == null) return;
             label.AppendText("[");
             label.AppendLabel(Expression.GetLabel());
             label.AppendText("]");
+        }
+        public override string CreateString()
+        {
+            if (Expression == null) return "[?]";
+            return "[" + Expression.CreateString() + "]";
         }
     }
     public class AbsoluteRangeExpression : RangeExpression
@@ -54,8 +65,8 @@ namespace pluginVerilog.Verilog.Expressions
                 BitWidth = (int)MsbExpression.Value - (int)LsbExpression.Value + 1;
             }
         }
-        public Expression MsbExpression;
-        public Expression LsbExpression;
+        public Expression? MsbExpression;
+        public Expression? LsbExpression;
 
         public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
         {
@@ -65,6 +76,11 @@ namespace pluginVerilog.Verilog.Expressions
             label.AppendText(":");
             label.AppendLabel(LsbExpression.GetLabel());
             label.AppendText("]");
+        }
+        public override string CreateString()
+        {
+            if (LsbExpression == null || MsbExpression == null) return "[:]";
+            return "[" + MsbExpression.CreateString() +":"+ LsbExpression.CreateString() + "]";
         }
     }
     public class RelativePlusRangeExpression : RangeExpression
@@ -79,8 +95,8 @@ namespace pluginVerilog.Verilog.Expressions
                 BitWidth = (int)WidthExpression.Value;
             }
         }
-        public Expression BaseExpression;
-        public Expression WidthExpression;
+        public Expression? BaseExpression;
+        public Expression? WidthExpression;
 
         public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
         {
@@ -90,6 +106,11 @@ namespace pluginVerilog.Verilog.Expressions
             label.AppendText("+:");
             label.AppendLabel(WidthExpression.GetLabel());
             label.AppendText("]");
+        }
+        public override string CreateString()
+        {
+            if (BaseExpression == null || WidthExpression == null) return "[?]";
+            return "[" + BaseExpression.CreateString() + "+:" + WidthExpression.CreateString() + "]";
         }
     }
     public class RelativeMinusRangeExpression : RangeExpression
@@ -104,8 +125,8 @@ namespace pluginVerilog.Verilog.Expressions
                 BitWidth = (int)WidthExpression.Value;
             }
         }
-        public Expression BaseExpression;
-        public Expression WidthExpression;
+        public Expression? BaseExpression;
+        public Expression? WidthExpression;
 
         public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
         {
@@ -115,6 +136,11 @@ namespace pluginVerilog.Verilog.Expressions
             label.AppendText("-:");
             label.AppendLabel(WidthExpression.GetLabel());
             label.AppendText("]");
+        }
+        public override string CreateString()
+        {
+            if (BaseExpression == null || WidthExpression == null) return"[?]";
+            return "[" + BaseExpression.CreateString() + "-:" + WidthExpression.CreateString() + "]";
         }
     }
 }

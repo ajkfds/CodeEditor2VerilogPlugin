@@ -23,6 +23,8 @@ namespace pluginVerilog.Verilog.Snippets
 
         public override void Apply(CodeEditor2.CodeEditor.CodeDocument codeDocument)
         {
+            System.Diagnostics.Debug.Print("## AlwaysFFSnippet.Apply");
+
             document = codeDocument;
 
             string indent = "";
@@ -70,6 +72,8 @@ namespace pluginVerilog.Verilog.Snippets
 
         public override void Aborted()
         {
+            System.Diagnostics.Debug.Print("## AlwaysFFSnippet.Aborted");
+
             CodeEditor2.Controller.CodeEditor.ClearHighlight();
             document = null;
             base.Aborted();
@@ -80,6 +84,8 @@ namespace pluginVerilog.Verilog.Snippets
 
         public override void KeyDown(object? sender, KeyEventArgs e, PopupMenuView popupMenuView)
         {
+            System.Diagnostics.Debug.Print("## AlwaysFFSnippet.KeyDown");
+
             // overrider return & escape
             if (!CodeEditor2.Controller.CodeEditor.IsPopupMenuOpened)
             {
@@ -101,6 +107,8 @@ namespace pluginVerilog.Verilog.Snippets
         }
         public override void AfterAutoCompleteHandled(CodeEditor2.Views.PopupMenuView popupMenuView)
         {
+            System.Diagnostics.Debug.Print("## AlwaysFFSnippet.AfterAutoCompleteHandled");
+
             int i = CodeEditor2.Controller.CodeEditor.GetHighlightIndex(document.CaretIndex);
             switch (i)
             {
@@ -134,7 +142,7 @@ namespace pluginVerilog.Verilog.Snippets
 
         private void moveToNextHighlight(out bool moved)
         {
-            moved = false;
+            System.Diagnostics.Debug.Print("## AlwaysFFSnippet.moveToNextHighlight");
             moved = false;
             int i = CodeEditor2.Controller.CodeEditor.GetHighlightIndex(document.CaretIndex);
             if (i == -1) return;
