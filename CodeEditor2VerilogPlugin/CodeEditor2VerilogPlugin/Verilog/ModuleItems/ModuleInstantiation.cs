@@ -19,6 +19,10 @@ namespace pluginVerilog.Verilog.ModuleItems
 
         public Dictionary<string, Expressions.Expression> PortConnection { get; set; } = new Dictionary<string, Expressions.Expression>();
 
+        public void AppendLabel(int index,AjkAvaloniaLibs.Contorls.ColorLabel label)
+        {
+        }
+
         public string OverrideParameterID
         {
             get
@@ -38,8 +42,8 @@ namespace pluginVerilog.Verilog.ModuleItems
 
         public bool Prototype { get; set; } = false;
 
-        public IndexReference BeginIndexReference;
-        public IndexReference LastIndexReference;
+        public IndexReference BeginIndexReference { get; set; }
+        public IndexReference LastIndexReference { get; set; }
         public static bool Parse(WordScanner word, NameSpace nameSpace)
         {
             // interface instantiation can be placed only in module

@@ -18,6 +18,11 @@ namespace pluginVerilog.Verilog.ModuleItems
 
         public Dictionary<string, Expressions.Expression> PortConnection { get; set; } = new Dictionary<string, Expressions.Expression>();
 
+        public IndexReference BeginIndexReference { get; set; }
+        public IndexReference LastIndexReference { get; set; }
+        public void AppendLabel(int index, AjkAvaloniaLibs.Contorls.ColorLabel label)
+        {
+        }
         public string OverrideParameterID
         {
             get
@@ -52,8 +57,6 @@ namespace pluginVerilog.Verilog.ModuleItems
         parameter_value_assignment ::= # ( [ list_of_parameter_assignments ] )
         hierarchical_instance ::= name_of_instance ( [ list_of_port_connections ] )
          */
-        public IndexReference BeginIndexReference;
-        public IndexReference LastIndexReference;
         public static bool Parse(WordScanner word, NameSpace nameSpace)
         {
             // interface instantiation can be placed only in module,or interface

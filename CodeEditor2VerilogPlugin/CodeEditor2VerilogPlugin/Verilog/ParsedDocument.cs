@@ -149,6 +149,14 @@ namespace pluginVerilog.Verilog
                 break;
             }
 
+            //foreach(IInstantiation instantiation in space.BuildingBlock.Instantiations.Values)
+            //{
+            //    if (iref.IsSmallerThan(instantiation.BeginIndexReference)) continue;
+            //    if (iref.IsGreaterThan(instantiation.LastIndexReference)) continue;
+            //    instantiation.AppendLabel(ret);
+            //    break;
+            //}
+
             if (text.StartsWith(".") && space is IModuleOrGeneratedBlock)
             {
                 IModuleOrGeneratedBlock? block = space as IModuleOrGeneratedBlock;
