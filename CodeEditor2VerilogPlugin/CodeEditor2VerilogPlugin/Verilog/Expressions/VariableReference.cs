@@ -225,10 +225,11 @@ namespace pluginVerilog.Verilog.Expressions
             }
             else
             {   // w/o range
-                if (variable is DataObjects.Variables.Reg)
+                if (variable is DataObjects.Variables.IntegerVectorValueVariable)
                 {
-                    DataObjects.Variables.Reg reg = (DataObjects.Variables.Reg)variable;
-                    if (reg.Range != null) val.BitWidth = reg.Range.BitWidth;
+                    var original = variable as DataObjects.Variables.IntegerVectorValueVariable;
+                    if (original == null) throw new Exception();
+                    if (original.Range != null) val.BitWidth = original.Range.BitWidth;
                     else val.BitWidth = 1;
                 }
                 else if (variable is Net)
