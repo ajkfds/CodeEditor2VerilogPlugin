@@ -16,6 +16,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         {
             get
             {
+                if (PackedDimensions == null) return null;
                 if (PackedDimensions.Count < 1) return null;
                 return PackedDimensions[0];
             }
