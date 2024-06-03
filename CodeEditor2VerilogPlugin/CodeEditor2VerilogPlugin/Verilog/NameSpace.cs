@@ -59,11 +59,7 @@ namespace pluginVerilog.Verilog
                 {
                     items.Add(newItem(variable.Name, CodeDrawStyle.ColorType.Net));
                 }
-                else if (variable is DataObjects.Variables.Reg)
-                {
-                    items.Add(newItem(variable.Name, CodeDrawStyle.ColorType.Register));
-                }
-                else if (variable is DataObjects.Variables.Integer)
+                else if (variable is DataObjects.Variables.Variable)
                 {
                     items.Add(newItem(variable.Name, CodeDrawStyle.ColorType.Variable));
                 }
