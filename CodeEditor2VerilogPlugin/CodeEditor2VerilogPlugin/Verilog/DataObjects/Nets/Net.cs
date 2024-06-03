@@ -325,7 +325,16 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                     {
                         if (nameSpace.DataObjects.ContainsKey(net.Name))
                         {
-                            word.RootPointer.AddError(net.DefinedReference, "duplicated net name");
+                            BuildingBlocks.IModuleOrInterfaceOrProgram portBlock = nameSpace.BuildingBlock as BuildingBlocks.IModuleOrInterfaceOrProgram;
+                            if(portBlock != null && portBlock.Ports.ContainsKey(net.Name))
+                            {   // for non-ansi style port definition
+                                nameSpace.DataObjects[net.Name] = net;
+                                portBlock.Ports[net.Name].DataObject = net;
+                            }
+                            else
+                            {
+                                word.RootPointer.AddError(net.DefinedReference, "duplicated net name");
+                            }
                         }
                         else
                         {
