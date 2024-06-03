@@ -59,6 +59,15 @@ namespace pluginVerilog.Verilog.DataObjects
         constant_expression ::= (From Annex A - A.8.3)
         constant_primary | unary_operator { attribute_instance } constant_primary | constant_expression binary_operator { attribute_instance } constant_expression | constant_expression ? { attribute_instance } constant_expression     constant_expression | string 
          */
+
+        public static Range CreateTempRange(int msbBit,int lsbBit)
+        {
+            Range range = new Range();
+            range.MsbBitExpression = Expressions.Expression.CreateTempExpression(msbBit.ToString());
+            range.LsbBitExpression = Expressions.Expression.CreateTempExpression(lsbBit.ToString());
+            range.BitWidth = msbBit - lsbBit + 1;
+            return range;
+        }
         public static Range ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             if (word.GetCharAt(0) != '[') System.Diagnostics.Debugger.Break();
