@@ -204,12 +204,17 @@ namespace pluginVerilog.Verilog
                     {
                         Verilog.DataObjects.Nets.Net net = Verilog.DataObjects.Nets.Net.Create(Verilog.DataObjects.Nets.Net.NetTypeEnum.Wire, null);
                         net.Name = name;
+
+                        if(expression!=null && expression.BitWidth > 1)
+                        {
+                            net.PackedDimensions.Add(Verilog.DataObjects.Range.CreateTempRange((int)expression.BitWidth - 1, 0));
+                        }
                         DataObjects.Add(net.Name, net);
                     }
                     else
                     {
-                        DataObjects.DataTypes.IntegerVectorType dtype = Verilog.DataObjects.DataTypes.IntegerVectorType.Create(Verilog.DataObjects.DataTypes.DataTypeEnum.Logic, false, null);
-                        Verilog.DataObjects.Variables.Logic logic = Verilog.DataObjects.Variables.Logic.Create(dtype);
+                        DataObjects.DataTypes.IntegerVectorType dType = Verilog.DataObjects.DataTypes.IntegerVectorType.Create(Verilog.DataObjects.DataTypes.DataTypeEnum.Logic, false, null);
+                        Verilog.DataObjects.Variables.Logic logic = Verilog.DataObjects.Variables.Logic.Create(dType);
                         logic.Name = name;
                         DataObjects.Add(logic.Name, logic);
                     }
