@@ -149,39 +149,15 @@ namespace pluginVerilog.Verilog
                 break;
             }
 
-            //foreach(IInstantiation instantiation in space.BuildingBlock.Instantiations.Values)
-            //{
-            //    if (iref.IsSmallerThan(instantiation.BeginIndexReference)) continue;
-            //    if (iref.IsGreaterThan(instantiation.LastIndexReference)) continue;
-            //    instantiation.AppendLabel(ret);
-            //    break;
-            //}
-
-            if (text.StartsWith(".") && space is IModuleOrGeneratedBlock)
+            int count = ret.ItemCount;
+            foreach (IInstantiation instantiation in space.BuildingBlock.Instantiations.Values)
             {
-                IModuleOrGeneratedBlock? block = space as IModuleOrGeneratedBlock;
-                ModuleItems.ModuleInstantiation? inst = null;
-                if(block != null)
-                {
-                    foreach (ModuleItems.ModuleInstantiation i in block.ModuleInstantiations.Values)
-                    {
-                        if (iref.IsSmallerThan(i.BeginIndexReference)) continue;
-                        if (iref.IsGreaterThan(i.LastIndexReference)) continue;
-                        inst = i;
-                        break;
-                    }
-                }
-
-                if (inst != null)
-                {
-                    string portName = text.Substring(1);
-                    Module? originalModule = ProjectProperty.GetBuildingBlock(inst.SourceName) as Module;
-                    if (originalModule == null) return ret;
-                    if (!originalModule.Ports.ContainsKey(portName)) return ret;
-                    Verilog.DataObjects.Port port = originalModule.Ports[portName];
-                    ret.AppendLabel(port.GetLabel());
-                }
+                if (iref.IsSmallerThan(instantiation.BeginIndexReference)) continue;
+                if (iref.IsGreaterThan(instantiation.LastIndexReference)) continue;
+                instantiation.AppendLabel(iref,ret);
+                break;
             }
+            if (ret.ItemCount != count) return ret;
 
             if (space.DataObjects.ContainsKey(text))
             {

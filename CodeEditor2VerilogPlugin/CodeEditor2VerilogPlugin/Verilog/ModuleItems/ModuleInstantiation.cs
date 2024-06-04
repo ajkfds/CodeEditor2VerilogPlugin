@@ -19,8 +19,37 @@ namespace pluginVerilog.Verilog.ModuleItems
 
         public Dictionary<string, Expressions.Expression> PortConnection { get; set; } = new Dictionary<string, Expressions.Expression>();
 
-        public void AppendLabel(int index,AjkAvaloniaLibs.Contorls.ColorLabel label)
+        public List<PortReference> PortReferences = new List<PortReference>();
+        public class PortReference
         {
+            public PortReference(string name, IndexReference beginIndexReference, IndexReference lastIndexReference)
+            {
+                BeginIndexReference = beginIndexReference;
+                LastIndexReference = lastIndexReference;
+                Name = name;
+            }
+            public readonly IndexReference BeginIndexReference;
+            public readonly IndexReference LastIndexReference;
+            public readonly string Name;
+        }
+        public void AppendLabel(IndexReference iref,AjkAvaloniaLibs.Contorls.ColorLabel label)
+        {
+            PortReference? portRef = null;
+            foreach(PortReference pRef in PortReferences)
+            {
+                if (iref.IsSmallerThan(pRef.BeginIndexReference)) continue;
+                if (iref.IsGreaterThan(pRef.LastIndexReference)) continue;
+                portRef = pRef;
+                break;
+            }
+            if (portRef == null) return;
+
+            string portName = portRef.Name;
+            Module? originalModule = ProjectProperty.GetBuildingBlock(SourceName) as Module;
+            if (originalModule == null) return;
+            if (!originalModule.Ports.ContainsKey(portName)) return;
+            Verilog.DataObjects.Port port = originalModule.Ports[portName];
+            label.AppendLabel(port.GetLabel());
         }
 
         public string OverrideParameterID
@@ -293,12 +322,14 @@ namespace pluginVerilog.Verilog.ModuleItems
                 { // named parameter assignment
                     while (!word.Eof && word.Text == ".")
                     {
-                        word.MoveNext();
+                        word.MoveNext();    // .
                         string pinName = word.Text;
+                        IndexReference startRef = word.CreateIndexReference();
                         if (notWrittenPortName.Contains(pinName)) notWrittenPortName.Remove(pinName);
 
                         bool outPort = false;
                         word.Color(CodeDrawStyle.ColorType.Identifier);
+
 
                         if (instancedModule != null && !word.Prototype) {
                             if (instancedModule.Ports.ContainsKey(pinName))
@@ -319,6 +350,13 @@ namespace pluginVerilog.Verilog.ModuleItems
                             word.AddError("duplicated");
                         }
                         word.MoveNext();
+                        if (!word.Prototype)
+                        {
+                            PortReference pRef = new PortReference(pinName, startRef, word.CreateIndexReference());
+                            moduleInstantiation.PortReferences.Add(pRef);
+                        }
+
+
                         if (word.Text != "(")
                         {
                             word.AddError("( expected");

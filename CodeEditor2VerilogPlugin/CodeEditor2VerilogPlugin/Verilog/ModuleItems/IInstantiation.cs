@@ -16,7 +16,7 @@ namespace pluginVerilog.Verilog.ModuleItems
         string OverrideParameterID { get; }
         bool Prototype { get; set; }
         BuildingBlock GetInstancedBuildingBlock();
-        void AppendLabel(int index, AjkAvaloniaLibs.Contorls.ColorLabel label);
+        void AppendLabel(IndexReference iref, AjkAvaloniaLibs.Contorls.ColorLabel label);
 
         IndexReference BeginIndexReference { get; }
         IndexReference LastIndexReference { get; }

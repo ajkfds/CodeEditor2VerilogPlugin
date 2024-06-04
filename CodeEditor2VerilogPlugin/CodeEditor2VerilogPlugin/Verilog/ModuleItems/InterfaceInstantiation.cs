@@ -20,7 +20,7 @@ namespace pluginVerilog.Verilog.ModuleItems
 
         public IndexReference BeginIndexReference { get; set; }
         public IndexReference LastIndexReference { get; set; }
-        public void AppendLabel(int index, AjkAvaloniaLibs.Contorls.ColorLabel label)
+        public void AppendLabel(IndexReference iref, AjkAvaloniaLibs.Contorls.ColorLabel label)
         {
         }
         public string OverrideParameterID
