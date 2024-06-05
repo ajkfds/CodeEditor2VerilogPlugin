@@ -1089,7 +1089,8 @@ namespace pluginVerilog.Verilog
             stock.Add(wordPointer);
             wordPointer = newPointer;
             wordPointer.Document._tag = "diveInto";
-
+            wordPointer.Document.TextColors.RemoveColors();
+            wordPointer.Document.Marks.RemoveMarks();
 
             // activate coloring when code editor opened the target node
 //            wordPointer.InhibitColor = true;
