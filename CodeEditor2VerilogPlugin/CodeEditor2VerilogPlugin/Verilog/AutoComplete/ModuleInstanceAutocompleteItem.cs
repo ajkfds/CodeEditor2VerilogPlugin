@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Avalonia.Media;
@@ -29,23 +30,25 @@ namespace pluginVerilog.Verilog.AutoComplete
             char currentChar = codeDocument.GetCharAt(codeDocument.CaretIndex);
             if (currentChar != '\r' && currentChar != '\n') return;
 
-            ProjectProperty projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+            ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+            if (projectProperty == null) return;
 
-            CodeEditor2.Data.ITextFile itext = CodeEditor2.Controller.CodeEditor.GetTextFile();
+            CodeEditor2.Data.ITextFile iText = CodeEditor2.Controller.CodeEditor.GetTextFile();
 
-            if (!(itext is Data.IVerilogRelatedFile)) return;
-            var vfile = itext as Data.IVerilogRelatedFile;
-            ParsedDocument parsedDocument = vfile.VerilogParsedDocument;
+            if (!(iText is Data.IVerilogRelatedFile)) return;
+            var vFile = iText as Data.IVerilogRelatedFile;
+            if (vFile == null) return;
+            ParsedDocument? parsedDocument = vFile.VerilogParsedDocument;
             if (parsedDocument == null) return;
 
-            BuildingBlock module = parsedDocument.GetBuildingBlockAt(vfile.CodeDocument.GetLineStartIndex(vfile.CodeDocument.GetLineAt(vfile.CodeDocument.CaretIndex)));
+            BuildingBlock? module = parsedDocument.GetBuildingBlockAt(vFile.CodeDocument.GetLineStartIndex(vFile.CodeDocument.GetLineAt(vFile.CodeDocument.CaretIndex)));
             if (module == null) return;
 
-            Data.VerilogFile instancedFile = projectProperty.GetFileOfBuildingBlock(Text) as Data.VerilogFile;
+            Data.VerilogFile? instancedFile = projectProperty.GetFileOfBuildingBlock(Text) as Data.VerilogFile;
             if (instancedFile == null) return;
-            Verilog.ParsedDocument instancedParsedDocument = instancedFile.ParsedDocument as Verilog.ParsedDocument;
+            Verilog.ParsedDocument? instancedParsedDocument = instancedFile.ParsedDocument as Verilog.ParsedDocument;
             if (instancedParsedDocument == null) return;
-            Module instancedModule = instancedParsedDocument.Root.BuldingBlocks[Text] as Module;
+            Module? instancedModule = instancedParsedDocument.Root.BuldingBlocks[Text] as Module;
             if (instancedModule == null) return;
 
             string instanceName;
@@ -60,7 +63,7 @@ namespace pluginVerilog.Verilog.AutoComplete
             // create code
             StringBuilder sb = new StringBuilder();
 
-            // modulename
+            // module name
             sb.Append(" ");
 
             // parameters

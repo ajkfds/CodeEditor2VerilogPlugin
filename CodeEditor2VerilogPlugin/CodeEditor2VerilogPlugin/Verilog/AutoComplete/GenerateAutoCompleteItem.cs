@@ -14,18 +14,21 @@ namespace pluginVerilog.Verilog.AutoComplete
 
         public override void Apply(CodeEditor2.CodeEditor.CodeDocument codeDocument)
         {
-            int prevIndex = codeDocument.CaretIndex;
-            if (codeDocument.GetLineStartIndex(codeDocument.GetLineAt(prevIndex)) != prevIndex && prevIndex != 0)
+            CodeEditor.CodeDocument? document = codeDocument as CodeEditor.CodeDocument;
+            if (document == null) return;
+
+            int prevIndex = document.CaretIndex;
+            if (document.GetLineStartIndex(document.GetLineAt(prevIndex)) != prevIndex && prevIndex != 0)
             {
                 prevIndex--;
             }
-            char currentChar = codeDocument.GetCharAt(codeDocument.CaretIndex);
+            char currentChar = document.GetCharAt(document.CaretIndex);
             if (currentChar != '\r' && currentChar != '\n') return;
-            string indent = (codeDocument as CodeEditor.CodeDocument).GetIndentString(prevIndex);
+            string indent = document.GetIndentString(prevIndex);
 
             int headIndex, length;
-            codeDocument.GetWord(prevIndex, out headIndex, out length);
-            codeDocument.Replace(headIndex, length, ColorIndex, Text + "\r\n"+indent+"endgenerate");
+            document.GetWord(prevIndex, out headIndex, out length);
+            document.Replace(headIndex, length, ColorIndex, Text + "\r\n"+indent+"endgenerate");
             CodeEditor2.Controller.CodeEditor.SetCaretPosition(headIndex + Text.Length);
             CodeEditor2.Controller.CodeEditor.SetSelection(headIndex + Text.Length, headIndex + Text.Length);
         }
