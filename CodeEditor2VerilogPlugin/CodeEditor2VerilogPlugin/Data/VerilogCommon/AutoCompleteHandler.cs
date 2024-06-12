@@ -60,6 +60,7 @@ namespace pluginVerilog.Data.VerilogCommon
             //            toolItems.Add(new Verilog.Snippets.ConnectionCheckSnippet());
             toolItems.Add(new Verilog.Snippets.AutoFormatSnippet());
             toolItems.Add(new Verilog.Snippets.ModuleInstanceSnippet());
+            toolItems.Add(new Verilog.Snippets.PortConnectionCreateSnippet());
             return toolItems;
         }
 

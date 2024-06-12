@@ -2,10 +2,13 @@
 using CodeEditor2;
 using CodeEditor2.FileTypes;
 using CodeEditor2.Views;
+using CodeEditor2Plugin;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace pluginVerilog
@@ -35,7 +38,12 @@ namespace pluginVerilog
                 CodeEditor2.Global.FileTypes.Add(fileType.ID, fileType);
             }
 
-
+            if (!CodeEditor2.Global.ProjectPropertyDeserializers.ContainsKey(Id))
+            {
+                CodeEditor2.Global.ProjectPropertyDeserializers.Add(Id,
+                    (je, op) => { return ProjectProperty.DeserializeSetup(je, op); }
+                    );
+            }
             // append navigate context menu items
 
 //            contextMenu.Items.Add()
@@ -81,5 +89,6 @@ namespace pluginVerilog
 
             return true;
         }
+
     }
 }

@@ -5,55 +5,141 @@ using System.Text;
 using System.Threading.Tasks;
 using AjkAvaloniaLibs.Libs.Json;
 using Avalonia.Controls.Platform;
+using CodeEditor2.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.ModuleItems;
+using System.Text.Json.Serialization;
+using System.Text.Json;
+using System.Globalization;
+using Avalonia.OpenGL;
 
 namespace pluginVerilog
 {
     public class ProjectProperty : CodeEditor2.Data.ProjectProperty
     {
-        public ProjectProperty(CodeEditor2.Data.Project project)
+        //public ProjectProperty(CodeEditor2.Data.Project project)
+        //{
+        //    this.project = project;
+        //}
+
+        public ProjectProperty(Project project,ProjectProperty.Setup setup) : base(project,setup)
         {
-            this.project = project;
+
         }
+        public ProjectProperty(Project project) : base(project)
+        {
+
+        }
+
         private CodeEditor2.Data.Project project;
 
         public Verilog.AutoComplete.Setup SnippetSetup = new Verilog.AutoComplete.Setup();
 
-        public override void SaveSetup(JsonWriter writer)
+        public override Setup CreateSetup()
         {
-            using (var macroWriter = writer.GetObjectWriter("Macros"))
-            {
-                foreach (var kvp in Macros)
-                {
-                    macroWriter.writeKeyValue(kvp.Key, kvp.Value.MacroText);
-                }
-            }
+            return new Setup(this);
         }
+
+        public override CodeEditor2.Data.ProjectProperty.Setup? CreateSetup(JsonElement jsonElement, JsonSerializerOptions options)
+        {
+            return JsonSerializer.Deserialize(jsonElement, typeof(Setup), options) as CodeEditor2.Data.ProjectProperty.Setup;
+        }
+        public static ProjectProperty.Setup? DeserializeSetup(JsonElement jsonElement, JsonSerializerOptions options)
+        {
+            return JsonSerializer.Deserialize(jsonElement, typeof(ProjectProperty.Setup), options) as ProjectProperty.Setup;
+        }
+        public new class Setup : CodeEditor2.Data.ProjectProperty.Setup
+        {
+            public Setup() { }
+            public Setup(ProjectProperty projectProperty)
+            {
+
+            }
+            public override string ID { get; set; } = Plugin.StaticID;
+            public string test { get; set; } = "verilogTest";
+            public override void Write(
+                Utf8JsonWriter writer,
+                JsonSerializerOptions options)
+            {
+                JsonSerializer.Serialize(writer, this, typeof(Setup), options);
+            }
+
+
+        }
+
+        //public new class Setup : CodeEditor2.Data.ProjectProperty.Setup
+        //{
+        //    public Setup(CodeEditor2.Data.ProjectProperty projectProperty) : base(projectProperty)
+        //    {
+
+        //    }
+
+        //    public override string ID { get => Plugin.StaticID;  }
+
+        //    [JsonInclude]
+        //    string Name = "VerilogPulgin";
+
+
+        //}
+
+        //public override void AddJsonConverter(JsonSerializerOptions options)
+        //{
+        //    options.Converters.Add(new ProjectPropertyJsonConverter());
+        //}
+        //public class ProjectPropertyJsonConverter : JsonConverter<CodeEditor2.Data.ProjectPropertySetup>
+        //{
+        //    public override ProjectPropertySetup Read(
+        //        ref Utf8JsonReader reader,
+        //        Type typeToConvert,
+        //        JsonSerializerOptions options)
+        //    {
+        //        return (ProjectPropertySetup)JsonSerializer.Deserialize(ref reader, typeof(ProjectPropertySetup), options);
+        //    }
+
+        //    public override void Write(
+        //        Utf8JsonWriter writer,
+        //        ProjectPropertySetup value,
+        //        JsonSerializerOptions options)
+        //    {
+        //        ProjectPropertySetup val = value as ProjectPropertySetup;
+        //        JsonSerializer.Serialize(writer, value as ProjectPropertySetup, typeof(pluginVerilog.ProjectProperty.Setup), options);
+        //    }
+        //}
+
+        //public override void SaveSetup(JsonWriter writer)
+        //{
+        //    using (var macroWriter = writer.GetObjectWriter("Macros"))
+        //    {
+        //        foreach (var kvp in Macros)
+        //        {
+        //            macroWriter.writeKeyValue(kvp.Key, kvp.Value.MacroText);
+        //        }
+        //    }
+        //}
 
         // VerilogModuleParsedData
-        public override void LoadSetup(JsonReader jsonReader)
-        {
-            Macros.Clear();
-            using(var reader = jsonReader.GetNextObjectReader())
-            {
-                while (true)
-                {
-                    string key = reader.GetNextKey();
-                    if (key == null) break;
+        //public override void LoadSetup(JsonReader jsonReader)
+        //{
+        //    Macros.Clear();
+        //    using(var reader = jsonReader.GetNextObjectReader())
+        //    {
+        //        while (true)
+        //        {
+        //            string key = reader.GetNextKey();
+        //            if (key == null) break;
 
-                    switch (key)
-                    {
-                        case "Macros":
-                            loadMacros(reader);
-                            break;
-                        default:
-                            reader.SkipValue();
-                            break;
-                    }
-                }
-            }
-        }
+        //            switch (key)
+        //            {
+        //                case "Macros":
+        //                    loadMacros(reader);
+        //                    break;
+        //                default:
+        //                    reader.SkipValue();
+        //                    break;
+        //            }
+        //        }
+        //    }
+        //}
 
         public BuildingBlock? GetInstancedBuildingBlock(IInstantiation instantiation)
         {
