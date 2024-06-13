@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Avalonia.Media;
 using CodeEditor2.CodeEditor;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.ModuleItems;
@@ -42,6 +43,8 @@ namespace pluginVerilog.Verilog.Snippets
                 if (iref.IsGreaterThan(moduleInstantiation.LastIndexReference)) continue;
 
                 writeModuleInstance(codeDocument, index, moduleInstantiation);
+
+                CodeEditor2.Controller.CodeEditor.RequestReparse();
                 return;
             }
         }
