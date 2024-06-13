@@ -64,6 +64,7 @@ namespace pluginVerilog.Verilog.Snippets
                 CreateString(moduleInstantiation,"\t",projectProperty)
                 );
             CodeEditor2.Controller.CodeEditor.SetSelection(codeDocument.CaretIndex, codeDocument.CaretIndex);
+            CodeEditor2.Controller.CodeEditor.RequestReparse();
         }
 
         private string CreateString(ModuleInstantiation moduleInstantiation,string indent, ProjectProperty projectProperty)
@@ -140,6 +141,7 @@ namespace pluginVerilog.Verilog.Snippets
                 {
                     string valueName = port.Name.ToLower();
                     sb.Append(valueName);
+
 //                    if(moduleInstantiation.)
                 }
                 sb.Append(" )");
