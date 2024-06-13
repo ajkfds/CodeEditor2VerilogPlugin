@@ -796,8 +796,33 @@ namespace pluginVerilog.Verilog
                 wordPointer.MoveNextUntilEol();
                 return;
             }
+
+            /*
+            # double quotes     ("filename")
+              a relative path the compiler's current working directory, 
+              and optionally user-specified locations are searched. 
+
+            # angle brackets    (<filename>)
+              then only an implementation dependent location containing files defined by the language standard is searched.
+              Relative path names are interpreted relative to that location. 
+
+              When the filename is an absolute path, only that filename is included and only the double quote form of the `include can be used.
+
+            `include nesting levels must accept > 15
+             */
+
+            string quote = wordPointer.Text.Substring(0, 1);
             string filePath = wordPointer.Text;
             filePath = filePath.Substring(1, filePath.Length - 2);
+
+            if (filePath.Contains('/') && System.IO.Path.DirectorySeparatorChar !='/')
+            {
+                filePath = filePath.Replace('/', System.IO.Path.DirectorySeparatorChar);
+            }
+            if (filePath.Contains('\\') && System.IO.Path.DirectorySeparatorChar != '\\')
+            {
+                filePath = filePath.Replace('\\', System.IO.Path.DirectorySeparatorChar);
+            }
 
             // search in same folder with original verilog file
             Data.IVerilogRelatedFile file = wordPointer.VerilogFile;
@@ -1089,11 +1114,11 @@ namespace pluginVerilog.Verilog
             stock.Add(wordPointer);
             wordPointer = newPointer;
             wordPointer.Document._tag = "diveInto";
-            wordPointer.Document.TextColors.RemoveColors();
-            wordPointer.Document.Marks.RemoveMarks();
+//            wordPointer.Document.TextColors.RemoveColors();
+//            wordPointer.Document.Marks.RemoveMarks();
 
             // activate coloring when code editor opened the target node
-//            wordPointer.InhibitColor = true;
+            wordPointer.InhibitColor = true;
             {
                 CodeEditor2.NavigatePanel.NavigatePanelNode? node = CodeEditor2.Controller.NavigatePanel.GetSelectedNode();
                 if (node != null)
@@ -1103,11 +1128,15 @@ namespace pluginVerilog.Verilog
                     {
                         if (vh.ID == vhInstance.ID)
                         {
+                            wordPointer.Document.TextColors.RemoveColors();
+                            wordPointer.Document.Marks.RemoveMarks();
                             wordPointer.InhibitColor = false;
                         }
                     }
                 }
             }
+
+            System.Diagnostics.Debug.Print("### "+newParsedDocument.File.Name+"  "+wordPointer.InhibitColor.ToString());
 
             if (wordPointer.Eof)
             {

@@ -17,7 +17,7 @@ namespace pluginVerilog.Verilog
             this.ParsedDocument = parsedDocument;
             if (this.ParsedDocument == null) System.Diagnostics.Debugger.Break();
             string sectionName = SectionName;
-            fetchNext(this.Document,ref index, out length, out nextIndex, out wordType, ref sectionName,true);
+            fetchNext(this.Document,ref index, out length, out nextIndex, out wordType, ref sectionName, !InhibitColor);
             SectionName = sectionName;
         }
 
@@ -244,7 +244,7 @@ namespace pluginVerilog.Verilog
             if (Eof) return;
 
             string sectionName = SectionName;
-            fetchNext(Document, ref index, out length, out nextIndex, out wordType,ref sectionName,true);
+            fetchNext(Document, ref index, out length, out nextIndex, out wordType,ref sectionName, !InhibitColor);
             SectionName = sectionName;
             commentSkippedPrev = commentSkipped;
             commentIndexPrev = commentIndex;
@@ -259,7 +259,7 @@ namespace pluginVerilog.Verilog
                     commentSkipped = true;
                     index = nextIndex;
                     sectionName = SectionName;
-                    fetchNext(Document, ref index, out length, out nextIndex, out wordType, ref sectionName, true);
+                    fetchNext(Document, ref index, out length, out nextIndex, out wordType, ref sectionName, !InhibitColor);
                     SectionName = sectionName;
                 }
                 else
@@ -300,7 +300,7 @@ namespace pluginVerilog.Verilog
                 commentSkipped = true;
                 index = nextIndex;
                 string sectionName = SectionName;
-                fetchNext(Document, ref index, out length, out nextIndex, out wordType, ref sectionName, true);
+                fetchNext(Document, ref index, out length, out nextIndex, out wordType, ref sectionName, !InhibitColor);
                 SectionName = sectionName;
             }
         }
@@ -825,7 +825,7 @@ namespace pluginVerilog.Verilog
                 ch = document.GetCharAt(nextIndex);
                 if (ch == '\n') return;
                 if (ch != target[i]) return;
-                document.TextColors.SetColorAt(nextIndex, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Comment));
+//                document.TextColors.SetColorAt(nextIndex, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Comment));
                 nextIndex++;
                 i++;
 
@@ -834,7 +834,7 @@ namespace pluginVerilog.Verilog
 
             for (int j = nextIndex - i; j < nextIndex; j++)
             {
-                document.TextColors.SetColorAt(j, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.HighLightedComment));
+//                document.TextColors.SetColorAt(j, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.HighLightedComment));
             }
             while (docLength > nextIndex)
             {
@@ -847,7 +847,7 @@ namespace pluginVerilog.Verilog
             {
                 ch = document.GetCharAt(nextIndex);
                 if (ch == '\n' || ch == '\r') break;
-                document.TextColors.SetColorAt(nextIndex, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.HighLightedComment));
+//                document.TextColors.SetColorAt(nextIndex, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.HighLightedComment));
                 sb.Append(ch);
                 nextIndex++;
             }
