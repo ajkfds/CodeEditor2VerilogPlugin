@@ -1,5 +1,6 @@
 ﻿using DynamicData.Binding;
 using pluginVerilog.Verilog.BuildingBlocks;
+using pluginVerilog.Verilog.DataObjects.Nets;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -216,6 +217,12 @@ namespace pluginVerilog.Verilog
                         DataObjects.DataTypes.IntegerVectorType dType = Verilog.DataObjects.DataTypes.IntegerVectorType.Create(Verilog.DataObjects.DataTypes.DataTypeEnum.Logic, false, null);
                         Verilog.DataObjects.Variables.Logic logic = Verilog.DataObjects.Variables.Logic.Create(dType);
                         logic.Name = name;
+                        if (expression != null && expression.BitWidth > 1)
+                        {
+                            logic.PackedDimensions = new List<DataObjects.Range>();
+                            logic.PackedDimensions.Add(Verilog.DataObjects.Range.CreateTempRange((int)expression.BitWidth - 1, 0));
+                        }
+
                         DataObjects.Add(logic.Name, logic);
                     }
                 }
