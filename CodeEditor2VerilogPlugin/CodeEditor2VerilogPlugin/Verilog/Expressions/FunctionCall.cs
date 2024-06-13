@@ -11,12 +11,12 @@ namespace pluginVerilog.Verilog.Expressions
         protected FunctionCall() { }
         public List<Expression> Expressions = new List<Expression>();
         public string FunctionName { get; protected set; }
-        public new static FunctionCall ParseCreate(WordScanner word, NameSpace nameSpace)
+        public new static FunctionCall? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             return ParseCreate(word, nameSpace, nameSpace);
         }
 
-        public static FunctionCall ParseCreate(WordScanner word, NameSpace nameSpace,NameSpace functionNameSpace)
+        public static FunctionCall? ParseCreate(WordScanner word, NameSpace nameSpace,NameSpace functionNameSpace)
         {
             FunctionCall functionCall = new FunctionCall();
             functionCall.Reference = word.GetReference();
