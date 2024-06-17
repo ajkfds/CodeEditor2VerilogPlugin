@@ -831,12 +831,18 @@ namespace pluginVerilog.Verilog
             {
                 System.Diagnostics.Debugger.Break();
             }
-            string sameFolderPath = file.RelativePath;
-            if (sameFolderPath.Contains(System.IO.Path.DirectorySeparatorChar))
-            {
-                sameFolderPath = sameFolderPath.Substring(0, sameFolderPath.LastIndexOf(System.IO.Path.DirectorySeparatorChar));
-                sameFolderPath = sameFolderPath + System.IO.Path.DirectorySeparatorChar + filePath;
 
+            {
+                string sameFolderPath = file.RelativePath;
+                if (sameFolderPath.Contains(System.IO.Path.DirectorySeparatorChar))
+                {
+                    sameFolderPath = sameFolderPath.Substring(0, sameFolderPath.LastIndexOf(System.IO.Path.DirectorySeparatorChar));
+                    sameFolderPath = sameFolderPath + System.IO.Path.DirectorySeparatorChar + filePath;
+                }
+                else
+                {
+                    sameFolderPath = filePath;
+                }
                 if (wordPointer.ParsedDocument == null) return;
                 if (wordPointer.ParsedDocument.Project == null) return;
 
@@ -844,11 +850,11 @@ namespace pluginVerilog.Verilog
                     (item) =>
                     {
                         if (item == null) return false;
-                        if(item is CodeEditor2.Data.TextFile)
+                        if (item is CodeEditor2.Data.TextFile)
                         {
                             var textFile = item as CodeEditor2.Data.TextFile;
                             if (textFile == null) throw new Exception();
-                            if(textFile.RelativePath == sameFolderPath)
+                            if (textFile.RelativePath == sameFolderPath)
                             {
                                 return true;
                             }
@@ -866,6 +872,7 @@ namespace pluginVerilog.Verilog
                     diveIntoIncludeFile(sameFolderPath);
                     return;
                 }
+
             }
 
             // search same filename in full project
@@ -1044,6 +1051,7 @@ namespace pluginVerilog.Verilog
 
         private void diveIntoIncludeFile(string relativeFilePath)
         {
+            if (wordPointer.ParsedDocument.File == null) return;
             string id = wordPointer.ParsedDocument.File.ID + ","+ relativeFilePath +"_"+ wordPointer.ParsedDocument.IncludeFiles.Count.ToString();
 
             Data.IVerilogRelatedFile rootFile;
