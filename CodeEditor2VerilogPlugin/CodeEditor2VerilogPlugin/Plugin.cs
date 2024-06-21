@@ -87,6 +87,8 @@ namespace pluginVerilog
             // register project property form tab
             //            CodeEditor.Tools.ProjectPropertyForm.FormCreated += Tools.ProjectPropertyTab.ProjectPropertyFromCreated;
 
+            NavigatePanel.NavigatePanelMenu.Register();
+
             return true;
         }
 
