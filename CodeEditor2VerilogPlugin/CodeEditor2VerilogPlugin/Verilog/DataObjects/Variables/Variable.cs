@@ -11,7 +11,7 @@ using pluginVerilog.Verilog.Statements;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
-    // #SystemVeriog 2017
+    // #SystemVerilog 2017
     //	variable	+ integer_vector_type	+ bit 		user-defined-size	2state	sv
     //										+ logic		user-defined-size	4state  sv
     //										+ reg		user-defined-size	4state	v
@@ -109,7 +109,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         }
 
-        public virtual Variable Clone()
+        public override Variable Clone()
         {
             Variable val = new Variable();
             return val;
@@ -282,7 +282,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             }
             else
             {
-                return null;
+                return new List<string>();
             }
         }
 

@@ -20,9 +20,15 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         // logic        4state  >=1bit      
         // bit          2state  >=1bit      
 
-        public virtual int BitWidth { get; }
+        public virtual int? BitWidth { 
+            get 
+            {
+                if (PackedDimensions.Count == 0) return 0;
+                return PackedDimensions[0].BitWidth;
+            } 
+        }
 
-        public static IntegerVectorType ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static IntegerVectorType? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             switch (word.Text)
             {
@@ -37,6 +43,29 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             }
         }
 
+        public override string CreateString()
+        {
+            StringBuilder sb = new StringBuilder();
+            switch (Type)
+            {
+                case DataTypeEnum.Bit:
+                    sb.Append("bit");
+                    break;
+                case DataTypeEnum.Logic:
+                    sb.Append("logic");
+                    break;
+                case DataTypeEnum.Reg:
+                    sb.Append("reg");
+                    break;
+            }
+            foreach(Range range in PackedDimensions)
+            {
+                sb.Append(" " + range.CreateString());
+            }
+            return sb.ToString();
+        }
+
+
         public static IntegerVectorType Create(DataTypeEnum dataType, bool signed,List<Range> packedDimensions)
         {
             IntegerVectorType integerVectorType = new IntegerVectorType();
@@ -46,7 +75,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             return integerVectorType;
         }
 
-        public static IntegerVectorType parse(WordScanner word,NameSpace nameSpace,DataTypeEnum dataType)
+        public static IntegerVectorType? parse(WordScanner word,NameSpace nameSpace,DataTypeEnum dataType)
         {
             var integerVectorType = new IntegerVectorType();
             integerVectorType.Type = dataType;

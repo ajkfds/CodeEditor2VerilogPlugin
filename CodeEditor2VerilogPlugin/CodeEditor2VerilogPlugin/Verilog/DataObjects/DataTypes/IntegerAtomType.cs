@@ -17,7 +17,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         // signing              ::=   "signed" | "unsigned"
 
 
-        public static IntegerAtomType ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static IntegerAtomType? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             IntegerAtomType dType = new IntegerAtomType();
 
@@ -39,6 +39,34 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     return null;
             }
         }
+        public override string CreateString()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            switch (Type)
+            {
+                case DataTypeEnum.Byte:
+                    sb.Append("byte");
+                    break;
+                case DataTypeEnum.Shortint:
+                    sb.Append("shortint");
+                    break;
+                case DataTypeEnum.Int:
+                    sb.Append("int");
+                    break;
+                case DataTypeEnum.Longint:
+                    sb.Append("longint");
+                    break;
+                case DataTypeEnum.Integer:
+                    sb.Append("integer");
+                    break;
+                case DataTypeEnum.Time:
+                    sb.Append("time");
+                    break;
+            }
+
+            return sb.ToString();
+        }
 
         public static IntegerAtomType Create(DataTypeEnum dataType,bool signed)
         {
@@ -48,7 +76,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             return integerAtomType;
         }
 
-        protected static IntegerAtomType parse(WordScanner word, NameSpace nameSpace, DataTypeEnum dataType)
+        protected static IntegerAtomType? parse(WordScanner word, NameSpace nameSpace, DataTypeEnum dataType)
         {
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();

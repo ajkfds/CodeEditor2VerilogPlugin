@@ -21,19 +21,29 @@ namespace pluginVerilog.NavigatePanel
             if (menuItem_Add == null) return;
 
             {
-                MenuItem menuItem_AddFile = CodeEditor2.Global.CreateMenuItem("Verilog File", "MenuItem_AddVerilogFile",
+                MenuItem menuItem_AddFile = CodeEditor2.Global.CreateMenuItem("verilog module", "MenuItem_AddVerilogModule",
                     "CodeEditor2VerilogPlugin/Assets/Icons/verilogDocument.svg",
                     Avalonia.Media.Color.FromArgb(100, 200, 240, 240)
                     );
-                menuItem_AddFile.Click += menuItem_AddVerilogFile_Click;
+                menuItem_AddFile.Click += menuItem_AddVerilogModule_Click;
                 menuItem_Add.Items.Add(menuItem_AddFile);
             }
+
             {
-                MenuItem menuItem_AddFile = CodeEditor2.Global.CreateMenuItem("SystemVerilog File", "MenuItem_AddSystemVerilogFile",
+                MenuItem menuItem_AddFile = CodeEditor2.Global.CreateMenuItem("SystemVerilog module", "MenuItem_AddSystemVerilogModule",
                     "CodeEditor2VerilogPlugin/Assets/Icons/systemVerilogDocument.svg",
                     Avalonia.Media.Color.FromArgb(100, 200, 240, 240)
                     );
-                menuItem_AddFile.Click += menuItem_AddSystemVerilogFile_Click;
+                menuItem_AddFile.Click += menuItem_AddSystemVerilogModule_Click;
+                menuItem_Add.Items.Add(menuItem_AddFile);
+            }
+
+            {
+                MenuItem menuItem_AddFile = CodeEditor2.Global.CreateMenuItem("SystemVerilog interface", "MenuItem_AddSystemVerilogInterface",
+                    "CodeEditor2VerilogPlugin/Assets/Icons/systemVerilogDocument.svg",
+                    Avalonia.Media.Color.FromArgb(100, 200, 240, 240)
+                    );
+                menuItem_AddFile.Click += menuItem_AddSystemVerilogInterface_Click;
                 menuItem_Add.Items.Add(menuItem_AddFile);
             }
         }
@@ -86,7 +96,7 @@ namespace pluginVerilog.NavigatePanel
             CodeEditor2.Controller.NavigatePanel.UpdateFolder(node);
         }
 
-        private static async void menuItem_AddVerilogFile_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        private static async void menuItem_AddVerilogModule_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
             await generateFile("verilog module", "v",
                 (sw,name) => {
@@ -98,7 +108,7 @@ namespace pluginVerilog.NavigatePanel
                 }
             );
         }
-        private static async void menuItem_AddSystemVerilogFile_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        private static async void menuItem_AddSystemVerilogModule_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
             await generateFile("system verilog module", "sv",
                 (sw, name) => {
@@ -111,6 +121,16 @@ namespace pluginVerilog.NavigatePanel
             );
         }
 
+        private static async void menuItem_AddSystemVerilogInterface_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            await generateFile("system verilog interface", "sv",
+                (sw, name) => {
+                    sw.Write("interface " + name + ";\n");
+                    sw.Write("\n");
+                    sw.Write("endinterface\n");
+                }
+            );
+        }
         private static string getRelativeFolderPath(NavigatePanelNode node)
         {
             FileNode? fileNode = node as FileNode;

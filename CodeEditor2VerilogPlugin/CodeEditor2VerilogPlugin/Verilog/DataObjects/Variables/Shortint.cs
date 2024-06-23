@@ -14,7 +14,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         public static new Shortint Create(IDataType dataType)
         {
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.Shortint);
-            DataTypes.IntegerAtomType dType = dataType as DataTypes.IntegerAtomType;
+            DataTypes.IntegerAtomType? dType = dataType as DataTypes.IntegerAtomType;
 
             Shortint val = new Shortint();
             val.DataType = dType.Type;

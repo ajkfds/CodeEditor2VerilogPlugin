@@ -78,6 +78,11 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         //        public virtual bool State4 { get; }
         public virtual DataTypeEnum Type { get; set; }
 
+        public virtual string CreateString()
+        {
+            return "";
+        }
+
         /*
         data_type::=
               integer_vector_type[signing] { packed_dimension }

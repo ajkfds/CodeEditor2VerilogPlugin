@@ -19,7 +19,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             }
         }
 
-        public DataType BaseType { get; protected set; } = null;
+        public DataType? BaseType { get; protected set; } = null;
         public List<Item> Items = new List<Item>();
 
         public static Enum ParseCreate(WordScanner word, NameSpace nameSpace)

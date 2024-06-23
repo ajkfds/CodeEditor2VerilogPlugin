@@ -18,7 +18,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             }
         }
 
-        private string interfaceName;
+        private string interfaceName="";
 
         public static InterfaceInstance Create(ModuleItems.IInstantiation inst)
         {

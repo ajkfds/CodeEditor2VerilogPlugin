@@ -39,7 +39,7 @@ namespace pluginVerilog.Verilog.DataObjects
         // 
 
 
-        public string Name { set; get; }
+        public string Name { set; get; } = "";
         public string Comment { set; get; } = "";
         public WordReference DefinedReference { set; get; } = null;
         public DataTypeEnum DataType = DataTypeEnum.Reg;
@@ -49,6 +49,41 @@ namespace pluginVerilog.Verilog.DataObjects
         public List<WordReference> AssignedReferences { set; get; } = new List<WordReference>();
         public int DisposedIndex = -1;
 
+        public string CreateDataTypeString()
+        {
+            StringBuilder sb = new StringBuilder();
+            switch (DataType)
+            {
+                case DataTypeEnum.Bit:
+                    sb.Append("bit");
+                    break;
+                case DataTypeEnum.Byte:
+                    sb.Append("byte");
+                    break;
+                case DataTypeEnum.Chandle:
+                    sb.Append("chandle");
+                    break;
+                case DataTypeEnum.Class:
+                    sb.Append("class");
+                    break;
+                case DataTypeEnum.CoverGroup:
+                    sb.Append("covergroup");
+                    break;
+                case DataTypeEnum.Enum:
+                    sb.Append("enum");
+                    break;
+                case DataTypeEnum.Logic:
+                    sb.Append("logic");
+                    break;
+                case DataTypeEnum.Reg:
+                    sb.Append("reg");
+                    break;
+                case DataTypeEnum.String:
+                    sb.Append("string");
+                    break;
+            }
+            return sb.ToString();
+        }
 
         public virtual void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
         {

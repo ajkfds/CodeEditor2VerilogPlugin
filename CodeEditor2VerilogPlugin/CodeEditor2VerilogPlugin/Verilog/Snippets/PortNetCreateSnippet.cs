@@ -112,7 +112,7 @@ namespace pluginVerilog.Verilog.Snippets
                 sb.Append("\r\n) ");
             }
 
-            sb.Append(Name);
+            sb.Append(moduleInstantiation.Name);
             sb.Append(" (\r\n");
 
             first = true;
@@ -142,13 +142,18 @@ namespace pluginVerilog.Verilog.Snippets
                     string valueName = port.Name.ToLower();
                     sb.Append(valueName);
 
-//                    if(moduleInstantiation.)
+                    BuildingBlock buildingBlock = moduleInstantiation.GetInstancedBuildingBlock();
+                    if(!buildingBlock.DataObjects.ContainsKey(valueName)){
+                        sbDefine.Append( port.DataObject.DataType.ToString()+"\t"+valueName+";\n");
+                    }
                 }
                 sb.Append(" )");
                 first = false;
             }
             sb.Append("\r\n);");
-            return sb.ToString();
+
+            sbDefine.Append(sb.ToString());
+            return sbDefine.ToString();
         }
     }
 }

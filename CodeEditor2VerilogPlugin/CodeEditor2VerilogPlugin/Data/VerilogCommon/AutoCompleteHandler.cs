@@ -61,6 +61,7 @@ namespace pluginVerilog.Data.VerilogCommon
             toolItems.Add(new Verilog.Snippets.AutoFormatSnippet());
             toolItems.Add(new Verilog.Snippets.ModuleInstanceSnippet());
             toolItems.Add(new Verilog.Snippets.PortConnectionCreateSnippet());
+            toolItems.Add(new Verilog.Snippets.ModPortSnippet());
             return toolItems;
         }
 
