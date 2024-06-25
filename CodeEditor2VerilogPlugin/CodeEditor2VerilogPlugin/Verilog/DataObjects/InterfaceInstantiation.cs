@@ -1,16 +1,32 @@
 ﻿using CodeEditor2.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
+using pluginVerilog.Verilog.ModuleItems;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace pluginVerilog.Verilog.ModuleItems
+namespace pluginVerilog.Verilog.DataObjects
 {
-    public class InterfaceInstantiation : Item, IInstantiation
+    public class InterfaceInstantiation : DataObject,IInstantiation
     {
         protected InterfaceInstantiation() { }
+        public Attribute Attribute { get; set; }
+        public WordReference DefinitionReference { get; set; }
+
+        public Project Project { get; protected set; }
+
+        public Dictionary<string, string> Properties = new Dictionary<string, string>();
+        public ProjectProperty ProjectProperty
+        {
+            get
+            {
+                ProjectProperty? projectProperty = Project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+                if (projectProperty == null) throw new Exception();
+                return projectProperty;
+            }
+        }
 
         public string SourceName { get; protected set; }
         public string? ModPortName { get; set; }
@@ -42,13 +58,13 @@ namespace pluginVerilog.Verilog.ModuleItems
 
         public bool Prototype { get; set; } = false;
 
-        public static InterfaceInstantiation Create(string name,string sourceName,Project project)
+        public static InterfaceInstantiation Create(string name, string sourceName, Project project)
         {
-            InterfaceInstantiation inst = new InterfaceInstantiation();
-            inst.Name = name;
-            inst.SourceName = sourceName;
-            inst.Project = project;
-            return inst;
+            InterfaceInstantiation instantiation = new InterfaceInstantiation();
+            instantiation.Name = name;
+            instantiation.SourceName = sourceName;
+            instantiation.Project = project;
+            return instantiation;
         }
 
 
@@ -74,7 +90,7 @@ namespace pluginVerilog.Verilog.ModuleItems
             word.MoveNext();
 
             string next = word.NextText;
-            if(word.Text != "#" && next != "(" && next != ";" && General.IsIdentifier(word.Text))
+            if (word.Text != "#" && next != "(" && next != ";" && General.IsIdentifier(word.Text))
             {
                 moduleIdentifier.AddError("illegal module item");
                 word.SkipToKeyword(";");
@@ -108,7 +124,8 @@ namespace pluginVerilog.Verilog.ModuleItems
                         word.MoveNext();
                         word.Color(CodeDrawStyle.ColorType.Parameter);
                         string paramName = word.Text;
-                        if (instancedInterface != null && !instancedInterface.PortParameterNameList.Contains(paramName)){
+                        if (instancedInterface != null && !instancedInterface.PortParameterNameList.Contains(paramName))
+                        {
                             word.AddError("illegal parameter name");
                             error = true;
                         }
@@ -122,17 +139,18 @@ namespace pluginVerilog.Verilog.ModuleItems
                         {
                             word.MoveNext();
                         }
-                        Expressions.Expression expression = Expressions.Expression.ParseCreate(word, nameSpace);
-                        if(expression == null)
+                        Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
+                        if (expression == null)
                         {
                             error = true;
-                        }else if (!expression.Constant)
+                        }
+                        else if (!expression.Constant)
                         {
                             word.AddError("port parameter should be constant");
                             error = true;
                         }
 
-                        if (!error )//& word.Prototype)
+                        if (!error)//& word.Prototype)
                         {
                             if (interfaceInstantiation.ParameterOverrides.ContainsKey(paramName))
                             {
@@ -168,7 +186,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                     while (!word.Eof && word.Text != ")")
                     {
                         Expressions.Expression expression = Expressions.Expression.ParseCreate(word, nameSpace);
-                        if(instancedInterface != null)
+                        if (instancedInterface != null)
                         {
                             if (i >= instancedInterface.PortParameterNameList.Count)
                             {
@@ -212,13 +230,13 @@ namespace pluginVerilog.Verilog.ModuleItems
             }
 
             // swap to parameter overrided module
-            if( instancedInterface != null)
+            if (instancedInterface != null)
             {
                 if (interfaceInstantiation.ParameterOverrides.Count != 0)
                 {
                     instancedInterface = word.ProjectProperty.GetInstancedBuildingBlock(interfaceInstantiation) as Interface;
                 }
-                if (instancedInterface == null) nameSpace.BuildingBlock.ReperseRequested = true;
+                if (instancedInterface == null) nameSpace.BuildingBlock.ReparseRequested = true;
             }
 
 
@@ -294,11 +312,12 @@ namespace pluginVerilog.Verilog.ModuleItems
                         string pinName = word.Text;
                         bool outPort = false;
                         word.Color(CodeDrawStyle.ColorType.Identifier);
-                        if (instancedInterface != null && !word.Prototype) {
+                        if (instancedInterface != null && !word.Prototype)
+                        {
                             if (instancedInterface.Ports.ContainsKey(pinName))
                             {
-                                if(instancedInterface.Ports[pinName].Direction == DataObjects.Port.DirectionEnum.Output
-                                    || instancedInterface.Ports[pinName].Direction == DataObjects.Port.DirectionEnum.Inout )
+                                if (instancedInterface.Ports[pinName].Direction == Port.DirectionEnum.Output
+                                    || instancedInterface.Ports[pinName].Direction == Port.DirectionEnum.Inout)
                                 {
                                     outPort = true;
                                 }
@@ -324,7 +343,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                         if (outPort)
                         {
                             Expressions.Expression expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace);
-                            if ( word.Prototype && expression != null && !interfaceInstantiation.PortConnection.ContainsKey(pinName)) interfaceInstantiation.PortConnection.Add(pinName, expression);
+                            if (word.Prototype && expression != null && !interfaceInstantiation.PortConnection.ContainsKey(pinName)) interfaceInstantiation.PortConnection.Add(pinName, expression);
 
                             if (!word.Prototype)
                             {
@@ -393,10 +412,10 @@ namespace pluginVerilog.Verilog.ModuleItems
                     while (!word.Eof && word.Text != ")")
                     {
                         string pinName = "";
-                        if(instancedInterface != null && i < instancedInterface.PortsList.Count)
+                        if (instancedInterface != null && i < instancedInterface.PortsList.Count)
                         {
                             pinName = instancedInterface.PortsList[i].Name;
-                            Expressions.Expression expression = Expressions.Expression.ParseCreate(word,nameSpace);
+                            Expressions.Expression expression = Expressions.Expression.ParseCreate(word, nameSpace);
                             if (word.Prototype && expression != null && !interfaceInstantiation.PortConnection.ContainsKey(pinName)) interfaceInstantiation.PortConnection.Add(pinName, expression);
                         }
                         else
@@ -422,7 +441,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                 word.MoveNext();
                 interfaceInstantiation.LastIndexReference = word.CreateIndexReference();
 
-                if (!word.Prototype && word.Active) word.AppendBlock(interfaceInstantiation.BeginIndexReference , interfaceInstantiation.LastIndexReference);
+                if (!word.Prototype && word.Active) word.AppendBlock(interfaceInstantiation.BeginIndexReference, interfaceInstantiation.LastIndexReference);
                 if (word.Text != ",") break;
                 word.MoveNext();
             }
@@ -465,12 +484,12 @@ namespace pluginVerilog.Verilog.ModuleItems
             sb.Append(SourceName);
             sb.Append(" ");
 
-            if(instancedModule.PortParameterNameList.Count != 0)
+            if (instancedModule.PortParameterNameList.Count != 0)
             {
                 sb.Append("#(\r\n");
 
                 first = true;
-                foreach(var paramName in instancedModule.PortParameterNameList)
+                foreach (var paramName in instancedModule.PortParameterNameList)
                 {
                     if (!first) sb.Append(",\r\n");
                     sb.Append(indent);
@@ -483,8 +502,8 @@ namespace pluginVerilog.Verilog.ModuleItems
                     }
                     else
                     {
-                        if(
-                            instancedModule.Constants.ContainsKey(paramName) && 
+                        if (
+                            instancedModule.Constants.ContainsKey(paramName) &&
                             instancedModule.Constants[paramName].Expression != null
                             )
                         {
@@ -506,7 +525,7 @@ namespace pluginVerilog.Verilog.ModuleItems
             {
                 if (!first) sb.Append(",\r\n");
 
-                if(port.SectionName != sectionName)
+                if (port.SectionName != sectionName)
                 {
                     sectionName = port.SectionName;
                     sb.Append("// ");

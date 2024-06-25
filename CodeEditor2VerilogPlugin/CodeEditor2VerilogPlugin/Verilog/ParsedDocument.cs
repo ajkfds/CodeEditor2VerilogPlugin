@@ -1,5 +1,6 @@
 ﻿using Avalonia.Media.TextFormatting;
 using pluginVerilog.Verilog.BuildingBlocks;
+using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.ModuleItems;
 using System;
 using System.Collections.Generic;
@@ -421,23 +422,22 @@ namespace pluginVerilog.Verilog
             new AutoComplete.NonBlockingAssignmentAutoCompleteItem("<=",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Normal), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
         };
 
-        private NameSpace? getSearchNameSpace(NameSpace nameSpace,List<string> hier)
+        private NameSpace? getSearchNameSpace(NameSpace? nameSpace,List<string> hier)
         {
+            if (nameSpace == null) return null;
             BuildingBlock? buildingBlock = nameSpace.BuildingBlock;
-//            IBuildingBlockWithModuleInstance? buildingBlock = nameSpace.BuildingBlock as IBuildingBlockWithModuleInstance;
             if (buildingBlock == null) return null;
 
-            if(nameSpace == null) return null;
             if (hier.Count == 0) return nameSpace;
 
             if (buildingBlock.Instantiations.ContainsKey(hier[0]))
             {
-                IInstantiation inst = buildingBlock.Instantiations[hier[0]];
-                NameSpace bBlock = ProjectProperty.GetInstancedBuildingBlock(inst);
+                IInstantiation instantiation = buildingBlock.Instantiations[hier[0]];
+                NameSpace? bBlock = ProjectProperty.GetInstancedBuildingBlock(instantiation);
 
-                if (inst is InterfaceInstantiation)
+                if (instantiation is InterfaceInstantiation)
                 {
-                    InterfaceInstantiation? interfaceInstantiation = inst as InterfaceInstantiation;
+                    InterfaceInstantiation? interfaceInstantiation = instantiation as InterfaceInstantiation;
                     if (interfaceInstantiation == null) throw new Exception();
                     if(interfaceInstantiation.ModPortName != null)
                     {
@@ -474,7 +474,7 @@ namespace pluginVerilog.Verilog
             IndexReference iref = IndexReference.Create(this.IndexReference, index);
 
             // get current nameSpace
-            NameSpace space = null;
+            NameSpace? space = null;
             foreach (BuildingBlock module in Root.BuldingBlocks.Values)
             {
                 if (iref.IsSmallerThan(module.BeginIndexReference)) continue;
@@ -491,13 +491,6 @@ namespace pluginVerilog.Verilog
                 document.GetWord(index, out headIndex, out length);
                 return items;
             }
-
-            //bool endWithDot;
-            //List<string> words = document.GetHierWords(index, out endWithDot);
-            //if (words.Count == 0)
-            //{
-            //    return new List<CodeEditor2.CodeEditor.AutocompleteItem>();
-            //}
 
             if (hierWords.Count == 0 && cantidateWord.StartsWith("$"))
             {

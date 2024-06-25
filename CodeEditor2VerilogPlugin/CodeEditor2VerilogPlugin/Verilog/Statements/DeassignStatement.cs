@@ -21,7 +21,7 @@ namespace pluginVerilog.Verilog.Statements
 
         public void DisposeSubReference()
         {
-            LValue.DisposeSubRefrence(true);
+            LValue.DisposeSubReference(true);
         }
 
         protected DeassignStatement() { }

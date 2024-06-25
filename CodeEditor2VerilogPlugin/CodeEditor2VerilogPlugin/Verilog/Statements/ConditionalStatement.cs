@@ -14,7 +14,7 @@ namespace pluginVerilog.Verilog.Statements
         {
             foreach(ConditionStatementPair pair in ConditionStatementPairs)
             {
-                pair.ConditionalExpression.DisposeSubRefrence(true);
+                pair.ConditionalExpression.DisposeSubReference(true);
                 pair.Statement.DisposeSubReference();
             }
         }

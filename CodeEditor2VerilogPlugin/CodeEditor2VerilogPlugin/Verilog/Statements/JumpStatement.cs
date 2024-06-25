@@ -14,7 +14,7 @@ namespace pluginVerilog.Verilog.Statements
         protected ReturnStatement() { }
         public void DisposeSubReference()
         {
-            Expression.DisposeSubRefrence(true);
+            Expression.DisposeSubReference(true);
         }
 
         public Expressions.Expression Expression;

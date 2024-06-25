@@ -66,12 +66,19 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         }
 
 
-        public static IntegerVectorType Create(DataTypeEnum dataType, bool signed,List<Range> packedDimensions)
+        public static IntegerVectorType Create(DataTypeEnum dataType, bool signed,List<Range>? packedDimensions)
         {
             IntegerVectorType integerVectorType = new IntegerVectorType();
             integerVectorType.Type = dataType;
             integerVectorType.Signed = signed;
-            integerVectorType.PackedDimensions = packedDimensions;
+            if(packedDimensions == null)
+            {
+                integerVectorType.PackedDimensions.Clear();
+            }
+            else
+            {
+                integerVectorType.PackedDimensions = packedDimensions;
+            }
             return integerVectorType;
         }
 

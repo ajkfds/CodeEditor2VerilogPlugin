@@ -55,7 +55,7 @@ namespace pluginVerilog.Verilog.Statements
 
         public void DisposeSubReference()
         {
-            Expression.DisposeSubRefrence(true);
+            Expression.DisposeSubReference(true);
             Statement.DisposeSubReference();
         }
 
@@ -104,7 +104,7 @@ namespace pluginVerilog.Verilog.Statements
 
         public void DisposeSubReference()
         {
-            Expression.DisposeSubRefrence(true);
+            Expression.DisposeSubReference(true);
             Statement.DisposeSubReference();
         }
 
@@ -156,7 +156,7 @@ namespace pluginVerilog.Verilog.Statements
 
         public void DisposeSubReference()
         {
-            Expression.DisposeSubRefrence(true);
+            Expression.DisposeSubReference(true);
             Statement.DisposeSubReference();
         }
 

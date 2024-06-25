@@ -32,8 +32,8 @@ namespace pluginVerilog.Verilog.Statements
 
         public void DisposeSubReference()
         {
-            LValue.DisposeSubRefrence(true);
-            Expression.DisposeSubRefrence(true);
+            LValue.DisposeSubReference(true);
+            Expression.DisposeSubReference(true);
         }
         public static NonBlockingAssignment? ParseCreate(WordScanner word,NameSpace nameSpace,Expressions.Expression lExpression)
         {
@@ -86,8 +86,8 @@ namespace pluginVerilog.Verilog.Statements
 
         public void DisposeSubReference()
         {
-            LValue.DisposeSubRefrence(true);
-            Expression.DisposeSubRefrence(true);
+            LValue.DisposeSubReference(true);
+            Expression.DisposeSubReference(true);
         }
         public Expressions.Expression LValue { get; protected set; }
         public Expressions.Expression Expression { get; protected set; }

@@ -104,12 +104,12 @@ namespace pluginVerilog.Verilog.Expressions
             return new TenaryOperator("?",0);
         }
 
-        public override void DisposeSubRefrence(bool keepThisReference)
+        public override void DisposeSubReference(bool keepThisReference)
         {
-            base.DisposeSubRefrence(keepThisReference);
-            Condition.DisposeSubRefrence(false);
-            Primary1.DisposeSubRefrence(false);
-            Primary2.DisposeSubRefrence(false);
+            base.DisposeSubReference(keepThisReference);
+            Condition.DisposeSubReference(false);
+            Primary1.DisposeSubReference(false);
+            Primary2.DisposeSubReference(false);
         }
 
         public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
@@ -194,10 +194,10 @@ namespace pluginVerilog.Verilog.Expressions
         inc_or_dec_operator ::= ++ | --
         */
 
-        public override void DisposeSubRefrence(bool keepThisReference)
+        public override void DisposeSubReference(bool keepThisReference)
         {
-            base.DisposeSubRefrence(keepThisReference);
-            Primary.DisposeSubRefrence(false);
+            base.DisposeSubReference(keepThisReference);
+            Primary.DisposeSubReference(false);
         }
 
         public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
@@ -308,10 +308,10 @@ namespace pluginVerilog.Verilog.Expressions
                             | ^~
         */
 
-        public override void DisposeSubRefrence(bool keepThisReference)
+        public override void DisposeSubReference(bool keepThisReference)
         {
-            base.DisposeSubRefrence(keepThisReference);
-            Primary.DisposeSubRefrence(false);
+            base.DisposeSubReference(keepThisReference);
+            Primary.DisposeSubReference(false);
         }
 
         public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
@@ -480,11 +480,11 @@ namespace pluginVerilog.Verilog.Expressions
                             | <<< 
         */
 
-        public override void DisposeSubRefrence(bool keepThisReference)
+        public override void DisposeSubReference(bool keepThisReference)
         {
-            base.DisposeSubRefrence(keepThisReference);
-            Primary1.DisposeSubRefrence(false);
-            Primary2.DisposeSubRefrence(false);
+            base.DisposeSubReference(keepThisReference);
+            Primary1.DisposeSubReference(false);
+            Primary2.DisposeSubReference(false);
         }
         public static BinaryOperator ParseCreate(WordScanner word)
         {

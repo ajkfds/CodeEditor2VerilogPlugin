@@ -10,7 +10,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 {
     public class BuildingBlock : NameSpace, IBuildingBlock
     {
-        protected BuildingBlock(BuildingBlock bulidingBlock, NameSpace parent) :base(bulidingBlock, parent)
+        protected BuildingBlock(BuildingBlock buildingBlock, NameSpace parent) :base(buildingBlock, parent)
         {
         }
 
@@ -20,7 +20,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
         public Dictionary<string, Task> Tasks { get; set; } = new Dictionary<string, Task>();
 
-        public Dictionary<string, Class> Classes { get; set; } = new Dictionary<string, Class>();
+//        public Dictionary<string, Class> Classes { get; set; } = new Dictionary<string, Class>();
 
         public Dictionary<string, DataType> Datatypes { get; set; } = new Dictionary<string, DataType>();
 
@@ -46,7 +46,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
 
         private bool reparseRequested = false;
-        public bool ReperseRequested
+        public bool ReparseRequested
         {
             get
             {

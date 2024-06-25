@@ -187,7 +187,15 @@ namespace pluginVerilog.Verilog
                 }
                 word.MoveNext();
 
-                Expressions.Expression expression = Expressions.Expression.ParseCreate(word, nameSpace);
+                Expressions.Expression? expression;
+                if(direction == Port.DirectionEnum.Output)
+                {
+                    expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace);
+                }
+                else
+                {
+                    expression = Expressions.Expression.ParseCreate(word, nameSpace);
+                }
                 if (expression == null) return false;
 
                 if (word.Text != ")")
@@ -238,7 +246,7 @@ namespace pluginVerilog.Verilog
             {
                 Port port = new Port { Direction = direction, Name = word.Text };
 
-                Expressions.Expression expression = Expressions.Expression.ParseCreate(word, nameSpace);
+                Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
                 if (expression == null) return false;
 
                 port.Expression = expression;
@@ -268,7 +276,7 @@ namespace pluginVerilog.Verilog
                 Ref
             }
 
-            public string Name { get; internal set; }
+            public string Name { get; internal set; } = "";
             public DirectionEnum Direction { get; internal set; } = DirectionEnum.Undefined;
             public Expressions.Expression Expression { get; internal set; } = null;
         }

@@ -21,7 +21,7 @@ namespace pluginVerilog.Verilog.Statements
 
         public void DisposeSubReference()
         {
-            Value.DisposeSubRefrence(true);
+            Value.DisposeSubReference(true);
         }
         protected ReleaseStatement() { }
         public static ReleaseStatement ParseCreate(WordScanner word, NameSpace nameSpace)

@@ -10,7 +10,7 @@ namespace pluginVerilog.Verilog.DataObjects
 {
     public class DataObject
     {
-        // #SystemVeriog 2017
+        // #SystemVerilog 2017
         //	net												user-defined-size	4state	v
         //
         //	variable	+ integer_vector_type	+ bit 		user-defined-size	2state	sv

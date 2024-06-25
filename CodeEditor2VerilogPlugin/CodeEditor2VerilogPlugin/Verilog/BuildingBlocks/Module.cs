@@ -139,8 +139,10 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         protected static void parseModuleItems(
             WordScanner word,
             //            string parameterOverrideModuleName,
-            Dictionary<string, Expressions.Expression> parameterOverrides,
-            Attribute attribute, Module module)
+            Dictionary<string, Expressions.Expression>? parameterOverrides,
+            Attribute? attribute,
+            Module module
+            )
         {
 
             // module_identifier
@@ -207,7 +209,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         {
                             if (module.Constants[vkp.Key].DefinitionRefrecnce != null)
                             {
-                                //                                module.Parameters[vkp.Key].DefinitionRefrecnce.AddNotice("override " + vkp.Value.Value.ToString());
+                                //                                module.Parameters[vkp.Key].DefinitionReference.AddNotice("override " + vkp.Value.Value.ToString());
                                 module.Constants[vkp.Key].DefinitionRefrecnce.AddHint("override " + vkp.Value.Value.ToString());
                             }
 
@@ -219,7 +221,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         }
                         else
                         {
-                            //System.Diagnostics.Debug.Print("undefed params "+module.File.Name +":" + vkp.Key );
+                            //System.Diagnostics.Debug.Print("undefined params "+module.File.Name +":" + vkp.Key );
                         }
                     }
                 }
@@ -228,7 +230,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 if (word.Text == "(")
                 {
                     parseListOfPorts_ListOfPortsDeclarations(word, module);
-                } // list_of_ports or list_of_posrt_declarations
+                } // list_of_ports or list_of_port_declarations
 
                 if (word.Eof || word.Text == "endmodule") break;
 
@@ -275,10 +277,10 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
             base.AppendAutoCompleteItem(items);
 
-            foreach (ModuleItems.IInstantiation inst in Instantiations.Values)
+            foreach (ModuleItems.IInstantiation instantiation in Instantiations.Values)
             {
-                if (inst.Name == null) System.Diagnostics.Debugger.Break();
-                items.Add(newItem(inst.Name, CodeDrawStyle.ColorType.Identifier));
+                if (instantiation.Name == null) throw new Exception();
+                items.Add(newItem(instantiation.Name, CodeDrawStyle.ColorType.Identifier));
             }
         }
 
@@ -288,7 +290,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
                 if (variable.DefinedReference == null) continue;
 
-                DataObjects.Variables.ValueVariable valueVar = variable as DataObjects.Variables.ValueVariable;
+                DataObjects.Variables.ValueVariable? valueVar = variable as DataObjects.Variables.ValueVariable;
                 if (valueVar == null) continue;
 
                 if (valueVar.AssignedReferences.Count == 0)

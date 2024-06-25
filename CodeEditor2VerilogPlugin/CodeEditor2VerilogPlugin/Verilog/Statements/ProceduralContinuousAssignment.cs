@@ -24,8 +24,8 @@ namespace pluginVerilog.Verilog.Statements
 
         public void DisposeSubReference()
         {
-            LValue.DisposeSubRefrence(true);
-            Value.DisposeSubRefrence(true);
+            LValue.DisposeSubReference(true);
+            Value.DisposeSubReference(true);
         }
 
         public static ProceduralContinuousAssignment ParseCreate(WordScanner word, NameSpace nameSpace)

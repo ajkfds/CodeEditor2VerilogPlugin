@@ -139,7 +139,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 }
                 if (module.Instantiations.Count != 0) // prepare reparse (instanced module could have un-refferenced link)
                 {
-                    module.ReperseRequested = true;
+                    module.ReparseRequested = true;
                 }
             }
             else
@@ -157,7 +157,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             if (!parsedDocument.Root.BuldingBlocks.ContainsKey(module.Name))
             {
                 parsedDocument.Root.BuldingBlocks.Add(module.Name, module);
-                if (module.ReperseRequested) parsedDocument.ReparseRequested = true;
+                if (module.ReparseRequested) parsedDocument.ReparseRequested = true;
             }
             else
             {
@@ -196,7 +196,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 }
                 if (program.Instantiations.Count != 0) // prepare reparse (instanced module could have un-referenced link)
                 {
-                    program.ReperseRequested = true;
+                    program.ReparseRequested = true;
                 }
             }
             else
@@ -214,7 +214,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             if (!parsedDocument.Root.BuldingBlocks.ContainsKey(program.Name))
             {
                 parsedDocument.Root.BuldingBlocks.Add(program.Name, program);
-                if (program.ReperseRequested) parsedDocument.ReparseRequested = true;
+                if (program.ReparseRequested) parsedDocument.ReparseRequested = true;
             }
             else
             {
@@ -252,7 +252,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 }
                 if (module.Instantiations.Count != 0) // prepare reparse (instanced module could have un-refferenced link)
                 {
-                    module.ReperseRequested = true;
+                    module.ReparseRequested = true;
                 }
             }
             else
@@ -270,7 +270,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             if (!parsedDocument.Root.BuldingBlocks.ContainsKey(module.Name))
             {
                 parsedDocument.Root.BuldingBlocks.Add(module.Name, module);
-                if (module.ReperseRequested) parsedDocument.ReparseRequested = true;
+                if (module.ReparseRequested) parsedDocument.ReparseRequested = true;
             }
             else
             {

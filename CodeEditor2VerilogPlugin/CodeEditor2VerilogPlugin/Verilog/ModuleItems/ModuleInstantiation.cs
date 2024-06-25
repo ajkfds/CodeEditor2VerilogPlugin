@@ -1,4 +1,5 @@
 ﻿using pluginVerilog.Verilog.BuildingBlocks;
+using pluginVerilog.Verilog.DataObjects;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -236,7 +237,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                 {
                     instancedModule = word.ProjectProperty.GetInstancedBuildingBlock(moduleInstantiation) as Module;
                 }
-                if (instancedModule == null) nameSpace.BuildingBlock.ReperseRequested = true;
+                if (instancedModule == null) nameSpace.BuildingBlock.ReparseRequested = true;
             }
 
 
@@ -379,20 +380,20 @@ namespace pluginVerilog.Verilog.ModuleItems
                                     {
                                         if (expression.BitWidth != null && expression.Reference != null && expression.BitWidth != 1)
                                         {
-                                            expression.Reference.AddWarning("bitwidth mismatch 1 vs " + expression.BitWidth);
+                                            expression.Reference.AddWarning("bit width mismatch 1 vs " + expression.BitWidth);
                                         }
 
                                     }
                                     else if (instancedModule.Ports[pinName].Range.BitWidth != expression.BitWidth && expression.Reference != null)
                                     {
-                                        expression.Reference.AddWarning("bitwidth mismatch " + instancedModule.Ports[pinName].Range.BitWidth + " vs " + expression.BitWidth);
+                                        expression.Reference.AddWarning("bit width mismatch " + instancedModule.Ports[pinName].Range.BitWidth + " vs " + expression.BitWidth);
                                     }
                                 }
                             }
                         }
                         else
                         {
-                            Expressions.Expression expression = Expressions.Expression.ParseCreate(word, nameSpace);
+                            Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
                             if (word.Prototype && expression != null && !moduleInstantiation.PortConnection.ContainsKey(pinName)) moduleInstantiation.PortConnection.Add(pinName, expression);
 
                             if (!word.Prototype)
@@ -405,29 +406,32 @@ namespace pluginVerilog.Verilog.ModuleItems
                                         {
                                             if (expression.BitWidth != null && expression.Reference != null && expression.BitWidth != 1)
                                             {
-                                                expression.Reference.AddWarning("bitwidth mismatch 1 vs " + expression.BitWidth);
+                                                expression.Reference.AddWarning("bit width mismatch 1 vs " + expression.BitWidth);
                                             }
 
                                         }
                                         else if (instancedModule.Ports[pinName].Range.BitWidth != expression.BitWidth && expression.Reference != null)
                                         {
-                                            expression.Reference.AddWarning("bitwidth mismatch " + instancedModule.Ports[pinName].Range.BitWidth + " vs " + expression.BitWidth);
+                                            expression.Reference.AddWarning("bit width mismatch " + instancedModule.Ports[pinName].Range.BitWidth + " vs " + expression.BitWidth);
                                         }
                                     }else if(expression is Expressions.InterfaceReference) // interface connection
                                     {
-                                        if(instancedModule.Ports[pinName].Instantiation == null)
+                                        if(!(instancedModule.Ports[pinName].DataObject is InterfaceInstantiation))
                                         {
                                             expression.Reference.AddError("illegal interface connection");
                                         }
                                         else
                                         {
+                                            InterfaceInstantiation? iInst = instancedModule.Ports[pinName].DataObject as InterfaceInstantiation;
+                                            if (iInst == null) throw new Exception();
+
                                             Expressions.InterfaceReference? interfaceRef = expression as Expressions.InterfaceReference;
                                             if(interfaceRef == null)
                                             {
-                                                expression.Reference.AddError("should be "+ instancedModule.Ports[pinName].Instantiation.SourceName);
-                                            }else if(interfaceRef.interfaceInstantiation.SourceName != instancedModule.Ports[pinName].Instantiation.SourceName)
+                                                expression.Reference.AddError("should be "+ iInst.SourceName);
+                                            }else if(interfaceRef.interfaceInstantiation.SourceName != iInst.SourceName)
                                             {
-                                                expression.Reference.AddError("should be " + instancedModule.Ports[pinName].Instantiation.SourceName);
+                                                expression.Reference.AddError("should be " + iInst.SourceName);
                                             }
                                             else
                                             {
@@ -514,7 +518,7 @@ namespace pluginVerilog.Verilog.ModuleItems
 
         public BuildingBlock GetInstancedBuildingBlock()
         {
-            BuildingBlock instancedModule = ProjectProperty.GetBuildingBlock(SourceName);
+            BuildingBlock? instancedModule = ProjectProperty.GetBuildingBlock(SourceName);
 
             if (ParameterOverrides.Count != 0)
             {

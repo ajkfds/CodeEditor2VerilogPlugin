@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using pluginVerilog.Verilog.DataObjects;
 
 namespace pluginVerilog.Verilog.Items
 {
@@ -66,7 +67,7 @@ namespace pluginVerilog.Verilog.Items
                     return Generate.IfGenerateConstruct.Parse(word, nameSpace);
             }
 
-            if (ModuleItems.InterfaceInstantiation.Parse(word, nameSpace)) return true;
+            if (InterfaceInstantiation.Parse(word, nameSpace)) return true;
 
             return false;
         }

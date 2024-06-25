@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -144,7 +145,15 @@ namespace pluginVerilog.Verilog.Snippets
 
                     BuildingBlock buildingBlock = moduleInstantiation.GetInstancedBuildingBlock();
                     if(!buildingBlock.DataObjects.ContainsKey(valueName)){
-                        sbDefine.Append( port.DataObject.DataType.ToString()+"\t"+valueName+";\n");
+                        if(port.DataObject != null)
+                        {
+                            sbDefine.Append(port.DataObject.CreateDataTypeString() + "\t" + valueName);
+                            foreach (var dimension in port.DataObject.Dimensions)
+                            {
+                                sbDefine.Append(dimension.CreateString());
+                            }
+                            sbDefine.Append(";\n");
+                        }
                     }
                 }
                 sb.Append(" )");

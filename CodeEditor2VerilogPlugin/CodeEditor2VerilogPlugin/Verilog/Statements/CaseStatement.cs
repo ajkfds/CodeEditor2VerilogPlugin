@@ -14,7 +14,7 @@ namespace pluginVerilog.Verilog.Statements
 
         public void DisposeSubReference()
         {
-            Expression.DisposeSubRefrence(true);
+            Expression.DisposeSubReference(true);
             foreach(CaseItem caseItem in CaseItems)
             {
                 caseItem.DisposeSubRefrence();
@@ -124,7 +124,7 @@ namespace pluginVerilog.Verilog.Statements
             {
                 foreach(pluginVerilog.Verilog.Expressions.Expression expression in Expressions)
                 {
-                    expression.DisposeSubRefrence(true);
+                    expression.DisposeSubReference(true);
                 }
                 Statement.DisposeSubReference();
             }

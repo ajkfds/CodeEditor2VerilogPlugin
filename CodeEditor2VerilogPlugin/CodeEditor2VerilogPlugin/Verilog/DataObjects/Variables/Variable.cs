@@ -94,7 +94,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                     System.Diagnostics.Debugger.Break();
                     break;
             }
-            return null;
+            throw new Exception();
         }
 
 

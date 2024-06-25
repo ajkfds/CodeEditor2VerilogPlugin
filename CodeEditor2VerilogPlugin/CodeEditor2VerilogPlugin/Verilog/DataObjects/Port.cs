@@ -1,10 +1,10 @@
 ﻿using pluginVerilog.Verilog.BuildingBlocks;
-using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.DataObjects.Nets;
 using pluginVerilog.Verilog.ModuleItems;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Drawing.Drawing2D;
 using System.Linq;
@@ -41,8 +41,8 @@ namespace pluginVerilog.Verilog.DataObjects
             }
         }
 
-        public DataObject DataObject { set; get; } = null;
-        public IInstantiation Instantiation{  set; get; } = null;
+        public DataObject? DataObject { set; get; } = null;
+//        public IInstantiation Instantiation{  set; get; } = null;
         public string Comment = "";
         public string SectionName = "";
 
@@ -245,7 +245,7 @@ ansi_port_declaration ::=
 
         public static void ParsePortDeclarations(WordScanner word,NameSpace nameSpace)
         {
-            IDataType prevDataType = null;
+            IDataType? prevDataType = null;
             Net.NetTypeEnum? prevNetType = null;
             DirectionEnum? prevDirection = null;
 
@@ -291,7 +291,7 @@ ansi_port_declaration ::=
             return true;
         }
 
-        private static bool ParsePortDeclaration(WordScanner word, NameSpace nameSpace, bool firstPort, ref IDataType prevDataType, ref Net.NetTypeEnum? prevNetType, ref DirectionEnum? prevDirection)
+        private static bool ParsePortDeclaration(WordScanner word, NameSpace nameSpace, bool firstPort, ref IDataType? prevDataType, ref Net.NetTypeEnum? prevNetType, ref DirectionEnum? prevDirection)
         {
 
 
@@ -380,13 +380,13 @@ ansi_port_declaration ::=
 
             Net.NetTypeEnum? netType = Net.parseNetType(word, nameSpace);
 
-            IDataType dataType = null;
+            IDataType? dataType = null;
             if(netType == null)
             {
                 dataType = DataObjects.DataTypes.DataType.ParseCreate(word, nameSpace, null);
             }
 
-            Interface interface_ = null;
+            Interface? interface_ = null;
             if(direction == null && netType == null && dataType == null)
             {
                 if (parseInterfacePort(word, nameSpace))
@@ -515,7 +515,7 @@ ansi_port_declaration ::=
             if (word.Text == "=")
             {
                 word.MoveNext();
-                Expressions.Expression ex = Expressions.Expression.ParseCreate(word, nameSpace);
+                Expressions.Expression? ex = Expressions.Expression.ParseCreate(word, nameSpace);
                 if (ex == null) return true;
                 if (!ex.Constant)
                 {
@@ -523,7 +523,7 @@ ansi_port_declaration ::=
                 }
                 else
                 {
-                    // TODO contant value assignment
+                    // TODO constant value assignment
                 }
             }
 
@@ -564,7 +564,7 @@ ansi_port_declaration ::=
 
         private static void addPort(WordScanner word, NameSpace nameSpace,Port port)
         {
-            IModuleOrInterfaceOrProgram block = nameSpace.BuildingBlock as IModuleOrInterfaceOrProgram;
+            IModuleOrInterfaceOrProgram? block = nameSpace.BuildingBlock as IModuleOrInterfaceOrProgram;
             if (block == null)
             {
                 word.AddError("cannot add port");
@@ -660,7 +660,7 @@ ansi_port_declaration ::=
 
             Port port = new Port();
             port.Name = instance_name;
-            port.Instantiation = iInst;
+            port.DataObject = iInst;
 
             addPort(word, nameSpace, port);
             addInstantiation(word, nameSpace, iInst);
@@ -804,7 +804,8 @@ ansi_port_declaration ::=
 
                 if( nameSpace is Function)
                 {
-                    Function function = nameSpace as Function;
+                    Function? function = nameSpace as Function;
+                    if (function == null) throw new Exception();
                     if (!function.Ports.ContainsKey(port.Name))
                     {
                         function.Ports.Add(port.Name, port);
@@ -812,7 +813,8 @@ ansi_port_declaration ::=
                     }
                 }else if(nameSpace is Task)
                 {
-                    Task task = nameSpace as Task;
+                    Task? task = nameSpace as Task;
+                    if (task == null) throw new Exception();
                     if (!task.Ports.ContainsKey(port.Name))
                     {
                         task.Ports.Add(port.Name, port);
@@ -837,7 +839,7 @@ ansi_port_declaration ::=
         public static void ParseTfPortItems(WordScanner word, NameSpace nameSpace, IPortNameSpace portNameSpace)
         {
             DirectionEnum? prevDirection = null;
-            IDataType prevDataType = null;
+            IDataType? prevDataType = null;
 
             bool firstPort = true;
             portNameSpace.Ports.Clear();
@@ -859,7 +861,7 @@ ansi_port_declaration ::=
 
         }
 
-        public static bool ParseTfPortItem(WordScanner word, NameSpace nameSpace, IPortNameSpace portNameSpace, bool first,ref DirectionEnum? prevDirection, ref IDataType prevDataType)
+        public static bool ParseTfPortItem(WordScanner word, NameSpace nameSpace, IPortNameSpace portNameSpace, bool first,ref DirectionEnum? prevDirection, ref IDataType? prevDataType)
         {
             // tf_port_item    ::= { attribute_instance } [ tf_port_direction ] [ var ] data_type_or_implicit [ port_identifier { variable_dimension } [ = expression ] ]
 
@@ -906,7 +908,7 @@ ansi_port_declaration ::=
                 word.MoveNext();
             }
 
-            IDataType dataType = DataType.ParseCreate(word, nameSpace, null);
+            IDataType? dataType = DataType.ParseCreate(word, nameSpace, null);
 
             // Each formal argument has a data type that can be explicitly declared or inherited from the previous argument.
             // If the data type is not explicitly declared, then the default data type is logic
@@ -925,7 +927,6 @@ ansi_port_declaration ::=
                         Range range = Range.ParseCreate(word, nameSpace);
                         vectorType.PackedDimensions.Add(range);
                     }
-
                     dataType = vectorType;
                 }
                 else
@@ -933,6 +934,7 @@ ansi_port_declaration ::=
                     dataType = prevDataType;
                 }
             }
+            if (dataType == null) throw new Exception();
 
             // There is a default direction of input if no direction has been specified. Once a direction is given,
             // subsequent formals default to the same direction. 
@@ -982,7 +984,6 @@ ansi_port_declaration ::=
             {
                 portNameSpace.DataObjects.Add(port.DataObject.Name, port.DataObject);
             }
-
 
             word.MoveNext();
 

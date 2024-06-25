@@ -34,7 +34,7 @@ namespace pluginVerilog.Verilog.Expressions
         /// <summary>
         ///  dispose reference hierarchy, keep top level reference only.
         /// </summary>
-        public virtual void DisposeSubRefrence(bool keepThisReference)
+        public virtual void DisposeSubReference(bool keepThisReference)
         {
             if (!keepThisReference) DisposeReference();
         }
@@ -110,29 +110,29 @@ namespace pluginVerilog.Verilog.Expressions
         range_expression                ::= expression  msb_constant_expression : lsb_constant_expression | base_expression +: width_constant_expression | base_expression -: width_constant_expression
         width_constant_expression ::= constant_expression
         */
-        public static Expression ParseCreate(WordScanner word,NameSpace nameSpace)
+        public static Expression? ParseCreate(WordScanner word,NameSpace nameSpace)
         {
             Expression expression = new Expression();
             List<Operator> operatorsStock = new List<Operator>();
             WordReference reference = word.GetReference();
 
-            List<Primary> rpnPrimarys = new List<Primary>();
+            List<Primary> rpnPrimaries = new List<Primary>();
 
-            parseExpression(word, nameSpace, rpnPrimarys, operatorsStock,ref reference);
+            parseExpression(word, nameSpace, rpnPrimaries, operatorsStock,ref reference);
             expression.Reference = reference;
             while(operatorsStock.Count != 0)
             {
-                rpnPrimarys.Add(operatorsStock.Last());
+                rpnPrimaries.Add(operatorsStock.Last());
                 operatorsStock.RemoveAt(operatorsStock.Count - 1);
             }
-            if(rpnPrimarys.Count == 0)
+            if(rpnPrimaries.Count == 0)
             {
                 return null;
             }
 
-            if (rpnPrimarys.Count == 1 && rpnPrimarys[0] is Primary)
+            if (rpnPrimaries.Count == 1 && rpnPrimaries[0] is Primary)
             {
-                Primary primary = rpnPrimarys[0] as Primary;
+                Primary primary = rpnPrimaries[0] as Primary;
                 //expression.Constant = primary.Constant;
                 //expression.Value = primary.Value;
                 //expression.BitWidth = primary.BitWidth;
@@ -143,9 +143,9 @@ namespace pluginVerilog.Verilog.Expressions
             if (!word.Active) return expression;
 
             bool incdec = false;
-            if(rpnPrimarys.Count == 2)
+            if(rpnPrimaries.Count == 2)
             {
-                if (rpnPrimarys[0] is IncDecOperator || rpnPrimarys[1] is IncDecOperator)
+                if (rpnPrimaries[0] is IncDecOperator || rpnPrimaries[1] is IncDecOperator)
                 {
                     incdec = true;
                 }
@@ -153,64 +153,68 @@ namespace pluginVerilog.Verilog.Expressions
 
 
             // parse rpn
-            List<Primary> primarys = new List<Primary>();
-            for(int i=0;i<rpnPrimarys.Count;i++)
+            List<Primary> primaries = new List<Primary>();
+            for(int i=0;i<rpnPrimaries.Count;i++)
             {
-                Primary item = rpnPrimarys[i];
+                Primary item = rpnPrimaries[i];
                 if (item is BinaryOperator)
                 {
-                    if (primarys.Count < 2) return null;
-                    BinaryOperator op = item as BinaryOperator;
-                    Primary primary = op.Operate(primarys[primarys.Count - 2], primarys[primarys.Count-1]);
-                    primarys.RemoveAt(primarys.Count - 1);
-                    primarys.RemoveAt(primarys.Count - 1);
-                    primarys.Add(primary);
+                    if (primaries.Count < 2) return null;
+                    BinaryOperator? op = item as BinaryOperator;
+                    if (op == null) throw new Exception();
+                    Primary primary = op.Operate(primaries[primaries.Count - 2], primaries[primaries.Count-1]);
+                    primaries.RemoveAt(primaries.Count - 1);
+                    primaries.RemoveAt(primaries.Count - 1);
+                    primaries.Add(primary);
                 }
                 else if (item is UnaryOperator)
                 {
-                    if (primarys.Count < 1) return null;
-                    UnaryOperator op = item as UnaryOperator;
-                    Primary primary = op.Operate(primarys[0]);
-                    primarys.RemoveAt(0);
-                    primarys.Add(primary);
+                    if (primaries.Count < 1) return null;
+                    UnaryOperator? op = item as UnaryOperator;
+                    if (op == null) throw new Exception();
+                    Primary primary = op.Operate(primaries[0]);
+                    primaries.RemoveAt(0);
+                    primaries.Add(primary);
                 }
                 else if (item is IncDecOperator)
                 {
-                    if (primarys.Count < 1) return null;
-                    IncDecOperator op = item as IncDecOperator;
-                    Primary primary = op.Operate(primarys[0]);
-                    primarys.RemoveAt(0);
-                    primarys.Add(primary);
+                    if (primaries.Count < 1) return null;
+                    IncDecOperator? op = item as IncDecOperator;
+                    if (op == null) throw new Exception();
+                    Primary primary = op.Operate(primaries[0]);
+                    primaries.RemoveAt(0);
+                    primaries.Add(primary);
                 }
                 else if (item is TenaryOperator)
                 {
-                    if (primarys.Count < 3) return null;
-                    TenaryOperator op = item as TenaryOperator;
-                    Primary primary = op.Operate(primarys[primarys.Count - 3], primarys[primarys.Count - 2], primarys[primarys.Count - 1]);
-                    primarys.RemoveAt(primarys.Count - 1);
-                    primarys.RemoveAt(primarys.Count - 1);
-                    primarys.RemoveAt(primarys.Count - 1);
-                    primarys.Add(primary);
+                    if (primaries.Count < 3) return null;
+                    TenaryOperator? op = item as TenaryOperator;
+                    if (op == null) throw new Exception();
+                    Primary primary = op.Operate(primaries[primaries.Count - 3], primaries[primaries.Count - 2], primaries[primaries.Count - 1]);
+                    primaries.RemoveAt(primaries.Count - 1);
+                    primaries.RemoveAt(primaries.Count - 1);
+                    primaries.RemoveAt(primaries.Count - 1);
+                    primaries.Add(primary);
                 }
                 else
                 {
-                    primarys.Add(item as Primary);
+                    primaries.Add(item as Primary);
                 }
             }
-            if(primarys.Count == 1)
+            if(primaries.Count == 1)
             {
-                //expression.Constant = Primarys[0].Constant;
-                //expression.BitWidth = Primarys[0].BitWidth;
-                //expression.Value = Primarys[0].Value;
-                //expression.Primary = Primarys[0];
+                //expression.Constant = Primaries[0].Constant;
+                //expression.BitWidth = Primaries[0].BitWidth;
+                //expression.Value = Primaries[0].Value;
+                //expression.Primary = Primaries[0];
             }
             else
             {
                 return null;
             }
 
-            primarys[0].IncrementDecrement = incdec;
-            return primarys[0];
+            primaries[0].IncrementDecrement = incdec;
+            return primaries[0];
 //            return expression;
         }
 
@@ -223,29 +227,29 @@ namespace pluginVerilog.Verilog.Expressions
 
 
         // parse lvalue expression or task reference
-        public static Expression ParseCreateVariableLValue(WordScanner word, NameSpace nameSpace)
+        public static Expression? ParseCreateVariableLValue(WordScanner word, NameSpace nameSpace)
         {
             Expression expression = new Expression();
             List<Operator> operatorsStock = new List<Operator>();
-            List<Primary> rpnPrimarys = new List<Primary>();
+            List<Primary> rpnPrimaries = new List<Primary>();
 
             WordReference reference = word.GetReference();
 
-            parseVariableLValue(word, nameSpace, rpnPrimarys, operatorsStock);
+            parseVariableLValue(word, nameSpace, rpnPrimaries, operatorsStock);
             expression.Reference = reference;
             while (operatorsStock.Count != 0)
             {
-                rpnPrimarys.Add(operatorsStock.Last());
+                rpnPrimaries.Add(operatorsStock.Last());
                 operatorsStock.RemoveAt(operatorsStock.Count - 1);
             }
-            if (rpnPrimarys.Count == 0)
+            if (rpnPrimaries.Count == 0)
             {
                 return null;
             }
 
-            if (rpnPrimarys.Count == 1 && rpnPrimarys[0] is Primary)
+            if (rpnPrimaries.Count == 1 && rpnPrimaries[0] is Primary)
             {
-                Primary primary = rpnPrimarys[0] as Primary;
+                Primary primary = rpnPrimaries[0] as Primary;
                 //expression.Constant = primary.Constant;
                 //expression.Value = primary.Value;
                 //expression.BitWidth = primary.BitWidth;
@@ -254,61 +258,63 @@ namespace pluginVerilog.Verilog.Expressions
                 return primary;
             }
             // parse rpn
-            List<Primary> Primarys = new List<Primary>();
-            for (int i = 0; i < rpnPrimarys.Count; i++)
+            List<Primary> Primaries = new List<Primary>();
+            for (int i = 0; i < rpnPrimaries.Count; i++)
             {
-                Primary item = rpnPrimarys[i];
+                Primary item = rpnPrimaries[i];
                 if (item is Primary)
                 {
-                    Primarys.Add(item as Primary);
+                    Primaries.Add(item as Primary);
                 }
                 else if (item is BinaryOperator)
                 {
-                    if (Primarys.Count < 2) return null;
-                    BinaryOperator op = item as BinaryOperator;
-                    Primary primary = op.Operate(Primarys[0], Primarys[1]);
-                    Primarys.RemoveAt(0);
-                    Primarys.RemoveAt(0);
-                    Primarys.Add(primary);
+                    if (Primaries.Count < 2) return null;
+                    BinaryOperator? op = item as BinaryOperator;
+                    if (op == null) throw new Exception();
+                    Primary primary = op.Operate(Primaries[0], Primaries[1]);
+                    Primaries.RemoveAt(0);
+                    Primaries.RemoveAt(0);
+                    Primaries.Add(primary);
                 }
                 else if (item is UnaryOperator)
                 {
-                    if (Primarys.Count < 1) return null;
-                    UnaryOperator op = item as UnaryOperator;
-                    Primary primary = op.Operate(Primarys[0]);
-                    Primarys.RemoveAt(0);
-                    Primarys.Add(primary);
+                    if (Primaries.Count < 1) return null;
+                    UnaryOperator? op = item as UnaryOperator;
+                    if (op == null) throw new Exception();
+                    Primary primary = op.Operate(Primaries[0]);
+                    Primaries.RemoveAt(0);
+                    Primaries.Add(primary);
                 }else if(item is TenaryOperator)
                 {
-                    if (Primarys.Count < 3) return null;
-                    TenaryOperator op = item as TenaryOperator;
-                    Primary primary = op.Operate(Primarys[0], Primarys[1], Primarys[2]);
-                    Primarys.RemoveAt(0);
-                    Primarys.RemoveAt(0);
-                    Primarys.RemoveAt(0);
-                    Primarys.Add(primary);
+                    if (Primaries.Count < 3) return null;
+                    TenaryOperator? op = item as TenaryOperator;
+                    if (op == null) throw new Exception();
+                    Primary primary = op.Operate(Primaries[0], Primaries[1], Primaries[2]);
+                    Primaries.RemoveAt(0);
+                    Primaries.RemoveAt(0);
+                    Primaries.RemoveAt(0);
+                    Primaries.Add(primary);
                 }
                 else
                 {
                     return null;
                 }
             }
-            if (Primarys.Count == 1)
+            if (Primaries.Count == 1)
             {
-                return Primarys[0];
-//                expression.Constant = Primarys[0].Constant;
-//                expression.BitWidth = Primarys[0].BitWidth;
-//                expression.Value = Primarys[0].Value;
+                return Primaries[0];
+                //                expression.Constant = Primaries[0].Constant;
+                //                expression.BitWidth = Primaries[0].BitWidth;
+                //                expression.Value = Primaries[0].Value;
             }
             else
             {
                 return null;
             }
 
-            return expression;
         }
 
-        private static bool parseExpression(WordScanner word,NameSpace nameSpace,List<Primary> Primarys,List<Operator> operatorStock,ref WordReference reference)
+        private static bool parseExpression(WordScanner word,NameSpace nameSpace,List<Primary> Primaries,List<Operator> operatorStock,ref WordReference reference)
         {
             reference = word.GetReference(reference);
 
@@ -316,18 +322,18 @@ namespace pluginVerilog.Verilog.Expressions
             Primary primary = Primary.ParseCreate(word, nameSpace);
             if (primary != null)
             {
-                Primarys.Add(primary);
-                IncDecOperator incdecOperator = IncDecOperator.ParseCreate(word);
-                if (incdecOperator != null)
+                Primaries.Add(primary);
+                IncDecOperator incDecOperator = IncDecOperator.ParseCreate(word);
+                if (incDecOperator != null)
                 {
-                    Primarys.Add(incdecOperator);
+                    Primaries.Add(incDecOperator);
                 }
             }
             else
             {
                 // ++(primary),-(primary)
-                IncDecOperator incdecOperator = IncDecOperator.ParseCreate(word);
-                if(incdecOperator != null)
+                IncDecOperator incDecOperator = IncDecOperator.ParseCreate(word);
+                if(incDecOperator != null)
                 {
                     if (word.Eof)
                     {
@@ -340,8 +346,8 @@ namespace pluginVerilog.Verilog.Expressions
                         word.AddError("illegal unary Operator");
                         return false;
                     }
-                    Primarys.Add(primary);
-                    Primarys.Add(incdecOperator);
+                    Primaries.Add(primary);
+                    Primaries.Add(incDecOperator);
                 }
                 else
                 {
@@ -359,9 +365,9 @@ namespace pluginVerilog.Verilog.Expressions
                             word.AddError("illegal unary Operator");
                             return false;
                         }
-                        Primarys.Add(primary);
-                        Primarys.Add(unaryOperator);
-//                        addOperator(unaryOperator, Primarys, operatorStock);
+                        Primaries.Add(primary);
+                        Primaries.Add(unaryOperator);
+//                        addOperator(unaryOperator, Primaries, operatorStock);
                     }
                     else
                     {
@@ -377,7 +383,7 @@ namespace pluginVerilog.Verilog.Expressions
                 word.MoveNext();
                 do
                 {
-                    if (!parseExpression(word, nameSpace, Primarys, operatorStock,ref reference))
+                    if (!parseExpression(word, nameSpace, Primaries, operatorStock,ref reference))
                     {
                         word.AddError("illegal binary Operator");
                         break;
@@ -391,21 +397,21 @@ namespace pluginVerilog.Verilog.Expressions
                         word.AddError(": expected");
                         break;
                     }
-                    if (!parseExpression(word, nameSpace, Primarys, operatorStock, ref reference))
+                    if (!parseExpression(word, nameSpace, Primaries, operatorStock, ref reference))
                     {
                         word.AddError("illegal binary Operator");
                         break;
                     }
-                    Primarys.Add(TenaryOperator.Create());
+                    Primaries.Add(TenaryOperator.Create());
                 } while (false);
             }
 
             BinaryOperator binaryOperator = BinaryOperator.ParseCreate(word);
             if (binaryOperator == null) return true;
 
-            addOperator(binaryOperator, Primarys, operatorStock);
+            addOperator(binaryOperator, Primaries, operatorStock);
 
-            if (!parseExpression(word, nameSpace, Primarys, operatorStock, ref reference))
+            if (!parseExpression(word, nameSpace, Primaries, operatorStock, ref reference))
             {
                 word.AddError("illegal binary Operator");
             }
@@ -413,23 +419,23 @@ namespace pluginVerilog.Verilog.Expressions
             return true;
         }
 
-        private static bool parseVariableLValue(WordScanner word, NameSpace nameSpace, List<Primary> Primarys, List<Operator> operatorStock)
+        private static bool parseVariableLValue(WordScanner word, NameSpace nameSpace, List<Primary> Primaries, List<Operator> operatorStock)
         {
             Primary primary = Primary.ParseCreateLValue(word, nameSpace);
             if (primary != null)
             {
-                Primarys.Add(primary);
+                Primaries.Add(primary);
             }
             return true;
         }
 
-        private static void addOperator(Operator newOperator,List<Primary> expressioItems, List<Operator> operatorStock)
+        private static void addOperator(Operator newOperator,List<Primary> expressionItems, List<Operator> operatorStock)
         {
             while (operatorStock.Count != 0 && operatorStock.Last().Precedence <= newOperator.Precedence)
             {
                 Operator popOperator = operatorStock.Last();
                 operatorStock.RemoveAt(operatorStock.Count - 1);
-                expressioItems.Add(popOperator);
+                expressionItems.Add(popOperator);
             }
             operatorStock.Add(newOperator);
         }

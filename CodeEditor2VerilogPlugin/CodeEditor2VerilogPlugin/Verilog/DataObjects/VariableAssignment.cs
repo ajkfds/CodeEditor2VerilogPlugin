@@ -12,8 +12,8 @@ namespace pluginVerilog.Verilog.DataObjects
 
         public void DisposeSubReference()
         {
-            Expression.DisposeSubRefrence(true);
-            NetLValue.DisposeSubRefrence(true);
+            Expression.DisposeSubReference(true);
+            NetLValue.DisposeSubReference(true);
         }
         public Expressions.Expression NetLValue { get; protected set; }
         public Expressions.Expression Expression { get; protected set; }

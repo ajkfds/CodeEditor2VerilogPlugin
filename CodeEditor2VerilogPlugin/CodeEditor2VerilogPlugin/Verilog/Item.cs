@@ -10,7 +10,7 @@ namespace pluginVerilog.Verilog
     {
         public string Name { get; set; }
         public Attribute Attribute { get; set; }
-        public WordReference DefinitionRefrecnce { get; set; }
+        public WordReference DefinitionReference { get; set; }
 
         public CodeEditor2.Data.Project Project { get; protected set; }
 
