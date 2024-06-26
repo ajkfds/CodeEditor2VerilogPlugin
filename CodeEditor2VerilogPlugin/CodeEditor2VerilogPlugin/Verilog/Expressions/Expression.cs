@@ -51,7 +51,7 @@ namespace pluginVerilog.Verilog.Expressions
         }
         public virtual string CreateString()
         {
-            return null;
+            return "";
         }
         public virtual void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
         {
@@ -142,12 +142,12 @@ namespace pluginVerilog.Verilog.Expressions
 
             if (!word.Active) return expression;
 
-            bool incdec = false;
+            bool incDec = false;
             if(rpnPrimaries.Count == 2)
             {
                 if (rpnPrimaries[0] is IncDecOperator || rpnPrimaries[1] is IncDecOperator)
                 {
-                    incdec = true;
+                    incDec = true;
                 }
             }
 
@@ -213,7 +213,7 @@ namespace pluginVerilog.Verilog.Expressions
                 return null;
             }
 
-            primaries[0].IncrementDecrement = incdec;
+            primaries[0].IncrementDecrement = incDec;
             return primaries[0];
 //            return expression;
         }
@@ -319,7 +319,7 @@ namespace pluginVerilog.Verilog.Expressions
             reference = word.GetReference(reference);
 
             // ++(primary),--(primary)
-            Primary primary = Primary.ParseCreate(word, nameSpace);
+            Primary? primary = Primary.ParseCreate(word, nameSpace);
             if (primary != null)
             {
                 Primaries.Add(primary);
@@ -421,7 +421,7 @@ namespace pluginVerilog.Verilog.Expressions
 
         private static bool parseVariableLValue(WordScanner word, NameSpace nameSpace, List<Primary> Primaries, List<Operator> operatorStock)
         {
-            Primary primary = Primary.ParseCreateLValue(word, nameSpace);
+            Primary? primary = Primary.ParseCreateLValue(word, nameSpace);
             if (primary != null)
             {
                 Primaries.Add(primary);

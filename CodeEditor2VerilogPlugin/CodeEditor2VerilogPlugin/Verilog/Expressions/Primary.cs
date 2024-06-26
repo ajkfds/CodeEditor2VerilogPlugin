@@ -111,7 +111,6 @@ namespace pluginVerilog.Verilog.Expressions
         {
             //if (word.Text == "srif") System.Diagnostics.Debugger.Break();
 
-            if (nameSpace == null) System.Diagnostics.Debugger.Break();
             switch (word.WordType)
             {
                 case WordPointer.WordTypeEnum.Number:
@@ -408,7 +407,7 @@ namespace pluginVerilog.Verilog.Expressions
                         {
                             if(nameSpace.BuildingBlock is IBuildingBlockWithModuleInstance &&
                                (nameSpace.BuildingBlock as IBuildingBlockWithModuleInstance).Instantiations.ContainsKey(word.Text) )
-                            { // module instancce
+                            { // module instance
 
                                 IBuildingBlockWithModuleInstance buildingBlock = nameSpace.BuildingBlock as IBuildingBlockWithModuleInstance;
                                 
@@ -445,7 +444,7 @@ namespace pluginVerilog.Verilog.Expressions
                         {
                             if (nameSpace.BuildingBlock is IBuildingBlockWithModuleInstance &&
                                (nameSpace.BuildingBlock as IBuildingBlockWithModuleInstance).Instantiations.ContainsKey(word.Text))
-                            { // module instancce
+                            { // module instance
                                 IBuildingBlockWithModuleInstance buildingBlock = nameSpace.BuildingBlock as IBuildingBlockWithModuleInstance;
 
                                 word.Color(CodeDrawStyle.ColorType.Identifier);
@@ -488,7 +487,6 @@ namespace pluginVerilog.Verilog.Expressions
                         {
                             return new NameSpaceReference(nameSpace);
                         }
-//                            return null;
                     }
                     break;
             }
