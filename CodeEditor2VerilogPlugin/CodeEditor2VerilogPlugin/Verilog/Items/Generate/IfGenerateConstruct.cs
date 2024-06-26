@@ -44,12 +44,12 @@ namespace pluginVerilog.Verilog.Items.Generate
             if (word.Active && expression != null && expression.Constant && expression.Value == 0)
             {
                 // false
-                word.StartNonGenenerated();
+                word.StartNonGenerated();
                 while (!word.Eof)
                 {
                     if (!GenerateBlock.Parse(word, nameSpace)) break;
                 }
-                word.EndNonGeneratred();
+                word.EndNonGenerated();
             }
             else
             {
@@ -67,12 +67,12 @@ namespace pluginVerilog.Verilog.Items.Generate
                 if (word.Active && expression != null && expression.Constant && expression.Value != 0)
                 {
                     // false
-                    word.StartNonGenenerated();
+                    word.StartNonGenerated();
                     while (!word.Eof)
                     {
                         if (!GenerateBlock.Parse(word, nameSpace)) break;
                     }
-                    word.EndNonGeneratred();
+                    word.EndNonGenerated();
                 }
                 else
                 {

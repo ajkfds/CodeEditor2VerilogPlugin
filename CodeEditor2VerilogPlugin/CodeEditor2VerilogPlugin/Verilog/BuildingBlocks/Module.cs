@@ -69,7 +69,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             word.Color(CodeDrawStyle.ColorType.Keyword);
             Module module = new Module();
             module.Parent = word.RootParsedDocument.Root;
-
+            module.Project = word.Project;
             module.BuildingBlock = module;
             module.File = file;
             module.BeginIndexReference = word.CreateIndexReference();

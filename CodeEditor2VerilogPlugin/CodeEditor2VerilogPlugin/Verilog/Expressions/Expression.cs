@@ -13,7 +13,7 @@ namespace pluginVerilog.Verilog.Expressions
             Constant = false;
         }
 
-//        public List<Primary> RpnPrimarys = new List<Primary>();
+//        public List<Primary> RpnPrimaries = new List<Primary>();
 
         public Primary Primary;
         public virtual bool Constant { get; protected set; }
@@ -23,7 +23,7 @@ namespace pluginVerilog.Verilog.Expressions
         public bool IncrementDecrement = false;
 
         /// <summary>
-        /// dispose refrence
+        /// dispose reference
         /// </summary>
         public virtual void DisposeReference()
         {

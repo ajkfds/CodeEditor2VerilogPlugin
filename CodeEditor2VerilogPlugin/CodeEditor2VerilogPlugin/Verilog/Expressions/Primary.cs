@@ -45,15 +45,6 @@ namespace pluginVerilog.Verilog.Expressions
             return "";
         }
 
-        /*        public virtual void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
-                {
-
-                }
-        */
-        //public virtual void AppendString( StringBuilder stringBuilder )
-        //{
-
-        //}
         /*
          * 
          * 
@@ -108,15 +99,15 @@ namespace pluginVerilog.Verilog.Expressions
         simple_type     ::= integer_type | non_integer_type | ps_type_identifier | ps_parameter_identifier 
 
         */
-        public static new Primary ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static new Primary? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             return parseCreate(word, nameSpace, false);
         }
-        public static Primary ParseCreateLValue(WordScanner word, NameSpace nameSpace)
+        public static Primary? ParseCreateLValue(WordScanner word, NameSpace nameSpace)
         {
             return parseCreate(word, nameSpace, true);
         }
-        private static Primary parseCreate(WordScanner word, NameSpace nameSpace,bool lValue)
+        private static Primary? parseCreate(WordScanner word, NameSpace nameSpace,bool lValue)
         {
             //if (word.Text == "srif") System.Diagnostics.Debugger.Break();
 
@@ -149,6 +140,32 @@ namespace pluginVerilog.Verilog.Expressions
                                 else throw new Exception();
                             }
 
+                            if (variable.Variable is DataObjects.InterfaceInstantiation && word.Text == ".")
+                            {
+                                word.MoveNext();
+                                DataObjects.InterfaceInstantiation? interfaceInstantiation = variable.Variable as DataObjects.InterfaceInstantiation;
+                                if (interfaceInstantiation == null) throw new Exception();
+                                Interface? interface_ = nameSpace.ProjectProperty.GetBuildingBlock(interfaceInstantiation.SourceName) as Interface;
+                                if(interface_ != null)
+                                {
+                                    if (interface_.ModPorts.ContainsKey(word.Text))
+                                    {
+                                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                                        interfaceInstantiation.ModPortName = word.Text;
+                                        ModPort modPort = interface_.ModPorts[interfaceInstantiation.ModPortName];
+                                        word.MoveNext();
+                                        if(word.Text == ".")
+                                        {
+                                            word.MoveNext();
+                                            Primary.parseCreate(word, modPort, lValue);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Primary.parseCreate(word, interface_, lValue);
+                                    }
+                                }
+                            }
 
                             return variable;
                         }
@@ -168,8 +185,8 @@ namespace pluginVerilog.Verilog.Expressions
 
                         {
                             NameSpace space = nameSpace;
-                            Primary primary = null;
-                            parseHierNameSpace(word, nameSpace, ref space, ref primary,lValue);
+                            Primary? primary = null;
+                            parseHierarchyNameSpace(word, nameSpace, ref space, ref primary,lValue);
 
                             if(primary == null || space == null)// || space == nameSpace || space is Class)
                             {
@@ -219,9 +236,9 @@ namespace pluginVerilog.Verilog.Expressions
             return null;
         }
 
-        public static void parseHierNameSpace(WordScanner word, NameSpace rootNameSpace, ref NameSpace nameSpace,ref Primary primary,bool assigned)
+        public static void parseHierarchyNameSpace(WordScanner word, NameSpace rootNameSpace, ref NameSpace nameSpace,ref Primary? primary,bool assigned)
         {
-            if(parseKnownHierNameSpace(word,rootNameSpace,ref nameSpace, ref primary, assigned))
+            if(parseKnownHierarchyNameSpace(word,rootNameSpace,ref nameSpace, ref primary, assigned))
             {
                 // parsed
                 return;
@@ -258,7 +275,7 @@ namespace pluginVerilog.Verilog.Expressions
                 if (word.Text == ".")
                 {
                     word.MoveNext();    // .
-                    parseHierNameSpace(word, rootNameSpace, ref nameSpace, ref primary,assigned);
+                    parseHierarchyNameSpace(word, rootNameSpace, ref nameSpace, ref primary,assigned);
                 }
                 else
                 {
@@ -289,7 +306,7 @@ namespace pluginVerilog.Verilog.Expressions
             }
         }
 
-        public static bool parseKnownHierNameSpace(WordScanner word, NameSpace rootNameSpace, ref NameSpace nameSpace, ref Primary primary, bool assigned)
+        public static bool parseKnownHierarchyNameSpace(WordScanner word, NameSpace rootNameSpace, ref NameSpace nameSpace, ref Primary? primary, bool assigned)
         {
             BuildingBlock buildingBlock = nameSpace.BuildingBlock;
             if (!buildingBlock.Instantiations.ContainsKey(word.Text)) return false;
@@ -311,7 +328,7 @@ namespace pluginVerilog.Verilog.Expressions
                 if (word.Text == ".")
                 {
                     word.MoveNext();    // .
-                    parseHierNameSpace(word, rootNameSpace, ref nameSpace, ref primary, assigned);
+                    parseHierarchyNameSpace(word, rootNameSpace, ref nameSpace, ref primary, assigned);
                     return true;
                 }
                 else
@@ -346,7 +363,7 @@ namespace pluginVerilog.Verilog.Expressions
                 if (word.Text == ".")
                 {
                     word.MoveNext();    // .
-                    parseHierNameSpace(word, rootNameSpace, ref nameSpace, ref primary, assigned);
+                    parseHierarchyNameSpace(word, rootNameSpace, ref nameSpace, ref primary, assigned);
                     return true;
                 }
                 else

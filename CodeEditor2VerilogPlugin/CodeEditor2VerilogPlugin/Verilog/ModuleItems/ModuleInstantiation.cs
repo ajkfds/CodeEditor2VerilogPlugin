@@ -369,7 +369,7 @@ namespace pluginVerilog.Verilog.ModuleItems
 
                         if (outPort)
                         {
-                            Expressions.Expression expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace);
+                            Expressions.Expression? expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace);
                             if ( word.Prototype && expression != null && !moduleInstantiation.PortConnection.ContainsKey(pinName)) moduleInstantiation.PortConnection.Add(pinName, expression);
 
                             if (!word.Prototype)

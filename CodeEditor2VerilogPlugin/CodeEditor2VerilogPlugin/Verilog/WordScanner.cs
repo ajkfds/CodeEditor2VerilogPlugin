@@ -68,8 +68,10 @@ namespace pluginVerilog.Verilog
         {
             get
             {
-                if (Project == null) return null;
-                return Project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+                if (Project == null) throw new Exception();
+                ProjectProperty? projectProperty = Project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+                if (projectProperty == null) throw new Exception();
+                return projectProperty;
             }
         }
         public WordPointer RootPointer
@@ -117,12 +119,12 @@ namespace pluginVerilog.Verilog
             get { return systemVerilog; }
         }
 
-        public void StartNonGenenerated()
+        public void StartNonGenerated()
         {
             nonGeneratedCount++;
         }
 
-        public void EndNonGeneratred()
+        public void EndNonGenerated()
         {
             if (nonGeneratedCount == 0) return;
             nonGeneratedCount--;
@@ -290,7 +292,7 @@ namespace pluginVerilog.Verilog
             {
                 while (wordPointer.Eof && stock.Count != 0)
                 {
-                    returnHier();
+                    returnHierarchy();
                 }
                 recheckWord();
             }
@@ -326,7 +328,7 @@ namespace pluginVerilog.Verilog
                 }
             }
 
-            // return hier at EOF
+            // return hierarchy at EOF
             if (wordPointer.Eof)
             {
                 if (wordPointer.WordType == WordPointer.WordTypeEnum.Comment || wordPointer.Text == "")
@@ -337,7 +339,7 @@ namespace pluginVerilog.Verilog
                     }
                     while (wordPointer.Eof && stock.Count != 0)
                     {
-                        returnHier();
+                        returnHierarchy();
                         recheckWord();
                     }
                 }
@@ -345,7 +347,7 @@ namespace pluginVerilog.Verilog
 
         }
 
-        private void returnHier()
+        private void returnHierarchy()
         {
             bool error = false;
             if (wordPointer.ParsedDocument.Messages.Count != 0)
@@ -422,7 +424,7 @@ namespace pluginVerilog.Verilog
                 {
                     while (wordPointer.Eof && stock.Count != 0)
                     {
-                        returnHier();
+                        returnHierarchy();
                     }
                 }
                 else
@@ -468,7 +470,7 @@ namespace pluginVerilog.Verilog
             ElseActive,
             ElseInActive
         }
-        private List<ifdefEnum> ifDefs = new List<ifdefEnum>();
+        private List<ifdefEnum> ifDefList = new List<ifdefEnum>();
 
         private void parseCompilerDirective()
         {
@@ -552,7 +554,7 @@ namespace pluginVerilog.Verilog
                 case "`endif":
                     wordPointer.Color(CodeDrawStyle.ColorType.Keyword);
                     wordPointer.MoveNext();
-                    if (ifDefs.Count != 0) ifDefs.Remove(ifDefs.Last());
+                    if (ifDefList.Count != 0) ifDefList.Remove(ifDefList.Last());
                     break;
                 case "`ifdef":
                     wordPointer.Color(CodeDrawStyle.ColorType.Keyword);
@@ -829,7 +831,7 @@ namespace pluginVerilog.Verilog
 
             if (file == null)
             {
-                System.Diagnostics.Debugger.Break();
+                throw new Exception();
             }
 
             {
@@ -878,15 +880,15 @@ namespace pluginVerilog.Verilog
             // search same filename in full project
             if(wordPointer.ParsedDocument!= null && wordPointer.ParsedDocument.Project !=null) {
 
-                CodeEditor2.Data.File ffile = wordPointer.ParsedDocument.Project.SearchFile(
+                CodeEditor2.Data.File? fFile = wordPointer.ParsedDocument.Project.SearchFile(
                     (f)=> {
                     if (f.Name == filePath) return true;
                     return false;
                     });
-                  if (ffile != null)
+                if (fFile != null)
                 {
                     //wordPointer.MoveNext();
-                    diveIntoIncludeFile(ffile.RelativePath);
+                    diveIntoIncludeFile(fFile.RelativePath);
                     return;
                 }
             }

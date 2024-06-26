@@ -62,12 +62,12 @@ namespace pluginVerilog.Verilog.Items.Generate
 
                     if (caseSelected && word.Active)
                     {
-                        word.StartNonGenenerated();
+                        word.StartNonGenerated();
                         while (!word.Eof)
                         {
                             if (!GenerateItem.Parse(word, module)) break;
                         }
-                        word.EndNonGeneratred();
+                        word.EndNonGenerated();
                     }
                     else
                     {
@@ -104,12 +104,12 @@ namespace pluginVerilog.Verilog.Items.Generate
                     if (word.Active && expression != null && conditionExpression != null && expression.Constant && conditionExpression.Constant && expression.Value != conditionExpression.Value)
                     {
                         // false
-                        word.StartNonGenenerated();
+                        word.StartNonGenerated();
                         while (!word.Eof)
                         {
                             if (!GenerateItem.Parse(word, module)) break;
                         }
-                        word.EndNonGeneratred();
+                        word.EndNonGenerated();
                     }
                     else
                     {
