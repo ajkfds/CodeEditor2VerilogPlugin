@@ -1,5 +1,7 @@
-﻿using pluginVerilog.Verilog.BuildingBlocks;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
+using pluginVerilog.Verilog.DataObjects.Variables;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -141,7 +143,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                         {
                             word.MoveNext();
                         }
-                        Expressions.Expression expression = Expressions.Expression.ParseCreate(word, nameSpace);
+                        Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
                         if(expression == null)
                         {
                             error = true;
@@ -370,78 +372,20 @@ namespace pluginVerilog.Verilog.ModuleItems
                         if (outPort)
                         {
                             Expressions.Expression? expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace);
-                            if ( word.Prototype && expression != null && !moduleInstantiation.PortConnection.ContainsKey(pinName)) moduleInstantiation.PortConnection.Add(pinName, expression);
-
-                            if (!word.Prototype)
+                            if (word.Prototype && expression != null && !moduleInstantiation.PortConnection.ContainsKey(pinName))
                             {
-                                if (instancedModule != null && expression != null && expression.BitWidth != null && instancedModule.Ports.ContainsKey(pinName))
-                                {
-                                    if (instancedModule.Ports[pinName].Range == null)
-                                    {
-                                        if (expression.BitWidth != null && expression.Reference != null && expression.BitWidth != 1)
-                                        {
-                                            expression.Reference.AddWarning("bit width mismatch 1 vs " + expression.BitWidth);
-                                        }
-
-                                    }
-                                    else if (instancedModule.Ports[pinName].Range.BitWidth != expression.BitWidth && expression.Reference != null)
-                                    {
-                                        expression.Reference.AddWarning("bit width mismatch " + instancedModule.Ports[pinName].Range.BitWidth + " vs " + expression.BitWidth);
-                                    }
-                                }
+                                moduleInstantiation.PortConnection.Add(pinName, expression);
                             }
+                            if (!word.Prototype) checkPortConnection(instancedModule, expression, pinName,true);
                         }
                         else
                         {
                             Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
-                            if (word.Prototype && expression != null && !moduleInstantiation.PortConnection.ContainsKey(pinName)) moduleInstantiation.PortConnection.Add(pinName, expression);
-
-                            if (!word.Prototype)
+                            if (word.Prototype && expression != null && !moduleInstantiation.PortConnection.ContainsKey(pinName))
                             {
-                                if (instancedModule != null && expression != null && instancedModule.Ports.ContainsKey(pinName))
-                                {
-                                    if (expression.BitWidth != null) // value connection
-                                    {
-                                        if (instancedModule.Ports[pinName].Range == null)
-                                        {
-                                            if (expression.BitWidth != null && expression.Reference != null && expression.BitWidth != 1)
-                                            {
-                                                expression.Reference.AddWarning("bit width mismatch 1 vs " + expression.BitWidth);
-                                            }
-
-                                        }
-                                        else if (instancedModule.Ports[pinName].Range.BitWidth != expression.BitWidth && expression.Reference != null)
-                                        {
-                                            expression.Reference.AddWarning("bit width mismatch " + instancedModule.Ports[pinName].Range.BitWidth + " vs " + expression.BitWidth);
-                                        }
-                                    }else if(expression is Expressions.InterfaceReference) // interface connection
-                                    {
-                                        if(!(instancedModule.Ports[pinName].DataObject is InterfaceInstantiation))
-                                        {
-                                            expression.Reference.AddError("illegal interface connection");
-                                        }
-                                        else
-                                        {
-                                            InterfaceInstantiation? iInst = instancedModule.Ports[pinName].DataObject as InterfaceInstantiation;
-                                            if (iInst == null) throw new Exception();
-
-                                            Expressions.InterfaceReference? interfaceRef = expression as Expressions.InterfaceReference;
-                                            if(interfaceRef == null)
-                                            {
-                                                expression.Reference.AddError("should be "+ iInst.SourceName);
-                                            }else if(interfaceRef.interfaceInstantiation.SourceName != iInst.SourceName)
-                                            {
-                                                expression.Reference.AddError("should be " + iInst.SourceName);
-                                            }
-                                            else
-                                            {
-                                                // properly connected
-                                            }
-                                        }
-
-                                    }
-                                }
+                                moduleInstantiation.PortConnection.Add(pinName, expression);
                             }
+                            if (!word.Prototype) checkPortConnection(instancedModule, expression, pinName,false);
                         }
                         if (word.Text != ")")
                         {
@@ -475,13 +419,13 @@ namespace pluginVerilog.Verilog.ModuleItems
                         if(instancedModule != null && i < instancedModule.PortsList.Count)
                         {
                             pinName = instancedModule.PortsList[i].Name;
-                            Expressions.Expression expression = Expressions.Expression.ParseCreate(word,nameSpace);
+                            Expressions.Expression? expression = Expressions.Expression.ParseCreate(word,nameSpace);
                             if (word.Prototype && expression != null && !moduleInstantiation.PortConnection.ContainsKey(pinName)) moduleInstantiation.PortConnection.Add(pinName, expression);
                         }
                         else
                         {
                             word.AddError("illegal port connection");
-                            Expressions.Expression expression = Expressions.Expression.ParseCreate(word, nameSpace);
+                            Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
                         }
                         if (word.Text != ",")
                         {
@@ -514,6 +458,147 @@ namespace pluginVerilog.Verilog.ModuleItems
             }
             word.MoveNext();
             return true;
+        }
+
+        //private static void checkOutputPortConnection(Module? instancedModule, Expressions.Expression? expression, string pinName)
+        //{
+        //    if (instancedModule != null && expression != null && expression.BitWidth != null && instancedModule.Ports.ContainsKey(pinName))
+        //    {
+        //        if (instancedModule.Ports[pinName].Range == null)
+        //        {
+        //            if (expression.BitWidth != null && expression.Reference != null && expression.BitWidth != 1)
+        //            {
+        //                expression.Reference.AddWarning("bit width mismatch 1 vs " + expression.BitWidth);
+        //            }
+
+        //        }
+        //        else if (instancedModule.Ports[pinName].Range.BitWidth != expression.BitWidth && expression.Reference != null)
+        //        {
+        //            expression.Reference.AddWarning("bit width mismatch " + instancedModule.Ports[pinName].Range.BitWidth + " vs " + expression.BitWidth);
+        //        }
+        //    }
+        //}
+
+        private static void checkPortConnection(Module? instancedModule,Expressions.Expression? expression,string pinName,bool output)
+        {
+            if (instancedModule == null) return;
+            if (expression == null) return;
+            if (!instancedModule.Ports.ContainsKey(pinName)) return;
+            Port? port = instancedModule.Ports[pinName];
+            if (port == null) throw new Exception();
+
+            DataObject? portDataObject = instancedModule.Ports[pinName].DataObject;
+
+            if (portDataObject is InterfaceInstantiation)
+            {
+                InterfaceInstantiation? portInterfaceInstantiation = instancedModule.Ports[pinName].DataObject as InterfaceInstantiation;
+                if (portInterfaceInstantiation == null) throw new Exception();
+                Interface? interface_ = instancedModule.Project.GetPluginProperty().GetBuildingBlock(portInterfaceInstantiation.SourceName) as Interface;
+                if(interface_ == null)
+                {
+                    expression.Reference.AddError("illegal interface");
+                }
+                else
+                {
+                    checkInterfacePortConnection(expression, portInterfaceInstantiation, interface_, pinName, output);
+                }
+            }
+            else if( portDataObject is Variable)
+            {
+                Variable? variable = portDataObject as Variable;
+                if (variable == null) throw new Exception();
+
+                checkVariablePortConnection( expression, port, variable, pinName, output);
+            }
+            else if(portDataObject is DataObjects.Nets.Net)
+            {
+                DataObjects.Nets.Net? net = portDataObject as DataObjects.Nets.Net;
+                if (net == null) throw new Exception();
+
+                checkNetPortConnection(expression, port, net, pinName, output);
+            }
+
+        }
+        private static void checkNetPortConnection(
+            Expressions.Expression expression,
+            Port port,
+            DataObjects.Nets.Net net,
+            string pinName,
+            bool output
+            )
+        {
+            if (port.Range == null)
+            {
+                if (expression.BitWidth != null && expression.Reference != null && expression.BitWidth != 1)
+                {
+                    expression.Reference.AddWarning("bit width mismatch 1 vs " + expression.BitWidth);
+                }
+
+            }
+            else if (port.Range.BitWidth != expression.BitWidth && expression.Reference != null)
+            {
+                expression.Reference.AddWarning("bit width mismatch " + port.Range.BitWidth + " vs " + expression.BitWidth);
+            }
+        }
+        private static void checkVariablePortConnection(
+            Expressions.Expression expression,
+            Port port,
+            Variable variable,
+            string pinName, 
+            bool output
+            )
+        {
+            if (port.Range == null)
+            {
+                if (expression.BitWidth != null && expression.Reference != null && expression.BitWidth != 1)
+                {
+                    expression.Reference.AddWarning("bit width mismatch 1 vs " + expression.BitWidth);
+                }
+
+            }
+            else if (port.Range.BitWidth != expression.BitWidth && expression.Reference != null)
+            {
+                expression.Reference.AddWarning("bit width mismatch " + port.Range.BitWidth + " vs " + expression.BitWidth);
+            }
+        }
+        private static void checkInterfacePortConnection(
+            Expressions.Expression expression,
+            InterfaceInstantiation portInterfaceInstantiation,
+            Interface interface_,
+            string pinName,
+            bool output
+            )
+        {
+            if (portInterfaceInstantiation.ModPortName == "")
+            { // interface
+                Expressions.InterfaceReference? expressionInterface = expression as Expressions.InterfaceReference;
+                if (expressionInterface == null)
+                {
+                    expression.Reference.AddError("should be " + portInterfaceInstantiation.ModPortName);
+                }
+                else
+                {
+                    if (expressionInterface == null)
+                    {
+                        expression.Reference.AddError("should be " + portInterfaceInstantiation.SourceName);
+                    }
+                    else if (expressionInterface.interfaceInstantiation.SourceName != portInterfaceInstantiation.SourceName)
+                    {
+                        expression.Reference.AddError("should be " + portInterfaceInstantiation.SourceName);
+                    }
+                    else
+                    {
+                        // properly connected
+                    }
+                }
+            }
+            else
+            { // modport
+            }
+        }
+        private static void checkDataObjectPortConnection(
+            Module? instancedModule, Expressions.Expression? expression, string pinName, bool output)
+        {
         }
 
         public BuildingBlock GetInstancedBuildingBlock()

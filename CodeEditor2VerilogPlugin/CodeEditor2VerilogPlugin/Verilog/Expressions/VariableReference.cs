@@ -66,7 +66,7 @@ namespace pluginVerilog.Verilog.Expressions
             return sb.ToString();
         }
 
-        private static DataObjects.DataObject getDataObject(WordScanner word, string identifier, NameSpace nameSpace)
+        private static DataObjects.DataObject? getDataObject(WordScanner word, string identifier, NameSpace nameSpace)
         {
             if (nameSpace.DataObjects.ContainsKey(identifier))
             {
@@ -118,10 +118,19 @@ namespace pluginVerilog.Verilog.Expressions
             return val;
         }
 
-        public static VariableReference ParseCreate(WordScanner word, NameSpace nameSpace, bool assigned)
+        /// <summary>
+        /// parse local variable references.
+        /// hierarchy reference will parsed on upper module
+        /// </summary>
+        /// <param name="word"></param>
+        /// <param name="nameSpace"></param>
+        /// <param name="assigned"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public static VariableReference? ParseCreate(WordScanner word, NameSpace nameSpace, bool assigned)
         {
             if (nameSpace == null) System.Diagnostics.Debugger.Break();
-            DataObjects.DataObject variable = getDataObject(word, word.Text, nameSpace);
+            DataObjects.DataObject? variable = getDataObject(word, word.Text, nameSpace);
 
             if (variable == null) return null;
 
@@ -162,8 +171,8 @@ namespace pluginVerilog.Verilog.Expressions
                     break;
                 }
                 word.MoveNext();
-                Expression exp = Expression.ParseCreate(word, nameSpace);
-                val.Dimensions.Add(exp);
+                Expression? exp = Expression.ParseCreate(word, nameSpace);
+                if(exp != null) val.Dimensions.Add(exp);
                 if (word.GetCharAt(0) != ']')
                 {
                     word.AddError("illegal dimension");
@@ -176,8 +185,8 @@ namespace pluginVerilog.Verilog.Expressions
             {
                 word.MoveNext();
 
-                Expression exp1 = Expression.ParseCreate(word, nameSpace);
-                Expression exp2;
+                Expression? exp1 = Expression.ParseCreate(word, nameSpace);
+                Expression? exp2;
                 switch (word.Text)
                 {
                     case ":":
