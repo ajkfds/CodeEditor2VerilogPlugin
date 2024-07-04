@@ -233,7 +233,7 @@ namespace pluginVerilog.Verilog
             {
                 parse_function_items_non_ansi(word, nameSpace, function);
             }
-            else
+            else if (word.Text == "(")
             {
                 parse_function_items_ansi(word, nameSpace, function);
             }

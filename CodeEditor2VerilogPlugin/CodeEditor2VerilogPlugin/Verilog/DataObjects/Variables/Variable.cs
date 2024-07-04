@@ -200,7 +200,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                     }
                     else
                     {
-                        Expressions.Expression exp = Expressions.Expression.ParseCreate(word, nameSpace);
+                        Expressions.Expression? exp = Expressions.Expression.ParseCreate(word, nameSpace);
                     }
                 }
 

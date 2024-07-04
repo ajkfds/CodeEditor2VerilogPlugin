@@ -76,6 +76,7 @@ namespace pluginVerilog
             project.ProjectProperties.Add(Id, new ProjectProperty(project));
         }
 
+
         public bool Initialize()
         {
             ContextMenu contextMenu = Controller.NavigatePanel.GetContextMenu();

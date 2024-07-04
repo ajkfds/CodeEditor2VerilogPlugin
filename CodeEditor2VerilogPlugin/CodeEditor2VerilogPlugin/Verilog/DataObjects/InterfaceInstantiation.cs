@@ -1,5 +1,6 @@
 ﻿using CodeEditor2.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
+using pluginVerilog.Verilog.DataObjects.Variables;
 using pluginVerilog.Verilog.ModuleItems;
 using System;
 using System.Collections.Generic;
@@ -55,6 +56,7 @@ namespace pluginVerilog.Verilog.DataObjects
                 return sb.ToString();
             }
         }
+
 
         public bool Prototype { get; set; } = false;
 

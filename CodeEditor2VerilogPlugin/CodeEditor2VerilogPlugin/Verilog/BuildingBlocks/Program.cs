@@ -81,12 +81,13 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             // "program"
             if (word.Text != "program") System.Diagnostics.Debugger.Break();
             word.Color(CodeDrawStyle.ColorType.Keyword);
-            Program module = new Program();
-            module.Parent = word.RootParsedDocument.Root;
+            Program program = new Program();
+            program.Parent = word.RootParsedDocument.Root;
+            program.Project = word.Project;
 
-            module.BuildingBlock = module;
-            module.File = file;
-            module.BeginIndexReference = word.CreateIndexReference();
+            program.BuildingBlock = program;
+            program.File = file;
+            program.BeginIndexReference = word.CreateIndexReference();
             word.MoveNext();
 
 
@@ -103,18 +104,18 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 // prototype parse
                 WordScanner prototypeWord = word.Clone();
                 prototypeWord.Prototype = true;
-                parseProgramItems(prototypeWord, parameterOverrides, null, module);
+                parseProgramItems(prototypeWord, parameterOverrides, null, program);
                 prototypeWord.Dispose();
 
                 // parse
                 word.RootParsedDocument.Macros = macroKeep;
-                parseProgramItems(word, parameterOverrides, null, module);
+                parseProgramItems(word, parameterOverrides, null, program);
             }
             else
             {
                 // parse prototype only
                 word.Prototype = true;
-                parseProgramItems(word, parameterOverrides, null, module);
+                parseProgramItems(word, parameterOverrides, null, program);
                 word.Prototype = false;
             }
 
@@ -122,18 +123,18 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             if (word.Text == "endprogram")
             {
                 word.Color(CodeDrawStyle.ColorType.Keyword);
-                module.LastIndexReference = word.CreateIndexReference();
+                program.LastIndexReference = word.CreateIndexReference();
 
-                word.AppendBlock(module.BeginIndexReference, module.LastIndexReference);
+                word.AppendBlock(program.BeginIndexReference, program.LastIndexReference);
                 word.MoveNext();
-                return module;
+                return program;
             }
 
             {
                 word.AddError("endprogram expected");
             }
 
-            return module;
+            return program;
         }
 
         /*
