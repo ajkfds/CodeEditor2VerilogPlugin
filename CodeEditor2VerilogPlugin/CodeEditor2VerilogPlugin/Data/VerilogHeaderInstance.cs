@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CodeEditor2.CodeEditor;
 using CodeEditor2.Data;
+using pluginVerilog.Verilog;
 using static CodeEditor2.Controller;
 
 namespace pluginVerilog.Data
@@ -18,12 +19,13 @@ namespace pluginVerilog.Data
 
         public static VerilogHeaderInstance Create(
             string relativePath,
+            IndexReference instancedReference,
             IVerilogRelatedFile parentFile,
             CodeEditor2.Data.Project project,
             string id)
         {
-            ProjectProperty projectPropery = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
-            CodeEditor2.Data.Item fileItem = project.GetItem(relativePath);
+            ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+            CodeEditor2.Data.Item? fileItem = project.GetItem(relativePath);
             VerilogHeaderFile? vhFile = fileItem as VerilogHeaderFile;
 
             if (vhFile == null) return null;
@@ -41,10 +43,12 @@ namespace pluginVerilog.Data
             }
             instance.id = id;
             instance.RootFile = parentFile;
+            instance.InstancedReference = instancedReference;
 
             return instance;
         }
         public IVerilogRelatedFile RootFile { get; protected set; }
+        public IndexReference InstancedReference { get; protected set; }
 
         private string id;
         public override string ID
@@ -74,7 +78,6 @@ namespace pluginVerilog.Data
             //if (ModuleName != moduleInstantiation.ModuleName) return false;
 
             ParsedDocument = file.ParsedDocument;
-
 
             return true;
         }
@@ -177,7 +180,7 @@ namespace pluginVerilog.Data
             }
         }
 
-        public override void AcceptParsedDocument(ParsedDocument newParsedDocument)
+        public override void AcceptParsedDocument(CodeEditor2.CodeEditor.ParsedDocument newParsedDocument)
         {
             Verilog.ParsedDocument vParsedDocument = newParsedDocument as Verilog.ParsedDocument;
             parsedDocument = vParsedDocument;
@@ -261,6 +264,10 @@ namespace pluginVerilog.Data
         //{
         //    return VerilogCommon.AutoComplete.GetPopupItems(this,VerilogParsedDocument, version, index);
         //}
+        public override CodeEditor2.CodeEditor.PopupItem GetPopupItem(ulong version, int index)
+        {
+            return VerilogCommon.AutoComplete.GetPopupItem(this, VerilogParsedDocument, version, index);
+        }
 
         public override List<CodeEditor2.CodeEditor.ToolItem> GetToolItems(int index)
         {

@@ -67,7 +67,7 @@ namespace pluginVerilog.Data
                 {
                     try
                     {
-                        loadDoumentFromFile();
+                        loadDocumentFromFile();
                     }
                     catch
                     {
@@ -147,13 +147,13 @@ namespace pluginVerilog.Data
 
         public override void LoadFormFile()
         {
-            loadDoumentFromFile();
+            loadDocumentFromFile();
             AcceptParsedDocument(null);
             Project.AddReparseTarget(this);
             if (NavigatePanelNode != null) NavigatePanelNode.Update();
         }
 
-        private void loadDoumentFromFile()
+        private void loadDocumentFromFile()
         {
             try
             {

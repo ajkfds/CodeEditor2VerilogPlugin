@@ -79,23 +79,12 @@ namespace pluginVerilog.Verilog
         {
             if (InhibitColor) return;
             Document.TextColors.SetColorAt(index, CodeDrawStyle.ColorIndex(colorType),length);
-
-            //for (int i = index; i < index + length; i++)
-            //{
-            //    Document.SetColorAt(i, CodeDrawStyle.ColorIndex(colorType));
-            //}
         }
 
         public void Color(CodeDrawStyle.ColorType colorType,int start,int last)
         {
             if (InhibitColor) return;
-            //            if (last > length) System.Diagnostics.Debugger.Break();
-
             Document.TextColors.SetColorAt(start, CodeDrawStyle.ColorIndex(colorType), last - start);
-            //for (int i = index+start; i < index + last; i++)
-            //{
-            //    Document.SetColorAt(i, CodeDrawStyle.ColorIndex(colorType));
-            //}
         }
 
         public void AppendBlock(int startIndex,int lastIndex)
@@ -137,15 +126,17 @@ namespace pluginVerilog.Verilog
         private void addError(int index,int length, string message)
         {
             if (ParsedDocument == null) return;
+            Data.IVerilogRelatedFile? verilogRelatedFile = Document.TextFile as Data.IVerilogRelatedFile;
+            if (verilogRelatedFile == null) return;
 
             if (ParsedDocument is Verilog.ParsedDocument && (ParsedDocument as Verilog.ParsedDocument).ErrorCount < 100)
             {
                 int lineNo = Document.GetLineAt(index);
-                ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(Document.TextFile as Data.IVerilogRelatedFile, message, Verilog.ParsedDocument.Message.MessageType.Error, index, lineNo, length, ParsedDocument.Project));
+                ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(verilogRelatedFile, message, Verilog.ParsedDocument.Message.MessageType.Error, index, lineNo, length, ParsedDocument.Project));
             }
             else if (ParsedDocument is Verilog.ParsedDocument && (ParsedDocument as Verilog.ParsedDocument).ErrorCount == 100)
             {
-                ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(Document.TextFile as Data.IVerilogRelatedFile, ">100 errors", Verilog.ParsedDocument.Message.MessageType.Error, 0, 0, 0, ParsedDocument.Project));
+                ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(verilogRelatedFile, ">100 errors", Verilog.ParsedDocument.Message.MessageType.Error, 0, 0, 0, ParsedDocument.Project));
             }
 
             Document.Marks.SetMarkAt(index, length, 0);
@@ -164,15 +155,17 @@ namespace pluginVerilog.Verilog
         private void addWarning(int index, int length, string message)
         {
             if (ParsedDocument == null) return;
+            Data.IVerilogRelatedFile? verilogRelatedFile = Document.TextFile as Data.IVerilogRelatedFile;
+            if (verilogRelatedFile == null) return;
 
             if (ParsedDocument is Verilog.ParsedDocument && (ParsedDocument as Verilog.ParsedDocument).WarningCount < 100)
             {
                 int lineNo = Document.GetLineAt(index);
-                ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(Document.TextFile as Data.IVerilogRelatedFile, message, Verilog.ParsedDocument.Message.MessageType.Warning, index, lineNo, length, ParsedDocument.Project));
+                ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(verilogRelatedFile, message, Verilog.ParsedDocument.Message.MessageType.Warning, index, lineNo, length, ParsedDocument.Project));
             }
             else if (ParsedDocument is Verilog.ParsedDocument && (ParsedDocument as Verilog.ParsedDocument).WarningCount == 100)
             {
-                ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(Document.TextFile as Data.IVerilogRelatedFile, ">100 warnings", Verilog.ParsedDocument.Message.MessageType.Warning, 0, 0, 0, ParsedDocument.Project));
+                ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(verilogRelatedFile, ">100 warnings", Verilog.ParsedDocument.Message.MessageType.Warning, 0, 0, 0, ParsedDocument.Project));
             }
 
             Document.Marks.SetMarkAt(index, length, 1);
@@ -192,6 +185,8 @@ namespace pluginVerilog.Verilog
         private void addNotice(int index, int length, string message)
         {
             if (ParsedDocument == null) return;
+            Data.IVerilogRelatedFile? verilogRelatedFile = Document.TextFile as Data.IVerilogRelatedFile;
+            if (verilogRelatedFile == null) return;
 
             if (ParsedDocument is Verilog.ParsedDocument && (ParsedDocument as Verilog.ParsedDocument).WarningCount < 100)
             {

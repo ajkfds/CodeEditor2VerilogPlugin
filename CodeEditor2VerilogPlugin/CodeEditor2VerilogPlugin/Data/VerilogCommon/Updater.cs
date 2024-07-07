@@ -59,16 +59,16 @@ namespace pluginVerilog.Data.VerilogCommon
                         }
                         else
                         {
-                            string keyname = vhFile.Name;
+                            string keyName = vhFile.Name;
                             {
                                 int i = 0;
-                                while (rootItem.Items.ContainsKey(keyname + "_" + i.ToString()))
+                                while (rootItem.Items.ContainsKey(keyName + "_" + i.ToString()) || newItems.ContainsKey(keyName + "_" + i.ToString()))
                                 {
                                     i++;
                                 }
-                                keyname = keyname + "_" + i.ToString();
+                                keyName = keyName + "_" + i.ToString();
                             }
-                            newItems.Add(keyname, vhFile);
+                            newItems.Add(keyName, vhFile);
                             targetItems.Add(vhFile);
                             vhFile.Parent = rootItem as Item;
                         }

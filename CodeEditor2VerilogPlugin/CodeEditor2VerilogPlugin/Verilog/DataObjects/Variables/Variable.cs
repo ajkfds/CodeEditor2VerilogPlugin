@@ -212,7 +212,8 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                     }
                     else
                     {
-                        word.AddError("duplicate");
+                        variable.DefinedReference.AddError("duplicate");
+//                        word.AddError("duplicate");
                     }
                 }
                 else

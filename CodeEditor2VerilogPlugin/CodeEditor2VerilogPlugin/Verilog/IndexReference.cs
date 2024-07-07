@@ -90,16 +90,32 @@ namespace pluginVerilog.Verilog
             if (indexReference == null) return false;
 
             int i = Indexs.Count;
-            if( i > indexReference.Indexs.Count)
+            if (i > indexReference.Indexs.Count)
             {
                 i = indexReference.Indexs.Count;
             }
 
-            for(int j=0; j < i; j++)
+            for (int j = 0; j < i; j++)
             {
                 if (Indexs[j] > indexReference.Indexs[j]) return true;
             }
             return false;
+        }
+        public bool IsSameAs(IndexReference indexReference)
+        {
+            if (indexReference == null) return false;
+
+            int i = Indexs.Count;
+            if (i > indexReference.Indexs.Count)
+            {
+                i = indexReference.Indexs.Count;
+            }
+
+            for (int j = 0; j < i; j++)
+            {
+                if (Indexs[j] != indexReference.Indexs[j]) return false;
+            }
+            return true;
         }
 
         public bool IsSmallerThan(IndexReference indexReference)

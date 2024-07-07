@@ -15,10 +15,13 @@ namespace pluginVerilog.Parser
             CodeEditor2.CodeEditor.DocumentParser.ParseModeEnum parseMode
             )
         {
-            this.document = new CodeEditor.CodeDocument(verilogFile); // use verilog codedocument
+            this.document = new CodeEditor.CodeDocument(verilogFile); // use verilog codeDocument
             this.document.CopyTextOnlyFrom(verilogFile.CodeDocument);
             this.ParseMode = parseMode;
-            this.TextFile = verilogFile as CodeEditor2.Data.TextFile;
+
+            CodeEditor2.Data.TextFile? textFile = verilogFile as CodeEditor2.Data.TextFile;
+            if (textFile == null) throw new Exception();
+            this.TextFile = textFile;
 
             File = verilogFile;
             parsedDocument = new Verilog.ParsedDocument(verilogFile,null, parseMode);
@@ -41,11 +44,13 @@ namespace pluginVerilog.Parser
             CodeEditor2.CodeEditor.DocumentParser.ParseModeEnum parseMode
             ) : base(verilogFile as CodeEditor2.Data.TextFile, parseMode)
         {
-            this.document = new CodeEditor.CodeDocument(verilogFile); // use verilog codedocument
+            this.document = new CodeEditor.CodeDocument(verilogFile); // use verilog codeDocument
             this.document.CopyTextOnlyFrom(verilogFile.CodeDocument);
 
             this.ParseMode = parseMode;
-            this.TextFile = verilogFile as CodeEditor2.Data.TextFile;
+            CodeEditor2.Data.TextFile? textFile = verilogFile as CodeEditor2.Data.TextFile;
+            if (textFile == null) throw new Exception();
+            this.TextFile = textFile;
 
             File = verilogFile;
             parsedDocument = new Verilog.ParsedDocument(verilogFile,null, parseMode);

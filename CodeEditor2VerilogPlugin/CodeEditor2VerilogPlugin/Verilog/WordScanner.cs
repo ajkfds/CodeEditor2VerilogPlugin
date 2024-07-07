@@ -153,14 +153,15 @@ namespace pluginVerilog.Verilog
         }
         public WordReference GetReference()
         {
-            if (stock.Count == 0)
+//            if (stock.Count == 0)
             {
                 return new WordReference(wordPointer.Index, wordPointer.Length, wordPointer.ParsedDocument,Document);
             }
-            else
-            {
-                return new WordReference(stock[0].Index, stock[0].Length, stock[0].ParsedDocument,stock[0].Document);
-            }
+//            else
+//            {
+//                return new WordReference(stock[0].Index, stock[0].Length, stock[0].ParsedDocument, stock[0].Document);
+//                return new WordReference(stock.Last().Index, stock.Last().Length, stock.Last().ParsedDocument, stock.Last().Document);
+//            }
         }
 
         public WordReference GetReference(WordReference fromReference)
@@ -370,7 +371,7 @@ namespace pluginVerilog.Verilog
             //wordPointer.Dispose(); keep document & parsedData
             wordPointer = stock.Last();
             stock.Remove(stock.Last());
-            if (error) wordPointer.AddError("include errors");
+            if (error && !prototype) wordPointer.AddError("include errors");
             wordPointer.MoveNext();
         }
 
@@ -1066,7 +1067,13 @@ namespace pluginVerilog.Verilog
                 rootFile = stock[0].VerilogFile;
             }
 
-            Data.VerilogHeaderInstance vhInstance = Data.VerilogHeaderInstance.Create(relativeFilePath,rootFile , wordPointer.ParsedDocument.Project,id);
+            Data.VerilogHeaderInstance vhInstance = Data.VerilogHeaderInstance.Create(
+                                                                relativeFilePath,
+                                                                CreateIndexReference(),
+                                                                rootFile,
+                                                                wordPointer.ParsedDocument.Project,
+                                                                id
+                                                                );
             if(vhInstance == null)
             {
                 wordPointer.AddError("illegal file");
@@ -1074,19 +1081,19 @@ namespace pluginVerilog.Verilog
             }
 
             vhInstance.Parent = wordPointer.ParsedDocument.File as CodeEditor2.Data.Item;
-            
-            if(wordPointer.ParsedDocument.IncludeFiles.ContainsKey(vhInstance.Name))
-            { // avoid duplicate name
-                int count = 1;
-                while (wordPointer.ParsedDocument.IncludeFiles.ContainsKey(vhInstance.Name + ":"+count.ToString()))
-                {
-                    count++;
-                }
-                vhInstance.SetName(vhInstance.Name + ":" + count.ToString());
-            }
 
-            if (!prototype)
+            if (prototype)
             {
+                if (wordPointer.ParsedDocument.IncludeFiles.ContainsKey(vhInstance.Name))
+                { // avoid duplicate name
+                    int count = 1;
+                    while (wordPointer.ParsedDocument.IncludeFiles.ContainsKey(vhInstance.Name + ":" + count.ToString()))
+                    {
+                        count++;
+                    }
+                    vhInstance.SetName(vhInstance.Name + ":" + count.ToString());
+                }
+
                 if (!wordPointer.ParsedDocument.IncludeFiles.ContainsKey(vhInstance.ID))
                 {
                     wordPointer.ParsedDocument.IncludeFiles.Add(vhInstance.ID, vhInstance);
@@ -1096,12 +1103,38 @@ namespace pluginVerilog.Verilog
                     vhInstance = wordPointer.ParsedDocument.IncludeFiles[vhInstance.ID];
                 }
             }
+            else
+            {
+                IndexReference currentIndex = CreateIndexReference();
+                foreach(Data.VerilogHeaderInstance vh in wordPointer.ParsedDocument.IncludeFiles.Values)
+                {
+                    if (currentIndex.IsSameAs(vh.InstancedReference))
+                    {
+                        vhInstance = vh;
+                    }
+                }
+            }
 
             // assign new parsed document
             IndexReference indexReference = IndexReference.Create(wordPointer.ParsedDocument.IndexReference, wordPointer.Index);
-            ParsedDocument newParsedDocument = new Verilog.ParsedDocument(vhInstance, indexReference, RootParsedDocument.ParseMode);// editid =, -1);
-            
-            
+
+            ParsedDocument newParsedDocument;
+            if (prototype)
+            {
+                newParsedDocument = new Verilog.ParsedDocument(vhInstance, indexReference, RootParsedDocument.ParseMode);// editid =, -1);
+            } else
+            {
+                if(vhInstance.VerilogParsedDocument != null)
+                {
+                    newParsedDocument = vhInstance.VerilogParsedDocument;
+                }
+                else
+                {
+                    newParsedDocument = new Verilog.ParsedDocument(vhInstance, indexReference, RootParsedDocument.ParseMode);// editid =, -1);
+                }
+            }
+            vhInstance.ParsedDocument = newParsedDocument;
+
             newParsedDocument.SystemVerilog = wordPointer.ParsedDocument.SystemVerilog;
             if (rootFile != null && rootFile.VerilogParsedDocument != null && rootFile.VerilogParsedDocument.SystemVerilog)
             {
