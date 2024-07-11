@@ -231,6 +231,46 @@ namespace pluginVerilog.Verilog
 
         }
 
+        // task_prototype::= task task_identifier[([tf_port_list])]
+        public static void ParsePrototype(WordScanner word, NameSpace nameSpace)
+        {
+            if (word.Text != "task") throw new Exception();
+
+            Task task = new Task(nameSpace);
+            task.BuildingBlock = nameSpace.BuildingBlock;
+            word.Color(CodeDrawStyle.ColorType.Keyword);
+            task.BeginIndexReference = word.CreateIndexReference();
+            word.MoveNext();
+
+            if (!General.IsIdentifier(word.Text))
+            {
+                word.AddError("illegal identifier name");
+                return;
+            }
+
+            task.Name = word.Text;
+
+            if (!word.Active)
+            {
+                // skip
+            }
+            else
+            {
+                if (nameSpace.BuildingBlock.Tasks.ContainsKey(task.Name))
+                {
+                    nameSpace.BuildingBlock.Tasks[task.Name] = task;
+                }
+                else
+                {
+                    nameSpace.BuildingBlock.Tasks.Add(task.Name, task);
+                }
+            }
+
+            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.MoveNext();
+
+            parse_task_items_ansi(word, nameSpace, task);
+        }
 
         // function_body_declaration    ::=   function_data_type_or_implicit [interface_identifier. | class_scope] function_identifier;
 
@@ -265,7 +305,7 @@ namespace pluginVerilog.Verilog
                         Verilog.DataObjects.Variables.Integer.ParseDeclaration(word, function);
                         continue;
                     case "localparameter": // local_parameter_declaration
-                    case "paraeter":  // parameter_declaration
+                    case " parameter":  // parameter_declaration
                         Verilog.DataObjects.Constants.Parameter.ParseCreateDeclaration(word, function, null);
                         continue;
                     case "real": // real_declaration
@@ -278,7 +318,7 @@ namespace pluginVerilog.Verilog
                         Verilog.DataObjects.Variables.Time.ParseDeclaration(word, function);
                         continue;
                     case "wire": // illegal format for Verilog 2001
-                        word.AddError("not supported(Veriog2001)");
+                        word.AddError("not supported(Verilog2001)");
                         Net.ParseDeclaration(word, function);
                         continue;
                     default:
@@ -289,12 +329,12 @@ namespace pluginVerilog.Verilog
         }
 
         // ( [ tf_port_list ] ) ; { block_item_declaration }
-        private static void parse_task_items_ansi(WordScanner word, NameSpace nameSpace, Task function)
+        private static void parse_task_items_ansi(WordScanner word, NameSpace nameSpace, Task task)
         {
             if (word.Text != "(") //System.Diagnostics.Debugger.Break();
             word.MoveNext();
 
-            Port.ParseTfPortItems(word, nameSpace, function);
+            Port.ParseTfPortItems(word, nameSpace, task);
 
             if (word.Text == ")")
             {
@@ -315,7 +355,7 @@ namespace pluginVerilog.Verilog
 
             while (!word.Eof)
             {
-                if (!BlockItemDeclaration.Parse(word, function)) break;
+                if (!BlockItemDeclaration.Parse(word, task)) break;
             }
 
         }

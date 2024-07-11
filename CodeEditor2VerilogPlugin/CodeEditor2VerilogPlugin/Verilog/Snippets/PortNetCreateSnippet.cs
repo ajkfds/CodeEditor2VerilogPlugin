@@ -57,10 +57,10 @@ namespace pluginVerilog.Verilog.Snippets
 
             string indent = vCodeDocument.GetIndentString(index);
 
-            CodeEditor2.Controller.CodeEditor.SetCaretPosition(moduleInstantiation.BeginIndexReference.Indexs.Last());
+            CodeEditor2.Controller.CodeEditor.SetCaretPosition(moduleInstantiation.BeginIndexReference.Indexes.Last());
             codeDocument.Replace(
-                moduleInstantiation.BeginIndexReference.Indexs.Last(),
-                moduleInstantiation.LastIndexReference.Indexs.Last() - moduleInstantiation.BeginIndexReference.Indexs.Last() + 1,
+                moduleInstantiation.BeginIndexReference.Indexes.Last(),
+                moduleInstantiation.LastIndexReference.Indexes.Last() - moduleInstantiation.BeginIndexReference.Indexes.Last() + 1,
                 0,
                 CreateString(moduleInstantiation,"\t",projectProperty)
                 );

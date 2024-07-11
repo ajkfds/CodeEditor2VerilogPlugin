@@ -182,14 +182,14 @@ namespace pluginVerilog.Verilog
 
         public void AppendBlock(IndexReference startIndexReference, IndexReference lastIndexReference)
         {
-            if (startIndexReference.Indexs.Count != lastIndexReference.Indexs.Count) return;
-            for (int i= 0; i < startIndexReference.Indexs.Count - 1; i++)
+            if (startIndexReference.Indexes.Count != lastIndexReference.Indexes.Count) return;
+            for (int i= 0; i < startIndexReference.Indexes.Count - 1; i++)
             {
-                if (startIndexReference.Indexs[i] != lastIndexReference.Indexs[i]) return;
+                if (startIndexReference.Indexes[i] != lastIndexReference.Indexes[i]) return;
             }
 
-            if (wordPointer.Document.GetLineAt(startIndexReference.Indexs.Last()) == wordPointer.Document.GetLineAt(lastIndexReference.Indexs.Last())) return;
-            wordPointer.AppendBlock(startIndexReference.Indexs.Last(), lastIndexReference.Indexs.Last());
+            if (wordPointer.Document.GetLineAt(startIndexReference.Indexes.Last()) == wordPointer.Document.GetLineAt(lastIndexReference.Indexes.Last())) return;
+            wordPointer.AppendBlock(startIndexReference.Indexes.Last(), lastIndexReference.Indexes.Last());
         }
 
         private bool systemVerilogError = false;
@@ -828,15 +828,24 @@ namespace pluginVerilog.Verilog
             }
 
             // search in same folder with original verilog file
-            Data.IVerilogRelatedFile file = wordPointer.VerilogFile;
+            Data.IVerilogRelatedFile rootFile;
+            if (stock.Count == 0)
+            {
+                rootFile = wordPointer.VerilogFile;
+            }
+            else
+            {
+                rootFile = stock[0].VerilogFile;
+            }
+//            Data.IVerilogRelatedFile file = wordPointer.VerilogFile;
 
-            if (file == null)
+            if (rootFile == null)
             {
                 throw new Exception();
             }
 
             {
-                string sameFolderPath = file.RelativePath;
+                string sameFolderPath = rootFile.RelativePath;
                 if (sameFolderPath.Contains(System.IO.Path.DirectorySeparatorChar))
                 {
                     sameFolderPath = sameFolderPath.Substring(0, sameFolderPath.LastIndexOf(System.IO.Path.DirectorySeparatorChar));

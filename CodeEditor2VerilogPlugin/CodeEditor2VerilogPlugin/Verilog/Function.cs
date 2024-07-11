@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace pluginVerilog.Verilog
 {
@@ -318,11 +319,123 @@ namespace pluginVerilog.Verilog
                     word.MoveNext();
                 }
             }
+            return;
+        }
+
+        //function_prototype::= function data_type_or_void function_identifier[([tf_port_list])]
+        public static void ParsePrototype(WordScanner word, NameSpace nameSpace)
+        {
+            if (word.Text != "function") throw new System.Exception();
+
+            Function function = new Function(nameSpace);
+            word.Color(CodeDrawStyle.ColorType.Keyword);
+            function.BeginIndexReference = word.CreateIndexReference();
+            word.MoveNext();
+
+            // function_data_type_or_implicit   ::= data_type_or_void | implicit_data_type;
+            Variable retVal = null;
+            bool returnVoid = false;
+
+            switch (word.Text)
+            {
+                case "void":
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    returnVoid = true;
+                    word.MoveNext();
+                    break;
+                case "signed":
+                case "unsigned":
+                case "[":
+                    {
+                        bool signed = false;
+                        if (word.Text == "signed")
+                        {
+                            signed = true;
+                            word.Color(CodeDrawStyle.ColorType.Keyword);
+                            word.MoveNext();
+                        }
+                        else if (word.Text == "unsigned")
+                        {
+                            word.Color(CodeDrawStyle.ColorType.Keyword);
+                            word.MoveNext();
+                        }
+                        List<Range> packedDimensions = new List<Range>();
+                        while (word.Text == "[")
+                        {
+                            Range range = Range.ParseCreate(word, nameSpace);
+                            if (range != null) packedDimensions.Add(range);
+                        }
+                        DataType dataType = Verilog.DataObjects.DataTypes.IntegerVectorType.Create(DataTypeEnum.Logic, signed, packedDimensions);
+                        Logic logic = Verilog.DataObjects.Variables.Logic.Create(dataType);
+                        logic.PackedDimensions = packedDimensions;
+                        retVal = logic;
+                    }
+                    break;
+                default:
+                    {
+                        IDataType dataType = DataType.ParseCreate(word, nameSpace, null);
+                        if (dataType != null)
+                        {
+                            retVal = Verilog.DataObjects.Variables.Variable.Create(dataType);
+                        }
+                    }
+                    break;
+            }
+
+            if (!General.IsIdentifier(word.Text))
+            {
+                word.AddError("illegal identifier name");
+                return;
+            }
+
+            function.Name = word.Text;
+            if (!returnVoid)
+            {
+                IDataType dat_type = Verilog.DataObjects.DataTypes.IntegerVectorType.Create(DataTypeEnum.Logic, false, null);
+                retVal = Verilog.DataObjects.Variables.Logic.Create(dat_type);
+            }
+
+            if (retVal != null) retVal.Name = function.Name;
+
+            function.ReturnVariable = retVal;
+
+            if (!word.Active)
+            {
+                // skip
+            }
+            else
+            {
+                if (retVal != null && retVal.Name != null)
+                {
+                    function.DataObjects.Add(retVal.Name, retVal);
+                }
+
+                if (nameSpace.BuildingBlock.Functions.ContainsKey(function.Name))
+                {
+                    nameSpace.BuildingBlock.Functions[function.Name] = function;
+                }
+                else
+                {
+                    nameSpace.BuildingBlock.Functions.Add(function.Name, function);
+                }
+            }
+
+            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.MoveNext();
 
 
+            if (word.Text == "(")
+            {
+                parse_function_items_ansi(word, nameSpace, function);
+            }
+            else
+            {
+                word.AddError("( required");
+            }
 
             return;
         }
+
 
         // function_body_declaration    ::=   function_data_type_or_implicit [interface_identifier. | class_scope] function_identifier;
 

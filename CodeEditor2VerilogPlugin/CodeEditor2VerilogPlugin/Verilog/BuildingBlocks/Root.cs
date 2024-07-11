@@ -93,6 +93,9 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     // bind_directive
                     // config_declaration
                     // package_declaration
+                    case "package":
+                        parsePackage(word, parsedDocument, file);
+                        break;
                     default:
                         // package_item
                         if (!Items.PackageItem.Parse(word, root))
@@ -158,6 +161,62 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
                 parsedDocument.Root.BuldingBlocks.Add(module.Name, module);
                 if (module.ReparseRequested) parsedDocument.ReparseRequested = true;
+            }
+            else
+            {
+                word.AddError("duplicated module name");
+            }
+        }
+        private static void parsePackage(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
+        {
+            if (word.Text != "package") System.Diagnostics.Debugger.Break();
+
+            if (parsedDocument.TargetBuldingBlockName != null)
+            {
+                string moduleName = word.NextText;
+                if (moduleName != parsedDocument.TargetBuldingBlockName)
+                {
+                    word.SkipToKeyword("endpackage");
+                    word.MoveNext();
+                    return;
+                }
+            }
+
+
+            Package package;
+            IndexReference iref = IndexReference.Create(parsedDocument);
+
+            if (parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse)
+            {
+                if (parsedDocument.ParameterOverrides == null)
+                {
+                    package = Package.Create(word, null, file, true);
+                }
+                else
+                {
+                    package = Package.Create(word, parsedDocument.ParameterOverrides, null, file, true);
+                }
+                if (package.Instantiations.Count != 0) // prepare reparse (instanced module could have un-refferenced link)
+                {
+                    package.ReparseRequested = true;
+                }
+            }
+            else
+            {
+                if (parsedDocument.ParameterOverrides == null)
+                {
+                    package = Package.Create(word, null, file, false);
+                }
+                else
+                {
+                    package = Package.Create(word, parsedDocument.ParameterOverrides, null, file, false);
+                }
+            }
+
+            if (!parsedDocument.Root.BuldingBlocks.ContainsKey(package.Name))
+            {
+                parsedDocument.Root.BuldingBlocks.Add(package.Name, package);
+                if (package.ReparseRequested) parsedDocument.ReparseRequested = true;
             }
             else
             {

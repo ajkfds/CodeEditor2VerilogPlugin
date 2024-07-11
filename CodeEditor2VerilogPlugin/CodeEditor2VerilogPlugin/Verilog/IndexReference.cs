@@ -16,17 +16,17 @@ namespace pluginVerilog.Verilog
             if(stocks.Count == 0)
             {
                 ret.RootParsedDocument = wordPointer.ParsedDocument;
-                ret.Indexs.Add(wordPointer.Index);
+                ret.Indexes.Add(wordPointer.Index);
             }
             else
             {
                 ret.RootParsedDocument = stocks[0].ParsedDocument;
-                ret.Indexs.Add(stocks[0].Index);
+                ret.Indexes.Add(stocks[0].Index);
             }
 
             foreach(WordPointer wp in stocks)
             {
-                ret.Indexs.Add(wp.Index);
+                ret.Indexes.Add(wp.Index);
             }
             return ret;
         }
@@ -41,14 +41,14 @@ namespace pluginVerilog.Verilog
         public static IndexReference Create(IndexReference indexReference, int index)
         {
             IndexReference ret = indexReference.Clone();
-            ret.Indexs.Add(index);
+            ret.Indexes.Add(index);
             return ret;
         }
 
         public ParsedDocument GetNodeParsedDocument()
         {
             ParsedDocument pDocument = RootParsedDocument;
-            foreach(int index in Indexs)
+            foreach(int index in Indexes)
             {
                 if (!pDocument.ParsedDocumentIndexDictionary.ContainsKey(index)) return null;
                 pDocument = pDocument.ParsedDocumentIndexDictionary[index];
@@ -61,9 +61,9 @@ namespace pluginVerilog.Verilog
         {
             IndexReference ret = new IndexReference();
             ret.RootParsedDocument = RootParsedDocument;
-            foreach (int index in Indexs)
+            foreach (int index in Indexes)
             {
-                ret.Indexs.Add(index);
+                ret.Indexes.Add(index);
             }
             return ret;
         }
@@ -83,21 +83,21 @@ namespace pluginVerilog.Verilog
             }
         }
 
-        public List<int> Indexs = new List<int>();
+        public List<int> Indexes = new List<int>();
 
         public bool IsGreaterThan(IndexReference indexReference)
         {
             if (indexReference == null) return false;
 
-            int i = Indexs.Count;
-            if (i > indexReference.Indexs.Count)
+            int i = Indexes.Count;
+            if (i > indexReference.Indexes.Count)
             {
-                i = indexReference.Indexs.Count;
+                i = indexReference.Indexes.Count;
             }
 
             for (int j = 0; j < i; j++)
             {
-                if (Indexs[j] > indexReference.Indexs[j]) return true;
+                if (Indexes[j] > indexReference.Indexes[j]) return true;
             }
             return false;
         }
@@ -105,15 +105,15 @@ namespace pluginVerilog.Verilog
         {
             if (indexReference == null) return false;
 
-            int i = Indexs.Count;
-            if (i > indexReference.Indexs.Count)
+            int i = Indexes.Count;
+            if (i > indexReference.Indexes.Count)
             {
-                i = indexReference.Indexs.Count;
+                i = indexReference.Indexes.Count;
             }
 
             for (int j = 0; j < i; j++)
             {
-                if (Indexs[j] != indexReference.Indexs[j]) return false;
+                if (Indexes[j] != indexReference.Indexes[j]) return false;
             }
             return true;
         }
@@ -122,15 +122,15 @@ namespace pluginVerilog.Verilog
         {
             if (indexReference == null) return false;
 
-            int i = Indexs.Count;
-            if (i > indexReference.Indexs.Count)
+            int i = Indexes.Count;
+            if (i > indexReference.Indexes.Count)
             {
-                i = indexReference.Indexs.Count;
+                i = indexReference.Indexes.Count;
             }
 
             for (int j = 0; j < i; j++)
             {
-                if (Indexs[j] < indexReference.Indexs[j]) return true;
+                if (Indexes[j] < indexReference.Indexes[j]) return true;
             }
             return false;
         }
@@ -139,15 +139,15 @@ namespace pluginVerilog.Verilog
         {
             if (indexReference == null) return false;
 
-            int i = Indexs.Count;
-            if (i > indexReference.Indexs.Count)
+            int i = Indexes.Count;
+            if (i > indexReference.Indexes.Count)
             {
-                i = indexReference.Indexs.Count;
+                i = indexReference.Indexes.Count;
             }
 
             for (int j = 0; j < i-1; j++)
             {
-                if (Indexs[j] != indexReference.Indexs[j]) return false;
+                if (Indexes[j] != indexReference.Indexes[j]) return false;
             }
             return true;
 

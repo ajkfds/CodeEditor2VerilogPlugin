@@ -87,8 +87,10 @@ namespace pluginVerilog.Verilog.Items
                 // TODO
 
                 // dpi_import_export
-                // TODO
-
+                case "import":
+                case "export":
+                    DpiImportExport.Parse(word, nameSpace);
+                    break;
                 // extern_constraint_declaration
                 // TODO
 

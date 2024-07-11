@@ -72,6 +72,7 @@ namespace pluginVerilog.Verilog
         }
         public void AddError(string message)
         {
+            // null check
             if (ParsedDocument == null || Document == null) return;
 
             Verilog.ParsedDocument? vParsedDocument = ParsedDocument as Verilog.ParsedDocument;
@@ -80,6 +81,7 @@ namespace pluginVerilog.Verilog
             Data.IVerilogRelatedFile? vFile = Document.TextFile as Data.IVerilogRelatedFile;
             if (vFile == null) return;
 
+            // add message
             if (ParsedDocument is Verilog.ParsedDocument && vParsedDocument.ErrorCount < 100)
             {
                 int lineNo = Document.GetLineAt(Index);
@@ -90,13 +92,16 @@ namespace pluginVerilog.Verilog
                 ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(vFile, ">100 errors", Verilog.ParsedDocument.Message.MessageType.Error, 0, 0, 0, ParsedDocument.Project)); ;
             }
 
-            Document.Marks.SetMarkAt(Index,Length, 0);
+            // increment message count
             if (ParsedDocument is Verilog.ParsedDocument) vParsedDocument.ErrorCount++;
+
+            // add mark
+            Document.Marks.SetMarkAt(Index,Length, 0);
         }
         public void AddWarning(string message)
         {
+            // null check
             if (ParsedDocument == null || Document == null) return;
-            if (ParsedDocument.TextFile is Data.VerilogHeaderFile) return;
 
             Verilog.ParsedDocument? vParsedDocument = ParsedDocument as Verilog.ParsedDocument;
             if (vParsedDocument == null) return;
@@ -104,6 +109,7 @@ namespace pluginVerilog.Verilog
             Data.IVerilogRelatedFile? vFile = Document.TextFile as Data.IVerilogRelatedFile;
             if (vFile == null) return;
 
+            // add message
             if (vParsedDocument.WarningCount < 100)
             {
                 int lineNo = Document.GetLineAt(Index);
@@ -114,11 +120,15 @@ namespace pluginVerilog.Verilog
                 ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(vFile, ">100 warnings", Verilog.ParsedDocument.Message.MessageType.Warning, 0, 0, 0, ParsedDocument.Project));
             }
 
-            Document.Marks.SetMarkAt(Index, Length,1);
+            // increment message count
             if (ParsedDocument is Verilog.ParsedDocument) vParsedDocument.WarningCount++;
+
+            // add mark
+            Document.Marks.SetMarkAt(Index, Length,1);
         }
         public void AddNotice(string message)
         {
+            // null check
             if (ParsedDocument == null || Document == null) return;
 
             Verilog.ParsedDocument? vParsedDocument = ParsedDocument as Verilog.ParsedDocument;
@@ -127,6 +137,7 @@ namespace pluginVerilog.Verilog
             Data.IVerilogRelatedFile? vFile = Document.TextFile as Data.IVerilogRelatedFile;
             if (vFile == null) return;
 
+            // add message
             if (ParsedDocument is Verilog.ParsedDocument && vParsedDocument.NoticeCount < 100)
             {
                 int lineNo = Document.GetLineAt(Index);
@@ -137,11 +148,15 @@ namespace pluginVerilog.Verilog
                 ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(vFile, ">100 notices", Verilog.ParsedDocument.Message.MessageType.Notice, 0, 0, 0, ParsedDocument.Project));
             }
 
-            Document.Marks.SetMarkAt(Index,Length, 2);
+            // increment message count
             if (ParsedDocument is Verilog.ParsedDocument) vParsedDocument.NoticeCount++;
+
+            // add mark
+            Document.Marks.SetMarkAt(Index, Length, 2);
         }
         public void AddHint(string message)
         {
+            // null check
             if (ParsedDocument == null || Document == null) return;
 
             Verilog.ParsedDocument? vParsedDocument = ParsedDocument as Verilog.ParsedDocument;
@@ -150,6 +165,7 @@ namespace pluginVerilog.Verilog
             Data.IVerilogRelatedFile? vFile = Document.TextFile as Data.IVerilogRelatedFile;
             if (vFile == null) return;
 
+            // add message
             if (ParsedDocument is Verilog.ParsedDocument && vParsedDocument.HintCount < 100)
             {
                 int lineNo = Document.GetLineAt(Index);
@@ -160,8 +176,11 @@ namespace pluginVerilog.Verilog
                 ParsedDocument.Messages.Add(new Verilog.ParsedDocument.Message(vFile, ">100 notices", Verilog.ParsedDocument.Message.MessageType.Hint, 0, 0, 0, ParsedDocument.Project));
             }
 
-            Document.Marks.SetMarkAt(Index, Length, 3);
+            // increment message count
             if (ParsedDocument is Verilog.ParsedDocument) vParsedDocument.HintCount++;
+
+            // add mark
+            Document.Marks.SetMarkAt(Index, Length, 3);
         }
 
     }
