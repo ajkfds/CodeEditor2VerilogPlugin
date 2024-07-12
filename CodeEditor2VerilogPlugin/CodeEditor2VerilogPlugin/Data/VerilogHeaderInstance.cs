@@ -70,8 +70,8 @@ namespace pluginVerilog.Data
             //CodeEditor2.Data.Project project
             )
         {
-            //ProjectProperty projectPropery = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
-            //Data.IVerilogRelatedFile file = projectPropery.GetFileOfModule(moduleInstantiation.ModuleName);
+            //ProjectProperty projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+            //Data.IVerilogRelatedFile file = projectProperty.GetFileOfModule(moduleInstantiation.ModuleName);
             if (file == null) return false;
             if (!IsSameAs(file as File)) return false;
             //if (Project != project) return false;
@@ -83,8 +83,8 @@ namespace pluginVerilog.Data
         }
 
 
-        private ulong casheVersion = ulong.MaxValue;
-        CodeDocument casheDocument = null;
+        private ulong cashedVersion = ulong.MaxValue;
+        CodeDocument cashedDocument = null;
         public override CodeEditor2.CodeEditor.CodeDocument CodeDocument
         {
             get

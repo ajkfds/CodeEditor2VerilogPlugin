@@ -115,10 +115,10 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
             if (word.Text != "module" && word.Text != "macromodule") System.Diagnostics.Debugger.Break();
 
-            if (parsedDocument.TargetBuldingBlockName != null)
+            if (parsedDocument.TargetBuildingBlockName != null)
             {
                 string moduleName = word.NextText;
-                if (moduleName != parsedDocument.TargetBuldingBlockName)
+                if (moduleName != parsedDocument.TargetBuildingBlockName)
                 {
                     word.SkipToKeyword("endmodule");
                     word.MoveNext();
@@ -171,10 +171,10 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
             if (word.Text != "package") System.Diagnostics.Debugger.Break();
 
-            if (parsedDocument.TargetBuldingBlockName != null)
+            if (parsedDocument.TargetBuildingBlockName != null)
             {
                 string moduleName = word.NextText;
-                if (moduleName != parsedDocument.TargetBuldingBlockName)
+                if (moduleName != parsedDocument.TargetBuildingBlockName)
                 {
                     word.SkipToKeyword("endpackage");
                     word.MoveNext();
@@ -228,10 +228,10 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
             if (word.Text != "program") System.Diagnostics.Debugger.Break();
 
-            if (parsedDocument.TargetBuldingBlockName != null)
+            if (parsedDocument.TargetBuildingBlockName != null)
             {
                 string moduleName = word.NextText;
-                if (moduleName != parsedDocument.TargetBuldingBlockName)
+                if (moduleName != parsedDocument.TargetBuildingBlockName)
                 {
                     word.SkipToKeyword("endprogram");
                     word.MoveNext();
@@ -285,10 +285,10 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
             if (word.Text != "interface") System.Diagnostics.Debugger.Break();
 
-            if (parsedDocument.TargetBuldingBlockName != null)
+            if (parsedDocument.TargetBuildingBlockName != null)
             {
                 string moduleName = word.NextText;
-                if (moduleName != parsedDocument.TargetBuldingBlockName)
+                if (moduleName != parsedDocument.TargetBuildingBlockName)
                 {
                     word.SkipToKeyword("endinterface");
                     word.MoveNext();

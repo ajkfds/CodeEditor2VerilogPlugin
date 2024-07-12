@@ -45,16 +45,16 @@ namespace pluginVerilog.Verilog
             return ret;
         }
 
-        public ParsedDocument GetNodeParsedDocument()
-        {
-            ParsedDocument pDocument = RootParsedDocument;
-            foreach(int index in Indexes)
-            {
-                if (!pDocument.ParsedDocumentIndexDictionary.ContainsKey(index)) return null;
-                pDocument = pDocument.ParsedDocumentIndexDictionary[index];
-            }
-            return pDocument;
-        }
+        //public ParsedDocument GetNodeParsedDocument()
+        //{
+        //    ParsedDocument pDocument = RootParsedDocument;
+        //    foreach(int index in Indexes)
+        //    {
+        //        if (!pDocument.ParsedDocumentIndexDictionary.ContainsKey(index)) return null;
+        //        pDocument = pDocument.ParsedDocumentIndexDictionary[index];
+        //    }
+        //    return pDocument;
+        //}
 
 
         public IndexReference Clone()

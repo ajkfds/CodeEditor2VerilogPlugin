@@ -1130,7 +1130,7 @@ namespace pluginVerilog.Verilog
             ParsedDocument newParsedDocument;
             if (prototype)
             {
-                newParsedDocument = new Verilog.ParsedDocument(vhInstance, indexReference, RootParsedDocument.ParseMode);// editid =, -1);
+                newParsedDocument = new Verilog.ParsedDocument(vhInstance, indexReference, RootParsedDocument.ParseMode);
             } else
             {
                 if(vhInstance.VerilogParsedDocument != null)
@@ -1139,7 +1139,7 @@ namespace pluginVerilog.Verilog
                 }
                 else
                 {
-                    newParsedDocument = new Verilog.ParsedDocument(vhInstance, indexReference, RootParsedDocument.ParseMode);// editid =, -1);
+                    newParsedDocument = new Verilog.ParsedDocument(vhInstance, indexReference, RootParsedDocument.ParseMode);
                 }
             }
             vhInstance.ParsedDocument = newParsedDocument;
@@ -1152,10 +1152,10 @@ namespace pluginVerilog.Verilog
 
 
             vhInstance.ParsedDocument = newParsedDocument;
-            if (wordPointer.ParsedDocument.ParsedDocumentIndexDictionary.ContainsKey(wordPointer.Index)){
-                wordPointer.ParsedDocument.ParsedDocumentIndexDictionary.Remove(wordPointer.Index);
-            }
-            if (!prototype) wordPointer.ParsedDocument.ParsedDocumentIndexDictionary.Add(wordPointer.Index, newParsedDocument);
+            //if (wordPointer.ParsedDocument.ParsedDocumentIndexDictionary.ContainsKey(wordPointer.Index)){
+            //    wordPointer.ParsedDocument.ParsedDocumentIndexDictionary.Remove(wordPointer.Index);
+            //}
+            //if (!prototype) wordPointer.ParsedDocument.ParsedDocumentIndexDictionary.Add(wordPointer.Index, newParsedDocument);
 
 
             //            CodeDocument doc = CodeDocument.SnapShotFrom(vhInstance.CodeDocument as CodeEditor.CodeDocument);

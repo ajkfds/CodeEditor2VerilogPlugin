@@ -64,7 +64,7 @@ namespace pluginVerilog.Parser
             parsedDocument.Version = verilogFile.CodeDocument.Version;
             parsedDocument.Instance = true;
             parsedDocument.ParameterOverrides = parameterOverrides;
-            parsedDocument.TargetBuldingBlockName = moduleName;
+            parsedDocument.TargetBuildingBlockName = moduleName;
             word = new Verilog.WordScanner(VerilogDocument, parsedDocument, parsedDocument.SystemVerilog);
         }
 

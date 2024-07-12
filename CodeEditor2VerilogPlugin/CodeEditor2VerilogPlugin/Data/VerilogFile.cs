@@ -99,24 +99,24 @@ namespace pluginVerilog.Data
                 return;
             }
 
+
+            // Register New Building Block
             foreach (BuildingBlock buildingBlock in VerilogParsedDocument.Root.BuldingBlocks.Values)
             {
                 if (ProjectProperty.HasRegisteredBuildingBlock(buildingBlock.Name))
-                {
-                    Module? module = buildingBlock as Module;
+                {   // swap building block
+                    BuildingBlock? module = buildingBlock as Module;
                     if (module == null) continue;
 
-                    Module? registeredModule = ProjectProperty.GetBuildingBlock(module.Name)as Module;
+                    BuildingBlock? registeredModule = ProjectProperty.GetBuildingBlock(module.Name)as Module;
                     if (registeredModule == null) continue;
                     if (registeredModule.File == null) continue;
                     if (registeredModule.File.RelativePath == module.File.RelativePath) continue;
 
-                    if (module.NameReference != null) {
-                    //    module.NameReference.AddError("duplicated module name"); 
-                    }
                     continue;
                 }
 
+                // register new parsedDocument
                 ProjectProperty.RegisterBuildingBlock(buildingBlock.Name, buildingBlock, this);
             }
 

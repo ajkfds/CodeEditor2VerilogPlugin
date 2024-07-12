@@ -39,11 +39,10 @@ namespace pluginVerilog.Verilog
 
         public IndexReference IndexReference;
 
-        public List<int> Indexs = new List<int>();
+        public List<int> Indexes = new List<int>();
 
         public bool SystemVerilog = false;
         public bool Instance = false;
-//        public Dictionary<string, Module> Modules = new Dictionary<string, Module>();
 
         public Root Root = null;
 
@@ -51,9 +50,10 @@ namespace pluginVerilog.Verilog
         public Dictionary<string, Macro> Macros = new Dictionary<string, Macro>();
 
         public Dictionary<string, Verilog.Expressions.Expression> ParameterOverrides;
-        public string TargetBuldingBlockName = null;
+        public string TargetBuildingBlockName = null;
 
-        public Dictionary<int, ParsedDocument> ParsedDocumentIndexDictionary = new Dictionary<int, ParsedDocument>();
+        // for IndexReference
+//        public Dictionary<int, ParsedDocument> ParsedDocumentIndexDictionary = new Dictionary<int, ParsedDocument>();
 
         private bool reparseRequested = false;
         public bool ReparseRequested
