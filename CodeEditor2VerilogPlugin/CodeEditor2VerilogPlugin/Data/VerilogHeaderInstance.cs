@@ -66,16 +66,10 @@ namespace pluginVerilog.Data
 
         public bool ReplaceBy(
             VerilogHeaderInstance file
-            //Verilog.ModuleItems.ModuleInstantiation moduleInstantiation,
-            //CodeEditor2.Data.Project project
             )
         {
-            //ProjectProperty projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
-            //Data.IVerilogRelatedFile file = projectProperty.GetFileOfModule(moduleInstantiation.ModuleName);
             if (file == null) return false;
             if (!IsSameAs(file as File)) return false;
-            //if (Project != project) return false;
-            //if (ModuleName != moduleInstantiation.ModuleName) return false;
 
             ParsedDocument = file.ParsedDocument;
 
@@ -104,13 +98,11 @@ namespace pluginVerilog.Data
                 }
             }
             parsedDocument = null;
-            //SourceVerilogFile.RemoveModuleInstance(this);
         }
 
         public string ModuleName { set; get; }
 
 
-//        public Dictionary<string, Verilog.Expressions.Expression> ParameterOverrides;
         public string ParameterId
         {
             get

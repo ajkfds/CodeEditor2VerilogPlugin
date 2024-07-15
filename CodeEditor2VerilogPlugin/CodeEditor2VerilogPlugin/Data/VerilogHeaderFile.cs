@@ -60,8 +60,10 @@ namespace pluginVerilog.Data
             }
             protected set
             {
-                if (value != null && value as CodeEditor.CodeDocument == null) System.Diagnostics.Debugger.Break();
-                document = value as CodeEditor.CodeDocument;
+                if (value == null) throw new Exception();
+                CodeEditor.CodeDocument? codeDocument = value as CodeEditor.CodeDocument;
+                if (codeDocument == null) throw new Exception();
+                document = codeDocument;
             }
         }
 
@@ -163,39 +165,5 @@ namespace pluginVerilog.Data
             return VerilogCommon.AutoComplete.GetToolItems(this, index);
         }
 
-        //public new void AfterKeyPressed(KeyPressEventArgs e)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //public new void AfterKeyDown(KeyEventArgs e)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //public new void BeforeKeyPressed(KeyPressEventArgs e)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //public new void BeforeKeyDown(KeyEventArgs e)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //public override List<CodeEditor2.CodeEditor.PopupItem> GetPopupItems(ulong version, int index)
-        //{
-        //    return null;
-        //}
-
-        //public new List<AutocompleteItem> GetAutoCompleteItems(int index, out string cantidateText)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        //public new List<ToolItem> GetToolItems(int index)
-        //{
-        //    throw new NotImplementedException();
-        //}
     }
 }
