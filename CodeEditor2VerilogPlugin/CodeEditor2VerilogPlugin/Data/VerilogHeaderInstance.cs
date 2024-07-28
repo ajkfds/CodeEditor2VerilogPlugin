@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using CodeEditor2.CodeEditor;
 using CodeEditor2.Data;
 using pluginVerilog.Verilog;
+using pluginVerilog.Verilog.ModuleItems;
 using static CodeEditor2.Controller;
 
 namespace pluginVerilog.Data
@@ -108,15 +109,6 @@ namespace pluginVerilog.Data
             get
             {
                 return "";
-                //StringBuilder sb = new StringBuilder();
-                //foreach (var kvp in ParameterOverrides)
-                //{
-                //    sb.Append(kvp.Key);
-                //    sb.Append("=");
-                //    sb.Append(kvp.Value.Value.ToString());
-                //    sb.Append(",");
-                //}
-                //return sb.ToString();
             }
         }
 
@@ -136,7 +128,7 @@ namespace pluginVerilog.Data
             //SourceVerilogFile.Close();
         }
 
-        private CodeEditor2.CodeEditor.ParsedDocument parsedDocument = null;
+        private Verilog.ParsedDocument parsedDocument = null;
 
         public override CodeEditor2.CodeEditor.ParsedDocument ParsedDocument
         {
@@ -146,7 +138,9 @@ namespace pluginVerilog.Data
             }
             set
             {
-                parsedDocument = value;
+                Verilog.ParsedDocument? vParsedDocument = value as Verilog.ParsedDocument;
+                if (vParsedDocument == null) throw new Exception();
+                parsedDocument = vParsedDocument;
             }
         }
         public override void Save()
@@ -168,23 +162,30 @@ namespace pluginVerilog.Data
         {
             get
             {
-                return ParsedDocument as Verilog.ParsedDocument;
+                return parsedDocument;
             }
         }
 
         public override void AcceptParsedDocument(CodeEditor2.CodeEditor.ParsedDocument newParsedDocument)
         {
-            Verilog.ParsedDocument vParsedDocument = newParsedDocument as Verilog.ParsedDocument;
-            parsedDocument = vParsedDocument;
-
             //{
             //    Data.VerilogFile source = SourceVerilogFile;
             //    if (source == null) return;
             //    source.RegisterInstanceParsedDocument(ParameterId, newParsedDocument, this);
             //}
-            ReparseRequested = vParsedDocument.ReparseRequested;
+
+            //Data.VerilogFile source = SourceVerilogFile;
+            //if (source == null) return;
+
+            //if (ParameterOverrides.Count == 0)
+            //{
+            //    source.AcceptParsedDocument(newParsedDocument);
+
+
+//            ReparseRequested = VerilogParsedDocument.ReparseRequested;
             Update();
         }
+
 
 
 
@@ -192,7 +193,10 @@ namespace pluginVerilog.Data
         {
             get
             {
-                return Project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+                CodeEditor2.Data.ProjectProperty projectProperty = Project.ProjectProperties[Plugin.StaticID];
+                ProjectProperty? vProjectProperty = projectProperty as ProjectProperty;
+                if (vProjectProperty == null) throw new Exception();
+                return vProjectProperty;
             }
         }
 

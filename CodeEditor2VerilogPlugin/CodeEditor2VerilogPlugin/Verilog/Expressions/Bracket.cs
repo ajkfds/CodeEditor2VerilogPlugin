@@ -57,7 +57,7 @@ namespace pluginVerilog.Verilog.Expressions
                 word.AddError("illegal bracket");
                 return null;
             }
-            bracket.Reference = word.GetReference().CreateReferenceFrom(bracket.Reference);
+            bracket.Reference = WordReference.CreateReferenceRange(bracket.Reference, word.GetReference());
             word.MoveNext();
             bracket.Expression = exp1;
             bracket.Constant = exp1.Constant;

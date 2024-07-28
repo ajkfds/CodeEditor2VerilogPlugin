@@ -59,5 +59,36 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         }
 
         #endregion
+
+        public static void CheckVariablesUseAndDriven(WordScanner word, NameSpace nameSpace)
+        {
+            foreach (var variable in nameSpace.DataObjects.Values)
+            {
+                if (variable.DefinedReference == null) continue;
+
+                DataObjects.Variables.ValueVariable? valueVar = variable as DataObjects.Variables.ValueVariable;
+                if (valueVar == null) continue;
+
+                if (valueVar.AssignedReferences.Count == 0)
+                {
+                    if (valueVar.UsedReferences.Count == 0)
+                    {
+                        variable.DefinedReference.AddNotice("undriven & unused");
+                    }
+                    else
+                    {
+                       variable.DefinedReference.AddNotice("undriven");
+                    }
+                }
+                else
+                {
+                    if (valueVar.UsedReferences.Count == 0)
+                    {
+                        variable.DefinedReference.AddNotice("unused");
+                    }
+                }
+            }
+        }
+
     }
 }

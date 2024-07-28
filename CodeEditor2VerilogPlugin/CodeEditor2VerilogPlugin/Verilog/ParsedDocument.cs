@@ -1,4 +1,6 @@
 ﻿using Avalonia.Media.TextFormatting;
+using ExCSS;
+using pluginVerilog.CodeEditor;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.ModuleItems;
@@ -6,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,16 +18,33 @@ namespace pluginVerilog.Verilog
     {
         public ParsedDocument(Data.IVerilogRelatedFile file, IndexReference indexReference, CodeEditor2.CodeEditor.DocumentParser.ParseModeEnum parseMode) : base(file as CodeEditor2.Data.TextFile,file.CodeDocument.Version,parseMode)
         {
+            CodeDocument? document = file.CodeDocument as CodeDocument;
+            if (document == null) throw new Exception();
+            codeDocument = document;
+
             fileRef = new WeakReference<Data.IVerilogRelatedFile>(file);
             if(indexReference == null)
             {
-                IndexReference = IndexReference.Create(this);
+                IndexReference = IndexReference.Create(this,document,0);
             }
             else
             {
                 IndexReference = indexReference;
             }
+
+            tag = "verilogParsedDocument" + tagCount.ToString();
+            if (tagCount == int.MaxValue)
+            {
+                tagCount = 0;
+            }
+            else
+            {
+                tagCount++;
+            }
         }
+
+        public static int tagCount = 0;
+        public string tag;
 
         private System.WeakReference<Data.IVerilogRelatedFile> fileRef;
         public Data.IVerilogRelatedFile File
@@ -44,12 +64,12 @@ namespace pluginVerilog.Verilog
         public bool SystemVerilog = false;
         public bool Instance = false;
 
-        public Root Root = null;
+        public Root? Root;
 
         public Dictionary<string, Data.VerilogHeaderInstance> IncludeFiles = new Dictionary<string, Data.VerilogHeaderInstance>();
         public Dictionary<string, Macro> Macros = new Dictionary<string, Macro>();
 
-        public Dictionary<string, Verilog.Expressions.Expression> ParameterOverrides;
+        public Dictionary<string, Verilog.Expressions.Expression> ParameterOverrides = new Dictionary<string, Expressions.Expression>();
         public string TargetBuildingBlockName = null;
 
         // for IndexReference
@@ -72,6 +92,19 @@ namespace pluginVerilog.Verilog
             }
         }
 
+        CodeDocument codeDocument;
+        public CodeDocument CodeDocument
+        {
+            get
+            {
+                return codeDocument;
+            }
+            set
+            {
+                codeDocument = value;
+            }
+        }
+
         public ProjectProperty ProjectProperty
         {
             get
@@ -90,10 +123,13 @@ namespace pluginVerilog.Verilog
             {
                 if (file is Data.VerilogFile)
                 {
-                    Data.VerilogFile verilogFile = file as Data.VerilogFile;
-                    foreach (BuildingBlock module in Root.BuldingBlocks.Values)
+                    Data.VerilogFile? verilogFile = file as Data.VerilogFile;
+                    if(verilogFile!= null)
                     {
-                        verilogFile.ProjectProperty.RemoveBuildingBlock(module.Name);
+                        foreach (BuildingBlock module in Root.BuldingBlocks.Values)
+                        {
+                            verilogFile.ProjectProperty.RemoveBuildingBlock(module.Name);
+                        }
                     }
                 }
                 foreach (var includeFile in IncludeFiles.Values)
@@ -108,6 +144,108 @@ namespace pluginVerilog.Verilog
         public int WarningCount = 0;
         public int HintCount = 0;
         public int NoticeCount = 0;
+
+        public void AddError(int index,int length ,string message)
+        {
+            CodeDocument? document = CodeDocument;
+            if (document == null) return;
+
+            Data.IVerilogRelatedFile? vFile = document.TextFile as Data.IVerilogRelatedFile;
+            if (vFile == null) return;
+
+            // add message
+            if (ErrorCount < 100)
+            {
+                int lineNo = document.GetLineAt(index);
+                Messages.Add(new Verilog.ParsedDocument.Message(vFile, message, Verilog.ParsedDocument.Message.MessageType.Error, index, lineNo, length, Project));
+            }
+            else if (ErrorCount == 100)
+            {
+                Messages.Add(new Verilog.ParsedDocument.Message(vFile, ">100 errors", Verilog.ParsedDocument.Message.MessageType.Error, 0, 0, 0, Project)); ;
+            }
+
+            // increment message count
+            ErrorCount++;
+
+            // add mark
+            document.Marks.SetMarkAt(index, length, 0);
+        }
+
+        public void AddWarning(int index, int length, string message)
+        {
+            CodeDocument? document = CodeDocument;
+            if (document == null) return;
+
+            Data.IVerilogRelatedFile? vFile = document.TextFile as Data.IVerilogRelatedFile;
+            if (vFile == null) return;
+
+            // add message
+            if (WarningCount < 100)
+            {
+                int lineNo = document.GetLineAt(index);
+               Messages.Add(new Verilog.ParsedDocument.Message(vFile, message, Verilog.ParsedDocument.Message.MessageType.Warning, index, lineNo, length, Project));
+            }
+            else if (WarningCount == 100)
+            {
+                Messages.Add(new Verilog.ParsedDocument.Message(vFile, ">100 warnings", Verilog.ParsedDocument.Message.MessageType.Warning, 0, 0, 0, Project));
+            }
+
+            // increment message count
+            WarningCount++;
+
+            // add mark
+            document.Marks.SetMarkAt(index, length, 1);
+        }
+        public void AddNotice(int index, int length, string message)
+        {
+            CodeDocument? document = CodeDocument;
+            if (document == null) return;
+
+            Data.IVerilogRelatedFile? vFile = document.TextFile as Data.IVerilogRelatedFile;
+            if (vFile == null) return;
+
+            // add message
+            if (NoticeCount < 100)
+            {
+                int lineNo = document.GetLineAt(index);
+                Messages.Add(new Verilog.ParsedDocument.Message(vFile, message, Verilog.ParsedDocument.Message.MessageType.Notice, index, lineNo, length, Project));
+            }
+            else if (NoticeCount == 100)
+            {
+                Messages.Add(new Verilog.ParsedDocument.Message(vFile, ">100 notices", Verilog.ParsedDocument.Message.MessageType.Notice, 0, 0, 0, Project));
+            }
+
+            // increment message count
+            NoticeCount++;
+
+            // add mark
+            document.Marks.SetMarkAt(index, length, 2);
+        }
+        public void AddHint(int index, int length, string message)
+        {
+            CodeDocument? document = CodeDocument;
+            if (document == null) return;
+
+            Data.IVerilogRelatedFile? vFile = document.TextFile as Data.IVerilogRelatedFile;
+            if (vFile == null) return;
+
+            // add message
+            if (HintCount < 100)
+            {
+                int lineNo = document.GetLineAt(index);
+                Messages.Add(new Verilog.ParsedDocument.Message(vFile, message, Verilog.ParsedDocument.Message.MessageType.Hint, index, lineNo, length, Project));
+            }
+            else if (HintCount == 100)
+            {
+                Messages.Add(new Verilog.ParsedDocument.Message(vFile, ">100 notices", Verilog.ParsedDocument.Message.MessageType.Hint, 0, 0, 0, Project));
+            }
+
+            // increment message count
+            HintCount++;
+
+            // add mark
+            document.Marks.SetMarkAt(index, length, 3);
+        }
 
 
         public CodeEditor2.CodeEditor.PopupItem GetPopupItem(int index, string text)
@@ -140,7 +278,7 @@ namespace pluginVerilog.Verilog
                 }
             }
 
-            NameSpace space = iref.RootParsedDocument.Root;
+            NameSpace? space = iref.RootParsedDocument.Root;
 
             foreach (BuildingBlock module in iref.RootParsedDocument.Root.BuldingBlocks.Values)
             {

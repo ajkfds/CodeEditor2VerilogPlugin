@@ -316,8 +316,6 @@ namespace pluginVerilog.Verilog.Expressions
 
         private static bool parseExpression(WordScanner word,NameSpace nameSpace,List<Primary> Primaries,List<Operator> operatorStock,ref WordReference reference)
         {
-            reference = word.GetReference(reference);
-
             // ++(primary),--(primary)
             Primary? primary = Primary.ParseCreate(word, nameSpace);
             if (primary != null)

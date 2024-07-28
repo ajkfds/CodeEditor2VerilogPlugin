@@ -80,7 +80,7 @@ namespace pluginVerilog.Verilog.Expressions
 
                 if(word.Text == ")")
                 {
-                    functionCall.Reference = word.GetReference().CreateReferenceFrom(functionCall.Reference);
+                    functionCall.Reference = WordReference.CreateReferenceRange(functionCall.Reference,word.GetReference());
                     word.MoveNext();
                     break;
                 }

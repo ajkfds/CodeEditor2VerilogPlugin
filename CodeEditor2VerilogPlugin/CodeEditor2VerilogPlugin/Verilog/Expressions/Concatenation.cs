@@ -77,7 +77,7 @@ namespace pluginVerilog.Verilog.Expressions
                     return null;
                 }
             }
-            concatenation.Reference = word.GetReference().CreateReferenceFrom(reference);
+            concatenation.Reference = WordReference.CreateReferenceRange(reference,word.GetReference());
             word.MoveNext(); // }
             return concatenation;
         }
@@ -135,7 +135,7 @@ namespace pluginVerilog.Verilog.Expressions
             MultipleConcatenation multipleConcatenation = new MultipleConcatenation();
             multipleConcatenation.MultipleExpression = multipleExpression;
             multipleConcatenation.Expression = exp;
-            multipleConcatenation.Reference = word.GetReference().CreateReferenceFrom(reference);
+            multipleConcatenation.Reference = WordReference.CreateReferenceRange(reference,word.GetReference());
             if(exp != null) multipleConcatenation.Constant = exp.Constant & multipleConcatenation.Constant;
 
             if(exp != null && multipleExpression != null)

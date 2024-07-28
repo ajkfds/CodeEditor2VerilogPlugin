@@ -55,8 +55,8 @@ namespace pluginVerilog.Verilog.DataObjects
                     variableAssign.NetLValue.BitWidth != variableAssign.Expression.BitWidth
                     )
                 {
-                    variableAssign.Expression.Reference.CreateReferenceFrom(variableAssign.NetLValue.Reference)
-                        .AddWarning("bitwidth mismatch " + variableAssign.NetLValue.BitWidth + " vs " + variableAssign.Expression.BitWidth);
+                    WordReference wRef = WordReference.CreateReferenceRange(variableAssign.NetLValue.Reference, variableAssign.Expression.Reference);
+                    wRef.AddWarning("bit width mismatch " + variableAssign.NetLValue.BitWidth + " vs " + variableAssign.Expression.BitWidth);
                 }
             }
 

@@ -155,7 +155,7 @@ namespace pluginVerilog.Verilog.Expressions
             this.BitWidth = BitWidth;
             if(Primary2.Reference != null && Condition.Reference != null)
             {
-                this.Reference = Primary2.Reference.CreateReferenceFrom(Condition.Reference);
+                this.Reference = WordReference.CreateReferenceRange(Condition.Reference, Primary2.Reference);
             }
             if (Operated!=null) Operated(this);
             return this;
@@ -255,7 +255,7 @@ namespace pluginVerilog.Verilog.Expressions
             this.BitWidth = BitWidth;
             if (Primary.Reference != null)
             {
-                this.Reference = Primary.Reference.CreateReferenceFrom(Primary.Reference);
+                this.Reference = WordReference.CreateReferenceRange(Primary.Reference,Primary.Reference);
             }
             if (Operated != null) Operated(this);
             return this;
@@ -380,7 +380,7 @@ namespace pluginVerilog.Verilog.Expressions
             this.BitWidth = BitWidth;
             if(Primary.Reference != null)
             {
-                this.Reference = Primary.Reference.CreateReferenceFrom(Primary.Reference);
+                this.Reference = Primary.Reference;
             }
             if (Operated != null) Operated(this);
             return this;
@@ -602,7 +602,7 @@ namespace pluginVerilog.Verilog.Expressions
             Primary ret = this;
             if (Primary1 != null && Primary2.Reference != null)
             {
-                this.Reference = Primary2.Reference.CreateReferenceFrom(Primary1.Reference);
+                this.Reference = WordReference.CreateReferenceRange(Primary1.Reference,Primary2.Reference);
             }
             //            Primary ret = Primary.Create(constant, value, bitWidth);
             if (Operated != null) Operated(this);

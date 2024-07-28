@@ -1,4 +1,5 @@
-﻿using pluginVerilog.Verilog.BuildingBlocks;
+﻿using pluginVerilog.Data;
+using pluginVerilog.Verilog.BuildingBlocks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,57 +12,70 @@ namespace pluginVerilog.Parser
     {
         // create parser
         public VerilogParser(
-            Data.IVerilogRelatedFile verilogFile,
+            Data.IVerilogRelatedFile verilogRelatedFile,
             CodeEditor2.CodeEditor.DocumentParser.ParseModeEnum parseMode
             )
         {
-            this.document = new CodeEditor.CodeDocument(verilogFile); // use verilog codeDocument
-            this.document.CopyTextOnlyFrom(verilogFile.CodeDocument);
             this.ParseMode = parseMode;
 
-            CodeEditor2.Data.TextFile? textFile = verilogFile as CodeEditor2.Data.TextFile;
+            CodeEditor2.Data.TextFile? textFile = verilogRelatedFile as CodeEditor2.Data.TextFile;
             if (textFile == null) throw new Exception();
             this.TextFile = textFile;
 
-            File = verilogFile;
-            parsedDocument = new Verilog.ParsedDocument(verilogFile,null, parseMode);
-            parsedDocument.Version = verilogFile.CodeDocument.Version;
-            if (
-                (verilogFile is Data.VerilogFile && (verilogFile as Data.VerilogFile).SystemVerilog) ||
-                (verilogFile is Data.VerilogModuleInstance && (verilogFile as Data.VerilogModuleInstance).SystemVerilog)
-            )
+            File = verilogRelatedFile;
+            parsedDocument = new Verilog.ParsedDocument(verilogRelatedFile,null, parseMode);
+            parsedDocument.Version = verilogRelatedFile.CodeDocument.Version;
+
+            // swap CodeDocument to new one
+            CodeEditor.CodeDocument originalCodeDocument = parsedDocument.CodeDocument;
+
+            parsedDocument.CodeDocument = new CodeEditor.CodeDocument(verilogRelatedFile); // use verilog codeDocument
+            parsedDocument.CodeDocument.CopyTextOnlyFrom(originalCodeDocument);
+            this.document = parsedDocument.CodeDocument;
+
+            if (verilogRelatedFile is Data.VerilogFile)
             {
-                parsedDocument.SystemVerilog = true;
+                VerilogFile? file = verilogRelatedFile as Data.VerilogFile;
+                if (file == null) throw new Exception();
+                if(file.SystemVerilog) parsedDocument.SystemVerilog = true;
             }
+
+            if (verilogRelatedFile is Data.VerilogModuleInstance)
+            {
+                VerilogModuleInstance? file = verilogRelatedFile as Data.VerilogModuleInstance;
+                if (file == null) throw new Exception();
+                if (file.SystemVerilog) parsedDocument.SystemVerilog = true;
+            }
+
              word = new Verilog.WordScanner(VerilogDocument, parsedDocument, parsedDocument.SystemVerilog);
         }
 
         // create parser with parameter override
         public VerilogParser(
-            Data.IVerilogRelatedFile verilogFile,
+            Data.IVerilogRelatedFile verilogRelatedFile,
             string moduleName,
             Dictionary<string, Verilog.Expressions.Expression> parameterOverrides,
             CodeEditor2.CodeEditor.DocumentParser.ParseModeEnum parseMode
-            ) : base(verilogFile as CodeEditor2.Data.TextFile, parseMode)
+            ) : base(verilogRelatedFile as CodeEditor2.Data.TextFile, parseMode)
         {
-            this.document = new CodeEditor.CodeDocument(verilogFile); // use verilog codeDocument
-            this.document.CopyTextOnlyFrom(verilogFile.CodeDocument);
+            this.document = new CodeEditor.CodeDocument(verilogRelatedFile); // use verilog codeDocument
+            this.document.CopyTextOnlyFrom(verilogRelatedFile.CodeDocument);
 
             this.ParseMode = parseMode;
-            CodeEditor2.Data.TextFile? textFile = verilogFile as CodeEditor2.Data.TextFile;
+            CodeEditor2.Data.TextFile? textFile = verilogRelatedFile as CodeEditor2.Data.TextFile;
             if (textFile == null) throw new Exception();
             this.TextFile = textFile;
 
-            File = verilogFile;
-            parsedDocument = new Verilog.ParsedDocument(verilogFile,null, parseMode);
+            File = verilogRelatedFile;
+            parsedDocument = new Verilog.ParsedDocument(verilogRelatedFile,null, parseMode);
             if(
-                (verilogFile is Data.VerilogFile && (verilogFile as Data.VerilogFile).SystemVerilog) ||
-                (verilogFile is Data.VerilogModuleInstance && (verilogFile as Data.VerilogModuleInstance).SystemVerilog)
+                (verilogRelatedFile is Data.VerilogFile && (verilogRelatedFile as Data.VerilogFile).SystemVerilog) ||
+                (verilogRelatedFile is Data.VerilogModuleInstance && (verilogRelatedFile as Data.VerilogModuleInstance).SystemVerilog)
             )                
             {
                 parsedDocument.SystemVerilog = true;
             }
-            parsedDocument.Version = verilogFile.CodeDocument.Version;
+            parsedDocument.Version = verilogRelatedFile.CodeDocument.Version;
             parsedDocument.Instance = true;
             parsedDocument.ParameterOverrides = parameterOverrides;
             parsedDocument.TargetBuildingBlockName = moduleName;

@@ -128,7 +128,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
 
             Module module;
-            IndexReference iref = IndexReference.Create(parsedDocument);
+            //IndexReference iref = IndexReference.Create(parsedDocument);
 
             if (parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse)
             {
@@ -184,7 +184,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
 
             Package package;
-            IndexReference iref = IndexReference.Create(parsedDocument);
+            //IndexReference iref = IndexReference.Create(parsedDocument);
 
             if (parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse)
             {
@@ -241,7 +241,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
 
             Program program;
-            IndexReference iref = IndexReference.Create(parsedDocument);
+            //IndexReference iref = IndexReference.Create(parsedDocument);
 
             if (parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse)
             {
@@ -297,7 +297,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
 
             Interface module;
-            IndexReference iref = IndexReference.Create(parsedDocument);
+            //IndexReference iref = IndexReference.Create(parsedDocument);
 
             if (parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse)
             {

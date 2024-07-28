@@ -308,7 +308,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
             if (!word.Prototype)
             {
-                checkVariablesUseAndDriven(word, program);
+                CheckVariablesUseAndDriven(word, program);
             }
 
             //foreach (var variable in module.Variables.Values)
@@ -334,35 +334,6 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
         }
 
-        protected static void checkVariablesUseAndDriven(WordScanner word, NameSpace nameSpace)
-        {
-            foreach (var variable in nameSpace.DataObjects.Values)
-            {
-                if (variable.DefinedReference == null) continue;
-
-                DataObjects.Variables.ValueVariable? valueVar = variable as DataObjects.Variables.ValueVariable;
-                if (valueVar == null) continue;
-
-                if (valueVar.AssignedReferences.Count == 0)
-                {
-                    if (valueVar.UsedReferences.Count == 0)
-                    {
-                        word.AddNotice(variable.DefinedReference, "undriven & unused");
-                    }
-                    else
-                    {
-                        word.AddNotice(variable.DefinedReference, "undriven");
-                    }
-                }
-                else
-                {
-                    if (valueVar.UsedReferences.Count == 0)
-                    {
-                        word.AddNotice(variable.DefinedReference, "unused");
-                    }
-                }
-            }
-        }
 
         protected static void parseListOfPorts_ListOfPortsDeclarations(WordScanner word, Program module)
         {

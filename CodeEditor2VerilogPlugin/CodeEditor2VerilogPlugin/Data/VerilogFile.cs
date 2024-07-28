@@ -9,6 +9,7 @@ using Avalonia.Threading;
 using CodeEditor2.CodeEditor;
 using CodeEditor2.Data;
 using CodeEditor2.Tools;
+using pluginVerilog.CodeEditor;
 using pluginVerilog.Verilog.BuildingBlocks;
 
 namespace pluginVerilog.Data
@@ -99,7 +100,6 @@ namespace pluginVerilog.Data
                 return;
             }
 
-
             // Register New Building Block
             foreach (BuildingBlock buildingBlock in VerilogParsedDocument.Root.BuldingBlocks.Values)
             {
@@ -126,24 +126,45 @@ namespace pluginVerilog.Data
                 ReparseRequested = vParsedDocument.ReparseRequested;
             }
 
+
+            updateIncludeFiles(VerilogParsedDocument, Items);
+            //foreach(var includeFile in VerilogParsedDocument.IncludeFiles.Values)
+            //{
+            //    if (!headerItems.ContainsKey(includeFile.ID)) continue;
+            //    Data.VerilogHeaderInstance item = headerItems[includeFile.ID];
+            //    item.CodeDocument.CopyColorMarkFrom(includeFile.VerilogParsedDocument.CodeDocument);
+            //}
+
+            Update(); // eliminated here
+            System.Diagnostics.Debug.Print("### Verilog File Parsed "+ID);
+        }
+
+        internal static void updateIncludeFiles(Verilog.ParsedDocument parsedDocument,ItemList items)
+        {
+            // create id table
             Dictionary<string, Data.VerilogHeaderInstance> headerItems = new Dictionary<string, VerilogHeaderInstance>();
-            foreach(var item in Items.Values)
+            foreach (var item in items.Values)
             {
                 Data.VerilogHeaderInstance? vh = item as Data.VerilogHeaderInstance;
                 if (vh == null) continue;
                 headerItems.Add(item.ID, vh);
             }
 
-            foreach(var includeFile in VerilogParsedDocument.IncludeFiles.Values)
+            foreach (var includeFile in parsedDocument.IncludeFiles.Values)
             {
                 if (!headerItems.ContainsKey(includeFile.ID)) continue;
                 Data.VerilogHeaderInstance item = headerItems[includeFile.ID];
-                item.CodeDocument.CopyColorMarkFrom(includeFile.CodeDocument);
+                item.CodeDocument.CopyColorMarkFrom(includeFile.VerilogParsedDocument.CodeDocument);
+                updateIncludeFiles(includeFile.VerilogParsedDocument, item.Items);
             }
 
-            Update(); // eliminated here
-            System.Diagnostics.Debug.Print("### Verilog File Parsed "+ID);
+            //foreach (var item in headerItems.Values)
+            //{
+            //    updateIncludeFiles(item.VerilogParsedDocument, item.Items);
+            //    item.AcceptParsedDocument(item.VerilogParsedDocument);
+            //}
         }
+
 
         public override void LoadFormFile()
         {

@@ -153,21 +153,9 @@ namespace pluginVerilog.Verilog
         }
         public WordReference GetReference()
         {
-//            if (stock.Count == 0)
-            {
-                return new WordReference(wordPointer.Index, wordPointer.Length, wordPointer.ParsedDocument,Document);
-            }
-//            else
-//            {
-//                return new WordReference(stock[0].Index, stock[0].Length, stock[0].ParsedDocument, stock[0].Document);
-//                return new WordReference(stock.Last().Index, stock.Last().Length, stock.Last().ParsedDocument, stock.Last().Document);
-//            }
+            return CrateWordReference();
         }
 
-        public WordReference GetReference(WordReference fromReference)
-        {
-            return new WordReference(fromReference.Index, wordPointer.Index + wordPointer.Length - fromReference.Index, wordPointer.ParsedDocument,Document);
-        }
 
         public void Color(CodeDrawStyle.ColorType colorType)
         {
@@ -224,15 +212,15 @@ namespace pluginVerilog.Verilog
             wordPointer.AddWarning(message);
         }
 
-        public void AddNotice(WordReference reference, string message)
+        public void AddNotice(string message)
         {
             if (prototype) return;
-            wordPointer.AddNotice(reference, message);
+            wordPointer.AddNotice(message);
         }
-        public void AddHint(WordReference reference, string message)
+        public void AddHint(string message)
         {
             if (prototype) return;
-            wordPointer.AddHint(reference, message);
+            wordPointer.AddHint(message);
         }
 
         public int RootIndex
@@ -253,6 +241,11 @@ namespace pluginVerilog.Verilog
         public IndexReference CreateIndexReference()
         {
             return IndexReference.Create(wordPointer, stock);
+        }
+
+        public WordReference CrateWordReference()
+        {
+            return WordReference.Create(wordPointer, stock);
         }
 
         public bool Active
@@ -1076,23 +1069,27 @@ namespace pluginVerilog.Verilog
                 rootFile = stock[0].VerilogFile;
             }
 
-            Data.VerilogHeaderInstance vhInstance = Data.VerilogHeaderInstance.Create(
-                                                                relativeFilePath,
-                                                                CreateIndexReference(),
-                                                                rootFile,
-                                                                wordPointer.ParsedDocument.Project,
-                                                                id
-                                                                );
-            if(vhInstance == null)
-            {
-                wordPointer.AddError("illegal file");
-                return;
-            }
-
-            vhInstance.Parent = wordPointer.ParsedDocument.File as CodeEditor2.Data.Item;
+            Data.VerilogHeaderInstance vhInstance = null;
+            IndexReference indexReference = IndexReference.Create(wordPointer.ParsedDocument.IndexReference, wordPointer.Index);
+            ParsedDocument newParsedDocument;
 
             if (prototype)
             {
+                vhInstance = Data.VerilogHeaderInstance.Create(
+                                                relativeFilePath,
+                                                CreateIndexReference(),
+                                                rootFile,
+                                                wordPointer.ParsedDocument.Project,
+                                                id
+                                                );
+
+
+                if (vhInstance == null)
+                {
+                    wordPointer.AddError("illegal file");
+                    return;
+                }
+
                 if (wordPointer.ParsedDocument.IncludeFiles.ContainsKey(vhInstance.Name))
                 { // avoid duplicate name
                     int count = 1;
@@ -1111,83 +1108,48 @@ namespace pluginVerilog.Verilog
                 {
                     vhInstance = wordPointer.ParsedDocument.IncludeFiles[vhInstance.ID];
                 }
+
+                CodeEditor2.Data.Item? parent = wordPointer.ParsedDocument.File as CodeEditor2.Data.Item;
+                if (parent == null) throw new Exception();
+                vhInstance.Parent = parent;
+
+                newParsedDocument = new Verilog.ParsedDocument(vhInstance, indexReference, RootParsedDocument.ParseMode);
+                CodeDocument? originalDocument = vhInstance.CodeDocument as CodeDocument;
+                if (originalDocument == null) throw new Exception();
+
+                // create codeDocument copy
+                CodeDocument document = CodeDocument.SnapShotFrom(originalDocument);
+                newParsedDocument.CodeDocument = document;
+
+                newParsedDocument.SystemVerilog = wordPointer.ParsedDocument.SystemVerilog;
+                if (rootFile != null && rootFile.VerilogParsedDocument != null && rootFile.VerilogParsedDocument.SystemVerilog)
+                {
+                    newParsedDocument.SystemVerilog = true;
+                }
+                vhInstance.ParsedDocument = newParsedDocument;
             }
             else
             {
+                // get vhInstance parsed @ prototype
                 IndexReference currentIndex = CreateIndexReference();
-                foreach(Data.VerilogHeaderInstance vh in wordPointer.ParsedDocument.IncludeFiles.Values)
+                foreach (Data.VerilogHeaderInstance vh in wordPointer.ParsedDocument.IncludeFiles.Values)
                 {
                     if (currentIndex.IsSameAs(vh.InstancedReference))
                     {
                         vhInstance = vh;
                     }
                 }
+                if (vhInstance == null) return;
+
+                newParsedDocument = vhInstance.VerilogParsedDocument;
+
             }
 
-            // assign new parsed document
-            IndexReference indexReference = IndexReference.Create(wordPointer.ParsedDocument.IndexReference, wordPointer.Index);
-
-            ParsedDocument newParsedDocument;
-            if (prototype)
-            {
-                newParsedDocument = new Verilog.ParsedDocument(vhInstance, indexReference, RootParsedDocument.ParseMode);
-            } else
-            {
-                if(vhInstance.VerilogParsedDocument != null)
-                {
-                    newParsedDocument = vhInstance.VerilogParsedDocument;
-                }
-                else
-                {
-                    newParsedDocument = new Verilog.ParsedDocument(vhInstance, indexReference, RootParsedDocument.ParseMode);
-                }
-            }
-            vhInstance.ParsedDocument = newParsedDocument;
-
-            newParsedDocument.SystemVerilog = wordPointer.ParsedDocument.SystemVerilog;
-            if (rootFile != null && rootFile.VerilogParsedDocument != null && rootFile.VerilogParsedDocument.SystemVerilog)
-            {
-                newParsedDocument.SystemVerilog = true;
-            }
-
-
-            vhInstance.ParsedDocument = newParsedDocument;
-            //if (wordPointer.ParsedDocument.ParsedDocumentIndexDictionary.ContainsKey(wordPointer.Index)){
-            //    wordPointer.ParsedDocument.ParsedDocumentIndexDictionary.Remove(wordPointer.Index);
-            //}
-            //if (!prototype) wordPointer.ParsedDocument.ParsedDocumentIndexDictionary.Add(wordPointer.Index, newParsedDocument);
-
-
-            //            CodeDocument doc = CodeDocument.SnapShotFrom(vhInstance.CodeDocument as CodeEditor.CodeDocument);
-
-            //            WordPointer newPointer = new WordPointer(doc, vhInstance.ParsedDocument as Verilog.ParsedDocument);
-            WordPointer newPointer = new WordPointer( vhInstance.CodeDocument as pluginVerilog.CodeEditor.CodeDocument, vhInstance.ParsedDocument as Verilog.ParsedDocument);
+            WordPointer newPointer = new WordPointer(newParsedDocument.CodeDocument, newParsedDocument);
 
             stock.Add(wordPointer);
             wordPointer = newPointer;
             wordPointer.Document._tag = "diveInto";
-//            wordPointer.Document.TextColors.RemoveColors();
-//            wordPointer.Document.Marks.RemoveMarks();
-
-            // activate coloring when code editor opened the target node
-            wordPointer.InhibitColor = true;
-            {
-                CodeEditor2.NavigatePanel.NavigatePanelNode? node = CodeEditor2.Controller.NavigatePanel.GetSelectedNode();
-                if (node != null)
-                {
-                    Data.VerilogHeaderInstance? vh = node.Item as Data.VerilogHeaderInstance;
-                    if (vh != null)
-                    {
-                        if (vh.ID == vhInstance.ID)
-                        {
-                            wordPointer.Document.TextColors.RemoveColors();
-                            wordPointer.Document.Marks.RemoveMarks();
-                            wordPointer.InhibitColor = false;
-                        }
-                    }
-                }
-            }
-
             System.Diagnostics.Debug.Print("### "+newParsedDocument.File.Name+"  "+wordPointer.InhibitColor.ToString());
 
             if (wordPointer.Eof)

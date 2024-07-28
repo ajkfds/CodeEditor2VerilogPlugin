@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -10,40 +11,93 @@ namespace pluginVerilog.Verilog
 {
     public class IndexReference
     {
+        protected IndexReference() { }
+
+
         public static IndexReference Create(WordPointer wordPointer,List<WordPointer> stocks)
         {
             IndexReference ret = new IndexReference();
-            if(stocks.Count == 0)
+
+            if (stocks.Count >= 1)
             {
-                ret.RootParsedDocument = wordPointer.ParsedDocument;
-                ret.Indexes.Add(wordPointer.Index);
+                ret.rootParsedDocumentRef = new WeakReference<ParsedDocument>(stocks[0].ParsedDocument);
             }
             else
             {
-                ret.RootParsedDocument = stocks[0].ParsedDocument;
-                ret.Indexes.Add(stocks[0].Index);
+                ret.rootParsedDocumentRef = new WeakReference<ParsedDocument>(wordPointer.ParsedDocument);
             }
 
-            foreach(WordPointer wp in stocks)
+            ret.parsedDocumentRef = new WeakReference<ParsedDocument>(wordPointer.ParsedDocument);
+            if (stocks.Count != 0)
             {
-                ret.Indexes.Add(wp.Index);
+                foreach (WordPointer wp in stocks)
+                {
+                    ret.indexes.Add(wp.Index);
+                }
             }
+            ret.indexes.Add(wordPointer.Index);
+
             return ret;
         }
-
-        public static IndexReference Create(ParsedDocument rootParsedDocument)
+        public static IndexReference Create(ParsedDocument parsedDocument, CodeEditor.CodeDocument document,int index)
         {
             IndexReference ret = new IndexReference();
-            ret.RootParsedDocument = rootParsedDocument;
+
+            ret.rootParsedDocumentRef = new WeakReference<ParsedDocument>(parsedDocument);
+            ret.parsedDocumentRef = new WeakReference<ParsedDocument>(parsedDocument);
+            ret.indexes.Add(index);
+
             return ret;
         }
 
         public static IndexReference Create(IndexReference indexReference, int index)
         {
             IndexReference ret = indexReference.Clone();
-            ret.Indexes.Add(index);
+            ret.rootParsedDocumentRef = indexReference.rootParsedDocumentRef;
+            ret.parsedDocumentRef = indexReference.parsedDocumentRef;
+            ret.indexes.Add(index);
             return ret;
         }
+
+        public IndexReference Clone()
+        {
+            IndexReference ret = new IndexReference();
+            ret.rootParsedDocumentRef = rootParsedDocumentRef;
+            ret.parsedDocumentRef = parsedDocumentRef;
+            foreach (int index in indexes)
+            {
+                ret.indexes.Add(index);
+            }
+            return ret;
+        }
+
+        protected WeakReference<ParsedDocument> parsedDocumentRef;
+        public ParsedDocument? ParsedDocument
+        {
+            get
+            {
+                ParsedDocument? ret;
+                if (!parsedDocumentRef.TryGetTarget(out ret)) return null;
+                return ret;
+            }
+        }
+
+        public pluginVerilog.CodeEditor.CodeDocument? Document
+        {
+            get
+            {
+                ParsedDocument? parsedDocument = ParsedDocument;
+                if (parsedDocument == null) return null;
+                return parsedDocument.CodeDocument;
+            }
+        }
+
+        //public static IndexReference Create(ParsedDocument rootParsedDocument)
+        //{
+        //    IndexReference ret = new IndexReference();
+        //    ret.RootParsedDocument = rootParsedDocument;
+        //    return ret;
+        //}
 
         //public ParsedDocument GetNodeParsedDocument()
         //{
@@ -57,47 +111,49 @@ namespace pluginVerilog.Verilog
         //}
 
 
-        public IndexReference Clone()
-        {
-            IndexReference ret = new IndexReference();
-            ret.RootParsedDocument = RootParsedDocument;
-            foreach (int index in Indexes)
-            {
-                ret.Indexes.Add(index);
-            }
-            return ret;
-        }
 
-        private System.WeakReference<ParsedDocument> parsedDocumentRef;
+        private System.WeakReference<ParsedDocument> rootParsedDocumentRef;
         public ParsedDocument RootParsedDocument
         {
             get
             {
                 ParsedDocument ret;
-                if (!parsedDocumentRef.TryGetTarget(out ret)) return null;
+                if (!rootParsedDocumentRef.TryGetTarget(out ret)) return null;
                 return ret;
-            }
-            protected set
-            {
-                parsedDocumentRef = new WeakReference<ParsedDocument>(value);
             }
         }
 
-        public List<int> Indexes = new List<int>();
+        public int Index
+        {
+            get
+            {
+                return indexes.Last();
+            }
+        }
+
+        public IReadOnlyList<int> Indexes
+        {
+            get
+            {
+                return indexes;   
+            }
+        }
+
+        private List<int> indexes = new List<int>();
 
         public bool IsGreaterThan(IndexReference indexReference)
         {
             if (indexReference == null) return false;
 
-            int i = Indexes.Count;
-            if (i > indexReference.Indexes.Count)
+            int i = indexes.Count;
+            if (i > indexReference.indexes.Count)
             {
-                i = indexReference.Indexes.Count;
+                i = indexReference.indexes.Count;
             }
 
             for (int j = 0; j < i; j++)
             {
-                if (Indexes[j] > indexReference.Indexes[j]) return true;
+                if (indexes[j] > indexReference.indexes[j]) return true;
             }
             return false;
         }
@@ -105,15 +161,15 @@ namespace pluginVerilog.Verilog
         {
             if (indexReference == null) return false;
 
-            int i = Indexes.Count;
-            if (i > indexReference.Indexes.Count)
+            int i = indexes.Count;
+            if (i > indexReference.indexes.Count)
             {
-                i = indexReference.Indexes.Count;
+                i = indexReference.indexes.Count;
             }
 
             for (int j = 0; j < i; j++)
             {
-                if (Indexes[j] != indexReference.Indexes[j]) return false;
+                if (indexes[j] != indexReference.indexes[j]) return false;
             }
             return true;
         }
@@ -122,15 +178,15 @@ namespace pluginVerilog.Verilog
         {
             if (indexReference == null) return false;
 
-            int i = Indexes.Count;
-            if (i > indexReference.Indexes.Count)
+            int i = indexes.Count;
+            if (i > indexReference.indexes.Count)
             {
-                i = indexReference.Indexes.Count;
+                i = indexReference.indexes.Count;
             }
 
             for (int j = 0; j < i; j++)
             {
-                if (Indexes[j] < indexReference.Indexes[j]) return true;
+                if (indexes[j] < indexReference.indexes[j]) return true;
             }
             return false;
         }
@@ -139,15 +195,15 @@ namespace pluginVerilog.Verilog
         {
             if (indexReference == null) return false;
 
-            int i = Indexes.Count;
-            if (i > indexReference.Indexes.Count)
+            int i = indexes.Count;
+            if (i > indexReference.indexes.Count)
             {
-                i = indexReference.Indexes.Count;
+                i = indexReference.indexes.Count;
             }
 
             for (int j = 0; j < i-1; j++)
             {
-                if (Indexes[j] != indexReference.Indexes[j]) return false;
+                if (indexes[j] != indexReference.indexes[j]) return false;
             }
             return true;
 

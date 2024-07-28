@@ -333,7 +333,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                             }
                             else
                             {
-                                word.RootPointer.AddError(net.DefinedReference, "duplicated net name");
+                                net.DefinedReference.AddError("duplicated net name");
                             }
                         }
                         else
