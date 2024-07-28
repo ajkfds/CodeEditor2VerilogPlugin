@@ -723,6 +723,7 @@ namespace pluginVerilog.Verilog
 
             WordReference wordRef = GetReference();
             string macroText = wordPointer.Text;
+            int index = wordPointer.Index;
 
             while(macroText.EndsWith("\\") && !wordPointer.Eof)
             {
@@ -759,7 +760,7 @@ namespace pluginVerilog.Verilog
             else
             {
                 identifier = macroText.Substring(0, separatorIndex);
-                wordPointer.Color(CodeDrawStyle.ColorType.Identifier, wordPointer.Index, wordPointer.Index+separatorIndex);
+                wordPointer.Color(CodeDrawStyle.ColorType.Identifier, index, index+separatorIndex);
                 macroText = macroText.Substring(separatorIndex);
             }
 
