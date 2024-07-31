@@ -53,6 +53,13 @@ namespace pluginVerilog.Verilog.Expressions
             }
             word.MoveNext();
 
+            if (word.Text == ")")
+            {
+                functionCall.Reference = WordReference.CreateReferenceRange(functionCall.Reference, word.GetReference());
+                word.MoveNext();
+                return functionCall;
+            }
+
             int i = 0;
             while (!word.Eof)
             {

@@ -28,6 +28,7 @@ namespace pluginVerilog.Verilog.Statements
 
             if (word.Text == ";")
             {
+                word.MoveNext();
                 return jumpStatement;
             }
 

@@ -74,10 +74,14 @@ namespace pluginVerilog.Data
         {
             ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
             if (projectProperty == null) throw new Exception();
-            Data.IVerilogRelatedFile? file = projectProperty.GetFileOfBuildingBlock(moduleInstantiation.SourceName);
+
+            Data.IVerilogRelatedFile? ivFile = projectProperty.GetFileOfBuildingBlock(moduleInstantiation.SourceName);
+            if (ivFile == null) return false;
+
+            File? file = ivFile as File;
             if (file == null) return false;
 
-            if (!IsSameAs(file as File)) return false;
+            if (!IsSameAs(file)) return false;
             if (Project != project) return false;
             if (ModuleName != moduleInstantiation.SourceName) return false;
 
@@ -150,7 +154,9 @@ namespace pluginVerilog.Data
         {
             get
             {
-                return SourceTextFile as VerilogFile;
+                Data.VerilogFile? vFile = SourceTextFile as VerilogFile;
+                if (vFile == null) throw new Exception();
+                return vFile;
             }
         }
 

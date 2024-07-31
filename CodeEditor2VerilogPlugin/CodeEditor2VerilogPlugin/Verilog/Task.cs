@@ -141,9 +141,13 @@ namespace pluginVerilog.Verilog
             {
                 parse_task_items_non_ansi(word, nameSpace, task);
             }
-            else
+            else if(word.Text =="(")
             {
                 parse_task_items_ansi(word, nameSpace, task);
+            }
+            else
+            {
+                word.AddError("illegal task definition");
             }
 
             if (!word.SystemVerilog && word.Text == "endtask")
@@ -331,7 +335,7 @@ namespace pluginVerilog.Verilog
         // ( [ tf_port_list ] ) ; { block_item_declaration }
         private static void parse_task_items_ansi(WordScanner word, NameSpace nameSpace, Task task)
         {
-            if (word.Text != "(") //System.Diagnostics.Debugger.Break();
+            if (word.Text != "(") throw new Exception(); //System.Diagnostics.Debugger.Break();
             word.MoveNext();
 
             Port.ParseTfPortItems(word, nameSpace, task);

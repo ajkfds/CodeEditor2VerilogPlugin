@@ -987,6 +987,14 @@ ansi_port_declaration ::=
 
             word.MoveNext();
 
+
+            if(word.Text == "=")
+            {
+                word.AddSystemVerilogError();
+                word.MoveNext();
+                Expressions.Expression? exp = Expressions.Expression.ParseCreate(word,nameSpace);
+            }
+
             prevDirection = port.Direction;
             prevDataType = dataType;
             return true;

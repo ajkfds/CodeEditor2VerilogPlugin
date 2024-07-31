@@ -146,6 +146,11 @@ namespace pluginVerilog.Verilog.Expressions
                             return FunctionCall.ParseCreate(word, nameSpace);
                         }
 
+                        if (word.NextText == "'") // cast
+                        {
+                            return Cast.ParseCreate(word, nameSpace);
+                        }
+
                         {
                             Primary? primary = parseHierarchyVariable(word, nameSpace, lValue);
                             if (primary != null) return primary; 

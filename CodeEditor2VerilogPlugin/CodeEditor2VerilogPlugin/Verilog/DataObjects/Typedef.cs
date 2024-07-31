@@ -15,14 +15,14 @@ namespace pluginVerilog.Verilog.DataObjects
         public static bool ParseDeclaration(WordScanner word, NameSpace nameSpace)
         {
 
-            /* ## SyetemVerilog2012
+            /* ## SystemVerilog2012
              type_declaration ::= 
                   "typedef" data_type type_identifier { variable_dimension } ;
                 | "typedef" interface_instance_identifier constant_bit_select . type_identifier type_identifier ;
                 | "typedef" [ "enum" | "struct" | "union" | "class" | "interface class" ] type_identifier ;
              */
-            if (word.Text != "typedef") System.Diagnostics.Debugger.Break();
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            if (word.Text != "typedef") throw new Exception();
+            word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
             Typedef typeDef = new Typedef();
@@ -32,7 +32,7 @@ namespace pluginVerilog.Verilog.DataObjects
             typeDef.VariableType = DataType.ParseCreate(word, nameSpace, null);
             if(typeDef.VariableType == null)
             {
-                word.AddError("datat type expected");
+                word.AddError("data type expected");
                 word.SkipToKeyword(";");
                 return true;
             }

@@ -113,15 +113,21 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
         private static void parseModule(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
         {
-            if (word.Text != "module" && word.Text != "macromodule") System.Diagnostics.Debugger.Break();
+            if (word.Text != "module" && word.Text != "macromodule") throw new Exception();
 
             if (parsedDocument.TargetBuildingBlockName != null)
             {
                 string moduleName = word.NextText;
                 if (moduleName != parsedDocument.TargetBuildingBlockName)
                 {
-                    word.SkipToKeyword("endmodule");
                     word.MoveNext();
+
+                    List<string> stopWords = new List<string> { "endmodule" };
+                    while (!word.Eof)
+                    {
+                        if (stopWords.Contains(word.Text)) break;   // TODO support hier module definition
+                        word.MoveNext();
+                    }
                     return;
                 }
             }

@@ -166,7 +166,9 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 // "string"
                 case "string":
                     return parseSimpleType(word, nameSpace, DataTypeEnum.String);
-                // "chandle"
+                case "chandle":
+                    return Chandle.ParseCreate(word, nameSpace);
+
                 // "virtual" ["interface"] interface_identifier[parameter_value_assignment][ . modport_identifier] 
 
                 // class_type

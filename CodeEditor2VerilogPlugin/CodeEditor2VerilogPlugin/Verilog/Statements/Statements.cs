@@ -36,7 +36,7 @@ namespace pluginVerilog.Verilog.Statements
                                 | { attribute_instance } disable_statement
                                 | { attribute_instance } system_task_enable  
         */
-        public static IStatement ParseCreateStatement(WordScanner word, NameSpace nameSpace)
+        public static IStatement? ParseCreateStatement(WordScanner word, NameSpace nameSpace)
         {
             /*
             A.6.4 Statements
@@ -80,7 +80,10 @@ namespace pluginVerilog.Verilog.Statements
 	                            | clocking_drive ;
 	                            | randsequence_statement 
 	                            | randcase_statement 
-	                            | expect_property_statement             
+	                            | expect_property_statement
+            subroutine_call_statement ::= 
+                subroutine_call ; 
+                | void ' ( function_subroutine_call ) ; 
             */
 
             // inc_or_dec_expression ;
@@ -190,6 +193,9 @@ namespace pluginVerilog.Verilog.Statements
                         else if (General.IsIdentifier(word.Text)){
                             return TaskEnable.ParseCreate(word, nameSpace,nameSpace);
                         }
+                    }else if (word.Text =="void" && nextText == "'")
+                    {
+                        return VoidFunctionCall.ParseCreate(word, nameSpace);
                     }
 
                     Expressions.Expression expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace);
