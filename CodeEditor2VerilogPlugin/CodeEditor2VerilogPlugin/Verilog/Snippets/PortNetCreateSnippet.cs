@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 using CodeEditor2.CodeEditor;
@@ -17,8 +18,12 @@ namespace pluginVerilog.Verilog.Snippets
         {
         }
 
-        public override void Apply(CodeDocument codeDocument)
+        public override void Apply()
         {
+            CodeEditor2.Data.TextFile? file = CodeEditor2.Controller.CodeEditor.GetTextFile();
+            if (file == null) return;
+            CodeEditor2.CodeEditor.CodeDocument codeDocument = file.CodeDocument;
+
             CodeEditor2.Data.ITextFile iText = CodeEditor2.Controller.CodeEditor.GetTextFile();
 
             if (!(iText is Data.IVerilogRelatedFile)) return;

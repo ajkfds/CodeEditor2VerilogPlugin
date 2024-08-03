@@ -9,66 +9,41 @@ using pluginVerilog.Verilog.BuildingBlocks;
 using Avalonia.Input;
 using CodeEditor2.Views;
 using Avalonia.Media;
+using static System.Net.Mime.MediaTypeNames;
+using System.Reflection.Metadata;
 
 namespace pluginVerilog.Verilog.Snippets
 {
     public class ModuleInstanceSnippet : CodeEditor2.Snippets.InteractiveSnippet
     {
-        public ModuleInstanceSnippet() : base("moduleInstance")
+        public ModuleInstanceSnippet(string moduleName) : base(moduleName)
         {
+            this.moduleName = moduleName;
         }
 
-        private CodeDocument? document;
 
         // initial value for {n}
         private List<string> initials = new List<string> { };
 
-        public override void Apply(CodeDocument codeDocument)
+        private CodeDocument codeDocument;
+        private CodeEditor2.Data.TextFile textFile;
+        private string moduleName;
+
+        public override void Apply()
         {
-            base.Apply(codeDocument);
+            CodeEditor2.Data.TextFile? textFile = CodeEditor2.Controller.CodeEditor.GetTextFile();
+            if (textFile == null) return;
+            codeDocument = textFile.CodeDocument;
 
-            List<ToolItem> items = new List<ToolItem>();
-
-            CodeEditor2.Data.Project project = codeDocument.TextFile.Project;
-            ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
-            if (projectProperty == null) throw new Exception();
-
-            List<string> moduleNames = projectProperty.GetModuleNameList();
-            foreach (string moduleName in moduleNames)
-            {
-                items.Add(new ModuleInstanceSelectionItem(moduleName, this));
-            }
-
-            CodeEditor2.Controller.CodeEditor.ForceOpenCustomSelection(items);
-        }
-
-        public class ModuleInstanceSelectionItem : CodeEditor2.CodeEditor.ToolItem
-        {
-            public ModuleInstanceSelectionItem(string text, ModuleInstanceSnippet moduleInstanceSnippet) : base(text)
-            {
-                snippet = moduleInstanceSnippet;
-                Foreground = new SolidColorBrush(Global.CodeDrawStyle.GetColor(CodeDrawStyle.ColorType.Keyword));
-            }
-
-            private ModuleInstanceSnippet snippet;
-            public override void Apply(CodeDocument codeDocument)
-            {
-                if (Text == null) return;
-                snippet.ApplyModuleInstance(codeDocument, Text);
-            }
-        }
-
-        public void ApplyModuleInstance(CodeDocument codeDocument, string Text)
-        {
-            CodeEditor2.Data.Project project = codeDocument.TextFile.Project;
+            CodeEditor2.Data.Project project = textFile.Project;
 
             ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
             if (projectProperty == null) return;
 
-            Data.VerilogFile? targetFile = projectProperty.GetFileOfBuildingBlock(Text) as Data.VerilogFile;
+            Data.VerilogFile? targetFile = projectProperty.GetFileOfBuildingBlock(moduleName) as Data.VerilogFile;
             if (targetFile == null) return;
 
-            string instanceName = Text + "_";
+            string instanceName = moduleName + "_";
             {
                 Data.IVerilogRelatedFile? vFile = CodeEditor2.Controller.CodeEditor.GetTextFile() as Data.IVerilogRelatedFile;
                 if (vFile == null) return;
@@ -78,17 +53,17 @@ namespace pluginVerilog.Verilog.Snippets
                 if (module == null) return;
 
                 int instanceCount = 0;
-                while (module.Instantiations.ContainsKey(Text + "_" + instanceCount.ToString()))
+                while (module.Instantiations.ContainsKey(moduleName + "_" + instanceCount.ToString()))
                 {
                     instanceCount++;
                 }
-                instanceName = Text + "_" + instanceCount.ToString();
+                instanceName = moduleName + "_" + instanceCount.ToString();
             }
 
             Verilog.ParsedDocument? targetParsedDocument = targetFile.ParsedDocument as Verilog.ParsedDocument;
             if (targetParsedDocument == null) return;
 
-            Module? targetModule = targetParsedDocument.Root.BuldingBlocks[Text] as Module;
+            Module? targetModule = targetParsedDocument.Root.BuldingBlocks[moduleName] as Module;
             if (targetModule == null) return;
 
             string replaceText = getReplaceText(targetModule, instanceName);
@@ -114,7 +89,7 @@ namespace pluginVerilog.Verilog.Snippets
 
                 codeDocument.Replace(index, 0, 0, replaceText);
                 CodeEditor2.Controller.CodeEditor.SetCaretPosition(startIndexes[0]);
-                CodeEditor2.Controller.CodeEditor.SetSelection( startIndexes[0],lastIndexes[0] + 1);
+                CodeEditor2.Controller.CodeEditor.SetSelection(startIndexes[0], lastIndexes[0] + 1);
 
                 CodeEditor2.Controller.CodeEditor.ClearHighlight();
                 for (int i = 0; i < startIndexes.Count; i++)
@@ -123,14 +98,17 @@ namespace pluginVerilog.Verilog.Snippets
                 }
             }
 
-            base.Apply(codeDocument);
+            base.Apply();
         }
+
+
 
 
         public override void Aborted()
         {
             CodeEditor2.Controller.CodeEditor.ClearHighlight();
-            document = null;
+            codeDocument = null;
+            textFile = null;
             base.Aborted();
         }
 
@@ -159,8 +137,8 @@ namespace pluginVerilog.Verilog.Snippets
 
         public override void AfterAutoCompleteHandled(CodeEditor2.Views.PopupMenuView popupMenuView)
         {
-            if (document == null) return;
-            int i = CodeEditor2.Controller.CodeEditor.GetHighlightIndex(document.CaretIndex);
+            if (codeDocument == null) return;
+            int i = CodeEditor2.Controller.CodeEditor.GetHighlightIndex(codeDocument.CaretIndex);
             switch (i)
             {
                 default:
@@ -172,8 +150,8 @@ namespace pluginVerilog.Verilog.Snippets
         private void moveToNextHighlight(out bool moved)
         {
             moved = false;
-            if (document == null) return;
-            int i = CodeEditor2.Controller.CodeEditor.GetHighlightIndex(document.CaretIndex);
+            if (codeDocument == null) return;
+            int i = CodeEditor2.Controller.CodeEditor.GetHighlightIndex(codeDocument.CaretIndex);
             if (i == -1) return;
             i++;
             if (i >= initials.Count) return;

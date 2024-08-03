@@ -19,11 +19,13 @@ namespace pluginVerilog.Verilog.Snippets
         // initial value for {n}
         private List<string> initials = new List<string> { "clock", "reset_x", "reset_x", "" };
 
-        public override void Apply(CodeEditor2.CodeEditor.CodeDocument codeDocument)
+        public override void Apply()
         {
             System.Diagnostics.Debug.Print("## AlwaysFFSnippet.Apply");
 
-            document = codeDocument;
+            CodeEditor2.Data.TextFile? file = CodeEditor2.Controller.CodeEditor.GetTextFile();
+            if (file == null) return;
+            document = file.CodeDocument;
 
             string indent = "";
             if (document.GetCharAt(document.GetLineStartIndex(document.GetLineAt(document.CaretIndex))) == '\t')
@@ -42,29 +44,29 @@ namespace pluginVerilog.Verilog.Snippets
                 indent + "end";
 
 
-            int index = codeDocument.CaretIndex;
+            int index = document.CaretIndex;
 
             for (int i = 0; i < initials.Count; i++)
             {
                 string target = "{" + i.ToString() + "}";
                 if (!replaceText.Contains(target)) break;
-                startIndexs.Add(index + replaceText.IndexOf(target));
-                lastIndexs.Add(index + replaceText.IndexOf(target) + initials[i].Length - 1);
+                startIndexes.Add(index + replaceText.IndexOf(target));
+                lastIndexes.Add(index + replaceText.IndexOf(target) + initials[i].Length - 1);
                 replaceText = replaceText.Replace(target, initials[i]);
             }
 
-            codeDocument.Replace(index, 0, 0, replaceText);
-            CodeEditor2.Controller.CodeEditor.SetCaretPosition(startIndexs[0]);
-            CodeEditor2.Controller.CodeEditor.SetSelection(startIndexs[0], lastIndexs[0]);
+            document.Replace(index, 0, 0, replaceText);
+            CodeEditor2.Controller.CodeEditor.SetCaretPosition(startIndexes[0]);
+            CodeEditor2.Controller.CodeEditor.SetSelection(startIndexes[0], lastIndexes[0]);
 
             // set highlights for {n} texts
             CodeEditor2.Controller.CodeEditor.ClearHighlight();
-            for (int i = 0; i < startIndexs.Count; i++)
+            for (int i = 0; i < startIndexes.Count; i++)
             {
-                CodeEditor2.Controller.CodeEditor.AppendHighlight(startIndexs[i], lastIndexs[i]);
+                CodeEditor2.Controller.CodeEditor.AppendHighlight(startIndexes[i], lastIndexes[i]);
             }
 
-            base.Apply(codeDocument);
+            base.Apply();
 
         }
 
@@ -78,8 +80,8 @@ namespace pluginVerilog.Verilog.Snippets
             base.Aborted();
         }
 
-        private List<int> startIndexs = new List<int>();
-        private List<int> lastIndexs = new List<int>();
+        private List<int> startIndexes = new List<int>();
+        private List<int> lastIndexes = new List<int>();
 
         public override void KeyDown(object? sender, KeyEventArgs e, PopupMenuView popupMenuView)
         {

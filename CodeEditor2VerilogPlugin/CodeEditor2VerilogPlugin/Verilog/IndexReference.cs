@@ -55,6 +55,7 @@ namespace pluginVerilog.Verilog
             IndexReference ret = indexReference.Clone();
             ret.rootParsedDocumentRef = indexReference.rootParsedDocumentRef;
             ret.parsedDocumentRef = indexReference.parsedDocumentRef;
+            if (ret.indexes.Count > 0) ret.indexes.RemoveAt(ret.indexes.Count - 1);
             ret.indexes.Add(index);
             return ret;
         }

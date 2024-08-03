@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 using Avalonia.Media;
@@ -16,12 +17,13 @@ namespace pluginVerilog.Verilog.Snippets
         {
         }
 
-        public override void Apply(CodeDocument codeDocument)
+        public override void Apply()
         {
-            CodeEditor2.Data.ITextFile iText = CodeEditor2.Controller.CodeEditor.GetTextFile();
+            CodeEditor2.Data.TextFile? file = CodeEditor2.Controller.CodeEditor.GetTextFile();
+            if (file == null) return;
+            CodeDocument codeDocument = file.CodeDocument;
 
-            if (!(iText is Data.IVerilogRelatedFile)) return;
-            Data.IVerilogRelatedFile? vFile = iText as Data.IVerilogRelatedFile;
+            Data.IVerilogRelatedFile? vFile = file as Data.IVerilogRelatedFile;
             if (vFile == null) return;
 
             ParsedDocument parsedDocument = vFile.VerilogParsedDocument;
