@@ -1,4 +1,7 @@
 ﻿using Avalonia.Media.TextFormatting;
+using CodeEditor2.CodeEditor.CodeComplete;
+using CodeEditor2.CodeEditor.Parser;
+using CodeEditor2.CodeEditor.PopupHint;
 using ExCSS;
 using pluginVerilog.CodeEditor;
 using pluginVerilog.Verilog.BuildingBlocks;
@@ -6,17 +9,19 @@ using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.ModuleItems;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
+using CodeComplete = CodeEditor2.CodeEditor.CodeComplete;
 
 namespace pluginVerilog.Verilog
 {
     public class ParsedDocument : CodeEditor2.CodeEditor.ParsedDocument
     {
-        public ParsedDocument(Data.IVerilogRelatedFile file, IndexReference indexReference, CodeEditor2.CodeEditor.DocumentParser.ParseModeEnum parseMode) : base(file as CodeEditor2.Data.TextFile,file.CodeDocument.Version,parseMode)
+        public ParsedDocument(Data.IVerilogRelatedFile file, IndexReference indexReference, DocumentParser.ParseModeEnum parseMode) : base(file as CodeEditor2.Data.TextFile,file.CodeDocument.Version,parseMode)
         {
             CodeDocument? document = file.CodeDocument as CodeDocument;
             if (document == null) throw new Exception();
@@ -248,13 +253,13 @@ namespace pluginVerilog.Verilog
         }
 
 
-        public CodeEditor2.CodeEditor.PopupItem GetPopupItem(int index, string text)
+        public PopupItem GetPopupItem(int index, string text)
         {
             IndexReference iref = IndexReference.Create(this.IndexReference, index);
             if (iref.RootParsedDocument == null) return null;
 
 
-            var ret = new CodeEditor2.CodeEditor.PopupItem();
+            var ret = new CodeEditor2.CodeEditor.PopupHint.PopupItem();
 
             // add messages
             foreach (Message message in Messages)
@@ -341,224 +346,135 @@ namespace pluginVerilog.Verilog
         }
 
 
-        private static List<CodeEditor2.CodeEditor.AutocompleteItem> verilogKeywords = new List<CodeEditor2.CodeEditor.AutocompleteItem>()
+        private static List<AutocompleteItem>? verilogAutoCompleteItems = null;
+        private static List<AutocompleteItem> VerilogAutoCompleteItems
         {
-            new CodeEditor2.CodeEditor.AutocompleteItem("always",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("and",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("assign",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("automatic",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
+            get
+            {
+                if(verilogAutoCompleteItems == null)
+                {
+                    verilogAutoCompleteItems = new List<AutocompleteItem>();
+
+                    List<string> keywords = new List<string>
+                    {
+                        // Verilog
+                        "always",       "and",          "assign",       "automatic",
+                        /*"begin",*/    "case",         "casex",        "casez",
+                        "deassign",     "default",      "defparam",     "design",
+                        "disable",      "edge",         "else",         "end",
+                        "endcase",      "endfunction",  "endgenerate",  "endmodule",
+                        "endprimitive", "endspecify",   "endtask",      "for",
+                        "force",        "forever",      "fork",         /*"function",*/
+                        /*"generate",*/ "genvar",       "if",           "incdir",
+                        "include",      "initial",      "inout",        "input",
+                        "integer",      /*"interface",*/"join",         "localparam",
+                        /*"module",*/   "nand",         "negedge",      "nor",
+                        "not",          "or",           "output",       "parameter",
+                        "posedge",      "pulldown",     "pullup",       "real",
+                        "realtime",     "reg",          "release",      "repeat",
+                        "signed",       /*"task",*/     "time",         "tri0",
+                        "tri1",         "trireg",       "unsigned",     "vectored",
+                        "wait",         "wand",         "weak0",        "weak1",    
+                        "while",        "wire",         "wor",
+                        // SystemVerilog
+                        "accept_on",    "alias",        "always_comb",  "always_ff",
+                        "always_latch", "assert",       "assume",       "before",
+                        "bind",         "bins",         "binsof",       "bit",
+                        "break",        "byte",         "chandle",      "checker",
+                        "class",        "clocking",     "const",        "constraint",
+                        "context",      "continue",     "cover",        "covergroup",
+                        "coverpoint",   "cross",        "dist",         "do",
+                        "endchecker",   "endclass",     "endclocking",  "endgroup",
+                        "endinterface", "endpackage",   "endprogram",   "endproperty",
+                        "endsequence",  "enum",         "eventually",   "expect",
+                        "export",       "extends",      "extern",       "final",
+                        "first_match",  "foreach",      "forkjoin",     "global",
+                        "iff",          "ignore_bins",  "illegal_bins", "implements",
+                        "implies",      "import",       "inside",       "int",
+                        "interconnect", "interface",    "intersect",    "join_any",
+                        "join_none",    "let",          "local",        "logic",
+                        "longint",      "matches",      "modport",      "nettype",
+                        "new",          "nexttime",     "null",         "package",
+                        "packed",       "priority",     "program",      "property",
+                        "protected",    "pure",         "rand",         "randc",
+                        "randcase",     "randsequence", "ref",          "reject_on",
+                        "restrict",     "return",       "s_always",     "s_eventually",
+                        "s_nexttime",   "s_until",      "s_until_with", "sequence",
+                        "shortint",     "shortreal",    "soft",         "solve",
+                        "static",       "string",       "strong",       "struct",
+                        "super",        "sync_accept_on",   "sync_reject_on",   "tagged",
+                        "this",         "throughout",   "timeprecision",    "timeunit",
+                        "type",         "typedef",      "union",        "unique",
+                        "unique0",      "until",        "until_with",   "untyped",
+                        "uwire",        "var",          "virtual",      "void",
+                        "wait_order",   "weak",         "wildcard",     "with",
+                        "within",
+                    };
+                    foreach (string keyword in keywords)
+                    {
+                        verilogAutoCompleteItems.Add(
+                            new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
+                            keyword,
+                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), 
+                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
+                            )
+                        );
+                    }
+
+                    List<AutocompleteItem> specialItems = new List<AutocompleteItem>()
+                    {
+                        new AutoComplete.BeginAutoCompleteItem(
+                            "begin",
+                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), 
+                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
+                            ),
+                        new AutoComplete.FunctionAutocompleteItem(
+                            "function",
+                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), 
+                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
+                            ),
+                        new AutoComplete.GenerateAutoCompleteItem(
+                            "generate",
+                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), 
+                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
+                            ),
+                        new AutoComplete.ModuleAutocompleteItem(
+                            "module",
+                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
+                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
+                            ),
+                        new AutoComplete.InterfaceAutocompleteItem(
+                            "interface",
+                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
+                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
+                            ),
+                        new AutoComplete.TaskAutocompleteItem(
+                            "task",
+                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
+                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
+                            ),
+                        new AutoComplete.NonBlockingAssignmentAutoCompleteItem(
+                            "<=",
+                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Normal),
+                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Normal)
+                            ),
+                    };
+
+                    foreach (AutocompleteItem item in specialItems)
+                    {
+                        verilogAutoCompleteItems.Add(item);
+                    }
 
 
 
-            new AutoComplete.BeginAutoCompleteItem("begin",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("case",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("casex",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("casez",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
 
-            new CodeEditor2.CodeEditor.AutocompleteItem("deassign",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("default",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("defparam",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("design",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("disable",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("edge",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("else",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("end",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("endcase",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("endfunction",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("endgenerate",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("endmodule",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("endspecify",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("endtask",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("endprimitive",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("for",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("force",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("forever",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("fork",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-
-            new AutoComplete.FunctionAutocompleteItem("function",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new AutoComplete.GenerateAutoCompleteItem("generate",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("genvar",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("if",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("incdir",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("include",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("initial",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("inout",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("input",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("integer",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("join",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("localparam",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new AutoComplete.ModuleAutocompleteItem("module",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new AutoComplete.InterfaceAutocompleteItem("interface",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-
-            new CodeEditor2.CodeEditor.AutocompleteItem("nand",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-
-            new CodeEditor2.CodeEditor.AutocompleteItem("negedge",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("nor",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("not",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("or",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("output",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("parameter",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("posedge",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-
-            new CodeEditor2.CodeEditor.AutocompleteItem("pulldown",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("pullup",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("real",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-
-            new CodeEditor2.CodeEditor.AutocompleteItem("realtime",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("reg",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("release",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("repeat",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("signed",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("time",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new AutoComplete.TaskAutocompleteItem("task",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-
-            new CodeEditor2.CodeEditor.AutocompleteItem("tri0",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("tri1",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("trireg",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("unsigned",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("vectored",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-
-            new CodeEditor2.CodeEditor.AutocompleteItem("wait",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("weak0",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("weak1",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("while",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-
-            new CodeEditor2.CodeEditor.AutocompleteItem("wand",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("wire",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("wor",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-
-            // SystemVerilog
-            new CodeEditor2.CodeEditor.AutocompleteItem("accept_on",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("alias",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("always_comb",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("always_ff",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("always_latch",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("assert",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("assume",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("before",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("bind",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("bins",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("binsof",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("bit",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("break",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("byte",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("chandle",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("checker",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("class",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("clocking",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("const",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("constraint",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("context",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("continue",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("cover",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("covergroup",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("coverpoint",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("cross",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("dist",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("do",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("endchecker",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("endclass",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("endclocking",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("endgroup",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("endinterface",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("endpackage",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("endprogram",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("endproperty",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("endsequence",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("enum",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("eventually",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("expect",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("export",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("extends",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("extern",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("final",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("first_match",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("foreach",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("forkjoin",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("global",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("iff",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("ignore_bins",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("illegal_bins",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("implements",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("implies",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("import",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("inside",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("int",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("interconnect",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("interface",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("intersect",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("join_any",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("join_none",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("let",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("local",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("logic",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("longint",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("matches",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("modport",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("nettype",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("new",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("nexttime",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("null",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("package",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("packed",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("priority",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("program",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("property",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("protected",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("pure",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("rand",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("randc",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("randcase",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("randsequence",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("ref",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("reject_on",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("restrict",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("return",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("s_always",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("s_eventually",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("s_nexttime",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("s_until",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("s_until_with",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("sequence",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("shortint",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("shortreal",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("soft",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("solve",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("static",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("string",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("strong",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("struct",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("super",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("sync_accept_on",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("sync_reject_on",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("tagged",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("this",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("throughout",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("timeprecision",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("timeunit",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("type",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("typedef",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("union",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("unique",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("unique0",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("until",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("until_with",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("untyped",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("uwire",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("var",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("virtual",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("void",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("wait_order",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("weak",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("wildcard",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("with",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-            new CodeEditor2.CodeEditor.AutocompleteItem("within",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
+                }
+                return verilogAutoCompleteItems;
+            }
+        }
 
 
 
-            new AutoComplete.NonBlockingAssignmentAutoCompleteItem("<=",CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Normal), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)),
-        };
 
         private NameSpace? getSearchNameSpace(NameSpace? nameSpace,List<string> hier)
         {
@@ -597,15 +513,15 @@ namespace pluginVerilog.Verilog
             return nameSpace;
         }
 
-        public List<CodeEditor2.CodeEditor.AutocompleteItem> GetAutoCompleteItems(List<string> hierWords,int index,int line,CodeEditor.CodeDocument document,string cantidateWord)
+        public List<AutocompleteItem> GetAutoCompleteItems(List<string> hierWords,int index,int line,CodeEditor.CodeDocument document,string cantidateWord)
         {
 
 
-            List<CodeEditor2.CodeEditor.AutocompleteItem> items = null;
+            List<AutocompleteItem> items = null;
 
             if (Root == null || Root.BuldingBlocks == null)
             {
-                items = verilogKeywords.ToList();
+                items = VerilogAutoCompleteItems.ToList();
                 return items;
             }
 
@@ -623,7 +539,7 @@ namespace pluginVerilog.Verilog
 
             if (space == null) // external module/class/program
             {
-                items = verilogKeywords.ToList();
+                items = VerilogAutoCompleteItems.ToList();
                 int headIndex;
                 int length;
                 document.GetWord(index, out headIndex, out length);
@@ -632,17 +548,25 @@ namespace pluginVerilog.Verilog
 
             if (hierWords.Count == 0 && cantidateWord.StartsWith("$"))
             {
-                items = new List<CodeEditor2.CodeEditor.AutocompleteItem>();
+                items = new List<AutocompleteItem>();
                 foreach (string key in ProjectProperty.SystemFunctions.Keys)
                 {
                     items.Add(
-                        new CodeEditor2.CodeEditor.AutocompleteItem(key, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword))
+                        new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
+                            key,
+                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
+                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
+                            )
                     );
                 }
                 foreach (string key in ProjectProperty.SystemTaskParsers.Keys)
                 {
                     items.Add(
-                        new CodeEditor2.CodeEditor.AutocompleteItem(key, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword))
+                        new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
+                            key,
+                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
+                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
+                            )
                     );
                 }
                 return items;
@@ -650,11 +574,11 @@ namespace pluginVerilog.Verilog
 
             if (hierWords.Count == 0)
             {
-                items = verilogKeywords.ToList();
+                items = VerilogAutoCompleteItems.ToList();
             }
             else
             {
-                items = new List<CodeEditor2.CodeEditor.AutocompleteItem>();
+                items = new List<AutocompleteItem>();
             }
 
             if (hierWords.Count == 0)
@@ -663,7 +587,11 @@ namespace pluginVerilog.Verilog
                 foreach(var name in objectList) 
                 {
                     items.Add(
-                        new CodeEditor2.CodeEditor.AutocompleteItem(name, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Identifier), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Identifier))
+                        new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
+                            name,
+                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Identifier),
+                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Identifier)
+                            )
                     );
                 }
             }
@@ -695,9 +623,9 @@ namespace pluginVerilog.Verilog
         }
 
 
-        private CodeEditor2.CodeEditor.AutocompleteItem newItem(string text, CodeDrawStyle.ColorType colorType)
+        private AutocompleteItem newItem(string text, CodeDrawStyle.ColorType colorType)
         {
-            return new CodeEditor2.CodeEditor.AutocompleteItem(text, CodeDrawStyle.ColorIndex(colorType), Global.CodeDrawStyle.Color(colorType));
+            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(text, CodeDrawStyle.ColorIndex(colorType), Global.CodeDrawStyle.Color(colorType));
         }
 
 

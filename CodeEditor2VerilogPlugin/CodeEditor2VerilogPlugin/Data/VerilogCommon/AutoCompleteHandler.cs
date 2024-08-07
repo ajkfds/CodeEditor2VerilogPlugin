@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Avalonia.Input;
-using CodeEditor2.CodeEditor;
+using CodeEditor2.CodeEditor.CodeComplete;
+using CodeEditor2.CodeEditor.PopupHint;
+using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
 
 namespace pluginVerilog.Data.VerilogCommon
@@ -40,7 +42,7 @@ namespace pluginVerilog.Data.VerilogCommon
         }
 
 
-        public static CodeEditor2.CodeEditor.PopupItem GetPopupItem(IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, ulong version, int index)
+        public static PopupItem GetPopupItem(IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, ulong version, int index)
         {
             if (parsedDocument == null) return null;
             if (parsedDocument.Version != version) return null;
@@ -52,9 +54,9 @@ namespace pluginVerilog.Data.VerilogCommon
         }
 
 
-        public static List<CodeEditor2.CodeEditor.ToolItem> GetToolItems(IVerilogRelatedFile item, int index)
+        public static List<ToolItem> GetToolItems(IVerilogRelatedFile item, int index)
         {
-            List<CodeEditor2.CodeEditor.ToolItem> toolItems = new List<CodeEditor2.CodeEditor.ToolItem>();
+            List<ToolItem> toolItems = new List<ToolItem>();
             toolItems.Add(new Verilog.Snippets.AlwaysFFSnippet());
 //            toolItems.Add(new Verilog.Snippets.AutoConnectSnippet());
             //            toolItems.Add(new Verilog.Snippets.ConnectionCheckSnippet());
@@ -65,7 +67,7 @@ namespace pluginVerilog.Data.VerilogCommon
             return toolItems;
         }
 
-        public static List<CodeEditor2.CodeEditor.AutocompleteItem> GetAutoCompleteItems(IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, int index, out string cantidateWord)
+        public static List<AutocompleteItem> GetAutoCompleteItems(IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, int index, out string cantidateWord)
         {
             cantidateWord = null;
 
@@ -88,7 +90,7 @@ namespace pluginVerilog.Data.VerilogCommon
             }
             if (cantidateWord == null) cantidateWord = "";
 
-            List<CodeEditor2.CodeEditor.AutocompleteItem> items = parsedDocument.GetAutoCompleteItems(words, lineStartIndex, line, (CodeEditor.CodeDocument)item.CodeDocument, cantidateWord);
+            List<AutocompleteItem> items = parsedDocument.GetAutoCompleteItems(words, lineStartIndex, line, (CodeEditor.CodeDocument)item.CodeDocument, cantidateWord);
 
             return items;
         }

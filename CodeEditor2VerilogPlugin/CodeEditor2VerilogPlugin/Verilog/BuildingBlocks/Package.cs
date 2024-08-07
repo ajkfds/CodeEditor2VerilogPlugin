@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CodeEditor2.CodeEditor.CodeComplete;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
@@ -190,11 +191,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             return;
         }
 
-        private CodeEditor2.CodeEditor.AutocompleteItem newItem(string text, CodeDrawStyle.ColorType colorType)
+        private AutocompleteItem newItem(string text, CodeDrawStyle.ColorType colorType)
         {
-            return new CodeEditor2.CodeEditor.AutocompleteItem(text, CodeDrawStyle.ColorIndex(colorType), Global.CodeDrawStyle.Color(colorType));
+            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(text, CodeDrawStyle.ColorIndex(colorType), Global.CodeDrawStyle.Color(colorType));
         }
-        public override void AppendAutoCompleteItem(List<CodeEditor2.CodeEditor.AutocompleteItem> items)
+        public override void AppendAutoCompleteItem(List<AutocompleteItem> items)
         {
             base.AppendAutoCompleteItem(items);
 

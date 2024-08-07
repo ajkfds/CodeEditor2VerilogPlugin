@@ -1,4 +1,5 @@
-﻿using pluginVerilog.Data;
+﻿using CodeEditor2.CodeEditor.Parser;
+using pluginVerilog.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
 using System;
 using System.Collections.Generic;
@@ -8,12 +9,12 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Parser
 {
-    public class VerilogParser : CodeEditor2.CodeEditor.DocumentParser
+    public class VerilogParser : DocumentParser
     {
         // create parser
         public VerilogParser(
             Data.IVerilogRelatedFile verilogRelatedFile,
-            CodeEditor2.CodeEditor.DocumentParser.ParseModeEnum parseMode
+            DocumentParser.ParseModeEnum parseMode
             )
         {
             this.ParseMode = parseMode;
@@ -55,7 +56,7 @@ namespace pluginVerilog.Parser
             Data.IVerilogRelatedFile verilogRelatedFile,
             string moduleName,
             Dictionary<string, Verilog.Expressions.Expression> parameterOverrides,
-            CodeEditor2.CodeEditor.DocumentParser.ParseModeEnum parseMode
+            DocumentParser.ParseModeEnum parseMode
             ) : base(verilogRelatedFile as CodeEditor2.Data.TextFile, parseMode)
         {
             this.document = new CodeEditor.CodeDocument(verilogRelatedFile); // use verilog codeDocument

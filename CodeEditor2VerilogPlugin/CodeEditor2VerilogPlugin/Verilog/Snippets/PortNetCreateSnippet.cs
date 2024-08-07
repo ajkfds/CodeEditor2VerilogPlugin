@@ -6,13 +6,14 @@ using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 using CodeEditor2.CodeEditor;
+using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.ModuleItems;
 
 namespace pluginVerilog.Verilog.Snippets
 {
-    public class PortConnectionCreateSnippet : CodeEditor2.CodeEditor.ToolItem
+    public class PortConnectionCreateSnippet : ToolItem
     {
         public PortConnectionCreateSnippet() : base("portConnectionCreate")
         {

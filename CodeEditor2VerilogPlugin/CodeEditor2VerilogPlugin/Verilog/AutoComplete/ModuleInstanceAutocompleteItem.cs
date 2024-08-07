@@ -5,11 +5,12 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Avalonia.Media;
+using CodeEditor2.CodeEditor.CodeComplete;
 using pluginVerilog.Verilog.BuildingBlocks;
 
 namespace pluginVerilog.Verilog.AutoComplete
 {
-    public class ModuleInstanceAutocompleteItem : CodeEditor2.CodeEditor.AutocompleteItem
+    public class ModuleInstanceAutocompleteItem : AutocompleteItem
     {
         public ModuleInstanceAutocompleteItem(string text, byte colorIndex, Color color, CodeEditor2.Data.Project project) : base(text, colorIndex, color)
         {

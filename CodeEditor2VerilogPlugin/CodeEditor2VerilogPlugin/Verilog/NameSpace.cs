@@ -1,4 +1,5 @@
-﻿using pluginVerilog.Verilog.BuildingBlocks;
+﻿using CodeEditor2.CodeEditor.CodeComplete;
+using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects.Nets;
 using System;
 using System.Collections.Generic;
@@ -47,11 +48,11 @@ namespace pluginVerilog.Verilog
         }
         
 
-        private CodeEditor2.CodeEditor.AutocompleteItem newItem(string text, CodeDrawStyle.ColorType colorType)
+        private AutocompleteItem newItem(string text, CodeDrawStyle.ColorType colorType)
         {
-            return new CodeEditor2.CodeEditor.AutocompleteItem(text, CodeDrawStyle.ColorIndex(colorType), Global.CodeDrawStyle.Color(colorType));
+            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(text, CodeDrawStyle.ColorIndex(colorType), Global.CodeDrawStyle.Color(colorType));
         }
-        public virtual void AppendAutoCompleteItem( List<CodeEditor2.CodeEditor.AutocompleteItem> items)
+        public virtual void AppendAutoCompleteItem( List<AutocompleteItem> items)
         {
             foreach (DataObjects.DataObject variable in DataObjects.Values)
             {

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CodeEditor2.CodeEditor;
+using CodeEditor2.CodeEditor.Parser;
+using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
 using pluginVerilog.Verilog;
 using static CodeEditor2.Controller;
@@ -149,7 +151,7 @@ namespace pluginVerilog.Data
             return new NavigatePanel.VerilogHeaderNode(this);
         }
 
-        public override CodeEditor2.CodeEditor.DocumentParser CreateDocumentParser(CodeEditor2.CodeEditor.DocumentParser.ParseModeEnum parseMode)
+        public override DocumentParser CreateDocumentParser(DocumentParser.ParseModeEnum parseMode)
         {
             Data.IVerilogRelatedFile parentFile = Parent as Data.IVerilogRelatedFile;
             if (parentFile == null) return null;
@@ -160,7 +162,7 @@ namespace pluginVerilog.Data
             return parentFile.CreateDocumentParser(parseMode);
         }
 
-        public override List<CodeEditor2.CodeEditor.ToolItem> GetToolItems(int index)
+        public override List<ToolItem> GetToolItems(int index)
         {
             return VerilogCommon.AutoComplete.GetToolItems(this, index);
         }

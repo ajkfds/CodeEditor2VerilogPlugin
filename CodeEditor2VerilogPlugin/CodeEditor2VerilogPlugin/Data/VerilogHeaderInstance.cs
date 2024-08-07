@@ -4,6 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CodeEditor2.CodeEditor;
+using CodeEditor2.CodeEditor.CodeComplete;
+using CodeEditor2.CodeEditor.Parser;
+using CodeEditor2.CodeEditor.PopupHint;
+using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
 using pluginVerilog.Verilog;
 using pluginVerilog.Verilog.ModuleItems;
@@ -217,7 +221,7 @@ namespace pluginVerilog.Data
             return node;
         }
 
-        public override CodeEditor2.CodeEditor.DocumentParser CreateDocumentParser(CodeEditor2.CodeEditor.DocumentParser.ParseModeEnum parseMode)
+        public override DocumentParser CreateDocumentParser(DocumentParser.ParseModeEnum parseMode)
         {
             Data.IVerilogRelatedFile parentFile = Parent as Data.IVerilogRelatedFile;
             if (parentFile == null) return null;
@@ -260,17 +264,17 @@ namespace pluginVerilog.Data
         //{
         //    return VerilogCommon.AutoComplete.GetPopupItems(this,VerilogParsedDocument, version, index);
         //}
-        public override CodeEditor2.CodeEditor.PopupItem GetPopupItem(ulong version, int index)
+        public override PopupItem GetPopupItem(ulong version, int index)
         {
             return VerilogCommon.AutoComplete.GetPopupItem(this, VerilogParsedDocument, version, index);
         }
 
-        public override List<CodeEditor2.CodeEditor.ToolItem> GetToolItems(int index)
+        public override List<ToolItem> GetToolItems(int index)
         {
             return VerilogCommon.AutoComplete.GetToolItems(this, index);
         }
 
-        public override List<CodeEditor2.CodeEditor.AutocompleteItem> GetAutoCompleteItems(int index, out string cantidateWord)
+        public override List<AutocompleteItem> GetAutoCompleteItems(int index, out string cantidateWord)
         {
             return VerilogCommon.AutoComplete.GetAutoCompleteItems(this, VerilogParsedDocument, index, out cantidateWord);
         }

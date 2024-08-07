@@ -6,12 +6,13 @@ using System.Text;
 using System.Threading.Tasks;
 using Avalonia.Media;
 using CodeEditor2.CodeEditor;
+using CodeEditor2.CodeEditor.PopupMenu;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.ModuleItems;
 
 namespace pluginVerilog.Verilog.Snippets
 {
-    public class AutoFormatSnippet : CodeEditor2.CodeEditor.ToolItem
+    public class AutoFormatSnippet : ToolItem
     {
         public AutoFormatSnippet() : base("autoFormat")
         {

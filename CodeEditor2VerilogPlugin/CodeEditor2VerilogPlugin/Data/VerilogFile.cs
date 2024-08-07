@@ -7,6 +7,10 @@ using System.Text;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using CodeEditor2.CodeEditor;
+using CodeEditor2.CodeEditor.CodeComplete;
+using CodeEditor2.CodeEditor.Parser;
+using CodeEditor2.CodeEditor.PopupHint;
+using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
 using CodeEditor2.Tools;
 using pluginVerilog.CodeEditor;
@@ -375,16 +379,16 @@ namespace pluginVerilog.Data
         //    VerilogCommon.AutoComplete.BeforeKeyDown(this, e);
         //}
 
-        public override CodeEditor2.CodeEditor.PopupItem GetPopupItem(ulong version, int index)
+        public override PopupItem GetPopupItem(ulong version, int index)
         {
             return VerilogCommon.AutoComplete.GetPopupItem(this, VerilogParsedDocument, version, index);
         }
 
-        public override List<CodeEditor2.CodeEditor.ToolItem> GetToolItems(int index)
+        public override List<ToolItem> GetToolItems(int index)
         {
             return VerilogCommon.AutoComplete.GetToolItems(this, index);
         }
-        public override List<CodeEditor2.CodeEditor.AutocompleteItem> GetAutoCompleteItems(int index, out string cantidateWord)
+        public override List<AutocompleteItem> GetAutoCompleteItems(int index, out string cantidateWord)
         {
             return VerilogCommon.AutoComplete.GetAutoCompleteItems(this, VerilogParsedDocument, index, out cantidateWord);
         }

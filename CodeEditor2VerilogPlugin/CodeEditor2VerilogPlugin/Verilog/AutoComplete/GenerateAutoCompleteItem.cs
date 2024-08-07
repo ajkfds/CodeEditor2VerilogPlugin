@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CodeEditor2.CodeEditor.CodeComplete;
 
 namespace pluginVerilog.Verilog.AutoComplete
 {
-    public class GenerateAutoCompleteItem : CodeEditor2.CodeEditor.AutocompleteItem
+    public class GenerateAutoCompleteItem : AutocompleteItem
     {
         public GenerateAutoCompleteItem(string text, byte colorIndex, Avalonia.Media.Color color) : base(text, colorIndex, color)
         {

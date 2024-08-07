@@ -1,4 +1,5 @@
-﻿using pluginVerilog.Verilog.DataObjects.DataTypes;
+﻿using CodeEditor2.CodeEditor.CodeComplete;
+using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.ModuleItems;
 using System;
 using System.Collections.Generic;
@@ -348,18 +349,18 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             return;
         }
 
-        private CodeEditor2.CodeEditor.AutocompleteItem newItem(string text, CodeDrawStyle.ColorType colorType)
+        private AutocompleteItem newItem(string text, CodeDrawStyle.ColorType colorType)
         {
-            return new CodeEditor2.CodeEditor.AutocompleteItem(text, CodeDrawStyle.ColorIndex(colorType), Global.CodeDrawStyle.Color(colorType));
+            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(text, CodeDrawStyle.ColorIndex(colorType), Global.CodeDrawStyle.Color(colorType));
         }
-        public override void AppendAutoCompleteItem(List<CodeEditor2.CodeEditor.AutocompleteItem> items)
+        public override void AppendAutoCompleteItem(List<AutocompleteItem> items)
         {
             base.AppendAutoCompleteItem(items);
 
-            foreach (IInstantiation inst in Instantiations.Values)
+            foreach (IInstantiation instantiation in Instantiations.Values)
             {
-                if (inst.Name == null) System.Diagnostics.Debugger.Break();
-                items.Add(newItem(inst.Name, CodeDrawStyle.ColorType.Identifier));
+                if (instantiation.Name == null) throw new Exception();
+                items.Add(newItem(instantiation.Name, CodeDrawStyle.ColorType.Identifier));
             }
         }
 

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using CodeEditor2.CodeEditor;
 using System.Drawing;
 using pluginVerilog.Verilog.BuildingBlocks;
 using Avalonia.Input;
@@ -12,11 +11,12 @@ using Avalonia.Media;
 using static System.Net.Mime.MediaTypeNames;
 using static pluginVerilog.Verilog.Snippets.ModuleInstanceSnippet;
 using System.Reflection.Metadata;
+using CodeEditor2.CodeEditor.PopupMenu;
 
 
 namespace pluginVerilog.Verilog.Snippets
 {
-    public class ModuleInstanceMenuSnippet : CodeEditor2.CodeEditor.ToolItem
+    public class ModuleInstanceMenuSnippet : ToolItem
     {
         public ModuleInstanceMenuSnippet() : base("moduleInstance")
         {
