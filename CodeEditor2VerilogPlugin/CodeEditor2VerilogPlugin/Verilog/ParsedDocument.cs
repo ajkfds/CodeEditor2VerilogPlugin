@@ -306,7 +306,6 @@ namespace pluginVerilog.Verilog
             if (space.DataObjects.ContainsKey(text))
             {
                 space.DataObjects[text].AppendLabel(ret);
-                //                ret.Add(space.DataObjects[text]   new Popup.VariablePopup(space.DataObjects[text]));
             }
 
             {
@@ -314,7 +313,6 @@ namespace pluginVerilog.Verilog
                 if (param != null)
                 {
                     param.AppendLabel(ret);
-//                    ret.Add(new Popup.ParameterPopup(param));
                 }
             }
 
@@ -322,14 +320,17 @@ namespace pluginVerilog.Verilog
             {
 //                ret.Add(new Popup.MacroPopup(text.Substring(1), iref.RootParsedDocument.Macros[text.Substring(1)].MacroText));
             }
+
             if (space.BuildingBlock.Functions.ContainsKey(text))
             {
 //                ret.Add(new Popup.FunctionPopup(space.BuildingBlock.Functions[text]));
             }
+
             if (space.BuildingBlock.Tasks.ContainsKey(text))
             {
 //                ret.Add(new Popup.TaskPopup(space.BuildingBlock.Tasks[text]));
             }
+
             return ret;
         }
 
