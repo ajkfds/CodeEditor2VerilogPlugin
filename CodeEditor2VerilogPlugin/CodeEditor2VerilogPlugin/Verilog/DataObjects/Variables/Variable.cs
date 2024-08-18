@@ -215,7 +215,31 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                     }
                     else
                     {
-                        variable.DefinedReference.AddError("duplicate");
+                        if (nameSpace.BuildingBlock.AnsiStylePortDefinition)
+                        {
+                            variable.DefinedReference.AddError("duplicate");
+                        }
+                        else
+                        {
+                            BuildingBlocks.IModuleOrInterfaceOrProgram? buildingBlockWithPorts = nameSpace.BuildingBlock as BuildingBlocks.IModuleOrInterfaceOrProgram;
+                            if(buildingBlockWithPorts == null)
+                            {
+                                variable.DefinedReference.AddError("duplicate");
+                            }
+                            else
+                            {
+                                if (buildingBlockWithPorts.Ports.ContainsKey(variable.Name))
+                                {
+                                    Port port = buildingBlockWithPorts.Ports[variable.Name];
+                                    port.DataObject = variable;
+                                }
+                                else
+                                {
+                                    variable.DefinedReference.AddError("duplicate");
+                                }
+                            }
+
+                        }
 //                        word.AddError("duplicate");
                     }
                 }

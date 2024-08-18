@@ -260,6 +260,15 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
 
             // [vectored | scalared]
 
+            if (word.Text == "vectored")
+            {
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext();
+            }else if(word.Text == "scalared")
+            {
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext();
+            }
 
             if (word.Eof)
             {
@@ -299,14 +308,17 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             }
 
 
+            //[delay3]
+            if (word.Text == "#")
+            {
+                Delay3.ParseCreate(word, nameSpace);
+            }
 
             if (!General.IsIdentifier(word.Text))
             {
                 word.AddError("illegal net identifier");
                 return true;
             }
-            //[delay3]
-            // TODO
 
             List<Net> nets = new List<Net>();
             while (!word.Eof)

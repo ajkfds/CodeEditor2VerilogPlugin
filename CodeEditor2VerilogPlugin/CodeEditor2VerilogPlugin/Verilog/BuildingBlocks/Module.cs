@@ -66,7 +66,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             */
 
             // module_keyword ( module | macromodule )
-            if (word.Text != "module" && word.Text != "macromodule") System.Diagnostics.Debugger.Break();
+            if (word.Text != "module" && word.Text != "macromodule") throw new Exception();
             word.Color(CodeDrawStyle.ColorType.Keyword);
             Module module = new Module();
             module.Parent = word.RootParsedDocument.Root;
@@ -85,24 +85,23 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 macroKeep.Add(kvPair.Key, kvPair.Value);
             }
 
-
             if (!word.CellDefine && !protoType)
             {
                 // prototype parse
                 WordScanner prototypeWord = word.Clone();
                 prototypeWord.Prototype = true;
-                parseModuleItems(prototypeWord, parameterOverrides, null, module);
+                parseModule(prototypeWord, parameterOverrides, null, module);
                 prototypeWord.Dispose();
 
                 // parse
                 word.RootParsedDocument.Macros = macroKeep;
-                parseModuleItems(word, parameterOverrides, null, module);
+                parseModule(word, parameterOverrides, null, module);
             }
             else
             {
                 // parse prototype only
                 word.Prototype = true;
-                parseModuleItems(word, parameterOverrides, null, module);
+                parseModule(word, parameterOverrides, null, module);
                 word.Prototype = false;
             }
 
@@ -137,7 +136,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         module_parameter_port_list  ::= # ( parameter_declaration { , parameter_declaration } ) 
         list_of_ports ::= ( port { , port } )
         */
-        protected static void parseModuleItems(
+        protected static void parseModule(
             WordScanner word,
             //            string parameterOverrideModuleName,
             Dictionary<string, Expressions.Expression>? parameterOverrides,
@@ -246,11 +245,23 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                 while (!word.Eof)
                 {
-                    if(!Items.ModuleItem.Parse(word, module))
+                    if (module.AnsiStylePortDefinition)
                     {
-                        if (word.Text == "endmodule") break;
-                        word.AddError("illegal module item");
-                        word.MoveNext();
+                        if (!Items.NonPortModuleItem.Parse(word, module))
+                        {
+                            if (word.Text == "endmodule") break;
+                            word.AddError("illegal module item");
+                            word.MoveNext();
+                        }
+                    }
+                    else
+                    {
+                        if (!Items.ModuleItem.Parse(word, module))
+                        {
+                            if (word.Text == "endmodule") break;
+                            word.AddError("illegal module item");
+                            word.MoveNext();
+                        }
                     }
                 }
                 //parseModuleItems(word, module);
@@ -285,35 +296,6 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
         }
 
-        //protected static void checkVariablesUseAndDriven(WordScanner word, NameSpace nameSpace)
-        //{
-        //    foreach (var variable in nameSpace.DataObjects.Values)
-        //    {
-        //        if (variable.DefinedReference == null) continue;
-
-        //        DataObjects.Variables.ValueVariable? valueVar = variable as DataObjects.Variables.ValueVariable;
-        //        if (valueVar == null) continue;
-
-        //        if (valueVar.AssignedReferences.Count == 0)
-        //        {
-        //            if (valueVar.UsedReferences.Count == 0)
-        //            {
-        //                word.AddNotice(variable.DefinedReference, "undriven & unused");
-        //            }
-        //            else
-        //            {
-        //                word.AddNotice(variable.DefinedReference, "undriven");
-        //            }
-        //        }
-        //        else
-        //        {
-        //            if (valueVar.UsedReferences.Count == 0)
-        //            {
-        //                word.AddNotice(variable.DefinedReference, "unused");
-        //            }
-        //        }
-        //    }
-        //}
 
         protected static void parseListOfPorts_ListOfPortsDeclarations(WordScanner word, Module module)
         {
