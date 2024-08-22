@@ -118,7 +118,7 @@ namespace pluginVerilog.Verilog.Expressions
 
             List<Primary> rpnPrimaries = new List<Primary>();
 
-            parseExpression(word, nameSpace, rpnPrimaries, operatorsStock,ref reference);
+            parseExpressionPrimaries(word, nameSpace, rpnPrimaries, operatorsStock,ref reference);
             expression.Reference = reference;
             while(operatorsStock.Count != 0)
             {
@@ -314,7 +314,7 @@ namespace pluginVerilog.Verilog.Expressions
 
         }
 
-        private static bool parseExpression(WordScanner word,NameSpace nameSpace,List<Primary> Primaries,List<Operator> operatorStock,ref WordReference reference)
+        private static bool parseExpressionPrimaries(WordScanner word,NameSpace nameSpace,List<Primary> Primaries,List<Operator> operatorStock,ref WordReference reference)
         {
             // ++(primary),--(primary)
             Primary? primary = Primary.ParseCreate(word, nameSpace);
@@ -381,7 +381,7 @@ namespace pluginVerilog.Verilog.Expressions
                 word.MoveNext();
                 do
                 {
-                    if (!parseExpression(word, nameSpace, Primaries, operatorStock,ref reference))
+                    if (!parseExpressionPrimaries(word, nameSpace, Primaries, operatorStock,ref reference))
                     {
                         word.AddError("illegal binary Operator");
                         break;
@@ -395,7 +395,7 @@ namespace pluginVerilog.Verilog.Expressions
                         word.AddError(": expected");
                         break;
                     }
-                    if (!parseExpression(word, nameSpace, Primaries, operatorStock, ref reference))
+                    if (!parseExpressionPrimaries(word, nameSpace, Primaries, operatorStock, ref reference))
                     {
                         word.AddError("illegal binary Operator");
                         break;
@@ -409,7 +409,7 @@ namespace pluginVerilog.Verilog.Expressions
 
             addOperator(binaryOperator, Primaries, operatorStock);
 
-            if (!parseExpression(word, nameSpace, Primaries, operatorStock, ref reference))
+            if (!parseExpressionPrimaries(word, nameSpace, Primaries, operatorStock, ref reference))
             {
                 word.AddError("illegal binary Operator");
             }
