@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using pluginVerilog.Verilog.Expressions.Operators;
 
 namespace pluginVerilog.Verilog.Expressions
 {
@@ -276,6 +277,16 @@ namespace pluginVerilog.Verilog.Expressions
                     Primaries.RemoveAt(0);
                     Primaries.Add(primary);
                 }
+                else if (item is AssignmentOperator)
+                {
+                    if (Primaries.Count < 2) return null;
+                    AssignmentOperator? op = item as AssignmentOperator;
+                    if (op == null) throw new Exception();
+                    Primary primary = op.Operate(Primaries[0], Primaries[1]);
+                    Primaries.RemoveAt(0);
+                    Primaries.RemoveAt(0);
+                    Primaries.Add(primary);
+                }
                 else if (item is UnaryOperator)
                 {
                     if (Primaries.Count < 1) return null;
@@ -404,10 +415,23 @@ namespace pluginVerilog.Verilog.Expressions
                 } while (false);
             }
 
-            BinaryOperator binaryOperator = BinaryOperator.ParseCreate(word);
-            if (binaryOperator == null) return true;
-
-            addOperator(binaryOperator, Primaries, operatorStock);
+            BinaryOperator? binaryOperator = BinaryOperator.ParseCreate(word);
+            if(binaryOperator != null)
+            {
+                addOperator(binaryOperator, Primaries, operatorStock);
+            }
+            else
+            {
+                AssignmentOperator? assignmentOperator = AssignmentOperator.ParseCreate(word);
+                if (assignmentOperator != null)
+                {
+                    addOperator(assignmentOperator, Primaries, operatorStock);
+                }
+                else
+                {
+                    return true;
+                }
+            }
 
             if (!parseExpressionPrimaries(word, nameSpace, Primaries, operatorStock, ref reference))
             {
