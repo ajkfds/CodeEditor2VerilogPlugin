@@ -289,7 +289,7 @@ namespace pluginVerilog.Verilog
             {
                 if (iref.IsSmallerThan(module.BeginIndexReference)) continue;
                 if (iref.IsGreaterThan(module.LastIndexReference)) continue;
-                space = module.GetHierarchyNameSpace(index);
+                space = module.GetHierarchyNameSpace(iref);
                 break;
             }
 
@@ -534,7 +534,7 @@ namespace pluginVerilog.Verilog
             {
                 if (iref.IsSmallerThan(module.BeginIndexReference)) continue;
                 if (iref.IsGreaterThan(module.LastIndexReference)) continue;
-                space = module.GetHierarchyNameSpace(index);
+                space = module.GetHierarchyNameSpace(iref);
                 break;
             }
 

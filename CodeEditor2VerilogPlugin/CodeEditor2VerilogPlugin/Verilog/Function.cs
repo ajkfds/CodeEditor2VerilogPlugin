@@ -46,10 +46,8 @@ namespace pluginVerilog.Verilog
 
         private static void Parse(WordScanner word, NameSpace nameSpace,bool acceptClassConstructor)
         {
-            if(word.Text != "function")
-            {
-                System.Diagnostics.Debugger.Break();
-            }
+            if (word.Text != "function") throw new System.Exception();
+
             Function function = new Function(nameSpace);
             word.Color(CodeDrawStyle.ColorType.Keyword);
             function.BeginIndexReference = word.CreateIndexReference();
@@ -109,7 +107,7 @@ namespace pluginVerilog.Verilog
 
 
             // function_data_type_or_implicit   ::= data_type_or_void | implicit_data_type;
-            Variable retVal = null;
+            Variable? retVal = null;
             bool returnVoid = false;
 
             switch (word.Text)
@@ -175,7 +173,7 @@ namespace pluginVerilog.Verilog
             }
             else
             {
-                if (!returnVoid)
+                if (!returnVoid && retVal == null)
                 {
                     IDataType dat_type = Verilog.DataObjects.DataTypes.IntegerVectorType.Create(DataTypeEnum.Logic, false, null);
                     retVal = Verilog.DataObjects.Variables.Logic.Create(dat_type);

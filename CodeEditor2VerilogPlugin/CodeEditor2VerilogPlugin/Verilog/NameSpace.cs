@@ -42,11 +42,44 @@ namespace pluginVerilog.Verilog
         public BuildingBlocks.BuildingBlock BuildingBlock { get; protected set; }
         public Dictionary<string, NameSpace> NameSpaces { get { return nameSpaces;  } }
 
-        public NameSpace GetHierarchyNameSpace(int index)
+        //public NameSpace GetHierarchyNameSpace(int index)
+        //{
+        //    foreach (NameSpace nameSpace in NameSpaces.Values)
+        //    {
+        //        if(index < nameSpace.BeginIndexReference)
+        //        if (iref.IsSmallerThan(module.BeginIndexReference)) continue;
+        //        if (iref.IsGreaterThan(module.LastIndexReference)) continue;
+        //        space = module.GetHierarchyNameSpace(index);
+        //        break;
+        //    }
+        //    return this;
+        //}
+        public NameSpace GetHierarchyNameSpace(IndexReference iref)
         {
+            foreach (Function function in BuildingBlock.Functions.Values)
+            {
+                if (iref.IsSmallerThan(function.BeginIndexReference)) continue;
+                if (iref.IsGreaterThan(function.LastIndexReference)) continue;
+                return function.getHierarchyNameSpace2(iref);
+            }
+            foreach (Task task in BuildingBlock.Tasks.Values)
+            {
+                if (iref.IsSmallerThan(task.BeginIndexReference)) continue;
+                if (iref.IsGreaterThan(task.LastIndexReference)) continue;
+                return task.getHierarchyNameSpace2(iref);
+            }
+            return getHierarchyNameSpace2(iref);
+        }
+        private NameSpace getHierarchyNameSpace2(IndexReference iref)
+        {
+            foreach (NameSpace nameSpace in NameSpaces.Values)
+            {
+                if (iref.IsSmallerThan(nameSpace.BeginIndexReference)) continue;
+                if (iref.IsGreaterThan(nameSpace.LastIndexReference)) continue;
+                return nameSpace.GetHierarchyNameSpace(iref);
+            }
             return this;
         }
-        
 
         private AutocompleteItem newItem(string text, CodeDrawStyle.ColorType colorType)
         {
