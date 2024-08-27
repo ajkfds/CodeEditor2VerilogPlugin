@@ -180,7 +180,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
 
             switch (operatorText)
             {
-                // alithmetic operator
+                // arithmetic operator
                 case "+":
                     return maxWidth + 1;
                 case "-":
@@ -221,11 +221,11 @@ namespace pluginVerilog.Verilog.Expressions.Operators
                 case "~^":
                     return maxWidth;
 
-                // logical shoft
+                // logical shift
                 case ">>":
                 case "<<":
                     return bitWidth1;
-                // alithmetic shift
+                // arithmetic shift
                 case ">>>":
                 case "<<<":
                     return bitWidth1;
@@ -244,7 +244,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
         {
             switch (Text)
             {
-                // alithmetic operator
+                // arithmetic operator
                 case "+":
                     return value1 + value2;
                 case "-":
@@ -303,10 +303,10 @@ namespace pluginVerilog.Verilog.Expressions.Operators
                 case "^~":
                 case "~^":
 
-                // logical shoft
+                // logical shift
                 case ">>":
                 case "<<":
-                // alithmetic shift
+                // arithmetic shift
                 case ">>>":
                 case "<<<":
                     return null;

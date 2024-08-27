@@ -14,7 +14,7 @@ namespace pluginVerilog.Verilog.Expressions
             Constant = false;
         }
 
-//        public List<Primary> RpnPrimaries = new List<Primary>();
+        //        public List<Primary> RpnPrimaries = new List<Primary>();
 
         public Primary Primary;
         public virtual bool Constant { get; protected set; }
@@ -111,7 +111,66 @@ namespace pluginVerilog.Verilog.Expressions
         range_expression                ::= expression  msb_constant_expression : lsb_constant_expression | base_expression +: width_constant_expression | base_expression -: width_constant_expression
         width_constant_expression ::= constant_expression
         */
-        public static Expression? ParseCreate(WordScanner word,NameSpace nameSpace)
+
+        /*
+        expression ::= 
+              primary
+            | unary_operator { attribute_instance } primary
+            | inc_or_dec_expression
+            | "(" operator_assignment ")"
+            | expression binary_operator { attribute_instance } expression
+            | conditional_expression
+            | inside_expression
+            | tagged_union_expression
+
+        operator_assignment ::= 
+            variable_lvalue assignment_operator expression
+        assignment_operator ::=
+            = | += | -= | *= | /= | %= | &= | |= | ^= | <<= | >>= | <<<= | >>>=
+
+        inc_or_dec_expression ::=
+              inc_or_dec_operator { attribute_instance } variable_lvalue
+            | variable_lvalue { attribute_instance } inc_or_dec_operator
+        
+        conditional_expression ::= 
+            cond_predicate ? { attribute_instance } expression : expression
+        
+        constant_expression ::=
+              constant_primary
+            | unary_operator { attribute_instance } constant_primary
+            | constant_expression binary_operator { attribute_instance } constant_expression
+            | constant_expression ? { attribute_instance } constant_expression : constant_expression
+        constant_mintypmax_expression ::=
+              constant_expression
+            | constant_expression : constant_expression : constant_expression
+        constant_param_expression ::=
+            constant_mintypmax_expression | data_type | "$"
+        param_expression ::= 
+            mintypmax_expression | data_type | "$"
+
+        */
+        public static Expression? ParseCreate(WordScanner word, NameSpace nameSpace)
+        {
+            Expression? exp = parseCreate(word, nameSpace);
+            if (exp == null) return null;
+
+            if(exp is AssignmentOperator)
+            {
+                exp.Reference.AddError("assignment operator needs ()");
+            }
+
+            return exp;
+        }
+
+        public static Expression? ParseCreateInBracket(WordScanner word, NameSpace nameSpace)
+        {
+            Expression? exp = parseCreate(word, nameSpace);
+            if (exp == null) return null;
+
+            return exp;
+        }
+
+        public static Expression? parseCreate(WordScanner word, NameSpace nameSpace)
         {
             Expression expression = new Expression();
             List<Operator> operatorsStock = new List<Operator>();
@@ -119,14 +178,14 @@ namespace pluginVerilog.Verilog.Expressions
 
             List<Primary> rpnPrimaries = new List<Primary>();
 
-            parseExpressionPrimaries(word, nameSpace, rpnPrimaries, operatorsStock,ref reference);
+            parseExpressionPrimaries(word, nameSpace, rpnPrimaries, operatorsStock, ref reference);
             expression.Reference = reference;
-            while(operatorsStock.Count != 0)
+            while (operatorsStock.Count != 0)
             {
                 rpnPrimaries.Add(operatorsStock.Last());
                 operatorsStock.RemoveAt(operatorsStock.Count - 1);
             }
-            if(rpnPrimaries.Count == 0)
+            if (rpnPrimaries.Count == 0)
             {
                 return null;
             }
@@ -144,7 +203,7 @@ namespace pluginVerilog.Verilog.Expressions
             if (!word.Active) return expression;
 
             bool incDec = false;
-            if(rpnPrimaries.Count == 2)
+            if (rpnPrimaries.Count == 2)
             {
                 if (rpnPrimaries[0] is IncDecOperator || rpnPrimaries[1] is IncDecOperator)
                 {
@@ -155,7 +214,7 @@ namespace pluginVerilog.Verilog.Expressions
 
             // parse rpn
             List<Primary> primaries = new List<Primary>();
-            for(int i=0;i<rpnPrimaries.Count;i++)
+            for (int i = 0; i < rpnPrimaries.Count; i++)
             {
                 Primary item = rpnPrimaries[i];
                 if (item is BinaryOperator)
@@ -163,10 +222,24 @@ namespace pluginVerilog.Verilog.Expressions
                     if (primaries.Count < 2) return null;
                     BinaryOperator? op = item as BinaryOperator;
                     if (op == null) throw new Exception();
-                    Primary primary = op.Operate(primaries[primaries.Count - 2], primaries[primaries.Count-1]);
+                    Primary primary = op.Operate(primaries[primaries.Count - 2], primaries[primaries.Count - 1]);
                     primaries.RemoveAt(primaries.Count - 1);
                     primaries.RemoveAt(primaries.Count - 1);
                     primaries.Add(primary);
+                }
+                else if (item is AssignmentOperator)
+                {
+                    if (primaries.Count < 2) return null;
+                    AssignmentOperator? op = item as AssignmentOperator;
+                    if (op == null) throw new Exception();
+                    Primary primary = op.Operate(primaries[primaries.Count - 2], primaries[primaries.Count - 1]);
+                    primaries.RemoveAt(primaries.Count - 1);
+                    primaries.RemoveAt(primaries.Count - 1);
+                    primaries.Add(primary);
+                    if (primaries.Count != 1)
+                    {
+                        primary.Reference.AddError("assignment operator needs ()");
+                    }
                 }
                 else if (item is UnaryOperator)
                 {
@@ -202,7 +275,7 @@ namespace pluginVerilog.Verilog.Expressions
                     primaries.Add(item as Primary);
                 }
             }
-            if(primaries.Count == 1)
+            if (primaries.Count == 1)
             {
                 //expression.Constant = Primaries[0].Constant;
                 //expression.BitWidth = Primaries[0].BitWidth;
@@ -216,7 +289,7 @@ namespace pluginVerilog.Verilog.Expressions
 
             primaries[0].IncrementDecrement = incDec;
             return primaries[0];
-//            return expression;
+            //            return expression;
         }
 
         public static Expression CreateTempExpression(string text)
@@ -295,7 +368,8 @@ namespace pluginVerilog.Verilog.Expressions
                     Primary primary = op.Operate(Primaries[0]);
                     Primaries.RemoveAt(0);
                     Primaries.Add(primary);
-                }else if(item is TenaryOperator)
+                }
+                else if (item is TenaryOperator)
                 {
                     if (Primaries.Count < 3) return null;
                     TenaryOperator? op = item as TenaryOperator;
@@ -325,7 +399,7 @@ namespace pluginVerilog.Verilog.Expressions
 
         }
 
-        private static bool parseExpressionPrimaries(WordScanner word,NameSpace nameSpace,List<Primary> Primaries,List<Operator> operatorStock,ref WordReference reference)
+        private static bool parseExpressionPrimaries(WordScanner word, NameSpace nameSpace, List<Primary> Primaries, List<Operator> operatorStock, ref WordReference reference)
         {
             // ++(primary),--(primary)
             Primary? primary = Primary.ParseCreate(word, nameSpace);
@@ -342,7 +416,7 @@ namespace pluginVerilog.Verilog.Expressions
             {
                 // ++(primary),-(primary)
                 IncDecOperator incDecOperator = IncDecOperator.ParseCreate(word);
-                if(incDecOperator != null)
+                if (incDecOperator != null)
                 {
                     if (word.Eof)
                     {
@@ -376,7 +450,7 @@ namespace pluginVerilog.Verilog.Expressions
                         }
                         Primaries.Add(primary);
                         Primaries.Add(unaryOperator);
-//                        addOperator(unaryOperator, Primaries, operatorStock);
+                        //                        addOperator(unaryOperator, Primaries, operatorStock);
                     }
                     else
                     {
@@ -392,7 +466,7 @@ namespace pluginVerilog.Verilog.Expressions
                 word.MoveNext();
                 do
                 {
-                    if (!parseExpressionPrimaries(word, nameSpace, Primaries, operatorStock,ref reference))
+                    if (!parseExpressionPrimaries(word, nameSpace, Primaries, operatorStock, ref reference))
                     {
                         word.AddError("illegal binary Operator");
                         break;
@@ -416,7 +490,7 @@ namespace pluginVerilog.Verilog.Expressions
             }
 
             BinaryOperator? binaryOperator = BinaryOperator.ParseCreate(word);
-            if(binaryOperator != null)
+            if (binaryOperator != null)
             {
                 addOperator(binaryOperator, Primaries, operatorStock);
             }
@@ -451,7 +525,7 @@ namespace pluginVerilog.Verilog.Expressions
             return true;
         }
 
-        private static void addOperator(Operator newOperator,List<Primary> expressionItems, List<Operator> operatorStock)
+        private static void addOperator(Operator newOperator, List<Primary> expressionItems, List<Operator> operatorStock)
         {
             while (operatorStock.Count != 0 && operatorStock.Last().Precedence <= newOperator.Precedence)
             {

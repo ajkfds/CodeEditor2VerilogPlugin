@@ -27,7 +27,7 @@ namespace pluginVerilog.Verilog.Expressions
             return label;
         }
 
-        public static Primary ParseCreateBracketOrMinTypMax(WordScanner word, NameSpace nameSpace)
+        public static Primary? ParseCreateBracketOrMinTypMax(WordScanner word, NameSpace nameSpace)
         {
             Bracket bracket = new Bracket();
             bracket.Reference = word.GetReference();
@@ -37,7 +37,7 @@ namespace pluginVerilog.Verilog.Expressions
                 word.AddError("illegal bracket");
                 return null;
             }
-            Expression exp1 = Expression.ParseCreate(word, nameSpace);
+            Expression? exp1 = Expression.ParseCreateInBracket(word, nameSpace);
             if (exp1 == null)
             {
                 word.AddError("illegal bracket");
