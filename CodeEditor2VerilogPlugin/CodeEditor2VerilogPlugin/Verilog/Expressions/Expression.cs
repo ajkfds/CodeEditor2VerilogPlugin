@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using pluginVerilog.Verilog.Expressions.Operators;
 
@@ -123,6 +124,9 @@ namespace pluginVerilog.Verilog.Expressions
             | inside_expression
             | tagged_union_expression
 
+        inside_expression ::= expression "inside" "{" open_range_list "}"
+        open_range_list ::= open_value_range { , open_value_range }
+        open_value_range ::= value_range
         operator_assignment ::= 
             variable_lvalue assignment_operator expression
         assignment_operator ::=
@@ -151,7 +155,7 @@ namespace pluginVerilog.Verilog.Expressions
         */
         public static Expression? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
-            Expression? exp = parseCreate(word, nameSpace);
+            Expression? exp = parseCreate(word, nameSpace,false);
             if (exp == null) return null;
 
             if(exp is AssignmentOperator)
@@ -164,13 +168,13 @@ namespace pluginVerilog.Verilog.Expressions
 
         public static Expression? ParseCreateInBracket(WordScanner word, NameSpace nameSpace)
         {
-            Expression? exp = parseCreate(word, nameSpace);
+            Expression? exp = parseCreate(word, nameSpace,true);
             if (exp == null) return null;
 
             return exp;
         }
 
-        public static Expression? parseCreate(WordScanner word, NameSpace nameSpace)
+        public static Expression? parseCreate(WordScanner word, NameSpace nameSpace,bool acceptAssignment)
         {
             Expression expression = new Expression();
             List<Operator> operatorsStock = new List<Operator>();
@@ -178,7 +182,7 @@ namespace pluginVerilog.Verilog.Expressions
 
             List<Primary> rpnPrimaries = new List<Primary>();
 
-            parseExpressionPrimaries(word, nameSpace, rpnPrimaries, operatorsStock, ref reference);
+            parseExpressionPrimaries(word, nameSpace, rpnPrimaries, operatorsStock, ref reference,acceptAssignment);
             expression.Reference = reference;
             while (operatorsStock.Count != 0)
             {
@@ -399,7 +403,7 @@ namespace pluginVerilog.Verilog.Expressions
 
         }
 
-        private static bool parseExpressionPrimaries(WordScanner word, NameSpace nameSpace, List<Primary> Primaries, List<Operator> operatorStock, ref WordReference reference)
+        private static bool parseExpressionPrimaries(WordScanner word, NameSpace nameSpace, List<Primary> Primaries, List<Operator> operatorStock, ref WordReference reference,bool acceptAssignment)
         {
             // ++(primary),--(primary)
             Primary? primary = Primary.ParseCreate(word, nameSpace);
@@ -466,7 +470,7 @@ namespace pluginVerilog.Verilog.Expressions
                 word.MoveNext();
                 do
                 {
-                    if (!parseExpressionPrimaries(word, nameSpace, Primaries, operatorStock, ref reference))
+                    if (!parseExpressionPrimaries(word, nameSpace, Primaries, operatorStock, ref reference, false))
                     {
                         word.AddError("illegal binary Operator");
                         break;
@@ -480,7 +484,7 @@ namespace pluginVerilog.Verilog.Expressions
                         word.AddError(": expected");
                         break;
                     }
-                    if (!parseExpressionPrimaries(word, nameSpace, Primaries, operatorStock, ref reference))
+                    if (!parseExpressionPrimaries(word, nameSpace, Primaries, operatorStock, ref reference, false))
                     {
                         word.AddError("illegal binary Operator");
                         break;
@@ -494,7 +498,7 @@ namespace pluginVerilog.Verilog.Expressions
             {
                 addOperator(binaryOperator, Primaries, operatorStock);
             }
-            else
+            else if(acceptAssignment)
             {
                 AssignmentOperator? assignmentOperator = AssignmentOperator.ParseCreate(word);
                 if (assignmentOperator != null)
@@ -506,8 +510,12 @@ namespace pluginVerilog.Verilog.Expressions
                     return true;
                 }
             }
+            else
+            {
+                return true;
+            }
 
-            if (!parseExpressionPrimaries(word, nameSpace, Primaries, operatorStock, ref reference))
+            if (!parseExpressionPrimaries(word, nameSpace, Primaries, operatorStock, ref reference,false))
             {
                 word.AddError("illegal binary Operator");
             }
