@@ -106,7 +106,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         signing ::= "signed" | "unsigned"
         */
 
-        public static IDataType ParseCreate(WordScanner word, NameSpace nameSpace, DataTypeEnum? defaultDataType)
+        public static IDataType? ParseCreate(WordScanner word, NameSpace nameSpace, DataTypeEnum? defaultDataType)
         {
             /*
             data_type::=
@@ -131,16 +131,19 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             signing ::= "signed" | "unsigned"
             */
 
-            // systemverilog data type does not include nets
+            // SystemVerilog data type does not include nets
+
 
             switch (word.Text)
             {
+                //integer_vector_type [signing] { packed_dimension }
                 //integer_vector_type::= bit | logic | reg
                 case "bit":
                 case "logic":
                 case "reg":
                     return IntegerVectorType.ParseCreate(word, nameSpace);
 
+                //integer_atom_type[signing]
                 //integer_atom_type::= byte | shortint | int | longint | integer | time
                 case "byte":
                 case "shortint":
@@ -149,6 +152,8 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 case "integer":
                 case "time":
                     return IntegerAtomType.ParseCreate(word, nameSpace);
+
+                //non_integer_type
                 //non_integer_type::= "shortreal" | "real" | "realtime"
                 case "shortreal":
                     return parseSimpleType(word, nameSpace, DataTypeEnum.Shortreal);
@@ -157,7 +162,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 case "realtime":
                     return parseSimpleType(word, nameSpace, DataTypeEnum.Realtime);
 
-                // struct_union["packed"[signing]] { struct_union_member { struct_union_member } } { packed_dimension }
+                //struct_union["packed"[signing]] { struct_union_member { struct_union_member } } { packed_dimension }
 
                 // "enum" [enum_base_type] { enum_name_declaration { , enum_name_declaration } { packed_dimension }
                 case "enum":
@@ -171,8 +176,8 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
                 // "virtual" ["interface"] interface_identifier[parameter_value_assignment][ . modport_identifier] 
 
-                // class_type
                 // "event"
+
                 // ps_covergroup_identifier 
 
                 // type_reference
@@ -180,9 +185,10 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     return parseTypeReference(word, nameSpace);
 
                 default:
+                    // class_type
                     // class
                     {
-                        if(nameSpace.BuildingBlock.Classes.ContainsKey(word.Text))
+                        if (nameSpace.BuildingBlock.Classes.ContainsKey(word.Text))
                         {
                             IDataType dType = nameSpace.BuildingBlock.Classes[word.Text];
                             word.Color(CodeDrawStyle.ColorType.Keyword);
@@ -244,7 +250,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             return dType;
         }
 
-        private static IDataType parseTypeReference(WordScanner word, NameSpace nameSpace)
+        private static IDataType? parseTypeReference(WordScanner word, NameSpace nameSpace)
         {
             //type_reference::= type(expression) | type(data_type)
             if (word.Text != "type") System.Diagnostics.Debugger.Break();
@@ -256,10 +262,10 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 return null;
             }
 
-            IDataType dtype = ParseCreate(word, nameSpace,null);
+            IDataType? dtype = ParseCreate(word, nameSpace,null);
             if (dtype == null)
             {
-                Expressions.Expression ex = Expressions.Expression.ParseCreate(word, nameSpace);
+                Expressions.Expression? ex = Expressions.Expression.ParseCreate(word, nameSpace);
                 if (ex == null)
                 {
                     word.AddError("expression or data_type required");

@@ -1,4 +1,6 @@
-﻿using pluginVerilog.Verilog.DataObjects.DataTypes;
+﻿using DynamicData;
+using pluginVerilog.Verilog.DataObjects.Arrays;
+using pluginVerilog.Verilog.DataObjects.DataTypes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +11,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
     public class IntegerVectorType : DataType
     {
-        public virtual List<Range> PackedDimensions { get; protected set; } = new List<Range>();
+        public virtual List<Arrays.PackedArray> PackedDimensions { get; protected set; } = new List<Arrays.PackedArray>();
         public virtual bool Signed { get; protected set; }
 
         //      data_type::= integer_vector_type[signing] { packed_dimension }
@@ -20,11 +22,11 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         // logic        4state  >=1bit      
         // bit          2state  >=1bit      
 
-        public virtual int? BitWidth { 
+        public virtual int? BitWidth {
             get 
             {
                 if (PackedDimensions.Count == 0) return 0;
-                return PackedDimensions[0].BitWidth;
+                return PackedDimensions[0].Size;
             } 
         }
 
@@ -58,7 +60,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     sb.Append("reg");
                     break;
             }
-            foreach(Range range in PackedDimensions)
+            foreach(Arrays.PackedArray range in PackedDimensions)
             {
                 sb.Append(" " + range.CreateString());
             }
@@ -66,7 +68,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         }
 
 
-        public static IntegerVectorType Create(DataTypeEnum dataType, bool signed,List<Range>? packedDimensions)
+        public static IntegerVectorType Create(DataTypeEnum dataType, bool signed,List<Arrays.PackedArray>? packedDimensions)
         {
             IntegerVectorType integerVectorType = new IntegerVectorType();
             integerVectorType.Type = dataType;
@@ -116,13 +118,19 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
             while (word.GetCharAt(0) == '[')
             {
-                Range range = Range.ParseCreate(word, nameSpace);
+                PackedArray? range = PackedArray.ParseCreate(word, nameSpace);
                 if (word.Eof || range == null)
                 {
                     word.AddError("illegal reg declaration");
                     return null;
                 }
-                integerVectorType.PackedDimensions.Add(range);
+
+                PackedArray? packedArray = range as Arrays.PackedArray;
+
+                if(packedArray != null)
+                {
+                    integerVectorType.PackedDimensions.Add(packedArray);
+                }
             }
             return integerVectorType;
         }

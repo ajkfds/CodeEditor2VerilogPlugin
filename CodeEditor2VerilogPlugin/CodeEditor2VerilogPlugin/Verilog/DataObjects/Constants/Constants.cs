@@ -1,5 +1,6 @@
 ﻿using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
+using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using System;
 using System.Collections.Generic;
@@ -81,14 +82,27 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
 
             /* ## SystemVerilog
              * 
-            local_parameter_declaration ::=
-                  "localparam" data_type_or_implicit list_of_param_assignments 
-                | "localparam" type list_of_type_assignments 
-            parameter_declaration ::= 
-                  "parameter" data_type_or_implicit list_of_param_assignments 
-                | "parameter" type list_of_type_assignments 
-            specparam_declaration ::= 
-                  "specparam" [ packed_dimension ] list_of_specparam_assignments ;
+            local_parameter_declaration ::=       "localparam" data_type_or_implicit list_of_param_assignments 
+                                                | "localparam" "type" list_of_type_assignments
+            
+            parameter_declaration ::=             "parameter" data_type_or_implicit list_of_param_assignments 
+                                                | "parameter" "type" list_of_type_assignments 
+
+
+            list_of_param_assignments ::=       param_assignment { , param_assignment }
+            param_assignment ::=                parameter_identifier { unpacked_dimension } [ = constant_param_expression ]
+
+            list_of_type_assignments ::=        type_assignment { , type_assignment }
+            type_assignment ::=                 type_identifier [ = data_type ]
+
+            specparam_declaration ::=             "specparam" [ packed_dimension ] list_of_specparam_assignments ;
+            specparam_assignment ::=              specparam_identifier = constant_mintypmax_expression
+                                                | pulse_control_specparam
+
+
+
+
+
              */
             ConstantTypeEnum constantType = ConstantTypeEnum.parameter;
             if (word.Text == "parameter")
@@ -138,7 +152,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                     }
                     if (word.GetCharAt(0) == '[')
                     {
-                        Range range = Range.ParseCreate(word, (NameSpace)module);
+                        DataObjects.Arrays.VariableArray? range = DataObjects.Arrays.VariableArray.ParseCreate(word, (NameSpace)module);
                     }
                     break;
             }
@@ -298,8 +312,8 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
-            IDataType dataType = DataObjects.DataTypes.DataType.ParseCreate(word, nameSpace, null);
-            Range range = null;
+            IDataType? dataType = DataObjects.DataTypes.DataType.ParseCreate(word, nameSpace, null);
+            PackedArray? range = null;
             bool signed = false;
 
             if (word.Text == "signed")
@@ -311,7 +325,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
 
             if (word.GetCharAt(0) == '[')
             {
-                range = Range.ParseCreate(word, nameSpace);
+                range = PackedArray.ParseCreate(word, nameSpace);
             }
 
             while (!word.Eof)

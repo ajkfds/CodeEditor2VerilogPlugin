@@ -1,4 +1,5 @@
-﻿using pluginVerilog.Verilog.DataObjects.Constants;
+﻿using pluginVerilog.Verilog.DataObjects.Arrays;
+using pluginVerilog.Verilog.DataObjects.Constants;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,7 +34,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         struct_union ::= "struct" | "union" [ "tagged" ]          
          */
 
-        public static Struct ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static Struct? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "struct" ) System.Diagnostics.Debugger.Break();
             word.Color(CodeDrawStyle.ColorType.Keyword);
@@ -112,13 +113,13 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
             word.MoveNext();
 
-            Range range = null;
+            PackedArray? range = null;
             if (word.Text == "[")
             {
-                range = Range.ParseCreate(word, nameSpace);
+                range = PackedArray.ParseCreate(word, nameSpace);
             }
 
-            Expressions.Expression exp = null;
+            Expressions.Expression? exp = null;
             if (word.Text == "=")
             {
                 word.MoveNext();    // =

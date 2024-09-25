@@ -254,6 +254,15 @@ namespace pluginVerilog.Verilog.Expressions
                     primaries.RemoveAt(0);
                     primaries.Add(primary);
                 }
+                else if (item is InsideOperator)
+                {
+                    if (primaries.Count < 1) return null;
+                    InsideOperator? op = item as InsideOperator;
+                    if (op == null) throw new Exception();
+                    Primary primary = op.Operate(primaries[0]);
+                    primaries.RemoveAt(0);
+                    primaries.Add(primary);
+                }
                 else if (item is IncDecOperator)
                 {
                     if (primaries.Count < 1) return null;
@@ -491,6 +500,12 @@ namespace pluginVerilog.Verilog.Expressions
                     }
                     Primaries.Add(TenaryOperator.Create());
                 } while (false);
+            }
+
+            if(word.Text == "inside")
+            {
+                InsideOperator? insideOperator = InsideOperator.ParseCreate(word, nameSpace);
+                if (insideOperator != null) Primaries.Add(insideOperator); 
             }
 
             BinaryOperator? binaryOperator = BinaryOperator.ParseCreate(word);

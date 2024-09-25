@@ -77,7 +77,7 @@ namespace pluginVerilog.Verilog.Expressions
                     }
                     else
                     {
-                        if(function.PortsList[i] != null && expression != null & function.PortsList[i].Range != null && function.PortsList[i].Range.BitWidth != expression.BitWidth)
+                        if(function.PortsList[i] != null && expression != null & function.PortsList[i].Range != null && function.PortsList[i].Range.Size != expression.BitWidth)
                         {
                             word.AddWarning("bitwidth mismatch");
                         }

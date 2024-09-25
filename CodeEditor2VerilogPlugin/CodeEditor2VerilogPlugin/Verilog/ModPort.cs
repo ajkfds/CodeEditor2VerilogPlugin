@@ -216,7 +216,7 @@ namespace pluginVerilog.Verilog
 
                         if(expression!=null && expression.BitWidth > 1)
                         {
-                            net.PackedDimensions.Add(Verilog.DataObjects.Range.CreateTempRange((int)expression.BitWidth - 1, 0));
+                            net.PackedDimensions.Add(new DataObjects.Arrays.PackedArray((int)expression.BitWidth - 1, 0));
                         }
                         DataObjects.Add(net.Name, net);
                     }
@@ -227,8 +227,8 @@ namespace pluginVerilog.Verilog
                         logic.Name = name;
                         if (expression != null && expression.BitWidth > 1)
                         {
-                            logic.PackedDimensions = new List<DataObjects.Range>();
-                            logic.PackedDimensions.Add(Verilog.DataObjects.Range.CreateTempRange((int)expression.BitWidth - 1, 0));
+                            logic.PackedDimensions = new List<DataObjects.Arrays.PackedArray>();
+                            logic.PackedDimensions.Add( new DataObjects.Arrays.PackedArray((int)expression.BitWidth - 1, 0));
                         }
 
                         DataObjects.Add(logic.Name, logic);

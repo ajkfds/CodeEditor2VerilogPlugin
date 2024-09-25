@@ -133,10 +133,10 @@ namespace pluginVerilog.Verilog
                             word.Color(CodeDrawStyle.ColorType.Keyword);
                             word.MoveNext();
                         }
-                        List<Range> packedDimensions = new List<Range>();
+                        List<DataObjects.Arrays.PackedArray> packedDimensions = new List<DataObjects.Arrays.PackedArray>();
                         while (word.Text == "[")
                         {
-                            Range range = Range.ParseCreate(word, nameSpace);
+                            DataObjects.Arrays.PackedArray? range = Verilog.DataObjects.Arrays.PackedArray.ParseCreate(word, nameSpace);
                             if (range != null) packedDimensions.Add(range);
                         }
                         DataType dataType = Verilog.DataObjects.DataTypes.IntegerVectorType.Create(DataTypeEnum.Logic, signed, packedDimensions);
@@ -357,10 +357,10 @@ namespace pluginVerilog.Verilog
                             word.Color(CodeDrawStyle.ColorType.Keyword);
                             word.MoveNext();
                         }
-                        List<Range> packedDimensions = new List<Range>();
+                        List<DataObjects.Arrays.PackedArray> packedDimensions = new List<DataObjects.Arrays.PackedArray>();
                         while (word.Text == "[")
                         {
-                            Range range = Range.ParseCreate(word, nameSpace);
+                            DataObjects.Arrays.PackedArray? range = Verilog.DataObjects.Arrays.PackedArray.ParseCreate(word, nameSpace);
                             if (range != null) packedDimensions.Add(range);
                         }
                         DataType dataType = Verilog.DataObjects.DataTypes.IntegerVectorType.Create(DataTypeEnum.Logic, signed, packedDimensions);
@@ -371,7 +371,7 @@ namespace pluginVerilog.Verilog
                     break;
                 default:
                     {
-                        IDataType dataType = DataType.ParseCreate(word, nameSpace, null);
+                        IDataType? dataType = DataType.ParseCreate(word, nameSpace, null);
                         if (dataType != null)
                         {
                             retVal = Verilog.DataObjects.Variables.Variable.Create(dataType);

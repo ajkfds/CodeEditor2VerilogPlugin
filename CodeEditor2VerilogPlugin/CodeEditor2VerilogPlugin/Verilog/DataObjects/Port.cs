@@ -16,28 +16,30 @@ namespace pluginVerilog.Verilog.DataObjects
     public class Port : Item, CommentAnnotated
     {
         public DirectionEnum Direction = DirectionEnum.Undefined;
-        public Range Range
+        public DataObjects.Arrays.PackedArray? Range
         {
             get
             {
                 if (DataObject == null) return null;
-                if(DataObject is Net)
+                Net? net = DataObject as Net;
+                if(net != null)
                 {
-                    return (DataObject as Net).Range;
+                    return net.Range;
                 }
-                else
+
+                Variables.Variable? variable = DataObject as Variables.Variable;
+                if(variable != null)
                 {
-                    if( (DataObject as Variables.Variable) is Variables.IntegerVectorValueVariable)
+                    Variables.IntegerVectorValueVariable? integerVectorValueVariable = DataObject as Variables.IntegerVectorValueVariable;
+                    if(integerVectorValueVariable != null)
                     {
-                        Variables.IntegerVectorValueVariable vector = DataObject as Variables.IntegerVectorValueVariable;
-                        if (vector.PackedDimensions.Count < 1) return null;
-                        return vector.PackedDimensions[0];
+                        if (integerVectorValueVariable.PackedDimensions.Count < 1) return null;
+                        return integerVectorValueVariable.PackedDimensions[0];
                     }
-                    else
-                    {
-                        return null;
-                    }
+
                 }
+
+                return null;
             }
         }
 
@@ -454,12 +456,12 @@ ansi_port_declaration ::=
             //}
 
             // parse packed dimensions for net without explicit datatype
-            List<Range> packedDimensions = new List<Range>();
+            List<DataObjects.Arrays.PackedArray> packedDimensions = new List<DataObjects.Arrays.PackedArray>();
             if(dataType == null)
             {
                 while (word.Text=="[")
                 {
-                    Range range = Range.ParseCreate(word, nameSpace);
+                    DataObjects.Arrays.PackedArray? range = DataObjects.Arrays.PackedArray.ParseCreate(word, nameSpace);
                     if (range == null) break;
                     packedDimensions.Add(range);
                 }
@@ -504,7 +506,7 @@ ansi_port_declaration ::=
             // { dimension } 
             while (!word.Eof && word.Text == "[")
             {
-                Range dimension = Range.ParseCreate(word, nameSpace);
+                Verilog.DataObjects.Arrays.VariableArray? dimension = Verilog.DataObjects.Arrays.UnPackedArray.ParseCreate(word, nameSpace);
                 if(dimension != null)
                 {
                     port.DataObject.Dimensions.Add(dimension);
@@ -778,8 +780,8 @@ ansi_port_declaration ::=
                     vectorType.Type = DataTypeEnum.Logic;
                     if(word.Text == "[")
                     {
-                    Range range = Range.ParseCreate(word, nameSpace);
-                    vectorType.PackedDimensions.Add(range);
+                    DataObjects.Arrays.PackedArray? range = DataObjects.Arrays.PackedArray.ParseCreate(word, nameSpace);
+                    if (range != null) vectorType.PackedDimensions.Add(range);
 
                     }
 
@@ -924,8 +926,11 @@ ansi_port_declaration ::=
                     vectorType.Type = DataTypeEnum.Logic;
                     if (word.Text == "[")
                     {
-                        Range range = Range.ParseCreate(word, nameSpace);
-                        vectorType.PackedDimensions.Add(range);
+                        DataObjects.Arrays.PackedArray? range = DataObjects.Arrays.PackedArray.ParseCreate(word, nameSpace);
+                        if (range != null)
+                        {
+                            vectorType.PackedDimensions.Add(range);
+                        }
                     }
                     dataType = vectorType;
                 }

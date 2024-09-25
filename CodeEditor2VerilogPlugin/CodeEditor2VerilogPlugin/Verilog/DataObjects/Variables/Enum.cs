@@ -39,12 +39,12 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected Enum() { }
 
-        public List<Range> PackedDimensions { get; set; } = new List<Range>();
+        public List<DataObjects.Arrays.PackedArray> PackedDimensions { get; set; } = new List<DataObjects.Arrays.PackedArray>();
 
         public DataType BaseType { get; protected set; } = null;
         public List<DataTypes.Enum.Item> Items = new List<DataTypes.Enum.Item>();
 
-        public Range Range {
+        public DataObjects.Arrays.PackedArray? Range {
             get
             {
                 if (PackedDimensions.Count < 1) return null;

@@ -12,8 +12,8 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
 
         public NetTypeEnum NetType = NetTypeEnum.Wire;
 
-        public List<DataObjects.Range> PackedDimensions { get; set; } = new List<DataObjects.Range>();
-        public DataObjects.Range Range
+        public List<DataObjects.Arrays.PackedArray> PackedDimensions { get; set; } = new List<DataObjects.Arrays.PackedArray>();
+        public DataObjects.Arrays.PackedArray Range
         {
             get
             {
@@ -104,7 +104,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
 
             label.AppendText(Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Net));
 
-            foreach (DataObjects.Range dimension in Dimensions)
+            foreach (DataObjects.Arrays.VariableArray dimension in Dimensions)
             {
                 label.AppendText(" ");
                 label.AppendLabel(dimension.GetLabel());
@@ -292,10 +292,10 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             }
 
             // [range]
-            DataObjects.Range range = null;
+            DataObjects.Arrays.PackedArray? range = null;
             if (word.GetCharAt(0) == '[')
             {
-                range = DataObjects.Range.ParseCreate(word, nameSpace);
+                range = DataObjects.Arrays.PackedArray.ParseCreate(word, nameSpace);
                 if (word.Eof || range == null)
                 {
                     word.AddError("illegal net declaration");
@@ -376,10 +376,10 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                 {
                     while (word.Text == "[")
                     {
-                        DataObjects.Range dimension = DataObjects.Range.ParseCreate(word, nameSpace);
-                        if (word.Active && word.Prototype)
+                        DataObjects.Arrays.PackedArray? dimension = DataObjects.Arrays.PackedArray.ParseCreate(word, nameSpace);
+                        if (word.Active && word.Prototype && dimension != null)
                         {
-                            net.Dimensions.Add(dimension);
+                            net.PackedDimensions.Add(dimension);
                         }
                     }
                 }

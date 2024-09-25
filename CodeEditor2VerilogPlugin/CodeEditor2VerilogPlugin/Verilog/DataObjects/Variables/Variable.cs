@@ -8,6 +8,8 @@ using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.DataObjects;
 using System.Data;
 using pluginVerilog.Verilog.Statements;
+using System.Linq.Expressions;
+using System.ComponentModel.DataAnnotations;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
@@ -120,17 +122,35 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public static bool ParseDeclaration(WordScanner word, NameSpace nameSpace)
         {
-            // data_declaration::=    [ "const" ] ["var"] [lifetime] data_type_or_implicit list_of_variable_decl_assignments;
-            //                      | type_declaration
-            //                      | package_import_declaration11
-            //                      | net_type_declaration
-            // lifetime ::= static | automatic 
+        // data_declaration::=    [ "const" ] ["var"] [lifetime] data_type_or_implicit list_of_variable_decl_assignments;
+        //                      | type_declaration
+        //                      | package_import_declaration11
+        //                      | net_type_declaration
+        // lifetime ::= static | automatic 
 
-            // list_of_variable_decl_assignments ::= variable_decl_assignment { , variable_decl_assignment } 
+        // list_of_variable_decl_assignments ::= variable_decl_assignment { , variable_decl_assignment } 
 
-            // variable_decl_assignment     ::=   variable_identifier                                   { variable_dimension }  [ = expression]
-            //                                  | dynamic_array_variable_identifier unsized_dimension   { variable_dimension }  [ = dynamic_array_new]
-            //                                  | class_variable_identifier                                                     [ = class_new]
+        // variable_decl_assignment     ::=   variable_identifier                                   { variable_dimension }  [ = expression]
+        //                                  | dynamic_array_variable_identifier unsized_dimension   { variable_dimension }  [ = dynamic_array_new]
+        //                                  | class_variable_identifier                                                     [ = class_new]
+
+        // variable_dimension::=
+        //        unsized_dimension
+        //      | unpacked_dimension
+        //      | associative_dimension
+        //      | queue_dimension
+
+        // unsized_dimension::= "[" "]"
+
+        // associative_dimension ::=
+        //        "[" data_type "]"
+        //      | "[" "*" "]"
+
+        // unpacked_dimension ::=
+        //        "[" constant_range "]"
+        //      | "[" constant_expression "]"
+
+        // queue_dimension::= "[" "$" [ ":" constant_expression] "]"
 
             bool pointerMoved= false;
 
@@ -155,7 +175,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 pointerMoved = true;
             }
 
-            IDataType dataType = DataObjects.DataTypes.DataType.ParseCreate(word, nameSpace, null);
+            IDataType? dataType = DataObjects.DataTypes.DataType.ParseCreate(word, nameSpace, null);
             if (dataType == null) return pointerMoved;
 
             List<Variable> vars = new List<Variable>();
@@ -188,8 +208,8 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 // { variable_dimension }
                 while(word.Text == "[" && !word.Eof)
                 {
-                    Range range = Range.ParseCreate(word, nameSpace);
-                    variable.Dimensions.Add(range);
+                    DataObjects.Arrays.VariableArray? range = DataObjects.Arrays.VariableArray.ParseCreate(word, nameSpace);
+                    if(range != null )variable.Dimensions.Add(range);
                 }
 
 

@@ -45,7 +45,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
             Primary.AppendString(stringBuilder);
         }
 
-        public static UnaryOperator ParseCreate(WordScanner word)
+        public static UnaryOperator? ParseCreate(WordScanner word)
         {
             switch (word.Length)
             {
@@ -81,7 +81,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
         }
 
         public delegate void OperatedAction(UnaryOperator unaryOperator);
-        public static OperatedAction Operated;
+        public static OperatedAction? Operated;
 
         public UnaryOperator Operate(Primary primary)
         {
@@ -109,7 +109,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
         {
             switch (text)
             {
-                // alithmetic operators
+                // arithmetic operators
                 case "+":
                     return value;
                 case "-":
@@ -138,7 +138,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
         {
             switch (text)
             {
-                // alithmetic operators
+                // arithmetic operators
                 case "+":
                 case "-":
                     return bitWidth + 1;

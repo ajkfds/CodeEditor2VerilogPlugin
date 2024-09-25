@@ -10,10 +10,10 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected Chandle() { }
 
-        public List<Range> PackedDimensions { get; set; } = new List<Range>();
+        public List<DataObjects.Arrays.PackedArray> PackedDimensions { get; set; } = new List<DataObjects.Arrays.PackedArray>();
 
 
-        public Range Range
+        public DataObjects.Arrays.PackedArray? Range
         {
             get
             {

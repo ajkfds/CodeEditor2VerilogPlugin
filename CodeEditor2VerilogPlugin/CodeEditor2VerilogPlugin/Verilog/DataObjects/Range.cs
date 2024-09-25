@@ -6,23 +6,53 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects
 {
-    public class Range
+/*    public class xRange
     {
-        protected Range() { }
+        protected xRange() { }
 
         // ## SystemVerilog 2017
-        // unpacked_dimension       ::= [constant_range] | [constant_expression]
         // packed_dimension         ::= [constant_range] | unsized_dimension
+
+
+        // unpacked_dimension       ::= [constant_range] | [constant_expression]
+
         // associative_dimension    ::= [data_type] | [ * ]
         // variable_dimension       ::= unsized_dimension| unpacked_dimension | associative_dimension | queue_dimension
         // queue_dimension          ::= [ $ [ : constant_expression] ]
         // unsized_dimension        ::= [ ]
-        // onstant_range ::= constant_expression : constant_expression 
+        // constant_range ::= constant_expression : constant_expression
+        // 
+*/
+        /*
+        
+        
+        variable_dimension  : unsized_dimension     : "[]"
+                            : unpacked_dimension    : "[" constant_range "]"
+                                                    : "[" constant_expression "]"
+                            : associative_dimension : "[" data_type "]"
+                                                    : "[" "*" "]"
+                            : queue_dimension       : "[" "$" [ : constant_expression ] "]" 
+        
 
+        constant_range_expression   : constant_expression
+        
+        constant_part_select_range  : constant_range
+                                    : constant_indexed_range
+        
+        constant_range              : constant_expression : constant_expression
+
+        constant_indexed_range      : constant_expression +: constant_expression
+                                    : constant_expression -: constant_expression
+
+         */
+        /*
         public Expressions.Expression MsbBitExpression { get; protected set; }
         public Expressions.Expression LsbBitExpression { get; protected set; }
         public int? BitWidth { get; protected set; }
         public bool Constant { get; protected set; }
+
+        public bool Queue { get; protected set; }
+        public Expressions.Expression QueueMaxSize { get; protected set; }
 
         public string CreateString()
         {
@@ -43,8 +73,6 @@ namespace pluginVerilog.Verilog.DataObjects
             label.AppendLabel(LsbBitExpression.GetLabel());
             label.AppendText("]");
         }
-
-
         public AjkAvaloniaLibs.Contorls.ColorLabel GetLabel()
         {
             AjkAvaloniaLibs.Contorls.ColorLabel label = new AjkAvaloniaLibs.Contorls.ColorLabel();
@@ -60,82 +88,89 @@ namespace pluginVerilog.Verilog.DataObjects
         constant_primary | unary_operator { attribute_instance } constant_primary | constant_expression binary_operator { attribute_instance } constant_expression | constant_expression ? { attribute_instance } constant_expression     constant_expression | string 
          */
 
-        public static Range CreateTempRange(int msbBit,int lsbBit)
-        {
-            Range range = new Range();
-            range.MsbBitExpression = Expressions.Expression.CreateTempExpression(msbBit.ToString());
-            range.LsbBitExpression = Expressions.Expression.CreateTempExpression(lsbBit.ToString());
-            range.BitWidth = msbBit - lsbBit + 1;
-            return range;
-        }
-        public static Range ParseCreate(WordScanner word, NameSpace nameSpace)
-        {
-            if (word.GetCharAt(0) != '[') System.Diagnostics.Debugger.Break();
-            word.MoveNext(); // [
+        //public static Range CreateTempRange(int msbBit,int lsbBit)
+        //{
+        //    //Range range = new Range();
+        //    //range.MsbBitExpression = Expressions.Expression.CreateTempExpression(msbBit.ToString());
+        //    //range.LsbBitExpression = Expressions.Expression.CreateTempExpression(lsbBit.ToString());
+        //    //range.BitWidth = msbBit - lsbBit + 1;
+        //    //return range;
+        //}
+        //public static Range? ParseCreate(WordScanner word, NameSpace nameSpace)
+        //{
+        //    if (word.Text != "[") throw new Exception();
+        //    word.MoveNext(); // [
 
-            Expressions.Expression msbExpression = Expressions.Expression.ParseCreate(word, nameSpace);
-            if (word.Eof || msbExpression == null)
-            {
-                word.AddError("illegal range");
-                return null;
-            }
-            if (word.GetCharAt(0) == ']')
-            {
-                word.MoveNext();
-                Range range = new Range();
-                range.MsbBitExpression = msbExpression;
-                range.LsbBitExpression = msbExpression;
-                range.BitWidth = 1;
-                range.Constant = msbExpression.Constant;
-                return range;
-            }
+        //    if(word.Text == "$")
+        //    {
+        //        return parseQueue(word, nameSpace);
+        //    }
 
-            if (word.GetCharAt(0) != ':' || word.Length != 1)
-            {
-                word.AddError("illegal range");
-                return null;
-            }
-            word.MoveNext(); // :
-            if (word.Eof)
-            {
-                word.AddError("illegal range");
-                return null;
-            }
-            Expressions.Expression lsbExpression = Expressions.Expression.ParseCreate(word, nameSpace);
-            if (word.Eof || lsbExpression == null)
-            {
-                word.AddError("illegal range");
-                return null;
-            }
-            if (word.GetCharAt(0) != ']')
-            {
-                word.AddError("illegal range");
-                return null;
-            }
-            word.MoveNext(); // [
-            {
-                Range range = new Range();
-                range.MsbBitExpression = msbExpression;
-                range.LsbBitExpression = lsbExpression;
+        //    Expressions.Expression? msbExpression = Expressions.Expression.ParseCreate(word, nameSpace);
+        //    if (word.Eof || msbExpression == null)
+        //    {
+        //        word.AddError("illegal range");
+        //        return null;
+        //    }
+        //    if (word.GetCharAt(0) == ']')
+        //    {
+        //        word.MoveNext();
+        //        Range range = new Range();
+        //        range.MsbBitExpression = msbExpression;
+        //        range.LsbBitExpression = msbExpression;
+        //        range.BitWidth = 1;
+        //        range.Constant = msbExpression.Constant;
+        //        return range;
+        //    }
 
-                if (msbExpression.Value != null && lsbExpression.Value != null)
-                {
-                    range.BitWidth = (int)msbExpression.Value - (int)lsbExpression.Value + 1;
-                }
+        //    if (word.GetCharAt(0) != ':' || word.Length != 1)
+        //    {
+        //        word.AddError("illegal range");
+        //        return null;
+        //    }
+        //    word.MoveNext(); // :
+        //    if (word.Eof)
+        //    {
+        //        word.AddError("illegal range");
+        //        return null;
+        //    }
+        //    Expressions.Expression? lsbExpression = Expressions.Expression.ParseCreate(word, nameSpace);
+        //    if (word.Eof || lsbExpression == null)
+        //    {
+        //        word.AddError("illegal range");
+        //        return null;
+        //    }
+        //    if (word.GetCharAt(0) != ']')
+        //    {
+        //        word.AddError("illegal range");
+        //        return null;
+        //    }
+        //    word.MoveNext(); // [
+        //    {
+        //        Range range = new Range();
+        //        range.MsbBitExpression = msbExpression;
+        //        range.LsbBitExpression = lsbExpression;
 
-
-                if (msbExpression.Constant && lsbExpression.Constant)
-                {
-                    range.Constant = true;
-                }
-                else
-                {
-                    range.Constant = false;
-                }
+        //        if (msbExpression.Value != null && lsbExpression.Value != null)
+        //        {
+        //            range.BitWidth = (int)msbExpression.Value - (int)lsbExpression.Value + 1;
+        //        }
 
 
-                return range;
-            }
-        }
-    }
+        //        if (msbExpression.Constant && lsbExpression.Constant)
+        //        {
+        //            range.Constant = true;
+        //        }
+        //        else
+        //        {
+        //            range.Constant = false;
+        //        }
+
+
+        //        return range;
+        //    }
+        //}
+
+
+//    }
 }

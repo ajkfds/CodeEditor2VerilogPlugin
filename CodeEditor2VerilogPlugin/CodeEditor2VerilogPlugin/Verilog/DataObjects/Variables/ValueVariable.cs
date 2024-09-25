@@ -16,7 +16,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             AppendTypeLabel(label);
             label.AppendText(Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Register));
 
-            foreach (Range dimension in Dimensions)
+            foreach (Arrays.VariableArray dimension in Dimensions)
             {
                 if (dimension == null) continue;
                 label.AppendText(" ");

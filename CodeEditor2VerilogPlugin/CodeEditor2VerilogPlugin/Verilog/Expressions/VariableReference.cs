@@ -238,12 +238,12 @@ namespace pluginVerilog.Verilog.Expressions
                 {
                     var original = variable as DataObjects.Variables.IntegerVectorValueVariable;
                     if (original == null) throw new Exception();
-                    if (original.Range != null) val.BitWidth = original.Range.BitWidth;
+                    if (original.Range != null) val.BitWidth = original.Range.Size;
                     else val.BitWidth = 1;
                 }
                 else if (variable is Net)
                 {
-                    if (((Net)variable).Range != null) val.BitWidth = ((Net)variable).Range.BitWidth;
+                    if (((Net)variable).Range != null) val.BitWidth = ((Net)variable).Range.Size;
                     else val.BitWidth = 1;
                 }
                 else if (variable is DataObjects.Variables.Genvar)

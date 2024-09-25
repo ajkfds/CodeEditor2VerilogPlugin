@@ -39,6 +39,30 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     return null;
             }
         }
+
+        public virtual int? BitWidth
+        {
+            get
+            {
+                switch (Type)
+                {
+                    case DataTypeEnum.Byte:
+                        return 8;
+                    case DataTypeEnum.Shortint:
+                        return 16;
+                    case DataTypeEnum.Int:
+                        return 32;
+                    case DataTypeEnum.Longint:
+                        return 64;
+                    case DataTypeEnum.Integer:
+                        return 32;
+                    case DataTypeEnum.Time:
+                        return 64;
+                }
+                return null;
+            }
+        }
+
         public override string CreateString()
         {
             StringBuilder sb = new StringBuilder();

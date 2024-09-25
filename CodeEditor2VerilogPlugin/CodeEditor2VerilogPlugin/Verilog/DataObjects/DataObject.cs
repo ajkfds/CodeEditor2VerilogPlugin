@@ -43,7 +43,7 @@ namespace pluginVerilog.Verilog.DataObjects
         public string Comment { set; get; } = "";
         public WordReference DefinedReference { set; get; } = null;
         public DataTypeEnum DataType = DataTypeEnum.Reg;
-        public List<Range> Dimensions { get; set; } = new List<Range>();
+        public List<Arrays.VariableArray> Dimensions { get; set; } = new List<Arrays.VariableArray>();
 
         public List<WordReference> UsedReferences { set; get; } = new List<WordReference>();
         public List<WordReference> AssignedReferences { set; get; } = new List<WordReference>();

@@ -12,7 +12,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     public class IntegerVectorValueVariable : ValueVariable
     {
         //integer_vector_type::= bit | logic | reg
-        public Range Range
+        public DataObjects.Arrays.PackedArray Range
         {
             get
             {
@@ -23,7 +23,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         }
         public bool Signed { get; set; }
 
-        public List<Range> PackedDimensions = new List<Range>();
+        public List<DataObjects.Arrays.PackedArray> PackedDimensions = new List<DataObjects.Arrays.PackedArray>();
 
         public new static IntegerVectorValueVariable Create(IDataType dataType)
         {
@@ -66,7 +66,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 label.AppendText("signed ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
             }
 
-            foreach (Range dimension in PackedDimensions)
+            foreach (DataObjects.Arrays.PackedArray dimension in PackedDimensions)
             {
                 label.AppendLabel(dimension.GetLabel());
                 label.AppendText(" ");

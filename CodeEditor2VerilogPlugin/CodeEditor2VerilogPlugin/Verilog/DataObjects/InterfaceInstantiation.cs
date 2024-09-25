@@ -359,9 +359,9 @@ namespace pluginVerilog.Verilog.DataObjects
                                         }
 
                                     }
-                                    else if (instancedInterface.Ports[pinName].Range.BitWidth != expression.BitWidth && expression.Reference != null)
+                                    else if (instancedInterface.Ports[pinName].Range.Size != expression.BitWidth && expression.Reference != null)
                                     {
-                                        expression.Reference.AddWarning("bitwidth mismatch " + instancedInterface.Ports[pinName].Range.BitWidth + " vs " + expression.BitWidth);
+                                        expression.Reference.AddWarning("bitwidth mismatch " + instancedInterface.Ports[pinName].Range.Size + " vs " + expression.BitWidth);
                                     }
                                 }
                             }
@@ -383,9 +383,9 @@ namespace pluginVerilog.Verilog.DataObjects
                                         }
 
                                     }
-                                    else if (instancedInterface.Ports[pinName].Range.BitWidth != expression.BitWidth && expression.Reference != null)
+                                    else if (instancedInterface.Ports[pinName].Range.Size != expression.BitWidth && expression.Reference != null)
                                     {
-                                        expression.Reference.AddWarning("bitwidth mismatch " + instancedInterface.Ports[pinName].Range.BitWidth + " vs " + expression.BitWidth);
+                                        expression.Reference.AddWarning("bitwidth mismatch " + instancedInterface.Ports[pinName].Range.Size + " vs " + expression.BitWidth);
                                     }
                                 }
                             }
