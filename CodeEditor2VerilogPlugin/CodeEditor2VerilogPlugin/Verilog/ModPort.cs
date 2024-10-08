@@ -1,6 +1,9 @@
 ﻿using DynamicData.Binding;
 using pluginVerilog.Verilog.BuildingBlocks;
+using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.DataObjects.Nets;
+using pluginVerilog.Verilog.DataObjects.Variables;
+using pluginVerilog.Verilog.Expressions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -206,6 +209,9 @@ namespace pluginVerilog.Verilog
 
                 Port port = new Port { Direction = direction, Name = name };
                 port.Expression = expression;
+                VariableReference? vRef = expression as VariableReference;
+                IntegerVectorValueVariable? intVectorVar = vRef?.Variable as IntegerVectorValueVariable;
+
 
                 if (!DataObjects.ContainsKey(port.Name))
                 {
@@ -214,9 +220,12 @@ namespace pluginVerilog.Verilog
                         Verilog.DataObjects.Nets.Net net = Verilog.DataObjects.Nets.Net.Create(Verilog.DataObjects.Nets.Net.NetTypeEnum.Wire, null);
                         net.Name = name;
 
-                        if(expression!=null && expression.BitWidth > 1)
+                        if(intVectorVar != null)
                         {
-                            net.PackedDimensions.Add(new DataObjects.Arrays.PackedArray((int)expression.BitWidth - 1, 0));
+                            foreach(PackedArray pa in intVectorVar.PackedDimensions)
+                            {
+                                net.PackedDimensions.Add(pa.Clone());
+                            }
                         }
                         DataObjects.Add(net.Name, net);
                     }
@@ -225,10 +234,13 @@ namespace pluginVerilog.Verilog
                         DataObjects.DataTypes.IntegerVectorType dType = Verilog.DataObjects.DataTypes.IntegerVectorType.Create(Verilog.DataObjects.DataTypes.DataTypeEnum.Logic, false, null);
                         Verilog.DataObjects.Variables.Logic logic = Verilog.DataObjects.Variables.Logic.Create(dType);
                         logic.Name = name;
-                        if (expression != null && expression.BitWidth > 1)
+
+                        if (intVectorVar != null)
                         {
-                            logic.PackedDimensions = new List<DataObjects.Arrays.PackedArray>();
-                            logic.PackedDimensions.Add( new DataObjects.Arrays.PackedArray((int)expression.BitWidth - 1, 0));
+                            foreach (PackedArray pa in intVectorVar.PackedDimensions)
+                            {
+                                logic.PackedDimensions.Add(pa.Clone());
+                            }
                         }
 
                         DataObjects.Add(logic.Name, logic);

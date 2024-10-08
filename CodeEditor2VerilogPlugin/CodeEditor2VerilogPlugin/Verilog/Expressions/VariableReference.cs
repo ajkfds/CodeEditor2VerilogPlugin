@@ -15,10 +15,12 @@ namespace pluginVerilog.Verilog.Expressions
         public RangeExpression? RangeExpression { get; protected set; }
         public List<Expression> Dimensions = new List<Expression>();
         public DataObjects.DataObject? Variable = null;
-
+        public string NameSpaceText = "";
 
         public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
         {
+            label.AppendText(NameSpaceText, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Variable));
+
             if (Variable is DataObjects.Variables.Reg)
             {
                 label.AppendText(VariableName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Register));
@@ -52,6 +54,7 @@ namespace pluginVerilog.Verilog.Expressions
         public override string CreateString()
         {
             StringBuilder sb = new StringBuilder();
+            sb.Append(NameSpaceText);
             sb.Append(VariableName);
             if (RangeExpression != null)
             {

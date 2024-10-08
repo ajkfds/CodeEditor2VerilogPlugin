@@ -28,21 +28,27 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
             }
             MaxIndex = (int)max;
             MinIndex = (int)min;
-            Size = (int)max - (int)min;
+            Size = (int)max - (int)min + 1;
         }
 
-        public PackedArray(int value0,int value1) :this(
-            Expressions.Expression.CreateTempExpression(value0.ToString()),
-            Expressions.Expression.CreateTempExpression(value1.ToString())
-            )
+        public PackedArray Clone()
         {
+            PackedArray pArray = new(SizeExpression0, SizeExpression1);
+            return pArray;
         }
-        public PackedArray(string value0, string value1) : this(
-            Expressions.Expression.CreateTempExpression(value0),
-            Expressions.Expression.CreateTempExpression(value1)
-            )
-        {
-        }
+
+        //public PackedArray(int value0,int value1) :this(
+        //    Expressions.Expression.CreateTempExpression(value0.ToString()),
+        //    Expressions.Expression.CreateTempExpression(value1.ToString())
+        //    )
+        //{
+        //}
+        //public PackedArray(string value0, string value1) : this(
+        //    Expressions.Expression.CreateTempExpression(value0),
+        //    Expressions.Expression.CreateTempExpression(value1)
+        //    )
+        //{
+        //}
         public int? MaxIndex = null;
         public int? MinIndex = null;
         public Expressions.Expression? SizeExpression0 { get; protected set; }

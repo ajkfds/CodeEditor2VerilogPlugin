@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
+using CodeEditor2.CodeEditor;
 using pluginVerilog.Verilog.Expressions.Operators;
 
 namespace pluginVerilog.Verilog.Expressions
@@ -166,6 +168,19 @@ namespace pluginVerilog.Verilog.Expressions
             return exp;
         }
 
+        public static Expression? Create(string text, ParsedDocument parsedDocument, bool systemVerilog,NameSpace nameSpace)
+        {
+            WordScanner wordScanner = new WordScanner(parsedDocument.CodeDocument, parsedDocument, systemVerilog);
+            return ParseCreate(wordScanner, nameSpace);
+        }
+
+        public static Expression CreateTempExpression(string text)
+        {
+            Expression expression = new Expression();
+            expression.Primary = new TempPrimary(text);
+            return expression;
+        }
+
         public static Expression? ParseCreateInBracket(WordScanner word, NameSpace nameSpace)
         {
             Expression? exp = parseCreate(word, nameSpace,true);
@@ -305,12 +320,6 @@ namespace pluginVerilog.Verilog.Expressions
             //            return expression;
         }
 
-        public static Expression CreateTempExpression(string text)
-        {
-            Expression expression = new Expression();
-            expression.Primary = new TempPrimary(text);
-            return expression;
-        }
 
 
         // parse lvalue expression or task reference

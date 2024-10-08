@@ -219,7 +219,10 @@ namespace pluginVerilog.Verilog.Expressions
             {
                 word.MoveNext();
                 DataObjects.Variables.Object? obj = variable.Variable as DataObjects.Variables.Object;
-                if (obj != null) return Primary.parseCreate(word, obj.Class, lValue);
+                if (obj != null)
+                {
+                    return Primary.parseCreate(word, obj.Class, lValue);
+                }
                 else throw new Exception();
             }
 
@@ -240,12 +243,18 @@ namespace pluginVerilog.Verilog.Expressions
                         if (word.Text == ".")
                         {
                             word.MoveNext();
-                            Primary.parseCreate(word, modPort, lValue);
+                            Primary? primary = Primary.parseCreate(word, modPort, lValue);
+                            VariableReference? vRef = primary as VariableReference;
+                            if(vRef != null)
+                            {
+                                vRef.NameSpaceText = interface_.Name + "." + modPort.Name + ".";
+                            }
+                            return primary;
                         }
                     }
                     else
                     {
-                        Primary.parseCreate(word, interface_, lValue);
+                        return Primary.parseCreate(word, interface_, lValue);
                     }
                 }
             }
