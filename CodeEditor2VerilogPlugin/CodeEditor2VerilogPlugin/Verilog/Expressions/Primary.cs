@@ -215,6 +215,7 @@ namespace pluginVerilog.Verilog.Expressions
             var variable = VariableReference.ParseCreate(word, nameSpace, lValue);
             if (variable == null) return null;
 
+            // parse object member
             if (variable.Variable is DataObjects.Variables.Object && word.Text == ".")
             {
                 word.MoveNext();
@@ -226,6 +227,7 @@ namespace pluginVerilog.Verilog.Expressions
                 else throw new Exception();
             }
 
+            // parse interface
             if (variable.Variable is DataObjects.InterfaceInstantiation && word.Text == ".")
             {
                 word.MoveNext();
@@ -237,8 +239,9 @@ namespace pluginVerilog.Verilog.Expressions
                     if (interface_.ModPorts.ContainsKey(word.Text))
                     {
                         word.Color(CodeDrawStyle.ColorType.Keyword);
-                        interfaceInstantiation.ModPortName = word.Text;
-                        ModPort modPort = interface_.ModPorts[interfaceInstantiation.ModPortName];
+                        //                        interfaceInstantiation.ModPortName = word.Text;
+                        string modPortName = word.Text;
+                        ModPort modPort = interface_.ModPorts[modPortName];
                         word.MoveNext();
                         if (word.Text == ".")
                         {

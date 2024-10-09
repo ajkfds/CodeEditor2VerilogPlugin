@@ -166,6 +166,7 @@ namespace pluginVerilog.Verilog.Expressions
 
             word.MoveNext();
 
+            // parse dimensions
             while (!word.Eof && val.Dimensions.Count < variable.Dimensions.Count)
             {
                 if (word.GetCharAt(0) != '[')
@@ -184,6 +185,7 @@ namespace pluginVerilog.Verilog.Expressions
                 word.MoveNext();
             }
 
+            // parse ranges
             if (word.GetCharAt(0) == '[')
             {
                 word.MoveNext();

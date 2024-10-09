@@ -294,13 +294,18 @@ namespace pluginVerilog.Verilog
             }
 
             int count = ret.ItemCount;
-            foreach (IInstantiation instantiation in space.BuildingBlock.Instantiations.Values)
+
+            if(space != null)
             {
-                if (iref.IsSmallerThan(instantiation.BeginIndexReference)) continue;
-                if (iref.IsGreaterThan(instantiation.LastIndexReference)) continue;
-                instantiation.AppendLabel(iref,ret);
-                break;
+                foreach (IInstantiation instantiation in space.BuildingBlock.Instantiations.Values)
+                {
+                    if (iref.IsSmallerThan(instantiation.BeginIndexReference)) continue;
+                    if (iref.IsGreaterThan(instantiation.LastIndexReference)) continue;
+                    instantiation.AppendLabel(iref, ret);
+                    break;
+                }
             }
+
             if (ret.ItemCount != count) return ret;
 
             if (space.DataObjects.ContainsKey(text))
@@ -514,11 +519,9 @@ namespace pluginVerilog.Verilog
             return nameSpace;
         }
 
-        public List<AutocompleteItem> GetAutoCompleteItems(List<string> hierWords,int index,int line,CodeEditor.CodeDocument document,string cantidateWord)
+        public List<AutocompleteItem>? GetAutoCompleteItems(List<string> hierWords,int index,int line,CodeEditor.CodeDocument document,string candidateWord)
         {
-
-
-            List<AutocompleteItem> items = null;
+            List<AutocompleteItem>? items = null;
 
             if (Root == null || Root.BuldingBlocks == null)
             {
@@ -526,6 +529,7 @@ namespace pluginVerilog.Verilog
                 return items;
             }
 
+            // get reference of current position
             IndexReference iref = IndexReference.Create(this.IndexReference, index);
 
             // get current nameSpace
@@ -538,7 +542,8 @@ namespace pluginVerilog.Verilog
                 break;
             }
 
-            if (space == null) // external module/class/program
+            // external module/class/program
+            if (space == null)
             {
                 items = VerilogAutoCompleteItems.ToList();
                 int headIndex;
@@ -547,7 +552,8 @@ namespace pluginVerilog.Verilog
                 return items;
             }
 
-            if (hierWords.Count == 0 && cantidateWord.StartsWith("$"))
+            // system task & functions
+            if (hierWords.Count == 0 && candidateWord.StartsWith("$"))
             {
                 items = new List<AutocompleteItem>();
                 foreach (string key in ProjectProperty.SystemFunctions.Keys)

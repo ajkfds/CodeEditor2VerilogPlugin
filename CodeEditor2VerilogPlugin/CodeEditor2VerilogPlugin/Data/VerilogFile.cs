@@ -381,6 +381,7 @@ namespace pluginVerilog.Data
 
         public override PopupItem GetPopupItem(ulong version, int index)
         {
+            if (VerilogParsedDocument == null) return null;
             return VerilogCommon.AutoComplete.GetPopupItem(this, VerilogParsedDocument, version, index);
         }
 
@@ -388,9 +389,11 @@ namespace pluginVerilog.Data
         {
             return VerilogCommon.AutoComplete.GetToolItems(this, index);
         }
-        public override List<AutocompleteItem> GetAutoCompleteItems(int index, out string cantidateWord)
+        public override List<AutocompleteItem>? GetAutoCompleteItems(int index, out string candidateWord)
         {
-            return VerilogCommon.AutoComplete.GetAutoCompleteItems(this, VerilogParsedDocument, index, out cantidateWord);
+            candidateWord = "";
+            if (VerilogParsedDocument == null) return null;
+            return VerilogCommon.AutoComplete.GetAutoCompleteItems(this, VerilogParsedDocument, index, out candidateWord);
         }
 
     }
