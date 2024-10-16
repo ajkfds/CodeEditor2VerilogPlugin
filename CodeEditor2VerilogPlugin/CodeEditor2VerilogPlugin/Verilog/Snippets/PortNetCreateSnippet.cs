@@ -123,7 +123,7 @@ namespace pluginVerilog.Verilog.Snippets
             sb.Append(" (\r\n");
 
             first = true;
-            string sectionName = null;
+            string? sectionName = null;
             foreach (var port in instancedModule.Ports.Values)
             {
                 if (!first) sb.Append(",\r\n");
@@ -149,8 +149,8 @@ namespace pluginVerilog.Verilog.Snippets
                     string valueName = port.Name.ToLower();
                     sb.Append(valueName);
 
-                    BuildingBlock buildingBlock = moduleInstantiation.GetInstancedBuildingBlock();
-                    if(!buildingBlock.DataObjects.ContainsKey(valueName)){
+                    BuildingBlock? buildingBlock = moduleInstantiation.GetInstancedBuildingBlock();
+                    if(buildingBlock != null && !buildingBlock.DataObjects.ContainsKey(valueName)){
                         if(port.DataObject != null)
                         {
                             sbDefine.Append(port.DataObject.CreateDataTypeString() + "\t" + valueName);

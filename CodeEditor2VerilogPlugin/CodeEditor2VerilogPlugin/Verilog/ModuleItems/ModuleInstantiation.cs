@@ -827,7 +827,7 @@ namespace pluginVerilog.Verilog.ModuleItems
         {
         }
 
-        public BuildingBlock GetInstancedBuildingBlock()
+        public BuildingBlock? GetInstancedBuildingBlock()
         {
             BuildingBlock? instancedModule = ProjectProperty.GetBuildingBlock(SourceName);
 
@@ -840,12 +840,12 @@ namespace pluginVerilog.Verilog.ModuleItems
         }
 
 
-        public string CreateString()
+        public string? CreateString()
         {
             return CreateString("\t");
 
         }
-        public string CreateString(string indent)
+        public string? CreateString(string indent)
         {
             Module? instancedModule = ProjectProperty.GetBuildingBlock(SourceName) as Module;
             if (instancedModule == null) return null;
@@ -892,7 +892,7 @@ namespace pluginVerilog.Verilog.ModuleItems
             sb.Append(" (\r\n");
 
             first = true;
-            string sectionName = null;
+            string? sectionName = null;
             foreach (var port in instancedModule.Ports.Values)
             {
                 if (!first) sb.Append(",\r\n");

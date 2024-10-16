@@ -46,6 +46,8 @@ namespace pluginVerilog
             }
             // append navigate context menu items
 
+//            CodeEditor2.Controller.NavigatePanel.
+
 //            contextMenu.Items.Add()
 
 
@@ -79,6 +81,19 @@ namespace pluginVerilog
 
         public bool Initialize()
         {
+            {
+                MenuItem menuItem = CodeEditor2.Controller.Menu.Tool;
+                MenuItem newMenuItem = CodeEditor2.Global.CreateMenuItem(
+                    "Create Snapshot",
+                    "menuItem_CreateSnapShot",
+                    "CodeEditor2/Assets/Icons/play.svg",
+                    Avalonia.Media.Colors.Red
+                    );
+                menuItem.Items.Add(newMenuItem);
+                newMenuItem.Click += MenuItem_CreateSnapShot_Click;
+            }
+
+
             ContextMenu contextMenu = Controller.NavigatePanel.GetContextMenu();
             {
                 //MenuItem menuItem_RunSimulation = CodeEditor2.Global.CreateMenuItem("Run Simulation", "menuItem_RunSimulation","play",Avalonia.Media.Colors.Red);
@@ -91,6 +106,10 @@ namespace pluginVerilog
             NavigatePanel.NavigatePanelMenu.Register();
 
             return true;
+        }
+        private void MenuItem_CreateSnapShot_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            Global.CreateSnapShot();
         }
 
     }

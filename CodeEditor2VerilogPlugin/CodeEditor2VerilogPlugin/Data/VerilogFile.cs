@@ -15,6 +15,7 @@ using CodeEditor2.Data;
 using CodeEditor2.Tools;
 using pluginVerilog.CodeEditor;
 using pluginVerilog.Verilog.BuildingBlocks;
+using Splat;
 
 namespace pluginVerilog.Data
 {
@@ -91,7 +92,7 @@ namespace pluginVerilog.Data
         // accept new Parsed Document
         public override void AcceptParsedDocument(ParsedDocument newParsedDocument)
         {
-            ParsedDocument oldParsedDocument = ParsedDocument;
+            ParsedDocument? oldParsedDocument = ParsedDocument;
             if (oldParsedDocument != null) oldParsedDocument.Dispose();
 
             // copy include files
@@ -200,6 +201,27 @@ namespace pluginVerilog.Data
         }
 
         private Dictionary<string, System.WeakReference<ParsedDocument>> instancedParsedDocumentRefs = new Dictionary<string, WeakReference<ParsedDocument>>();
+
+        internal string DebugInfo()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("## " + Name+"\r\n");
+            if(Name == "MODULE3.v")
+            {
+                string a = "";
+            }
+            sb.Append(" path " + RelativePath + "\r\n");
+            foreach(var kvPair in instancedParsedDocumentRefs)
+            {
+                ParsedDocument pDoc;
+                if (!kvPair.Value.TryGetTarget(out pDoc)) continue;
+                Verilog.ParsedDocument? parsedDocument = pDoc as Verilog.ParsedDocument;
+                if (parsedDocument == null) continue;
+
+                sb.Append(" instance " + kvPair.Key + ":" + pDoc.ObjectID + " " +parsedDocument.ReparseRequested+" "+parsedDocument.Version+"\r\n");
+            }
+            return sb.ToString();
+        }
 
         public ParsedDocument? GetInstancedParsedDocument(string parameterId)
         {
@@ -389,7 +411,7 @@ namespace pluginVerilog.Data
         {
             return VerilogCommon.AutoComplete.GetToolItems(this, index);
         }
-        public override List<AutocompleteItem>? GetAutoCompleteItems(int index, out string candidateWord)
+        public override List<AutocompleteItem>? GetAutoCompleteItems(int index, out string? candidateWord)
         {
             candidateWord = "";
             if (VerilogParsedDocument == null) return null;

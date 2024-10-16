@@ -67,7 +67,7 @@ namespace pluginVerilog.Data.VerilogCommon
             return toolItems;
         }
 
-        public static List<AutocompleteItem> GetAutoCompleteItems(IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, int index, out string candidateWord)
+        public static List<AutocompleteItem>? GetAutoCompleteItems(IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, int index, out string? candidateWord)
         {
             candidateWord = null;
 
@@ -90,7 +90,7 @@ namespace pluginVerilog.Data.VerilogCommon
             }
             if (candidateWord == null) candidateWord = "";
 
-            List<AutocompleteItem> items = parsedDocument.GetAutoCompleteItems(words, lineStartIndex, line, (CodeEditor.CodeDocument)item.CodeDocument, candidateWord);
+            List<AutocompleteItem>? items = parsedDocument.GetAutoCompleteItems(words, lineStartIndex, line, (CodeEditor.CodeDocument)item.CodeDocument, candidateWord);
 
             return items;
         }

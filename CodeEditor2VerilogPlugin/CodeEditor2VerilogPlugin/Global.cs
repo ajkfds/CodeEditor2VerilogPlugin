@@ -1,6 +1,8 @@
 ﻿using Avalonia.Media;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,6 +28,34 @@ namespace pluginVerilog
         //    public static IconImage IcarusVerilog = new IconImage(Properties.Resources.icarusVerilog);
         //    public static IconImage NewBadge = new IconImage(Properties.Resources.newBadge);
         //    public static IconImage MedalBadge = new IconImage(Properties.Resources.medalBadge);
+        }
+
+        public static void CreateSnapShot()
+        {
+            using (StreamWriter sw = new StreamWriter("snapshot.log"))
+            {
+                List<WeakReference<CodeEditor2.Data.File>> disposeRefs = new List<WeakReference<CodeEditor2.Data.File>>();
+                foreach(WeakReference<CodeEditor2.Data.File> wRef in CodeEditor2.Data.File.FileWeakReferences)
+                {
+                    CodeEditor2.Data.File? file;
+                    if(!wRef.TryGetTarget(out file))
+                    {
+                        disposeRefs.Add(wRef);
+                    }
+                    else
+                    {
+                        Data.VerilogFile? vFile = file as Data.VerilogFile;
+                        if (vFile == null) continue;
+
+                        sw.Write(vFile.DebugInfo());
+                    }
+                }
+
+                foreach(var disposeRef in disposeRefs)
+                {
+                    CodeEditor2.Data.File.FileWeakReferences.Remove(disposeRef);
+                }
+            }
         }
     }
 }
