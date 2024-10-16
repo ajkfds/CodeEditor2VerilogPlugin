@@ -210,15 +210,26 @@ namespace pluginVerilog.Data
             {
                 string a = "";
             }
-            sb.Append(" path " + RelativePath + "\r\n");
-            foreach(var kvPair in instancedParsedDocumentRefs)
-            {
-                ParsedDocument pDoc;
-                if (!kvPair.Value.TryGetTarget(out pDoc)) continue;
-                Verilog.ParsedDocument? parsedDocument = pDoc as Verilog.ParsedDocument;
-                if (parsedDocument == null) continue;
 
-                sb.Append(" instance " + kvPair.Key + ":" + pDoc.ObjectID + " " +parsedDocument.ReparseRequested+" "+parsedDocument.Version+"\r\n");
+            Verilog.ParsedDocument? parsedDocument = VerilogParsedDocument;
+            sb.Append(" path " + ",ID:" + ObjectID + ",ReparseRequested:" + ReparseRequested);
+            if (parsedDocument != null)
+            {
+                sb.Append(",pd.ReparseRequested:" + parsedDocument.ReparseRequested + ",pd.Version" + parsedDocument.Version);
+            }
+            sb.Append("\r\n");
+            foreach (var kvPair in instancedParsedDocumentRefs)
+            {
+                ParsedDocument? pDoc;
+                if (!kvPair.Value.TryGetTarget(out pDoc)) continue;
+                Verilog.ParsedDocument? iParsedDocument = pDoc as Verilog.ParsedDocument;
+
+                sb.Append(" instance key:" + kvPair.Key + ",ID:" + pDoc.ObjectID);
+                if(iParsedDocument != null)
+                {
+                    sb.Append(",pd.ReparseRequested:" + iParsedDocument.ReparseRequested + ",pd.Version" + iParsedDocument.Version);
+                }
+                sb.Append("\r\n");
             }
             return sb.ToString();
         }
