@@ -12,159 +12,185 @@ namespace pluginVerilog.Data.VerilogCommon
 {
     public static class Updater
     {
-        public static void Update(IVerilogRelatedFile rootItem)
+        public static void Update(IVerilogRelatedFile targetItem)
         {
-            Project project = rootItem.Project;
-            string moduleName = null;
-            if (rootItem is VerilogModuleInstance)
+            // Update the Items member of this object according to the rootItem.ParsedDocument.
+
+            Project project = targetItem.Project;
+
+            string? moduleName = null;
+            VerilogModuleInstance? newVerilogModuleInstance = targetItem as VerilogModuleInstance;
+            moduleName = newVerilogModuleInstance?.ModuleName;
+
+
+            lock (targetItem.Items)
             {
-                moduleName = (rootItem as VerilogModuleInstance).ModuleName;
-            }
-
-
-
-            lock (rootItem.Items)
-            {
-                if (rootItem.VerilogParsedDocument == null)
+                if (targetItem.VerilogParsedDocument == null)
                 {
-                    // dispose all subnodes
-                    foreach (Item item in rootItem.Items.Values) item.Dispose();
-                    rootItem.Items.Clear();
+                    // dispose all sub items
+                    foreach (Item item in targetItem.Items.Values) item.Dispose();
+                    targetItem.Items.Clear();
                     return;
                 }
 
-                List<Item> targetItems = new List<Item>();
+                List<Item> keepItems = new List<Item>();
                 Dictionary<string, Item> newItems = new Dictionary<string, Item>();
 
-                // include files on the top of the files
-                Dictionary<string, VerilogHeaderInstance> prevIncludes = new Dictionary<string, VerilogHeaderInstance>();
-                foreach (Item item in rootItem.Items.Values)
+                // get new include files
+                Dictionary<string, VerilogHeaderInstance> oldIncludes = new Dictionary<string, VerilogHeaderInstance>();
+                foreach (Item item in targetItem.Items.Values)
                 {
-                    if (item is VerilogHeaderInstance)
+                    VerilogHeaderInstance? oldVerilogHeaderInstance = item as VerilogHeaderInstance;
+                    if (oldVerilogHeaderInstance == null) continue;
+                    oldIncludes.Add(oldVerilogHeaderInstance.ID, oldVerilogHeaderInstance);
+                }
+
+                // include file
+                foreach (VerilogHeaderInstance newVhInstance in targetItem.VerilogParsedDocument.IncludeFiles.Values)
+                {
+                    if (oldIncludes.ContainsKey(newVhInstance.ID)) // already exist
                     {
-                        VerilogHeaderInstance vfile = item as VerilogHeaderInstance;
-                        prevIncludes.Add(vfile.ID, vfile);
+                        oldIncludes[newVhInstance.ID].ReplaceBy(newVhInstance);
+                        keepItems.Add(oldIncludes[newVhInstance.ID]);
+                    }
+                    else
+                    {   // add new include item
+                        string keyName = newVhInstance.Name;
+                        { // If the names are duplicated, append a number to the end
+                            int i = 0;
+                            while (targetItem.Items.ContainsKey(keyName + "_" + i.ToString()) || newItems.ContainsKey(keyName + "_" + i.ToString()))
+                            {
+                                i++;
+                            }
+                            keyName = keyName + "_" + i.ToString();
+                        }
+                        newItems.Add(keyName, newVhInstance);
+                        keepItems.Add(newVhInstance);
+                        Item? parent = targetItem as Item;
+                        if (parent == null) throw new Exception();
+                        newVhInstance.Parent = parent;
                     }
                 }
 
-                if(rootItem.VerilogParsedDocument != null)
+                // module
+                if (targetItem.VerilogParsedDocument.Root != null)
                 {
-                    // include file
-                    foreach (VerilogHeaderInstance vhFile in rootItem.VerilogParsedDocument.IncludeFiles.Values)
+                    foreach (BuildingBlock module in targetItem.VerilogParsedDocument.Root.BuldingBlocks.Values)
                     {
-                        if (prevIncludes.ContainsKey(vhFile.ID))
+                        if (moduleName == null || moduleName == module.Name) // matched module
                         {
-                            prevIncludes[vhFile.ID].ReplaceBy(vhFile);
-                            targetItems.Add(prevIncludes[vhFile.ID]);
-                        }
-                        else
-                        {
-                            string keyName = vhFile.Name;
-                            {
-                                int i = 0;
-                                while (rootItem.Items.ContainsKey(keyName + "_" + i.ToString()) || newItems.ContainsKey(keyName + "_" + i.ToString()))
-                                {
-                                    i++;
-                                }
-                                keyName = keyName + "_" + i.ToString();
-                            }
-                            newItems.Add(keyName, vhFile);
-                            targetItems.Add(vhFile);
-                            vhFile.Parent = rootItem as Item;
-                        }
-                    }
-
-                    // module
-                    if (rootItem.VerilogParsedDocument.Root != null)
-                    {
-                        foreach (BuildingBlock module in rootItem.VerilogParsedDocument.Root.BuldingBlocks.Values)
-                        {
-                            if (moduleName == null || moduleName == module.Name) // matched module
-                            {
-                                UpdateModuleInstance(module, project, rootItem, targetItems, newItems); // targetItem.VerilogParsedDocument eliminated here
-                            }
+                            UpdateModuleInstance(module, project, targetItem, keepItems, newItems); // targetItem.VerilogParsedDocument eliminated here
                         }
                     }
                 }
 
-                { // remove unused items
+                { // Items not included in the acceptItems are considered unnecessary and will be deleted.
                     List<Item> removeItems = new List<Item>();
-                    foreach (CodeEditor2.Data.Item item in rootItem.Items.Values)
+                    foreach (CodeEditor2.Data.Item item in targetItem.Items.Values)
                     {
-                        if (!targetItems.Contains(item)) removeItems.Add(item);
+                        if (!keepItems.Contains(item)) removeItems.Add(item);
                     }
 
                     foreach (Item item in removeItems)
                     {
-                        rootItem.Items.Remove(item.Name);
+                        targetItem.Items.Remove(item.Name);
                     }
                 }
 
-//                rootItem.Items.Clear();
-                foreach (Item item in targetItems)
+                foreach (Item item in newItems.Values)
                 {
-                    if(!rootItem.Items.ContainsValue(item)) rootItem.Items.Add(item.Name, item);
+                    if(!targetItem.Items.ContainsValue(item)) targetItem.Items.Add(item.Name, item);
                 }
             }
         }
 
-        private static void UpdateModuleInstance(BuildingBlock module,Project project, IVerilogRelatedFile rootItem, List<Item> targetItems,Dictionary<string, Item> newItems)
+        private static void UpdateModuleInstance(BuildingBlock newModule,Project project, IVerilogRelatedFile targetItem, List<Item> keepItems,Dictionary<string, Item> newItems)
         {
-            foreach (Verilog.ModuleItems.IInstantiation subModuleInstantiation in module.Instantiations.Values)
+            foreach (IInstantiation newInstantiation in newModule.Instantiations.Values)
             {
-                if (rootItem.Items.ContainsKey(subModuleInstantiation.Name))
+                if (targetItem.Items.ContainsKey(newInstantiation.Name))
                 { // already exist item
-                    Item oldItem = rootItem.Items[subModuleInstantiation.Name];
-                    if (oldItem is Data.VerilogModuleInstance && (oldItem as Data.VerilogModuleInstance).ReplaceBy(subModuleInstantiation as ModuleInstantiation, project))
-                    { // sucessfully replaced
-                        targetItems.Add(oldItem);
-                    }
-                    else
-                    { // re-generate (same module instance name, but different file or module name or parameter
-                        Item item = null;
-                        if(subModuleInstantiation is ModuleInstantiation)
+                    Item oldItem = targetItem.Items[newInstantiation.Name];
+                    VerilogModuleInstance? oldVerilogModuleInstance = oldItem as VerilogModuleInstance;
+                    if(oldVerilogModuleInstance != null)
+                    {
+                        ModuleInstantiation? newModuleInstantiation = newInstantiation as ModuleInstantiation;
+                        if (newModuleInstantiation != null)
                         {
-                            item = Data.VerilogModuleInstance.Create(subModuleInstantiation as ModuleInstantiation, project);
-                        }
-                        if (item != null & !newItems.ContainsKey(subModuleInstantiation.Name))
-                        {
-                            item.Parent = item;
-                            newItems.Add(subModuleInstantiation.Name, item);
-                            targetItems.Add(item);
-                            if (subModuleInstantiation.ParameterOverrides.Count != 0)
+                            if (oldVerilogModuleInstance.ReplaceBy(newModuleInstantiation, project))
                             {
-                                Data.VerilogModuleInstance moduleInstance = item as Data.VerilogModuleInstance;
-                                if (moduleInstance.ParsedDocument == null)
-                                { // background reparse if not parsed
-                                    project.AddReparseTarget(item);
-                                }
+                                keepItems.Add(oldItem);
+                                continue;
+                            }
+                        }
+                    }
+
+                    // re-generate (same module instance name, but different file or module name or parameter
+                    {
+                        // re-generate module instantiation
+                        ModuleInstantiation? newModuleInstantiation = newInstantiation as ModuleInstantiation;
+                        if (newModuleInstantiation == null) continue;
+                        VerilogModuleInstance? newVerilogModuleInstance = VerilogModuleInstance.Create(newModuleInstantiation, project);
+                        if (newVerilogModuleInstance == null) continue;
+                        if (newItems.ContainsKey(newInstantiation.Name)) continue;
+
+                        Item? parent = targetItem as Item;
+                        if (parent == null) throw new Exception();
+                        newVerilogModuleInstance.Parent = parent;
+                        newItems.Add(newInstantiation.Name, newVerilogModuleInstance);
+                        keepItems.Add(newVerilogModuleInstance);
+                        if (newInstantiation.ParameterOverrides.Count != 0)
+                        {
+                            if(newVerilogModuleInstance.ParsedDocument == null)
+                            {
+                                project.AddReparseTarget(newVerilogModuleInstance);
                             }
                         }
                     }
                 }
                 else
                 { // new item
-                    Item item = null;
-                    if (subModuleInstantiation is ModuleInstantiation)
-                    {
-                        item = Data.VerilogModuleInstance.Create(subModuleInstantiation as ModuleInstantiation, project);
-                    }
-                    if (item != null & !newItems.ContainsKey(subModuleInstantiation.Name))
-                    {
-                        item.Parent = rootItem as Item;
-                        newItems.Add(subModuleInstantiation.Name, item);
-                        targetItems.Add(item);
-                        if (subModuleInstantiation.ParameterOverrides.Count != 0)
-                        {
-                            Data.VerilogModuleInstance moduleInstance = item as Data.VerilogModuleInstance;
+                    ModuleInstantiation? newModuleInstantiation = newInstantiation as ModuleInstantiation;
+                    if (newModuleInstantiation == null) continue;
+                    VerilogModuleInstance? newVerilogModuleInstance = VerilogModuleInstance.Create(newModuleInstantiation, project);
+                    if (newVerilogModuleInstance == null) continue;
+                    if (newItems.ContainsKey(newInstantiation.Name)) continue;
 
-                            
-                            if (moduleInstance.ParsedDocument == null)
-                            {   // background reparse
-                                project.AddReparseTarget(item);
-                            }
+                    Item? parent = targetItem as Item;
+                    if (parent == null) throw new Exception();
+                    newVerilogModuleInstance.Parent = parent;
+                    newItems.Add(newInstantiation.Name, newVerilogModuleInstance);
+                    keepItems.Add(newVerilogModuleInstance);
+                    if (newInstantiation.ParameterOverrides.Count != 0)
+                    {
+                        if (newVerilogModuleInstance.ParsedDocument == null)
+                        {
+                            project.AddReparseTarget(newVerilogModuleInstance);
                         }
                     }
+
+
+                    //Item item = null;
+                    //if (newInstantiation is ModuleInstantiation)
+                    //{
+                    //    item = Data.VerilogModuleInstance.Create(newInstantiation as ModuleInstantiation, project);
+                    //}
+                    //if (item != null & !newItems.ContainsKey(newInstantiation.Name))
+                    //{
+                    //    item.Parent = targetItem as Item;
+                    //    newItems.Add(newInstantiation.Name, item);
+                    //    keepItems.Add(item);
+                    //    if (newInstantiation.ParameterOverrides.Count != 0)
+                    //    {
+                    //        Data.VerilogModuleInstance moduleInstance = item as Data.VerilogModuleInstance;
+
+                            
+                    //        if (moduleInstance.ParsedDocument == null)
+                    //        {   // background reparse
+                    //            project.AddReparseTarget(item);
+                    //        }
+                    //    }
+                    //}
                 }
             }
         }
