@@ -14,11 +14,11 @@ namespace pluginVerilog.Data
         }
 
         private System.WeakReference<CodeEditor2.Data.TextFile> sourceFileRef;
-        public CodeEditor2.Data.TextFile SourceTextFile
+        public CodeEditor2.Data.TextFile? SourceTextFile
         {
             get
             {
-                CodeEditor2.Data.TextFile ret;
+                CodeEditor2.Data.TextFile? ret;
                 if (!sourceFileRef.TryGetTarget(out ret)) return null;
                 return ret;
             }

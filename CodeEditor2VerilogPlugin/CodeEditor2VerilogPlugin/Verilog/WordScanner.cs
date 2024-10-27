@@ -1076,8 +1076,39 @@ namespace pluginVerilog.Verilog
 
             if (prototype)
             {
+                string name;
+                if (relativeFilePath.Contains(System.IO.Path.DirectorySeparatorChar))
+                {
+                    name = relativeFilePath.Substring(relativeFilePath.LastIndexOf(System.IO.Path.DirectorySeparatorChar) + 1);
+                }
+                else
+                {
+                    name = relativeFilePath;
+                }
+
+                if (wordPointer.ParsedDocument.IncludeFiles.ContainsKey(name))
+                { // avoid duplicate name
+                    int count = 1;
+                    while (wordPointer.ParsedDocument.IncludeFiles.ContainsKey(name + ":" + count.ToString()))
+                    {
+                        count++;
+                    }
+                    name = name + ":" + count.ToString();
+                }
+
+                if (wordPointer.ParsedDocument.IncludeFiles.ContainsKey(name))
+                { // avoid duplicate name
+                    int count = 1;
+                    while (wordPointer.ParsedDocument.IncludeFiles.ContainsKey(name + ":" + count.ToString()))
+                    {
+                        count++;
+                    }
+                    name = name + ":" + count.ToString();
+                }
+
                 vhInstance = Data.VerilogHeaderInstance.Create(
                                                 relativeFilePath,
+                                                name,
                                                 CreateIndexReference(),
                                                 rootFile,
                                                 wordPointer.ParsedDocument.Project,
@@ -1091,15 +1122,7 @@ namespace pluginVerilog.Verilog
                     return;
                 }
 
-                if (wordPointer.ParsedDocument.IncludeFiles.ContainsKey(vhInstance.Name))
-                { // avoid duplicate name
-                    int count = 1;
-                    while (wordPointer.ParsedDocument.IncludeFiles.ContainsKey(vhInstance.Name + ":" + count.ToString()))
-                    {
-                        count++;
-                    }
-                    vhInstance.SetName(vhInstance.Name + ":" + count.ToString());
-                }
+
 
                 if (!wordPointer.ParsedDocument.IncludeFiles.ContainsKey(vhInstance.ID))
                 {

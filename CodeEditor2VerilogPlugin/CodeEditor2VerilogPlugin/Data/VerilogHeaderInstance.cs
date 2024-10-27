@@ -22,8 +22,10 @@ namespace pluginVerilog.Data
 
         }
 
+        
         public static VerilogHeaderInstance Create(
             string relativePath,
+            string name,
             IndexReference instancedReference,
             IVerilogRelatedFile parentFile,
             CodeEditor2.Data.Project project,
@@ -35,17 +37,22 @@ namespace pluginVerilog.Data
 
             if (vhFile == null) return null;
 
-            VerilogHeaderInstance instance = new VerilogHeaderInstance(vhFile);
-            instance.Project = project;
-            instance.RelativePath = relativePath;
-            if (instance.RelativePath.Contains(System.IO.Path.DirectorySeparatorChar))
-            {
-                instance.Name = relativePath.Substring(relativePath.LastIndexOf(System.IO.Path.DirectorySeparatorChar) + 1);
-            }
-            else
-            {
-                instance.Name = relativePath;
-            }
+
+            //string name;
+            //if (relativePath.Contains(System.IO.Path.DirectorySeparatorChar))
+            //{
+            //    name = relativePath.Substring(relativePath.LastIndexOf(System.IO.Path.DirectorySeparatorChar) + 1);
+            //}
+            //else
+            //{
+            //    name = relativePath;
+            //}
+            VerilogHeaderInstance instance = new VerilogHeaderInstance(vhFile) {
+                Name = name,
+                Project = project,
+                RelativePath = relativePath 
+            };
+
             instance.id = id;
             instance.RootFile = parentFile;
             instance.InstancedReference = instancedReference;
@@ -64,10 +71,6 @@ namespace pluginVerilog.Data
             }
         }
 
-        public void SetName(string name)
-        {
-            this.Name = name;
-        }
 
         public bool ReplaceBy(
             VerilogHeaderInstance file

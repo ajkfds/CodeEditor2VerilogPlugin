@@ -23,34 +23,35 @@ namespace pluginVerilog.Data
     {
         public new static VerilogFile Create(string relativePath, CodeEditor2.Data.Project project)
         {
-            VerilogFile fileItem = new VerilogFile();
-            fileItem.Project = project;
-            fileItem.RelativePath = relativePath;
+            string name;
             if (relativePath.Contains(System.IO.Path.DirectorySeparatorChar))
             {
-                fileItem.Name = relativePath.Substring(relativePath.LastIndexOf(System.IO.Path.DirectorySeparatorChar) + 1);
+                name = relativePath.Substring(relativePath.LastIndexOf(System.IO.Path.DirectorySeparatorChar) + 1);
             }
             else
             {
-                fileItem.Name = relativePath;
+                name = relativePath;
             }
+
+            VerilogFile fileItem = new VerilogFile() { Name = name, Project = project, RelativePath = relativePath };
 
             return fileItem;
         }
 
+
         public static VerilogFile CreateSystemVerilog(string relativePath, CodeEditor2.Data.Project project)
         {
-            VerilogFile fileItem = new VerilogFile();
-            fileItem.Project = project;
-            fileItem.RelativePath = relativePath;
+            string name;
             if (relativePath.Contains(System.IO.Path.DirectorySeparatorChar))
             {
-                fileItem.Name = relativePath.Substring(relativePath.LastIndexOf(System.IO.Path.DirectorySeparatorChar) + 1);
+                name = relativePath.Substring(relativePath.LastIndexOf(System.IO.Path.DirectorySeparatorChar) + 1);
             }
             else
             {
-                fileItem.Name = relativePath;
+                name = relativePath;
             }
+
+            VerilogFile fileItem = new VerilogFile() { Name = name, Project = project, RelativePath = relativePath };
             fileItem.SystemVerilog = true;
             return fileItem;
         }

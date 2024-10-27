@@ -3,6 +3,7 @@ using pluginVerilog.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,10 +13,11 @@ namespace pluginVerilog.Parser
     public class VerilogParser : DocumentParser
     {
         // create parser
+        [SetsRequiredMembers]
         public VerilogParser(
             Data.IVerilogRelatedFile verilogRelatedFile,
             DocumentParser.ParseModeEnum parseMode
-            )
+            ) : base(verilogRelatedFile.ToTextFile(),parseMode)
         {
             this.ParseMode = parseMode;
 
@@ -23,7 +25,8 @@ namespace pluginVerilog.Parser
             if (textFile == null) throw new Exception();
             this.TextFile = textFile;
 
-            File = verilogRelatedFile;
+            fileRef = new WeakReference<Data.IVerilogRelatedFile>(verilogRelatedFile);
+
             parsedDocument = new Verilog.ParsedDocument(verilogRelatedFile,null, parseMode);
             parsedDocument.Version = verilogRelatedFile.CodeDocument.Version;
 
@@ -32,7 +35,7 @@ namespace pluginVerilog.Parser
 
             parsedDocument.CodeDocument = new CodeEditor.CodeDocument(verilogRelatedFile); // use verilog codeDocument
             parsedDocument.CodeDocument.CopyTextOnlyFrom(originalCodeDocument);
-            this.document = parsedDocument.CodeDocument;
+            this.Document = parsedDocument.CodeDocument;
 
             if (verilogRelatedFile is Data.VerilogFile)
             {
@@ -52,22 +55,24 @@ namespace pluginVerilog.Parser
         }
 
         // create parser with parameter override
+        [SetsRequiredMembers]
         public VerilogParser(
             Data.IVerilogRelatedFile verilogRelatedFile,
             string moduleName,
             Dictionary<string, Verilog.Expressions.Expression> parameterOverrides,
             DocumentParser.ParseModeEnum parseMode
-            ) : base(verilogRelatedFile as CodeEditor2.Data.TextFile, parseMode)
+            ) : base(verilogRelatedFile.ToTextFile(), parseMode)
         {
-            this.document = new CodeEditor.CodeDocument(verilogRelatedFile); // use verilog codeDocument
-            this.document.CopyTextOnlyFrom(verilogRelatedFile.CodeDocument);
+            Document = new CodeEditor.CodeDocument(verilogRelatedFile); // use verilog codeDocument
+            Document.CopyTextOnlyFrom(verilogRelatedFile.CodeDocument);
 
             this.ParseMode = parseMode;
             CodeEditor2.Data.TextFile? textFile = verilogRelatedFile as CodeEditor2.Data.TextFile;
             if (textFile == null) throw new Exception();
             this.TextFile = textFile;
 
-            File = verilogRelatedFile;
+            fileRef = new WeakReference<Data.IVerilogRelatedFile>(verilogRelatedFile);
+            
             parsedDocument = new Verilog.ParsedDocument(verilogRelatedFile,null, parseMode);
             if(
                 (verilogRelatedFile is Data.VerilogFile && (verilogRelatedFile as Data.VerilogFile).SystemVerilog) ||
@@ -98,22 +103,22 @@ namespace pluginVerilog.Parser
         public override CodeEditor2.CodeEditor.ParsedDocument ParsedDocument { get { return parsedDocument as CodeEditor2.CodeEditor.ParsedDocument; } }
         public virtual Verilog.ParsedDocument VerilogParsedDocument { get { return parsedDocument; } }
 
-//        private Dictionary<string, Verilog.Expressions.Expression> parameterOverrides;
-//        private string targetModuleName = null;
+        //        private Dictionary<string, Verilog.Expressions.Expression> parameterOverrides;
+        //        private string targetModuleName = null;
 
         private System.WeakReference<Data.IVerilogRelatedFile> fileRef;
-        public Data.IVerilogRelatedFile File
+        public Data.IVerilogRelatedFile? File
         {
             get
             {
-                Data.IVerilogRelatedFile ret;
+                Data.IVerilogRelatedFile? ret;
                 if (!fileRef.TryGetTarget(out ret)) return null;
                 return ret;
             }
-            protected set
-            {
-                fileRef = new WeakReference<Data.IVerilogRelatedFile>(value);
-            }
+            //protected set
+            //{
+            //    fileRef = new WeakReference<Data.IVerilogRelatedFile>(value);
+            //}
         }
 
 

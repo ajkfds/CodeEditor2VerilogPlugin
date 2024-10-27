@@ -17,17 +17,22 @@ namespace pluginVerilog.Data
     {
         public new static VerilogHeaderFile Create(string relativePath, CodeEditor2.Data.Project project)
         {
-            VerilogHeaderFile fileItem = new VerilogHeaderFile();
-            fileItem.Project = project;
-            fileItem.RelativePath = relativePath;
+            string name;
             if (relativePath.Contains(System.IO.Path.DirectorySeparatorChar))
             {
-                fileItem.Name = relativePath.Substring(relativePath.LastIndexOf(System.IO.Path.DirectorySeparatorChar) + 1);
+                name = relativePath.Substring(relativePath.LastIndexOf(System.IO.Path.DirectorySeparatorChar) + 1);
             }
             else
             {
-                fileItem.Name = relativePath;
+                name = relativePath;
             }
+
+            VerilogHeaderFile fileItem = new VerilogHeaderFile()
+            {
+                Project = project,
+                RelativePath = relativePath,
+                Name = name
+            };
             return fileItem;
         }
 
