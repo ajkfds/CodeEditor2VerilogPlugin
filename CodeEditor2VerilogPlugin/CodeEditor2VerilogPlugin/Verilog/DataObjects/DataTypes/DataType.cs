@@ -262,8 +262,8 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 return null;
             }
 
-            IDataType? dtype = ParseCreate(word, nameSpace,null);
-            if (dtype == null)
+            IDataType? dType = ParseCreate(word, nameSpace,null);
+            if (dType == null)
             {
                 Expressions.Expression? ex = Expressions.Expression.ParseCreate(word, nameSpace);
                 if (ex == null)
@@ -282,7 +282,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 word.AddError(") required");
                 return null;
             }
-            return dtype;
+            return dType;
         }
     }
 }

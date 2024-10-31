@@ -30,10 +30,8 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 case DataTypeEnum.Time:
                     return Time.Create(dataType);
                 default:
-                    System.Diagnostics.Debugger.Break();
-                    break;
+                    throw new Exception();
             }
-            return null;
         }
 
         public override void AppendTypeLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
@@ -62,7 +60,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                     label.AppendText("class ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Identifier));
                     break;
                 default:
-                    System.Diagnostics.Debugger.Break();
+                    throw new Exception();
                     break;
             }
             label.AppendText(" ");
