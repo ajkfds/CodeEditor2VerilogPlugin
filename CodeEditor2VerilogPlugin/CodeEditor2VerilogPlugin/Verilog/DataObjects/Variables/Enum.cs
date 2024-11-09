@@ -41,7 +41,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public List<DataObjects.Arrays.PackedArray> PackedDimensions { get; set; } = new List<DataObjects.Arrays.PackedArray>();
 
-        public DataType BaseType { get; protected set; } = null;
+        public IDataType? BaseType { get; protected set; } = null;
         public List<DataTypes.Enum.Item> Items = new List<DataTypes.Enum.Item>();
 
         public DataObjects.Arrays.PackedArray? Range {
@@ -83,7 +83,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             if (dType == null) throw new Exception();
 
             Enum val = new Enum();
-            val.DataType = dType.Type;
+            val.DataType = dType;
             foreach(var item in dType.Items)
             {
                 val.Items.Add(item);

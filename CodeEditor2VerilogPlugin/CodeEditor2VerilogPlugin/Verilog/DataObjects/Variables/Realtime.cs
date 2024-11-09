@@ -16,7 +16,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.Realtime);
 
             Realtime val = new Realtime();
-            val.DataType = dataType.Type;
+            val.DataType = dataType;
             return val;
         }
 

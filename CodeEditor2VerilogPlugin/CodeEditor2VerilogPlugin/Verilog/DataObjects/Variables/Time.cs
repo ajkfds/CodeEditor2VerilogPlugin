@@ -17,7 +17,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             DataTypes.IntegerAtomType dType = dataType as DataTypes.IntegerAtomType;
 
             Time val = new Time();
-            val.DataType = dType.Type;
+            val.DataType = dType;
             return val;
         }
 

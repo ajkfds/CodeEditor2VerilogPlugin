@@ -1,4 +1,5 @@
-﻿using System;
+﻿using pluginVerilog.Verilog.DataObjects.Variables;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -70,18 +71,12 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         //        TypeReference
     }
 
-    public class DataType :IDataType
+    public static class DataType
     {
         //        protected List<Variables.Dimension> dimensions = new List<Variables.Dimension>();
         //        public IReadOnlyList<Variables.Dimension> Dimensions { get; }
         //        public virtual int BitWidth { get; }
         //        public virtual bool State4 { get; }
-        public virtual DataTypeEnum Type { get; set; }
-
-        public virtual string CreateString()
-        {
-            return "";
-        }
 
         /*
         data_type::=
@@ -156,11 +151,11 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 //non_integer_type
                 //non_integer_type::= "shortreal" | "real" | "realtime"
                 case "shortreal":
-                    return parseSimpleType(word, nameSpace, DataTypeEnum.Shortreal);
+                    return ShortRealType.ParseCreate(word, nameSpace);
                 case "real":
-                    return parseSimpleType(word, nameSpace, DataTypeEnum.Real);
+                    return RealType.ParseCreate(word, nameSpace);
                 case "realtime":
-                    return parseSimpleType(word, nameSpace, DataTypeEnum.Realtime);
+                    return RealTimeType.ParseCreate(word, nameSpace);
 
                 //struct_union["packed"[signing]] { struct_union_member { struct_union_member } } { packed_dimension }
 
@@ -170,7 +165,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
                 // "string"
                 case "string":
-                    return parseSimpleType(word, nameSpace, DataTypeEnum.String);
+                    return StringType.ParseCreate(word, nameSpace);
                 case "chandle":
                     return Chandle.ParseCreate(word, nameSpace);
 
@@ -221,34 +216,84 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                         }
                     }
 
-                    if (defaultDataType != null)
+                    if (defaultDataType == null) break;
+                    DataTypeEnum dataTypeEnum = (DataTypeEnum)defaultDataType;
+                    // data_type_or_implicit::= data_type | implicit_data_type
+                    // signing ::= "signed" | "unsigned"
+                    // implicit_data_type::= [signing] { packed_dimension }
+                    if (word.Text == "signed" || word.Text == "unsigned" || word.Text == "[")
                     {
-                        // data_type_or_implicit::= data_type | implicit_data_type
-                        // signing ::= "signed" | "unsigned"
-                        // implicit_data_type::= [signing] { packed_dimension }
-                        if (word.Text == "signed" || word.Text == "unsigned" || word.Text == "[")
+                        IDataType? dType = null;
+                        switch (dataTypeEnum)
                         {
-                            DataType dType = new DataType();
-                            dType.Type = (DataTypeEnum)defaultDataType;
-                            return dType;
+                            case DataTypeEnum.Bit:
+                            case DataTypeEnum.Logic:
+                            case DataTypeEnum.Reg:
+                                dType = new IntegerVectorType() { Type = dataTypeEnum };
+                                break;
+                            case DataTypeEnum.Byte:
+                            case DataTypeEnum.Shortint:
+                            case DataTypeEnum.Int:
+                            case DataTypeEnum.Longint:
+                            case DataTypeEnum.Integer:
+                            case DataTypeEnum.Time:
+                                dType = new IntegerAtomType() { Type = dataTypeEnum };
+                                break;
+                            case DataTypeEnum.Shortreal:
+                                dType = new ShortRealType();
+                                break;
+                            case DataTypeEnum.Real:
+                                dType = new ShortRealType();
+                                break;
+                            case DataTypeEnum.Realtime:
+                                dType = new RealTimeType();
+                                break;
                         }
+                        return dType;
                     }
-
                     break;
             }
             return null;
         }
 
-        private static DataType parseSimpleType(WordScanner word, NameSpace nameSpace, DataTypeEnum dataType)
-        {
-            DataType dType = new DataType();
-            dType.Type = dataType;
-
-            word.Color(CodeDrawStyle.ColorType.Keyword);
-            word.MoveNext();
-
-            return dType;
-        }
+        //private static IDataType Create(DataTypeEnum dataType)
+        //{
+        //    IDataType dType;
+        //    switch (dataType)
+        //    {
+        //        case DataTypeEnum.Bit:
+        //        case DataTypeEnum.Logic:
+        //        case DataTypeEnum.Reg:
+        //            dType = new IntegerVectorType() { Type = dataType };
+        //            break;
+        //        case DataTypeEnum.Byte:
+        //        case DataTypeEnum.Shortint:
+        //        case DataTypeEnum.Int:
+        //        case DataTypeEnum.Longint:
+        //        case DataTypeEnum.Integer:
+        //        case DataTypeEnum.Time:
+        //            dType = new IntegerAtomType() { Type = dataType };
+        //            break;
+        //        case DataTypeEnum.Shortreal:
+        //            dType = new ShortRealType();
+        //            break;
+        //        case DataTypeEnum.Real:
+        //            dType = new ShortRealType();
+        //            break;
+        //        case DataTypeEnum.Realtime:
+        //            dType = new RealTimeType();
+        //            break;
+        //        case DataTypeEnum.Enum:
+        //            return Enum.ParseCreate(word, nameSpace);
+        //        case DataTypeEnum.String:
+        //            return parseSimpleType(word, nameSpace, DataTypeEnum.String);
+        //        case DataTypeEnum.Chandle:
+        //            return Chandle.ParseCreate(word, nameSpace);
+        //        default:
+        //            return null;
+        //    }
+        //    return dType;
+        //}
 
         private static IDataType? parseTypeReference(WordScanner word, NameSpace nameSpace)
         {
@@ -262,8 +307,8 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 return null;
             }
 
-            IDataType? dType = ParseCreate(word, nameSpace,null);
-            if (dType == null)
+            IDataType? dtype = ParseCreate(word, nameSpace,null);
+            if (dtype == null)
             {
                 Expressions.Expression? ex = Expressions.Expression.ParseCreate(word, nameSpace);
                 if (ex == null)
@@ -282,7 +327,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 word.AddError(") required");
                 return null;
             }
-            return dType;
+            return dtype;
         }
     }
 }

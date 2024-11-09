@@ -90,70 +90,13 @@ namespace pluginVerilog.NavigatePanel
                 CodeEditor2.Controller.CodeEditor.SetTextFile(ModuleInstance, true);
                 Update();
             }
-            else if (CodeEditor2.Global.StopParse)
+            else
             {
+                await parseHierarchy();
                 CodeEditor2.Controller.CodeEditor.SetTextFile(ModuleInstance, true);
                 Update();
             }
-            else
-            {
-                var _ = parseHierarchy();
-                CodeEditor2.Controller.CodeEditor.SetTextFile(ModuleInstance, true);
-            }
 
-
-
-            //CodeEditor2.Controller.CodeEditor.SetTextFile(ModuleInstance);
-
-            //if (!ModuleInstance.ParseValid || ModuleInstance.ReparseRequested)
-            //{
-            //    if (!CodeEditor2.Global.StopParse)
-            //    {
-            //        await CodeEditor2.Tools.ParseHierarchy.Run(this); 
-            //    }
-            //}
-
-            // TODO
-            //Module targetModule = null;
-            //foreach (Module module in ModuleInstance.VerilogParsedDocument.Modules.Values)
-            //{
-            //    if(module.Name != ModuleInstance.ModuleName)
-            //    {
-            //        ModuleInstance.CodeDocument.CollapseBlock(ModuleInstance.CodeDocument.GetLineAt(module.BeginIndex));
-            //    }
-            //    else
-            //    {
-            //        ModuleInstance.CodeDocument.ExpandBlock(ModuleInstance.CodeDocument.GetLineAt(module.BeginIndex));
-            //        targetModule = module;
-            //    }
-            //}
-
-            //if(targetModule != null)
-            //{
-            //    if (
-            //        ModuleInstance.CodeDocument.SelectionStart < targetModule.BeginIndex &&
-            //        ModuleInstance.CodeDocument.SelectionLast < targetModule.BeginIndex
-            //        )
-            //    {
-            //        ModuleInstance.CodeDocument.SelectionStart = targetModule.BeginIndex;
-            //        ModuleInstance.CodeDocument.SelectionLast = targetModule.BeginIndex;
-            //        ModuleInstance.CodeDocument.CaretIndex = targetModule.BeginIndex;
-            //        CodeEditor2.Controller.CodeEditor.ScrollToCaret();
-            //    }
-
-            //    if (
-            //        targetModule.LastIndex < ModuleInstance.CodeDocument.SelectionStart &&
-            //        targetModule.LastIndex < ModuleInstance.CodeDocument.SelectionLast
-            //        )
-            //    {
-            //        ModuleInstance.CodeDocument.SelectionStart = targetModule.BeginIndex;
-            //        ModuleInstance.CodeDocument.SelectionLast = targetModule.BeginIndex;
-            //        ModuleInstance.CodeDocument.CaretIndex = targetModule.BeginIndex;
-            //        CodeEditor2.Controller.CodeEditor.ScrollToCaret();
-            //    }
-            //}
-
-            //targetModule.
         }
 
         private async Task parseHierarchy()

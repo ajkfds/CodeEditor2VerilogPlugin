@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Expressions
 {
-    public class Primary : Expression
+    public abstract class Primary : Expression
     {
         protected Primary() {
             Constant = false;
@@ -26,14 +26,14 @@ namespace pluginVerilog.Verilog.Expressions
         //        public bool Signed { get; protected set; }
 //        public WordReference Reference { get; protected set; }
 
-        public static Primary Create(bool constant, double? value, int? bitWidth)
-        {
-            Primary primary = new Primary();
-            primary.Constant = constant;
-            primary.Value = value;
-            primary.BitWidth = bitWidth;
-            return primary;
-        }
+        //public static Primary Create(bool constant, double? value, int? bitWidth)
+        //{
+        //    Primary primary = new Primary();
+        //    primary.Constant = constant;
+        //    primary.Value = value;
+        //    primary.BitWidth = bitWidth;
+        //    return primary;
+        //}
 
         public virtual AjkAvaloniaLibs.Contorls.ColorLabel GetLabel()
         {

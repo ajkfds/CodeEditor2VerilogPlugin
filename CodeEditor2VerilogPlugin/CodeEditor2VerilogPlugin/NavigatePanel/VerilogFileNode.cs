@@ -63,15 +63,14 @@ namespace pluginVerilog.NavigatePanel
                 if (NodeSelected != null) NodeSelected();
                 Update();
             }
-            else if (CodeEditor2.Global.StopParse)
+            else
             {
+                CodeEditor2.Global.StopBackGroundParse = true;
+                await parseHierarchy();
+                CodeEditor2.Global.StopBackGroundParse = false;
                 CodeEditor2.Controller.CodeEditor.SetTextFile(TextFile, true);
                 if (NodeSelected != null) NodeSelected();
                 Update();
-            }
-            else
-            {
-                var _ = parseHierarchy();
             }
         }
 

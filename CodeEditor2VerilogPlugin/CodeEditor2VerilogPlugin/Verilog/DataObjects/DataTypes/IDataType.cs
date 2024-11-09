@@ -8,6 +8,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
     public interface IDataType
     {
-        public DataTypeEnum Type { get; set; }
+        public DataTypeEnum Type { get; }
+        public string CreateString();
     }
 }

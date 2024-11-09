@@ -19,6 +19,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
         public Expressions.Expression Expression;
         public WordReference DefinitionRefrecnce { get; set; }
 
+        
         public enum ConstantTypeEnum
         {
             parameter,
@@ -402,6 +403,11 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                 word.SkipToKeyword(";");
                 if (word.Text == ";") word.MoveNext();
             }
+        }
+
+        public override DataObject Clone()
+        {
+            throw new NotImplementedException();
         }
     }
 }

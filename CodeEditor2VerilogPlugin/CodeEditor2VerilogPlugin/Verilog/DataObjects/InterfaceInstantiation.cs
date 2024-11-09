@@ -552,6 +552,11 @@ namespace pluginVerilog.Verilog.DataObjects
             return sb.ToString();
         }
 
+        public override DataObject Clone()
+        {
+            throw new NotImplementedException();
+        }
+
         /*
         module_instantiation            ::= module_identifier [ parameter_value_assignment ] module_instance { , module_instance } ;
         parameter_value_assignment      ::= # ( list_of_parameter_assignments )  

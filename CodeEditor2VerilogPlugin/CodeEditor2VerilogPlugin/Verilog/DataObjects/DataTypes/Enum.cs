@@ -10,18 +10,30 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
-    public class Enum : DataType
+    public class Enum : IDataType
     {
-        public override DataTypeEnum Type
-        {
+        public virtual DataTypeEnum Type {
             get
             {
                 return DataTypeEnum.Enum;
             }
         }
-
-        public DataType? BaseType { get; protected set; } = null;
+        public IDataType? BaseType { get; protected set; } = null;
         public List<Item> Items = new List<Item>();
+
+        public virtual string CreateString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("enum ");
+
+            if (BaseType != null)
+            {
+                sb.Append(BaseType.CreateString());
+                sb.Append(" ");
+            }
+
+            return sb.ToString();
+        }
 
         public static Enum ParseCreate(WordScanner word, NameSpace nameSpace)
         {
@@ -53,8 +65,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 default:
                     // In the absence of a data type declaration, the default data type shall be int.
                     // Any other data type used with enumerated types shall require an explicit data type declaration.
-                    type.BaseType = new DataTypes.IntegerAtomType();
-                    type.BaseType.Type = DataTypeEnum.Int;
+                    type.BaseType = new DataTypes.IntegerAtomType() { Type = DataTypeEnum.Int };
                     break;
             }
 

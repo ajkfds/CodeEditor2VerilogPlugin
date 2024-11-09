@@ -15,7 +15,7 @@ namespace pluginVerilog.Data
 
     public class VerilogHeaderFile : CodeEditor2.Data.TextFile, IVerilogRelatedFile
     {
-        public new static VerilogHeaderFile Create(string relativePath, CodeEditor2.Data.Project project)
+        public new static VerilogHeaderFile Create(string relativePath, CodeEditor2.Data.Project project, CodeEditor2.FileTypes.FileType fileType)
         {
             string name;
             if (relativePath.Contains(System.IO.Path.DirectorySeparatorChar))

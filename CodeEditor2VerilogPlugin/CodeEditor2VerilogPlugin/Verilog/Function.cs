@@ -139,7 +139,7 @@ namespace pluginVerilog.Verilog
                             DataObjects.Arrays.PackedArray? range = Verilog.DataObjects.Arrays.PackedArray.ParseCreate(word, nameSpace);
                             if (range != null) packedDimensions.Add(range);
                         }
-                        DataType dataType = Verilog.DataObjects.DataTypes.IntegerVectorType.Create(DataTypeEnum.Logic, signed, packedDimensions);
+                        IDataType dataType = Verilog.DataObjects.DataTypes.IntegerVectorType.Create(DataTypeEnum.Logic, signed, packedDimensions);
                         Logic logic = Verilog.DataObjects.Variables.Logic.Create(dataType);
                         logic.PackedDimensions = packedDimensions;
                         retVal = logic;
@@ -363,7 +363,7 @@ namespace pluginVerilog.Verilog
                             DataObjects.Arrays.PackedArray? range = Verilog.DataObjects.Arrays.PackedArray.ParseCreate(word, nameSpace);
                             if (range != null) packedDimensions.Add(range);
                         }
-                        DataType dataType = Verilog.DataObjects.DataTypes.IntegerVectorType.Create(DataTypeEnum.Logic, signed, packedDimensions);
+                        IDataType dataType = Verilog.DataObjects.DataTypes.IntegerVectorType.Create(DataTypeEnum.Logic, signed, packedDimensions);
                         Logic logic = Verilog.DataObjects.Variables.Logic.Create(dataType);
                         logic.PackedDimensions = packedDimensions;
                         retVal = logic;

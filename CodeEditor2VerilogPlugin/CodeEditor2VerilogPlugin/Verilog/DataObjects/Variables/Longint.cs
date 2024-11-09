@@ -14,10 +14,11 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         public static new Longint Create(IDataType dataType)
         {
             if (dataType.Type == DataTypeEnum.Int) System.Diagnostics.Debugger.Break();
-            DataTypes.IntegerAtomType dType = dataType as DataTypes.IntegerAtomType;
+            DataTypes.IntegerAtomType? dType = dataType as DataTypes.IntegerAtomType;
+            if (dType == null) throw new Exception();
 
             Longint val = new Longint();
-            val.DataType = dType.Type;
+            val.DataType = dType;
             return val;
         }
 

@@ -123,14 +123,8 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
         {
             Net net = new Net();
             net.NetType = netType;
-            if(dataType == null)
-            {
-                net.DataType = DataTypes.DataTypeEnum.Logic;
-            }
-            else
-            {
-                net.DataType = dataType.Type;
-            }
+            net.DataType = dataType;
+
             if (dataType is DataObjects.DataTypes.IntegerVectorType)
             {
                 var integerVectorType = (DataObjects.DataTypes.IntegerVectorType)dataType;
@@ -403,6 +397,11 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             }
 
             return true;
+        }
+
+        public override DataObject Clone()
+        {
+            throw new NotImplementedException();
         }
     }
 }

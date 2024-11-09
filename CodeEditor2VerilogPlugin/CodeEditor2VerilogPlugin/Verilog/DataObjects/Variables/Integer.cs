@@ -14,10 +14,11 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         public static new Integer Create(IDataType dataType)
         {
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.Int);
-            DataTypes.IntegerAtomType dType = dataType as DataTypes.IntegerAtomType;
+            DataTypes.IntegerAtomType? dType = dataType as DataTypes.IntegerAtomType;
+            if (dType == null) throw new Exception();
 
             Integer val = new Integer();
-            val.DataType = dType.Type;
+            val.DataType = dType;
             return val;
         }
 

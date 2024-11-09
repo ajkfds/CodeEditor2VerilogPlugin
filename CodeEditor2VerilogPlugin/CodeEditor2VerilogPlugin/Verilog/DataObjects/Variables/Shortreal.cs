@@ -17,7 +17,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.Shortreal );
 
             Shortreal val = new Shortreal();
-            val.DataType = dataType.Type;
+            val.DataType = dataType;
             return val;
         }
 

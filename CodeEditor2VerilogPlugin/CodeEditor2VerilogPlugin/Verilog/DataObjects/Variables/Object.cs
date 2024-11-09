@@ -19,7 +19,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             BuildingBlocks.Class class_ = dataType as BuildingBlocks.Class;
 
             Object val = new Object();
-            val.DataType = DataTypeEnum.Class;
+            val.DataType = dataType;
             val.Class = class_;
             return val;
         }

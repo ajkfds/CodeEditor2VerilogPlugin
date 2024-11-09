@@ -17,7 +17,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             DataTypes.IntegerAtomType? dType = dataType as DataTypes.IntegerAtomType;
 
             Shortint val = new Shortint();
-            val.DataType = dType.Type;
+            val.DataType = dType;
             return val;
         }
 

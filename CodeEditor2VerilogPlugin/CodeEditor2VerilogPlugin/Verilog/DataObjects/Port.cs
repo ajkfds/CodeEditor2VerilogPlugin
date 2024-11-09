@@ -776,8 +776,7 @@ ansi_port_declaration ::=
 
             if (dataType == null)
             {
-                    DataTypes.IntegerVectorType vectorType = new DataTypes.IntegerVectorType();
-                    vectorType.Type = DataTypeEnum.Logic;
+                DataTypes.IntegerVectorType vectorType = new DataTypes.IntegerVectorType() { Type = DataTypeEnum.Logic };
                     if(word.Text == "[")
                     {
                     DataObjects.Arrays.PackedArray? range = DataObjects.Arrays.PackedArray.ParseCreate(word, nameSpace);
@@ -922,8 +921,7 @@ ansi_port_declaration ::=
             {
                 if(first || direction != null)
                 {
-                    DataTypes.IntegerVectorType vectorType = new DataTypes.IntegerVectorType();
-                    vectorType.Type = DataTypeEnum.Logic;
+                    DataTypes.IntegerVectorType vectorType = new DataTypes.IntegerVectorType() { Type = DataTypeEnum.Logic };
                     if (word.Text == "[")
                     {
                         DataObjects.Arrays.PackedArray? range = DataObjects.Arrays.PackedArray.ParseCreate(word, nameSpace);

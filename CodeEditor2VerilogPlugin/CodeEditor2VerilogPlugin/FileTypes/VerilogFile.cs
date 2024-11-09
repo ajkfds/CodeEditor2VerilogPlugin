@@ -9,7 +9,8 @@ namespace pluginVerilog.FileTypes
 {
     public class VerilogFile : CodeEditor2.FileTypes.FileType
     {
-        public override string ID { get { return "VerilogFile"; } }
+        public static string TypeID = "VerilogFile";
+        public override string ID { get { return TypeID; } }
 
         public override bool IsThisFileType(string relativeFilePath, CodeEditor2.Data.Project project)
         {

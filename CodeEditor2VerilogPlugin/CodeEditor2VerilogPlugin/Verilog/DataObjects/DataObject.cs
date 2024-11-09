@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects
 {
-    public class DataObject
+    public abstract class DataObject
     {
         // #SystemVerilog 2017
         //	net												user-defined-size	4state	v
@@ -41,8 +41,8 @@ namespace pluginVerilog.Verilog.DataObjects
 
         public string Name { set; get; } = "";
         public string Comment { set; get; } = "";
-        public WordReference DefinedReference { set; get; } = null;
-        public DataTypeEnum DataType = DataTypeEnum.Reg;
+        public WordReference? DefinedReference { set; get; } = null;
+        public IDataType? DataType;
         public List<Arrays.VariableArray> Dimensions { get; set; } = new List<Arrays.VariableArray>();
 
         public List<WordReference> UsedReferences { set; get; } = new List<WordReference>();
@@ -51,38 +51,8 @@ namespace pluginVerilog.Verilog.DataObjects
 
         public string CreateDataTypeString()
         {
-            StringBuilder sb = new StringBuilder();
-            switch (DataType)
-            {
-                case DataTypeEnum.Bit:
-                    sb.Append("bit");
-                    break;
-                case DataTypeEnum.Byte:
-                    sb.Append("byte");
-                    break;
-                case DataTypeEnum.Chandle:
-                    sb.Append("chandle");
-                    break;
-                case DataTypeEnum.Class:
-                    sb.Append("class");
-                    break;
-                case DataTypeEnum.CoverGroup:
-                    sb.Append("covergroup");
-                    break;
-                case DataTypeEnum.Enum:
-                    sb.Append("enum");
-                    break;
-                case DataTypeEnum.Logic:
-                    sb.Append("logic");
-                    break;
-                case DataTypeEnum.Reg:
-                    sb.Append("reg");
-                    break;
-                case DataTypeEnum.String:
-                    sb.Append("string");
-                    break;
-            }
-            return sb.ToString();
+            if (DataType != null) return DataType.CreateString();
+            return "";
         }
 
         public virtual void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
@@ -95,12 +65,7 @@ namespace pluginVerilog.Verilog.DataObjects
 
         }
 
-        public virtual DataObject Clone()
-        {
-            return null;
-        }
-
-
+        public abstract DataObject Clone();
 
 
     }

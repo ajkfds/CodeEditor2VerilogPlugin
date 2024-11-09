@@ -18,7 +18,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
             Reg val = new Reg();
             val.PackedDimensions = dType.PackedDimensions;
-            val.DataType = dType.Type;
+            val.DataType = dType;
             return val;
         }
 

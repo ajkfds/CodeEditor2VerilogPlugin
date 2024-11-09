@@ -14,11 +14,12 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         public static new Logic Create(IDataType dataType)
         {
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.Logic);
-            DataTypes.IntegerVectorType dType = dataType as DataTypes.IntegerVectorType;
+            DataTypes.IntegerVectorType? dType = dataType as DataTypes.IntegerVectorType;
+            if (dType == null) throw new Exception();
 
             Logic val = new Logic();
             val.PackedDimensions = dType.PackedDimensions;
-            val.DataType = dType.Type;
+            val.DataType = dataType;
             return val;
         }
 

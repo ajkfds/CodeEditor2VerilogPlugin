@@ -22,7 +22,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
 //        public Dictionary<string, Class> Classes { get; set; } = new Dictionary<string, Class>();
 
-        public Dictionary<string, DataType> Datatypes { get; set; } = new Dictionary<string, DataType>();
+        public Dictionary<string, IDataType> Datatypes { get; set; } = new Dictionary<string, IDataType>();
 
         public Dictionary<string, BuildingBlock> Elements { get; set; } = new Dictionary<string, BuildingBlock>();
 

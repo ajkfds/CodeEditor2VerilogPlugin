@@ -74,9 +74,14 @@ namespace pluginVerilog.Parser
             fileRef = new WeakReference<Data.IVerilogRelatedFile>(verilogRelatedFile);
             
             parsedDocument = new Verilog.ParsedDocument(verilogRelatedFile,null, parseMode);
-            if(
-                (verilogRelatedFile is Data.VerilogFile && (verilogRelatedFile as Data.VerilogFile).SystemVerilog) ||
-                (verilogRelatedFile is Data.VerilogModuleInstance && (verilogRelatedFile as Data.VerilogModuleInstance).SystemVerilog)
+
+
+            Data.VerilogFile? verilogFile = verilogRelatedFile as Data.VerilogFile;
+            Data.VerilogModuleInstance? verilogModuleInstance = verilogRelatedFile as Data.VerilogModuleInstance;
+
+            if (
+                (verilogFile != null && verilogFile.SystemVerilog) ||
+                (verilogModuleInstance != null && verilogModuleInstance.SystemVerilog)
             )                
             {
                 parsedDocument.SystemVerilog = true;
@@ -95,13 +100,23 @@ namespace pluginVerilog.Parser
         {
             get
             {
-                return Document as CodeEditor.CodeDocument;
+                CodeEditor.CodeDocument? document = Document as CodeEditor.CodeDocument;
+                if (document == null) throw new Exception();
+                return document;
             }
         }
 
-        private Verilog.ParsedDocument parsedDocument = null;
-        public override CodeEditor2.CodeEditor.ParsedDocument ParsedDocument { get { return parsedDocument as CodeEditor2.CodeEditor.ParsedDocument; } }
-        public virtual Verilog.ParsedDocument VerilogParsedDocument { get { return parsedDocument; } }
+        private Verilog.ParsedDocument parsedDocument;
+        public override CodeEditor2.CodeEditor.ParsedDocument ParsedDocument {
+            get {
+                return parsedDocument as CodeEditor2.CodeEditor.ParsedDocument; 
+            } 
+        }
+        public virtual Verilog.ParsedDocument VerilogParsedDocument {
+            get {
+                return parsedDocument; 
+            } 
+        }
 
         //        private Dictionary<string, Verilog.Expressions.Expression> parameterOverrides;
         //        private string targetModuleName = null;
@@ -177,12 +192,14 @@ namespace pluginVerilog.Parser
             word.GetFirst();
 
             word.RootParsedDocument.LockedDocument.Add(word.Document);
-            Root root = Root.ParseCreate(word,VerilogParsedDocument,File as Data.VerilogFile);
+            if((File as Data.VerilogFile) == null)
+            {
+//                System.Diagnostics.Debugger.Break();
+            }
+            Root root = Root.ParseCreate(word,VerilogParsedDocument, File as Data.VerilogFile);
 
             word.RootParsedDocument.UnlockDocument();
-//            word.Document.LockThreadToUI();
             word.Dispose();
-            word = null;
         }
     }
 }

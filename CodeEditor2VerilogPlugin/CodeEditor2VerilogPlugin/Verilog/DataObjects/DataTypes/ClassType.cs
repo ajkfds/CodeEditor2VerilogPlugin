@@ -6,24 +6,29 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
-    public class ClassType : DataType
+    public class ClassType : IDataType
     {
+        public virtual DataTypeEnum Type
+        {
+            get
+            {
+                return DataTypeEnum.Class;
+            }
+        }
+
         /*
         class_type ::= 
             ps_class_identifier [ parameter_value_assignment ] 
             { "::" class_identifier [ parameter_value_assignment ] }
 
             parameter_value_assignment ::= # ( [ list_of_parameter_assignments ] ) 
-         */
-
-        
+        */
 
         public static ClassType ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             ClassType dType = new ClassType();
             if (word.Text != "class") throw new Exception();
             word.Color(CodeDrawStyle.ColorType.Keyword);
-            dType.Type = DataTypeEnum.Class;
             word.MoveNext();
 
             if (!General.IsIdentifier(word.Text))
@@ -36,15 +41,9 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
             return dType;
         }
-        public override string CreateString()
+        public virtual string CreateString()
         {
             return "chandle";
-        }
-        public static ClassType Create(IDataType dataType)
-        {
-            ClassType chandle = new ClassType();
-            chandle.Type = dataType.Type;
-            return chandle;
         }
 
     }

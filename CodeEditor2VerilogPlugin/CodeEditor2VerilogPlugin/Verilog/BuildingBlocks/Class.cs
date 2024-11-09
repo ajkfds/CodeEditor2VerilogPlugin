@@ -125,9 +125,9 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
             // parse definitions
             Dictionary<string, Macro> macroKeep = new Dictionary<string, Macro>();
-            foreach (var kvpair in word.RootParsedDocument.Macros)
+            foreach (var kvPair in word.RootParsedDocument.Macros)
             {
-                macroKeep.Add(kvpair.Key, kvpair.Value);
+                macroKeep.Add(kvPair.Key, kvPair.Value);
             }
 
 
@@ -362,6 +362,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 if (instantiation.Name == null) throw new Exception();
                 items.Add(newItem(instantiation.Name, CodeDrawStyle.ColorType.Identifier));
             }
+        }
+
+        public string CreateString()
+        {
+            throw new NotImplementedException();
         }
 
         //protected static void checkVariablesUseAndDriven(WordScanner word, NameSpace nameSpace)

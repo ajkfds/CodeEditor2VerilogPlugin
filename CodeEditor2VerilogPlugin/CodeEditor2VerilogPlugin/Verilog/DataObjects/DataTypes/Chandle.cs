@@ -7,25 +7,30 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
-    public class Chandle : DataType
+    public class Chandle : IDataType
     {
+        public virtual DataTypeEnum Type
+        {
+            get
+            {
+                return DataTypeEnum.Chandle;
+            }
+        }
         public static Chandle ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             Chandle dType = new Chandle();
             if (word.Text != "chandle") throw new Exception();
             word.Color(CodeDrawStyle.ColorType.Keyword);
-            dType.Type = DataTypeEnum.Chandle;
             word.MoveNext();
             return dType;
         }
-        public override string CreateString()
+        public virtual string CreateString()
         {
             return "chandle";
         }
         public static Chandle Create(IDataType dataType)
         {
             Chandle chandle = new Chandle();
-            chandle.Type = dataType.Type;
             return chandle;
         }
 

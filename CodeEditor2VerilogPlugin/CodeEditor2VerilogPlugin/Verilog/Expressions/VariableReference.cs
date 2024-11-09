@@ -11,7 +11,7 @@ namespace pluginVerilog.Verilog.Expressions
     public class VariableReference : Primary
     {
         protected VariableReference() { }
-        public string VariableName { get; protected set; }
+        public string VariableName { get; init; }
         public RangeExpression? RangeExpression { get; protected set; }
         public List<Expression> Dimensions = new List<Expression>();
         public DataObjects.DataObject? Variable = null;
@@ -113,8 +113,10 @@ namespace pluginVerilog.Verilog.Expressions
 
         public static VariableReference Create(DataObjects.Variables.Variable variable,NameSpace nameSpace)
         {
-            VariableReference val = new VariableReference();
-            val.VariableName = variable.Name;
+            VariableReference val = new VariableReference()
+            {
+                VariableName = variable.Name
+            };
             val.Variable = variable;
             val.Reference = variable.DefinedReference;
 
@@ -133,20 +135,21 @@ namespace pluginVerilog.Verilog.Expressions
         public static VariableReference? ParseCreate(WordScanner word, NameSpace nameSpace, bool assigned)
         {
             if (nameSpace == null) System.Diagnostics.Debugger.Break();
-            DataObjects.DataObject? variable = getDataObject(word, word.Text, nameSpace);
+            DataObjects.DataObject? dataObject = getDataObject(word, word.Text, nameSpace);
+            if (dataObject == null) return null;
 
-            if (variable == null) return null;
-
-            VariableReference val = new VariableReference();
-            val.VariableName = variable.Name;
-            val.Variable = variable;
+            VariableReference val = new VariableReference() {
+                VariableName = dataObject.Name
+            };
+            val.Variable = dataObject;
             val.Reference = word.GetReference();
 
-            if (variable is DataObjects.Variables.Reg)
+            // color
+            if (dataObject is DataObjects.Variables.Reg)
             {
                 word.Color(CodeDrawStyle.ColorType.Register);
             }
-            else if (variable is Net)
+            else if (dataObject is Net)
             {
                 word.Color(CodeDrawStyle.ColorType.Net);
             }
@@ -163,11 +166,10 @@ namespace pluginVerilog.Verilog.Expressions
             {
                 val.Variable.UsedReferences.Add(word.GetReference());
             }
-
             word.MoveNext();
 
             // parse dimensions
-            while (!word.Eof && val.Dimensions.Count < variable.Dimensions.Count)
+            while (!word.Eof && val.Dimensions.Count < dataObject.Dimensions.Count)
             {
                 if (word.GetCharAt(0) != '[')
                 {
@@ -239,19 +241,19 @@ namespace pluginVerilog.Verilog.Expressions
             }
             else
             {   // w/o range
-                if (variable is DataObjects.Variables.IntegerVectorValueVariable)
+                if (dataObject is DataObjects.Variables.IntegerVectorValueVariable)
                 {
-                    var original = variable as DataObjects.Variables.IntegerVectorValueVariable;
+                    var original = dataObject as DataObjects.Variables.IntegerVectorValueVariable;
                     if (original == null) throw new Exception();
                     if (original.Range != null) val.BitWidth = original.Range.Size;
                     else val.BitWidth = 1;
                 }
-                else if (variable is Net)
+                else if (dataObject is Net)
                 {
-                    if (((Net)variable).Range != null) val.BitWidth = ((Net)variable).Range.Size;
+                    if (((Net)dataObject).Range != null) val.BitWidth = ((Net)dataObject).Range.Size;
                     else val.BitWidth = 1;
                 }
-                else if (variable is DataObjects.Variables.Genvar)
+                else if (dataObject is DataObjects.Variables.Genvar)
                 {
                     val.Constant = true;
                 }

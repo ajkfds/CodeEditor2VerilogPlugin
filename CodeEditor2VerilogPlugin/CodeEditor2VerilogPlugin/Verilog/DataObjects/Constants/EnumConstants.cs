@@ -8,10 +8,10 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
 {
     public class EnumConstants : Constants
     {
-        public static EnumConstants Create(DataTypes.DataType dataType)
+        public static EnumConstants Create(DataTypes.IDataType dataType)
         {
             EnumConstants constants = new EnumConstants();
-            constants.DataType = dataType.Type;
+            constants.DataType = dataType;
             constants.ConstantType = ConstantTypeEnum.enum_;
             return constants;
         }

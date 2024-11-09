@@ -53,7 +53,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             if (dType == null) throw new Exception();
 
             Chandle val = new Chandle();
-            val.DataType = dType.Type;
+            val.DataType = dType;
             return val;
         }
 

@@ -17,7 +17,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
             Bit val = new Bit();
             val.PackedDimensions = dType.PackedDimensions;
-            val.DataType = dType.Type;
+            val.DataType = dType;
             return val;
         }
 

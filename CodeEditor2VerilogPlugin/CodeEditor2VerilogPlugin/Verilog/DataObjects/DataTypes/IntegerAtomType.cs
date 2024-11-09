@@ -7,8 +7,9 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
-    public class IntegerAtomType : DataType
+    public class IntegerAtomType : IDataType
     {
+        public required virtual DataTypeEnum Type { get; init; }
         public virtual bool Signed { get; protected set; }
 
         // data_type            ::=   integer_atom_type[signing]
@@ -19,8 +20,6 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
         public static IntegerAtomType? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
-            IntegerAtomType dType = new IntegerAtomType();
-
             switch (word.Text)
             {
                 case "byte":
@@ -63,7 +62,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             }
         }
 
-        public override string CreateString()
+        public virtual string CreateString()
         {
             StringBuilder sb = new StringBuilder();
 
@@ -94,8 +93,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
         public static IntegerAtomType Create(DataTypeEnum dataType,bool signed)
         {
-            IntegerAtomType integerAtomType = new IntegerAtomType();
-            integerAtomType.Type = dataType;
+            IntegerAtomType integerAtomType = new IntegerAtomType() { Type = dataType };
             integerAtomType.Signed = signed;
             return integerAtomType;
         }
@@ -105,8 +103,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
-            IntegerAtomType integerAtomType = new IntegerAtomType();
-            integerAtomType.Type = dataType;
+            IntegerAtomType integerAtomType = new IntegerAtomType() { Type = dataType };
 
             integerAtomType.Signed = false;
 

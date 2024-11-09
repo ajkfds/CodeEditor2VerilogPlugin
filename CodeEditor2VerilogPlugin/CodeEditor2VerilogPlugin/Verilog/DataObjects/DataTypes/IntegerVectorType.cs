@@ -9,8 +9,10 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
-    public class IntegerVectorType : DataType
+    public class IntegerVectorType : IDataType
     {
+        public required virtual DataTypeEnum Type { get; init; }
+
         public virtual List<Arrays.PackedArray> PackedDimensions { get; protected set; } = new List<Arrays.PackedArray>();
         public virtual bool Signed { get; protected set; }
 
@@ -45,7 +47,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             }
         }
 
-        public override string CreateString()
+        public virtual string CreateString()
         {
             StringBuilder sb = new StringBuilder();
             switch (Type)
@@ -70,8 +72,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
         public static IntegerVectorType Create(DataTypeEnum dataType, bool signed,List<Arrays.PackedArray>? packedDimensions)
         {
-            IntegerVectorType integerVectorType = new IntegerVectorType();
-            integerVectorType.Type = dataType;
+            IntegerVectorType integerVectorType = new IntegerVectorType() { Type = dataType };
             integerVectorType.Signed = signed;
             if(packedDimensions == null)
             {
@@ -86,8 +87,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
         public static IntegerVectorType? parse(WordScanner word,NameSpace nameSpace,DataTypeEnum dataType)
         {
-            var integerVectorType = new IntegerVectorType();
-            integerVectorType.Type = dataType;
+            var integerVectorType = new IntegerVectorType() { Type = dataType };
 
             word.Color(CodeDrawStyle.ColorType.Keyword);
             if(dataType == DataTypeEnum.Bit | dataType == DataTypeEnum.Logic)

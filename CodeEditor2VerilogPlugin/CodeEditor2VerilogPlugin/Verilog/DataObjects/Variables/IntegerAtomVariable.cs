@@ -36,7 +36,8 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public override void AppendTypeLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
         {
-            switch (DataType)
+            if (DataType == null) return;
+            switch (DataType.Type)
             {
                 case DataTypeEnum.Byte:
                     label.AppendText("byte ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));

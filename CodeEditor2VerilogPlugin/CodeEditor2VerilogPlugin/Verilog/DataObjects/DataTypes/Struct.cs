@@ -3,14 +3,15 @@ using pluginVerilog.Verilog.DataObjects.Constants;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
-    public class Struct : DataType
+    public class Struct : IDataType
     { 
-        public override DataTypeEnum Type
+        public virtual DataTypeEnum Type
         {
             get
             {
@@ -33,6 +34,16 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         data_type_or_void ::= data_type | "void"
         struct_union ::= "struct" | "union" [ "tagged" ]          
          */
+        public virtual string CreateString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("struct ");
+
+            if (Packed) sb.Append("packed ");
+            if (Signed) sb.Append("signed ");
+
+            return sb.ToString();
+        }
 
         public static Struct? ParseCreate(WordScanner word, NameSpace nameSpace)
         {

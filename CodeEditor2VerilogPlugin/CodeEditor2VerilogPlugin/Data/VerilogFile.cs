@@ -33,7 +33,8 @@ namespace pluginVerilog.Data
                 name = relativePath;
             }
 
-            VerilogFile fileItem = new VerilogFile() { Name = name, Project = project, RelativePath = relativePath };
+            CodeEditor2.FileTypes.FileType fileType = CodeEditor2.Global.FileTypes[FileTypes.VerilogFile.TypeID];
+            VerilogFile fileItem = new VerilogFile() { Name = name, Project = project, RelativePath = relativePath};
 
             return fileItem;
         }
@@ -51,7 +52,8 @@ namespace pluginVerilog.Data
                 name = relativePath;
             }
 
-            VerilogFile fileItem = new VerilogFile() { Name = name, Project = project, RelativePath = relativePath };
+            CodeEditor2.FileTypes.FileType fileType = CodeEditor2.Global.FileTypes[FileTypes.SystemVerilogFile.TypeID];
+            VerilogFile fileItem = new VerilogFile() { Name = name, Project = project, RelativePath = relativePath};
             fileItem.SystemVerilog = true;
             return fileItem;
         }
@@ -81,6 +83,7 @@ namespace pluginVerilog.Data
                         document = null;
                     }
                 }
+                if (document == null) throw new Exception();
                 return document;
             }
             protected set
