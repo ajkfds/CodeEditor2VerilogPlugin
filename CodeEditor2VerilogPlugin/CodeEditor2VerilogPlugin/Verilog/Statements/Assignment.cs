@@ -73,7 +73,7 @@ namespace pluginVerilog.Verilog.Statements
                         lExpression.Reference,
                         expression.Reference
                         );
-                    wordReference.AddWarning("bit width mismatch " + lExpression.BitWidth + " vs " + expression.BitWidth);
+                    wordReference.AddWarning("bit width mismatch " + lExpression.BitWidth + " <- " + expression.BitWidth);
                 }
             }
 
@@ -169,7 +169,7 @@ namespace pluginVerilog.Verilog.Statements
                         lExpression.Reference,
                         expression.Reference
                         );
-                    wRef.AddWarning("bit width mismatch " + lExpression.BitWidth + " vs " + expression.BitWidth);
+                    wRef.AddWarning("bit width mismatch " + lExpression.BitWidth + " <- " + expression.BitWidth);
                 }
             }
 

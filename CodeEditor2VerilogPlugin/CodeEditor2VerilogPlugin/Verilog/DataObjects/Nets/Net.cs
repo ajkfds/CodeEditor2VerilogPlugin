@@ -1,4 +1,5 @@
-﻿using System;
+﻿using pluginVerilog.Verilog.DataObjects.Variables;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -368,14 +369,23 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                 }
                 else if (word.Text == "[")
                 {
-                    while (word.Text == "[")
+                    net.Dimensions.Clear();
+                    // { variable_dimension }
+                    while (word.Text == "[" && !word.Eof)
                     {
-                        DataObjects.Arrays.PackedArray? dimension = DataObjects.Arrays.PackedArray.ParseCreate(word, nameSpace);
-                        if (word.Active && word.Prototype && dimension != null)
-                        {
-                            net.PackedDimensions.Add(dimension);
-                        }
+                        DataObjects.Arrays.VariableArray? uPrange = DataObjects.Arrays.VariableArray.ParseCreate(word, nameSpace);
+                        if (uPrange != null) net.Dimensions.Add(uPrange);
                     }
+
+
+                    //while (word.Text == "[")
+                    //{
+                    //    DataObjects.Arrays.PackedArray? dimension = DataObjects.Arrays.PackedArray.ParseCreate(word, nameSpace);
+                    //    if (word.Active && word.Prototype && dimension != null)
+                    //    {
+                    //        net.Dimensions PackedDimensions.Add(dimension);
+                    //    }
+                    //}
                 }
 
                 if (word.GetCharAt(0) != ',') break;

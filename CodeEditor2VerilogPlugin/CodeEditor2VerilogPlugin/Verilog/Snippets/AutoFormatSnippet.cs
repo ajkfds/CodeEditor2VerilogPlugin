@@ -59,12 +59,19 @@ namespace pluginVerilog.Verilog.Snippets
 
             string indent = vCodeDocument.GetIndentString(index);
 
+            string? moduleString = moduleInstantiation.CreateString("\t");
+            if(moduleString == null)
+            {
+                CodeEditor2.Controller.AppendLog("illegal module instance",Colors.Red);
+                return;
+            }
+
             CodeEditor2.Controller.CodeEditor.SetCaretPosition(moduleInstantiation.BeginIndexReference.Indexes.Last());
             codeDocument.Replace(
                 moduleInstantiation.BeginIndexReference.Indexes.Last(),
                 moduleInstantiation.LastIndexReference.Indexes.Last() - moduleInstantiation.BeginIndexReference.Indexes.Last() + 1,
                 0,
-                moduleInstantiation.CreateString("\t")
+                moduleString
                 );
             CodeEditor2.Controller.CodeEditor.SetSelection(codeDocument.CaretIndex, codeDocument.CaretIndex);
         }

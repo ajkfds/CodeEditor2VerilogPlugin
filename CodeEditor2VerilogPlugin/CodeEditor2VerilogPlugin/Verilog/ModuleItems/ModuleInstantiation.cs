@@ -757,13 +757,13 @@ namespace pluginVerilog.Verilog.ModuleItems
             {
                 if (expression.BitWidth != null && expression.Reference != null && expression.BitWidth != 1)
                 {
-                    expression.Reference.AddWarning("bit width mismatch 1 vs " + expression.BitWidth);
+                    expression.Reference.AddWarning("bit width mismatch 1 <- " + expression.BitWidth);
                 }
 
             }
             else if (port.Range.Size != expression.BitWidth && expression.Reference != null)
             {
-                expression.Reference.AddWarning("bit width mismatch " + port.Range.Size + " vs " + expression.BitWidth);
+                expression.Reference.AddWarning("bit width mismatch " + port.Range.Size + " <- " + expression.BitWidth);
             }
         }
         private static void checkVariablePortConnection(
@@ -778,13 +778,13 @@ namespace pluginVerilog.Verilog.ModuleItems
             {
                 if (expression.BitWidth != null && expression.Reference != null && expression.BitWidth != 1)
                 {
-                    expression.Reference.AddWarning("bit width mismatch 1 vs " + expression.BitWidth);
+                    expression.Reference.AddWarning("bit width mismatch 1 <- " + expression.BitWidth);
                 }
 
             }
             else if (port.Range.Size != expression.BitWidth && expression.Reference != null)
             {
-                expression.Reference.AddWarning("bit width mismatch " + port.Range.Size + " vs " + expression.BitWidth);
+                expression.Reference.AddWarning("bit width mismatch " + port.Range.Size + " <- " + expression.BitWidth);
             }
         }
         private static void checkInterfacePortConnection(
