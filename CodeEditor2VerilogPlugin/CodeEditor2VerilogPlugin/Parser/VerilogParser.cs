@@ -25,7 +25,15 @@ namespace pluginVerilog.Parser
             if (textFile == null) throw new Exception();
             this.TextFile = textFile;
 
-            fileRef = new WeakReference<Data.IVerilogRelatedFile>(verilogRelatedFile);
+            VerilogFile? verilogFile = verilogRelatedFile as VerilogFile;
+            if(verilogFile == null) 
+            {
+                VerilogModuleInstance? verilogModuleInstance = verilogRelatedFile as VerilogModuleInstance;
+                if (verilogModuleInstance != null) verilogFile = verilogModuleInstance.SourceVerilogFile;
+            }
+            if (verilogFile == null) throw new Exception();
+
+            fileRef = new WeakReference<Data.VerilogFile>(verilogFile);
 
             parsedDocument = new Verilog.ParsedDocument(verilogRelatedFile,null, parseMode);
             parsedDocument.Version = verilogRelatedFile.CodeDocument.Version;
@@ -71,13 +79,17 @@ namespace pluginVerilog.Parser
             if (textFile == null) throw new Exception();
             this.TextFile = textFile;
 
-            fileRef = new WeakReference<Data.IVerilogRelatedFile>(verilogRelatedFile);
+            VerilogFile? verilogFile = verilogRelatedFile as VerilogFile;
+            Data.VerilogModuleInstance? verilogModuleInstance = verilogRelatedFile as Data.VerilogModuleInstance;
+            if (verilogFile == null)
+            {
+                if (verilogModuleInstance != null) verilogFile = verilogModuleInstance.SourceVerilogFile;
+            }
+            if (verilogFile == null) throw new Exception();
+
+            fileRef = new WeakReference<Data.VerilogFile>(verilogFile);
             
             parsedDocument = new Verilog.ParsedDocument(verilogRelatedFile,null, parseMode);
-
-
-            Data.VerilogFile? verilogFile = verilogRelatedFile as Data.VerilogFile;
-            Data.VerilogModuleInstance? verilogModuleInstance = verilogRelatedFile as Data.VerilogModuleInstance;
 
             if (
                 (verilogFile != null && verilogFile.SystemVerilog) ||
@@ -121,12 +133,12 @@ namespace pluginVerilog.Parser
         //        private Dictionary<string, Verilog.Expressions.Expression> parameterOverrides;
         //        private string targetModuleName = null;
 
-        private System.WeakReference<Data.IVerilogRelatedFile> fileRef;
-        public Data.IVerilogRelatedFile? File
+        private System.WeakReference<VerilogFile> fileRef;
+        public VerilogFile? File
         {
             get
             {
-                Data.IVerilogRelatedFile? ret;
+                VerilogFile? ret;
                 if (!fileRef.TryGetTarget(out ret)) return null;
                 return ret;
             }
@@ -194,7 +206,7 @@ namespace pluginVerilog.Parser
             word.RootParsedDocument.LockedDocument.Add(word.Document);
             if((File as Data.VerilogFile) == null)
             {
-//                System.Diagnostics.Debugger.Break();
+                System.Diagnostics.Debugger.Break();
             }
             Root root = Root.ParseCreate(word,VerilogParsedDocument, File as Data.VerilogFile);
 
