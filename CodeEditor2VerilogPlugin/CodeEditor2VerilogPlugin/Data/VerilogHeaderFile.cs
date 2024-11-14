@@ -15,7 +15,7 @@ namespace pluginVerilog.Data
 
     public class VerilogHeaderFile : CodeEditor2.Data.TextFile, IVerilogRelatedFile
     {
-        public new static VerilogHeaderFile Create(string relativePath, CodeEditor2.Data.Project project, CodeEditor2.FileTypes.FileType fileType)
+        public new static VerilogHeaderFile Create(string relativePath, CodeEditor2.Data.Project project)
         {
             string name;
             if (relativePath.Contains(System.IO.Path.DirectorySeparatorChar))
@@ -151,7 +151,7 @@ namespace pluginVerilog.Data
             Update();
         }
 
-        protected override CodeEditor2.NavigatePanel.NavigatePanelNode createNode()
+        protected override CodeEditor2.NavigatePanel.NavigatePanelNode CreateNode()
         {
             return new NavigatePanel.VerilogHeaderNode(this);
         }

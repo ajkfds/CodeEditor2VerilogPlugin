@@ -370,7 +370,7 @@ namespace pluginVerilog.Data
             }
         }
 
-        protected override CodeEditor2.NavigatePanel.NavigatePanelNode createNode()
+        protected override CodeEditor2.NavigatePanel.NavigatePanelNode CreateNode()
         {
             NavigatePanel.VerilogFileNode node = new NavigatePanel.VerilogFileNode(this);
             return node;

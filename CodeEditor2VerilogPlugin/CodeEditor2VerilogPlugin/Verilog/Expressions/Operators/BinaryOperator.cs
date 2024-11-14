@@ -163,7 +163,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
             Value = value;
             BitWidth = bitWidth;
             Primary ret = this;
-            if (Primary1 != null && Primary2.Reference != null)
+            if (Primary1 != null && Primary1.Reference != null && Primary2 != null && Primary2.Reference != null)
             {
                 Reference = WordReference.CreateReferenceRange(Primary1.Reference, Primary2.Reference);
             }

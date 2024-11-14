@@ -897,7 +897,7 @@ namespace pluginVerilog.Verilog.ModuleItems
             {
                 if (!first) sb.Append(",\r\n");
 
-                if(port.SectionName != sectionName)
+                if(port.SectionName != sectionName && sectionName != "")
                 {
                     sectionName = port.SectionName;
                     sb.Append("// ");

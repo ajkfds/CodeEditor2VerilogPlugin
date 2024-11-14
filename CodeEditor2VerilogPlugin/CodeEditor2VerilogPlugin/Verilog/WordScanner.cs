@@ -1,5 +1,6 @@
 ﻿using Avalonia.Remote.Protocol;
 using pluginVerilog.CodeEditor;
+using pluginVerilog.Data;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -1070,90 +1071,18 @@ namespace pluginVerilog.Verilog
                 rootFile = stock[0].VerilogFile;
             }
 
-            Data.VerilogHeaderInstance vhInstance = null;
             IndexReference indexReference = IndexReference.Create(wordPointer.ParsedDocument.IndexReference, wordPointer.Index);
-            ParsedDocument newParsedDocument;
+            ParsedDocument? newParsedDocument;
 
             if (prototype)
             {
-                string name;
-                if (relativeFilePath.Contains(System.IO.Path.DirectorySeparatorChar))
-                {
-                    name = relativeFilePath.Substring(relativeFilePath.LastIndexOf(System.IO.Path.DirectorySeparatorChar) + 1);
-                }
-                else
-                {
-                    name = relativeFilePath;
-                }
-
-                if (wordPointer.ParsedDocument.IncludeFiles.ContainsKey(name))
-                { // avoid duplicate name
-                    int count = 1;
-                    while (wordPointer.ParsedDocument.IncludeFiles.ContainsKey(name + ":" + count.ToString()))
-                    {
-                        count++;
-                    }
-                    name = name + ":" + count.ToString();
-                }
-
-                if (wordPointer.ParsedDocument.IncludeFiles.ContainsKey(name))
-                { // avoid duplicate name
-                    int count = 1;
-                    while (wordPointer.ParsedDocument.IncludeFiles.ContainsKey(name + ":" + count.ToString()))
-                    {
-                        count++;
-                    }
-                    name = name + ":" + count.ToString();
-                }
-
-                vhInstance = Data.VerilogHeaderInstance.Create(
-                                                relativeFilePath,
-                                                name,
-                                                CreateIndexReference(),
-                                                rootFile,
-                                                wordPointer.ParsedDocument.Project,
-                                                id
-                                                );
-
-
-                if (vhInstance == null)
-                {
-                    wordPointer.AddError("illegal file");
-                    return;
-                }
-
-
-
-                if (!wordPointer.ParsedDocument.IncludeFiles.ContainsKey(vhInstance.ID))
-                {
-                    wordPointer.ParsedDocument.IncludeFiles.Add(vhInstance.ID, vhInstance);
-                }
-                else
-                {
-                    vhInstance = wordPointer.ParsedDocument.IncludeFiles[vhInstance.ID];
-                }
-
-                CodeEditor2.Data.Item? parent = wordPointer.ParsedDocument.File as CodeEditor2.Data.Item;
-                if (parent == null) throw new Exception();
-                vhInstance.Parent = parent;
-
-                newParsedDocument = new Verilog.ParsedDocument(vhInstance, indexReference, RootParsedDocument.ParseMode);
-                CodeDocument? originalDocument = vhInstance.CodeDocument as CodeDocument;
-                if (originalDocument == null) throw new Exception();
-
-                // create codeDocument copy
-                CodeDocument document = CodeDocument.SnapShotFrom(originalDocument);
-                newParsedDocument.CodeDocument = document;
-
-                newParsedDocument.SystemVerilog = wordPointer.ParsedDocument.SystemVerilog;
-                if (rootFile != null && rootFile.VerilogParsedDocument != null && rootFile.VerilogParsedDocument.SystemVerilog)
-                {
-                    newParsedDocument.SystemVerilog = true;
-                }
-                vhInstance.ParsedDocument = newParsedDocument;
+                addIncludeFile(relativeFilePath, rootFile, id, indexReference, out newParsedDocument);
             }
             else
             {
+                Data.VerilogHeaderInstance vhInstance = null;
+                // When including outside the module, prototype parse is not performed, so only this part is executed.
+
                 // get vhInstance parsed @ prototype
                 IndexReference currentIndex = CreateIndexReference();
                 foreach (Data.VerilogHeaderInstance vh in wordPointer.ParsedDocument.IncludeFiles.Values)
@@ -1163,11 +1092,16 @@ namespace pluginVerilog.Verilog
                         vhInstance = vh;
                     }
                 }
-                if (vhInstance == null) return;
-
-                newParsedDocument = vhInstance.VerilogParsedDocument;
-
+                if (vhInstance != null)
+                {
+                    newParsedDocument = vhInstance.VerilogParsedDocument;
+                }
+                else
+                {
+                    addIncludeFile(relativeFilePath, rootFile, id, indexReference, out newParsedDocument);
+                }
             }
+            if (newParsedDocument == null) return;
 
             WordPointer newPointer = new WordPointer(newParsedDocument.CodeDocument, newParsedDocument);
 
@@ -1198,6 +1132,87 @@ namespace pluginVerilog.Verilog
                     break;
                 }
             }
+        }
+
+        private void addIncludeFile(string relativeFilePath, IVerilogRelatedFile rootFile,string id, IndexReference indexReference, out ParsedDocument? newParsedDocument)
+        {
+            string name;
+            if (relativeFilePath.Contains(System.IO.Path.DirectorySeparatorChar))
+            {
+                name = relativeFilePath.Substring(relativeFilePath.LastIndexOf(System.IO.Path.DirectorySeparatorChar) + 1);
+            }
+            else
+            {
+                name = relativeFilePath;
+            }
+
+            if (wordPointer.ParsedDocument.IncludeFiles.ContainsKey(name))
+            { // avoid duplicate name
+                int count = 1;
+                while (wordPointer.ParsedDocument.IncludeFiles.ContainsKey(name + ":" + count.ToString()))
+                {
+                    count++;
+                }
+                name = name + ":" + count.ToString();
+            }
+
+            if (wordPointer.ParsedDocument.IncludeFiles.ContainsKey(name))
+            { // avoid duplicate name
+                int count = 1;
+                while (wordPointer.ParsedDocument.IncludeFiles.ContainsKey(name + ":" + count.ToString()))
+                {
+                    count++;
+                }
+                name = name + ":" + count.ToString();
+            }
+
+            Data.VerilogHeaderInstance vhInstance = Data.VerilogHeaderInstance.Create(
+                                            relativeFilePath,
+                                            name,
+                                            CreateIndexReference(),
+                                            rootFile,
+                                            wordPointer.ParsedDocument.Project,
+                                            id
+                                            );
+
+
+            if (vhInstance == null)
+            {
+                wordPointer.AddError("illegal file");
+                newParsedDocument = null;
+                return;
+            }
+
+
+
+            if (!wordPointer.ParsedDocument.IncludeFiles.ContainsKey(vhInstance.ID))
+            {
+                wordPointer.ParsedDocument.IncludeFiles.Add(vhInstance.ID, vhInstance);
+            }
+            else
+            {
+                vhInstance = wordPointer.ParsedDocument.IncludeFiles[vhInstance.ID];
+            }
+
+            CodeEditor2.Data.Item? parent = wordPointer.ParsedDocument.File as CodeEditor2.Data.Item;
+            if (parent == null) throw new Exception();
+            vhInstance.Parent = parent;
+
+            newParsedDocument = new Verilog.ParsedDocument(vhInstance, indexReference, RootParsedDocument.ParseMode);
+            CodeDocument? originalDocument = vhInstance.CodeDocument as CodeDocument;
+            if (originalDocument == null) throw new Exception();
+
+            // create codeDocument copy
+            CodeDocument document = CodeDocument.SnapShotFrom(originalDocument);
+            newParsedDocument.CodeDocument = document;
+
+            newParsedDocument.SystemVerilog = wordPointer.ParsedDocument.SystemVerilog;
+            if (rootFile != null && rootFile.VerilogParsedDocument != null && rootFile.VerilogParsedDocument.SystemVerilog)
+            {
+                newParsedDocument.SystemVerilog = true;
+            }
+            vhInstance.ParsedDocument = newParsedDocument;
+
         }
 
     }

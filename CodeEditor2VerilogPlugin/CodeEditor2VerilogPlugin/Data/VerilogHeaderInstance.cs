@@ -217,7 +217,7 @@ namespace pluginVerilog.Data
         }
 
 
-        protected override CodeEditor2.NavigatePanel.NavigatePanelNode createNode()
+        protected override CodeEditor2.NavigatePanel.NavigatePanelNode CreateNode()
         {
             NavigatePanel.VerilogHeaderInstanceNode node = new NavigatePanel.VerilogHeaderInstanceNode(this,Project);
             nodeRef = new WeakReference<CodeEditor2.NavigatePanel.NavigatePanelNode>(node);

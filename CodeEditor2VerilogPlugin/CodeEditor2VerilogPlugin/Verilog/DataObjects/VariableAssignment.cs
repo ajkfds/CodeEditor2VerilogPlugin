@@ -18,7 +18,7 @@ namespace pluginVerilog.Verilog.DataObjects
         public Expressions.Expression NetLValue { get; protected set; }
         public Expressions.Expression Expression { get; protected set; }
  
-        public static VariableAssignment ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static VariableAssignment? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             // variable_assignment  ::= variable_lvalue = expression
             // variable_lvalue      ::= hierarchical_variable_identifier
@@ -28,12 +28,13 @@ namespace pluginVerilog.Verilog.DataObjects
             //                          | variable_concatenation
 
             VariableAssignment variableAssign = new VariableAssignment();
-            variableAssign.NetLValue = Expressions.Expression.ParseCreate(word, nameSpace);
-
-            if (variableAssign.NetLValue == null)
+            Expressions.Expression? lExpression = Expressions.Expression.ParseCreate(word, nameSpace);
+            if (lExpression == null)
             {
                 return null;
             }
+            variableAssign.NetLValue = lExpression;
+
             if (variableAssign.NetLValue.IncrementDecrement) return variableAssign;
             if (word.Text != "=")
             {
@@ -43,8 +44,10 @@ namespace pluginVerilog.Verilog.DataObjects
             WordScanner equalPointer = word.Clone();
             word.MoveNext();
 
-            variableAssign.Expression = Expressions.Expression.ParseCreate(word, nameSpace);
-            if (variableAssign.Expression == null) return null;
+            Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
+
+            if (expression == null) return null;
+            variableAssign.Expression = expression;
 
             if (!word.Prototype)
             {
@@ -56,7 +59,7 @@ namespace pluginVerilog.Verilog.DataObjects
                     )
                 {
                     WordReference wRef = WordReference.CreateReferenceRange(variableAssign.NetLValue.Reference, variableAssign.Expression.Reference);
-                    wRef.AddWarning("bit width mismatch " + variableAssign.NetLValue.BitWidth + " vs " + variableAssign.Expression.BitWidth);
+                    wRef.AddWarning("bit width mismatch " + variableAssign.NetLValue.BitWidth + " <- " + variableAssign.Expression.BitWidth);
                 }
             }
 
