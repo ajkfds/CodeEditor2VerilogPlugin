@@ -430,12 +430,12 @@ ansi_port_declaration ::=
             {
                 switch (direction)
                 {
-                    //    — For input and inout ports, the port shall default to a net of default net type. 
+                    // — For input and inout ports, the port shall default to a net of default net type. 
                     case DirectionEnum.Inout:
                     case DirectionEnum.Input:
                         netType = buildingBlock.DefaultNetType;
                         break;
-                    //    — For output ports, the default port kind depends on how the data type is specified:
+                    // — For output ports, the default port kind depends on how the data type is specified:
                     //      — If the data type is omitted or declared with the implicit_data_type syntax, the port kind shall
                     //        default to a net of default net type.
                     //      — If the data type is declared with the explicit data_type syntax, the port kind shall default to variable.
@@ -449,12 +449,12 @@ ansi_port_declaration ::=
                 }
             }
 
-            //    — If the data type is omitted, it shall default to logic except for interconnect ports which have no data type.
             //if (direction != DirectionEnum.Inout && netType == null)
             //{
             //    dataType = DataType.ParseCreate(word, nameSpace, null);
             //}
 
+            // — If the data type is omitted, it shall default to logic except for interconnect ports which have no data type.
             // parse packed dimensions for net without explicit datatype
             List<DataObjects.Arrays.PackedArray> packedDimensions = new List<DataObjects.Arrays.PackedArray>();
             if(dataType == null)
@@ -466,13 +466,21 @@ ansi_port_declaration ::=
                     packedDimensions.Add(range);
                 }
             }
+            else
+            {
+                if (dataType.IsVector)
+                {
+                    DataTypes.IntegerVectorType? vector = dataType as DataTypes.IntegerVectorType;
+                    if (vector == null) throw new Exception();
+                    packedDimensions = vector.PackedDimensions;
+                }
+            }
 
             if (!General.IsIdentifier(word.Text))
             {
                 word.AddError("illegal port identifier");
                 return true;
             }
-
 
             Port port = new Port();
             port.Name = word.Text;

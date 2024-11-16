@@ -27,5 +27,6 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         {
             return "shortreal";
         }
+        public bool IsVector { get { return false; } }
     }
 }

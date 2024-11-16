@@ -10,5 +10,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
     {
         public DataTypeEnum Type { get; }
         public string CreateString();
+
+        public bool IsVector { get; }
     }
 }

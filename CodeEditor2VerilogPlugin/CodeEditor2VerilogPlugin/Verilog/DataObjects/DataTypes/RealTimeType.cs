@@ -15,6 +15,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 return DataTypeEnum.Realtime;
             }
         }
+
         public static RealTimeType ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             RealTimeType dType = new RealTimeType();
@@ -27,5 +28,6 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         {
             return "realtime";
         }
+        public bool IsVector { get { return false; } }
     }
 }

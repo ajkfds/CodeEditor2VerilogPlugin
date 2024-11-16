@@ -41,6 +41,8 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
             return dType;
         }
+        public bool IsVector { get { return false; } }
+
         public virtual string CreateString()
         {
             return "chandle";

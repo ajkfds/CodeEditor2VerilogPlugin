@@ -35,6 +35,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             return sb.ToString();
         }
 
+        public bool IsVector { get { return false; } }
         public static Enum ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "enum") System.Diagnostics.Debugger.Break();

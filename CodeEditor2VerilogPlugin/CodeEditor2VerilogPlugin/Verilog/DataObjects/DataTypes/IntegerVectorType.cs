@@ -31,6 +31,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 return PackedDimensions[0].Size;
             } 
         }
+        public bool IsVector { get { return true; } }
 
         public static IntegerVectorType? ParseCreate(WordScanner word, NameSpace nameSpace)
         {

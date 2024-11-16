@@ -45,6 +45,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
             return sb.ToString();
         }
+        public bool IsVector { get { return false; } }
 
         public static Struct? ParseCreate(WordScanner word, NameSpace nameSpace)
         {

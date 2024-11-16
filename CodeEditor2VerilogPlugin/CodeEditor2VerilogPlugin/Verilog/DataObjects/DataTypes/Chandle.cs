@@ -33,6 +33,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             Chandle chandle = new Chandle();
             return chandle;
         }
+        public bool IsVector { get { return false; } }
 
     }
 }

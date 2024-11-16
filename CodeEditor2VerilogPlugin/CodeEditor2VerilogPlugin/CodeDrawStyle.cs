@@ -45,7 +45,7 @@ namespace pluginVerilog
                 },
                 // 1 warning
                 new MarkDetail{
-                    Color = Avalonia.Media.Color.FromArgb(200,255,150,100),
+                    Color = Avalonia.Media.Color.FromArgb(150,255,250,100),
                     Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkDetail.MarkStyleEnum.WaveLine,
                     DecorationHeight = -2,
                     DecorationWidth = 4,

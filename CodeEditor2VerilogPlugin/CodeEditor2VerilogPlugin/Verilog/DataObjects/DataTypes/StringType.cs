@@ -27,5 +27,6 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         {
             return "string";
         }
+        public bool IsVector { get { return false; } }
     }
 }

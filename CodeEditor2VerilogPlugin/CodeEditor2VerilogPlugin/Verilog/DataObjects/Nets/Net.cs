@@ -353,7 +353,9 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                     {
                         if (nameSpace.DataObjects.ContainsKey(net.Name) && nameSpace.DataObjects[net.Name] is Net)
                         {
-                            net = nameSpace.DataObjects[net.Name] as Net;
+                            Net? newNet = nameSpace.DataObjects[net.Name] as Net;
+                            if (newNet == null) throw new Exception();
+                            net = newNet;
                         }
                         word.Color(CodeDrawStyle.ColorType.Net);
                     }
@@ -364,8 +366,22 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                 if (word.Text == "=")
                 {
                     word.MoveNext();
-                    Expressions.Expression initalValue = Expressions.Expression.ParseCreate(word, nameSpace);
-                    net.AssignedReferences.Add(net.DefinedReference);
+                    Expressions.Expression? assignValue = Expressions.Expression.ParseCreate(word, nameSpace);
+                    if(net.DefinedReference != null) net.AssignedReferences.Add(net.DefinedReference);
+                    if(!word.Prototype && assignValue != null)
+                    {
+                        if(net.Range == null)
+                        {
+                            if (assignValue.BitWidth != 1)
+                            {
+                                assignValue.Reference.AddWarning("Size mismatch 1 <- " + assignValue.BitWidth.ToString());
+                            }
+                        }
+                        else if(assignValue.BitWidth != net.Range.Size)
+                        {
+                            assignValue.Reference.AddWarning("Size mismatch "+ net.Range.Size.ToString() +" <- "+assignValue.BitWidth.ToString() );
+                        }
+                    }
                 }
                 else if (word.Text == "[")
                 {

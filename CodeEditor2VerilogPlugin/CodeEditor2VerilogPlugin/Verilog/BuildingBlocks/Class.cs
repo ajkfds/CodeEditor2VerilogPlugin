@@ -15,6 +15,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
 
         }
+        public bool IsVector { get { return false; } }
 
         // IModuleOrInterfaceOrProgram
 

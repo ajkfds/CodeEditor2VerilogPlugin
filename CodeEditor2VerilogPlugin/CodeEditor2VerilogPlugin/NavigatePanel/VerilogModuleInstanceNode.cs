@@ -154,44 +154,41 @@ namespace pluginVerilog.NavigatePanel
                 treeIndex++;
             }
 
-            //    // error mark
-            //    if( VerilogModuleInstance != null && VerilogModuleInstance.VerilogParsedDocument != null && VerilogModuleInstance.VerilogParsedDocument.ErrorCount != 0)
-            //    {
-            //        graphics.DrawImage(Global.Icons.Exclamation.GetImage(lineHeight, ajkControls.Primitive.IconImage.ColorStyle.Red), new Point(x, y));
-            //    }
-
-            //    // dirty mark
-            //    if (VerilogFile != null && VerilogFile.Dirty)
-            //    {
-            //        graphics.DrawImage(Global.Icons.NewBadge.GetImage(lineHeight, ajkControls.Primitive.IconImage.ColorStyle.Orange), new Point(x, y));
-            //    }
             if (VerilogFile == null) return;
-            if (VerilogFile.SystemVerilog)
-            {
-                Image = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
-                    "CodeEditor2VerilogPlugin/Assets/Icons/systemVerilogDocument.svg",
-                    Avalonia.Media.Color.FromArgb(100, 200, 240, 240)
-                    );
-            }
-            else
-            {
-                if (VerilogFile.CodeDocument.IsDirty)
-                {
-                    Image = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
-                        "CodeEditor2VerilogPlugin/Assets/Icons/verilogDocument.svg",
-                        Avalonia.Media.Color.FromArgb(100, 200, 240, 240),
-                        "CodeEditor2/Assets/Icons/shine.svg",
-                        Avalonia.Media.Color.FromArgb(255, 255, 255, 200)
-                        );
-                }
-                else
-                {
-                    Image = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
-                        "CodeEditor2VerilogPlugin/Assets/Icons/verilogDocument.svg",
-                        Avalonia.Media.Color.FromArgb(100, 200, 240, 240)
-                        );
-                }
-            }
+
+            // Icon badge will update only in UI thread
+            if (System.Threading.Thread.CurrentThread.Name != "UI") return;
+            Image = VerilogFileNode.GetIcon(VerilogFile);
+
+            //if (VerilogFile == null) return;
+            //if (VerilogFile.SystemVerilog)
+            //{
+            //    Image = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
+            //        "CodeEditor2VerilogPlugin/Assets/Icons/systemVerilogDocument.svg",
+            //        Avalonia.Media.Color.FromArgb(100, 200, 240, 240)
+            //        );
+            //}
+            //else
+            //{
+            //    if (VerilogFile.CodeDocument.IsDirty)
+            //    {
+            //        Image = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
+            //            "CodeEditor2VerilogPlugin/Assets/Icons/verilogDocument.svg",
+            //            Avalonia.Media.Color.FromArgb(100, 200, 240, 240),
+            //            "CodeEditor2/Assets/Icons/shine.svg",
+            //            Avalonia.Media.Color.FromArgb(255, 255, 255, 200)
+            //            );
+            //    }
+            //    else
+            //    {
+            //        Image = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
+            //            "CodeEditor2VerilogPlugin/Assets/Icons/verilogDocument.svg",
+            //            Avalonia.Media.Color.FromArgb(100, 200, 240, 240)
+            //            );
+            //    }
+            //}
+
+
 
         }
 
