@@ -1,4 +1,5 @@
-﻿using System;
+﻿using pluginVerilog.Verilog.DataObjects.Variables;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -48,5 +49,33 @@ namespace pluginVerilog.Verilog
         public List<string> Aurguments = null;
         public string MacroText;
 
+        public void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label,Dictionary<string,Macro> macros)
+        {
+            if (Name == null) return;
+            label.AppendText(Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Identifier));
+            label.AppendText(" : ");
+            label.AppendText(MacroText, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Normal));
+            label.AppendText("\r\n");
+
+            string fixedText = MacroText;
+            while (fixedText.Contains("`")){
+                foreach(Macro macro in macros.Values)
+                {
+                    string searchString = "`" + macro.Name;
+                    if (fixedText.Contains(searchString))
+                    {
+                        fixedText = fixedText.Replace(searchString, macro.MacroText);
+                        continue;
+                    }
+                }
+                break;
+            }
+            if (fixedText != MacroText)
+            {
+                label.AppendText("  = ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Normal));
+                label.AppendText(fixedText, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Normal));
+                label.AppendText("\r\n");
+            }
+        }
     }
 }

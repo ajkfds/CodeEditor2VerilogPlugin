@@ -204,7 +204,7 @@ namespace pluginVerilog.Data
         public override void Save()
         {
             if (CodeDocument == null) return;
-
+            if (SourceTextFile == null) return;
             SourceTextFile.Save();
         }
 

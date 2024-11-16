@@ -158,6 +158,8 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     return RealTimeType.ParseCreate(word, nameSpace);
 
                 //struct_union["packed"[signing]] { struct_union_member { struct_union_member } } { packed_dimension }
+                case "struct":
+                    return Struct.ParseCreate(word, nameSpace);
 
                 // "enum" [enum_base_type] { enum_name_declaration { , enum_name_declaration } { packed_dimension }
                 case "enum":

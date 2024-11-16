@@ -1,5 +1,6 @@
 ﻿using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.DataObjects.Constants;
+using pluginVerilog.Verilog.DataObjects.Variables;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -90,7 +91,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             int index = 0;
             while (!word.Eof | word.Text != "}")
             {
-                if (!parseItem(type, word, nameSpace, ref index)) break;
+                if (!parseMembers(type, word, nameSpace)) break;
 
                 if (word.Text == ",")
                 {
@@ -109,50 +110,79 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             return type;
         }
 
-        private static bool parseItem(Struct enum_, WordScanner word, NameSpace nameSpace, ref int index)
+        private static bool parseMembers(Struct struct_, WordScanner word, NameSpace nameSpace)
         {
             /*
-            enum_name_declaration::=
-                enum_identifier[ [integral_number[ : integral_number]] ] [ = constant_expression ]
+            struct_union_member ::=   { attribute_instance } [random_qualifier] data_type_or_void list_of_variable_decl_assignments;
+            random_qualifier ::= "rand" | "randc"
             */
+
             if (word.Text == "}" | word.Text == ",") return false;
             if (!General.IsIdentifier(word.Text)) return false;
 
-            Member item = new Member();
-            item.Identifier = word.Text;
-            word.Color(CodeDrawStyle.ColorType.Parameter);
-
-            word.MoveNext();
-
-            PackedArray? range = null;
-            if (word.Text == "[")
+            if (word.Text == "rand")
             {
-                range = PackedArray.ParseCreate(word, nameSpace);
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext();
+            }
+            else if (word.Text == "randc")
+            {
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext();
             }
 
-            Expressions.Expression? exp = null;
-            if (word.Text == "=")
+            IDataType? dataType = null;
+            if (word.Text == "void")
             {
-                word.MoveNext();    // =
-                exp = Expressions.Expression.ParseCreate(word, nameSpace);
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext();
+            }
+            else
+            {
+                dataType = DataType.ParseCreate(word, nameSpace, null);
             }
 
-            if (exp != null)
+            while (!word.Eof)
             {
-                int.TryParse(exp.ConstantValueString(), out index);
+                if (!General.IsSimpleIdentifier(word.Text)) return false;
+                string identifier = word.Text;
+                word.Color(CodeDrawStyle.ColorType.Parameter);
+                word.MoveNext();
+
+                PackedArray? range = null;
+                if (word.Text == "[")
+                {
+                    range = PackedArray.ParseCreate(word, nameSpace);
+                }
+
+                Expressions.Expression? exp = null;
+                if (word.Text == "=")
+                {
+                    word.MoveNext();    // =
+                    exp = Expressions.Expression.ParseCreate(word, nameSpace);
+                }
+
+                Member member = new Member()
+                {
+                    DatType = dataType,
+                    Identifier = identifier,
+                    PackedArray = range,
+                    Value = exp
+                };
+
+                struct_.Members.Add(member);
             }
-            item.Index = index;
-
-            enum_.Members.Add(item);
-
-            index++;
             return true;
         }
 
         public class Member
         {
+
+
             public string Identifier;
-            public int Index;
+            public PackedArray? PackedArray;
+            public IDataType? DatType;
+            public Expressions.Expression? Value;
         }
 
     }

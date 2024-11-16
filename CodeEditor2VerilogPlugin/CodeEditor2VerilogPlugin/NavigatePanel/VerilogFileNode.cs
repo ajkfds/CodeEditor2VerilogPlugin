@@ -9,11 +9,13 @@ using Avalonia.Media;
 using Avalonia.Threading;
 using System.ComponentModel;
 using CodeEditor2.Tools;
+using System.Diagnostics.CodeAnalysis;
 
 namespace pluginVerilog.NavigatePanel
 {
     public class VerilogFileNode : CodeEditor2.NavigatePanel.FileNode, IVerilogNavigateNode
     {
+        [SetsRequiredMembers]
         public VerilogFileNode(Data.VerilogFile verilogFile) : base(verilogFile)
         {
             UpdateVisual();
@@ -74,6 +76,7 @@ namespace pluginVerilog.NavigatePanel
             }
         }
 
+        // stop edit and parse all hierachy module
         private async Task parseHierarchy()
         {
             System.Diagnostics.Debug.Print("## VerilogFileNode.OnSelected.PharseHier.Run");

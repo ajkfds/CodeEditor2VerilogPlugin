@@ -333,7 +333,7 @@ namespace pluginVerilog.Data
 
         public override void Dispose()
         {
-            if(ParsedDocument != null)
+            if(VerilogParsedDocument != null)
             {
                 foreach(var incFile in VerilogParsedDocument.IncludeFiles.Values)
                 {

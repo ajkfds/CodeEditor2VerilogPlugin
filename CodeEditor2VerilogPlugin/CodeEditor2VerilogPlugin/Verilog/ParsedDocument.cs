@@ -308,7 +308,13 @@ namespace pluginVerilog.Verilog
 
             if (ret.ItemCount != count) return ret;
 
-            if (space.DataObjects.ContainsKey(text))
+            if (text.StartsWith("`") && Macros.ContainsKey(text.Substring(1)))
+            {
+                Macro macro = Macros[text.Substring(1)];
+                macro.AppendLabel(ret,Macros);
+            }
+
+            if (space != null && space.DataObjects.ContainsKey(text))
             {
                 space.DataObjects[text].AppendLabel(ret);
             }
@@ -338,6 +344,7 @@ namespace pluginVerilog.Verilog
 
             return ret;
         }
+
 
         public BuildingBlock? GetBuildingBlockAt(int index)
         {
