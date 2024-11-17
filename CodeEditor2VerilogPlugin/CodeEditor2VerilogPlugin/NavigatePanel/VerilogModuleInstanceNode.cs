@@ -160,38 +160,7 @@ namespace pluginVerilog.NavigatePanel
             if (System.Threading.Thread.CurrentThread.Name != "UI") return;
             Image = VerilogFileNode.GetIcon(VerilogFile);
 
-            //if (VerilogFile == null) return;
-            //if (VerilogFile.SystemVerilog)
-            //{
-            //    Image = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
-            //        "CodeEditor2VerilogPlugin/Assets/Icons/systemVerilogDocument.svg",
-            //        Avalonia.Media.Color.FromArgb(100, 200, 240, 240)
-            //        );
-            //}
-            //else
-            //{
-            //    if (VerilogFile.CodeDocument.IsDirty)
-            //    {
-            //        Image = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
-            //            "CodeEditor2VerilogPlugin/Assets/Icons/verilogDocument.svg",
-            //            Avalonia.Media.Color.FromArgb(100, 200, 240, 240),
-            //            "CodeEditor2/Assets/Icons/shine.svg",
-            //            Avalonia.Media.Color.FromArgb(255, 255, 255, 200)
-            //            );
-            //    }
-            //    else
-            //    {
-            //        Image = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
-            //            "CodeEditor2VerilogPlugin/Assets/Icons/verilogDocument.svg",
-            //            Avalonia.Media.Color.FromArgb(100, 200, 240, 240)
-            //            );
-            //    }
-            //}
-
-
-
         }
-
 
     }
 

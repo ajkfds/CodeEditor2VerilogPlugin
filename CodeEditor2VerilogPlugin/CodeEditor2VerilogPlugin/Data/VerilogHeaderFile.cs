@@ -36,7 +36,7 @@ namespace pluginVerilog.Data
             return fileItem;
         }
 
-        private string id = null;
+        private string id = "";
         public override string ID
         {
             get
@@ -80,6 +80,7 @@ namespace pluginVerilog.Data
             VerilogCommon.Updater.Update(this);
         }
 
+        // read text document from file
         private bool readFromFile()
         {
             try
@@ -133,7 +134,7 @@ namespace pluginVerilog.Data
             }
         }
 
-        public Verilog.ParsedDocument VerilogParsedDocument
+        public Verilog.ParsedDocument? VerilogParsedDocument
         {
             get
             {
@@ -143,7 +144,7 @@ namespace pluginVerilog.Data
 
         public override void AcceptParsedDocument(CodeEditor2.CodeEditor.ParsedDocument newParsedDocument)
         {
-            Data.IVerilogRelatedFile parentFile = Parent as Data.IVerilogRelatedFile;
+            Data.IVerilogRelatedFile? parentFile = Parent as Data.IVerilogRelatedFile;
             if (parentFile == null) return;
 
             parentFile.AcceptParsedDocument(newParsedDocument);
@@ -156,9 +157,9 @@ namespace pluginVerilog.Data
             return new NavigatePanel.VerilogHeaderNode(this);
         }
 
-        public override DocumentParser CreateDocumentParser(DocumentParser.ParseModeEnum parseMode)
+        public override DocumentParser? CreateDocumentParser(DocumentParser.ParseModeEnum parseMode)
         {
-            Data.IVerilogRelatedFile parentFile = Parent as Data.IVerilogRelatedFile;
+            Data.IVerilogRelatedFile? parentFile = Parent as Data.IVerilogRelatedFile;
             if (parentFile == null) return null;
             // do not parse again for background parse. header file is parsed with parent file.
             if (parseMode != DocumentParser.ParseModeEnum.EditParse ) return null;

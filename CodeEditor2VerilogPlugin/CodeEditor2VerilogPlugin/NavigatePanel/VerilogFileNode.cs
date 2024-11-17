@@ -205,7 +205,6 @@ namespace pluginVerilog.NavigatePanel
                     overrideIcons
                     );
             }
-            return null;
         }
 
     }

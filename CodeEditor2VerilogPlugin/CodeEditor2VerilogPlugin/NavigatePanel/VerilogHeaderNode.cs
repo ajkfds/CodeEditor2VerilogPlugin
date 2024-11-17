@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
 using Avalonia.Media;
+using pluginVerilog.Data;
 
 namespace pluginVerilog.NavigatePanel
 {
@@ -35,26 +36,66 @@ namespace pluginVerilog.NavigatePanel
         }
         public override void UpdateVisual()
         {
-            if (TextFile.CodeDocument.IsDirty)
-            {
-                Image = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
-                    "CodeEditor2VerilogPlugin/Assets/Icons/verilogHeaderDocument.svg",
-                    Avalonia.Media.Color.FromArgb(100, 255, 255, 255),
-                    "CodeEditor2/Assets/Icons/shine.svg",
-                    Avalonia.Media.Color.FromArgb(255, 255, 255, 200)
-                    );
-            }
-            else
-            {
-                Image = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
-                    "CodeEditor2VerilogPlugin/Assets/Icons/verilogHeaderDocument.svg",
-                    Avalonia.Media.Color.FromArgb(100, 255, 255, 255)
-                    );
-            }
+            if (System.Threading.Thread.CurrentThread.Name != "UI") return;
+
+            IVerilogRelatedFile? verilogRelatedFile = TextFile as IVerilogRelatedFile;
+            if (verilogRelatedFile == null) return;
+            Image = GetIcon(verilogRelatedFile);
         }
         public override void OnSelected()
         {
             CodeEditor2.Controller.CodeEditor.SetTextFile(TextFile);
         }
+
+        public static IImage? GetIcon(IVerilogRelatedFile verilogRelatedFile)
+        {
+            // Icon badge will update only in UI thread
+            if (System.Threading.Thread.CurrentThread.Name != "UI")
+            {
+                throw new Exception();
+            }
+
+            List<AjkAvaloniaLibs.Libs.Icons.OverrideIcon> overrideIcons = new List<AjkAvaloniaLibs.Libs.Icons.OverrideIcon>();
+
+            if (verilogRelatedFile.CodeDocument != null && verilogRelatedFile.CodeDocument.IsDirty)
+            {
+                overrideIcons.Add(new AjkAvaloniaLibs.Libs.Icons.OverrideIcon()
+                {
+                    SvgPath = "CodeEditor2/Assets/Icons/shine.svg",
+                    Color = Avalonia.Media.Color.FromArgb(255, 255, 255, 200),
+                    OverridePosition = AjkAvaloniaLibs.Libs.Icons.OverridePosition.UpRight
+                });
+            }
+
+            if (verilogRelatedFile != null && verilogRelatedFile.VerilogParsedDocument != null)
+            {
+                if (verilogRelatedFile.VerilogParsedDocument.ErrorCount > 0)
+                {
+                    overrideIcons.Add(new AjkAvaloniaLibs.Libs.Icons.OverrideIcon()
+                    {
+                        SvgPath = "CodeEditor2VerilogPlugin/Assets/Icons/exclamation_triangle.svg",
+                        Color = Avalonia.Media.Color.FromArgb(255, 255, 20, 20),
+                        OverridePosition = AjkAvaloniaLibs.Libs.Icons.OverridePosition.DownLeft
+                    });
+                }
+                else if (verilogRelatedFile.VerilogParsedDocument.WarningCount > 0)
+                {
+                    overrideIcons.Add(new AjkAvaloniaLibs.Libs.Icons.OverrideIcon()
+                    {
+                        SvgPath = "CodeEditor2VerilogPlugin/Assets/Icons/exclamation_triangle.svg",
+                        Color = Avalonia.Media.Color.FromArgb(255, 255, 255, 20),
+                        OverridePosition = AjkAvaloniaLibs.Libs.Icons.OverridePosition.DownLeft
+                    });
+                }
+            }
+
+
+            return AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
+                "CodeEditor2VerilogPlugin/Assets/Icons/verilogHeaderDocument.svg",
+                Avalonia.Media.Color.FromArgb(100, 200, 240, 240),
+                overrideIcons
+                );
+        }
+
     }
 }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
 using Avalonia.Media;
+using pluginVerilog.Data;
 
 namespace pluginVerilog.NavigatePanel
 {
@@ -96,22 +97,13 @@ namespace pluginVerilog.NavigatePanel
 
         public override void UpdateVisual()
         {
-            if (TextFile.CodeDocument.IsDirty)
-            {
-                Image = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
-                    "CodeEditor2VerilogPlugin/Assets/Icons/verilogHeaderDocument.svg",
-                    Avalonia.Media.Color.FromArgb(100, 255, 255, 255),
-                    "CodeEditor2/Assets/Icons/shine.svg",
-                    Avalonia.Media.Color.FromArgb(255, 255, 255, 200)
-                    );
-            }
-            else
-            {
-                Image = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
-                    "CodeEditor2VerilogPlugin/Assets/Icons/verilogHeaderDocument.svg",
-                    Avalonia.Media.Color.FromArgb(100, 255, 255, 255)
-                    );
-            }
+            // Icon badge will update only in the UI thread
+            if (System.Threading.Thread.CurrentThread.Name != "UI") return;
+
+            // // Select the same icon as VerilogHeaderNode
+            IVerilogRelatedFile? verilogRelatedFile = TextFile as IVerilogRelatedFile;
+            if (verilogRelatedFile == null) return;
+            Image = VerilogHeaderNode.GetIcon(verilogRelatedFile);
         }
 
     }
