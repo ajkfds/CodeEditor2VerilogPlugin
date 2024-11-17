@@ -7,11 +7,13 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace pluginVerilog.Verilog
 {
     public class NameSpace : Item
     {
+        
         private NameSpace() { }
         protected NameSpace(BuildingBlocks.BuildingBlock buildingBlock,NameSpace parent)
         {
@@ -19,8 +21,8 @@ namespace pluginVerilog.Verilog
             Parent = parent;
         }
 
-        public IndexReference BeginIndexReference = null;
-        public IndexReference LastIndexReference = null;
+        public IndexReference? BeginIndexReference = null;
+        public IndexReference? LastIndexReference = null;
 
         private Dictionary<string, DataObjects.DataObject> variables = new Dictionary<string, DataObjects.DataObject>();
         private Dictionary<string, Net> nets = new Dictionary<string, Net>();
@@ -42,28 +44,22 @@ namespace pluginVerilog.Verilog
         public BuildingBlocks.BuildingBlock BuildingBlock { get; protected set; }
         public Dictionary<string, NameSpace> NameSpaces { get { return nameSpaces;  } }
 
-        //public NameSpace GetHierarchyNameSpace(int index)
-        //{
-        //    foreach (NameSpace nameSpace in NameSpaces.Values)
-        //    {
-        //        if(index < nameSpace.BeginIndexReference)
-        //        if (iref.IsSmallerThan(module.BeginIndexReference)) continue;
-        //        if (iref.IsGreaterThan(module.LastIndexReference)) continue;
-        //        space = module.GetHierarchyNameSpace(index);
-        //        break;
-        //    }
-        //    return this;
-        //}
         public NameSpace GetHierarchyNameSpace(IndexReference iref)
         {
             foreach (Function function in BuildingBlock.Functions.Values)
             {
+                if (function.BeginIndexReference == null) continue;
+                if (function.LastIndexReference == null) continue;
+
                 if (iref.IsSmallerThan(function.BeginIndexReference)) continue;
                 if (iref.IsGreaterThan(function.LastIndexReference)) continue;
                 return function.getHierarchyNameSpace2(iref);
             }
             foreach (Task task in BuildingBlock.Tasks.Values)
             {
+                if (task.BeginIndexReference == null) continue;
+                if (task.LastIndexReference == null) continue;
+
                 if (iref.IsSmallerThan(task.BeginIndexReference)) continue;
                 if (iref.IsGreaterThan(task.LastIndexReference)) continue;
                 return task.getHierarchyNameSpace2(iref);
@@ -74,6 +70,9 @@ namespace pluginVerilog.Verilog
         {
             foreach (NameSpace nameSpace in NameSpaces.Values)
             {
+                if (nameSpace.BeginIndexReference == null) continue;
+                if (nameSpace.LastIndexReference == null) continue;
+
                 if (iref.IsSmallerThan(nameSpace.BeginIndexReference)) continue;
                 if (iref.IsGreaterThan(nameSpace.LastIndexReference)) continue;
                 return nameSpace.GetHierarchyNameSpace(iref);

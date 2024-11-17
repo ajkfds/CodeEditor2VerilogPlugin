@@ -80,7 +80,7 @@ namespace pluginVerilog.Verilog.Expressions
             stringBuilder.Append(Text);
         }
 
-        public static Number ParseCreate(WordScanner word)
+        public static Number? ParseCreate(WordScanner word)
         {
             word.Color(CodeDrawStyle.ColorType.Number);
             
@@ -137,7 +137,7 @@ namespace pluginVerilog.Verilog.Expressions
                 word.MoveNext();
 
                 if (!word.Text.StartsWith("\'")) return number;
-                Number number2 = Number.ParseCreate(word);
+                Number? number2 = Number.ParseCreate(word);
                 if (number2 != null && number != null)
                 {
                     number2.BitWidth = number.BitWidth;
@@ -232,9 +232,10 @@ namespace pluginVerilog.Verilog.Expressions
             return null;
         }
 
-
+        //// Parse the fractional part and exponent of a real number after the integer part, and return it as a number type.
         private static bool parseRealValueAfterInteger(Number number, WordScanner word, ref int index, StringBuilder sb)
         {
+            // parse fractional part
             if (word.GetCharAt(index) == '.')
             { // real
                 sb.Append('.');
@@ -248,7 +249,6 @@ namespace pluginVerilog.Verilog.Expressions
                     {
                         index++;
                         continue;
-//                        break;
                     }
                     if (!isDecimalDigit(word.GetCharAt(index))) return false;
                     sb.Append(word.GetCharAt(index));
@@ -257,6 +257,7 @@ namespace pluginVerilog.Verilog.Expressions
                 if (index >= word.Length) return false;
             }
 
+            // parse exponent
             if (word.GetCharAt(index) == 'e' || word.GetCharAt(index) == 'E')
             { // real
                 sb.Append('e');
@@ -279,7 +280,6 @@ namespace pluginVerilog.Verilog.Expressions
                     {
                         index++;
                         continue;
-//                        break;
                     }
                     if (!isDecimalDigit(word.GetCharAt(index))) return false;
                     sb.Append(word.GetCharAt(index));
@@ -308,6 +308,7 @@ namespace pluginVerilog.Verilog.Expressions
                 index = 0;
                 number.Text = number.Text + word.Text;
             }
+
             if (
                 word.GetCharAt(index) == 'x'
                 || word.GetCharAt(index) == 'X'
@@ -326,6 +327,12 @@ namespace pluginVerilog.Verilog.Expressions
 
             while (index < word.Length)
             {
+                // Skip underscores
+                if (word.GetCharAt(index) == '_')
+                {
+                    index++;
+                    continue;
+                }
                 if (!isDecimalDigit(word.GetCharAt(index))) return false;
                 sb.Append(word.GetCharAt(index));
                 index++;

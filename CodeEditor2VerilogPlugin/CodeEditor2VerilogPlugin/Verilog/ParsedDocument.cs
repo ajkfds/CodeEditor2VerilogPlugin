@@ -287,6 +287,9 @@ namespace pluginVerilog.Verilog
 
             foreach (BuildingBlock module in iref.RootParsedDocument.Root.BuldingBlocks.Values)
             {
+                if (module.BeginIndexReference == null) continue;
+                if (module.LastIndexReference == null) continue;
+
                 if (iref.IsSmallerThan(module.BeginIndexReference)) continue;
                 if (iref.IsGreaterThan(module.LastIndexReference)) continue;
                 space = module.GetHierarchyNameSpace(iref);
@@ -299,6 +302,9 @@ namespace pluginVerilog.Verilog
             {
                 foreach (IInstantiation instantiation in space.BuildingBlock.Instantiations.Values)
                 {
+                    if (instantiation.BeginIndexReference == null) continue;
+                    if (instantiation.LastIndexReference == null) continue;
+
                     if (iref.IsSmallerThan(instantiation.BeginIndexReference)) continue;
                     if (iref.IsGreaterThan(instantiation.LastIndexReference)) continue;
                     instantiation.AppendLabel(iref, ret);
