@@ -309,11 +309,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
                 if (parsedDocument.ParameterOverrides == null)
                 {
-                    module = Interface.Create(word, null, file, true);
+                    module = Interface.Create(word, parsedDocument.Root, null, file, true);
                 }
                 else
                 {
-                    module = Interface.Create(word, parsedDocument.ParameterOverrides, null, file, true);
+                    module = Interface.Create(word, parsedDocument.Root, parsedDocument.ParameterOverrides, null, file, true);
                 }
                 if (module.Instantiations.Count != 0) // prepare reparse (instanced module could have un-refferenced link)
                 {
@@ -324,11 +324,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
                 if (parsedDocument.ParameterOverrides == null)
                 {
-                    module = Interface.Create(word, null, file, false);
+                    module = Interface.Create(word, parsedDocument.Root, null, file, false);
                 }
                 else
                 {
-                    module = Interface.Create(word, parsedDocument.ParameterOverrides, null, file, false);
+                    module = Interface.Create(word, parsedDocument.Root, parsedDocument.ParameterOverrides, null, file, false);
                 }
             }
 

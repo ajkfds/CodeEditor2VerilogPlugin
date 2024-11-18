@@ -54,14 +54,15 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
 
 
-        public static Interface Create(WordScanner word, Attribute attribute, Data.IVerilogRelatedFile file, bool protoType)
+        public static Interface Create(WordScanner word, NameSpace nameSpace, Attribute? attribute, Data.IVerilogRelatedFile file, bool protoType)
         {
-            return Create(word, null, attribute, file, protoType);
+            return Create(word,nameSpace, null, attribute, file, protoType);
         }
         public static Interface Create(
             WordScanner word,
-            Dictionary<string, Expressions.Expression> parameterOverrides,
-            Attribute attribute,
+            NameSpace nameSpace,
+            Dictionary<string, Expressions.Expression>? parameterOverrides,
+            Attribute? attribute,
             Data.IVerilogRelatedFile file,
             bool protoType
             )
@@ -84,7 +85,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             if (word.Text != "interface") System.Diagnostics.Debugger.Break();
             word.Color(CodeDrawStyle.ColorType.Keyword);
             Interface interface_ = new Interface();
-            interface_.Parent = word.RootParsedDocument.Root;
+            interface_.Parent = nameSpace;
 
             interface_.BuildingBlock = interface_;
             interface_.File = file;
@@ -126,6 +127,26 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 interface_.LastIndexReference = word.CreateIndexReference();
+
+                if (interface_.Parent != null)
+                {
+                    if (interface_.Parent.NameSpaces.ContainsKey(interface_.Name))
+                    {
+                        if(protoType)
+                        {
+                            word.AddError("duplicate interface");
+                        }
+                        else
+                        {
+                            interface_.Parent.NameSpaces[interface_.Name]= interface_;
+                        }
+
+                    }
+                    else
+                    {
+                        interface_.Parent.NameSpaces.Add(interface_.Name, interface_);
+                    }
+                }
 
                 word.AppendBlock(interface_.BeginIndexReference, interface_.LastIndexReference);
                 word.MoveNext();
@@ -279,6 +300,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 //parseModuleItems(word, module);
                 break;
             }
+
 
             if (!word.Prototype)
             {

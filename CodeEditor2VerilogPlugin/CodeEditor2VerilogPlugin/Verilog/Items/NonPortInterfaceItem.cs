@@ -33,6 +33,9 @@ namespace pluginVerilog.Verilog.Items
                     return ModPort.Parse(word, nameSpace);
                 // timeunits_declaration3
                 // interface_declaration 
+                case "interface":
+                    BuildingBlocks.Interface.Create(word, nameSpace, null, word.RootParsedDocument.File, word.Prototype);
+                    return true;
                 // program_declaration 
                 default:
                     break;

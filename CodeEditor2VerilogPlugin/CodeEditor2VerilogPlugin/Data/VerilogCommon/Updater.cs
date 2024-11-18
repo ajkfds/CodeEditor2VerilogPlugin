@@ -79,7 +79,7 @@ namespace pluginVerilog.Data.VerilogCommon
                     {
                         if (moduleName == null || moduleName == module.Name) // matched module
                         {
-                            UpdateModuleInstance(module, project, targetItem, keepItems, newItems); // targetItem.VerilogParsedDocument eliminated here
+                            UpdateInstance(module, project, targetItem, keepItems, newItems); // targetItem.VerilogParsedDocument eliminated here
                         }
                     }
                 }
@@ -104,7 +104,7 @@ namespace pluginVerilog.Data.VerilogCommon
             }
         }
 
-        private static void UpdateModuleInstance(BuildingBlock newModule,Project project, IVerilogRelatedFile targetItem, List<Item> keepItems,Dictionary<string, Item> newItems)
+        private static void UpdateInstance(BuildingBlock newModule,Project project, IVerilogRelatedFile targetItem, List<Item> keepItems,Dictionary<string, Item> newItems)
         {
             foreach (IInstantiation newInstantiation in newModule.Instantiations.Values)
             {
@@ -168,29 +168,6 @@ namespace pluginVerilog.Data.VerilogCommon
                             project.AddReparseTarget(newVerilogModuleInstance);
                         }
                     }
-
-
-                    //Item item = null;
-                    //if (newInstantiation is ModuleInstantiation)
-                    //{
-                    //    item = Data.VerilogModuleInstance.Create(newInstantiation as ModuleInstantiation, project);
-                    //}
-                    //if (item != null & !newItems.ContainsKey(newInstantiation.Name))
-                    //{
-                    //    item.Parent = targetItem as Item;
-                    //    newItems.Add(newInstantiation.Name, item);
-                    //    keepItems.Add(item);
-                    //    if (newInstantiation.ParameterOverrides.Count != 0)
-                    //    {
-                    //        Data.VerilogModuleInstance moduleInstance = item as Data.VerilogModuleInstance;
-
-                            
-                    //        if (moduleInstance.ParsedDocument == null)
-                    //        {   // background reparse
-                    //            project.AddReparseTarget(item);
-                    //        }
-                    //    }
-                    //}
                 }
             }
         }
