@@ -269,7 +269,7 @@ namespace pluginVerilog.Data
             }
         }
 
-        public void RegisterInstanceParsedDocument(string id, ParsedDocument parsedDocument,VerilogModuleInstance moduleInstance)
+        public void RegisterInstanceParsedDocument(string id, ParsedDocument parsedDocument,InstanceTextFile moduleInstance)
         {
             System.Diagnostics.Debug.Print("#### Try RegisterInstanceParsedDocument " + id);
             cleanWeakRef();
@@ -313,19 +313,19 @@ namespace pluginVerilog.Data
             }
         }
 
-        private List<System.WeakReference<Data.VerilogModuleInstance>> moduleInstanceRefs
-            = new List<WeakReference<VerilogModuleInstance>>();
+        private List<System.WeakReference<Data.InstanceTextFile>> moduleInstanceRefs
+            = new List<WeakReference<InstanceTextFile>>();
 
-        public void RegisterModuleInstance(VerilogModuleInstance verilogModuleInstance)
+        public void RegisterModuleInstance(InstanceTextFile verilogModuleInstance)
         {
-            moduleInstanceRefs.Add(new WeakReference<VerilogModuleInstance>(verilogModuleInstance));
+            moduleInstanceRefs.Add(new WeakReference<InstanceTextFile>(verilogModuleInstance));
         }
 
-        public void RemoveModuleInstance(VerilogModuleInstance verilogModuleInstance)
+        public void RemoveModuleInstance(InstanceTextFile verilogModuleInstance)
         {
             for(int i = 0; i< moduleInstanceRefs.Count; i++)
             {
-                VerilogModuleInstance? ret;
+                InstanceTextFile? ret;
                 if (!moduleInstanceRefs[i].TryGetTarget(out ret)) continue;
                 if (ret == verilogModuleInstance) moduleInstanceRefs.Remove(moduleInstanceRefs[i]);
             }

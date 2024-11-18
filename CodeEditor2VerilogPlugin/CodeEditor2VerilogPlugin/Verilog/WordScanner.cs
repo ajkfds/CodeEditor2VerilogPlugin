@@ -345,14 +345,21 @@ namespace pluginVerilog.Verilog
         private void returnHierarchy()
         {
             bool error = false;
-            if (wordPointer.ParsedDocument.Messages.Count != 0)
+            bool warning = false;
+            if (wordPointer.ParsedDocument.ErrorCount != 0)
             {
                 error = true;
             }
+            if (wordPointer.ParsedDocument.WarningCount != 0)
+            {
+                warning = true;
+            }
+
 
             if (wordPointer.ParsedDocument == stock.Last().ParsedDocument)
             {
                 error = false;
+                warning = false;
             }
 
             if(wordPointer.ParsedDocument.Item != null) wordPointer.ParsedDocument.Item.Update();
@@ -365,7 +372,18 @@ namespace pluginVerilog.Verilog
             //wordPointer.Dispose(); keep document & parsedData
             wordPointer = stock.Last();
             stock.Remove(stock.Last());
-            if (error && !prototype) wordPointer.AddError("include errors");
+
+            if (!prototype)
+            {
+                if (error)
+                {
+                    wordPointer.AddError("include errors");
+                }
+                else if (warning)
+                {
+                    wordPointer.AddWarning("include warnings");
+                }
+            }
             wordPointer.MoveNext();
         }
 
