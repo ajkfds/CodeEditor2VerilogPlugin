@@ -125,7 +125,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
-            DataObjects.DataTypes.IDataType dataType = DataObjects.DataTypes.DataType.ParseCreate(word, (NameSpace)module, null);
+            DataObjects.DataTypes.IDataType dataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, (NameSpace)module, null);
 
             switch (word.Text)
             {
@@ -313,7 +313,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
-            IDataType? dataType = DataObjects.DataTypes.DataType.ParseCreate(word, nameSpace, null);
+            IDataType? dataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, null);
             PackedArray? range = null;
             bool signed = false;
 

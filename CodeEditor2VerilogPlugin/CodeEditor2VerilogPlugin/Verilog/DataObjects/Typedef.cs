@@ -29,7 +29,7 @@ namespace pluginVerilog.Verilog.DataObjects
 
             word.AddSystemVerilogError();
 
-            typeDef.VariableType = DataType.ParseCreate(word, nameSpace, null);
+            typeDef.VariableType = DataTypeFactory.ParseCreate(word, nameSpace, null);
             if(typeDef.VariableType == null)
             {
                 word.AddError("data type expected");

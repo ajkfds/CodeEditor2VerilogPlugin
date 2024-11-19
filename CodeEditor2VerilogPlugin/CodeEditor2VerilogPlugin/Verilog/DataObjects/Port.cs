@@ -385,7 +385,7 @@ ansi_port_declaration ::=
             IDataType? dataType = null;
             if(netType == null)
             {
-                dataType = DataObjects.DataTypes.DataType.ParseCreate(word, nameSpace, null);
+                dataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, null);
             }
 
             Interface? interface_ = null;
@@ -774,7 +774,7 @@ ansi_port_declaration ::=
                 word.MoveNext();
             }
 
-            IDataType dataType = DataType.ParseCreate(word, nameSpace, null);
+            IDataType dataType = DataTypeFactory.ParseCreate(word, nameSpace, null);
 
             // Each formal argument has a data type that can be explicitly declared or inherited from the previous argument.
             // If the data type is not explicitly declared, then the default data type is logic
@@ -917,7 +917,7 @@ ansi_port_declaration ::=
                 word.MoveNext();
             }
 
-            IDataType? dataType = DataType.ParseCreate(word, nameSpace, null);
+            IDataType? dataType = DataTypeFactory.ParseCreate(word, nameSpace, null);
 
             // Each formal argument has a data type that can be explicitly declared or inherited from the previous argument.
             // If the data type is not explicitly declared, then the default data type is logic

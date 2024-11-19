@@ -71,7 +71,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         //        TypeReference
     }
 
-    public static class DataType
+    public static class DataTypeFactory
     {
         //        protected List<Variables.Dimension> dimensions = new List<Variables.Dimension>();
         //        public IReadOnlyList<Variables.Dimension> Dimensions { get; }

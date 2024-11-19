@@ -1,4 +1,5 @@
-﻿using CodeEditor2.CodeEditor.Parser;
+﻿using CodeEditor2.CodeEditor;
+using CodeEditor2.CodeEditor.Parser;
 using pluginVerilog.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
 using System;
@@ -44,7 +45,7 @@ namespace pluginVerilog.Parser
             parsedDocument.CodeDocument = new CodeEditor.CodeDocument(verilogRelatedFile); // use verilog codeDocument
             parsedDocument.CodeDocument.CopyTextOnlyFrom(originalCodeDocument);
             this.Document = parsedDocument.CodeDocument;
-
+            
             if (verilogRelatedFile is Data.VerilogFile)
             {
                 VerilogFile? file = verilogRelatedFile as Data.VerilogFile;
@@ -71,8 +72,8 @@ namespace pluginVerilog.Parser
             DocumentParser.ParseModeEnum parseMode
             ) : base(verilogRelatedFile.ToTextFile(), parseMode)
         {
-            Document = new CodeEditor.CodeDocument(verilogRelatedFile); // use verilog codeDocument
-            Document.CopyTextOnlyFrom(verilogRelatedFile.CodeDocument);
+//            Document = new CodeEditor.CodeDocument(verilogRelatedFile); // use verilog codeDocument
+//            Document.CopyTextOnlyFrom(verilogRelatedFile.CodeDocument);
 
             this.ParseMode = parseMode;
             CodeEditor2.Data.TextFile? textFile = verilogRelatedFile as CodeEditor2.Data.TextFile;
@@ -90,6 +91,12 @@ namespace pluginVerilog.Parser
             fileRef = new WeakReference<Data.VerilogFile>(verilogFile);
             
             parsedDocument = new Verilog.ParsedDocument(verilogRelatedFile,null, parseMode);
+
+            // swap CodeDocument to new one
+            CodeEditor.CodeDocument originalCodeDocument = parsedDocument.CodeDocument;
+            parsedDocument.CodeDocument = new CodeEditor.CodeDocument(verilogRelatedFile); // use verilog codeDocument
+            parsedDocument.CodeDocument.CopyTextOnlyFrom(originalCodeDocument);
+            this.Document = parsedDocument.CodeDocument;
 
             if (
                 (verilogFile != null && verilogFile.SystemVerilog) ||
@@ -209,6 +216,7 @@ namespace pluginVerilog.Parser
                 System.Diagnostics.Debugger.Break();
             }
             Root root = Root.ParseCreate(word,VerilogParsedDocument, File as Data.VerilogFile);
+
 
             word.RootParsedDocument.UnlockDocument();
             word.Dispose();

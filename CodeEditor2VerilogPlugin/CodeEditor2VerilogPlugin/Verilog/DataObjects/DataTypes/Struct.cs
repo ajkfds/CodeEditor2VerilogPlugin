@@ -140,7 +140,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             }
             else
             {
-                dataType = DataType.ParseCreate(word, nameSpace, null);
+                dataType = DataTypeFactory.ParseCreate(word, nameSpace, null);
             }
 
             while (!word.Eof)

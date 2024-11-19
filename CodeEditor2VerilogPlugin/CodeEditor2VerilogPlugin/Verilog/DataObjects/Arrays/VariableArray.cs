@@ -72,7 +72,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
                 return parseCreateUnpackedArray(word, nameSpace, expression);
             }
 
-            DataTypes.IDataType? indexDataType = DataTypes.DataType.ParseCreate(word, nameSpace, null);
+            DataTypes.IDataType? indexDataType = DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, null);
             if(indexDataType != null)
             {
                 if (word.Text == "]")

@@ -175,7 +175,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 pointerMoved = true;
             }
 
-            IDataType? dataType = DataObjects.DataTypes.DataType.ParseCreate(word, nameSpace, null);
+            IDataType? dataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, null);
             if (dataType == null) return pointerMoved;
 
             List<Variable> vars = new List<Variable>();
