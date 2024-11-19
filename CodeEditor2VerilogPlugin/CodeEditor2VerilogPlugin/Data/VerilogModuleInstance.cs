@@ -179,20 +179,34 @@ namespace pluginVerilog.Data
         {
             get
             {
-                if (parsedDocument == null)
+                if (ParameterOverrides.Count == 0)
                 {
-                    if (ParameterOverrides.Count == 0)
-                    {
-                        Data.VerilogFile file = SourceVerilogFile;
-                        if (file == null) return null;
-                        parsedDocument = file.ParsedDocument;
-                    }
-                    else
-                    {
-                        Data.VerilogFile source = SourceVerilogFile;
-                        parsedDocument = source.GetInstancedParsedDocument(ParameterId);
-                    }
+                    Data.VerilogFile file = SourceVerilogFile;
+                    if (file == null) return null;
+                    parsedDocument = file.ParsedDocument;
                 }
+                else
+                {
+                    Data.VerilogFile source = SourceVerilogFile;
+                    parsedDocument = source.GetInstancedParsedDocument(ParameterId);
+                }
+
+
+
+                //if (parsedDocument == null)
+                //{
+                //    if (ParameterOverrides.Count == 0)
+                //    {
+                //        Data.VerilogFile file = SourceVerilogFile;
+                //        if (file == null) return null;
+                //        parsedDocument = file.ParsedDocument;
+                //    }
+                //    else
+                //    {
+                //        Data.VerilogFile source = SourceVerilogFile;
+                //        parsedDocument = source.GetInstancedParsedDocument(ParameterId);
+                //    }
+                //}
 
                 return parsedDocument;
             }

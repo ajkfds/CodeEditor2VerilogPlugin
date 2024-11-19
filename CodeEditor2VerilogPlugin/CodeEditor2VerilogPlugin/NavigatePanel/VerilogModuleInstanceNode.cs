@@ -125,33 +125,37 @@ namespace pluginVerilog.NavigatePanel
             }
 
             List<CodeEditor2.NavigatePanel.NavigatePanelNode> removeNodes = new List<CodeEditor2.NavigatePanel.NavigatePanelNode>();
-            foreach (CodeEditor2.NavigatePanel.NavigatePanelNode node in Nodes)
+            lock (Nodes)
             {
-                if (node.Item != null && targetDataItems.Contains(node.Item))
+                foreach (CodeEditor2.NavigatePanel.NavigatePanelNode node in Nodes)
                 {
-                    addDataItems.Remove(node.Item);
+                    if (node.Item != null && targetDataItems.Contains(node.Item))
+                    {
+                        addDataItems.Remove(node.Item);
+                    }
+                    else
+                    {
+                        removeNodes.Add(node);
+                    }
                 }
-                else
-                {
-                    removeNodes.Add(node);
-                }
-            }
 
-            foreach (CodeEditor2.NavigatePanel.NavigatePanelNode node in removeNodes)
-            {
-                Nodes.Remove(node);
-                node.Dispose();
-            }
-
-            int treeIndex = 0;
-            foreach (CodeEditor2.Data.Item item in targetDataItems)
-            {
-                if (item == null) continue;
-                if (addDataItems.Contains(item))
+                foreach (CodeEditor2.NavigatePanel.NavigatePanelNode node in removeNodes)
                 {
-                    Nodes.Insert(treeIndex, item.NavigatePanelNode);
+                    Nodes.Remove(node);
+                    node.Dispose();
                 }
-                treeIndex++;
+
+                int treeIndex = 0;
+                foreach (CodeEditor2.Data.Item item in targetDataItems)
+                {
+                    if (item == null) continue;
+                    if (addDataItems.Contains(item))
+                    {
+                        Nodes.Insert(treeIndex, item.NavigatePanelNode);
+                    }
+                    treeIndex++;
+                }
+
             }
 
             if (VerilogFile == null) return;
