@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using CodeEditor2.CodeEditor.CodeComplete;
+using pluginVerilog.Verilog.ModuleItems;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
@@ -16,7 +17,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         public List<DataObjects.Port> PortsList { get; } = new List<DataObjects.Port>();
 
         private WeakReference<Data.IVerilogRelatedFile> fileRef;
-        public override Data.IVerilogRelatedFile? File
+        public required override Data.IVerilogRelatedFile File
         {
             get
             {
@@ -24,7 +25,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 if (!fileRef.TryGetTarget(out ret)) return null;
                 return ret;
             }
-            protected set
+            init
             {
                 fileRef = new WeakReference<Data.IVerilogRelatedFile>(value);
             }
@@ -68,13 +69,8 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             // module_keyword ( module | macromodule )
             if (word.Text != "module" && word.Text != "macromodule") throw new Exception();
             word.Color(CodeDrawStyle.ColorType.Keyword);
-            Module module = new Module();
-            module.Parent = word.RootParsedDocument.Root;
-            module.Project = word.Project;
-            module.BuildingBlock = module;
-            module.File = file;
-            module.BeginIndexReference = word.CreateIndexReference();
-            if (word.CellDefine) module.cellDefine = true;
+            IndexReference beginReference = word.CreateIndexReference();
+
             word.MoveNext();
 
 
@@ -84,6 +80,33 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
                 macroKeep.Add(kvPair.Key, kvPair.Value);
             }
+
+            // module_identifier
+            if (word.RootParsedDocument.Root == null) throw new Exception();
+
+            Module module = new Module()
+            {
+                BeginIndexReference = beginReference,
+                Name = word.Text,
+                Parent = word.RootParsedDocument.Root,
+                Project = word.Project,
+                File = file,
+                DefinitionReference = word.CrateWordReference()
+            };
+            module.BuildingBlock = module;
+
+            if (word.CellDefine) module.cellDefine = true;
+            word.Color(CodeDrawStyle.ColorType.Identifier);
+            if (!General.IsIdentifier(word.Text))
+            {
+                word.AddError("illegal module name");
+            }
+            else
+            {
+                module.NameReference = word.GetReference();
+            }
+            word.MoveNext();
+
 
             if (!word.CellDefine && !protoType)
             {
@@ -145,19 +168,6 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             )
         {
 
-            // module_identifier
-            module.Name = word.Text;
-            word.Color(CodeDrawStyle.ColorType.Identifier);
-            if (!General.IsIdentifier(word.Text))
-            {
-                word.AddError("illegal module name");
-            }
-            else
-            {
-                module.NameReference = word.GetReference();
-            }
-            word.MoveNext();
-
             while (true)
             {
                 if (word.Eof || word.Text == "endmodule")
@@ -214,8 +224,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                             }
 
                             module.Constants.Remove(vkp.Key);
-                            DataObjects.Constants.Parameter param = new DataObjects.Constants.Parameter();
-                            param.Name = vkp.Key;
+                            DataObjects.Constants.Parameter param = new DataObjects.Constants.Parameter() { Name = vkp.Key };
                             param.Expression = vkp.Value;
                             module.Constants.Add(param.Name, param);
                         }
@@ -289,7 +298,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
             base.AppendAutoCompleteItem(items);
 
-            foreach (ModuleItems.IInstantiation instantiation in Instantiations.Values)
+            foreach (IBuildingBlockInstantiation instantiation in Instantiations.Values)
             {
                 if (instantiation.Name == null) throw new Exception();
                 items.Add(newItem(instantiation.Name, CodeDrawStyle.ColorType.Identifier));

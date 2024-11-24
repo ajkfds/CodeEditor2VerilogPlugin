@@ -77,12 +77,12 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         //{
         //}
 
-        public static new Enum Create(DataTypes.IDataType dataType)
+        public static new Enum Create(string name,DataTypes.IDataType dataType)
         {
             DataTypes.Enum? dType = dataType as DataTypes.Enum;
             if (dType == null) throw new Exception();
 
-            Enum val = new Enum();
+            Enum val = new Enum() { Name = name };
             val.DataType = dType;
             foreach(var item in dType.Items)
             {

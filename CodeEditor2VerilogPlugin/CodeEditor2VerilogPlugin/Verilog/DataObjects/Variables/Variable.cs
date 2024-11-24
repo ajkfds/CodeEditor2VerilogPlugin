@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
-using pluginVerilog.Verilog.DataObjects;
 using System.Data;
 using pluginVerilog.Verilog.Statements;
 using System.Linq.Expressions;
@@ -39,7 +38,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     //              + type_reference
 
 
-    public class Variable : DataObject, CommentAnnotated
+    public class Variable : DataObject, ICommentAnnotated
     {
         protected Variable() { }
 
@@ -48,8 +47,13 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         /// </summary>
         /// <param name="dataType"></param>
         /// <returns></returns>
-        public static Variable Create(IDataType dataType)
+        public static Variable Create(string name,IDataType dataType)
         {
+            /*
+            6.8 Variable declarations 
+             
+             */
+
             /* TODO
                 | struct_union["packed"[signing]] { struct_union_member { struct_union_member } } { packed_dimension }
                 | "enum" [enum_base_type] { enum_name_declaration { , enum_name_declaration } { packed_dimension }
@@ -63,11 +67,14 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             */
             switch (dataType.Type)
             {
+                //struct_union["packed"[signing]] { struct_union_member { struct_union_member } } { packed_dimension }
+                case DataTypeEnum.Struct:
+                    return Struct.Create(name, dataType);
                 //integer_vector_type ::= "bit" | "logic" | "reg"
                 case DataTypeEnum.Logic:
                 case DataTypeEnum.Bit:
                 case DataTypeEnum.Reg:
-                    return IntegerVectorValueVariable.Create(dataType);
+                    return IntegerVectorValueVariable.Create(name, dataType);
                 //integer_atom_type   ::= "byte" | "shortint" | "int" | "longint" | "integer" | "time"
                 case DataTypeEnum.Byte:
                 case DataTypeEnum.Shortint:
@@ -75,26 +82,26 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 case DataTypeEnum.Longint:
                 case DataTypeEnum.Integer:
                 case DataTypeEnum.Time:
-                    return IntegerAtomVariable.Create(dataType);
+                    return IntegerAtomVariable.Create(name, dataType);
 
                 //non_integer_type    ::= "shortreal" | "real" | "realtime"
                 case DataTypeEnum.Shortreal:
-                    return Shortreal.Create(dataType);
+                    return Shortreal.Create(name, dataType);
                 case DataTypeEnum.Real:
-                    return Real.Create(dataType);
+                    return Real.Create(name, dataType);
                 case DataTypeEnum.Realtime:
-                    return Realtime.Create(dataType);
+                    return Realtime.Create(name, dataType);
 
                 // "string"
                 case DataTypeEnum.String:
-                    return String.Create(dataType);
+                    return String.Create(name, dataType);
                 case DataTypeEnum.Enum:
-                    return Enum.Create(dataType);
+                    return Enum.Create(name, dataType);
                 case DataTypeEnum.Class:
-                    return Object.Create(dataType);
+                    return Object.Create(name, dataType);
 
                 case DataTypeEnum.Chandle:
-                    return Chandle.Create(dataType);
+                    return Chandle.Create(name, dataType);
                 default:
                     System.Diagnostics.Debugger.Break();
                     break;
@@ -116,7 +123,13 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public override Variable Clone()
         {
-            Variable val = new Variable();
+            Variable val = new Variable() { Name = Name };
+            return val;
+        }
+
+        public Variable Clone(string name)
+        {
+            Variable val = new Variable() { Name = name };
             return val;
         }
 
@@ -189,11 +202,10 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                     break;
                 }
 
-                Variable variable = Variable.Create(dataType);
+                Variable variable = Variable.Create(word.Text,dataType);
                 if (variable == null) return true;
                 variable.DefinedReference = word.GetReference();
 
-                variable.Name = word.Text;
                 switch (dataType.Type)
                 {
                     case DataTypeEnum.Reg:

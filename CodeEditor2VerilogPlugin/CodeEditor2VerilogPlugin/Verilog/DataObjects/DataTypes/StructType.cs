@@ -3,6 +3,7 @@ using pluginVerilog.Verilog.DataObjects.Constants;
 using pluginVerilog.Verilog.DataObjects.Variables;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Security.AccessControl;
 using System.Text;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
-    public class Struct : IDataType
+    public class StructType : IDataType
     { 
         public virtual DataTypeEnum Type
         {
@@ -24,7 +25,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         public bool Packed = false;
         public bool Signed = false;
 
-        public List<Member> Members = new List<Member>();
+        public Dictionary<string, Member> Members = new Dictionary<string, Member>();
 
         /*
         data_type ::= // from A.2.2.1
@@ -47,14 +48,14 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         }
         public bool IsVector { get { return false; } }
 
-        public static Struct? ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static StructType? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "struct" ) System.Diagnostics.Debugger.Break();
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.AddSystemVerilogError();
             word.MoveNext();
 
-            Struct type = new Struct();
+            StructType type = new StructType();
 
             if(word.Text == "tagged")
             {
@@ -89,15 +90,14 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             }
             word.MoveNext(); // "{"
 
-            int index = 0;
             while (!word.Eof | word.Text != "}")
             {
                 if (!parseMembers(type, word, nameSpace)) break;
 
-                if (word.Text == ",")
+                if (word.Text == ";")
                 {
                     word.MoveNext();
-                    if (word.Text == "}") word.AddError("illegal comma");
+//                    if (word.Text == "}") word.AddError("illegal ;");
                 }
             }
 
@@ -111,15 +111,12 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             return type;
         }
 
-        private static bool parseMembers(Struct struct_, WordScanner word, NameSpace nameSpace)
+        private static bool parseMembers(StructType struct_, WordScanner word, NameSpace nameSpace)
         {
             /*
             struct_union_member ::=   { attribute_instance } [random_qualifier] data_type_or_void list_of_variable_decl_assignments;
             random_qualifier ::= "rand" | "randc"
             */
-
-            if (word.Text == "}" | word.Text == ",") return false;
-            if (!General.IsIdentifier(word.Text)) return false;
 
             if (word.Text == "rand")
             {
@@ -163,6 +160,8 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     exp = Expressions.Expression.ParseCreate(word, nameSpace);
                 }
 
+                if (dataType == null) return false;
+
                 Member member = new Member()
                 {
                     DatType = dataType,
@@ -171,18 +170,27 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     Value = exp
                 };
 
-                struct_.Members.Add(member);
+                if (struct_.Members.ContainsKey(identifier))
+                {
+                    word.AddError("duplicated");
+                }
+                else
+                {
+                    struct_.Members.Add(identifier,member);
+                }
+
+                if (word.Text != ",") return true;
+                word.MoveNext();
             }
             return true;
         }
 
         public class Member
         {
-
-
-            public string Identifier;
+            public Member() { }
+            public required string Identifier { get; init; }
             public PackedArray? PackedArray;
-            public IDataType? DatType;
+            public required IDataType DatType { get; init; }
             public Expressions.Expression? Value;
         }
 

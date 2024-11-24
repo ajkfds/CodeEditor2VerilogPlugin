@@ -1,5 +1,6 @@
 ﻿using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.DataObjects.Nets;
+using pluginVerilog.Verilog.ModuleItems;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +27,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
         public Dictionary<string, BuildingBlock> Elements { get; set; } = new Dictionary<string, BuildingBlock>();
 
-        public Dictionary<string, ModuleItems.IInstantiation> Instantiations { get; } = new Dictionary<string, ModuleItems.IInstantiation>();
+        public Dictionary<string, IBuildingBlockInstantiation> Instantiations { get; } = new Dictionary<string, IBuildingBlockInstantiation>();
 
 
         public virtual string FileId { get; protected set; }
@@ -42,7 +43,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         public bool AnsiStylePortDefinition { get; set; } = false;
         public Net.NetTypeEnum DefaultNetType = Net.NetTypeEnum.Wire;
 
-        public virtual Data.IVerilogRelatedFile File { get; protected set; }
+        public required virtual Data.IVerilogRelatedFile File { get; init; }
 
 
         private bool reparseRequested = false;

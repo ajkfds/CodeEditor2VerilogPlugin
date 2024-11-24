@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects
 {
-    public class Port : Item, CommentAnnotated
+    public class Port : Item, ICommentAnnotated
     {
         public DirectionEnum Direction = DirectionEnum.Undefined;
         public DataObjects.Arrays.PackedArray? Range
@@ -85,11 +85,10 @@ namespace pluginVerilog.Verilog.DataObjects
             Ref
         }
 
-        public static Port Create(WordScanner word, Attribute attribute)
+        public static Port? Create(WordScanner word, Attribute attribute)
         {
             if (!General.IsIdentifier(word.Text)) return null;
-            Port port = new Port();
-            port.Name = word.Text;
+            Port port = new Port() { DefinitionReference = word.CrateWordReference(), Name = word.Text, Project = word.Project };
             word.Color(CodeDrawStyle.ColorType.Net);
             word.MoveNext();
             return port;
@@ -277,8 +276,7 @@ ansi_port_declaration ::=
         {
             if (!General.IsIdentifier(word.Text)) return false;
 
-            Port port = new Port();
-            port.Name = word.Text;
+            Port port = new Port() { DefinitionReference = word.CrateWordReference(), Name = word.Text, Project = word.Project };
             port.Direction = DirectionEnum.Undefined;
             IModuleOrInterfaceOrProgram? block = nameSpace.BuildingBlock as IModuleOrInterfaceOrProgram;
             if (block == null) return true;
@@ -482,20 +480,17 @@ ansi_port_declaration ::=
                 return true;
             }
 
-            Port port = new Port();
-            port.Name = word.Text;
+            Port port = new Port() { DefinitionReference = word.CrateWordReference(), Name = word.Text, Project = word.Project };
             port.Direction = (DirectionEnum)direction;
             if(netType != null)
             {
-                Net net = Net.Create((Net.NetTypeEnum)netType, dataType);
+                Net net = Net.Create(port.Name,(Net.NetTypeEnum)netType, dataType);
                 net.PackedDimensions = packedDimensions;
-                net.Name = port.Name;
                 port.DataObject = net;
             }
             else if(dataType != null)
             {
-                Variables.Variable variable = Variables.Variable.Create(dataType);
-                variable.Name = port.Name;
+                Variables.Variable variable = Variables.Variable.Create(port.Name, dataType);
                 port.DataObject = variable;
             }
             else if(interface_ != null)
@@ -544,7 +539,7 @@ ansi_port_declaration ::=
             return true;
         }
 
-        private static void addInstantiation(WordScanner word, NameSpace nameSpace, IInstantiation instantiation)
+        private static void addInstantiation(WordScanner word, NameSpace nameSpace, IBuildingBlockInstantiation instantiation)
         {
             BuildingBlock block = nameSpace.BuildingBlock as BuildingBlock;
             if (block == null)
@@ -602,7 +597,7 @@ ansi_port_declaration ::=
 
                 if (port.DataObject != null)
                 {
-                    port.DataObject.Name = port.Name;
+                    //port.DataObject.Name = port.Name;
                     if (block.DataObjects.ContainsKey(port.Name))
                     {
                         if (word.Prototype)
@@ -655,21 +650,17 @@ ansi_port_declaration ::=
             }
 
 
-            string instance_name = word.Text;
-            if (!General.IsIdentifier(instance_name))
+            if (!General.IsIdentifier(word.Text))
             {
                 word.AddError("illegal identifier");
                 return true;
             }
-
-
-            InterfaceInstantiation iInst = InterfaceInstantiation.Create(instance_name, interface_.Name, word.Project);
+            InterfaceInstantiation iInst = InterfaceInstantiation.CreatePortInstance(word,interface_.Name);
             iInst.ModPortName = modPortName;
             word.Color(CodeDrawStyle.ColorType.Variable);
             word.MoveNext();
 
-            Port port = new Port();
-            port.Name = instance_name;
+            Port port = new Port() { DefinitionReference = word.CrateWordReference(), Name = iInst.Name, Project = word.Project };
             port.DataObject = iInst;
 
             addPort(word, nameSpace, port);
@@ -805,11 +796,9 @@ ansi_port_declaration ::=
             {
                 if (!General.IsIdentifier(word.Text)) break;
 
-                Port port = new Port();
-                port.Name = word.Text;
+                Port port = new Port() { DefinitionReference = word.CrateWordReference(), Name = word.Text, Project = word.Project };
                 port.Direction = (DirectionEnum)direction;
-                port.DataObject = Variables.Variable.Create(dataType);
-                port.DataObject.Name = port.Name;
+                port.DataObject = Variables.Variable.Create(port.Name,dataType);
 
                 if( nameSpace is Function)
                 {
@@ -960,11 +949,9 @@ ansi_port_declaration ::=
                 word.SkipToKeyword(",");
             }
 
-            Port port = new Port();
+            Port port = new Port() { DefinitionReference = word.CrateWordReference(), Name = word.Text, Project = word.Project };
             port.Direction = (DirectionEnum)direction;
-            port.DataObject = Variables.Variable.Create(dataType);
-            port.Name = word.Text;
-            port.DataObject.Name = port.Name;
+            port.DataObject = Variables.Variable.Create(port.Name,dataType);
             word.Color(CodeDrawStyle.ColorType.Variable);
 
             if (portNameSpace.Ports.ContainsKey(port.Name))

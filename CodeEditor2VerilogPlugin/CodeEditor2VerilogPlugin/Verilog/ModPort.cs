@@ -78,8 +78,7 @@ namespace pluginVerilog.Verilog
 
             if (interface_ == null) return false;
 
-            ModPort modport = new ModPort(interface_);
-            modport.Name = word.Text;
+            ModPort modport = new ModPort(interface_) { BeginIndexReference = word.CreateIndexReference(), DefinitionReference = word.CrateWordReference(), Name = word.Text, Parent = nameSpace, Project = word.Project };
             word.Color(CodeDrawStyle.ColorType.Identifier);
             word.MoveNext();
             if (interface_ != null)
@@ -217,8 +216,7 @@ namespace pluginVerilog.Verilog
                 {
                     if (direction == Port.DirectionEnum.Input)
                     {
-                        Verilog.DataObjects.Nets.Net net = Verilog.DataObjects.Nets.Net.Create(Verilog.DataObjects.Nets.Net.NetTypeEnum.Wire, null);
-                        net.Name = name;
+                        Verilog.DataObjects.Nets.Net net = Verilog.DataObjects.Nets.Net.Create(name,Verilog.DataObjects.Nets.Net.NetTypeEnum.Wire, null);
 
                         if(intVectorVar != null)
                         {
@@ -232,8 +230,7 @@ namespace pluginVerilog.Verilog
                     else
                     {
                         DataObjects.DataTypes.IntegerVectorType dType = Verilog.DataObjects.DataTypes.IntegerVectorType.Create(Verilog.DataObjects.DataTypes.DataTypeEnum.Logic, false, null);
-                        Verilog.DataObjects.Variables.Logic logic = Verilog.DataObjects.Variables.Logic.Create(dType);
-                        logic.Name = name;
+                        Verilog.DataObjects.Variables.Logic logic = Verilog.DataObjects.Variables.Logic.Create(name,dType);
 
                         if (intVectorVar != null)
                         {

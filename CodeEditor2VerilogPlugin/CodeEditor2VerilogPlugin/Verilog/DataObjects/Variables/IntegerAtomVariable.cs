@@ -13,22 +13,22 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         //integer_atom_type::= byte | shortint | int | longint | integer | time
         public bool Signed { get; set; }
 
-        public new static IntegerAtomVariable Create(IDataType dataType)
+        public new static IntegerAtomVariable Create(string name, IDataType dataType)
         {
             switch (dataType.Type)
             {
                 case DataTypeEnum.Byte:
-                    return Byte.Create(dataType);
+                    return Byte.Create(name,dataType);
                 case DataTypeEnum.Shortint:
-                    return Shortint.Create(dataType);
+                    return Shortint.Create(name, dataType);
                 case DataTypeEnum.Int:
-                    return Int.Create(dataType);
+                    return Int.Create(name, dataType);
                 case DataTypeEnum.Longint:
-                    return Longint.Create(dataType);
+                    return Longint.Create(name, dataType);
                 case DataTypeEnum.Integer:
-                    return Longint.Create(dataType);
+                    return Integer.Create(name, dataType);
                 case DataTypeEnum.Time:
-                    return Time.Create(dataType);
+                    return Time.Create(name, dataType);
                 default:
                     throw new Exception();
             }
@@ -69,8 +69,9 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             {
                 label.AppendText("signed ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
             }
-
         }
+
+
 
     }
 }

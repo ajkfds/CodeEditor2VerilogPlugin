@@ -80,6 +80,7 @@ namespace pluginVerilog.Verilog
             // generate_block ::= begin[ : generate_block_identifier]  { generate_item } end
             word.Color(CodeDrawStyle.ColorType.Keyword);
             WordReference beginRef = word.GetReference();
+            IndexReference beginReference = word.CreateIndexReference();
             word.MoveNext();
 
             NamedGeneratedBlock block = nameSpace as NamedGeneratedBlock;
@@ -94,7 +95,7 @@ namespace pluginVerilog.Verilog
                     return true;
                 }
                 word.Color(CodeDrawStyle.ColorType.Identifier);
-                block = NamedGeneratedBlock.Create(nameSpace, word.Text);
+                block = NamedGeneratedBlock.Create(word,nameSpace, beginReference);
                 if (word.Prototype)
                 {
                     if (nameSpace.NameSpaces.ContainsKey(word.Text))

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CodeEditor2.CodeEditor.CodeComplete;
+using pluginVerilog.Verilog.ModuleItems;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
@@ -82,13 +83,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             // "program"
             if (word.Text != "program") System.Diagnostics.Debugger.Break();
             word.Color(CodeDrawStyle.ColorType.Keyword);
-            Program program = new Program();
-            program.Parent = word.RootParsedDocument.Root;
-            program.Project = word.Project;
-
-            program.BuildingBlock = program;
-            program.File = file;
-            program.BeginIndexReference = word.CreateIndexReference();
+            IndexReference beginReference = word.CreateIndexReference();
             word.MoveNext();
 
 
@@ -98,6 +93,44 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
                 macroKeep.Add(kvPair.Key, kvPair.Value);
             }
+
+            bool static_ = false;
+            switch (word.Text)
+            {
+                case "static":
+                    static_ = true;
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+                    break;
+                case "automatic":
+                    static_ = false;
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+                    break;
+            }
+
+            // program_identifier
+            Program program = new Program()
+            {
+                BeginIndexReference = word.CreateIndexReference(),
+                DefinitionReference = word.CrateWordReference(),
+                File = file,
+                Name = word.Text,
+                Parent = word.RootParsedDocument.Root,
+                Project = word.Project
+            };
+            program.Static = static_;
+            program.BuildingBlock = program;
+            word.Color(CodeDrawStyle.ColorType.Identifier);
+            if (!General.IsIdentifier(word.Text))
+            {
+                word.AddError("illegal program name");
+            }
+            else
+            {
+                program.NameReference = word.GetReference();
+            }
+            word.MoveNext();
 
 
             if (!word.CellDefine && !protoType)
@@ -182,33 +215,6 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             Dictionary<string, Expressions.Expression>? parameterOverrides,
             Attribute? attribute, Program program)
         {
-            switch (word.Text)
-            {
-                case "static":
-                    program.Static = true;
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
-                    word.MoveNext();
-                    break;
-                case "automatic":
-                    program.Static = false;
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
-                    word.MoveNext();
-                    break;
-            }
-
-            // program_identifier
-            program.Name = word.Text;
-            word.Color(CodeDrawStyle.ColorType.Identifier);
-            if (!General.IsIdentifier(word.Text))
-            {
-                word.AddError("illegal program name");
-            }
-            else
-            {
-                program.NameReference = word.GetReference();
-            }
-            word.MoveNext();
-
             while (true)
             {
                 if (word.Eof || word.Text == "endprogram")
@@ -265,8 +271,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                             }
 
                             program.Constants.Remove(vkp.Key);
-                            DataObjects.Constants.Parameter param = new DataObjects.Constants.Parameter();
-                            param.Name = vkp.Key;
+                            DataObjects.Constants.Parameter param = new DataObjects.Constants.Parameter() { Name = vkp.Key };
                             param.Expression = vkp.Value;
                             program.Constants.Add(param.Name, param);
                         }
@@ -328,7 +333,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
             base.AppendAutoCompleteItem(items);
 
-            foreach (ModuleItems.IInstantiation inst in Instantiations.Values)
+            foreach (IBuildingBlockInstantiation inst in Instantiations.Values)
             {
                 if (inst.Name == null) throw new Exception();
                 items.Add(newItem(inst.Name, CodeDrawStyle.ColorType.Identifier));

@@ -175,8 +175,7 @@ namespace pluginVerilog.Verilog.Expressions
                 if (General.IsIdentifier(word.Text) && !nameSpace.DataObjects.ContainsKey(word.Text) && !word.Prototype)
                 {   // undefined net
                     if (!word.CellDefine) word.AddWarning("undefined");
-                    Net net = new DataObjects.Nets.Net();
-                    net.Name = word.Text;
+                    Net net = new DataObjects.Nets.Net() { Name = word.Text };
                     net.Signed = false;
                     if (word.Active)
                     {
@@ -344,7 +343,7 @@ namespace pluginVerilog.Verilog.Expressions
             BuildingBlock buildingBlock = nameSpace.BuildingBlock;
             if (!buildingBlock.Instantiations.ContainsKey(word.Text)) return false;
 
-            IInstantiation instantiation = buildingBlock.Instantiations[word.Text];
+            IBuildingBlockInstantiation instantiation = buildingBlock.Instantiations[word.Text];
             if(instantiation is ModuleInstantiation)
             {
                 ModuleInstantiation? mInst = instantiation as ModuleInstantiation;

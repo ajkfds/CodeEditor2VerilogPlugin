@@ -5,18 +5,18 @@ using pluginVerilog.Verilog.ModuleItems;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects
 {
-    public class InterfaceInstantiation : DataObject,IInstantiation
+    public class InterfaceInstantiation : DataObject,IBuildingBlockInstantiation
     {
         protected InterfaceInstantiation() { }
-        public Attribute Attribute { get; set; }
-        public WordReference DefinitionReference { get; set; }
-
-        public Project Project { get; protected set; }
+        public Attribute? Attribute { get; set; }
+        public required WordReference DefinitionReference { get; init; }
+        public required Project Project { get; init; }
 
         public Dictionary<string, string> Properties = new Dictionary<string, string>();
         public ProjectProperty ProjectProperty
@@ -29,14 +29,13 @@ namespace pluginVerilog.Verilog.DataObjects
             }
         }
 
-        public string SourceName { get; protected set; }
+        public required string SourceName { get; init; }
         public string? ModPortName { get; set; }
-        public Dictionary<string, Expressions.Expression> ParameterOverrides { get; set; } = new Dictionary<string, Expressions.Expression>();
-
+        public required Dictionary<string, Expressions.Expression> ParameterOverrides { get; init; }
         public Dictionary<string, Expressions.Expression> PortConnection { get; set; } = new Dictionary<string, Expressions.Expression>();
 
-        public IndexReference BeginIndexReference { get; set; }
-        public IndexReference LastIndexReference { get; set; }
+        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; }
         public void AppendLabel(IndexReference iref, AjkAvaloniaLibs.Contorls.ColorLabel label)
         {
         }
@@ -60,15 +59,26 @@ namespace pluginVerilog.Verilog.DataObjects
 
         public bool Prototype { get; set; } = false;
 
-        public static InterfaceInstantiation Create(string name, string sourceName, Project project)
-        {
-            InterfaceInstantiation instantiation = new InterfaceInstantiation();
-            instantiation.Name = name;
-            instantiation.SourceName = sourceName;
-            instantiation.Project = project;
-            return instantiation;
-        }
+        //public static InterfaceInstantiation Create(string name, string sourceName, Project project)
+        //{
+        //    InterfaceInstantiation instantiation = new InterfaceInstantiation() { }
+        //    instantiation.Name = name;
+        //    instantiation.SourceName = sourceName;
+        //    instantiation.Project = project;
+        //    return instantiation;
+        //}
 
+        public static InterfaceInstantiation CreatePortInstance(WordScanner word,string sourceInterfaceName)
+        {
+            return new InterfaceInstantiation() {
+                BeginIndexReference = word.CreateIndexReference(),
+                DefinitionReference = word.CrateWordReference(),
+                Name = word.Text,
+                ParameterOverrides = new Dictionary<string, Expressions.Expression>(),
+                Project = word.Project,
+                SourceName = sourceInterfaceName
+            };
+        }
 
         /*
         interface_instantiation  ::= interface_identifier [ parameter_value_assignment ] hierarchical_instance { , hierarchical_instance } ;
@@ -99,11 +109,8 @@ namespace pluginVerilog.Verilog.DataObjects
                 return true;
             }
             moduleIdentifier.Color(CodeDrawStyle.ColorType.Keyword);
-            InterfaceInstantiation interfaceInstantiation = new InterfaceInstantiation();
-            interfaceInstantiation.SourceName = interfaceName;
-            interfaceInstantiation.BeginIndexReference = beginIndexReference;
-            interfaceInstantiation.Project = word.RootParsedDocument.Project;
 
+            Dictionary<string, Expressions.Expression> parameterOverrides = new Dictionary<string, Expressions.Expression>();
 
             if (word.Text == "#") // parameter
             {
@@ -154,13 +161,13 @@ namespace pluginVerilog.Verilog.DataObjects
 
                         if (!error)//& word.Prototype)
                         {
-                            if (interfaceInstantiation.ParameterOverrides.ContainsKey(paramName))
+                            if (parameterOverrides.ContainsKey(paramName))
                             {
                                 word.AddPrototypeError("duplicated");
                             }
                             else
                             {
-                                interfaceInstantiation.ParameterOverrides.Add(paramName, expression);
+                                parameterOverrides.Add(paramName, expression);
                             }
                         }
 
@@ -199,13 +206,13 @@ namespace pluginVerilog.Verilog.DataObjects
                                 string paramName = instancedInterface.PortParameterNameList[i];
                                 if (word.Prototype && expression != null)
                                 {
-                                    if (interfaceInstantiation.ParameterOverrides.ContainsKey(paramName))
+                                    if (parameterOverrides.ContainsKey(paramName))
                                     {
                                         word.AddError("duplicated");
                                     }
                                     else
                                     {
-                                        interfaceInstantiation.ParameterOverrides.Add(paramName, expression);
+                                        parameterOverrides.Add(paramName, expression);
                                     }
                                 }
                             }
@@ -231,28 +238,37 @@ namespace pluginVerilog.Verilog.DataObjects
                 word.MoveNext();
             }
 
-            // swap to parameter overrided module
-            if (instancedInterface != null)
-            {
-                if (interfaceInstantiation.ParameterOverrides.Count != 0)
-                {
-                    instancedInterface = word.ProjectProperty.GetInstancedBuildingBlock(interfaceInstantiation) as Interface;
-                }
-                if (instancedInterface == null) nameSpace.BuildingBlock.ReparseRequested = true;
-            }
 
 
             while (!word.Eof)
             {
 
                 word.Color(CodeDrawStyle.ColorType.Variable);
-                if (General.IsIdentifier(word.Text))
-                {
-                    interfaceInstantiation.Name = word.Text;
-                }
-                else
+                if (!General.IsIdentifier(word.Text))
                 {
                     if (word.Prototype) word.AddError("illegal instance name");
+                    word.SkipToKeyword("");
+                    return false;
+                }
+
+                InterfaceInstantiation interfaceInstantiation = new InterfaceInstantiation()
+                {
+                    BeginIndexReference = beginIndexReference,
+                    DefinitionReference = word.CrateWordReference(),
+                    Name = word.Text,
+                    ParameterOverrides = parameterOverrides,
+                    Project = word.RootParsedDocument.Project,
+                    SourceName = interfaceName
+                };
+
+                // swap to parameter overrided module
+                if (instancedInterface != null)
+                {
+                    if (parameterOverrides.Count != 0)
+                    {
+                        instancedInterface = word.ProjectProperty.GetInstancedBuildingBlock(interfaceInstantiation) as Interface;
+                    }
+                    if (instancedInterface == null) nameSpace.BuildingBlock.ReparseRequested = true;
                 }
 
                 if (word.Prototype)

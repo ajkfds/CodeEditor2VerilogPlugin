@@ -25,23 +25,20 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public List<DataObjects.Arrays.PackedArray> PackedDimensions = new List<DataObjects.Arrays.PackedArray>();
 
-        public new static IntegerVectorValueVariable Create(IDataType dataType)
+        public new static IntegerVectorValueVariable Create(string name,IDataType dataType)
         {
             switch (dataType.Type)
             {
                 case DataTypeEnum.Bit:
-                    return Bit.Create(dataType);
+                    return Bit.Create(name,dataType);
                 case DataTypeEnum.Logic:
-                    return Logic.Create(dataType);
+                    return Logic.Create(name, dataType);
                 case DataTypeEnum.Reg:
-                    return Reg.Create(dataType);
+                    return Reg.Create(name, dataType);
                 default:
-                    System.Diagnostics.Debugger.Break();
-                    break;
+                    throw new Exception();
             }
-            return null;
         }
-
 
         public override void AppendTypeLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
         {
@@ -74,6 +71,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 label.AppendText(" ");
             }
         }
+
 
     }
 }

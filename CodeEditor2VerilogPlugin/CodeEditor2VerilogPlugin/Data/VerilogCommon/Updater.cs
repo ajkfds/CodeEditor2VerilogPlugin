@@ -106,7 +106,7 @@ namespace pluginVerilog.Data.VerilogCommon
 
         private static void UpdateInstance(BuildingBlock newModule,Project project, IVerilogRelatedFile targetItem, List<Item> keepItems,Dictionary<string, Item> newItems)
         {
-            foreach (IInstantiation newInstantiation in newModule.Instantiations.Values)
+            foreach (IBuildingBlockInstantiation newInstantiation in newModule.Instantiations.Values)
             {
                 if (targetItem.Items.ContainsKey(newInstantiation.Name))
                 { // already exist item

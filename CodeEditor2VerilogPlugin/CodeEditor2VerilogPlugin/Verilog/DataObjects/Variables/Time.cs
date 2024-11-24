@@ -11,19 +11,19 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected Time() { }
 
-        public static new Time Create(IDataType dataType)
+        public static new Time Create(string name,IDataType dataType)
         {
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.Time);
             DataTypes.IntegerAtomType dType = dataType as DataTypes.IntegerAtomType;
 
-            Time val = new Time();
+            Time val = new Time() { Name = name };
             val.DataType = dType;
             return val;
         }
 
         public override Variable Clone()
         {
-            Time val = new Time();
+            Time val = new Time() { Name = Name };
             val.DataType = DataType;
             val.Signed = Signed;
             return val;

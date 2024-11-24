@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,7 +11,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected Genvar() { }
 
-
+        [SetsRequiredMembers]
         public Genvar(string Name)
         {
             this.Name = Name;
@@ -30,10 +31,8 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                     word.AddError("illegal real identifier");
                     return;
                 }
-                Genvar val = new Genvar();
+                Genvar val = new Genvar() { Name = word.Text };
                 val.DefinedReference = word.GetReference();
-                val.Name = word.Text;
-
 
                 if (word.Active)
                 {

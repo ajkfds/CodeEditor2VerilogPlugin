@@ -7,11 +7,11 @@ using AjkAvaloniaLibs.Libs.Json;
 using Avalonia.Controls.Platform;
 using CodeEditor2.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
-using pluginVerilog.Verilog.ModuleItems;
 using System.Text.Json.Serialization;
 using System.Text.Json;
 using System.Globalization;
 using Avalonia.OpenGL;
+using pluginVerilog.Verilog.ModuleItems;
 
 namespace pluginVerilog
 {
@@ -141,7 +141,7 @@ namespace pluginVerilog
         //    }
         //}
 
-        public BuildingBlock? GetInstancedBuildingBlock(IInstantiation instantiation)
+        public BuildingBlock? GetInstancedBuildingBlock(IBuildingBlockInstantiation instantiation)
         {
             if (instantiation.ParameterOverrides.Count == 0)
             {

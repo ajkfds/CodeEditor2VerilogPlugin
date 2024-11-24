@@ -1,8 +1,12 @@
-﻿using pluginVerilog.Verilog.DataObjects.DataTypes;
+﻿using Avalonia;
+using pluginVerilog.Data;
+using pluginVerilog.Verilog.BuildingBlocks;
+using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.DataObjects.Variables;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -38,8 +42,63 @@ namespace pluginVerilog.Verilog.DataObjects
         //              + type_reference
         // 
 
+        public static DataObject Create(string name,DataTypes.IDataType dataType)
+        {
+            switch (dataType.Type)
+            {
+                //integer_vector_type::= bit | logic | reg
+                case DataTypeEnum.Bit:
+                    return Bit.Create(name, dataType);
+                case DataTypeEnum.Logic:
+                    return Logic.Create(name, dataType);
+                case DataTypeEnum.Reg:
+                    return Reg.Create(name, dataType);
+                //integer_atom_type::= byte | shortint | int | longint | integer | time
+                case DataTypeEnum.Byte:
+                    return Variables.Byte.Create(name, dataType);
+                case DataTypeEnum.Shortint:
+                    return Shortint.Create(name, dataType);
+                case DataTypeEnum.Int:
+                    return Int.Create(name, dataType);
+                case DataTypeEnum.Longint:
+                    return Longint.Create(name, dataType);
+                case DataTypeEnum.Integer:
+                    return Integer.Create(name, dataType);
+                case DataTypeEnum.Time:
+                    return Time.Create(name, dataType);
+                //non_integer_type::= "shortreal" | "real" | "realtime"
+                case DataTypeEnum.Shortreal:
+                    return Shortreal.Create(name, dataType);
+                case DataTypeEnum.Real:
+                    return Real.Create(name, dataType);
+                case DataTypeEnum.Realtime:
+                    return Realtime.Create(name, dataType);
+                // others
+                case DataTypeEnum.Enum:
+                    return Variables.Enum.Create(name, dataType);
+                case DataTypeEnum.String:
+                    return Variables.String.Create(name, dataType);
+//                case DataTypeEnum.Chandle:
+//                    return Chan.Create(dataType);
+//                case DataTypeEnum.Virtual:
+//                    return .Create(dataType);
+                case DataTypeEnum.Class:
+                    return DataObject.Create(name,dataType);
+//                case DataTypeEnum.InterfaceInstance:
+//                    return InterfaceInstance.Create(dataType);
+                case DataTypeEnum.Event:
+                    return Event.Create(name,dataType);
+//                case DataTypeEnum.CoverGroup:
+//                    return .Create(dataType);
+                case DataTypeEnum.Struct:
+                    return Struct.Create(name, dataType);
+                    //        TypeReference
 
-        public string Name { set; get; } = "";
+            }
+            throw new NotImplementedException();
+        }
+
+        public required string Name { get; init; }
         public string Comment { set; get; } = "";
         public WordReference? DefinedReference { set; get; } = null;
         public IDataType? DataType;
@@ -67,6 +126,22 @@ namespace pluginVerilog.Verilog.DataObjects
 
         public abstract DataObject Clone();
 
+        // IInstance
+        public virtual Task? GetTask(string identifier)
+        {
+            return null;
+        }
+        public virtual Function? GetFunction(string identifier)
+        {
+            return null;
+        }
+        public virtual DataObject? GetDataObject(string identifier)
+        {
+            return null;
+        }
+        public virtual void AppendAutoCompleteItem(List<CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem> items)
+        {
+        }
 
     }
 }

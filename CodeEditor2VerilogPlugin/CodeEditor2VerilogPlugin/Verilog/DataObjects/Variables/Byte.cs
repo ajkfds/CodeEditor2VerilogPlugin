@@ -11,20 +11,20 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected Byte() { }
 
-        public static new Byte Create(IDataType dataType)
+        public static new Byte Create(string name,IDataType dataType)
         {
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.Byte);
             DataTypes.IntegerAtomType? dType = dataType as DataTypes.IntegerAtomType;
             if (dType == null) throw new Exception();
 
-            Byte val = new Byte();
+            Byte val = new Byte() { Name = name };
             val.DataType = dType;
             return val;
         }
 
         public override Variable Clone()
         {
-            Byte val = new Byte();
+            Byte val = new Byte() { Name = Name };
             val.DataType = DataType;
             val.Signed = Signed;
             return val;

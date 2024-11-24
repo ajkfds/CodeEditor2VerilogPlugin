@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace pluginVerilog.Verilog.Statements
 {
@@ -40,8 +41,8 @@ namespace pluginVerilog.Verilog.Statements
 
             if (word.GetCharAt(0) == ':')
             {
-                NamedParallelBlock namedBlock = new NamedParallelBlock(nameSpace.BuildingBlock , nameSpace);
-                namedBlock.BeginIndexReference = beginIndex;
+                NamedParallelBlock? namedBlock = null;
+                string name = "";
 
                 word.MoveNext(); // :
                 if (!General.IsIdentifier(word.Text))
@@ -55,11 +56,18 @@ namespace pluginVerilog.Verilog.Statements
                         if (nameSpace.NameSpaces.ContainsKey(word.Text))
                         {
                             word.AddError("duplicated name");
-                            namedBlock.Name = word.Text;
+                            name = word.Text;
                         }
                         else
                         {
-                            namedBlock.Name = word.Text;
+                            namedBlock = new NamedParallelBlock(nameSpace.BuildingBlock, nameSpace)
+                            {
+                                BeginIndexReference = beginIndex,
+                                DefinitionReference = word.CrateWordReference(),
+                                Name = word.Text,
+                                Parent = nameSpace,
+                                Project = word.Project
+                            };
                             nameSpace.NameSpaces.Add(namedBlock.Name, namedBlock);
                         }
                     }

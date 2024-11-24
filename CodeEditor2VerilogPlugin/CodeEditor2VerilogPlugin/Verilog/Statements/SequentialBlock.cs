@@ -53,8 +53,7 @@ namespace pluginVerilog.Verilog.Statements
 
             if (word.GetCharAt(0) == ':')
             {
-                NamedSequentialBlock namedBlock = new NamedSequentialBlock(nameSpace.BuildingBlock, nameSpace);
-                namedBlock.BeginIndexReference = beginIndex;
+                NamedSequentialBlock? namedBlock = null;
 
                 word.MoveNext(); // :
                 if (!General.IsIdentifier(word.Text))
@@ -68,11 +67,25 @@ namespace pluginVerilog.Verilog.Statements
                         if (nameSpace.NameSpaces.ContainsKey(word.Text))
                         {
                             word.AddError("duplicated name");
-                            namedBlock.Name = word.Text;
+                            namedBlock = new NamedSequentialBlock(nameSpace.BuildingBlock, nameSpace)
+                            {
+                                BeginIndexReference = beginIndex,
+                                DefinitionReference = word.CrateWordReference(),
+                                Name = word.Text,
+                                Parent = nameSpace,
+                                Project = word.Project
+                            };
                         }
                         else
                         {
-                            namedBlock.Name = word.Text;
+                            namedBlock = new NamedSequentialBlock(nameSpace.BuildingBlock, nameSpace)
+                            {
+                                BeginIndexReference = beginIndex,
+                                DefinitionReference = word.CrateWordReference(),
+                                Name = word.Text,
+                                Parent = nameSpace,
+                                Project = word.Project
+                            };
                             nameSpace.NameSpaces.Add(namedBlock.Name, namedBlock);
                         }
                         word.MoveNext();

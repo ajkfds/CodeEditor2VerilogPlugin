@@ -12,18 +12,18 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected String() { }
 
-        public static new String Create(IDataType dataType)
+        public static new String Create(string name,IDataType dataType)
         {
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.String);
 
-            String val = new String();
+            String val = new String() { Name = name };
             val.DataType = dataType;
             return val;
         }
 
         public override Variable Clone()
         {
-            String val = new String();
+            String val = new String() { Name = Name };
             val.DataType = DataType;
             return val;
         }

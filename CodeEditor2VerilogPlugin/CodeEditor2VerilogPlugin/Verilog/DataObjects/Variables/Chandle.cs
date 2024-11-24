@@ -47,12 +47,12 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         //{
         //}
 
-        public static new Chandle Create(DataTypes.IDataType dataType)
+        public static new Chandle Create(string name,DataTypes.IDataType dataType)
         {
             DataTypes.Chandle? dType = dataType as DataTypes.Chandle;
             if (dType == null) throw new Exception();
 
-            Chandle val = new Chandle();
+            Chandle val = new Chandle() { Name = name };
             val.DataType = dType;
             return val;
         }

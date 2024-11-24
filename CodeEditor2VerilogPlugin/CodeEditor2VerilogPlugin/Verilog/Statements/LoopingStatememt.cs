@@ -195,7 +195,13 @@ namespace pluginVerilog.Verilog.Statements
 
         public static ForStatememt? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
-            ForStatememt forStatement = new ForStatememt(nameSpace.BuildingBlock,nameSpace);
+            ForStatememt forStatement = new ForStatememt(nameSpace.BuildingBlock, nameSpace) {
+                BeginIndexReference = word.CreateIndexReference(), 
+                DefinitionReference = word.CrateWordReference(), 
+                Name = "", 
+                Parent = word.RootParsedDocument.Root, 
+                Project = word.Project 
+            };
 
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();

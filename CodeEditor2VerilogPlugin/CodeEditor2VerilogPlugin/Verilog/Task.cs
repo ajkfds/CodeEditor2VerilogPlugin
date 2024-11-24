@@ -75,10 +75,8 @@ namespace pluginVerilog.Verilog
             {
                 System.Diagnostics.Debugger.Break();
             }
-            Task task = new Task(nameSpace);
-            task.BuildingBlock = nameSpace.BuildingBlock;
             word.Color(CodeDrawStyle.ColorType.Keyword);
-            task.BeginIndexReference = word.CreateIndexReference();
+            IndexReference beginReference = word.CreateIndexReference();
             word.MoveNext();
 
             // [lifetime]
@@ -100,7 +98,14 @@ namespace pluginVerilog.Verilog
                 return;
             }
 
-            task.Name = word.Text;
+            Task task = new Task(nameSpace) { 
+                BeginIndexReference = beginReference, 
+                DefinitionReference = word.CrateWordReference(), 
+                Name = word.Text, 
+                Parent = nameSpace, 
+                Project = word.Project 
+            };
+            task.BuildingBlock = nameSpace.BuildingBlock;
 
             if (!word.Active)
             {
@@ -240,10 +245,8 @@ namespace pluginVerilog.Verilog
         {
             if (word.Text != "task") throw new Exception();
 
-            Task task = new Task(nameSpace);
-            task.BuildingBlock = nameSpace.BuildingBlock;
+            IndexReference beginReference = word.CreateIndexReference();
             word.Color(CodeDrawStyle.ColorType.Keyword);
-            task.BeginIndexReference = word.CreateIndexReference();
             word.MoveNext();
 
             if (!General.IsIdentifier(word.Text))
@@ -252,7 +255,14 @@ namespace pluginVerilog.Verilog
                 return;
             }
 
-            task.Name = word.Text;
+            Task task = new Task(nameSpace) { 
+                BeginIndexReference = beginReference,
+                DefinitionReference = word.CrateWordReference() ,
+                Name = word.Text, 
+                Parent = nameSpace,
+                Project = word.Project 
+            };
+            task.BuildingBlock = nameSpace.BuildingBlock;
 
             if (!word.Active)
             {

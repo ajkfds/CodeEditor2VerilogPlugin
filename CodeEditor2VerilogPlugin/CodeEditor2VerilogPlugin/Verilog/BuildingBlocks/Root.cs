@@ -68,7 +68,15 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
         public static Root ParseCreate(WordScanner word, ParsedDocument parsedDocument,Data.VerilogFile file)
         {
-            Root root = new Root();
+            Root root = new Root()
+            {
+                BeginIndexReference = word.CreateIndexReference(),
+                DefinitionReference = word.CrateWordReference(),
+                File = file,
+                Name = "$root",
+                Parent = null,
+                Project = word.Project
+            };
             root.BuildingBlock = root;
             parsedDocument.Root = root;
 

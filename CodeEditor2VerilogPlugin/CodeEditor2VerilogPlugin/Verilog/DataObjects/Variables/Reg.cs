@@ -11,12 +11,11 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected Reg() { }
 
-        public static new Reg Create(IDataType dataType)
+        public static new Reg Create(string name,IDataType dataType)
         {
-            System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.Reg);
-            DataTypes.IntegerVectorType dType = dataType as DataTypes.IntegerVectorType;
+            DataTypes.IntegerVectorType dType = (DataTypes.IntegerVectorType)dataType;
 
-            Reg val = new Reg();
+            Reg val = new Reg() { Name = name };
             val.PackedDimensions = dType.PackedDimensions;
             val.DataType = dType;
             return val;
@@ -24,7 +23,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public override Variable Clone()
         {
-            Reg val = new Reg();
+            Reg val = new Reg() { Name = Name };
             val.DataType = DataType;
             val.PackedDimensions = PackedDimensions;
             val.Signed = Signed;

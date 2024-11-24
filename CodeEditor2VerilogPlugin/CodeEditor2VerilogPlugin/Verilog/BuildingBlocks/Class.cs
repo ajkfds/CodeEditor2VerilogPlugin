@@ -31,7 +31,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
 
         private WeakReference<Data.IVerilogRelatedFile> fileRef;
-        public override Data.IVerilogRelatedFile File
+        public required override Data.IVerilogRelatedFile File
         {
             get
             {
@@ -39,7 +39,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 if (!fileRef.TryGetTarget(out ret)) return null;
                 return ret;
             }
-            protected set
+            init
             {
                 fileRef = new WeakReference<Data.IVerilogRelatedFile>(value);
             }
@@ -79,14 +79,14 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
         }
 
-        public static Class Create(WordScanner word, NameSpace nameSpace)
+        public static Class? Create(WordScanner word, NameSpace nameSpace)
         {
             return Create(word, nameSpace, null);
         }
-        public static Class Create(
+        public static Class? Create(
             WordScanner word,
             NameSpace nameSpace,
-            Dictionary<string, Expressions.Expression> parameterOverrides
+            Dictionary<string, Expressions.Expression>? parameterOverrides
             )
         {
             bool protoType = false;
@@ -115,12 +115,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
             if (word.Text != "class") System.Diagnostics.Debugger.Break();
             word.Color(CodeDrawStyle.ColorType.Keyword);
-            Class class_ = new Class();
-            class_.Parent = word.RootParsedDocument.Root;
-
-            class_.BuildingBlock = class_;
-            class_.BeginIndexReference = word.CreateIndexReference();
-            if (word.CellDefine) class_.cellDefine = true;
+            IndexReference beginReference = word.CreateIndexReference();
             word.MoveNext();
 
 
@@ -131,6 +126,28 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 macroKeep.Add(kvPair.Key, kvPair.Value);
             }
 
+            // class_identifier
+            word.Color(CodeDrawStyle.ColorType.Identifier);
+            if (!General.IsIdentifier(word.Text))
+            {
+                word.AddError("illegal class name");
+                word.SkipToKeyword(";");
+                return null;
+            }
+
+            Class class_ = new Class() {
+                BeginIndexReference = beginReference,
+                DefinitionReference = word.CrateWordReference(),
+                File = word.RootParsedDocument.File,
+                Name = word.Text,
+                Parent = word.RootParsedDocument.Root,
+                Project = word.Project
+            };
+            class_.NameReference = word.GetReference();
+            class_.BuildingBlock = class_;
+
+            if (word.CellDefine) class_.cellDefine = true;
+            word.MoveNext();
 
             if (!word.CellDefine && !protoType)
             {
@@ -196,18 +213,6 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             Attribute attribute, Class class_)
         {
 
-            // module_identifier
-            class_.Name = word.Text;
-            word.Color(CodeDrawStyle.ColorType.Identifier);
-            if (!General.IsIdentifier(word.Text))
-            {
-                word.AddError("illegal class name");
-            }
-            else
-            {
-                class_.NameReference = word.GetReference();
-            }
-            word.MoveNext();
 
             while (true)
             {
@@ -265,8 +270,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                             }
 
                             class_.Constants.Remove(vkp.Key);
-                            DataObjects.Constants.Parameter param = new DataObjects.Constants.Parameter();
-                            param.Name = vkp.Key;
+                            DataObjects.Constants.Parameter param = new DataObjects.Constants.Parameter() { Name = vkp.Key };
                             param.Expression = vkp.Value;
                             class_.Constants.Add(param.Name, param);
                         }
@@ -358,7 +362,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
             base.AppendAutoCompleteItem(items);
 
-            foreach (IInstantiation instantiation in Instantiations.Values)
+            foreach (IBuildingBlockInstantiation instantiation in Instantiations.Values)
             {
                 if (instantiation.Name == null) throw new Exception();
                 items.Add(newItem(instantiation.Name, CodeDrawStyle.ColorType.Identifier));

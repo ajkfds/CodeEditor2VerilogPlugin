@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog
 {
-    public interface CommentAnnotated
+    public interface ICommentAnnotated
     {
         Dictionary<string, string> CommentAnnotations { get; }
         void AppendAnnotation(string key, string value);

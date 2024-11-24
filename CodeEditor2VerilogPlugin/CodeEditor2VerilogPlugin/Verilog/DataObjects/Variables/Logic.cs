@@ -11,13 +11,13 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected Logic() { }
 
-        public static new Logic Create(IDataType dataType)
+        public static new Logic Create(string name,IDataType dataType)
         {
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.Logic);
             DataTypes.IntegerVectorType? dType = dataType as DataTypes.IntegerVectorType;
             if (dType == null) throw new Exception();
 
-            Logic val = new Logic();
+            Logic val = new Logic() { Name = name };
             val.PackedDimensions = dType.PackedDimensions;
             val.DataType = dataType;
             return val;
@@ -25,7 +25,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public override Variable Clone()
         {
-            Logic val = new Logic();
+            Logic val = new Logic() { Name = Name };
             val.DataType = DataType;
             val.PackedDimensions = PackedDimensions;
             val.Signed = Signed;

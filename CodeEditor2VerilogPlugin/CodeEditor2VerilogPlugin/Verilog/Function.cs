@@ -5,6 +5,7 @@ using pluginVerilog.Verilog.DataObjects.Nets;
 using pluginVerilog.Verilog.DataObjects.Variables;
 using pluginVerilog.Verilog.Items;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,6 +15,7 @@ namespace pluginVerilog.Verilog
 {
     public class Function : NameSpace, IPortNameSpace
     {
+        [SetsRequiredMembers]
         protected Function(NameSpace parent) : base(parent.BuildingBlock, parent)
         {
         }
@@ -48,9 +50,9 @@ namespace pluginVerilog.Verilog
         {
             if (word.Text != "function") throw new System.Exception();
 
-            Function function = new Function(nameSpace);
             word.Color(CodeDrawStyle.ColorType.Keyword);
-            function.BeginIndexReference = word.CreateIndexReference();
+            IndexReference beginReference = word.CreateIndexReference();
+//            function.BeginIndexReference = word.CreateIndexReference();
             word.MoveNext();
 
             // ## verilog 2001
@@ -140,7 +142,7 @@ namespace pluginVerilog.Verilog
                             if (range != null) packedDimensions.Add(range);
                         }
                         IDataType dataType = Verilog.DataObjects.DataTypes.IntegerVectorType.Create(DataTypeEnum.Logic, signed, packedDimensions);
-                        Logic logic = Verilog.DataObjects.Variables.Logic.Create(dataType);
+                        Logic logic = Verilog.DataObjects.Variables.Logic.Create("",dataType);
                         logic.PackedDimensions = packedDimensions;
                         retVal = logic;
                     }
@@ -151,10 +153,10 @@ namespace pluginVerilog.Verilog
                         // skip data type definition
                     }else
                     {
-                        IDataType dataType = DataTypeFactory.ParseCreate(word, nameSpace, null);
+                        IDataType? dataType = DataTypeFactory.ParseCreate(word, nameSpace, null);
                         if (dataType != null)
                         {
-                            retVal = Verilog.DataObjects.Variables.Variable.Create(dataType);
+                            retVal = Verilog.DataObjects.Variables.Variable.Create("", dataType);
                         }
                     }
                     break;
@@ -166,7 +168,12 @@ namespace pluginVerilog.Verilog
                 return;
             }
 
-            function.Name = word.Text;
+            Function function = new Function(nameSpace) {
+                Name = word.Text,
+                Project = word.Project,
+                BeginIndexReference = beginReference
+            };
+
             if (acceptClassConstructor)
             {
 
@@ -176,11 +183,11 @@ namespace pluginVerilog.Verilog
                 if (!returnVoid && retVal == null)
                 {
                     IDataType dat_type = Verilog.DataObjects.DataTypes.IntegerVectorType.Create(DataTypeEnum.Logic, false, null);
-                    retVal = Verilog.DataObjects.Variables.Logic.Create(dat_type);
+                    retVal = Verilog.DataObjects.Variables.Logic.Create("",dat_type);
                 }
             }
 
-            if (retVal != null) retVal.Name = function.Name;
+            if (retVal != null) retVal.Clone(function.Name);
 
             function.ReturnVariable = retVal;
 
@@ -325,9 +332,8 @@ namespace pluginVerilog.Verilog
         {
             if (word.Text != "function") throw new System.Exception();
 
-            Function function = new Function(nameSpace);
             word.Color(CodeDrawStyle.ColorType.Keyword);
-            function.BeginIndexReference = word.CreateIndexReference();
+            IndexReference beginReference = word.CreateIndexReference();
             word.MoveNext();
 
             // function_data_type_or_implicit   ::= data_type_or_void | implicit_data_type;
@@ -364,7 +370,7 @@ namespace pluginVerilog.Verilog
                             if (range != null) packedDimensions.Add(range);
                         }
                         IDataType dataType = Verilog.DataObjects.DataTypes.IntegerVectorType.Create(DataTypeEnum.Logic, signed, packedDimensions);
-                        Logic logic = Verilog.DataObjects.Variables.Logic.Create(dataType);
+                        Logic logic = Verilog.DataObjects.Variables.Logic.Create("",dataType);
                         logic.PackedDimensions = packedDimensions;
                         retVal = logic;
                     }
@@ -374,7 +380,7 @@ namespace pluginVerilog.Verilog
                         IDataType? dataType = DataTypeFactory.ParseCreate(word, nameSpace, null);
                         if (dataType != null)
                         {
-                            retVal = Verilog.DataObjects.Variables.Variable.Create(dataType);
+                            retVal = Verilog.DataObjects.Variables.Variable.Create("",dataType);
                         }
                     }
                     break;
@@ -386,14 +392,14 @@ namespace pluginVerilog.Verilog
                 return;
             }
 
-            function.Name = word.Text;
+            Function function = new Function(nameSpace) { Name = word.Text, Project = word.Project, BeginIndexReference = beginReference };
             if (!returnVoid)
             {
                 IDataType dat_type = Verilog.DataObjects.DataTypes.IntegerVectorType.Create(DataTypeEnum.Logic, false, null);
-                retVal = Verilog.DataObjects.Variables.Logic.Create(dat_type);
+                retVal = Verilog.DataObjects.Variables.Logic.Create("",dat_type);
             }
 
-            if (retVal != null) retVal.Name = function.Name;
+            if (retVal != null) retVal.Clone(function.Name);
 
             function.ReturnVariable = retVal;
 

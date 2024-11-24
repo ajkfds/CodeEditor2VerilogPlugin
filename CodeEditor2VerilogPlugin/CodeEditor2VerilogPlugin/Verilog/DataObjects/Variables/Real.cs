@@ -12,18 +12,18 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected Real() { }
 
-        public static new Real Create(IDataType dataType)
+        public static new Real Create(string name,IDataType dataType)
         {
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.Real);
 
-            Real val = new Real();
+            Real val = new Real() { Name = name };
             val.DataType = dataType;
             return val;
         }
 
         public override Variable Clone()
         {
-            Real val = new Real();
+            Real val = new Real() { Name = Name };
             val.DataType = DataType;
             return val;
         }

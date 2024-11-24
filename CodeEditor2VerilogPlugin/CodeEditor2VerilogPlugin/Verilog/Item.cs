@@ -8,18 +8,19 @@ namespace pluginVerilog.Verilog
 {
     public class Item
     {
-        public string Name { get; set; }
-        public Attribute Attribute { get; set; }
-        public WordReference DefinitionReference { get; set; }
-
-        public CodeEditor2.Data.Project Project { get; protected set; }
+        public required string Name { get; init;  }
+        public Attribute? Attribute { get; set; }
+        public required WordReference DefinitionReference { get; init; }
+        public required CodeEditor2.Data.Project Project { get; init; }
 
         public Dictionary<string, string> Properties = new Dictionary<string, string>();
         public ProjectProperty ProjectProperty
         {
             get
             {
-                return Project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+                ProjectProperty? projectPropery = Project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+                if (projectPropery == null) throw new Exception();
+                return projectPropery;
             }
         }
     }

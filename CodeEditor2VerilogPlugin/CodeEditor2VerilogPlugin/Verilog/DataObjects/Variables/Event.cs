@@ -30,8 +30,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                     word.AddError("illegal event identifier");
                     return;
                 }
-                Event val = new Event();
-                val.Name = word.Text;
+                Event val = new Event() { Name = word.Text };
                 if (nameSpace.DataObjects.ContainsKey(val.Name))
                 {
                     if (nameSpace.DataObjects[val.Name] is Event)

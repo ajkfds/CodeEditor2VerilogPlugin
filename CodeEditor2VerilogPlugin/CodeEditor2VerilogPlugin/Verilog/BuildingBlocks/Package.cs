@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CodeEditor2.CodeEditor.CodeComplete;
+using pluginVerilog.Verilog.ModuleItems;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
@@ -15,7 +16,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         }
 
         private WeakReference<Data.IVerilogRelatedFile> fileRef;
-        public override Data.IVerilogRelatedFile? File
+        public required override Data.IVerilogRelatedFile? File
         {
             get
             {
@@ -23,7 +24,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 if (!fileRef.TryGetTarget(out ret)) return null;
                 return ret;
             }
-            protected set
+            init
             {
                 fileRef = new WeakReference<Data.IVerilogRelatedFile>(value);
             }
@@ -68,13 +69,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
             if (word.Text != "package") throw new Exception();
             word.Color(CodeDrawStyle.ColorType.Keyword);
-            Package package = new Package();
-            package.Parent = word.RootParsedDocument.Root;
-            package.Project = word.Project;
-            package.BuildingBlock = package;
-            package.File = file;
-            package.BeginIndexReference = word.CreateIndexReference();
-            if (word.CellDefine) package.cellDefine = true;
+            IndexReference beginReference = word.CreateIndexReference();
             word.MoveNext();
 
 
@@ -85,6 +80,28 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 macroKeep.Add(kvPair.Key, kvPair.Value);
             }
 
+            // module_identifier
+            word.Color(CodeDrawStyle.ColorType.Identifier);
+            if (!General.IsIdentifier(word.Text))
+            {
+                word.AddError("illegal package name");
+                word.SkipToKeyword(";");
+                return null;
+            }
+
+            Package package = new Package()
+            {
+                BeginIndexReference = beginReference,
+                DefinitionReference = word.CrateWordReference(),
+                File = file,
+                Name = word.Text,
+                Parent = word.RootParsedDocument.Root,
+                Project = word.Project
+            };
+            package.BuildingBlock = package;
+            if (word.CellDefine) package.cellDefine = true;
+
+            word.MoveNext();
 
             if (!word.CellDefine && !protoType)
             {
@@ -140,18 +157,6 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             )
         {
 
-            // module_identifier
-            module.Name = word.Text;
-            word.Color(CodeDrawStyle.ColorType.Identifier);
-            if (!General.IsIdentifier(word.Text))
-            {
-                word.AddError("illegal package name");
-            }
-            else
-            {
-                module.NameReference = word.GetReference();
-            }
-            word.MoveNext();
 
             while (true)
             {
@@ -199,7 +204,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
             base.AppendAutoCompleteItem(items);
 
-            foreach (ModuleItems.IInstantiation instantiation in Instantiations.Values)
+            foreach (IBuildingBlockInstantiation instantiation in Instantiations.Values)
             {
                 if (instantiation.Name == null) throw new Exception();
                 items.Add(newItem(instantiation.Name, CodeDrawStyle.ColorType.Identifier));

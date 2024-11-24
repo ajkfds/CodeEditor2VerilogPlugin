@@ -12,18 +12,18 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected Shortreal() { }
 
-        public static new Shortreal Create(IDataType dataType)
+        public static new Shortreal Create(string name,IDataType dataType)
         {
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.Shortreal );
 
-            Shortreal val = new Shortreal();
+            Shortreal val = new Shortreal() { Name = name };
             val.DataType = dataType;
             return val;
         }
 
         public override Variable Clone()
         {
-            Shortreal val = new Shortreal();
+            Shortreal val = new Shortreal() { Name = Name };
             val.DataType = DataType;
             return val;
         }

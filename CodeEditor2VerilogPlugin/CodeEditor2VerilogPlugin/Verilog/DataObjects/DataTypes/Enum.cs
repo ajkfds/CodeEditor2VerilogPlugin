@@ -112,8 +112,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             item.Identifier = word.Text;
             word.Color(CodeDrawStyle.ColorType.Parameter);
 
-            EnumConstants constants = EnumConstants.Create(enum_.BaseType);
-            constants.Name = item.Identifier;
+            EnumConstants constants = EnumConstants.Create(item.Identifier,enum_.BaseType);
             constants.DefinedReference = word.GetReference();
             if (!nameSpace.Constants.ContainsKey(constants.Name)) nameSpace.Constants.Add(constants.Name, constants);
 

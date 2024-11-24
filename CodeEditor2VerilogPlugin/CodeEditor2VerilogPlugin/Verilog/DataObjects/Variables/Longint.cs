@@ -11,20 +11,18 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected Longint() { }
 
-        public static new Longint Create(IDataType dataType)
+        public static new Longint Create(string name, IDataType dataType)
         {
-            if (dataType.Type == DataTypeEnum.Int) System.Diagnostics.Debugger.Break();
-            DataTypes.IntegerAtomType? dType = dataType as DataTypes.IntegerAtomType;
-            if (dType == null) throw new Exception();
+            DataTypes.IntegerAtomType dType = (DataTypes.IntegerAtomType)dataType;
 
-            Longint val = new Longint();
+            Longint val = new Longint() { Name = name };
             val.DataType = dType;
             return val;
         }
 
         public override Variable Clone()
         {
-            Longint val = new Longint();
+            Longint val = new Longint() { Name = Name };
             val.DataType = DataType;
             val.Signed = Signed;
             return val;

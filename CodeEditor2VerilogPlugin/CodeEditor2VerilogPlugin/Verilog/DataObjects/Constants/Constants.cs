@@ -217,19 +217,18 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                                 switch (constantType)
                                 {
                                     case ConstantTypeEnum.localparam:
-                                        constants = new Localparam();
+                                        constants = new Localparam() { Name = identifier };
                                         break;
                                     case ConstantTypeEnum.parameter:
-                                        constants = new Parameter();
+                                        constants = new Parameter() { Name = identifier };
                                         break;
                                     case ConstantTypeEnum.specparam:
-                                        constants = new Specparam();
+                                        constants = new Specparam() { Name = identifier };
                                         break;
                                     default:
                                         System.Diagnostics.Debugger.Break();
                                         return;
                                 }
-                                constants.Name = identifier;
                                 constants.Expression = expression;
                                 constants.DefinitionRefrecnce = nameReference;
                                 constants.ConstantType = constantType;
@@ -338,13 +337,13 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                 switch (constantType)
                 {
                     case ConstantTypeEnum.localparam:
-                        constants = new Localparam();
+                        constants = new Localparam() { Name = identifier };
                         break;
                     case ConstantTypeEnum.parameter:
-                        constants = new Parameter();
+                        constants = new Parameter() { Name = identifier };
                         break;
                     case ConstantTypeEnum.specparam:
-                        constants = new Specparam();
+                        constants = new Specparam() { Name = identifier };
                         break;
                     default:
                         System.Diagnostics.Debugger.Break();
@@ -364,7 +363,6 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                         }
                         else
                         {
-                            constants.Name = identifier;
                             nameSpace.Constants.Add(constants.Name, constants);
                         }
                     }
@@ -376,7 +374,6 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                         }
                         else
                         { // for root nameSpace parameter
-                            constants.Name = identifier;
                             nameSpace.Constants.Add(constants.Name, constants);
                         }
                     }

@@ -20,10 +20,15 @@ namespace pluginVerilog.Verilog
         {
         }
 
-        public static NamedGeneratedBlock Create(NameSpace parent, string name)
+        public static NamedGeneratedBlock Create(WordScanner word,NameSpace parent, IndexReference beginReference)
         {
-            NamedGeneratedBlock block = new NamedGeneratedBlock(parent);
-            block.Name = name;
+            NamedGeneratedBlock block = new NamedGeneratedBlock(parent) { 
+                BeginIndexReference = beginReference, 
+                DefinitionReference = word.CrateWordReference(),
+                Name = word.Text,
+                Parent = parent, 
+                Project = word.Project 
+            };
             return block;
         }
 

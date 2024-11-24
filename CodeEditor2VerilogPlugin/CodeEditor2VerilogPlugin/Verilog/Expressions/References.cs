@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using pluginVerilog.Verilog.ModuleItems;
 
 namespace pluginVerilog.Verilog.Expressions
 {
@@ -96,8 +97,8 @@ namespace pluginVerilog.Verilog.Expressions
 
     public class ModuleInstanceReference : Primary
     {
-        ModuleItems.IInstantiation moduleInstantiation;
-        public ModuleInstanceReference(ModuleItems.IInstantiation moduleInstantiation)
+        IBuildingBlockInstantiation moduleInstantiation;
+        public ModuleInstanceReference(IBuildingBlockInstantiation moduleInstantiation)
         {
             this.moduleInstantiation = moduleInstantiation;
         }
@@ -105,8 +106,8 @@ namespace pluginVerilog.Verilog.Expressions
 
     public class InterfaceReference : Primary
     {
-        public ModuleItems.IInstantiation interfaceInstantiation;
-        public InterfaceReference(ModuleItems.IInstantiation interfaceInstantiation)
+        public IBuildingBlockInstantiation interfaceInstantiation;
+        public InterfaceReference(IBuildingBlockInstantiation interfaceInstantiation)
         {
             this.interfaceInstantiation = interfaceInstantiation;
         }

@@ -11,19 +11,18 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected Shortint() { }
 
-        public static new Shortint Create(IDataType dataType)
+        public static new Shortint Create(string name,IDataType dataType)
         {
-            System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.Shortint);
-            DataTypes.IntegerAtomType? dType = dataType as DataTypes.IntegerAtomType;
+            DataTypes.IntegerAtomType dType = (DataTypes.IntegerAtomType)dataType;
 
-            Shortint val = new Shortint();
+            Shortint val = new Shortint() { Name = name };
             val.DataType = dType;
             return val;
         }
 
         public override Variable Clone()
         {
-            Shortint val = new Shortint();
+            Shortint val = new Shortint() { Name = Name };
             val.DataType = DataType;
             val.Signed = Signed;
             return val;

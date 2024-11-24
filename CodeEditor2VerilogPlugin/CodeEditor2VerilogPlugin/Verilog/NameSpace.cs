@@ -3,6 +3,7 @@ using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects.Nets;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -13,15 +14,13 @@ namespace pluginVerilog.Verilog
 {
     public class NameSpace : Item
     {
-        
-        private NameSpace() { }
         protected NameSpace(BuildingBlocks.BuildingBlock buildingBlock,NameSpace parent)
         {
             BuildingBlock = buildingBlock;
             Parent = parent;
         }
 
-        public IndexReference? BeginIndexReference = null;
+        public required IndexReference BeginIndexReference { get; init; }
         public IndexReference? LastIndexReference = null;
 
         private Dictionary<string, DataObjects.DataObject> variables = new Dictionary<string, DataObjects.DataObject>();
@@ -33,8 +32,7 @@ namespace pluginVerilog.Verilog
 
         public Dictionary<string, DataObjects.DataObject> DataObjects { get { return variables; } }
 
-
-        public NameSpace Parent { get; protected set; }
+        public required NameSpace Parent { get; init; }
 
         private Dictionary<string, DataObjects.Constants.Constants> constants = new Dictionary<string, DataObjects.Constants.Constants>();
         public Dictionary<string, DataObjects.Constants.Constants> Constants { get { return constants; } }
@@ -134,7 +132,7 @@ namespace pluginVerilog.Verilog
             }
         }
 
-        public DataObjects.DataObject GetDataObject(string identifier)
+        public DataObjects.DataObject? GetDataObject(string identifier)
         {
             if (DataObjects.ContainsKey(identifier))
             {
@@ -148,7 +146,7 @@ namespace pluginVerilog.Verilog
             return null;
         }
 
-        public DataObjects.Constants.Constants GetConstants(string identifier)
+        public DataObjects.Constants.Constants? GetConstants(string identifier)
         {
             if (Constants.ContainsKey(identifier))
             {
@@ -167,7 +165,7 @@ namespace pluginVerilog.Verilog
             return null;
         }
 
-        private DataObjects.Constants.Constants getConstantsHier(string identifier)
+        private DataObjects.Constants.Constants? getConstantsHier(string identifier)
         {
             if (Constants.ContainsKey(identifier))
             {

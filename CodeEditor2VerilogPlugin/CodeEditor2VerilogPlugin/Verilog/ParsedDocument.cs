@@ -300,7 +300,7 @@ namespace pluginVerilog.Verilog
 
             if(space != null)
             {
-                foreach (IInstantiation instantiation in space.BuildingBlock.Instantiations.Values)
+                foreach (IBuildingBlockInstantiation instantiation in space.BuildingBlock.Instantiations.Values)
                 {
                     if (instantiation.BeginIndexReference == null) continue;
                     if (instantiation.LastIndexReference == null) continue;
@@ -505,7 +505,7 @@ namespace pluginVerilog.Verilog
 
             if (buildingBlock.Instantiations.ContainsKey(hier[0]))
             {
-                IInstantiation instantiation = buildingBlock.Instantiations[hier[0]];
+                IBuildingBlockInstantiation instantiation = buildingBlock.Instantiations[hier[0]];
                 NameSpace? bBlock = ProjectProperty.GetInstancedBuildingBlock(instantiation);
 
                 if (instantiation is InterfaceInstantiation)
@@ -545,13 +545,14 @@ namespace pluginVerilog.Verilog
             // get reference of current position
             IndexReference iref = IndexReference.Create(this.IndexReference, index);
 
-            // get current nameSpace
+            // get current buldingBlock
             NameSpace? space = null;
-            foreach (BuildingBlock module in Root.BuldingBlocks.Values)
+            foreach (BuildingBlock buildingBlock in Root.BuldingBlocks.Values)
             {
-                if (iref.IsSmallerThan(module.BeginIndexReference)) continue;
-                if (iref.IsGreaterThan(module.LastIndexReference)) continue;
-                space = module.GetHierarchyNameSpace(iref);
+                if (iref.IsSmallerThan(buildingBlock.BeginIndexReference)) continue;
+                if (buildingBlock.LastIndexReference == null) break;
+                if (iref.IsGreaterThan(buildingBlock.LastIndexReference)) continue;
+                space = buildingBlock.GetHierarchyNameSpace(iref);
                 break;
             }
 
@@ -566,7 +567,8 @@ namespace pluginVerilog.Verilog
             }
 
             // system task & functions
-            if (hierWords.Count == 0 && candidateWord.StartsWith("$"))
+            // return system task and function if the word starts with "$"
+            if (candidateWord.StartsWith("$"))
             {
                 items = new List<AutocompleteItem>();
                 foreach (string key in ProjectProperty.SystemFunctions.Keys)
@@ -592,6 +594,7 @@ namespace pluginVerilog.Verilog
                 return items;
             }
 
+            // if no hierarchy, add standerd compelete items
             if (hierWords.Count == 0)
             {
                 items = VerilogAutoCompleteItems.ToList();
@@ -601,6 +604,7 @@ namespace pluginVerilog.Verilog
                 items = new List<AutocompleteItem>();
             }
 
+            // if no hierarchy, add root level object name list
             if (hierWords.Count == 0)
             {
                 List<string> objectList = ProjectProperty.GetObjectsNameList();
@@ -635,9 +639,15 @@ namespace pluginVerilog.Verilog
                 }
             }
 
-            // get target autocomplete item
-            NameSpace? target = getSearchNameSpace(space, hierWords);
-            if(target != null) target.AppendAutoCompleteItem(items);
+            // GetDataObject
+
+
+            // get nameSpace autocomplete item
+            NameSpace? nameSpace = getSearchNameSpace(space, hierWords);
+            if (nameSpace != null)
+            {
+                nameSpace.AppendAutoCompleteItem(items);
+            }
 
             return items;
         }

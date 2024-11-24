@@ -120,9 +120,9 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             label.AppendText("\r\n");
         }
 
-        public static Net Create(NetTypeEnum netType, DataObjects.DataTypes.IDataType? dataType)
+        public static Net Create(string name, NetTypeEnum netType, DataObjects.DataTypes.IDataType? dataType)
         {
-            Net net = new Net();
+            Net net = new Net() { Name = name };
             net.NetType = netType;
             net.DataType = dataType;
 
@@ -318,11 +318,10 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             List<Net> nets = new List<Net>();
             while (!word.Eof)
             {
-                Net net = new Net();
+                Net net = new Net() { Name = word.Text };
                 nets.Add(net);
                 net.Signed = signed;
                 if(range != null)  net.PackedDimensions.Add(range);
-                net.Name = word.Text;
                 net.NetType = netType;
 
                 net.DefinedReference = word.GetReference();

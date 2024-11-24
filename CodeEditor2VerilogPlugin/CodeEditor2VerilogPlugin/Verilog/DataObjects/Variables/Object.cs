@@ -11,25 +11,46 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected Object() { }
 
-        public BuildingBlocks.Class Class;
+        public required BuildingBlocks.Class Class { get; init; }
 
-        public static new Object Create(IDataType dataType)
+        public static new Object Create(string name,IDataType dataType)
         {
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.Class);
-            BuildingBlocks.Class class_ = dataType as BuildingBlocks.Class;
+            BuildingBlocks.Class? class_ = dataType as BuildingBlocks.Class;
+            if (class_ == null) throw new Exception();
 
-            Object val = new Object();
+            Object val = new Object() { Class = class_, Name = name };
             val.DataType = dataType;
-            val.Class = class_;
             return val;
         }
 
         public override Variable Clone()
         {
-            Object val = new Object();
+            Object val = new Object() { Class = Class, Name = Name };
             val.DataType = DataType;
             return val;
         }
+
+        // IInstance
+        public override Task? GetTask(string identifier)
+        {
+            if (Class.Tasks.ContainsKey(identifier)) return Class.Tasks[identifier];
+            return null;
+        }
+        public override Function? GetFunction(string identifier)
+        {
+            if (Class.Functions.ContainsKey(identifier)) return Class.Functions[identifier];
+            return null;
+        }
+        public override DataObject? GetDataObject(string identifier)
+        {
+            return Class.GetDataObject(identifier);
+        }
+        public override void AppendAutoCompleteItem(List<CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem> items)
+        {
+            Class.AppendAutoCompleteItem(items);
+        }
+
 
     }
 }

@@ -169,7 +169,7 @@ namespace pluginVerilog.Verilog.ModuleItems
 
         public static new PullUpPullDown ParseCreate(WordScanner word, NameSpace nameSpace)
         {
-            PullUpPullDown pull = new PullUpPullDown();
+            PullUpPullDown pull = new PullUpPullDown() { DefinitionReference = word.CrateWordReference(), Name = "", Project = word.Project };
             if (word.Text == "pullup") pull.PullUp = true;
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
@@ -208,7 +208,7 @@ namespace pluginVerilog.Verilog.ModuleItems
     {
         protected CmosSwitchInstiation() { }
 
-        Delay3 delay3;
+        Delay3? delay3;
 
         // gate_instantiation::=    cmos_switchtype  [delay3] cmos_switch_instance        { , cmos_switch_instance }; 
         public static new CmosSwitchInstiation ParseCreate(WordScanner word, NameSpace nameSpace)
@@ -216,17 +216,21 @@ namespace pluginVerilog.Verilog.ModuleItems
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
-            CmosSwitchInstiation ret = new CmosSwitchInstiation();
+            string name = "";
+            Delay3? delay = null;
             if (word.Text == "(")
             {
-                ret.delay3 = Delay3.ParseCreate(word, nameSpace as NameSpace);
+                delay = Delay3.ParseCreate(word, nameSpace as NameSpace);
             }
             if(word.Text != "(" && General.IsIdentifier(word.Text))
             {
-                ret.Name = word.Text;
+                name = word.Text;
                 word.Color(CodeDrawStyle.ColorType.Identifier);
                 word.MoveNext();
             }
+            CmosSwitchInstiation ret = new CmosSwitchInstiation() { DefinitionReference = word.CrateWordReference(), Name = name, Project = word.Project };
+            ret.delay3 = delay;
+
             while (!word.Eof)
             {
                 if (word.Text == "(")
@@ -262,15 +266,15 @@ namespace pluginVerilog.Verilog.ModuleItems
             // mos_switch_instance              ::= [name_of_gate_instance] (output_terminal, input_terminal, enable_terminal) 
             while(!word.Eof && word.Text != ";")
             {
-                MosSwitchInstiation ret = new MosSwitchInstiation();
-
-                if(word.Text != "(" && General.IsIdentifier(word.Text))
+                string name = "";
+                if (word.Text != "(" && General.IsIdentifier(word.Text))
                 {
-                    ret.Name = word.Text;
+                    name = word.Text;
                     word.Color(CodeDrawStyle.ColorType.Identifier);
                     word.MoveNext();
                 }
-                if(word.Text != "(")
+                MosSwitchInstiation ret = new MosSwitchInstiation() { DefinitionReference = word.CrateWordReference(), Name = name, Project = word.Project };
+                if (word.Text != "(")
                 {
                     word.AddError("( required");
                     word.SkipToKeyword(";");
@@ -335,7 +339,7 @@ namespace pluginVerilog.Verilog.ModuleItems
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
-            EnableGate ret = new EnableGate();
+            EnableGate ret = new EnableGate() { DefinitionReference = word.CrateWordReference(), Name = "", Project = word.Project };
 
             ret.DriveStrength = DriveStrength.ParseCreate(word, nameSpace as NameSpace);
             ret.Delay3 = Delay3.ParseCreate(word, nameSpace as NameSpace);
@@ -388,7 +392,7 @@ namespace pluginVerilog.Verilog.ModuleItems
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
-            NInputGate ret = new NInputGate();
+            NInputGate ret = new NInputGate() { DefinitionReference = word.CrateWordReference(), Name = "", Project = word.Project };
 
             ret.DriveStrength = DriveStrength.ParseCreate(word, nameSpace as NameSpace);
             ret.Delay2 = Delay2.ParseCreate(word, nameSpace as NameSpace);
@@ -444,7 +448,7 @@ namespace pluginVerilog.Verilog.ModuleItems
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
-            NOutputGate ret = new NOutputGate();
+            NOutputGate ret = new NOutputGate() { DefinitionReference = word.CrateWordReference(), Name = "", Project = word.Project };
 
             ret.DriveStrength = DriveStrength.ParseCreate(word, nameSpace as NameSpace);
             ret.Delay2 = Delay2.ParseCreate(word, nameSpace as NameSpace);

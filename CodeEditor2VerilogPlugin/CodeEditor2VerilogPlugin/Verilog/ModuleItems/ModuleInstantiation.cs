@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.ModuleItems
 {
-    public class ModuleInstantiation : Item,IInstantiation
+    public class ModuleInstantiation : Item,IBuildingBlockInstantiation
     {
         protected ModuleInstantiation() { }
         /*
@@ -46,10 +46,10 @@ namespace pluginVerilog.Verilog.ModuleItems
             | { attribute_instance } ".*"
         */
 
-        public string SourceName{ get; protected set; }
+        public required string SourceName{ get; init; }
 
-        public Dictionary<string, Expressions.Expression> ParameterOverrides { get; set; } = new Dictionary<string, Expressions.Expression>();
-
+        public required Dictionary<string, Expressions.Expression> ParameterOverrides { get; init; }
+            
         public Dictionary<string, Expressions.Expression> PortConnection { get; set; } = new Dictionary<string, Expressions.Expression>();
 
         public List<PortReference> PortReferences = new List<PortReference>();
@@ -104,8 +104,8 @@ namespace pluginVerilog.Verilog.ModuleItems
 
         public bool Prototype { get; set; } = false;
 
-        public IndexReference BeginIndexReference { get; set; }
-        public IndexReference LastIndexReference { get; set; }
+        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; }
 
 
         public static bool Parse(WordScanner word, NameSpace nameSpace)
@@ -132,13 +132,9 @@ namespace pluginVerilog.Verilog.ModuleItems
                 return true;
             }
             moduleIdentifier.Color(CodeDrawStyle.ColorType.Keyword);
-            ModuleInstantiation moduleInstantiation = new ModuleInstantiation();
-            moduleInstantiation.SourceName = moduleName;
-            moduleInstantiation.BeginIndexReference = beginIndexReference;
-            moduleInstantiation.Project = word.RootParsedDocument.Project;
+//            word.MoveNext();
 
-            
-
+            Dictionary<string, Expressions.Expression> parameterOverrides = new Dictionary<string, Expressions.Expression>();
 
             if (word.Text == "#") // parameter
             {
@@ -187,13 +183,13 @@ namespace pluginVerilog.Verilog.ModuleItems
 
                         if (!error )//& word.Prototype)
                         {
-                            if (moduleInstantiation.ParameterOverrides.ContainsKey(paramName))
+                            if (parameterOverrides.ContainsKey(paramName))
                             {
                                 word.AddPrototypeError("duplicated");
                             }
                             else
                             {
-                                if(expression != null) moduleInstantiation.ParameterOverrides.Add(paramName, expression);
+                                if(expression != null) parameterOverrides.Add(paramName, expression);
                             }
                         }
 
@@ -232,13 +228,13 @@ namespace pluginVerilog.Verilog.ModuleItems
                                 string paramName = instancedModule.PortParameterNameList[i];
                                 if (word.Prototype && expression != null)
                                 {
-                                    if (moduleInstantiation.ParameterOverrides.ContainsKey(paramName))
+                                    if (parameterOverrides.ContainsKey(paramName))
                                     {
                                         word.AddError("duplicated");
                                     }
                                     else
                                     {
-                                        moduleInstantiation.ParameterOverrides.Add(paramName, expression);
+                                       parameterOverrides.Add(paramName, expression);
                                     }
                                 }
                             }
@@ -264,26 +260,36 @@ namespace pluginVerilog.Verilog.ModuleItems
                 word.MoveNext();
             }
 
-            // swap to parameter overrided module
-            if( instancedModule != null)
-            {
-                if (moduleInstantiation.ParameterOverrides.Count != 0)
-                {
-                    instancedModule = word.ProjectProperty.GetInstancedBuildingBlock(moduleInstantiation) as Module;
-                }
-                if (instancedModule == null) nameSpace.BuildingBlock.ReparseRequested = true;
-            }
 
             while (!word.Eof)
             {
                 word.Color(CodeDrawStyle.ColorType.Identifier);
-                if (General.IsIdentifier(word.Text))
-                {
-                    moduleInstantiation.Name = word.Text;
-                }
-                else
+
+
+                if (!General.IsIdentifier(word.Text))
                 {
                     if (word.Prototype) word.AddError("illegal instance name");
+                    word.SkipToKeyword(";");
+                }
+
+                ModuleInstantiation moduleInstantiation = new ModuleInstantiation()
+                {
+                    BeginIndexReference = beginIndexReference,
+                    DefinitionReference = word.CrateWordReference(),
+                    Name = word.Text,
+                    Project = word.RootParsedDocument.Project,
+                    SourceName = moduleName,
+                    ParameterOverrides = parameterOverrides
+                };
+
+                // swap to parameter overrided module
+                if (instancedModule != null)
+                {
+                    if (parameterOverrides.Count != 0)
+                    {
+                        instancedModule = word.ProjectProperty.GetInstancedBuildingBlock(moduleInstantiation) as Module;
+                    }
+                    if (instancedModule == null) nameSpace.BuildingBlock.ReparseRequested = true;
                 }
 
                 if (word.Prototype)

@@ -11,18 +11,18 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected Realtime() { }
 
-        public static new Realtime Create(IDataType dataType)
+        public static new Realtime Create(string name,IDataType dataType)
         {
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.Realtime);
 
-            Realtime val = new Realtime();
+            Realtime val = new Realtime() { Name = name };
             val.DataType = dataType;
             return val;
         }
 
         public override Variable Clone()
         {
-            Realtime val = new Realtime();
+            Realtime val = new Realtime() { Name = Name };
             val.DataType = DataType;
             return val;
         }

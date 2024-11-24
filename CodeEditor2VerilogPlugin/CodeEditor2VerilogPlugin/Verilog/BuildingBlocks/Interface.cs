@@ -30,8 +30,8 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         //        public Dictionary<string, ModuleItems.IInstantiation> Instantiations { get; } = new Dictionary<string, ModuleItems.IInstantiation>();
 
 
-        private WeakReference<Data.IVerilogRelatedFile> fileRef;
-        public override Data.IVerilogRelatedFile File
+        private WeakReference<Data.IVerilogRelatedFile>? fileRef;
+        public required override Data.IVerilogRelatedFile File
         {
             get
             {
@@ -39,7 +39,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 if (!fileRef.TryGetTarget(out ret)) return null;
                 return ret;
             }
-            protected set
+            init
             {
                 fileRef = new WeakReference<Data.IVerilogRelatedFile>(value);
             }
@@ -84,15 +84,30 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
             if (word.Text != "interface") System.Diagnostics.Debugger.Break();
             word.Color(CodeDrawStyle.ColorType.Keyword);
-            Interface interface_ = new Interface();
-            interface_.Parent = nameSpace;
-
-            interface_.BuildingBlock = interface_;
-            interface_.File = file;
-            interface_.BeginIndexReference = word.CreateIndexReference();
-            if (word.CellDefine) interface_.cellDefine = true;
+            IndexReference beginReference = word.CreateIndexReference();
             word.MoveNext();
 
+            // indentifier
+            Interface interface_ = new Interface() {
+                BeginIndexReference = beginReference,
+                Name = word.Text,
+                Parent = nameSpace,
+                Project = word.Project,
+                File = file,
+                DefinitionReference = word.CrateWordReference()
+            };
+            if (word.CellDefine) interface_.cellDefine = true;
+            word.Color(CodeDrawStyle.ColorType.Identifier);
+            if (!General.IsIdentifier(word.Text))
+            {
+                word.AddError("illegal module name");
+            }
+            else
+            {
+                interface_.NameReference = word.GetReference();
+            }
+            interface_.BuildingBlock = interface_;
+            word.MoveNext();
 
             // parse definitions
             Dictionary<string, Macro> macroKeep = new Dictionary<string, Macro>();
@@ -100,7 +115,6 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
                 macroKeep.Add(kvpair.Key, kvpair.Value);
             }
-
 
             if (!word.CellDefine && !protoType)
             {
@@ -187,21 +201,8 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             WordScanner word,
             //            string parameterOverrideModueName,
             Dictionary<string, Expressions.Expression> parameterOverrides,
-            Attribute attribute, Interface module)
+            Attribute attribute, Interface interface_)
         {
-
-            // module_identifier
-            module.Name = word.Text;
-            word.Color(CodeDrawStyle.ColorType.Identifier);
-            if (!General.IsIdentifier(word.Text))
-            {
-                word.AddError("illegal module name");
-            }
-            else
-            {
-                module.NameReference = word.GetReference();
-            }
-            word.MoveNext();
 
             while (true)
             {
@@ -222,7 +223,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         word.MoveNext();
                         while (!word.Eof)
                         {
-                            if (word.Text == "parameter") Verilog.DataObjects.Constants.Parameter.ParseCreateDeclarationForPort(word, module, null);
+                            if (word.Text == "parameter") Verilog.DataObjects.Constants.Parameter.ParseCreateDeclarationForPort(word, interface_, null);
                             if (word.Text != ",")
                             {
                                 if (word.Text == ")") break;
@@ -250,19 +251,18 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 {
                     foreach (var vkp in parameterOverrides)
                     {
-                        if (module.Constants.ContainsKey(vkp.Key))
+                        if (interface_.Constants.ContainsKey(vkp.Key))
                         {
-                            if (module.Constants[vkp.Key].DefinitionRefrecnce != null)
+                            if (interface_.Constants[vkp.Key].DefinitionRefrecnce != null)
                             {
                                 //                                module.Parameters[vkp.Key].DefinitionRefrecnce.AddNotice("override " + vkp.Value.Value.ToString());
-                                module.Constants[vkp.Key].DefinitionRefrecnce.AddHint("override " + vkp.Value.Value.ToString());
+                                interface_.Constants[vkp.Key].DefinitionRefrecnce.AddHint("override " + vkp.Value.Value.ToString());
                             }
 
-                            module.Constants.Remove(vkp.Key);
-                            DataObjects.Constants.Parameter param = new DataObjects.Constants.Parameter();
-                            param.Name = vkp.Key;
+                            interface_.Constants.Remove(vkp.Key);
+                            DataObjects.Constants.Parameter param = new DataObjects.Constants.Parameter() { Name = vkp.Key };
                             param.Expression = vkp.Value;
-                            module.Constants.Add(param.Name, param);
+                            interface_.Constants.Add(param.Name, param);
                         }
                         else
                         {
@@ -274,7 +274,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 if (word.Eof || word.Text == "endinterface") break;
                 if (word.Text == "(")
                 {
-                    parseListOfPorts_ListOfPortsDeclarations(word, module);
+                    parseListOfPorts_ListOfPortsDeclarations(word, interface_);
                 } // list_of_ports or list_of_posrt_declarations
 
                 if (word.Eof || word.Text == "endinterface") break;
@@ -290,7 +290,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                 while (!word.Eof)
                 {
-                    if (!Items.InterfaceItem.Parse(word, module))
+                    if (!Items.InterfaceItem.Parse(word, interface_))
                     {
                         if (word.Text == "endinterface") break;
                         word.AddError("illegal module item");
@@ -304,7 +304,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
             if (!word.Prototype)
             {
-                CheckVariablesUseAndDriven(word, module);
+                CheckVariablesUseAndDriven(word, interface_);
             }
 
             //foreach (var variable in module.Variables.Values)
@@ -323,7 +323,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
             base.AppendAutoCompleteItem(items);
 
-            foreach (IInstantiation instantiation in Instantiations.Values)
+            foreach (IBuildingBlockInstantiation instantiation in Instantiations.Values)
             {
                 if (instantiation.Name == null) continue;
                 items.Add(newItem(instantiation.Name, CodeDrawStyle.ColorType.Identifier));
