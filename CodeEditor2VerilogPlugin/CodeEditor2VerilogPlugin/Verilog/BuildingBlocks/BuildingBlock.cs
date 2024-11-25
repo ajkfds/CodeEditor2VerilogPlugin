@@ -15,6 +15,8 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
         }
 
+        public NamedElements NamedElements { get; } = new NamedElements();
+
         #region IDesignElementContainer
 
         public Dictionary<string, Function> Functions { get; set; } = new Dictionary<string, Function>();

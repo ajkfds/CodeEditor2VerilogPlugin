@@ -12,13 +12,15 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace pluginVerilog.Verilog
 {
-    public class NameSpace : Item
+    public class NameSpace : Item, INamedElement
     {
         protected NameSpace(BuildingBlocks.BuildingBlock buildingBlock,NameSpace parent)
         {
             BuildingBlock = buildingBlock;
             Parent = parent;
         }
+
+        public NamedElements NamedElements { get; } = new NamedElements();
 
         public required IndexReference BeginIndexReference { get; init; }
         public IndexReference? LastIndexReference = null;
@@ -134,6 +136,7 @@ namespace pluginVerilog.Verilog
 
         public DataObjects.DataObject? GetDataObject(string identifier)
         {
+            
             if (DataObjects.ContainsKey(identifier))
             {
                 return DataObjects[identifier];

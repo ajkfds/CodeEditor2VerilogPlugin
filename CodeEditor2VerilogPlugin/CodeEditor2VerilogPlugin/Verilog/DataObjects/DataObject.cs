@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects
 {
-    public abstract class DataObject
+    public abstract class DataObject : INamedElement
     {
         // #SystemVerilog 2017
         //	net												user-defined-size	4state	v
@@ -42,6 +42,7 @@ namespace pluginVerilog.Verilog.DataObjects
         //              + type_reference
         // 
 
+        public NamedElements NamedElements { get; } = new NamedElements();
         public static DataObject Create(string name,DataTypes.IDataType dataType)
         {
             switch (dataType.Type)
