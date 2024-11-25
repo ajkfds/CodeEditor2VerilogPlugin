@@ -207,7 +207,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                         }
                         else if (word.Prototype)
                         {
-                            if (module.Constants.ContainsKey(identifier))
+                            if (module.NamedElements.ContainsKey(identifier))
                             {
                                 //                                nameReference.AddError("parameter name duplicated");
                             }
@@ -232,7 +232,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                                 constants.Expression = expression;
                                 constants.DefinitionRefrecnce = nameReference;
                                 constants.ConstantType = constantType;
-                                module.Constants.Add(constants.Name, constants);
+                                module.NamedElements.Add(constants.Name, constants);
 
                                 module.PortParameterNameList.Add(identifier);
                             }
@@ -357,24 +357,24 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                     }
                     else if (word.Prototype)
                     {
-                        if (nameSpace.Constants.ContainsKey(identifier))
+                        if (nameSpace.NamedElements.ContainsKey(identifier))
                         {
                             word.AddError("name duplicated");
                         }
                         else
                         {
-                            nameSpace.Constants.Add(constants.Name, constants);
+                            nameSpace.NamedElements.Add(constants.Name, constants);
                         }
                     }
                     else
                     {
-                        if (nameSpace.Constants.ContainsKey(identifier))
+                        if (nameSpace.NamedElements.ContainsKey(identifier) && nameSpace.NamedElements[identifier] is DataObjects.Constants.Constants)
                         { // re-parse after prototype parse 
-                            constants = nameSpace.Constants[identifier];
+                            constants = (DataObjects.Constants.Constants)nameSpace.NamedElements[identifier];
                         }
                         else
                         { // for root nameSpace parameter
-                            nameSpace.Constants.Add(constants.Name, constants);
+                            nameSpace.NamedElements.Add(constants.Name, constants);
                         }
                     }
                 }

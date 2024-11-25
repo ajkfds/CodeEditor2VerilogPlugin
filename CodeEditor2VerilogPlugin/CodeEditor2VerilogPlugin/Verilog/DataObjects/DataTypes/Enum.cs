@@ -114,7 +114,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
             EnumConstants constants = EnumConstants.Create(item.Identifier,enum_.BaseType);
             constants.DefinedReference = word.GetReference();
-            if (!nameSpace.Constants.ContainsKey(constants.Name)) nameSpace.Constants.Add(constants.Name, constants);
+            if (!nameSpace.NamedElements.ContainsKey(constants.Name)) nameSpace.NamedElements.Add(constants.Name, constants);
 
             word.MoveNext();
 

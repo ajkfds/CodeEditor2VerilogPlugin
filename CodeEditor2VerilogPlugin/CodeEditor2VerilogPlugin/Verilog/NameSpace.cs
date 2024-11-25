@@ -29,8 +29,8 @@ namespace pluginVerilog.Verilog
         private Dictionary<string, DataObjects.Typedef> typedefs = new Dictionary<string, DataObjects.Typedef>();
         public required NameSpace Parent { get; init; }
 
-        private Dictionary<string, DataObjects.Constants.Constants> constants = new Dictionary<string, DataObjects.Constants.Constants>();
-        public Dictionary<string, DataObjects.Constants.Constants> Constants { get { return constants; } }
+//        private Dictionary<string, DataObjects.Constants.Constants> constants = new Dictionary<string, DataObjects.Constants.Constants>();
+//        public Dictionary<string, DataObjects.Constants.Constants> Constants { get { return constants; } }
 
         public Dictionary<string, DataObjects.Typedef> Typedefs { get { return typedefs; } }
         public BuildingBlocks.BuildingBlock BuildingBlock { get; protected set; }
@@ -111,12 +111,14 @@ namespace pluginVerilog.Verilog
 
                 }
 
+                if(element is DataObjects.Constants.Constants)
+                {
+                    DataObjects.Constants.Constants constants = (DataObjects.Constants.Constants)element;
+                    items.Add(newItem(constants.Name, CodeDrawStyle.ColorType.Parameter));
+                }
+
             }
 
-            foreach (DataObjects.Constants.Constants constants in BuildingBlock.Constants.Values)
-            {
-                items.Add(newItem(constants.Name, CodeDrawStyle.ColorType.Parameter));
-            }
 
             foreach (Function function in BuildingBlock.Functions.Values)
             {
@@ -136,9 +138,11 @@ namespace pluginVerilog.Verilog
 
         public DataObjects.Constants.Constants? GetConstants(string identifier)
         {
-            if (Constants.ContainsKey(identifier))
+            if (NamedElements.ContainsKey(identifier))
             {
-                return Constants[identifier];
+                INamedElement element = NamedElements[identifier];
+                DataObjects.Constants.Constants? constants = element as DataObjects.Constants.Constants;
+                return constants;
             }
 
             if (Parent != null)
@@ -149,15 +153,16 @@ namespace pluginVerilog.Verilog
             {
                 
             }
-
             return null;
         }
 
         private DataObjects.Constants.Constants? getConstantsHier(string identifier)
         {
-            if (Constants.ContainsKey(identifier))
+            if (NamedElements.ContainsKey(identifier))
             {
-                return Constants[identifier];
+                INamedElement element = NamedElements[identifier];
+                DataObjects.Constants.Constants? constants = element as DataObjects.Constants.Constants;
+                return constants;
             }
 
             if (Parent != null)

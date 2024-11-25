@@ -1,5 +1,6 @@
 ﻿using pluginVerilog.Verilog.DataObjects.Nets;
 using pluginVerilog.Verilog.DataObjects.Variables;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -87,7 +88,7 @@ namespace pluginVerilog.Verilog.Expressions
                     }
                     else
                     {
-                        if (val != null) word.AddWarning("external function reference");
+                        if (val != null && !(val is DataObjects.Constants.Constants)) word.AddWarning("external function reference");
                     }
                     return val;
                 }
@@ -152,6 +153,12 @@ namespace pluginVerilog.Verilog.Expressions
             else if (dataObject is Net)
             {
                 word.Color(CodeDrawStyle.ColorType.Net);
+            }
+            else if(dataObject is DataObjects.Constants.Constants)
+            {
+                word.Color(CodeDrawStyle.ColorType.Parameter);
+                DataObjects.Constants.Constants constants = (DataObjects.Constants.Constants)dataObject;
+                val.Constant = true;
             }
             else
             {
@@ -247,6 +254,15 @@ namespace pluginVerilog.Verilog.Expressions
                     if (original == null) throw new Exception();
                     if (original.Range != null) val.BitWidth = original.Range.Size;
                     else val.BitWidth = 1;
+                }
+                else if(dataObject is DataObjects.Constants.Parameter)
+                {
+                    var constants = (DataObjects.Constants.Parameter)dataObject;
+                    if(constants.Expression != null)
+                    {
+                        val.Value = constants.Expression.Value;
+                        val.BitWidth = constants.Expression.BitWidth;
+                    }
                 }
                 else if (dataObject is Net)
                 {

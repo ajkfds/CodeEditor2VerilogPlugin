@@ -251,18 +251,19 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 {
                     foreach (var vkp in parameterOverrides)
                     {
-                        if (interface_.Constants.ContainsKey(vkp.Key))
+                        if (interface_.NamedElements.ContainsKey(vkp.Key) && interface_.NamedElements[vkp.Key] is DataObjects.Constants.Constants)
                         {
-                            if (interface_.Constants[vkp.Key].DefinitionRefrecnce != null)
+                            DataObjects.Constants.Constants constants = (DataObjects.Constants.Constants)interface_.NamedElements[vkp.Key];
+                            if (constants.DefinitionRefrecnce != null)
                             {
                                 //                                module.Parameters[vkp.Key].DefinitionRefrecnce.AddNotice("override " + vkp.Value.Value.ToString());
-                                interface_.Constants[vkp.Key].DefinitionRefrecnce.AddHint("override " + vkp.Value.Value.ToString());
+                                constants.DefinitionRefrecnce.AddHint("override " + vkp.Value.Value.ToString());
                             }
 
-                            interface_.Constants.Remove(vkp.Key);
+                            interface_.NamedElements.Remove(vkp.Key);
                             DataObjects.Constants.Parameter param = new DataObjects.Constants.Parameter() { Name = vkp.Key };
                             param.Expression = vkp.Value;
-                            interface_.Constants.Add(param.Name, param);
+                            interface_.NamedElements.Add(param.Name, param);
                         }
                         else
                         {

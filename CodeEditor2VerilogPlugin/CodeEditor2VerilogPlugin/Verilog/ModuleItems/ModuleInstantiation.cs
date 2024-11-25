@@ -882,11 +882,12 @@ namespace pluginVerilog.Verilog.ModuleItems
                     else
                     {
                         if(
-                            instancedModule.Constants.ContainsKey(paramName) && 
-                            instancedModule.Constants[paramName].Expression != null
+                            instancedModule.NamedElements.ContainsKey(paramName) &&
+                            instancedModule.NamedElements[paramName] is DataObjects.Constants.Constants &&
+                            ((DataObjects.Constants.Constants)instancedModule.NamedElements[paramName]).Expression != null
                             )
                         {
-                            sb.Append(instancedModule.Constants[paramName].Expression.CreateString());
+                            sb.Append(((DataObjects.Constants.Constants)instancedModule.NamedElements[paramName]).Expression.CreateString());
                         }
                     }
                     sb.Append(" )");

@@ -13,7 +13,7 @@ namespace pluginVerilog.Verilog
         NamedElements NamedElements { get; }
 //        Dictionary<string, DataObjects.DataObject> DataObjects { get; }
         NameSpace Parent { get; }
-        Dictionary<string, DataObjects.Constants.Constants> Constants { get; }
+//        Dictionary<string, DataObjects.Constants.Constants> Constants { get; }
 
         BuildingBlocks.BuildingBlock BuildingBlock { get; }
 
