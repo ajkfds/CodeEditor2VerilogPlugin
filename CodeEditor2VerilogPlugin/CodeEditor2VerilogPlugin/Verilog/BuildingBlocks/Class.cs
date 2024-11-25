@@ -1,4 +1,5 @@
-﻿using CodeEditor2.CodeEditor.CodeComplete;
+﻿using Avalonia.Input;
+using CodeEditor2.CodeEditor.CodeComplete;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.ModuleItems;
 using System;
@@ -304,13 +305,18 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         word.Color(CodeDrawStyle.ColorType.Keyword);
                         word.MoveNext();
 
+                        foreach(INamedElement namedElement in baseClass.NamedElements.Values)
+                        {
+                            DataObject? dataObject = namedElement as DataObject;
+                            if (dataObject == null) continue;
+                            if (!class_.NamedElements.ContainsKey(namedElement.Name)) class_.NamedElements.Add(namedElement.Name, namedElement);
+
+                        }
+
+
                         foreach (var v in baseClass.Typedefs)
                         {
                             if (!class_.Typedefs.ContainsKey(v.Key)) class_.Typedefs.Add(v.Key, v.Value);
-                        }
-                        foreach (var v in baseClass.DataObjects)
-                        {
-                            if (!class_.DataObjects.ContainsKey(v.Key)) class_.DataObjects.Add(v.Key, v.Value);
                         }
                         foreach (var v in baseClass.Functions)
                         {

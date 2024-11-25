@@ -15,7 +15,6 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
         }
 
-        public NamedElements NamedElements { get; } = new NamedElements();
 
         #region IDesignElementContainer
 
@@ -65,29 +64,28 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
         public static void CheckVariablesUseAndDriven(WordScanner word, NameSpace nameSpace)
         {
-            foreach (var variable in nameSpace.DataObjects.Values)
+            foreach (var element in nameSpace.NamedElements.Values)
             {
-                if (variable.DefinedReference == null) continue;
-
-                DataObjects.Variables.ValueVariable? valueVar = variable as DataObjects.Variables.ValueVariable;
+                DataObjects.Variables.ValueVariable? valueVar = element as DataObjects.Variables.ValueVariable;
                 if (valueVar == null) continue;
+                if (valueVar.DefinedReference == null) continue;
 
                 if (valueVar.AssignedReferences.Count == 0)
                 {
                     if (valueVar.UsedReferences.Count == 0)
                     {
-                        variable.DefinedReference.AddNotice("undriven & unused");
+                        valueVar.DefinedReference.AddNotice("undriven & unused");
                     }
                     else
                     {
-                       variable.DefinedReference.AddNotice("undriven");
+                        valueVar.DefinedReference.AddNotice("undriven");
                     }
                 }
                 else
                 {
                     if (valueVar.UsedReferences.Count == 0)
                     {
-                        variable.DefinedReference.AddNotice("unused");
+                        valueVar.DefinedReference.AddNotice("unused");
                     }
                 }
             }

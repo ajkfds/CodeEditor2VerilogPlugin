@@ -150,7 +150,7 @@ namespace pluginVerilog.Verilog.Snippets
                     sb.Append(valueName);
 
                     BuildingBlock? buildingBlock = moduleInstantiation.GetInstancedBuildingBlock();
-                    if(buildingBlock != null && !buildingBlock.DataObjects.ContainsKey(valueName)){
+                    if(buildingBlock != null && !buildingBlock.NamedElements.ContainsKey(valueName)){
                         if(port.DataObject != null)
                         {
                             sbDefine.Append(port.DataObject.CreateDataTypeString() + "\t" + valueName);

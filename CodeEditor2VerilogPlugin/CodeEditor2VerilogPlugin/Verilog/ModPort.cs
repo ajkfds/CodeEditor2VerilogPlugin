@@ -212,7 +212,7 @@ namespace pluginVerilog.Verilog
                 IntegerVectorValueVariable? intVectorVar = vRef?.Variable as IntegerVectorValueVariable;
 
 
-                if (!DataObjects.ContainsKey(port.Name))
+                if (!NamedElements.ContainsKey(port.Name))
                 {
                     if (direction == Port.DirectionEnum.Input)
                     {
@@ -225,7 +225,7 @@ namespace pluginVerilog.Verilog
                                 net.PackedDimensions.Add(pa.Clone());
                             }
                         }
-                        DataObjects.Add(net.Name, net);
+                        NamedElements.Add(net.Name, net);
                     }
                     else
                     {
@@ -240,7 +240,7 @@ namespace pluginVerilog.Verilog
                             }
                         }
 
-                        DataObjects.Add(logic.Name, logic);
+                        NamedElements.Add(logic.Name, logic);
                     }
                 }
                 if (!Ports.ContainsKey(port.Name))

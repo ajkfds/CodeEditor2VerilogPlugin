@@ -199,7 +199,7 @@ namespace pluginVerilog.Verilog
             {
                 if(retVal != null && retVal.Name != null)
                 {
-                    function.DataObjects.Add(retVal.Name, retVal);
+                    function.NamedElements.Add(retVal.Name, retVal);
                 }
 
                 if (nameSpace.BuildingBlock.Functions.ContainsKey(function.Name))
@@ -411,7 +411,7 @@ namespace pluginVerilog.Verilog
             {
                 if (retVal != null && retVal.Name != null)
                 {
-                    function.DataObjects.Add(retVal.Name, retVal);
+                    function.NamedElements.Add(retVal.Name, retVal);
                 }
 
                 if (nameSpace.BuildingBlock.Functions.ContainsKey(function.Name))

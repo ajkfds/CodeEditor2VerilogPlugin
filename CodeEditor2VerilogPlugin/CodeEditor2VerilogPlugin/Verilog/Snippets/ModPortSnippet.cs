@@ -50,7 +50,7 @@ namespace pluginVerilog.Verilog.Snippets
             }
 
             Dictionary<string, ModPort.Port.DirectionEnum> newModPortDirection = new Dictionary<string, ModPort.Port.DirectionEnum>();
-            foreach (var dataObject in interface_.DataObjects.Values)
+            foreach (var dataObject in interface_.NamedElements.Values)
             {
                 if (dataObject is Verilog.DataObjects.Variables.Logic)
                 {

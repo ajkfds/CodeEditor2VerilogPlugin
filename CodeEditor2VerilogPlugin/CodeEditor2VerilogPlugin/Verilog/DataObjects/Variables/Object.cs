@@ -44,7 +44,8 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         }
         public override DataObject? GetDataObject(string identifier)
         {
-            return Class.GetDataObject(identifier);
+            if (!Class.NamedElements.ContainsKey(identifier)) return null;
+            return Class.NamedElements[identifier] as DataObject;
         }
         public override void AppendAutoCompleteItem(List<CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem> items)
         {

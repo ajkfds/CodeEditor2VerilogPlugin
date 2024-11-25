@@ -559,9 +559,9 @@ namespace pluginVerilog.Verilog.ModuleItems
 
             foreach (string pinName in notWrittenPortName)
             {
-                if (!nameSpace.DataObjects.ContainsKey(pinName)) continue;
+                DataObject? targetObject = nameSpace.NamedElements.GetDataObject(pinName);
+                if (targetObject == null) continue;
                 Port port = instancedModule.Ports[pinName];
-                DataObject targetObject = nameSpace.DataObjects[pinName];
                 Variable? variable = targetObject as Variable;
 
                 Expressions.Expression? expression;
@@ -633,14 +633,15 @@ namespace pluginVerilog.Verilog.ModuleItems
             WordScanner moduleIdentifier)
         {
             if (instancedModule == null) return;
-            if (!nameSpace.DataObjects.ContainsKey(pinName))
+            DataObject? targetObject = nameSpace.NamedElements.GetDataObject(pinName);
+
+            if (targetObject == null)
             {
                 word.AddError("illegal port connection");
                 return;
             }
 
             Port port = instancedModule.Ports[pinName];
-            DataObject targetObject = nameSpace.DataObjects[pinName];
             Variable? variable = targetObject as Variable;
 
             Expressions.Expression? expression;

@@ -172,14 +172,14 @@ namespace pluginVerilog.Verilog.Expressions
                 if (word.Eof) return null;
                 if (General.ListOfKeywords.Contains(word.Text)) return null;
 
-                if (General.IsIdentifier(word.Text) && !nameSpace.DataObjects.ContainsKey(word.Text) && !word.Prototype)
+                if (General.IsIdentifier(word.Text) && !nameSpace.NamedElements.ContainsKey(word.Text) && !word.Prototype)
                 {   // undefined net
                     if (!word.CellDefine) word.AddWarning("undefined");
                     Net net = new DataObjects.Nets.Net() { Name = word.Text };
                     net.Signed = false;
                     if (word.Active)
                     {
-                        nameSpace.DataObjects.Add(net.Name, net);
+                        nameSpace.NamedElements.Add(net.Name, net);
                     }
                     var variable = VariableReference.ParseCreate(word, nameSpace, lValue);
 
@@ -196,7 +196,7 @@ namespace pluginVerilog.Verilog.Expressions
             }
             else if (space != null)
             {
-                if (space.DataObjects.ContainsKey(word.Text))
+                if (space.NamedElements.ContainsKey(word.Text))
                 {
                     return VariableReference.ParseCreate(word, space, lValue);
                 }

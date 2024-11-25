@@ -71,16 +71,16 @@ namespace pluginVerilog.Verilog.Expressions
 
         private static DataObjects.DataObject? getDataObject(WordScanner word, string identifier, NameSpace nameSpace)
         {
-            if (nameSpace.DataObjects.ContainsKey(identifier))
+            if (nameSpace.NamedElements.ContainsKey(identifier))
             {
-                return nameSpace.DataObjects[identifier];
+                return nameSpace.NamedElements.GetDataObject(identifier);
             }
 
             if (nameSpace is Function)
             {
                 if (nameSpace.Parent != null)
                 {
-                    DataObjects.DataObject val = nameSpace.Parent.GetDataObject(identifier);
+                    DataObjects.DataObject? val = nameSpace.Parent.NamedElements.GetDataObject(identifier);
                     if(nameSpace.BuildingBlock is BuildingBlocks.Interface || nameSpace.BuildingBlock is BuildingBlocks.Program)
                     {
 
@@ -96,11 +96,11 @@ namespace pluginVerilog.Verilog.Expressions
             {
                 if (nameSpace.Parent != null)
                 {
-                    return nameSpace.Parent.GetDataObject(identifier);
+                    return nameSpace.Parent.NamedElements.GetDataObject(identifier);
                 }
                 else
                 {
-                    return nameSpace.GetDataObject(identifier);
+                    return nameSpace.NamedElements.GetDataObject(identifier);
                 }
             }
             return null;

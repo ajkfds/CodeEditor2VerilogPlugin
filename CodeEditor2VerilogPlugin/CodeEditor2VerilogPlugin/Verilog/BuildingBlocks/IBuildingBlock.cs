@@ -9,12 +9,14 @@ namespace pluginVerilog.Verilog.BuildingBlocks
     public interface IBuildingBlock
     {
         // NameSpace
-        Dictionary<string, DataObjects.DataObject> DataObjects { get; }
+
+        NamedElements NamedElements { get; }
+//        Dictionary<string, DataObjects.DataObject> DataObjects { get; }
         NameSpace Parent { get; }
         Dictionary<string, DataObjects.Constants.Constants> Constants { get; }
         Dictionary<string, NameSpace> NameSpaces { get; }
         NameSpace? GetHierarchyNameSpace(IndexReference index);
-        DataObjects.DataObject? GetDataObject(string identifier);
+//        DataObjects.DataObject? GetDataObject(string identifier);
         DataObjects.Constants.Constants? GetConstants(string identifier);
 
         // Bulding Block

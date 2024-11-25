@@ -320,9 +320,10 @@ namespace pluginVerilog.Verilog
                 macro.AppendLabel(ret,Macros);
             }
 
-            if (space != null && space.DataObjects.ContainsKey(text))
+            if (space != null && space.NamedElements.ContainsKey(text))
             {
-                space.DataObjects[text].AppendLabel(ret);
+                DataObject? dataObject = space.NamedElements.GetDataObject(text);
+                if(dataObject!=null) dataObject.AppendLabel(ret);
             }
 
             {

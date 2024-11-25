@@ -597,8 +597,13 @@ ansi_port_declaration ::=
 
                 if (port.DataObject != null)
                 {
-                    //port.DataObject.Name = port.Name;
-                    if (block.DataObjects.ContainsKey(port.Name))
+                    DataObject? dataObject = block.NamedElements.GetDataObject(port.Name);
+
+                    if(dataObject == null)
+                    {
+                        block.NamedElements.Add(port.Name, port.DataObject);
+                    }
+                    else
                     {
                         if (word.Prototype)
                         {
@@ -606,14 +611,11 @@ ansi_port_declaration ::=
                         }
                         else
                         {
-                            block.DataObjects.Remove(port.Name);
-                            block.DataObjects.Add(port.Name, port.DataObject);
+                            block.NamedElements.Remove(port.Name);
+                            block.NamedElements.Add(port.Name, port.DataObject);
                         }
                     }
-                    else
-                    {
-                        block.DataObjects.Add(port.Name, port.DataObject);
-                    }
+
                 }
             }
 
@@ -820,9 +822,11 @@ ansi_port_declaration ::=
                     }
                 }
 
-                if (!nameSpace.DataObjects.ContainsKey(port.DataObject.Name))
+                
+
+                if (!nameSpace.NamedElements.ContainsKey(port.DataObject.Name))
                 {
-                    nameSpace.DataObjects.Add(port.DataObject.Name, port.DataObject);
+                    nameSpace.NamedElements.Add(port.DataObject.Name, port.DataObject);
                 }
 
                 word.Color(CodeDrawStyle.ColorType.Variable);
@@ -967,20 +971,20 @@ ansi_port_declaration ::=
                 portNameSpace.PortsList.Add(port);
             }
 
-            if (portNameSpace.DataObjects.ContainsKey(port.DataObject.Name))
+            if (portNameSpace.NamedElements.ContainsKey(port.DataObject.Name))
             {
                 if (word.Prototype)
                 {
                 }
                 else
                 {
-                    if (portNameSpace.DataObjects.ContainsKey(port.DataObject.Name)) portNameSpace.DataObjects.Remove(port.DataObject.Name);
+                    if (portNameSpace.NamedElements.ContainsKey(port.DataObject.Name)) portNameSpace.NamedElements.Remove(port.DataObject.Name);
                 }
-                portNameSpace.DataObjects.Add(port.DataObject.Name, port.DataObject);
+                portNameSpace.NamedElements.Add(port.DataObject.Name, port.DataObject);
             }
             else
             {
-                portNameSpace.DataObjects.Add(port.DataObject.Name, port.DataObject);
+                portNameSpace.NamedElements.Add(port.DataObject.Name, port.DataObject);
             }
 
             word.MoveNext();

@@ -329,12 +329,12 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                 {
                     if (word.Prototype)
                     {
-                        if (nameSpace.DataObjects.ContainsKey(net.Name))
+                        if (nameSpace.NamedElements.ContainsKey(net.Name))
                         {
                             BuildingBlocks.IModuleOrInterfaceOrProgram portBlock = nameSpace.BuildingBlock as BuildingBlocks.IModuleOrInterfaceOrProgram;
                             if(portBlock != null && portBlock.Ports.ContainsKey(net.Name))
                             {   // for non-ansi style port definition
-                                nameSpace.DataObjects[net.Name] = net;
+                                nameSpace.NamedElements.Replace(net.Name,net);
                                 portBlock.Ports[net.Name].DataObject = net;
                             }
                             else
@@ -344,15 +344,15 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                         }
                         else
                         {
-                            nameSpace.DataObjects.Add(net.Name, net);
+                            nameSpace.NamedElements.Add(net.Name, net);
                         }
                         word.Color(CodeDrawStyle.ColorType.Net);
                     }
                     else
                     {
-                        if (nameSpace.DataObjects.ContainsKey(net.Name) && nameSpace.DataObjects[net.Name] is Net)
+                        if (nameSpace.NamedElements.ContainsKey(net.Name) && nameSpace.NamedElements[net.Name] is Net)
                         {
-                            Net? newNet = nameSpace.DataObjects[net.Name] as Net;
+                            Net? newNet = nameSpace.NamedElements[net.Name] as Net;
                             if (newNet == null) throw new Exception();
                             net = newNet;
                         }

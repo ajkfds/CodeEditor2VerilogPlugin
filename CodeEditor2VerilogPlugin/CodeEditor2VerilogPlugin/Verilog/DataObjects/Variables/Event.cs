@@ -31,22 +31,34 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                     return;
                 }
                 Event val = new Event() { Name = word.Text };
-                if (nameSpace.DataObjects.ContainsKey(val.Name))
+
+                if (nameSpace.NamedElements.ContainsKey(val.Name))
                 {
-                    if (nameSpace.DataObjects[val.Name] is Event)
-                    {
-                        nameSpace.DataObjects.Remove(val.Name);
-                        nameSpace.DataObjects.Add(val.Name, val);
-                    }
-                    else
+                    DataObject? dataObject = nameSpace.NamedElements.GetDataObject(val.Name);
+                    if(dataObject == null)
                     {
                         word.AddError("duplicated event name");
                     }
+                    else
+                    {
+                        Event? event_ = dataObject as Event;
+                        if (event_ == null)
+                        {
+                            word.AddError("duplicated event name");
+                        }
+                        else
+                        {
+                            nameSpace.NamedElements.Remove(val.Name);
+                            nameSpace.NamedElements.Add(val.Name, val);
+                        }
+                    }
+
                 }
                 else
                 {
-                    nameSpace.DataObjects.Add(val.Name, val);
+                    nameSpace.NamedElements.Add(val.Name, val);
                 }
+
 
                 word.Color(CodeDrawStyle.ColorType.Variable);
                 word.MoveNext();

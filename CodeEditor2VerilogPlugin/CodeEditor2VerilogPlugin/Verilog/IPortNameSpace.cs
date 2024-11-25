@@ -9,7 +9,9 @@ namespace pluginVerilog.Verilog
 {
     public interface IPortNameSpace
     {
-        Dictionary<string, DataObjects.DataObject> DataObjects { get; }
+
+        NamedElements NamedElements { get; }
+//        Dictionary<string, DataObjects.DataObject> DataObjects { get; }
         NameSpace Parent { get; }
         Dictionary<string, DataObjects.Constants.Constants> Constants { get; }
 

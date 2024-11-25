@@ -25,14 +25,14 @@ namespace pluginVerilog.Verilog
         public required IndexReference BeginIndexReference { get; init; }
         public IndexReference? LastIndexReference = null;
 
-        private Dictionary<string, DataObjects.DataObject> variables = new Dictionary<string, DataObjects.DataObject>();
+//        private Dictionary<string, DataObjects.DataObject> variables = new Dictionary<string, DataObjects.DataObject>();
         private Dictionary<string, Net> nets = new Dictionary<string, Net>();
         private Dictionary<string, DataObjects.Typedef> typedefs = new Dictionary<string, DataObjects.Typedef>();
         private Dictionary<string, BuildingBlocks.Class> classes = new Dictionary<string, Class>();
 
         private Dictionary<string, NameSpace> nameSpaces = new Dictionary<string, NameSpace>();
 
-        public Dictionary<string, DataObjects.DataObject> DataObjects { get { return variables; } }
+//        public Dictionary<string, DataObjects.DataObject> DataObjects { get { return variables; } }
 
         public required NameSpace Parent { get; init; }
 
@@ -86,9 +86,12 @@ namespace pluginVerilog.Verilog
         }
         public virtual void AppendAutoCompleteItem( List<AutocompleteItem> items)
         {
-            foreach (DataObjects.DataObject variable in DataObjects.Values)
+            foreach (INamedElement element in NamedElements.Values)
             {
-                if(variable is DataObjects.Nets.Net)
+                DataObjects.DataObject? variable = element as DataObjects.DataObject;
+                if (variable == null) continue;
+
+                if (variable is DataObjects.Nets.Net)
                 {
                     items.Add(newItem(variable.Name, CodeDrawStyle.ColorType.Net));
                 }
@@ -132,21 +135,6 @@ namespace pluginVerilog.Verilog
             {
                 Parent.AppendAutoCompleteItem(items);
             }
-        }
-
-        public DataObjects.DataObject? GetDataObject(string identifier)
-        {
-            
-            if (DataObjects.ContainsKey(identifier))
-            {
-                return DataObjects[identifier];
-            }
-
-            if (Parent != null)
-            {
-                return Parent.GetDataObject(identifier);
-            }
-            return null;
         }
 
         public DataObjects.Constants.Constants? GetConstants(string identifier)

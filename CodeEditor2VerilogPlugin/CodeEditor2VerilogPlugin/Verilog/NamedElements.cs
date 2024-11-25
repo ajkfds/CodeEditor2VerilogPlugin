@@ -26,10 +26,10 @@ namespace pluginVerilog.Verilog
             return itemDict[identifier] as DataObjects.DataObject;
         }
 
-        public INameSpace? GetNameSpace(string identifier)
+        public NameSpace? GetNameSpace(string identifier)
         {
             if (!itemDict.ContainsKey(identifier)) return null;
-            return itemDict[identifier] as INameSpace;
+            return itemDict[identifier] as NameSpace;
         }
 
         public void Insert(int index, string key, INamedElement item)
@@ -37,6 +37,14 @@ namespace pluginVerilog.Verilog
             if (itemDict.ContainsKey(key)) return;
             itemList.Insert(index, item);
             itemDict.Add(key, item);
+        }
+
+        public void Replace(string key,INamedElement item)
+        {
+            INamedElement oldItem = itemDict[key];
+            int index = itemList.IndexOf(item);
+            itemList[index] = item;
+            itemDict[key] = item;
         }
 
         public int IndexOf(INamedElement item)
