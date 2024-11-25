@@ -183,22 +183,22 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
                 default:
                     // class_type
-                    // class
+                    if (nameSpace.NamedElements.ContainsKey(word.Text))
                     {
-                        if (nameSpace.BuildingBlock.NamedElements.ContainsKey(word.Text) && nameSpace.BuildingBlock.NamedElements[word.Text] is BuildingBlocks.Class)
+                        INamedElement namedElement = nameSpace.NamedElements[word.Text];
+
+                        // class
+                        if (namedElement is BuildingBlocks.Class)
                         {
-                            IDataType dType = (BuildingBlocks.Class)nameSpace.BuildingBlock.Elements[word.Text];
+                            IDataType dType = (BuildingBlocks.Class)namedElement;
                             word.Color(CodeDrawStyle.ColorType.Keyword);
                             word.MoveNext();
                             return dType;
                         }
-                    }
-
-                    // [class_scope | package_scope] type_identifier { packed_dimension }
-                    {
-                        if (nameSpace.Typedefs.ContainsKey(word.Text))
+                        // [class_scope | package_scope] type_identifier { packed_dimension }
+                        if(namedElement is Typedef)
                         {
-                            IDataType dType = nameSpace.Typedefs[word.Text].VariableType;
+                            IDataType dType = ((Typedef)namedElement).VariableType;
                             if (dType != null)
                             {
                                 word.Color(CodeDrawStyle.ColorType.Keyword);
@@ -206,9 +206,26 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                                 return dType;
                             }
                         }
-                        else if(word.RootParsedDocument.Root != null && word.RootParsedDocument.Root.Typedefs.ContainsKey(word.Text))
+
+                        //if (nameSpace.Typedefs.ContainsKey(word.Text))
+                        //{
+                        //}
+                        //else if (word.RootParsedDocument.Root != null && word.RootParsedDocument.Root.Typedefs.ContainsKey(word.Text))
+                        //{
+                        //    IDataType dType = word.RootParsedDocument.Root.Typedefs[word.Text].VariableType;
+                        //    if (dType != null)
+                        //    {
+                        //        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        //        word.MoveNext();
+                        //        return dType;
+                        //    }
+                        //}
+                    }else if(word.RootParsedDocument.Root != null && word.RootParsedDocument.Root.NamedElements.ContainsKey(word.Text))
+                    {
+                        INamedElement namedElement = word.RootParsedDocument.Root.NamedElements[word.Text];
+                        if (namedElement is Typedef)
                         {
-                            IDataType dType = word.RootParsedDocument.Root.Typedefs[word.Text].VariableType;
+                            IDataType dType = ((Typedef)namedElement).VariableType;
                             if (dType != null)
                             {
                                 word.Color(CodeDrawStyle.ColorType.Keyword);

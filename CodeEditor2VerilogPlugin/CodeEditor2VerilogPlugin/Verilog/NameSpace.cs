@@ -26,13 +26,8 @@ namespace pluginVerilog.Verilog
         public required IndexReference BeginIndexReference { get; init; }
         public IndexReference? LastIndexReference = null;
 
-        private Dictionary<string, DataObjects.Typedef> typedefs = new Dictionary<string, DataObjects.Typedef>();
         public required NameSpace Parent { get; init; }
 
-//        private Dictionary<string, DataObjects.Constants.Constants> constants = new Dictionary<string, DataObjects.Constants.Constants>();
-//        public Dictionary<string, DataObjects.Constants.Constants> Constants { get { return constants; } }
-
-        public Dictionary<string, DataObjects.Typedef> Typedefs { get { return typedefs; } }
         public BuildingBlocks.BuildingBlock BuildingBlock { get; protected set; }
 
         public NameSpace GetHierarchyNameSpace(IndexReference iref)

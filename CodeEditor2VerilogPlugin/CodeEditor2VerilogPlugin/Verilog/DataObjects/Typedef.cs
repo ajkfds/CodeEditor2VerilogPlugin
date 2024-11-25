@@ -7,10 +7,12 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects
 {
-    public class Typedef
+    public class Typedef : INamedElement
     {
-        public IDataType VariableType;
-        public string Name;
+        public required IDataType VariableType { get; init; }
+        public required string Name { get; init; }
+
+        public NamedElements NamedElements { get; } = new NamedElements();
 
         public static bool ParseDeclaration(WordScanner word, NameSpace nameSpace)
         {
@@ -25,12 +27,11 @@ namespace pluginVerilog.Verilog.DataObjects
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
-            Typedef typeDef = new Typedef();
 
             word.AddSystemVerilogError();
 
-            typeDef.VariableType = DataTypeFactory.ParseCreate(word, nameSpace, null);
-            if(typeDef.VariableType == null)
+            IDataType? iDataType = DataTypeFactory.ParseCreate(word, nameSpace, null);
+            if (iDataType == null)
             {
                 word.AddError("data type expected");
                 word.SkipToKeyword(";");
@@ -45,7 +46,7 @@ namespace pluginVerilog.Verilog.DataObjects
             }
 
             word.Color(CodeDrawStyle.ColorType.Identifier);
-            typeDef.Name = word.Text;
+            Typedef typeDef = new Typedef() { Name = word.Text, VariableType = iDataType };
             word.MoveNext();
 
 
@@ -53,27 +54,27 @@ namespace pluginVerilog.Verilog.DataObjects
             {
                 if (word.Prototype)
                 {
-                    if (nameSpace.Typedefs.ContainsKey(typeDef.Name))
+                    if (nameSpace.NamedElements.ContainsKey(typeDef.Name))
                     {
                         //                            nameRef.AddError("duplicated name");
                     }
                     else
                     {
-                        nameSpace.Typedefs.Add(typeDef.Name, typeDef);
+                        nameSpace.NamedElements.Add(typeDef.Name, typeDef);
                     }
                 }
                 else
                 {
-                    if (nameSpace.Typedefs.ContainsKey(typeDef.Name))
+                    if (nameSpace.NamedElements.ContainsKey(typeDef.Name))
                     {
-                        if (nameSpace.Typedefs[typeDef.Name] is Typedef)
+                        if (nameSpace.NamedElements[typeDef.Name] is Typedef)
                         {
-                            typeDef = nameSpace.Typedefs[typeDef.Name] as Typedef;
+                            typeDef = (Typedef)nameSpace.NamedElements[typeDef.Name];
                         }
                     }
                     else
                     {
-                        nameSpace.Typedefs.Add(typeDef.Name, typeDef);
+                        nameSpace.NamedElements.Add(typeDef.Name, typeDef);
                     }
                 }
             }

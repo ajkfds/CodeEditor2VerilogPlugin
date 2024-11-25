@@ -1,5 +1,6 @@
 ﻿using Avalonia.Input;
 using CodeEditor2.CodeEditor.CodeComplete;
+using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.ModuleItems;
 using System;
@@ -309,17 +310,20 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                         foreach(INamedElement namedElement in baseClass.NamedElements.Values)
                         {
-                            DataObject? dataObject = namedElement as DataObject;
-                            if (dataObject == null) continue;
-                            if (!class_.NamedElements.ContainsKey(namedElement.Name)) class_.NamedElements.Add(namedElement.Name, namedElement);
+                            if(namedElement is DataObjects.DataObject)
+                            {
+                                DataObjects.DataObject dataObject = (DataObjects.DataObject)namedElement;
+                                if (!class_.NamedElements.ContainsKey(namedElement.Name)) class_.NamedElements.Add(namedElement.Name, namedElement);
+                            }
+                            if(namedElement is Typedef)
+                            {
+                                Typedef typeDef = (Typedef)namedElement;
+                                if (!class_.NamedElements.ContainsKey(namedElement.Name)) class_.NamedElements.Add(namedElement.Name, namedElement);
+                            }
 
                         }
 
-
-                        foreach (var v in baseClass.Typedefs)
-                        {
-                            if (!class_.Typedefs.ContainsKey(v.Key)) class_.Typedefs.Add(v.Key, v.Value);
-                        }
+                       
                         foreach (var v in baseClass.Functions)
                         {
                             if (!class_.Functions.ContainsKey(v.Key)) class_.Functions.Add(v.Key, v.Value);
