@@ -17,7 +17,7 @@ namespace pluginVerilog.Verilog
 
         BuildingBlocks.BuildingBlock BuildingBlock { get; }
 
-        Dictionary<string, NameSpace> NameSpaces { get; }
+//        Dictionary<string, NameSpace> NameSpaces { get; }
 
         Dictionary<string, DataObjects.Port> Ports { get; }
         List<DataObjects.Port> PortsList { get; }

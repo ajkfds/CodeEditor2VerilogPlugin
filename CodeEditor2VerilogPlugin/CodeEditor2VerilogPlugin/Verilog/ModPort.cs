@@ -87,9 +87,9 @@ namespace pluginVerilog.Verilog
                 {
                     interface_.ModPorts.Add(modport.Name, modport);
                 }
-                if (!interface_.NameSpaces.ContainsKey(modport.Name))
+                if (!interface_.NamedElements.ContainsKey(modport.Name))
                 {
-                    interface_.NameSpaces.Add(modport.Name, modport);
+                    interface_.NamedElements.Add(modport.Name, modport);
                 }
             }
 

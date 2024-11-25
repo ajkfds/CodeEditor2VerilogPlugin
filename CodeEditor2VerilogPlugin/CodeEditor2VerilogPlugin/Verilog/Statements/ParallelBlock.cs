@@ -53,7 +53,7 @@ namespace pluginVerilog.Verilog.Statements
                 {
                     if (word.Prototype)
                     { // protptype
-                        if (nameSpace.NameSpaces.ContainsKey(word.Text))
+                        if (nameSpace.NamedElements.ContainsKey(word.Text))
                         {
                             word.AddError("duplicated name");
                             name = word.Text;
@@ -68,15 +68,15 @@ namespace pluginVerilog.Verilog.Statements
                                 Parent = nameSpace,
                                 Project = word.Project
                             };
-                            nameSpace.NameSpaces.Add(namedBlock.Name, namedBlock);
+                            nameSpace.NamedElements.Add(namedBlock.Name, namedBlock);
                         }
                     }
                     else
                     { // implementation
-                        if (nameSpace.NameSpaces.ContainsKey(word.Text) && nameSpace.NameSpaces[word.Text] is NamedParallelBlock)
+                        if (nameSpace.NamedElements.ContainsKey(word.Text) && nameSpace.NamedElements[word.Text] is NamedParallelBlock)
                         {
                             word.Color(CodeDrawStyle.ColorType.Identifier);
-                            namedBlock = nameSpace.NameSpaces[word.Text] as NamedParallelBlock;
+                            namedBlock = nameSpace.NamedElements[word.Text] as NamedParallelBlock;
 
                         }
                     }
@@ -97,9 +97,9 @@ namespace pluginVerilog.Verilog.Statements
                 namedBlock.LastIndexReference = word.CreateIndexReference();
                 word.MoveNext(); // end
 
-                if (word.Active && namedBlock.Name != null && !nameSpace.NameSpaces.ContainsKey(namedBlock.Name))
+                if (word.Active && namedBlock.Name != null && !nameSpace.NamedElements.ContainsKey(namedBlock.Name))
                 {
-                    nameSpace.NameSpaces.Add(namedBlock.Name, namedBlock);
+                    nameSpace.NamedElements.Add(namedBlock.Name, namedBlock);
                 }
 
                 return namedBlock;

@@ -14,7 +14,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 //        Dictionary<string, DataObjects.DataObject> DataObjects { get; }
         NameSpace Parent { get; }
         Dictionary<string, DataObjects.Constants.Constants> Constants { get; }
-        Dictionary<string, NameSpace> NameSpaces { get; }
+//        Dictionary<string, NameSpace> NameSpaces { get; }
         NameSpace? GetHierarchyNameSpace(IndexReference index);
 //        DataObjects.DataObject? GetDataObject(string identifier);
         DataObjects.Constants.Constants? GetConstants(string identifier);
@@ -22,7 +22,6 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         // Bulding Block
         Dictionary<string, Function> Functions { get; }
         Dictionary<string, Task> Tasks { get; }
-        Dictionary<string, Class> Classes { get; }
         Dictionary<string, BuildingBlock> Elements { get; }
     }
 }

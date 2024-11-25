@@ -62,9 +62,9 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             Class class_ = Create(word, nameSpace);
             if (word.Prototype)
             {
-                if (!nameSpace.Classes.ContainsKey(class_.Name))
+                if (!nameSpace.NamedElements.ContainsKey(class_.Name))
                 {
-                    nameSpace.Classes.Add(class_.Name, class_);
+                    nameSpace.NamedElements.Add(class_.Name, class_);
                 }
                 else
                 {
@@ -73,9 +73,9 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
             else
             {
-                if (!nameSpace.Classes.ContainsKey(class_.Name))
+                if (!nameSpace.NamedElements.ContainsKey(class_.Name))
                 {
-                    nameSpace.Classes.Add(class_.Name, class_);
+                    nameSpace.NamedElements.Add(class_.Name, class_);
                 }
             }
         }
@@ -179,9 +179,9 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 word.AppendBlock(class_.BeginIndexReference, class_.LastIndexReference);
                 word.MoveNext();
 
-                if (!nameSpace.BuildingBlock.Classes.ContainsKey(class_.Name))
+                if (!nameSpace.BuildingBlock.NamedElements.ContainsKey(class_.Name))
                 {
-                    nameSpace.BuildingBlock.Classes.Add(class_.Name, class_);
+                    nameSpace.BuildingBlock.NamedElements.Add(class_.Name, class_);
                 }
 
                 return class_;
@@ -295,13 +295,13 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     word.Color(CodeDrawStyle.ColorType.Keyword);
                     word.MoveNext();
 
-                    if (!nameSpace.Classes.ContainsKey(word.Text))
+                    if (!nameSpace.NamedElements.ContainsKey(word.Text) || !(nameSpace.NamedElements[word.Text] is Class))
                     {
                         word.AddError("illegal class_type");
                     }
                     else
                     {
-                        Class baseClass = nameSpace.Classes[word.Text];
+                        Class baseClass = (Class)nameSpace.NamedElements[word.Text];
                         word.Color(CodeDrawStyle.ColorType.Keyword);
                         word.MoveNext();
 

@@ -187,7 +187,7 @@ namespace pluginVerilog.Verilog
                 }
             }
 
-            if (retVal != null) retVal.Clone(function.Name);
+            if (retVal != null) retVal = retVal.Clone(function.Name);
 
             function.ReturnVariable = retVal;
 

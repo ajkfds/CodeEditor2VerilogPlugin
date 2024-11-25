@@ -285,9 +285,9 @@ namespace pluginVerilog.Verilog.Expressions
                     primary = FunctionCall.ParseCreate(word,rootNameSpace, nameSpace);
                 }
             }
-            else if (nameSpace.NameSpaces.ContainsKey(word.Text))
+            else if (nameSpace.NamedElements.ContainsKey(word.Text) && nameSpace.NamedElements[word.Text] is NameSpace)
             {
-                nameSpace = nameSpace.NameSpaces[word.Text];
+                nameSpace = nameSpace.NamedElements[word.Text] as NameSpace;
                 if(assigned && word.NextText == ";" && nameSpace is Task)
                 {
                     TaskReference taskReference = TaskReference.ParseCreate(word, rootNameSpace, nameSpace);
@@ -457,10 +457,10 @@ namespace pluginVerilog.Verilog.Expressions
                                     word.AddError("illegal variable");
                                 }
                                 return primary;
-                            } else if (nameSpace.NameSpaces.ContainsKey(word.Text))
+                            } else if (nameSpace.NamedElements.ContainsKey(word.Text) && nameSpace.NamedElements[word.Text] is NameSpace)
                             { // namespaces
                                 word.Color(CodeDrawStyle.ColorType.Identifier);
-                                NameSpace space = nameSpace.NameSpaces[word.Text];
+                                NameSpace space = (NameSpace)nameSpace.NamedElements[word.Text];
                                 if (space == null) return null;
                                 word.MoveNext();
                                 word.MoveNext(); // .
@@ -505,10 +505,10 @@ namespace pluginVerilog.Verilog.Expressions
                             {
                                 return TaskReference.ParseCreate(word, nameSpace.BuildingBlock);
                             }
-                            else if (nameSpace.NameSpaces.ContainsKey(word.Text))
+                            else if (nameSpace.NamedElements.ContainsKey(word.Text) && nameSpace.NamedElements[word.Text] is NameSpace)
                             {
                                 word.Color(CodeDrawStyle.ColorType.Identifier);
-                                NameSpace space = nameSpace.NameSpaces[word.Text];
+                                NameSpace space = (NameSpace) nameSpace.NamedElements[word.Text];
                                 if (space == null) return null;
                                 word.MoveNext();
                                 return new NameSpaceReference(space);

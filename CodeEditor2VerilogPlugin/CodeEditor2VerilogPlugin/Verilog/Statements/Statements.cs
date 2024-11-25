@@ -275,9 +275,9 @@ namespace pluginVerilog.Verilog.Statements
         }
         private static NameSpace getSpace(string identifier, NameSpace nameSpace)
         {
-            if (nameSpace.NameSpaces.ContainsKey(identifier))
+            if (nameSpace.NamedElements.ContainsKey(identifier) && nameSpace.NamedElements[identifier] is NameSpace)
             {
-                return nameSpace.NameSpaces[identifier];
+                return (NameSpace)nameSpace.NamedElements[identifier];
             }
             if (nameSpace.Parent == null) return null;
 

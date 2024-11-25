@@ -185,9 +185,9 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     // class_type
                     // class
                     {
-                        if (nameSpace.BuildingBlock.Classes.ContainsKey(word.Text))
+                        if (nameSpace.BuildingBlock.NamedElements.ContainsKey(word.Text) && nameSpace.BuildingBlock.NamedElements[word.Text] is BuildingBlocks.Class)
                         {
-                            IDataType dType = nameSpace.BuildingBlock.Classes[word.Text];
+                            IDataType dType = (BuildingBlocks.Class)nameSpace.BuildingBlock.Elements[word.Text];
                             word.Color(CodeDrawStyle.ColorType.Keyword);
                             word.MoveNext();
                             return dType;

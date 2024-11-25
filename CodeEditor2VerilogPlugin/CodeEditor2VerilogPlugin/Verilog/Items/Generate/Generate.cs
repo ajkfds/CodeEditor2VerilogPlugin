@@ -98,25 +98,25 @@ namespace pluginVerilog.Verilog
                 block = NamedGeneratedBlock.Create(word,nameSpace, beginReference);
                 if (word.Prototype)
                 {
-                    if (nameSpace.NameSpaces.ContainsKey(word.Text))
+                    if (nameSpace.NamedElements.ContainsKey(word.Text))
                     {
                         word.AddPrototypeError("duplicated identifier");
                     }
                     else
                     {
-                        nameSpace.NameSpaces.Add(word.Text, block as NamedGeneratedBlock);
+                        nameSpace.NamedElements.Add(word.Text, block as NamedGeneratedBlock);
                     }
                 }
                 else
                 {
-                    if (nameSpace.NameSpaces.ContainsKey(word.Text))
+                    if (nameSpace.NamedElements.ContainsKey(word.Text))
                     {
 //                        word.AddPrototypeError("duplicated identifier");
                     }
                     else
                     {
                         word.AddPrototypeError("identifier prototype not found");
-                        nameSpace.NameSpaces.Add(word.Text, block as NamedGeneratedBlock);
+                        nameSpace.NamedElements.Add(word.Text, block as NamedGeneratedBlock);
                     }
                 }
                 word.MoveNext();

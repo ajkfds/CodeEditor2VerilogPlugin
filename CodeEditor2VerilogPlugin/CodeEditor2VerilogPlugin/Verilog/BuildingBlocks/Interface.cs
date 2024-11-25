@@ -144,7 +144,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                 if (interface_.Parent != null)
                 {
-                    if (interface_.Parent.NameSpaces.ContainsKey(interface_.Name))
+                    if (interface_.Parent.NamedElements.ContainsKey(interface_.Name))
                     {
                         if(protoType)
                         {
@@ -152,13 +152,13 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         }
                         else
                         {
-                            interface_.Parent.NameSpaces[interface_.Name]= interface_;
+                            interface_.Parent.NamedElements .Replace(interface_.Name,interface_);
                         }
 
                     }
                     else
                     {
-                        interface_.Parent.NameSpaces.Add(interface_.Name, interface_);
+                        interface_.Parent.NamedElements.Add(interface_.Name, interface_);
                     }
                 }
 

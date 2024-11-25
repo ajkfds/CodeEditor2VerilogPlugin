@@ -1,4 +1,5 @@
-﻿using CodeEditor2.CodeEditor.CodeComplete;
+﻿using Avalonia.Input;
+using CodeEditor2.CodeEditor.CodeComplete;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects.Nets;
 using System;
@@ -25,24 +26,14 @@ namespace pluginVerilog.Verilog
         public required IndexReference BeginIndexReference { get; init; }
         public IndexReference? LastIndexReference = null;
 
-//        private Dictionary<string, DataObjects.DataObject> variables = new Dictionary<string, DataObjects.DataObject>();
-        private Dictionary<string, Net> nets = new Dictionary<string, Net>();
         private Dictionary<string, DataObjects.Typedef> typedefs = new Dictionary<string, DataObjects.Typedef>();
-        private Dictionary<string, BuildingBlocks.Class> classes = new Dictionary<string, Class>();
-
-        private Dictionary<string, NameSpace> nameSpaces = new Dictionary<string, NameSpace>();
-
-//        public Dictionary<string, DataObjects.DataObject> DataObjects { get { return variables; } }
-
         public required NameSpace Parent { get; init; }
 
         private Dictionary<string, DataObjects.Constants.Constants> constants = new Dictionary<string, DataObjects.Constants.Constants>();
         public Dictionary<string, DataObjects.Constants.Constants> Constants { get { return constants; } }
 
         public Dictionary<string, DataObjects.Typedef> Typedefs { get { return typedefs; } }
-        public Dictionary<string,BuildingBlocks.Class> Classes {  get { return classes; } }
         public BuildingBlocks.BuildingBlock BuildingBlock { get; protected set; }
-        public Dictionary<string, NameSpace> NameSpaces { get { return nameSpaces;  } }
 
         public NameSpace GetHierarchyNameSpace(IndexReference iref)
         {
@@ -68,8 +59,10 @@ namespace pluginVerilog.Verilog
         }
         private NameSpace getHierarchyNameSpace2(IndexReference iref)
         {
-            foreach (NameSpace nameSpace in NameSpaces.Values)
+            foreach(INamedElement element in NamedElements.Values)
             {
+                NameSpace? nameSpace = element as NameSpace;
+                if (nameSpace == null) continue;
                 if (nameSpace.BeginIndexReference == null) continue;
                 if (nameSpace.LastIndexReference == null) continue;
 
@@ -88,25 +81,36 @@ namespace pluginVerilog.Verilog
         {
             foreach (INamedElement element in NamedElements.Values)
             {
-                DataObjects.DataObject? variable = element as DataObjects.DataObject;
-                if (variable == null) continue;
+                if(element is DataObject)
+                {
+                    DataObjects.DataObject variable = (DataObjects.DataObject)element;
+                    if (variable is DataObjects.Nets.Net)
+                    {
+                        items.Add(newItem(variable.Name, CodeDrawStyle.ColorType.Net));
+                    }
+                    else if (variable is DataObjects.Variables.Variable)
+                    {
+                        items.Add(newItem(variable.Name, CodeDrawStyle.ColorType.Variable));
+                    }
+                    else if (variable is DataObjects.Variables.Object)
+                    {
+                        items.Add(newItem(variable.Name, CodeDrawStyle.ColorType.Variable));
+                    }
+                    else if (variable is DataObjects.Variables.Time || variable is DataObjects.Variables.Real || variable is DataObjects.Variables.Realtime || variable is DataObjects.Variables.Integer || variable is DataObjects.Variables.Genvar)
+                    {
+                        items.Add(newItem(variable.Name, CodeDrawStyle.ColorType.Variable));
+                    }
+                }
 
-                if (variable is DataObjects.Nets.Net)
+                if(element is NameSpace)
                 {
-                    items.Add(newItem(variable.Name, CodeDrawStyle.ColorType.Net));
+                    NameSpace space = (NameSpace)element;
+                    if (space.Name == null) System.Diagnostics.Debugger.Break();
+                    if (space.Name == null) continue;
+                    items.Add(newItem(space.Name, CodeDrawStyle.ColorType.Identifier));
+
                 }
-                else if (variable is DataObjects.Variables.Variable)
-                {
-                    items.Add(newItem(variable.Name, CodeDrawStyle.ColorType.Variable));
-                }
-                else if (variable is DataObjects.Variables.Object)
-                {
-                    items.Add(newItem(variable.Name, CodeDrawStyle.ColorType.Variable));
-                }
-                else if (variable is DataObjects.Variables.Time || variable is DataObjects.Variables.Real || variable is DataObjects.Variables.Realtime || variable is DataObjects.Variables.Integer || variable is DataObjects.Variables.Genvar)
-                {
-                    items.Add(newItem(variable.Name, CodeDrawStyle.ColorType.Variable));
-                }
+
             }
 
             foreach (DataObjects.Constants.Constants constants in BuildingBlock.Constants.Values)
@@ -122,13 +126,6 @@ namespace pluginVerilog.Verilog
             foreach (Task task in BuildingBlock.Tasks.Values)
             {
                 items.Add(newItem(task.Name, CodeDrawStyle.ColorType.Identifier));
-            }
-
-            foreach (NameSpace space in NameSpaces.Values)
-            {
-                if (space.Name == null) System.Diagnostics.Debugger.Break();
-                if (space.Name == null) continue;
-                items.Add(newItem(space.Name, CodeDrawStyle.ColorType.Identifier));
             }
 
             if(Parent != null)

@@ -524,9 +524,9 @@ namespace pluginVerilog.Verilog
                 hier.RemoveAt(0);
                 return getSearchNameSpace(bBlock,hier);
             }
-            else if(nameSpace.NameSpaces.ContainsKey(hier[0]))
+            else if(nameSpace.NamedElements.ContainsKey(hier[0]))
             {
-                NameSpace space = nameSpace.NameSpaces[hier[0]];
+                NameSpace space = nameSpace.NamedElements[hier[0]] as NameSpace;
                 hier.RemoveAt(0);
                 return getSearchNameSpace(space, hier);
             }
