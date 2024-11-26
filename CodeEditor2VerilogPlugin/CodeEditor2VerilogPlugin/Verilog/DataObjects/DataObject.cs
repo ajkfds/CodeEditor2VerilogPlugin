@@ -93,7 +93,7 @@ namespace pluginVerilog.Verilog.DataObjects
 //                    return .Create(dataType);
                 case DataTypeEnum.Struct:
                     return Struct.Create(name, dataType);
-                    //        TypeReference
+//        TypeReference
 
             }
             throw new NotImplementedException();

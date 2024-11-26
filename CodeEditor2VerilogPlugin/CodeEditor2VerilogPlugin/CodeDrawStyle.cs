@@ -15,9 +15,9 @@ namespace pluginVerilog
         {
             colors = new Color[16]
             {
-                Avalonia.Media.Color.FromRgb(212,212,212),     // Normal
+                Avalonia.Media.Color.FromRgb(212,212,212),         // Normal
                     Avalonia.Media.Color.FromRgb(150,150,150),     // inactivated
-                    Avalonia.Media.Colors.DarkGray,                  // 2
+                    Avalonia.Media.Colors.DarkGray,                // 2
                     Avalonia.Media.Color.FromRgb(255,50,50),       // Resister
                     Avalonia.Media.Color.FromRgb(86,156,214),      // keyword
                     Avalonia.Media.Color.FromRgb(106,153,85),      // Comment
@@ -27,10 +27,10 @@ namespace pluginVerilog
                     Avalonia.Media.Color.FromRgb(255,150,200),     // Net
                     Avalonia.Media.Color.FromRgb(200,255,100),     // highlighted comment
                     Avalonia.Media.Color.FromRgb(255,200,200),     // Variable
-                    Avalonia.Media.Colors.Black,                     // 12
-                    Avalonia.Media.Colors.Black,                     // 13
-                    Avalonia.Media.Colors.Black,                     // 14
-                    Avalonia.Media.Colors.Black                      // 15
+                    Avalonia.Media.Colors.Black,                   // 12
+                    Avalonia.Media.Colors.Black,                   // 13
+                    Avalonia.Media.Colors.Black,                   // 14
+                    Avalonia.Media.Colors.Black                    // 15
             };
 
             markStyle = new CodeEditor2.CodeEditor.CodeDrawStyle.MarkDetail[]

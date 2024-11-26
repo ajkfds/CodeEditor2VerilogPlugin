@@ -254,7 +254,7 @@ namespace pluginVerilog.Verilog.Expressions
                     sb.Append(word.GetCharAt(index));
                     index++;
                 }
-                if (index >= word.Length) return false;
+                if (index >= word.Length) return true;
             }
 
             // parse exponent

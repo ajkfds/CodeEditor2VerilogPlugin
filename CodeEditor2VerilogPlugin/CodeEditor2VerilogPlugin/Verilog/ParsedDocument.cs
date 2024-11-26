@@ -535,6 +535,8 @@ namespace pluginVerilog.Verilog
 
         public List<AutocompleteItem>? GetAutoCompleteItems(List<string> hierWords,int index,int line,CodeEditor.CodeDocument document,string candidateWord)
         {
+            if (hierWords.Count == 0 && candidateWord == "") return null;
+
             List<AutocompleteItem>? items = null;
 
             if (Root == null || Root.BuldingBlocks == null)
