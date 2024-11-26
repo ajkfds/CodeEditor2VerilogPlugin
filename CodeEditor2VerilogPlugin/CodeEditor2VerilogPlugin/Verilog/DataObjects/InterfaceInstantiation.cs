@@ -11,8 +11,9 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects
 {
-    public class InterfaceInstantiation : DataObject,IBuildingBlockInstantiation
+    public class InterfaceInstantiation : DataObject,IBuildingBlockInstantiation,INamedElement
     {
+        
         protected InterfaceInstantiation() { }
         public Attribute? Attribute { get; set; }
         public required WordReference DefinitionReference { get; init; }
@@ -279,13 +280,13 @@ namespace pluginVerilog.Verilog.DataObjects
                     {
                         // 
                     }
-                    else if (moduleOrInterface.Instantiations.ContainsKey(interfaceInstantiation.Name))
+                    else if (moduleOrInterface.NamedElements.ContainsIBuldingBlockInstantiation(interfaceInstantiation.Name))
                     {   // duplicated
                         word.AddPrototypeError("instance name duplicated");
                     }
                     else
                     {
-                        moduleOrInterface.Instantiations.Add(interfaceInstantiation.Name, interfaceInstantiation);
+                        moduleOrInterface.NamedElements.Add(interfaceInstantiation.Name, interfaceInstantiation);
                     }
                 }
                 else
@@ -294,11 +295,11 @@ namespace pluginVerilog.Verilog.DataObjects
                     {
                         // 
                     }
-                    else if (moduleOrInterface.Instantiations.ContainsKey(interfaceInstantiation.Name))
+                    else if (moduleOrInterface.NamedElements.ContainsIBuldingBlockInstantiation(interfaceInstantiation.Name))
                     {   // duplicated
-                        if (moduleOrInterface.Instantiations[interfaceInstantiation.Name].Prototype)
+                        if (((IBuildingBlockInstantiation)moduleOrInterface.NamedElements[interfaceInstantiation.Name]).Prototype)
                         {
-                            interfaceInstantiation = moduleOrInterface.Instantiations[interfaceInstantiation.Name] as InterfaceInstantiation;
+                            interfaceInstantiation = moduleOrInterface.NamedElements[interfaceInstantiation.Name] as InterfaceInstantiation;
                             interfaceInstantiation.Prototype = false;
                         }
                         else

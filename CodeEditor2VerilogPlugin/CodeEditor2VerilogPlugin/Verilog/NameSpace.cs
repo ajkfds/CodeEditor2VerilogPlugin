@@ -32,24 +32,30 @@ namespace pluginVerilog.Verilog
 
         public NameSpace GetHierarchyNameSpace(IndexReference iref)
         {
-            foreach (Function function in BuildingBlock.Functions.Values)
+            foreach (INamedElement namedElement in BuildingBlock.NamedElements.Values)
             {
-                if (function.BeginIndexReference == null) continue;
-                if (function.LastIndexReference == null) continue;
+                if(namedElement is Function)
+                {
+                    Function function = (Function)namedElement;
+                    if (function.BeginIndexReference == null) continue;
+                    if (function.LastIndexReference == null) continue;
 
-                if (iref.IsSmallerThan(function.BeginIndexReference)) continue;
-                if (iref.IsGreaterThan(function.LastIndexReference)) continue;
-                return function.getHierarchyNameSpace2(iref);
-            }
-            foreach (Task task in BuildingBlock.Tasks.Values)
-            {
-                if (task.BeginIndexReference == null) continue;
-                if (task.LastIndexReference == null) continue;
+                    if (iref.IsSmallerThan(function.BeginIndexReference)) continue;
+                    if (iref.IsGreaterThan(function.LastIndexReference)) continue;
+                    return function.getHierarchyNameSpace2(iref);
+                }
+                else if(namedElement is Task)
+                {
+                    Task task = (Task)namedElement;
+                    if (task.BeginIndexReference == null) continue;
+                    if (task.LastIndexReference == null) continue;
 
-                if (iref.IsSmallerThan(task.BeginIndexReference)) continue;
-                if (iref.IsGreaterThan(task.LastIndexReference)) continue;
-                return task.getHierarchyNameSpace2(iref);
+                    if (iref.IsSmallerThan(task.BeginIndexReference)) continue;
+                    if (iref.IsGreaterThan(task.LastIndexReference)) continue;
+                    return task.getHierarchyNameSpace2(iref);
+                }
             }
+
             return getHierarchyNameSpace2(iref);
         }
         private NameSpace getHierarchyNameSpace2(IndexReference iref)
@@ -95,34 +101,27 @@ namespace pluginVerilog.Verilog
                     {
                         items.Add(newItem(variable.Name, CodeDrawStyle.ColorType.Variable));
                     }
-                }
-
-                if(element is NameSpace)
+                } else if(element is NameSpace)
                 {
                     NameSpace space = (NameSpace)element;
                     if (space.Name == null) System.Diagnostics.Debugger.Break();
                     if (space.Name == null) continue;
                     items.Add(newItem(space.Name, CodeDrawStyle.ColorType.Identifier));
 
-                }
-
-                if(element is DataObjects.Constants.Constants)
+                }else if(element is DataObjects.Constants.Constants)
                 {
                     DataObjects.Constants.Constants constants = (DataObjects.Constants.Constants)element;
                     items.Add(newItem(constants.Name, CodeDrawStyle.ColorType.Parameter));
+                }else if(element is Function)
+                {
+                    Function function = (Function)element;
+                    items.Add(newItem(function.Name, CodeDrawStyle.ColorType.Identifier));
                 }
-
-            }
-
-
-            foreach (Function function in BuildingBlock.Functions.Values)
-            {
-                items.Add(newItem(function.Name, CodeDrawStyle.ColorType.Identifier));
-            }
-
-            foreach (Task task in BuildingBlock.Tasks.Values)
-            {
-                items.Add(newItem(task.Name, CodeDrawStyle.ColorType.Identifier));
+                else if(element is Task)
+                {
+                    Task task = (Task)element;
+                    items.Add(newItem(task.Name, CodeDrawStyle.ColorType.Identifier));
+                }
             }
 
             if(Parent != null)

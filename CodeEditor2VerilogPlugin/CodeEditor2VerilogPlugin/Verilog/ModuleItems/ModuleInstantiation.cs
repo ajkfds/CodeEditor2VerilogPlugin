@@ -12,8 +12,10 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.ModuleItems
 {
-    public class ModuleInstantiation : Item,IBuildingBlockInstantiation
+    public class ModuleInstantiation : Item,IBuildingBlockInstantiation,INamedElement
     {
+        public NamedElements NamedElements { get; } = new NamedElements();
+
         protected ModuleInstantiation() { }
         /*
         A.4.1.1 Module instantiation 
@@ -300,13 +302,13 @@ namespace pluginVerilog.Verilog.ModuleItems
                     {
                         // 
                     }
-                    else if (buildingBlock.Instantiations.ContainsKey(moduleInstantiation.Name))
+                    else if (buildingBlock.NamedElements.ContainsIBuldingBlockInstantiation(moduleInstantiation.Name))
                     {   // duplicated
                         word.AddPrototypeError("instance name duplicated");
                     }
                     else
                     {
-                        buildingBlock.Instantiations.Add(moduleInstantiation.Name, moduleInstantiation);
+                        buildingBlock.NamedElements.Add(moduleInstantiation.Name, moduleInstantiation);
                     }
                 }
                 else
@@ -315,11 +317,11 @@ namespace pluginVerilog.Verilog.ModuleItems
                     {
                         // 
                     }
-                    else if (buildingBlock.Instantiations.ContainsKey(moduleInstantiation.Name))
+                    else if (buildingBlock.NamedElements.ContainsIBuldingBlockInstantiation(moduleInstantiation.Name))
                     {   // duplicated
-                        if (buildingBlock.Instantiations[moduleInstantiation.Name].Prototype)
+                        if (((IBuildingBlockInstantiation)buildingBlock.NamedElements[moduleInstantiation.Name]).Prototype)
                         {
-                            ModuleInstantiation? mod = buildingBlock.Instantiations[moduleInstantiation.Name] as ModuleInstantiation;
+                            ModuleInstantiation? mod = buildingBlock.NamedElements[moduleInstantiation.Name] as ModuleInstantiation;
                             if(mod != null)
                             {
                                 moduleInstantiation = mod;

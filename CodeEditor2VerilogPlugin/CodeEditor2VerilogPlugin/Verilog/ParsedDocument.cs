@@ -300,7 +300,7 @@ namespace pluginVerilog.Verilog
 
             if(space != null)
             {
-                foreach (IBuildingBlockInstantiation instantiation in space.BuildingBlock.Instantiations.Values)
+                foreach (IBuildingBlockInstantiation instantiation in space.BuildingBlock.NamedElements.Values.OfType<IBuildingBlockInstantiation>())
                 {
                     if (instantiation.BeginIndexReference == null) continue;
                     if (instantiation.LastIndexReference == null) continue;
@@ -339,15 +339,15 @@ namespace pluginVerilog.Verilog
 //                ret.Add(new Popup.MacroPopup(text.Substring(1), iref.RootParsedDocument.Macros[text.Substring(1)].MacroText));
             }
 
-            if (space.BuildingBlock.Functions.ContainsKey(text))
-            {
-//                ret.Add(new Popup.FunctionPopup(space.BuildingBlock.Functions[text]));
-            }
+//            if (space.BuildingBlock.Functions.ContainsKey(text))
+//            {
+////                ret.Add(new Popup.FunctionPopup(space.BuildingBlock.Functions[text]));
+//            }
 
-            if (space.BuildingBlock.Tasks.ContainsKey(text))
-            {
-//                ret.Add(new Popup.TaskPopup(space.BuildingBlock.Tasks[text]));
-            }
+//            if (space.BuildingBlock.Tasks.ContainsKey(text))
+//            {
+////                ret.Add(new Popup.TaskPopup(space.BuildingBlock.Tasks[text]));
+//            }
 
             return ret;
         }
@@ -504,9 +504,9 @@ namespace pluginVerilog.Verilog
 
             if (hier.Count == 0) return nameSpace;
 
-            if (buildingBlock.Instantiations.ContainsKey(hier[0]))
+            if (buildingBlock.NamedElements.ContainsIBuldingBlockInstantiation(hier[0]))
             {
-                IBuildingBlockInstantiation instantiation = buildingBlock.Instantiations[hier[0]];
+                IBuildingBlockInstantiation instantiation = (IBuildingBlockInstantiation)buildingBlock.NamedElements[hier[0]];
                 NameSpace? bBlock = ProjectProperty.GetInstancedBuildingBlock(instantiation);
 
                 if (instantiation is InterfaceInstantiation)

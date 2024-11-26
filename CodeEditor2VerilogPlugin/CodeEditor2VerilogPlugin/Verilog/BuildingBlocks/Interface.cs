@@ -324,7 +324,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
             base.AppendAutoCompleteItem(items);
 
-            foreach (IBuildingBlockInstantiation instantiation in Instantiations.Values)
+            foreach (IBuildingBlockInstantiation instantiation in NamedElements.Values.OfType<IBuildingBlockInstantiation>())
             {
                 if (instantiation.Name == null) continue;
                 items.Add(newItem(instantiation.Name, CodeDrawStyle.ColorType.Identifier));

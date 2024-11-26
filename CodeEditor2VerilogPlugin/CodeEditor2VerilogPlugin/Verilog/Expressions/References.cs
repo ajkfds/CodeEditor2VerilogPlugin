@@ -44,12 +44,12 @@ namespace pluginVerilog.Verilog.Expressions
             ret.TaskName = word.Text;
             ret.ModuleName = nameSpace.BuildingBlock.Name;
             word.Color(CodeDrawStyle.ColorType.Keyword);
-            if (taskNameSpace.BuildingBlock.Tasks.ContainsKey(ret.TaskName))
+            if (taskNameSpace.BuildingBlock.NamedElements.ContainsTask(ret.TaskName))
             {
-                ret.Task = taskNameSpace.BuildingBlock.Tasks[ret.TaskName];
-            }else if (taskNameSpace.BuildingBlock.Functions.ContainsKey(ret.TaskName))
+                ret.Task = (Task)taskNameSpace.BuildingBlock.NamedElements[ret.TaskName];
+            }else if (taskNameSpace.BuildingBlock.NamedElements.ContainsFunction(ret.TaskName))
             {
-                Function function = taskNameSpace.BuildingBlock.Functions[ret.TaskName];
+                Function function = (Function)taskNameSpace.BuildingBlock.NamedElements[ret.TaskName];
                 if(function.ReturnVariable != null)
                 {
                     word.AddError("illegal task name");

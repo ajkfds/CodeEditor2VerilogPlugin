@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
-    public class BuildingBlock : NameSpace, IBuildingBlock
+    public class BuildingBlock : NameSpace, IBuildingBlock,INamedElement
     {
         protected BuildingBlock(BuildingBlock buildingBlock, NameSpace parent) :base(buildingBlock, parent)
         {
@@ -18,17 +18,8 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
         #region IDesignElementContainer
 
-        public Dictionary<string, Function> Functions { get; set; } = new Dictionary<string, Function>();
 
-        public Dictionary<string, Task> Tasks { get; set; } = new Dictionary<string, Task>();
-
-//        public Dictionary<string, Class> Classes { get; set; } = new Dictionary<string, Class>();
-
-        public Dictionary<string, IDataType> Datatypes { get; set; } = new Dictionary<string, IDataType>();
-
-        public Dictionary<string, BuildingBlock> Elements { get; set; } = new Dictionary<string, BuildingBlock>();
-
-        public Dictionary<string, IBuildingBlockInstantiation> Instantiations { get; } = new Dictionary<string, IBuildingBlockInstantiation>();
+//        public Dictionary<string, IBuildingBlockInstantiation> Instantiations { get; } = new Dictionary<string, IBuildingBlockInstantiation>();
 
 
         public virtual string FileId { get; protected set; }

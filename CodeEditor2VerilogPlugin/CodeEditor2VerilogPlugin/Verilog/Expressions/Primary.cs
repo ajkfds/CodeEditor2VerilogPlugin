@@ -200,7 +200,7 @@ namespace pluginVerilog.Verilog.Expressions
                 {
                     return VariableReference.ParseCreate(word, space, lValue);
                 }
-                if (lValue && space.BuildingBlock.Tasks.ContainsKey(word.Text))
+                if (lValue && space.BuildingBlock.NamedElements.ContainsKey(word.Text) && space.BuildingBlock.NamedElements[word.Text] is Task)
                 {
                     return TaskReference.ParseCreate(word, space);
                 }
@@ -341,10 +341,10 @@ namespace pluginVerilog.Verilog.Expressions
         public static bool parseKnownHierarchyNameSpace(WordScanner word, NameSpace rootNameSpace, ref NameSpace nameSpace, ref Primary? primary, bool assigned)
         {
             BuildingBlock buildingBlock = nameSpace.BuildingBlock;
-            if (!buildingBlock.Instantiations.ContainsKey(word.Text)) return false;
+            if (!buildingBlock.NamedElements.ContainsIBuldingBlockInstantiation(word.Text)) return false;
 
-            IBuildingBlockInstantiation instantiation = buildingBlock.Instantiations[word.Text];
-            if(instantiation is ModuleInstantiation)
+            IBuildingBlockInstantiation instantiation = (IBuildingBlockInstantiation)buildingBlock.NamedElements[word.Text];
+            if (instantiation is ModuleInstantiation)
             {
                 ModuleInstantiation? mInst = instantiation as ModuleInstantiation;
                 if (mInst == null) throw new Exception();
@@ -438,14 +438,16 @@ namespace pluginVerilog.Verilog.Expressions
 
                         if (word.NextText == ".")
                         {
-                            if(nameSpace.BuildingBlock is IBuildingBlockWithModuleInstance &&
-                               (nameSpace.BuildingBlock as IBuildingBlockWithModuleInstance).Instantiations.ContainsKey(word.Text) )
-                            { // module instance
+                            if(
+                                nameSpace.BuildingBlock.NamedElements.ContainsIBuldingBlockInstantiation(word.Text)
+                            ){ // module instance
 
                                 IBuildingBlockWithModuleInstance buildingBlock = nameSpace.BuildingBlock as IBuildingBlockWithModuleInstance;
                                 
                                 word.Color(CodeDrawStyle.ColorType.Identifier);
-                                string moduleName = buildingBlock.Instantiations[word.Text].SourceName;
+                                IBuildingBlockInstantiation instantiation = (IBuildingBlockInstantiation)nameSpace.BuildingBlock.NamedElements[word.Text];
+
+                                string moduleName = instantiation.SourceName;
                                 BuildingBlock module = word.RootParsedDocument.ProjectProperty.GetBuildingBlock(moduleName);
                                 if (module == null) return null;
                                 word.MoveNext();
@@ -475,13 +477,15 @@ namespace pluginVerilog.Verilog.Expressions
                         }
                         else
                         {
-                            if (nameSpace.BuildingBlock is IBuildingBlockWithModuleInstance &&
-                               (nameSpace.BuildingBlock as IBuildingBlockWithModuleInstance).Instantiations.ContainsKey(word.Text))
-                            { // module instance
+                            if (
+                                nameSpace.BuildingBlock.NamedElements.ContainsIBuldingBlockInstantiation(word.Text)
+                            ){ // module instance
                                 IBuildingBlockWithModuleInstance buildingBlock = nameSpace.BuildingBlock as IBuildingBlockWithModuleInstance;
 
                                 word.Color(CodeDrawStyle.ColorType.Identifier);
-                                string moduleName = buildingBlock.Instantiations[word.Text].SourceName;
+                                IBuildingBlockInstantiation instantiation = (IBuildingBlockInstantiation)nameSpace.BuildingBlock.NamedElements[word.Text];
+                                string moduleName = instantiation.SourceName;
+
                                 BuildingBlock module = word.RootParsedDocument.ProjectProperty.GetBuildingBlock(moduleName);
                                 if (module == null) return null;
                                 word.MoveNext();
@@ -501,7 +505,7 @@ namespace pluginVerilog.Verilog.Expressions
                                     return new NameSpaceReference(module);
                                 }
 
-                            }else if(nameSpace is BuildingBlock && nameSpace.BuildingBlock.Tasks.ContainsKey(word.Text))
+                            }else if(nameSpace is BuildingBlock && nameSpace.BuildingBlock.NamedElements.ContainsKey(word.Text) && nameSpace.BuildingBlock.NamedElements[word.Text] is Task)
                             {
                                 return TaskReference.ParseCreate(word, nameSpace.BuildingBlock);
                             }

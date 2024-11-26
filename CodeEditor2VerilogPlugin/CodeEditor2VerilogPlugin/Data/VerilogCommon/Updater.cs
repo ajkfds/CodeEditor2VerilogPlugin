@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CodeEditor2.CodeEditor;
 using CodeEditor2.Data;
+using pluginVerilog.Verilog;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.ModuleItems;
 
@@ -28,17 +29,17 @@ namespace pluginVerilog.Data.VerilogCommon
                 if (targetItem.VerilogParsedDocument == null)
                 {
                     // dispose all sub items
-                    foreach (Item item in targetItem.Items.Values) item.Dispose();
+                    foreach (CodeEditor2.Data.Item item in targetItem.Items.Values) item.Dispose();
                     targetItem.Items.Clear();
                     return;
                 }
 
-                List<Item> keepItems = new List<Item>();
-                Dictionary<string, Item> newItems = new Dictionary<string, Item>();
+                List<CodeEditor2.Data.Item> keepItems = new List<CodeEditor2.Data.Item>();
+                Dictionary<string, CodeEditor2.Data.Item> newItems = new Dictionary<string, CodeEditor2.Data.Item>();
 
                 // get new include files
                 Dictionary<string, VerilogHeaderInstance> oldIncludes = new Dictionary<string, VerilogHeaderInstance>();
-                foreach (Item item in targetItem.Items.Values)
+                foreach (CodeEditor2.Data.Item item in targetItem.Items.Values)
                 {
                     VerilogHeaderInstance? oldVerilogHeaderInstance = item as VerilogHeaderInstance;
                     if (oldVerilogHeaderInstance == null) continue;
@@ -66,7 +67,7 @@ namespace pluginVerilog.Data.VerilogCommon
                         }
                         newItems.Add(keyName, newVhInstance);
                         keepItems.Add(newVhInstance);
-                        Item? parent = targetItem as Item;
+                        CodeEditor2.Data.Item? parent = targetItem as CodeEditor2.Data.Item;
                         if (parent == null) throw new Exception();
                         newVhInstance.Parent = parent;
                     }
@@ -85,32 +86,34 @@ namespace pluginVerilog.Data.VerilogCommon
                 }
 
                 { // Items not included in the acceptItems are considered unnecessary and will be deleted.
-                    List<Item> removeItems = new List<Item>();
+                    List<CodeEditor2.Data.Item> removeItems = new List<CodeEditor2.Data.Item>();
                     foreach (CodeEditor2.Data.Item item in targetItem.Items.Values)
                     {
                         if (!keepItems.Contains(item)) removeItems.Add(item);
                     }
 
-                    foreach (Item item in removeItems)
+                    foreach (CodeEditor2.Data.Item item in removeItems)
                     {
                         targetItem.Items.Remove(item.Name);
                     }
                 }
 
-                foreach (Item item in newItems.Values)
+                foreach (CodeEditor2.Data.Item item in newItems.Values)
                 {
                     if(!targetItem.Items.ContainsValue(item)) targetItem.Items.Add(item.Name, item);
                 }
             }
         }
 
-        private static void UpdateInstance(BuildingBlock newModule,Project project, IVerilogRelatedFile targetItem, List<Item> keepItems,Dictionary<string, Item> newItems)
+        private static void UpdateInstance(BuildingBlock newModule,Project project, IVerilogRelatedFile targetItem, List<CodeEditor2.Data.Item> keepItems,Dictionary<string, CodeEditor2.Data.Item> newItems)
         {
-            foreach (IBuildingBlockInstantiation newInstantiation in newModule.Instantiations.Values)
+            List<INamedElement> instantiations = newModule.NamedElements.Values.FindAll(x => x is IBuildingBlockInstantiation);
+
+            foreach (IBuildingBlockInstantiation newInstantiation in instantiations)
             {
                 if (targetItem.Items.ContainsKey(newInstantiation.Name))
                 { // already exist item
-                    Item oldItem = targetItem.Items[newInstantiation.Name];
+                    CodeEditor2.Data.Item oldItem = targetItem.Items[newInstantiation.Name];
                     VerilogModuleInstance? oldVerilogModuleInstance = oldItem as VerilogModuleInstance;
                     if(oldVerilogModuleInstance != null)
                     {
@@ -134,7 +137,7 @@ namespace pluginVerilog.Data.VerilogCommon
                         if (newVerilogModuleInstance == null) continue;
                         if (newItems.ContainsKey(newInstantiation.Name)) continue;
 
-                        Item? parent = targetItem as Item;
+                        CodeEditor2.Data.Item? parent = targetItem as CodeEditor2.Data.Item;
                         if (parent == null) throw new Exception();
                         newVerilogModuleInstance.Parent = parent;
                         newItems.Add(newInstantiation.Name, newVerilogModuleInstance);
@@ -156,7 +159,7 @@ namespace pluginVerilog.Data.VerilogCommon
                     if (newVerilogModuleInstance == null) continue;
                     if (newItems.ContainsKey(newInstantiation.Name)) continue;
 
-                    Item? parent = targetItem as Item;
+                    CodeEditor2.Data.Item? parent = targetItem as CodeEditor2.Data.Item;
                     if (parent == null) throw new Exception();
                     newVerilogModuleInstance.Parent = parent;
                     newItems.Add(newInstantiation.Name, newVerilogModuleInstance);

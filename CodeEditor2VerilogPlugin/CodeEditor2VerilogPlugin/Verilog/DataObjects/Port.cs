@@ -539,7 +539,7 @@ ansi_port_declaration ::=
             return true;
         }
 
-        private static void addInstantiation(WordScanner word, NameSpace nameSpace, IBuildingBlockInstantiation instantiation)
+        private static void addInstantiation(WordScanner word, NameSpace nameSpace, INamedElement instantiation)
         {
             BuildingBlock block = nameSpace.BuildingBlock as BuildingBlock;
             if (block == null)
@@ -548,7 +548,7 @@ ansi_port_declaration ::=
             }
             else
             {
-                if (block.Instantiations.ContainsKey(instantiation.Name))
+                if (block.NamedElements.ContainsKey(instantiation.Name))
                 {
                     if (word.Prototype)
                     {
@@ -556,13 +556,13 @@ ansi_port_declaration ::=
                     }
                     else
                     {
-                        block.Instantiations.Remove(instantiation.Name);
-                        block.Instantiations.Add(instantiation.Name, instantiation);
+                        block.NamedElements.Remove(instantiation.Name);
+                        block.NamedElements.Add(instantiation.Name, instantiation);
                     }
                 }
                 else
                 {
-                    block.Instantiations.Add(instantiation.Name, instantiation);
+                    block.NamedElements.Add(instantiation.Name, instantiation);
                 }
             }
         }

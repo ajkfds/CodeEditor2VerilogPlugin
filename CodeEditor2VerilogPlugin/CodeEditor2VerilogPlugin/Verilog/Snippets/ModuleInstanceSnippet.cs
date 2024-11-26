@@ -53,7 +53,7 @@ namespace pluginVerilog.Verilog.Snippets
                 if (module == null) return;
 
                 int instanceCount = 0;
-                while (module.Instantiations.ContainsKey(moduleName + "_" + instanceCount.ToString()))
+                while (module.NamedElements.ContainsIBuldingBlockInstantiation(moduleName + "_" + instanceCount.ToString()))
                 {
                     instanceCount++;
                 }

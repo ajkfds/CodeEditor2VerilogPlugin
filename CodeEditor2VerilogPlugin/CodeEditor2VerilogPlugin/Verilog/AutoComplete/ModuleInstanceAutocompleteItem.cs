@@ -57,7 +57,7 @@ namespace pluginVerilog.Verilog.AutoComplete
             while (true)
             {
                 instanceName = Text + "_" + i.ToString();
-                if (!module.Instantiations.ContainsKey(instanceName)) break;
+                if (!module.NamedElements.ContainsIBuldingBlockInstantiation(instanceName)) break;
                 i++;
             }
 

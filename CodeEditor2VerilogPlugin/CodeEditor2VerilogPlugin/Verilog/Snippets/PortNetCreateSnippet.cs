@@ -41,7 +41,7 @@ namespace pluginVerilog.Verilog.Snippets
             if (buildingBlock == null) return;
 
             foreach (var instance in
-                buildingBlock.Instantiations.Values)
+                buildingBlock.NamedElements.Values)
             {
                 ModuleInstantiation? moduleInstantiation = instance as ModuleInstantiation;
                 if (moduleInstantiation == null) continue;

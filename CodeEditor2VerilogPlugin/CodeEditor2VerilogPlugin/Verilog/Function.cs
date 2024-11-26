@@ -202,13 +202,13 @@ namespace pluginVerilog.Verilog
                     function.NamedElements.Add(retVal.Name, retVal);
                 }
 
-                if (nameSpace.BuildingBlock.Functions.ContainsKey(function.Name))
+                if (nameSpace.BuildingBlock.NamedElements.ContainsKey(function.Name) && nameSpace.BuildingBlock.NamedElements[function.Name] is Function)
                 {
-                    nameSpace.BuildingBlock.Functions[function.Name] = function;
+                    nameSpace.BuildingBlock.NamedElements.Replace(function.Name,function);
                 }
                 else
                 {
-                    nameSpace.BuildingBlock.Functions.Add(function.Name, function);
+                    nameSpace.BuildingBlock.NamedElements.Add(function.Name, function);
                 }
             }
 
@@ -414,13 +414,13 @@ namespace pluginVerilog.Verilog
                     function.NamedElements.Add(retVal.Name, retVal);
                 }
 
-                if (nameSpace.BuildingBlock.Functions.ContainsKey(function.Name))
+                if (nameSpace.BuildingBlock.NamedElements.ContainsKey(function.Name) && nameSpace.BuildingBlock.NamedElements[function.Name] is Function)
                 {
-                    nameSpace.BuildingBlock.Functions[function.Name] = function;
+                    nameSpace.BuildingBlock.NamedElements.Replace(function.Name,function);
                 }
                 else
                 {
-                    nameSpace.BuildingBlock.Functions.Add(function.Name, function);
+                    nameSpace.BuildingBlock.NamedElements.Add(function.Name, function);
                 }
             }
 

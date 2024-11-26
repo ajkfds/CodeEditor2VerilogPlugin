@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,7 +32,6 @@ namespace pluginVerilog.Verilog
             if (!itemDict.ContainsKey(identifier)) return null;
             return itemDict[identifier] as NameSpace;
         }
-
         public void Insert(int index, string key, INamedElement item)
         {
             if (itemDict.ContainsKey(key)) return;
@@ -42,7 +42,7 @@ namespace pluginVerilog.Verilog
         public void Replace(string key,INamedElement item)
         {
             INamedElement oldItem = itemDict[key];
-            int index = itemList.IndexOf(item);
+            int index = itemList.IndexOf(oldItem);
             itemList[index] = item;
             itemDict[key] = item;
         }
@@ -76,6 +76,36 @@ namespace pluginVerilog.Verilog
         public bool ContainsKey(string key)
         {
             return itemDict.ContainsKey(key);
+        }
+        public bool ContainsNameSpace(string key)
+        {
+            if (!itemDict.ContainsKey(key)) return false;
+            if (itemDict[key] is NameSpace) return true;
+            return false;
+        }
+        public bool ContainsTask(string key)
+        {
+            if (!itemDict.ContainsKey(key)) return false;
+            if (itemDict[key] is Task) return true;
+            return false;
+        }
+        public bool ContainsFunction(string key)
+        {
+            if (!itemDict.ContainsKey(key)) return false;
+            if (itemDict[key] is Function) return true;
+            return false;
+        }
+        public bool ContainsDataObject(string key)
+        {
+            if (!itemDict.ContainsKey(key)) return false;
+            if (itemDict[key] is DataObjects.DataObject) return true;
+            return false;
+        }
+        public bool ContainsIBuldingBlockInstantiation(string key)
+        {
+            if (!itemDict.ContainsKey(key)) return false;
+            if (itemDict[key] is ModuleItems.IBuildingBlockInstantiation) return true;
+            return false;
         }
 
         public bool ContainsValue(INamedElement item)

@@ -154,7 +154,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 {
                     module = Module.Create(word, parsedDocument.ParameterOverrides, null , file, true);
                 }
-                if (module.Instantiations.Count != 0) // prepare reparse (instanced module could have un-refferenced link)
+                //if (module.Instantiations.Count != 0) // prepare reparse (instanced module could have un-refferenced link)
                 {
                     module.ReparseRequested = true;
                 }
@@ -210,7 +210,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 {
                     package = Package.Create(word, parsedDocument.ParameterOverrides, null, file, true);
                 }
-                if (package.Instantiations.Count != 0) // prepare reparse (instanced module could have un-refferenced link)
+                //if (package.Instantiations.Count != 0) // prepare reparse (instanced module could have un-refferenced link)
                 {
                     package.ReparseRequested = true;
                 }
@@ -267,7 +267,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 {
                     program = Program.Create(word, parsedDocument.ParameterOverrides, null, file, true);
                 }
-                if (program.Instantiations.Count != 0) // prepare reparse (instanced module could have un-referenced link)
+                //if (program.Instantiations.Count != 0) // prepare reparse (instanced module could have un-referenced link)
                 {
                     program.ReparseRequested = true;
                 }
@@ -323,7 +323,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 {
                     module = Interface.Create(word, parsedDocument.Root, parsedDocument.ParameterOverrides, null, file, true);
                 }
-                if (module.Instantiations.Count != 0) // prepare reparse (instanced module could have un-refferenced link)
+//                if (module.Instantiations.Count != 0) // prepare reparse (instanced module could have un-refferenced link)
                 {
                     module.ReparseRequested = true;
                 }

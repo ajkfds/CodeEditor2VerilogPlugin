@@ -314,24 +314,21 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                             {
                                 DataObjects.DataObject dataObject = (DataObjects.DataObject)namedElement;
                                 if (!class_.NamedElements.ContainsKey(namedElement.Name)) class_.NamedElements.Add(namedElement.Name, namedElement);
-                            }
-                            if(namedElement is Typedef)
+                            } else if(namedElement is Typedef)
                             {
                                 Typedef typeDef = (Typedef)namedElement;
                                 if (!class_.NamedElements.ContainsKey(namedElement.Name)) class_.NamedElements.Add(namedElement.Name, namedElement);
+                            } else if(namedElement is Function)
+                            {
+                                Function function = (Function)namedElement;
+                                if (!class_.NamedElements.ContainsKey(namedElement.Name)) class_.NamedElements.Add(namedElement.Name, namedElement);
+                            } else if(namedElement is Task)
+                            {
+                                Task task = (Task)namedElement;
+                                if (!class_.NamedElements.ContainsKey(namedElement.Name)) class_.NamedElements.Add(namedElement.Name, namedElement);
                             }
-
                         }
 
-                       
-                        foreach (var v in baseClass.Functions)
-                        {
-                            if (!class_.Functions.ContainsKey(v.Key)) class_.Functions.Add(v.Key, v.Value);
-                        }
-                        foreach (var v in baseClass.Tasks)
-                        {
-                            if (!class_.Tasks.ContainsKey(v.Key)) class_.Tasks.Add(v.Key, v.Value);
-                        }
                     }
                 }
 
@@ -374,10 +371,13 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
             base.AppendAutoCompleteItem(items);
 
-            foreach (IBuildingBlockInstantiation instantiation in Instantiations.Values)
+            foreach(INamedElement namedElement in NamedElements.Values)
             {
-                if (instantiation.Name == null) throw new Exception();
-                items.Add(newItem(instantiation.Name, CodeDrawStyle.ColorType.Identifier));
+                if(namedElement is IBuildingBlockInstantiation)
+                {
+                    IBuildingBlockInstantiation instantiation = (IBuildingBlockInstantiation)namedElement;
+                    items.Add(newItem(instantiation.Name, CodeDrawStyle.ColorType.Identifier));
+                }
             }
         }
 

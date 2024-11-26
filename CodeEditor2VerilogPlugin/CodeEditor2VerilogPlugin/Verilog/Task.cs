@@ -113,13 +113,13 @@ namespace pluginVerilog.Verilog
             }
             else
             {
-                if (nameSpace.BuildingBlock.Tasks.ContainsKey(task.Name))
+                if (nameSpace.BuildingBlock.NamedElements.ContainsTask(task.Name))
                 {
-                    nameSpace.BuildingBlock.Tasks[task.Name] = task;
+                    nameSpace.BuildingBlock.NamedElements.Replace(task.Name,task);
                 }
                 else
                 {
-                    nameSpace.BuildingBlock.Tasks.Add(task.Name, task);
+                    nameSpace.BuildingBlock.NamedElements.Add(task.Name, task);
                 }
             }
 
@@ -270,13 +270,13 @@ namespace pluginVerilog.Verilog
             }
             else
             {
-                if (nameSpace.BuildingBlock.Tasks.ContainsKey(task.Name))
+                if (nameSpace.BuildingBlock.NamedElements.ContainsTask(task.Name))
                 {
-                    nameSpace.BuildingBlock.Tasks[task.Name] = task;
+                    nameSpace.BuildingBlock.NamedElements.Replace(task.Name,task);
                 }
                 else
                 {
-                    nameSpace.BuildingBlock.Tasks.Add(task.Name, task);
+                    nameSpace.BuildingBlock.NamedElements.Add(task.Name, task);
                 }
             }
 

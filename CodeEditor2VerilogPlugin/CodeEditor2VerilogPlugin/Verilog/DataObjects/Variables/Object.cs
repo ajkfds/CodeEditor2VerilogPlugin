@@ -34,12 +34,12 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         // IInstance
         public override Task? GetTask(string identifier)
         {
-            if (Class.Tasks.ContainsKey(identifier)) return Class.Tasks[identifier];
+            if (Class.NamedElements.ContainsKey(identifier) && Class.NamedElements[identifier] is Task) return (Task)Class.NamedElements[identifier];
             return null;
         }
         public override Function? GetFunction(string identifier)
         {
-            if (Class.Functions.ContainsKey(identifier)) return Class.Functions[identifier];
+            if (Class.NamedElements.ContainsKey(identifier) && Class.NamedElements[identifier] is Function) return (Function)Class.NamedElements[identifier];
             return null;
         }
         public override DataObject? GetDataObject(string identifier)

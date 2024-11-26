@@ -23,9 +23,9 @@ namespace pluginVerilog.Verilog.Expressions
             functionCall.FunctionName = word.Text;
 
             Function function = null;
-            if (functionNameSpace.BuildingBlock.Functions.ContainsKey(functionCall.FunctionName))
+            if (functionNameSpace.BuildingBlock.NamedElements.ContainsFunction(functionCall.FunctionName))
             {
-                function = functionNameSpace.BuildingBlock.Functions[functionCall.FunctionName];
+                function = (Function)functionNameSpace.BuildingBlock.NamedElements[functionCall.FunctionName];
             }
             else if (word.RootParsedDocument.ProjectProperty.SystemFunctions.ContainsKey(word.Text))
             {
