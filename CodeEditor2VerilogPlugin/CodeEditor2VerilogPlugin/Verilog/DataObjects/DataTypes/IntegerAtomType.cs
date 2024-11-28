@@ -11,6 +11,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
     public class IntegerAtomType : IDataType
     {
         public required virtual DataTypeEnum Type { get; init; }
+        public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
         public virtual bool Signed { get; protected set; }
 
         // data_type            ::=   integer_atom_type[signing]

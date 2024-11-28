@@ -1,4 +1,5 @@
 ﻿using CodeEditor2.Data;
+using pluginVerilog.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects.Variables;
 using pluginVerilog.Verilog.ModuleItems;
@@ -7,14 +8,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects
 {
-    public class InterfaceInstantiation : DataObject,IBuildingBlockInstantiation,INamedElement
+    public class InterfaceInstance : DataObject,IBuildingBlockInstantiation,INamedElement
     {
         
-        protected InterfaceInstantiation() { }
+        protected InterfaceInstance() { }
+        public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
         public Attribute? Attribute { get; set; }
         public required WordReference DefinitionReference { get; init; }
         public required Project Project { get; init; }
@@ -31,7 +34,7 @@ namespace pluginVerilog.Verilog.DataObjects
         }
 
         public required string SourceName { get; init; }
-        public string? ModPortName { get; set; }
+//        public string? ModPortName { get; set; }
         public required Dictionary<string, Expressions.Expression> ParameterOverrides { get; init; }
         public Dictionary<string, Expressions.Expression> PortConnection { get; set; } = new Dictionary<string, Expressions.Expression>();
 
@@ -69,9 +72,9 @@ namespace pluginVerilog.Verilog.DataObjects
         //    return instantiation;
         //}
 
-        public static InterfaceInstantiation CreatePortInstance(WordScanner word,string sourceInterfaceName)
+        public static InterfaceInstance CreatePortInstance(WordScanner word,string sourceInterfaceName)
         {
-            return new InterfaceInstantiation() {
+            InterfaceInstance interfaceInstantiation = new InterfaceInstance() {
                 BeginIndexReference = word.CreateIndexReference(),
                 DefinitionReference = word.CrateWordReference(),
                 Name = word.Text,
@@ -79,6 +82,24 @@ namespace pluginVerilog.Verilog.DataObjects
                 Project = word.Project,
                 SourceName = sourceInterfaceName
             };
+            Interface? interface_ = interfaceInstantiation.Interface;
+            if (interface_ == null) return interfaceInstantiation;
+            //foreach (var modPort in interface_.NamedElements.Values.OfType<ModPort>())
+            //{
+            //    interface_.ModPorts.cl
+            //}
+            copyItems(interfaceInstantiation, interface_);
+
+            return interfaceInstantiation;
+        }
+
+        public Interface? Interface { 
+            get
+            {
+                ProjectProperty projectProperty = (ProjectProperty)Project.ProjectProperties[Plugin.StaticID];
+                Interface? instancedInterface = projectProperty.GetBuildingBlock(SourceName) as Interface;
+                return instancedInterface;
+            } 
         }
 
         /*
@@ -113,7 +134,7 @@ namespace pluginVerilog.Verilog.DataObjects
 
             Dictionary<string, Expressions.Expression> parameterOverrides = new Dictionary<string, Expressions.Expression>();
 
-            if (word.Text == "#") // parameter
+            if (word.Text == "#") // parse parameter override
             {
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 word.MoveNext();
@@ -252,7 +273,7 @@ namespace pluginVerilog.Verilog.DataObjects
                     return false;
                 }
 
-                InterfaceInstantiation interfaceInstantiation = new InterfaceInstantiation()
+                InterfaceInstance interfaceInstance = new InterfaceInstance()
                 {
                     BeginIndexReference = beginIndexReference,
                     DefinitionReference = word.CrateWordReference(),
@@ -267,40 +288,41 @@ namespace pluginVerilog.Verilog.DataObjects
                 {
                     if (parameterOverrides.Count != 0)
                     {
-                        instancedInterface = word.ProjectProperty.GetInstancedBuildingBlock(interfaceInstantiation) as Interface;
+                        instancedInterface = word.ProjectProperty.GetInstancedBuildingBlock(interfaceInstance) as Interface;
                     }
                     if (instancedInterface == null) nameSpace.BuildingBlock.ReparseRequested = true;
                 }
 
+                // register to upper bulding block
                 if (word.Prototype)
                 {
-                    interfaceInstantiation.Prototype = true;
+                    interfaceInstance.Prototype = true;
 
-                    if (interfaceInstantiation.Name == null)
+                    if (interfaceInstance.Name == null)
                     {
                         // 
                     }
-                    else if (moduleOrInterface.NamedElements.ContainsIBuldingBlockInstantiation(interfaceInstantiation.Name))
+                    else if (moduleOrInterface.NamedElements.ContainsIBuldingBlockInstantiation(interfaceInstance.Name))
                     {   // duplicated
                         word.AddPrototypeError("instance name duplicated");
                     }
                     else
                     {
-                        moduleOrInterface.NamedElements.Add(interfaceInstantiation.Name, interfaceInstantiation);
+                        moduleOrInterface.NamedElements.Add(interfaceInstance.Name, interfaceInstance);
                     }
                 }
                 else
                 {
-                    if (interfaceInstantiation.Name == null)
+                    if (interfaceInstance.Name == null)
                     {
                         // 
                     }
-                    else if (moduleOrInterface.NamedElements.ContainsIBuldingBlockInstantiation(interfaceInstantiation.Name))
+                    else if (moduleOrInterface.NamedElements.ContainsIBuldingBlockInstantiation(interfaceInstance.Name))
                     {   // duplicated
-                        if (((IBuildingBlockInstantiation)moduleOrInterface.NamedElements[interfaceInstantiation.Name]).Prototype)
+                        if (((IBuildingBlockInstantiation)moduleOrInterface.NamedElements[interfaceInstance.Name]).Prototype)
                         {
-                            interfaceInstantiation = moduleOrInterface.NamedElements[interfaceInstantiation.Name] as InterfaceInstantiation;
-                            interfaceInstantiation.Prototype = false;
+                            interfaceInstance = moduleOrInterface.NamedElements[interfaceInstance.Name] as InterfaceInstance;
+                            interfaceInstance.Prototype = false;
                         }
                         else
                         {
@@ -346,7 +368,7 @@ namespace pluginVerilog.Verilog.DataObjects
                                 word.AddError("illegal port name");
                             }
                         }
-                        if (word.Prototype && interfaceInstantiation.PortConnection.ContainsKey(pinName))
+                        if (word.Prototype && interfaceInstance.PortConnection.ContainsKey(pinName))
                         {
                             word.AddError("duplicated");
                         }
@@ -362,7 +384,7 @@ namespace pluginVerilog.Verilog.DataObjects
                         if (outPort)
                         {
                             Expressions.Expression expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace);
-                            if (word.Prototype && expression != null && !interfaceInstantiation.PortConnection.ContainsKey(pinName)) interfaceInstantiation.PortConnection.Add(pinName, expression);
+                            if (word.Prototype && expression != null && !interfaceInstance.PortConnection.ContainsKey(pinName)) interfaceInstance.PortConnection.Add(pinName, expression);
 
                             if (!word.Prototype)
                             {
@@ -386,7 +408,7 @@ namespace pluginVerilog.Verilog.DataObjects
                         else
                         {
                             Expressions.Expression expression = Expressions.Expression.ParseCreate(word, nameSpace);
-                            if (word.Prototype && expression != null && !interfaceInstantiation.PortConnection.ContainsKey(pinName)) interfaceInstantiation.PortConnection.Add(pinName, expression);
+                            if (word.Prototype && expression != null && !interfaceInstance.PortConnection.ContainsKey(pinName)) interfaceInstance.PortConnection.Add(pinName, expression);
 
                             if (!word.Prototype)
                             {
@@ -435,7 +457,7 @@ namespace pluginVerilog.Verilog.DataObjects
                         {
                             pinName = instancedInterface.PortsList[i].Name;
                             Expressions.Expression expression = Expressions.Expression.ParseCreate(word, nameSpace);
-                            if (word.Prototype && expression != null && !interfaceInstantiation.PortConnection.ContainsKey(pinName)) interfaceInstantiation.PortConnection.Add(pinName, expression);
+                            if (word.Prototype && expression != null && !interfaceInstance.PortConnection.ContainsKey(pinName)) interfaceInstance.PortConnection.Add(pinName, expression);
                         }
                         else
                         {
@@ -458,9 +480,13 @@ namespace pluginVerilog.Verilog.DataObjects
                     return true;
                 }
                 word.MoveNext();
-                interfaceInstantiation.LastIndexReference = word.CreateIndexReference();
+                interfaceInstance.LastIndexReference = word.CreateIndexReference();
 
-                if (!word.Prototype && word.Active) word.AppendBlock(interfaceInstantiation.BeginIndexReference, interfaceInstantiation.LastIndexReference);
+                if (!word.Prototype && word.Active) word.AppendBlock(interfaceInstance.BeginIndexReference, interfaceInstance.LastIndexReference);
+
+                // copy items from interface
+                copyItems(interfaceInstance,instancedInterface);
+
                 if (word.Text != ",") break;
                 word.MoveNext();
             }
@@ -472,6 +498,22 @@ namespace pluginVerilog.Verilog.DataObjects
             }
             word.MoveNext();
             return true;
+        }
+
+        private static void copyItems(InterfaceInstance interfaceInstance, Interface? instancedInterface)
+        {
+            // copy items from interface
+            if (instancedInterface != null)
+            {
+                foreach (var dataObject in instancedInterface.NamedElements.Values.OfType<DataObject>())
+                {
+                    interfaceInstance.NamedElements.Add(dataObject.Name, dataObject.Clone());
+                }
+                foreach (var modPort in instancedInterface.NamedElements.Values.OfType<ModPort>() )
+                {
+                    interfaceInstance.NamedElements.Add(modPort.Name, ModportInstance.Create(modPort.Name,instancedInterface,modPort));
+                }
+            }
         }
 
         public BuildingBlock GetInstancedBuildingBlock()

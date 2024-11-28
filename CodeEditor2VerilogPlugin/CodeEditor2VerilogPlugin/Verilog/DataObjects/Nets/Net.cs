@@ -12,6 +12,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
         public bool Signed = false;
 
         public NetTypeEnum NetType = NetTypeEnum.Wire;
+        public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Net; } }
 
         public List<DataObjects.Arrays.PackedArray> PackedDimensions { get; set; } = new List<DataObjects.Arrays.PackedArray>();
         public DataObjects.Arrays.PackedArray Range
@@ -426,7 +427,8 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
 
         public override DataObject Clone()
         {
-            throw new NotImplementedException();
+            return new Net() { Name = Name, DefinedReference = DefinedReference, PackedDimensions = PackedDimensions };
+//            throw new NotImplementedException();
         }
     }
 }

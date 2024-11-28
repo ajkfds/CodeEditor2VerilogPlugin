@@ -354,7 +354,7 @@ namespace pluginVerilog.Verilog
             {
                 warning = true;
             }
-
+            wordPointer.ParsedDocument.CodeDocument = wordPointer.Document;
 
             if (wordPointer.ParsedDocument == stock.Last().ParsedDocument)
             {

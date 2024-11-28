@@ -15,6 +15,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 return DataTypeEnum.String;
             }
         }
+        public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
         public static StringType ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             StringType dType = new StringType();

@@ -12,6 +12,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     public class IntegerVectorValueVariable : ValueVariable
     {
         //integer_vector_type::= bit | logic | reg
+        public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Register; } }
         public DataObjects.Arrays.PackedArray Range
         {
             get

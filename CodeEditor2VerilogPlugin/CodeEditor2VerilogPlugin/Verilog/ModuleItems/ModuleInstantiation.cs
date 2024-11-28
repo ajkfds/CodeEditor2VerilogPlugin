@@ -724,9 +724,9 @@ namespace pluginVerilog.Verilog.ModuleItems
 
             DataObject? portDataObject = instancedModule.Ports[pinName].DataObject;
 
-            if (portDataObject is InterfaceInstantiation)
+            if (portDataObject is InterfaceInstance)
             {
-                InterfaceInstantiation? portInterfaceInstantiation = instancedModule.Ports[pinName].DataObject as InterfaceInstantiation;
+                InterfaceInstance? portInterfaceInstantiation = instancedModule.Ports[pinName].DataObject as InterfaceInstance;
                 if (portInterfaceInstantiation == null) throw new Exception();
                 Interface? interface_ = instancedModule.Project.GetPluginProperty().GetBuildingBlock(portInterfaceInstantiation.SourceName) as Interface;
                 if(interface_ == null)
@@ -798,18 +798,18 @@ namespace pluginVerilog.Verilog.ModuleItems
         }
         private static void checkInterfacePortConnection(
             Expressions.Expression expression,
-            InterfaceInstantiation portInterfaceInstantiation,
+            InterfaceInstance portInterfaceInstantiation,
             Interface interface_,
             string pinName,
             bool output
             )
         {
-            if (portInterfaceInstantiation.ModPortName == "")
+//            if (portInterfaceInstantiation.ModPortName == "")
             { // interface
                 Expressions.InterfaceReference? expressionInterface = expression as Expressions.InterfaceReference;
                 if (expressionInterface == null)
                 {
-                    expression.Reference.AddError("should be " + portInterfaceInstantiation.ModPortName);
+                    expression.Reference.AddError("should be " + portInterfaceInstantiation.SourceName);
                 }
                 else
                 {
@@ -827,9 +827,9 @@ namespace pluginVerilog.Verilog.ModuleItems
                     }
                 }
             }
-            else
-            { // modport
-            }
+            //else
+            //{ // modport
+            //}
         }
         private static void checkDataObjectPortConnection(
             Module? instancedModule, Expressions.Expression? expression, string pinName, bool output)

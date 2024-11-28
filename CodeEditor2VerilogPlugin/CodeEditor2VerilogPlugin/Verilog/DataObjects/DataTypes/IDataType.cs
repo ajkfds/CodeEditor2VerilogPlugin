@@ -11,6 +11,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         public DataTypeEnum Type { get; }
         public string CreateString();
 
+        public CodeDrawStyle.ColorType ColorType { get; }
         public bool IsVector { get; }
     }
 }

@@ -628,27 +628,25 @@ ansi_port_declaration ::=
             Interface? interface_ = null;
             interface_ = word.ProjectProperty.GetBuildingBlock(identifier) as Interface;
             if (interface_ == null) return false;
-            string? modPortName = null;
+//            string? modPortName = null;
 
             BuildingBlock buildingBlock = nameSpace.BuildingBlock;
             word.Color(CodeDrawStyle.ColorType.Identifier);
             word.MoveNext();
-
+            
             if (word.Text == ".")
             {
                 word.MoveNext();
 
                 word.Color(CodeDrawStyle.ColorType.Identifier);
-                if(!interface_.ModPorts.ContainsKey(word.Text))
+                if(!interface_.NamedElements.ContainsModPort(word.Text))
                 {
                     word.AddError("illegal modport name");
+                    return true;
                 }
-                else
-                {
-                    modPortName = word.Text;
-                }
-
+                ModPort modPort = (ModPort)interface_.NamedElements[word.Text];
                 word.MoveNext();
+                return parseModPort(word, nameSpace, interface_, modPort);
             }
 
 
@@ -657,8 +655,8 @@ ansi_port_declaration ::=
                 word.AddError("illegal identifier");
                 return true;
             }
-            InterfaceInstantiation iInst = InterfaceInstantiation.CreatePortInstance(word,interface_.Name);
-            iInst.ModPortName = modPortName;
+            InterfaceInstance iInst = InterfaceInstance.CreatePortInstance(word,interface_.Name);
+//            iInst.ModPortName = modPortName;
             word.Color(CodeDrawStyle.ColorType.Variable);
             word.MoveNext();
 
@@ -667,6 +665,25 @@ ansi_port_declaration ::=
 
             addPort(word, nameSpace, port);
             addInstantiation(word, nameSpace, iInst);
+
+            return true;
+        }
+        private static bool parseModPort(WordScanner word, NameSpace nameSpace,Interface interface_, ModPort modPort)
+        {
+            if (!General.IsIdentifier(word.Text))
+            {
+                word.AddError("illegal identifier");
+                return true;
+            }
+            ModportInstance iModport = ModportInstance.Create(word.Text,interface_, modPort);
+            word.Color(iModport.ColorType);
+            word.MoveNext();
+
+            Port port = new Port() { DefinitionReference = word.CrateWordReference(), Name = iModport.Name, Project = word.Project };
+            port.DataObject = iModport;
+
+            addPort(word, nameSpace, port);
+            addInstantiation(word, nameSpace, iModport);
 
             return true;
         }
@@ -697,7 +714,7 @@ ansi_port_declaration ::=
         // task / function port
 
         // tf_port_list / tf_port_item style ------------------------------
-        
+
         tf_port_list::= tf_port_item { , tf_port_item }
         tf_port_item         ::= { attribute_instance } [ tf_port_direction ] [ var ] data_type_or_implicit [ port_identifier { variable_dimension } [ = expression ] ]
 

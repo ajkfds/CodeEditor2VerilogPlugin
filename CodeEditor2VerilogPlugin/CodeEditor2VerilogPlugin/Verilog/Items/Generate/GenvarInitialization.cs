@@ -38,7 +38,7 @@ namespace pluginVerilog.Verilog.Items.Generate
             }
             else
             {
-                genvar = Expressions.VariableReference.ParseCreate(word, nameSpace, true);
+                genvar = Expressions.VariableReference.ParseCreate(word, nameSpace, nameSpace, true);
                 if (genvar == null) return false;
             }
 

@@ -83,10 +83,6 @@ namespace pluginVerilog.Verilog
             word.MoveNext();
             if (interface_ != null)
             {
-                if (!interface_.ModPorts.ContainsKey(modport.Name))
-                {
-                    interface_.ModPorts.Add(modport.Name, modport);
-                }
                 if (!interface_.NamedElements.ContainsKey(modport.Name))
                 {
                     interface_.NamedElements.Add(modport.Name, modport);
@@ -216,7 +212,7 @@ namespace pluginVerilog.Verilog
                 {
                     if (direction == Port.DirectionEnum.Input)
                     {
-                        Verilog.DataObjects.Nets.Net net = Verilog.DataObjects.Nets.Net.Create(name,Verilog.DataObjects.Nets.Net.NetTypeEnum.Wire, null);
+                        Net net = Net.Create(name,Net.NetTypeEnum.Wire, null);
 
                         if(intVectorVar != null)
                         {
@@ -230,7 +226,7 @@ namespace pluginVerilog.Verilog
                     else
                     {
                         DataObjects.DataTypes.IntegerVectorType dType = Verilog.DataObjects.DataTypes.IntegerVectorType.Create(Verilog.DataObjects.DataTypes.DataTypeEnum.Logic, false, null);
-                        Verilog.DataObjects.Variables.Logic logic = Verilog.DataObjects.Variables.Logic.Create(name,dType);
+                        Logic logic = Logic.Create(name,dType);
 
                         if (intVectorVar != null)
                         {
@@ -255,7 +251,15 @@ namespace pluginVerilog.Verilog
             {
                 Port port = new Port { Direction = direction, Name = word.Text };
 
-                Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
+                Expressions.Expression? expression;
+                if (direction == Port.DirectionEnum.Output)
+                {
+                    expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace);
+                }
+                else
+                {
+                    expression = Expressions.Expression.ParseCreate(word, nameSpace);
+                }
                 if (expression == null) return false;
 
                 port.Expression = expression;
@@ -284,7 +288,6 @@ namespace pluginVerilog.Verilog
                 Inout,
                 Ref
             }
-
             public string Name { get; internal set; } = "";
             public DirectionEnum Direction { get; internal set; } = DirectionEnum.Undefined;
             public Expressions.Expression Expression { get; internal set; } = null;

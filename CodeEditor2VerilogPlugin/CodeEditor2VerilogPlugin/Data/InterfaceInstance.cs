@@ -24,7 +24,7 @@ namespace pluginVerilog.Data
 
         }
         public static InterfaceInstance? Create(
-            Verilog.DataObjects.InterfaceInstantiation moduleInstantiation,
+            Verilog.DataObjects.InterfaceInstance moduleInstantiation,
             CodeEditor2.Data.Project project
             )
         {
@@ -73,7 +73,7 @@ namespace pluginVerilog.Data
         }
 
         public bool ReplaceBy(
-            Verilog.DataObjects.InterfaceInstantiation moduleInstantiation,
+            Verilog.DataObjects.InterfaceInstance moduleInstantiation,
             CodeEditor2.Data.Project project
             )
         {

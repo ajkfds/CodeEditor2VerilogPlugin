@@ -83,6 +83,12 @@ namespace pluginVerilog.Verilog
             if (itemDict[key] is NameSpace) return true;
             return false;
         }
+        public bool ContainsModPort(string key)
+        {
+            if (!itemDict.ContainsKey(key)) return false;
+            if (itemDict[key] is ModPort) return true;
+            return false;
+        }
         public bool ContainsTask(string key)
         {
             if (!itemDict.ContainsKey(key)) return false;

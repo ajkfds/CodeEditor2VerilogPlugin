@@ -20,6 +20,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 return DataTypeEnum.Struct;
             }
         }
+        public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
 
         public bool Tagged = false; 
         public bool Packed = false;
@@ -144,7 +145,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             {
                 if (!General.IsSimpleIdentifier(word.Text)) return false;
                 string identifier = word.Text;
-                word.Color(CodeDrawStyle.ColorType.Parameter);
+                if (dataType != null) word.Color(dataType.ColorType);
                 word.MoveNext();
 
                 PackedArray? range = null;

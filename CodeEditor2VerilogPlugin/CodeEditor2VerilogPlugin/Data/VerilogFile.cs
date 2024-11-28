@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Avalonia.Threading;
+using CodeEditor2;
 using CodeEditor2.CodeEditor;
 using CodeEditor2.CodeEditor.CodeComplete;
 using CodeEditor2.CodeEditor.Parser;
@@ -13,6 +14,7 @@ using CodeEditor2.CodeEditor.PopupHint;
 using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
 using CodeEditor2.Tools;
+using DynamicData;
 using pluginVerilog.CodeEditor;
 using pluginVerilog.Verilog.BuildingBlocks;
 using Splat;
@@ -137,15 +139,14 @@ namespace pluginVerilog.Data
 
 
             updateIncludeFiles(VerilogParsedDocument, Items);
-            //foreach(var includeFile in VerilogParsedDocument.IncludeFiles.Values)
-            //{
-            //    if (!headerItems.ContainsKey(includeFile.ID)) continue;
-            //    Data.VerilogHeaderInstance item = headerItems[includeFile.ID];
-            //    item.CodeDocument.CopyColorMarkFrom(includeFile.VerilogParsedDocument.CodeDocument);
-            //}
 
             Update(); // eliminated here
             System.Diagnostics.Debug.Print("### Verilog File Parsed "+ID);
+
+            // update navigate menu icons
+            // update current node to update include file icon
+            CodeEditor2.NavigatePanel.NavigatePanelNode node = CodeEditor2.Controller.NavigatePanel.GetSelectedNode();
+            if (node != null) node.UpdateVisual();
         }
 
         internal static void updateIncludeFiles(Verilog.ParsedDocument parsedDocument,ItemList items)
@@ -159,19 +160,30 @@ namespace pluginVerilog.Data
                 headerItems.Add(item.ID, vh);
             }
 
+            // get file selected in text editor
+            CodeEditor2.NavigatePanel.NavigatePanelNode? node = CodeEditor2.Controller.NavigatePanel.GetSelectedNode();
+            CodeEditor2.Data.Item? currentItem = node?.Item;
+            CodeEditor2.Data.ITextFile? currentTextFile = Controller.CodeEditor.GetTextFile();
+
+
             foreach (var includeFile in parsedDocument.IncludeFiles.Values)
             {
                 if (!headerItems.ContainsKey(includeFile.ID)) continue;
                 Data.VerilogHeaderInstance item = headerItems[includeFile.ID];
                 item.CodeDocument.CopyColorMarkFrom(includeFile.VerilogParsedDocument.CodeDocument);
+
+                // If this include file is selected in the editor, update the editor display.
+                if (item == currentItem && currentTextFile != null)
+                {
+                    Controller.CodeEditor.Refresh();
+                    Controller.MessageView.Update(includeFile.VerilogParsedDocument);
+                }
+
+                includeFile.NavigatePanelNode.UpdateVisual();
+
+                // update nested include file
                 updateIncludeFiles(includeFile.VerilogParsedDocument, item.Items);
             }
-
-            //foreach (var item in headerItems.Values)
-            //{
-            //    updateIncludeFiles(item.VerilogParsedDocument, item.Items);
-            //    item.AcceptParsedDocument(item.VerilogParsedDocument);
-            //}
         }
 
 

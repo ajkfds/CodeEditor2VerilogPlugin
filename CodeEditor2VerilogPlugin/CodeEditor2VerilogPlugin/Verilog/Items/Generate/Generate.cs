@@ -50,7 +50,7 @@ namespace pluginVerilog.Verilog
         private static bool parseGenvarAssignment(WordScanner word, NameSpace nameSpace)
         {
             //    genvar_assignment::= genvar_identifier = constant_expression
-            Expressions.VariableReference genvar = Expressions.VariableReference.ParseCreate(word, nameSpace, true);
+            Expressions.VariableReference genvar = Expressions.VariableReference.ParseCreate(word, nameSpace, nameSpace, true);
             if (genvar == null) return false;
             if (!(genvar.Variable is DataObjects.Variables.Genvar))
             {

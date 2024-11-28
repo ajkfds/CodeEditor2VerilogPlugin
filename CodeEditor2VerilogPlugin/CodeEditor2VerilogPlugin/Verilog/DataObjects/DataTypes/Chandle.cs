@@ -16,6 +16,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 return DataTypeEnum.Chandle;
             }
         }
+        public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
         public static Chandle ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             Chandle dType = new Chandle();

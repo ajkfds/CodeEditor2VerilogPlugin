@@ -238,7 +238,29 @@ namespace pluginVerilog.Data
         // update sub-items from ParsedDocument
         public override void Update()
         {
-            VerilogCommon.Updater.Update(this);
+            if(Parent == null)
+            {
+                VerilogCommon.Updater.Update(this);
+            }
+            CodeEditor2.Data.Item? item = Parent;
+            while (true)
+            {
+                if (item == null) break;
+                if(item is VerilogHeaderFile)
+                {
+                    item = item.Parent;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            if( item != null && item is VerilogFile)
+            {
+                VerilogFile vFile = (VerilogFile)item;
+                VerilogCommon.Updater.Update(vFile);
+            }
         }
 
         // Auto Complete Handler

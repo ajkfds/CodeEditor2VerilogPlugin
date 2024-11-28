@@ -67,7 +67,7 @@ namespace pluginVerilog.Verilog.Items
                     return Generate.IfGenerateConstruct.Parse(word, nameSpace);
             }
 
-            if (InterfaceInstantiation.Parse(word, nameSpace)) return true;
+            if (InterfaceInstance.Parse(word, nameSpace)) return true;
 
             return false;
         }

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Drawing.Text;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -109,7 +110,7 @@ namespace pluginVerilog.Verilog.Expressions
         {
             return parseCreate(word, nameSpace, true);
         }
-        private static Primary? parseCreate(WordScanner word, NameSpace nameSpace,bool lValue)
+        private new static Primary? parseCreate(WordScanner word, NameSpace nameSpace,bool lValue)
         {
             //if (word.Text == "srif") System.Diagnostics.Debugger.Break();
 
@@ -129,286 +130,368 @@ namespace pluginVerilog.Verilog.Expressions
                 case WordPointer.WordTypeEnum.String:
                     return ConstantString.ParseCreate(word);
                 case WordPointer.WordTypeEnum.Text:
+                    if (word.Text.StartsWith("$") && word.RootParsedDocument.ProjectProperty.SystemFunctions.Keys.Contains(word.Text))
                     {
-                        var variable = parseVariable(word, nameSpace, lValue);
-                        if (variable != null) return variable;
-
-                        var parameter = ParameterReference.ParseCreate(word, nameSpace);
-                        if (parameter != null) return parameter;
-
-                        if (word.Text.StartsWith("$") && word.RootParsedDocument.ProjectProperty.SystemFunctions.Keys.Contains(word.Text))
-                        {
-                            return FunctionCall.ParseCreate(word, nameSpace);
-                        }
-
-                        if (word.NextText == "(" & !lValue)
-                        {
-                            return FunctionCall.ParseCreate(word, nameSpace);
-                        }
-
-                        if (word.NextText == "'") // cast
-                        {
-                            return Cast.ParseCreate(word, nameSpace);
-                        }
-
-                        {
-                            Primary? primary = parseHierarchyVariable(word, nameSpace, lValue);
-                            if (primary != null) return primary; 
-                        }
-                        break;
+                        return FunctionCall.ParseCreate(word, nameSpace);
                     }
+                    if (word.NextText == "'") // cast
+                    {
+                        return Cast.ParseCreate(word, nameSpace);
+                    }
+
+                    return searchNameSpace(word, nameSpace, lValue);
             }
             return null;
         }
-
-        public static Primary? parseHierarchyVariable(WordScanner word, NameSpace nameSpace, bool lValue)
+        public static Primary? searchNameSpace(WordScanner word, NameSpace nameSpace, bool lValue)
         {
-            NameSpace space = nameSpace;
-            Primary? primary = null;
-            parseHierarchyNameSpace(word, nameSpace, ref space, ref primary, lValue);
-
-            if (primary == null || space == null)// || space == nameSpace || space is Class)
+            if (nameSpace.NamedElements.ContainsKey(word.Text)) return parseText(word, nameSpace, lValue);
+            if (nameSpace.Parent == null) return null;
+            return searchNameSpace(word, nameSpace.Parent, lValue);
+        }
+        public static Primary? parseText(WordScanner word, NameSpace nameSpace, bool lValue)
+        {
+            if (!nameSpace.NamedElements.ContainsKey(word.Text))
             {
-                if (word.Eof) return null;
-                if (General.ListOfKeywords.Contains(word.Text)) return null;
-
-                if (General.IsIdentifier(word.Text) && !nameSpace.NamedElements.ContainsKey(word.Text) && !word.Prototype)
-                {   // undefined net
-                    if (!word.CellDefine) word.AddWarning("undefined");
-                    Net net = new DataObjects.Nets.Net() { Name = word.Text };
-                    net.Signed = false;
-                    if (word.Active)
-                    {
-                        nameSpace.NamedElements.Add(net.Name, net);
-                    }
-                    var variable = VariableReference.ParseCreate(word, nameSpace, lValue);
-
-                    if (variable != null)
-                    {
-                        return variable;
-                    }
-
-                }
+                word.AddError("illegal primitive");
+                return null;
             }
-            else if (primary is TaskReference)
+
+            INamedElement element = nameSpace.NamedElements[word.Text];
+            if (element is DataObject)
             {
-                return primary;
+                return parseDataObject(word, nameSpace, nameSpace, lValue);
             }
-            else if (space != null)
+
+            // Since Task and Function are also namespaces, they need to be processed before namespaces.
+
+            // task reference : for left side only
+            if (lValue && element is Task)
             {
-                if (space.NamedElements.ContainsKey(word.Text))
-                {
-                    return VariableReference.ParseCreate(word, space, lValue);
-                }
-                if (lValue && space.BuildingBlock.NamedElements.ContainsKey(word.Text) && space.BuildingBlock.NamedElements[word.Text] is Task)
-                {
-                    return TaskReference.ParseCreate(word, space);
-                }
-                return primary;
+                return TaskReference.ParseCreate(word, nameSpace.BuildingBlock, nameSpace);
             }
+
+            // function call : for right side only
+            if (!lValue && element is Function)
+            {
+                return FunctionCall.ParseCreate(word, nameSpace.BuildingBlock, nameSpace);
+            }
+
+            if (element is NameSpace)
+            {
+                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.MoveNext();
+                NameSpace newNameSpace = (NameSpace)element;
+                return parseText(word, newNameSpace, lValue);
+            }
+
+            if(element is DataObjects.Constants.Constants)
+            {
+                return ParameterReference.ParseCreate(word, nameSpace);
+            }
+
+
+            if(element is IBuildingBlockInstantiation)
+            {
+                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.MoveNext();
+                IBuildingBlockInstantiation buildingBlockInstantiation = (IBuildingBlockInstantiation)element;
+                BuildingBlock? buildingBlock = buildingBlockInstantiation.GetInstancedBuildingBlock();
+                if (buildingBlock == null) return null;
+                return parseText(word, buildingBlock, lValue);
+            }
+
             return null;
         }
 
-        public static Primary? parseVariable(WordScanner word, NameSpace nameSpace, bool lValue)
+        public static Primary? parseDataObject(WordScanner word, NameSpace nameSpace, INamedElement owner, bool lValue)
         {
-            var variable = VariableReference.ParseCreate(word, nameSpace, lValue);
+            var variable = VariableReference.ParseCreate(word, nameSpace, owner, lValue);
             if (variable == null) return null;
+            if (variable.Variable == null) return null;
 
-            // parse object member
-            if (variable.Variable is DataObjects.Variables.Object && word.Text == ".")
+            if (word.Text != ".") return variable;
+            word.MoveNext();
+
+            if (!variable.Variable.NamedElements.ContainsKey(word.Text))
             {
-                word.MoveNext();
-                DataObjects.Variables.Object? obj = variable.Variable as DataObjects.Variables.Object;
-                if (obj != null)
-                {
-                    return Primary.parseCreate(word, obj.Class, lValue);
-                }
-                else throw new Exception();
+                word.AddError("illegal primitive");
+                return null;
+            }
+            INamedElement? element = variable.Variable.NamedElements[word.Text];
+
+            // Since ModPort are also namespaces, they need to be processed before namespaces.
+            if (element is DataObject)
+            {
+                return parseDataObject(word, nameSpace, variable.Variable, lValue);
             }
 
-            // parse interface
-            if (variable.Variable is DataObjects.InterfaceInstantiation && word.Text == ".")
+            // Since Task and Function are also namespaces, they need to be processed before namespaces.
+
+            // task reference : for left side only
+            if (lValue && element is Task)
             {
-                word.MoveNext();
-                DataObjects.InterfaceInstantiation? interfaceInstantiation = variable.Variable as DataObjects.InterfaceInstantiation;
-                if (interfaceInstantiation == null) throw new Exception();
-                Interface? interface_ = nameSpace.ProjectProperty.GetBuildingBlock(interfaceInstantiation.SourceName) as Interface;
-                if (interface_ != null)
-                {
-                    if (interface_.ModPorts.ContainsKey(word.Text))
-                    {
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
-                        //                        interfaceInstantiation.ModPortName = word.Text;
-                        string modPortName = word.Text;
-                        ModPort modPort = interface_.ModPorts[modPortName];
-                        word.MoveNext();
-                        if (word.Text == ".")
-                        {
-                            word.MoveNext();
-                            Primary? primary = Primary.parseCreate(word, modPort, lValue);
-                            VariableReference? vRef = primary as VariableReference;
-                            if(vRef != null)
-                            {
-                                vRef.NameSpaceText = interface_.Name + "." + modPort.Name + ".";
-                            }
-                            return primary;
-                        }
-                    }
-                    else
-                    {
-                        return Primary.parseCreate(word, interface_, lValue);
-                    }
-                }
+                return TaskReference.ParseCreate(word, nameSpace.BuildingBlock, nameSpace);
             }
 
-            return variable;
+            // function call : for right side only
+            if (!lValue && element is Function)
+            {
+                return FunctionCall.ParseCreate(word, nameSpace.BuildingBlock, nameSpace);
+            }
+
+            word.AddError("illegal primitive");
+            return null;
         }
 
-        public static void parseHierarchyNameSpace(WordScanner word, NameSpace rootNameSpace, ref NameSpace nameSpace,ref Primary? primary,bool assigned)
-        {
-            if(parseKnownHierarchyNameSpace(word,rootNameSpace,ref nameSpace, ref primary, assigned))
-            {
-                // parsed
-                return;
-            }else if (word.NextText == "(")
-            {
-                // task reference : for left side only
-                // function call : for right side only
-                if (assigned)
-                { // left value
-                    TaskReference taskReference = TaskReference.ParseCreate(word, rootNameSpace, nameSpace);
-                    primary = taskReference;
-                    return;
-                }
-                else
-                {
-                    primary = FunctionCall.ParseCreate(word,rootNameSpace, nameSpace);
-                }
-            }
-            else if (nameSpace.NamedElements.ContainsKey(word.Text) && nameSpace.NamedElements[word.Text] is NameSpace)
-            {
-                nameSpace = nameSpace.NamedElements[word.Text] as NameSpace;
-                if(assigned && word.NextText == ";" && nameSpace is Task)
-                {
-                    TaskReference taskReference = TaskReference.ParseCreate(word, rootNameSpace, nameSpace);
-                    primary = taskReference;
-                    return;
-                }
+        //public static Primary? parseHierarchyVariable(WordScanner word, NameSpace nameSpace, bool lValue)
+        //{
+        //    NameSpace space = nameSpace;
+        //    Primary? primary = null;
+        //    parseHierarchyNameSpace(word, nameSpace, ref space, ref primary, lValue);
 
-                word.Color(CodeDrawStyle.ColorType.Identifier);
-                NameSpaceReference nameSpaceReference = new NameSpaceReference(nameSpace);
-                primary = nameSpaceReference;
-                primary.Reference = word.GetReference();
-                word.MoveNext();
+        //    if (primary == null || space == null)// || space == nameSpace || space is Class)
+        //    {
+        //        if (word.Eof) return null;
+        //        if (General.ListOfKeywords.Contains(word.Text)) return null;
+
+        //        if (General.IsIdentifier(word.Text) && !nameSpace.NamedElements.ContainsKey(word.Text) && !word.Prototype)
+        //        {   // undefined net
+        //            if (!word.CellDefine) word.AddWarning("undefined");
+        //            Net net = new DataObjects.Nets.Net() { Name = word.Text };
+        //            net.Signed = false;
+        //            if (word.Active)
+        //            {
+        //                nameSpace.NamedElements.Add(net.Name, net);
+        //            }
+        //            var variable = VariableReference.ParseCreate(word, nameSpace, lValue);
+
+        //            if (variable != null)
+        //            {
+        //                return variable;
+        //            }
+
+        //        }
+        //    }
+        //    else if (primary is TaskReference)
+        //    {
+        //        return primary;
+        //    }
+        //    else if (space != null)
+        //    {
+        //        if (space.NamedElements.ContainsKey(word.Text))
+        //        {
+        //            return VariableReference.ParseCreate(word, space, lValue);
+        //        }
+        //        if (lValue && space.BuildingBlock.NamedElements.ContainsKey(word.Text) && space.BuildingBlock.NamedElements[word.Text] is Task)
+        //        {
+        //            return TaskReference.ParseCreate(word, space);
+        //        }
+        //        return primary;
+        //    }
+        //    return null;
+        //}
+
+        //public static Primary? parseVariable(WordScanner word, NameSpace nameSpace, bool lValue)
+        //{
+        //    var variable = VariableReference.ParseCreate(word, nameSpace, lValue);
+        //    if (variable == null) return null;
+
+        //    // parse object member
+        //    if (variable.Variable is DataObjects.Variables.Object && word.Text == ".")
+        //    {
+        //        word.MoveNext();
+        //        DataObjects.Variables.Object? obj = variable.Variable as DataObjects.Variables.Object;
+        //        if (obj != null)
+        //        {
+        //            return Primary.parseCreate(word, obj.Class, lValue);
+        //        }
+        //        else throw new Exception();
+        //    }
+
+        //    // parse interface
+        //    if (variable.Variable is DataObjects.InterfaceInstantiation && word.Text == ".")
+        //    {
+        //        word.MoveNext();
+        //        DataObjects.InterfaceInstantiation? interfaceInstantiation = variable.Variable as DataObjects.InterfaceInstantiation;
+        //        if (interfaceInstantiation == null) throw new Exception();
+        //        Interface? interface_ = nameSpace.ProjectProperty.GetBuildingBlock(interfaceInstantiation.SourceName) as Interface;
+        //        if (interface_ != null)
+        //        {
+        //            if (interface_.ModPorts.ContainsKey(word.Text))
+        //            {
+        //                word.Color(CodeDrawStyle.ColorType.Keyword);
+        //                //                        interfaceInstantiation.ModPortName = word.Text;
+        //                string modPortName = word.Text;
+        //                ModPort modPort = interface_.ModPorts[modPortName];
+        //                word.MoveNext();
+        //                if (word.Text == ".")
+        //                {
+        //                    word.MoveNext();
+        //                    Primary? primary = Primary.parseCreate(word, modPort, lValue);
+        //                    VariableReference? vRef = primary as VariableReference;
+        //                    if(vRef != null)
+        //                    {
+        //                        vRef.NameSpaceText = interface_.Name + "." + modPort.Name + ".";
+        //                    }
+        //                    return primary;
+        //                }
+        //            }
+        //            else
+        //            {
+        //                return Primary.parseCreate(word, interface_, lValue);
+        //            }
+        //        }
+        //    }
+
+        //    return variable;
+        //}
+
+        //public static void parseHierarchyNameSpace(WordScanner word, NameSpace rootNameSpace, ref NameSpace nameSpace,ref Primary? primary,bool assigned)
+        //{
+        //    if(parseKnownHierarchyNameSpace(word,rootNameSpace,ref nameSpace, ref primary, assigned))
+        //    {
+        //        // parsed
+        //        return;
+        //    }else if (word.NextText == "(")
+        //    {
+        //        // task reference : for left side only
+        //        // function call : for right side only
+        //        if (assigned)
+        //        { // left value
+        //            TaskReference taskReference = TaskReference.ParseCreate(word, rootNameSpace, nameSpace);
+        //            primary = taskReference;
+        //            return;
+        //        }
+        //        else
+        //        {
+        //            primary = FunctionCall.ParseCreate(word,rootNameSpace, nameSpace);
+        //        }
+        //    }
+        //    else if (nameSpace.NamedElements.ContainsKey(word.Text) && nameSpace.NamedElements[word.Text] is NameSpace)
+        //    {
+        //        nameSpace = nameSpace.NamedElements[word.Text] as NameSpace;
+        //        if(assigned && word.NextText == ";" && nameSpace is Task)
+        //        {
+        //            TaskReference taskReference = TaskReference.ParseCreate(word, rootNameSpace, nameSpace);
+        //            primary = taskReference;
+        //            return;
+        //        }
+
+        //        word.Color(CodeDrawStyle.ColorType.Identifier);
+        //        NameSpaceReference nameSpaceReference = new NameSpaceReference(nameSpace);
+        //        primary = nameSpaceReference;
+        //        primary.Reference = word.GetReference();
+        //        word.MoveNext();
 
 
-                if (word.Text == ".")
-                {
-                    word.MoveNext();    // .
-                    parseHierarchyNameSpace(word, rootNameSpace, ref nameSpace, ref primary,assigned);
-                }
-                else
-                {
-                    if(nameSpace != null && rootNameSpace != nameSpace)
-                    {
-                        Primary newPrimary = new NameSpaceReference(nameSpace);
-                        newPrimary.Reference = primary.Reference;
-                        primary = newPrimary;
-                    }
-                    return;
-                }
-            }
-            else
-            {
-                var variable = VariableReference.ParseCreate(word, nameSpace,assigned);
-                if (variable != null)
-                {
-                    primary = variable;
-                    return;
-                }
+        //        if (word.Text == ".")
+        //        {
+        //            word.MoveNext();    // .
+        //            parseHierarchyNameSpace(word, rootNameSpace, ref nameSpace, ref primary,assigned);
+        //        }
+        //        else
+        //        {
+        //            if(nameSpace != null && rootNameSpace != nameSpace)
+        //            {
+        //                Primary newPrimary = new NameSpaceReference(nameSpace);
+        //                newPrimary.Reference = primary.Reference;
+        //                primary = newPrimary;
+        //            }
+        //            return;
+        //        }
+        //    }
+        //    else
+        //    {
+        //        var variable = VariableReference.ParseCreate(word, nameSpace,assigned);
+        //        if (variable != null)
+        //        {
+        //            primary = variable;
+        //            return;
+        //        }
 
-                var parameter = ParameterReference.ParseCreate(word, nameSpace);
-                if (parameter != null)
-                {
-                    primary = parameter;
-                    return;
-                }
+        //        var parameter = ParameterReference.ParseCreate(word, nameSpace);
+        //        if (parameter != null)
+        //        {
+        //            primary = parameter;
+        //            return;
+        //        }
 
-                return;
-            }
-        }
+        //        return;
+        //    }
+        //}
 
-        public static bool parseKnownHierarchyNameSpace(WordScanner word, NameSpace rootNameSpace, ref NameSpace nameSpace, ref Primary? primary, bool assigned)
-        {
-            BuildingBlock buildingBlock = nameSpace.BuildingBlock;
-            if (!buildingBlock.NamedElements.ContainsIBuldingBlockInstantiation(word.Text)) return false;
+        //public static bool parseKnownHierarchyNameSpace(WordScanner word, NameSpace rootNameSpace, ref NameSpace nameSpace, ref Primary? primary, bool assigned)
+        //{
+        //    BuildingBlock buildingBlock = nameSpace.BuildingBlock;
+        //    if (!buildingBlock.NamedElements.ContainsIBuldingBlockInstantiation(word.Text)) return false;
 
-            IBuildingBlockInstantiation instantiation = (IBuildingBlockInstantiation)buildingBlock.NamedElements[word.Text];
-            if (instantiation is ModuleInstantiation)
-            {
-                ModuleInstantiation? mInst = instantiation as ModuleInstantiation;
-                if (mInst == null) throw new Exception();
+        //    IBuildingBlockInstantiation instantiation = (IBuildingBlockInstantiation)buildingBlock.NamedElements[word.Text];
+        //    if (instantiation is ModuleInstantiation)
+        //    {
+        //        ModuleInstantiation? mInst = instantiation as ModuleInstantiation;
+        //        if (mInst == null) throw new Exception();
 
-                ModuleInstanceReference moduleInstanceReference = new ModuleInstanceReference(mInst);
-                primary = moduleInstanceReference;
-                nameSpace = mInst.GetInstancedBuildingBlock();
-                word.Color(CodeDrawStyle.ColorType.Identifier);
-                word.MoveNext();
+        //        ModuleInstanceReference moduleInstanceReference = new ModuleInstanceReference(mInst);
+        //        primary = moduleInstanceReference;
+        //        nameSpace = mInst.GetInstancedBuildingBlock();
+        //        word.Color(CodeDrawStyle.ColorType.Identifier);
+        //        word.MoveNext();
 
-                if (nameSpace == null) return true;
+        //        if (nameSpace == null) return true;
 
-                if (word.Text == ".")
-                {
-                    word.MoveNext();    // .
-                    parseHierarchyNameSpace(word, rootNameSpace, ref nameSpace, ref primary, assigned);
-                    return true;
-                }
-                else
-                {
-                    return true;
-                }
-            }
-            else if(instantiation is InterfaceInstantiation)
-            {
-                InterfaceInstantiation? iInst = instantiation as InterfaceInstantiation;
-                if (iInst == null) throw new Exception();
-                InterfaceReference interfaceInstanceReference = new InterfaceReference(iInst);
-                interfaceInstanceReference.Reference = word.GetReference();
+        //        if (word.Text == ".")
+        //        {
+        //            word.MoveNext();    // .
+        //            parseHierarchyNameSpace(word, rootNameSpace, ref nameSpace, ref primary, assigned);
+        //            return true;
+        //        }
+        //        else
+        //        {
+        //            return true;
+        //        }
+        //    }
+        //    else if(instantiation is InterfaceInstantiation)
+        //    {
+        //        InterfaceInstantiation? iInst = instantiation as InterfaceInstantiation;
+        //        if (iInst == null) throw new Exception();
+        //        InterfaceReference interfaceInstanceReference = new InterfaceReference(iInst);
+        //        interfaceInstanceReference.Reference = word.GetReference();
 
-                primary = interfaceInstanceReference;
-                BuildingBlock bBlock = iInst.GetInstancedBuildingBlock();
-                nameSpace = bBlock;
+        //        primary = interfaceInstanceReference;
+        //        BuildingBlock bBlock = iInst.GetInstancedBuildingBlock();
+        //        nameSpace = bBlock;
 
-                if (iInst.ModPortName != null)
-                {
-                    Interface? interface_ = bBlock as Interface;
-                    if(interface_ != null && interface_.ModPorts.ContainsKey(iInst.ModPortName))
-                    {
-                        nameSpace = interface_.ModPorts[iInst.ModPortName];
-                    }
-                }
+        //        if (iInst.ModPortName != null)
+        //        {
+        //            Interface? interface_ = bBlock as Interface;
+        //            if(interface_ != null && interface_.ModPorts.ContainsKey(iInst.ModPortName))
+        //            {
+        //                nameSpace = interface_.ModPorts[iInst.ModPortName];
+        //            }
+        //        }
 
-                word.Color(CodeDrawStyle.ColorType.Variable);
-                word.MoveNext();
-                if (nameSpace == null) return true;
+        //        word.Color(CodeDrawStyle.ColorType.Variable);
+        //        word.MoveNext();
+        //        if (nameSpace == null) return true;
 
-                if (word.Text == ".")
-                {
-                    word.MoveNext();    // .
-                    parseHierarchyNameSpace(word, rootNameSpace, ref nameSpace, ref primary, assigned);
-                    return true;
-                }
-                else
-                {
-                    return true;
-                }
-            }
-            else
-            {
-                return false;
-            }
+        //        if (word.Text == ".")
+        //        {
+        //            word.MoveNext();    // .
+        //            parseHierarchyNameSpace(word, rootNameSpace, ref nameSpace, ref primary, assigned);
+        //            return true;
+        //        }
+        //        else
+        //        {
+        //            return true;
+        //        }
+        //    }
+        //    else
+        //    {
+        //        return false;
+        //    }
 
-        }
+        //}
 
 
 
@@ -425,7 +508,7 @@ namespace pluginVerilog.Verilog.Expressions
                     return null;
                 case WordPointer.WordTypeEnum.Text:
                     {
-                        var variable = VariableReference.ParseCreate(word, nameSpace,lValue);
+                        var variable = VariableReference.ParseCreate(word, nameSpace, nameSpace, lValue);
                         if (variable != null) return variable;
 
                         var parameter = ParameterReference.ParseCreate(word, nameSpace);

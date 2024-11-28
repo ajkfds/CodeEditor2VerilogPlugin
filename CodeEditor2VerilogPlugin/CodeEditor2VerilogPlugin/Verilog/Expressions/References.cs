@@ -38,7 +38,7 @@ namespace pluginVerilog.Verilog.Expressions
         {
             return ParseCreate(word, nameSpace, nameSpace);
         }
-        public static TaskReference ParseCreate(WordScanner word, NameSpace nameSpace,NameSpace taskNameSpace)
+        public static TaskReference ParseCreate(WordScanner word, NameSpace nameSpace, NameSpace taskNameSpace)
         {
             TaskReference ret = new TaskReference();
             ret.TaskName = word.Text;

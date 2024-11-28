@@ -41,6 +41,7 @@ namespace pluginVerilog.Verilog.DataObjects
         //              + pos_covergroup
         //              + type_reference
         // 
+        public virtual CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Normal; } }
 
         public NamedElements NamedElements { get; } = new NamedElements();
         public static DataObject Create(string name,DataTypes.IDataType dataType)

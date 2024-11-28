@@ -509,16 +509,22 @@ namespace pluginVerilog.Verilog
                 IBuildingBlockInstantiation instantiation = (IBuildingBlockInstantiation)buildingBlock.NamedElements[hier[0]];
                 NameSpace? bBlock = ProjectProperty.GetInstancedBuildingBlock(instantiation);
 
-                if (instantiation is InterfaceInstantiation)
+                if (instantiation is InterfaceInstance)
                 {
-                    InterfaceInstantiation? interfaceInstantiation = instantiation as InterfaceInstantiation;
+                    InterfaceInstance? interfaceInstantiation = instantiation as InterfaceInstance;
                     if (interfaceInstantiation == null) throw new Exception();
-                    if(interfaceInstantiation.ModPortName != null)
-                    {
-                        Interface? instance = bBlock as Interface;
-                        if (instance == null) throw new Exception();
-                        if (instance.ModPorts.ContainsKey(interfaceInstantiation.ModPortName)) bBlock = instance.ModPorts[interfaceInstantiation.ModPortName];
-                    }
+                    //if(interfaceInstantiation.ModPortName != null)
+                    //{
+                    //    Interface? instance = bBlock as Interface;
+                    //    if (instance == null) throw new Exception();
+                    //    if (
+                    //        instance.NamedElements.ContainsKey(interfaceInstantiation.ModPortName) &&
+                    //        instance.NamedElements[interfaceInstantiation.ModPortName] is ModPort
+                    //        )
+                    //    {
+                    //        bBlock = (ModPort)instance.NamedElements[interfaceInstantiation.ModPortName];
+                    //    }
+                    //}
                 }
 
                 hier.RemoveAt(0);
@@ -536,7 +542,142 @@ namespace pluginVerilog.Verilog
         public List<AutocompleteItem>? GetAutoCompleteItems(List<string> hierWords,int index,int line,CodeEditor.CodeDocument document,string candidateWord)
         {
             if (hierWords.Count == 0 && candidateWord == "") return null;
+            if (HintCount == 0) return getFlatAutoCompleteItems(index, line, document, candidateWord);
 
+            List<AutocompleteItem>? items = null;
+
+            if (Root == null || Root.BuldingBlocks == null)
+            {
+                items = VerilogAutoCompleteItems.ToList();
+                return items;
+            }
+
+            // get reference of current position
+            IndexReference iref = IndexReference.Create(this.IndexReference, index);
+
+            // get current buldingBlock
+            NameSpace? space = null;
+            foreach (BuildingBlock buildingBlock in Root.BuldingBlocks.Values)
+            {
+                if (iref.IsSmallerThan(buildingBlock.BeginIndexReference)) continue;
+                if (buildingBlock.LastIndexReference == null) break;
+                if (iref.IsGreaterThan(buildingBlock.LastIndexReference)) continue;
+                space = buildingBlock.GetHierarchyNameSpace(iref);
+                break;
+            }
+
+            // parse macro in hierarchy words
+            for (int i = 0; i < hierWords.Count; i++)
+            {
+                if (!hierWords[i].StartsWith("`")) continue;
+
+                string macroText = hierWords[i].Substring(1);
+                if (!Macros.ContainsKey(macroText)) continue;
+                Macro macro = Macros[macroText];
+                if (macro.MacroText.Contains(' ')) continue;
+                if (macro.MacroText.Contains('\t')) continue;
+
+                string[] swapTexts = macro.MacroText.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+                hierWords.RemoveAt(i);
+                for (int j = swapTexts.Length - 1; j >= 0; j--)
+                {
+                    hierWords.Insert(i, swapTexts[j]);
+                }
+            }
+
+
+            // system task & functions
+            // return system task and function if the word starts with "$"
+            if (candidateWord.StartsWith("$"))
+            {
+                items = new List<AutocompleteItem>();
+                foreach (string key in ProjectProperty.SystemFunctions.Keys)
+                {
+                    items.Add(
+                        new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
+                            key,
+                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
+                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
+                            )
+                    );
+                }
+                foreach (string key in ProjectProperty.SystemTaskParsers.Keys)
+                {
+                    items.Add(
+                        new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
+                            key,
+                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
+                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
+                            )
+                    );
+                }
+                return items;
+            }
+
+            items = new List<AutocompleteItem>();
+
+
+            // GetDataObject
+
+
+            // get nameSpace autocomplete item
+            INamedElement? namedElement = getSearchNameSpace(space, hierWords);
+            if(namedElement != null)
+            {
+                foreach(INamedElement element in namedElement.NamedElements.Values)
+                {
+                    items.Add(
+                        new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
+                            element.Name,
+                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
+                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
+                            )
+                    );
+                }
+            }
+
+            return items;
+        }
+
+        private INamedElement? getSearchElement(NameSpace nameSpace, List<string> hier)
+        {
+            if (nameSpace == null) return null;
+            if (hier.Count == 0) return nameSpace;
+
+            if (nameSpace.NamedElements.ContainsKey(hier[0]))
+            {
+                INamedElement element = nameSpace.NamedElements[hier[0]];
+                hier.RemoveAt(0);
+                getSearchSubElement(element, hier);
+            }
+
+            while (nameSpace.Parent != null)
+            {
+                nameSpace = nameSpace.Parent;
+                INamedElement element = nameSpace.NamedElements[hier[0]];
+                hier.RemoveAt(0);
+                getSearchSubElement(element, hier);
+            }
+            return nameSpace;
+        }
+
+        private INamedElement? getSearchSubElement(INamedElement element, List<string> hier)
+        {
+            if (element == null) return null;
+            if (hier.Count == 0) return element;
+
+            if (element.NamedElements.ContainsKey(hier[0]))
+            {
+                INamedElement subElement = element.NamedElements[hier[0]];
+                hier.RemoveAt(0);
+                getSearchSubElement(element, hier);
+            }
+            return element;
+        }
+
+
+        private List<AutocompleteItem>? getFlatAutoCompleteItems(int index, int line, CodeEditor.CodeDocument document, string candidateWord)
+        {
             List<AutocompleteItem>? items = null;
 
             if (Root == null || Root.BuldingBlocks == null)
@@ -597,21 +738,13 @@ namespace pluginVerilog.Verilog
                 return items;
             }
 
-            // if no hierarchy, add standerd compelete items
-            if (hierWords.Count == 0)
-            {
-                items = VerilogAutoCompleteItems.ToList();
-            }
-            else
-            {
-                items = new List<AutocompleteItem>();
-            }
+            // add standerd compelete items
+            items = VerilogAutoCompleteItems.ToList();
 
             // if no hierarchy, add root level object name list
-            if (hierWords.Count == 0)
             {
                 List<string> objectList = ProjectProperty.GetObjectsNameList();
-                foreach(var name in objectList) 
+                foreach (var name in objectList)
                 {
                     items.Add(
                         new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
@@ -621,35 +754,6 @@ namespace pluginVerilog.Verilog
                             )
                     );
                 }
-            }
-
-            // parse macro in hierarchy words
-            for (int i = 0; i < hierWords.Count;i++)
-            {
-                if (!hierWords[i].StartsWith("`")) continue;
-                
-                string macroText = hierWords[i].Substring(1);
-                if (!Macros.ContainsKey(macroText)) continue;
-                Macro macro = Macros[macroText];
-                if (macro.MacroText.Contains(' ')) continue;
-                if (macro.MacroText.Contains('\t')) continue;
-
-                string[] swapTexts = macro.MacroText.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
-                hierWords.RemoveAt(i);
-                for(int j = swapTexts.Length - 1; j >= 0; j--)
-                {
-                    hierWords.Insert(i, swapTexts[j]);
-                }
-            }
-
-            // GetDataObject
-
-
-            // get nameSpace autocomplete item
-            NameSpace? nameSpace = getSearchNameSpace(space, hierWords);
-            if (nameSpace != null)
-            {
-                nameSpace.AppendAutoCompleteItem(items);
             }
 
             return items;

@@ -19,7 +19,8 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
         public Expressions.Expression Expression;
         public WordReference DefinitionRefrecnce { get; set; }
 
-        
+        public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Parameter; } }
+
         public enum ConstantTypeEnum
         {
             parameter,

@@ -15,6 +15,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 return DataTypeEnum.Realtime;
             }
         }
+        public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
 
         public static RealTimeType ParseCreate(WordScanner word, NameSpace nameSpace)
         {

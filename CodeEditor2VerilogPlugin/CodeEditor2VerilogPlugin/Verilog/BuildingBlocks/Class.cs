@@ -18,6 +18,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
 
         }
+        public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
         public bool IsVector { get { return false; } }
 
         // IModuleOrInterfaceOrProgram

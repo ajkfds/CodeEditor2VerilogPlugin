@@ -15,6 +15,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 return DataTypeEnum.Shortreal;
             }
         }
+        public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
         public static ShortRealType ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             ShortRealType dType = new ShortRealType();

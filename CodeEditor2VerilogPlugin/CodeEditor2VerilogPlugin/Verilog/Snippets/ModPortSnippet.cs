@@ -58,7 +58,7 @@ namespace pluginVerilog.Verilog.Snippets
                 }
             }
 
-            foreach(ModPort modport in interface_.ModPorts.Values)
+            foreach(ModPort modport in interface_.NamedElements.Values.OfType<ModPort>())
             {
                 foreach(var port in modport.Ports.Values)
                 {
