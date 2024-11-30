@@ -20,6 +20,7 @@ namespace pluginVerilog.Verilog
             BuildingBlock = buildingBlock;
             Parent = parent;
         }
+        public virtual CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable ; } }
 
         public NamedElements NamedElements { get; } = new NamedElements();
 

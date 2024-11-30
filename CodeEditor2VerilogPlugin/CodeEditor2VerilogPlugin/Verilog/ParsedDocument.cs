@@ -353,147 +353,38 @@ namespace pluginVerilog.Verilog
         }
 
 
+
+
+
+
         public BuildingBlock? GetBuildingBlockAt(int index)
         {
+            if (Root == null) return null;
             IndexReference iref = IndexReference.Create(this.IndexReference, index);
             foreach (BuildingBlock module in Root.BuldingBlocks.Values)
             {
                 if (iref.IsSmallerThan(module.BeginIndexReference)) continue;
+                if (module.LastIndexReference == null) continue;
                 if (iref.IsGreaterThan(module.LastIndexReference)) continue;
                 return module;
             }
             return null;
         }
 
-
-        private static List<AutocompleteItem>? verilogAutoCompleteItems = null;
-        private static List<AutocompleteItem> VerilogAutoCompleteItems
+        public NameSpace? GetNameSpace(IndexReference iref)
         {
-            get
+            // get current buldingBlock
+            NameSpace? space = null;
+            foreach (BuildingBlock buildingBlock in Root.BuldingBlocks.Values)
             {
-                if(verilogAutoCompleteItems == null)
-                {
-                    verilogAutoCompleteItems = new List<AutocompleteItem>();
-
-                    List<string> keywords = new List<string>
-                    {
-                        // Verilog
-                        "always",       "and",          "assign",       "automatic",
-                        /*"begin",*/    "case",         "casex",        "casez",
-                        "deassign",     "default",      "defparam",     "design",
-                        "disable",      "edge",         "else",         "end",
-                        "endcase",      "endfunction",  "endgenerate",  "endmodule",
-                        "endprimitive", "endspecify",   "endtask",      "for",
-                        "force",        "forever",      "fork",         /*"function",*/
-                        /*"generate",*/ "genvar",       "if",           "incdir",
-                        "include",      "initial",      "inout",        "input",
-                        "integer",      /*"interface",*/"join",         "localparam",
-                        /*"module",*/   "nand",         "negedge",      "nor",
-                        "not",          "or",           "output",       "parameter",
-                        "posedge",      "pulldown",     "pullup",       "real",
-                        "realtime",     "reg",          "release",      "repeat",
-                        "signed",       /*"task",*/     "time",         "tri0",
-                        "tri1",         "trireg",       "unsigned",     "vectored",
-                        "wait",         "wand",         "weak0",        "weak1",    
-                        "while",        "wire",         "wor",
-                        // SystemVerilog
-                        "accept_on",    "alias",        "always_comb",  "always_ff",
-                        "always_latch", "assert",       "assume",       "before",
-                        "bind",         "bins",         "binsof",       "bit",
-                        "break",        "byte",         "chandle",      "checker",
-                        "class",        "clocking",     "const",        "constraint",
-                        "context",      "continue",     "cover",        "covergroup",
-                        "coverpoint",   "cross",        "dist",         "do",
-                        "endchecker",   "endclass",     "endclocking",  "endgroup",
-                        "endinterface", "endpackage",   "endprogram",   "endproperty",
-                        "endsequence",  "enum",         "eventually",   "expect",
-                        "export",       "extends",      "extern",       "final",
-                        "first_match",  "foreach",      "forkjoin",     "global",
-                        "iff",          "ignore_bins",  "illegal_bins", "implements",
-                        "implies",      "import",       "inside",       "int",
-                        "interconnect", "interface",    "intersect",    "join_any",
-                        "join_none",    "let",          "local",        "logic",
-                        "longint",      "matches",      "modport",      "nettype",
-                        "new",          "nexttime",     "null",         "package",
-                        "packed",       "priority",     "program",      "property",
-                        "protected",    "pure",         "rand",         "randc",
-                        "randcase",     "randsequence", "ref",          "reject_on",
-                        "restrict",     "return",       "s_always",     "s_eventually",
-                        "s_nexttime",   "s_until",      "s_until_with", "sequence",
-                        "shortint",     "shortreal",    "soft",         "solve",
-                        "static",       "string",       "strong",       "struct",
-                        "super",        "sync_accept_on",   "sync_reject_on",   "tagged",
-                        "this",         "throughout",   "timeprecision",    "timeunit",
-                        "type",         "typedef",      "union",        "unique",
-                        "unique0",      "until",        "until_with",   "untyped",
-                        "uwire",        "var",          "virtual",      "void",
-                        "wait_order",   "weak",         "wildcard",     "with",
-                        "within",
-                    };
-                    foreach (string keyword in keywords)
-                    {
-                        verilogAutoCompleteItems.Add(
-                            new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
-                            keyword,
-                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), 
-                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
-                            )
-                        );
-                    }
-
-                    List<AutocompleteItem> specialItems = new List<AutocompleteItem>()
-                    {
-                        new AutoComplete.BeginAutoCompleteItem(
-                            "begin",
-                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), 
-                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
-                            ),
-                        new AutoComplete.FunctionAutocompleteItem(
-                            "function",
-                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), 
-                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
-                            ),
-                        new AutoComplete.GenerateAutoCompleteItem(
-                            "generate",
-                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), 
-                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
-                            ),
-                        new AutoComplete.ModuleAutocompleteItem(
-                            "module",
-                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
-                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
-                            ),
-                        new AutoComplete.InterfaceAutocompleteItem(
-                            "interface",
-                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
-                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
-                            ),
-                        new AutoComplete.TaskAutocompleteItem(
-                            "task",
-                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
-                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
-                            ),
-                        new AutoComplete.NonBlockingAssignmentAutoCompleteItem(
-                            "<=",
-                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Normal),
-                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Normal)
-                            ),
-                    };
-
-                    foreach (AutocompleteItem item in specialItems)
-                    {
-                        verilogAutoCompleteItems.Add(item);
-                    }
-
-
-
-
-                }
-                return verilogAutoCompleteItems;
+                if (iref.IsSmallerThan(buildingBlock.BeginIndexReference)) continue;
+                if (buildingBlock.LastIndexReference == null) break;
+                if (iref.IsGreaterThan(buildingBlock.LastIndexReference)) continue;
+                space = buildingBlock.GetHierarchyNameSpace(iref);
+                break;
             }
+            return space;
         }
-
-
 
 
         private NameSpace? getSearchNameSpace(NameSpace? nameSpace,List<string> hier)
@@ -542,13 +433,15 @@ namespace pluginVerilog.Verilog
         public List<AutocompleteItem>? GetAutoCompleteItems(List<string> hierWords,int index,int line,CodeEditor.CodeDocument document,string candidateWord)
         {
             if (hierWords.Count == 0 && candidateWord == "") return null;
-            if (HintCount == 0) return getFlatAutoCompleteItems(index, line, document, candidateWord);
+            if (hierWords.Count==0 && candidateWord.Length < 2) return null;
 
-            List<AutocompleteItem>? items = null;
+            List<AutocompleteItem> items = new List<AutocompleteItem>();
 
+            if (hierWords.Count == 0) appendKeywordAutoCompleteItems(items, candidateWord);
+
+            // on Root and sont have ant Building Blocks
             if (Root == null || Root.BuldingBlocks == null)
             {
-                items = VerilogAutoCompleteItems.ToList();
                 return items;
             }
 
@@ -556,15 +449,7 @@ namespace pluginVerilog.Verilog
             IndexReference iref = IndexReference.Create(this.IndexReference, index);
 
             // get current buldingBlock
-            NameSpace? space = null;
-            foreach (BuildingBlock buildingBlock in Root.BuldingBlocks.Values)
-            {
-                if (iref.IsSmallerThan(buildingBlock.BeginIndexReference)) continue;
-                if (buildingBlock.LastIndexReference == null) break;
-                if (iref.IsGreaterThan(buildingBlock.LastIndexReference)) continue;
-                space = buildingBlock.GetHierarchyNameSpace(iref);
-                break;
-            }
+            NameSpace? space = GetNameSpace(iref);
 
             // parse macro in hierarchy words
             for (int i = 0; i < hierWords.Count; i++)
@@ -585,7 +470,6 @@ namespace pluginVerilog.Verilog
                 }
             }
 
-
             // system task & functions
             // return system task and function if the word starts with "$"
             if (candidateWord.StartsWith("$"))
@@ -593,6 +477,7 @@ namespace pluginVerilog.Verilog
                 items = new List<AutocompleteItem>();
                 foreach (string key in ProjectProperty.SystemFunctions.Keys)
                 {
+                    if (!key.StartsWith(candidateWord)) continue;
                     items.Add(
                         new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
                             key,
@@ -603,6 +488,7 @@ namespace pluginVerilog.Verilog
                 }
                 foreach (string key in ProjectProperty.SystemTaskParsers.Keys)
                 {
+                    if (!key.StartsWith(candidateWord)) continue;
                     items.Add(
                         new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
                             key,
@@ -614,113 +500,196 @@ namespace pluginVerilog.Verilog
                 return items;
             }
 
-            items = new List<AutocompleteItem>();
-
-
-            // GetDataObject
-
-
-            // get nameSpace autocomplete item
-            INamedElement? namedElement = getSearchNameSpace(space, hierWords);
-            if(namedElement != null)
+            if(hierWords.Count ==0)
             {
-                foreach(INamedElement element in namedElement.NamedElements.Values)
-                {
-                    items.Add(
-                        new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
-                            element.Name,
-                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
-                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
-                            )
-                    );
-                }
+                // append INamedElements
+                if (space != null) appendAutoCompleteINamedElements(items, space, candidateWord);
+
+                // special autocomplete tool
+                appendSpecialAutoCompleteItems(items, candidateWord);
+            }
+            else
+            {
+                if(space!=null) appendHierElement(hierWords, items, space, candidateWord);
             }
 
             return items;
         }
 
-        private List<AutocompleteItem>? getFlatAutoCompleteItems(int index, int line, CodeEditor.CodeDocument document, string candidateWord)
+        private void appendHierElement(List<string> hierWords, List<AutocompleteItem> items, INamedElement element, string candidate)
         {
-            List<AutocompleteItem>? items = null;
-
-            if (Root == null || Root.BuldingBlocks == null)
+            if (hierWords.Count == 0)
             {
-                items = VerilogAutoCompleteItems.ToList();
-                return items;
-            }
-
-            // get reference of current position
-            IndexReference iref = IndexReference.Create(this.IndexReference, index);
-
-            // get current buldingBlock
-            NameSpace? space = null;
-            foreach (BuildingBlock buildingBlock in Root.BuldingBlocks.Values)
-            {
-                if (iref.IsSmallerThan(buildingBlock.BeginIndexReference)) continue;
-                if (buildingBlock.LastIndexReference == null) break;
-                if (iref.IsGreaterThan(buildingBlock.LastIndexReference)) continue;
-                space = buildingBlock.GetHierarchyNameSpace(iref);
-                break;
-            }
-
-            // external module/class/program
-            if (space == null)
-            {
-                items = VerilogAutoCompleteItems.ToList();
-                int headIndex;
-                int length;
-                document.GetWord(index, out headIndex, out length);
-                return items;
-            }
-
-            // system task & functions
-            // return system task and function if the word starts with "$"
-            if (candidateWord.StartsWith("$"))
-            {
-                items = new List<AutocompleteItem>();
-                foreach (string key in ProjectProperty.SystemFunctions.Keys)
+                foreach (INamedElement subElement in element.NamedElements.Values)
                 {
+                    if (!subElement.Name.StartsWith(candidate)) continue;
                     items.Add(
                         new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
-                            key,
-                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
-                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
+                            subElement.Name,
+                            CodeDrawStyle.ColorIndex(subElement.ColorType),
+                            Global.CodeDrawStyle.Color(subElement.ColorType)
                             )
                     );
                 }
-                foreach (string key in ProjectProperty.SystemTaskParsers.Keys)
-                {
-                    items.Add(
-                        new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
-                            key,
-                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
-                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
-                            )
-                    );
-                }
-                return items;
+                return;
             }
-
-            // add standerd compelete items
-            items = VerilogAutoCompleteItems.ToList();
-
-            // if no hierarchy, add root level object name list
+            else
             {
-                List<string> objectList = ProjectProperty.GetObjectsNameList();
-                foreach (var name in objectList)
+                if (element.NamedElements.ContainsKey(hierWords[0]))
                 {
-                    items.Add(
-                        new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
-                            name,
-                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Identifier),
-                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Identifier)
-                            )
-                    );
+                    INamedElement subElement = element.NamedElements[hierWords[0]];
+                    hierWords.RemoveAt(0);
+                    appendHierElement(hierWords, items, subElement, candidate);
+                    return;
+                }
+                else
+                {
+                    return;
                 }
             }
-
-            return items;
         }
+
+        private void appendAutoCompleteINamedElements(List<AutocompleteItem> items, NameSpace nameSpace,string candidate)
+        {
+            foreach(INamedElement element in nameSpace.NamedElements.Values)
+            {
+                if (!element.Name.StartsWith(candidate)) continue;
+                items.Add(
+                    new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
+                        element.Name,
+                        CodeDrawStyle.ColorIndex(element.ColorType),
+                        Global.CodeDrawStyle.Color(element.ColorType)
+                        )
+                );
+            }
+
+            if (nameSpace.Parent == null) return;
+            if (nameSpace == Root ) return;
+            if (nameSpace is BuildingBlocks.BuildingBlock) return;
+            if (nameSpace.Parent == nameSpace) return;
+            if (nameSpace.Parent is NameSpace) appendAutoCompleteINamedElements(items, nameSpace,candidate); 
+        }
+
+
+        private static void appendKeywordAutoCompleteItems(List<AutocompleteItem> items,string cantidate)
+        {
+            List<string> keywords = new List<string>
+                    {
+                        // Verilog
+                        "always",       "and",          "assign",       "automatic",
+                        /*"begin",*/    "case",         "casex",        "casez",
+                        "deassign",     "default",      "defparam",     "design",
+                        "disable",      "edge",         "else",         "end",
+                        "endcase",      "endfunction",  "endgenerate",  "endmodule",
+                        "endprimitive", "endspecify",   "endtask",      "for",
+                        "force",        "forever",      "fork",         /*"function",*/
+                        /*"generate",*/ "genvar",       "if",           "incdir",
+                        "include",      "initial",      "inout",        "input",
+                        "integer",      /*"interface",*/"join",         "localparam",
+                        /*"module",*/   "nand",         "negedge",      "nor",
+                        "not",          "or",           "output",       "parameter",
+                        "posedge",      "pulldown",     "pullup",       "real",
+                        "realtime",     "reg",          "release",      "repeat",
+                        "signed",       /*"task",*/     "time",         "tri0",
+                        "tri1",         "trireg",       "unsigned",     "vectored",
+                        "wait",         "wand",         "weak0",        "weak1",
+                        "while",        "wire",         "wor",
+                        // SystemVerilog
+                        "accept_on",    "alias",        "always_comb",  "always_ff",
+                        "always_latch", "assert",       "assume",       "before",
+                        "bind",         "bins",         "binsof",       "bit",
+                        "break",        "byte",         "chandle",      "checker",
+                        "class",        "clocking",     "const",        "constraint",
+                        "context",      "continue",     "cover",        "covergroup",
+                        "coverpoint",   "cross",        "dist",         "do",
+                        "endchecker",   "endclass",     "endclocking",  "endgroup",
+                        "endinterface", "endpackage",   "endprogram",   "endproperty",
+                        "endsequence",  "enum",         "eventually",   "expect",
+                        "export",       "extends",      "extern",       "final",
+                        "first_match",  "foreach",      "forkjoin",     "global",
+                        "iff",          "ignore_bins",  "illegal_bins", "implements",
+                        "implies",      "import",       "inside",       "int",
+                        "interconnect", "interface",    "intersect",    "join_any",
+                        "join_none",    "let",          "local",        "logic",
+                        "longint",      "matches",      "modport",      "nettype",
+                        "new",          "nexttime",     "null",         "package",
+                        "packed",       "priority",     "program",      "property",
+                        "protected",    "pure",         "rand",         "randc",
+                        "randcase",     "randsequence", "ref",          "reject_on",
+                        "restrict",     "return",       "s_always",     "s_eventually",
+                        "s_nexttime",   "s_until",      "s_until_with", "sequence",
+                        "shortint",     "shortreal",    "soft",         "solve",
+                        "static",       "string",       "strong",       "struct",
+                        "super",        "sync_accept_on",   "sync_reject_on",   "tagged",
+                        "this",         "throughout",   "timeprecision",    "timeunit",
+                        "type",         "typedef",      "union",        "unique",
+                        "unique0",      "until",        "until_with",   "untyped",
+                        "uwire",        "var",          "virtual",      "void",
+                        "wait_order",   "weak",         "wildcard",     "with",
+                        "within",
+                    };
+
+            foreach (string keyword in keywords)
+            {
+                if (!keyword.StartsWith(cantidate)) continue;
+                items.Add(
+                    new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
+                    keyword,
+                    CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
+                    Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
+                    )
+                );
+            }
+        }
+        private static void appendSpecialAutoCompleteItems(List<AutocompleteItem> items, string cantidate)
+        {
+            List<AutocompleteItem> specialItems = new List<AutocompleteItem>()
+                    {
+                        new AutoComplete.BeginAutoCompleteItem(
+                            "begin",
+                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
+                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
+                            ),
+                        new AutoComplete.FunctionAutocompleteItem(
+                            "function",
+                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
+                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
+                            ),
+                        new AutoComplete.GenerateAutoCompleteItem(
+                            "generate",
+                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
+                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
+                            ),
+                        new AutoComplete.ModuleAutocompleteItem(
+                            "module",
+                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
+                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
+                            ),
+                        new AutoComplete.InterfaceAutocompleteItem(
+                            "interface",
+                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
+                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
+                            ),
+                        new AutoComplete.TaskAutocompleteItem(
+                            "task",
+                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
+                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
+                            ),
+                        new AutoComplete.NonBlockingAssignmentAutoCompleteItem(
+                            "<=",
+                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Normal),
+                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Normal)
+                            ),
+                    };
+
+            foreach (AutocompleteItem item in specialItems)
+            {
+                if (!item.Text.StartsWith(cantidate)) continue;
+                items.Add(item);
+            }
+        }
+
+
 
         private INamedElement? getSearchElement(NameSpace nameSpace, List<string> hier)
         {

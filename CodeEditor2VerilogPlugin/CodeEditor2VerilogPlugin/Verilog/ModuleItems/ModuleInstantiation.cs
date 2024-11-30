@@ -16,6 +16,7 @@ namespace pluginVerilog.Verilog.ModuleItems
     {
         public NamedElements NamedElements { get; } = new NamedElements();
 
+        public virtual CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
         protected ModuleInstantiation() { }
         /*
         A.4.1.1 Module instantiation 

@@ -145,11 +145,11 @@ namespace pluginVerilog.Verilog.Expressions
         }
         public static Primary? searchNameSpace(WordScanner word, NameSpace nameSpace, bool lValue)
         {
-            if (nameSpace.NamedElements.ContainsKey(word.Text)) return parseText(word, nameSpace, lValue);
+            if (nameSpace.NamedElements.ContainsKey(word.Text)) return parseText(word, nameSpace, lValue,"");
             if (nameSpace.Parent == null) return null;
             return searchNameSpace(word, nameSpace.Parent, lValue);
         }
-        public static Primary? parseText(WordScanner word, NameSpace nameSpace, bool lValue)
+        public static Primary? parseText(WordScanner word, NameSpace nameSpace, bool lValue, string nameSpaceText)
         {
             if (!nameSpace.NamedElements.ContainsKey(word.Text))
             {
@@ -160,7 +160,7 @@ namespace pluginVerilog.Verilog.Expressions
             INamedElement element = nameSpace.NamedElements[word.Text];
             if (element is DataObject)
             {
-                return parseDataObject(word, nameSpace, nameSpace, lValue);
+                return parseDataObject(word, nameSpace, nameSpace, lValue,nameSpaceText);
             }
 
             // Since Task and Function are also namespaces, they need to be processed before namespaces.
@@ -182,7 +182,7 @@ namespace pluginVerilog.Verilog.Expressions
                 word.Color(CodeDrawStyle.ColorType.Identifier);
                 word.MoveNext();
                 NameSpace newNameSpace = (NameSpace)element;
-                return parseText(word, newNameSpace, lValue);
+                return parseText(word, newNameSpace, lValue,nameSpaceText+"."+newNameSpace.Name);
             }
 
             if(element is DataObjects.Constants.Constants)
@@ -198,15 +198,17 @@ namespace pluginVerilog.Verilog.Expressions
                 IBuildingBlockInstantiation buildingBlockInstantiation = (IBuildingBlockInstantiation)element;
                 BuildingBlock? buildingBlock = buildingBlockInstantiation.GetInstancedBuildingBlock();
                 if (buildingBlock == null) return null;
-                return parseText(word, buildingBlock, lValue);
+                return parseText(word, buildingBlock, lValue,buildingBlockInstantiation.Name);
             }
 
             return null;
         }
 
-        public static Primary? parseDataObject(WordScanner word, NameSpace nameSpace, INamedElement owner, bool lValue)
+        public static Primary? parseDataObject(WordScanner word, NameSpace nameSpace, INamedElement owner, bool lValue,string nameSpaceText)
         {
             var variable = VariableReference.ParseCreate(word, nameSpace, owner, lValue);
+            if(variable != null) variable.NameSpaceText = nameSpaceText;
+
             if (variable == null) return null;
             if (variable.Variable == null) return null;
 
@@ -223,7 +225,9 @@ namespace pluginVerilog.Verilog.Expressions
             // Since ModPort are also namespaces, they need to be processed before namespaces.
             if (element is DataObject)
             {
-                return parseDataObject(word, nameSpace, variable.Variable, lValue);
+                if (nameSpaceText != "") nameSpaceText = nameSpaceText + ".";
+                nameSpaceText = nameSpaceText + variable.VariableName + ".";
+                return parseDataObject(word, nameSpace, variable.Variable, lValue,nameSpaceText);
             }
 
             // Since Task and Function are also namespaces, they need to be processed before namespaces.
@@ -231,13 +235,15 @@ namespace pluginVerilog.Verilog.Expressions
             // task reference : for left side only
             if (lValue && element is Task)
             {
-                return TaskReference.ParseCreate(word, nameSpace.BuildingBlock, nameSpace);
+                TaskReference task =TaskReference.ParseCreate(word, nameSpace.BuildingBlock, nameSpace);
+                return task;
             }
 
             // function call : for right side only
             if (!lValue && element is Function)
             {
-                return FunctionCall.ParseCreate(word, nameSpace.BuildingBlock, nameSpace);
+                FunctionCall? func = FunctionCall.ParseCreate(word, nameSpace.BuildingBlock, nameSpace);
+                return func;
             }
 
             word.AddError("illegal primitive");

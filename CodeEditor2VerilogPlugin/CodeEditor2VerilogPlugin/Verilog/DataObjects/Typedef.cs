@@ -11,6 +11,7 @@ namespace pluginVerilog.Verilog.DataObjects
     {
         public required IDataType VariableType { get; init; }
         public required string Name { get; init; }
+        public virtual CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
 
         public NamedElements NamedElements { get; } = new NamedElements();
 
