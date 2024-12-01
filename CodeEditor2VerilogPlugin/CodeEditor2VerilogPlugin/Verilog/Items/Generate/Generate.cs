@@ -158,6 +158,20 @@ namespace pluginVerilog.Verilog
             {
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 word.MoveNext();
+                if (word.Text == ":")
+                {
+                    word.MoveNext();
+                    if(block != null && word.Text== block.Name)
+                    {
+                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.MoveNext();
+                    }
+                    else
+                    {
+                        word.AddError("iilegal name");
+                        return true;
+                    }
+                }
                 return true;
             }
             else
@@ -171,6 +185,7 @@ namespace pluginVerilog.Verilog
         {
             if (word.Text != "begin") return false;
 
+            string identifier="";
             // generate_block ::= begin[ : generate_block_identifier]  { generate_item } end
             word.Color(CodeDrawStyle.ColorType.Keyword);
             WordReference beginRef = word.GetReference();
@@ -190,6 +205,7 @@ namespace pluginVerilog.Verilog
                     return true;
                 }
                 word.Color(CodeDrawStyle.ColorType.Identifier);
+                identifier = word.Text;
                 word.MoveNext();
             }
 
@@ -226,6 +242,19 @@ namespace pluginVerilog.Verilog
             {
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 word.MoveNext();
+                if (word.Text == ":")
+                {
+                    word.MoveNext();
+                    if (word.Text == identifier)
+                    {
+                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.MoveNext();
+                    }
+                    else
+                    {
+                        word.AddError("iilegal name");
+                    }
+                }
                 return true;
             }
             else
