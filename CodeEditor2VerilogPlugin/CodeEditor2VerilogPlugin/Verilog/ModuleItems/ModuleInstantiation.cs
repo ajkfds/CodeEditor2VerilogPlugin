@@ -292,7 +292,11 @@ namespace pluginVerilog.Verilog.ModuleItems
                     {
                         instancedModule = word.ProjectProperty.GetInstancedBuildingBlock(moduleInstantiation) as Module;
                     }
-                    if (instancedModule == null) nameSpace.BuildingBlock.ReparseRequested = true;
+                    if (instancedModule == null)
+                    {
+                        nameSpace.BuildingBlock.ReparseRequested = true;
+                        word.AddWarning("not parsed yet.");
+                    }
                 }
 
                 if (word.Prototype)

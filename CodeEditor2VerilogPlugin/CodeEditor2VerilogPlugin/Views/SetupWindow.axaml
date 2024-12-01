@@ -1,0 +1,23 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ajkctrl="clr-namespace:AjkAvaloniaLibs.Contorls;assembly=AjkAvaloniaLibs"
+        mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="400"
+        x:Class="pluginVerilog.Views.SetupWindow"
+        Title="SetupWindow">
+	<TabControl Margin="1" Grid.Column="2" Name="TabControl0">
+		<TabItem Header="SimServer"  FontSize="12" Name="EditorTabItem">
+			<StackPanel Orientation="Vertical" Margin="0">
+				<TextBlock Name="HeaderTextBlock">Server Path </TextBlock>
+				<TextBox></TextBox>
+				<TextBlock Name="HeaderTextBlock1">Server Path </TextBlock>
+				<TextBox Height="100"  AcceptsReturn="true"></TextBox>
+			</StackPanel>
+		</TabItem>
+		<TabItem Header="RunList"  FontSize="12" Name="ShellTabItem">
+			test
+		</TabItem>
+	</TabControl>
+
+</Window>
