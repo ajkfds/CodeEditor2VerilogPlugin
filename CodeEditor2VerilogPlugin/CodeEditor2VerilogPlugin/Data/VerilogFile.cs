@@ -321,6 +321,7 @@ namespace pluginVerilog.Data
                 foreach(string key in removeKeys)
                 {
                     instancedParsedDocumentRefs.Remove(key);
+                    System.Diagnostics.Debug.Print("### remove key: "+key);
                 }
             }
         }

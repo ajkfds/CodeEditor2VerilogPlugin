@@ -11,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace pluginVerilog.Verilog
 {
@@ -181,7 +182,7 @@ namespace pluginVerilog.Verilog
 
                 if (word.Text != "(")
                 {
-                    return false;
+                    return true;
                 }
                 word.MoveNext();
 
@@ -194,62 +195,21 @@ namespace pluginVerilog.Verilog
                 {
                     expression = Expressions.Expression.ParseCreate(word, nameSpace);
                 }
-                if (expression == null) return false;
+                if (expression == null) return true;
 
                 if (word.Text != ")")
                 {
-                    return false;
+                    return true;
                 }
                 word.MoveNext();
 
-                Port port = new Port { Direction = direction, Name = name };
-                port.Expression = expression;
-                VariableReference? vRef = expression as VariableReference;
-                IntegerVectorValueVariable? intVectorVar = vRef?.Variable as IntegerVectorValueVariable;
-
-
-                if (!NamedElements.ContainsKey(port.Name))
-                {
-                    if (direction == Port.DirectionEnum.Input)
-                    {
-                        Net net = Net.Create(name,Net.NetTypeEnum.Wire, null);
-
-                        if(intVectorVar != null)
-                        {
-                            foreach(PackedArray pa in intVectorVar.PackedDimensions)
-                            {
-                                net.PackedDimensions.Add(pa.Clone());
-                            }
-                        }
-                        NamedElements.Add(net.Name, net);
-                    }
-                    else
-                    {
-                        DataObjects.DataTypes.IntegerVectorType dType = Verilog.DataObjects.DataTypes.IntegerVectorType.Create(Verilog.DataObjects.DataTypes.DataTypeEnum.Logic, false, null);
-                        Logic logic = Logic.Create(name,dType);
-
-                        if (intVectorVar != null)
-                        {
-                            foreach (PackedArray pa in intVectorVar.PackedDimensions)
-                            {
-                                logic.PackedDimensions.Add(pa.Clone());
-                            }
-                        }
-
-                        NamedElements.Add(logic.Name, logic);
-                    }
-                }
-                if (!Ports.ContainsKey(port.Name))
-                {
-                    Ports.Add(port.Name, port);
-                    return true;
-                }
+                registerPort(name, direction, expression);
             }
 
 
             if (!General.IsIdentifier(word.Text)) return false;
             {
-                Port port = new Port { Direction = direction, Name = word.Text };
+                string identifier = word.Text;
 
                 Expressions.Expression? expression;
                 if (direction == Port.DirectionEnum.Output)
@@ -260,20 +220,57 @@ namespace pluginVerilog.Verilog
                 {
                     expression = Expressions.Expression.ParseCreate(word, nameSpace);
                 }
-                if (expression == null) return false;
+                if (expression == null) return true;
 
-                port.Expression = expression;
-                //word.Color(CodeDrawStyle.ColorType.Variable);
-                //word.MoveNext();
-
-                if (!Ports.ContainsKey(port.Name))
-                {
-                    Ports.Add(port.Name, port);
-                    return true;
-                }
+                registerPort(identifier, direction, expression);
             }
 
             return false;
+        }
+
+        private void registerPort(string identifier,Port.DirectionEnum direction, Expression? expression)
+        {
+            Port port = new Port { Direction = direction, Name = identifier };
+            port.Expression = expression;
+            VariableReference? vRef = expression as VariableReference;
+            IntegerVectorValueVariable? intVectorVar = vRef?.Variable as IntegerVectorValueVariable;
+
+            if (!NamedElements.ContainsKey(port.Name))
+            {
+                if (direction == Port.DirectionEnum.Input)
+                {
+                    Net net = Net.Create(identifier, Net.NetTypeEnum.Wire, null);
+
+                    if (intVectorVar != null)
+                    {
+                        foreach (PackedArray pa in intVectorVar.PackedDimensions)
+                        {
+                            net.PackedDimensions.Add(pa.Clone());
+                        }
+                    }
+                    NamedElements.Add(net.Name, net);
+                }
+                else
+                {
+                    DataObjects.DataTypes.IntegerVectorType dType = Verilog.DataObjects.DataTypes.IntegerVectorType.Create(Verilog.DataObjects.DataTypes.DataTypeEnum.Logic, false, null);
+                    Logic logic = Logic.Create(identifier, dType);
+
+                    if (intVectorVar != null)
+                    {
+                        foreach (PackedArray pa in intVectorVar.PackedDimensions)
+                        {
+                            logic.PackedDimensions.Add(pa.Clone());
+                        }
+                    }
+
+                    NamedElements.Add(logic.Name, logic);
+                }
+            }
+            if (!Ports.ContainsKey(port.Name))
+            {
+                Ports.Add(port.Name, port);
+            }
+
         }
 
         public Dictionary<string, Port> Ports = new Dictionary<string, Port>();
