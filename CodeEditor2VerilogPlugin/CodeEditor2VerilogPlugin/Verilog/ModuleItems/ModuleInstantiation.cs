@@ -110,6 +110,7 @@ namespace pluginVerilog.Verilog.ModuleItems
         public required IndexReference BeginIndexReference { get; init; }
         public IndexReference? LastIndexReference { get; set; }
 
+        public Module InstancedModule { get; set; }
 
         public static bool Parse(WordScanner word, NameSpace nameSpace)
         {
@@ -275,6 +276,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                     word.SkipToKeyword(";");
                 }
 
+
                 ModuleInstantiation moduleInstantiation = new ModuleInstantiation()
                 {
                     BeginIndexReference = beginIndexReference,
@@ -298,6 +300,8 @@ namespace pluginVerilog.Verilog.ModuleItems
                         word.AddWarning("not parsed yet.");
                     }
                 }
+
+                moduleInstantiation.InstancedModule = instancedModule;
 
                 if (word.Prototype)
                 {
@@ -496,7 +500,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                 {
                     if (moduleInstantiation.PortConnection.ContainsKey(pinName))
                     {
-                        word.AddError("duplicated");
+                        word.AddPrototypeError("duplicated");
                     }
                     word.MoveNext();
                 }

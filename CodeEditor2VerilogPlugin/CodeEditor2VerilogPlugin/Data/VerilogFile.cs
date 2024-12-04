@@ -141,7 +141,7 @@ namespace pluginVerilog.Data
             updateIncludeFiles(VerilogParsedDocument, Items);
 
             Update(); // eliminated here
-            System.Diagnostics.Debug.Print("### Verilog File Parsed "+ID);
+            //System.Diagnostics.Debug.Print("### Verilog File Parsed "+ID);
 
             // update navigate menu icons
             // update current node to update include file icon
@@ -283,7 +283,7 @@ namespace pluginVerilog.Data
 
         public void RegisterInstanceParsedDocument(string id, ParsedDocument parsedDocument,InstanceTextFile moduleInstance)
         {
-            System.Diagnostics.Debug.Print("#### Try RegisterInstanceParsedDocument " + id);
+            System.Diagnostics.Debug.Print("#### RegisterInstanceParsedDocument " + id+"::"+parsedDocument.ObjectID);
             cleanWeakRef();
             if (id == "")
             {
@@ -296,13 +296,13 @@ namespace pluginVerilog.Data
                     if (instancedParsedDocumentRefs.ContainsKey(id))
                     {
                         instancedParsedDocumentRefs[id] = new WeakReference<ParsedDocument>(parsedDocument);
-                        System.Diagnostics.Debug.Print("#### Try RegisterInstanceParsedDocument.Update " + id);
+                        System.Diagnostics.Debug.Print("#### RegisterInstanceParsedDocument replace to " + id+"::"+parsedDocument.ObjectID);
                     }
                     else
                     {
                         instancedParsedDocumentRefs.Add(id, new WeakReference<ParsedDocument>(parsedDocument));
-                        Project.AddReparseTarget(moduleInstance);
-                        System.Diagnostics.Debug.Print("#### Try RegisterInstanceParsedDocument.Add " + id);
+                        //Project.AddReparseTarget(moduleInstance);
+                        System.Diagnostics.Debug.Print("#### Try RegisterInstanceParsedDocument.Add " + id+"::"+parsedDocument.ObjectID);
                     }
                 }
             }

@@ -13,6 +13,7 @@ using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Reflection.Metadata;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using CodeComplete = CodeEditor2.CodeEditor.CodeComplete;
@@ -46,6 +47,14 @@ namespace pluginVerilog.Verilog
             {
                 tagCount++;
             }
+            id = file.ID;
+        }
+
+
+        string id;
+        ~ParsedDocument()
+        {
+            System.Diagnostics.Debug.Print("### pasedDocument.Finalize " + id+"::"+ObjectID);
         }
 
         public static int tagCount = 0;
@@ -123,13 +132,14 @@ namespace pluginVerilog.Verilog
         public override void Dispose()
         {
             Data.IVerilogRelatedFile file = File;
+            System.Diagnostics.Debug.Print("### pasedDocument.Disposed " + file.ID);
 
             if (!Instance)
             {
                 if (file is Data.VerilogFile)
                 {
                     Data.VerilogFile? verilogFile = file as Data.VerilogFile;
-                    if(verilogFile!= null)
+                    if (verilogFile != null)
                     {
                         foreach (BuildingBlock module in Root.BuldingBlocks.Values)
                         {

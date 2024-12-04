@@ -236,6 +236,11 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                     else
                     {
                         Expressions.Expression? exp = Expressions.Expression.ParseCreate(word, nameSpace);
+                        if(exp == null)
+                        {
+                            word.AddError("expression required.");
+                            return true;
+                        }
                     }
                 }
 

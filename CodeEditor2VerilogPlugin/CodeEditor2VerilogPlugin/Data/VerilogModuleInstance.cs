@@ -81,6 +81,7 @@ namespace pluginVerilog.Data
             CodeEditor2.Data.Project project
             )
         {
+            System.Diagnostics.Debug.Print("### VerilogModuleInstance ReplaceBy "+ID);
             ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
             if (projectProperty == null) throw new Exception();
 
@@ -136,7 +137,7 @@ namespace pluginVerilog.Data
                 }
             }
 
-            parsedDocument = null;
+            ParsedDocument = null;
             SourceVerilogFile.RemoveModuleInstance(this);
         }
 
@@ -190,24 +191,6 @@ namespace pluginVerilog.Data
                     Data.VerilogFile source = SourceVerilogFile;
                     parsedDocument = source.GetInstancedParsedDocument(ParameterId);
                 }
-
-
-
-                //if (parsedDocument == null)
-                //{
-                //    if (ParameterOverrides.Count == 0)
-                //    {
-                //        Data.VerilogFile file = SourceVerilogFile;
-                //        if (file == null) return null;
-                //        parsedDocument = file.ParsedDocument;
-                //    }
-                //    else
-                //    {
-                //        Data.VerilogFile source = SourceVerilogFile;
-                //        parsedDocument = source.GetInstancedParsedDocument(ParameterId);
-                //    }
-                //}
-
                 return parsedDocument;
             }
             set
@@ -240,10 +223,8 @@ namespace pluginVerilog.Data
 
         public override void AcceptParsedDocument(ParsedDocument newParsedDocument)
         {
-//            Verilog.ParsedDocument? vParsedDocument = newParsedDocument as Verilog.ParsedDocument;
-//            if (vParsedDocument == null) return;
-
-//            parsedDocument = vParsedDocument;
+            if (newParsedDocument == null) throw new Exception();
+//            System.Diagnostics.Debug.Print("VerilogModuleInstance.AcceptParsedDocument "+ID+"::"+newParsedDocument.ObjectID);
             Data.VerilogFile source = SourceVerilogFile;
             if (source == null) return;
 
@@ -251,18 +232,26 @@ namespace pluginVerilog.Data
             {
                 source.AcceptParsedDocument(newParsedDocument);
             }else{
-                source.RegisterInstanceParsedDocument(ModuleName+":"+ ParameterId, newParsedDocument, this);
-                acceptParameterizedParsedDocument(newParsedDocument);
+                ParsedDocument? oldParsedDocument = ParsedDocument;
+                //if (oldParsedDocument == null)
+                //{
+                //    System.Diagnostics.Debug.Print("VerilogModuleInstance.AcceptParsedDocument from null");
+                //}
+                //else
+                //{
+                //    System.Diagnostics.Debug.Print("VerilogModuleInstance.AcceptParsedDocument from " + ID + "::" + oldParsedDocument.ObjectID);
+                //}
+                {
+                    ParsedDocument = newParsedDocument; // should keep parseddocument 1st
+                    source.RegisterInstanceParsedDocument(ModuleName + ":" + ParameterId, newParsedDocument, this);
+                    acceptParameterizedParsedDocument(newParsedDocument);
+                }
+                if (oldParsedDocument != null) oldParsedDocument.Dispose();
             }
-//            ReparseRequested = vParsedDocument.ReparseRequested;
-//            Update();
-            System.Diagnostics.Debug.Print("### Verilog Module Instance Parsed " + ID);
         }
 
         private void acceptParameterizedParsedDocument(ParsedDocument newParsedDocument)
         {
-            ParsedDocument oldParsedDocument = ParsedDocument;
-            if (oldParsedDocument != null) oldParsedDocument.Dispose();
 
             // copy include files
 
@@ -274,26 +263,6 @@ namespace pluginVerilog.Data
                 return;
             }
 
-            // Register New Building Block
-            //foreach (BuildingBlock buildingBlock in VerilogParsedDocument.Root.BuldingBlocks.Values)
-            //{
-            //    if (ProjectProperty.HasRegisteredBuildingBlock(buildingBlock.Name))
-            //    {   // swap building block
-            //        BuildingBlock? module = buildingBlock as Module;
-            //        if (module == null) continue;
-
-            //        BuildingBlock? registeredModule = ProjectProperty.GetBuildingBlock(module.Name) as Module;
-            //        if (registeredModule == null) continue;
-            //        if (registeredModule.File == null) continue;
-            //        if (registeredModule.File.RelativePath == module.File.RelativePath) continue;
-
-            //        continue;
-            //    }
-
-            //    // register new parsedDocument
-            //    ProjectProperty.RegisterBuildingBlock(buildingBlock.Name, buildingBlock, this);
-            //}
-
             Verilog.ParsedDocument? vParsedDocument = ParsedDocument as Verilog.ParsedDocument;
             if (vParsedDocument != null)
             {
@@ -302,23 +271,8 @@ namespace pluginVerilog.Data
 
             VerilogFile.updateIncludeFiles(VerilogParsedDocument, Items);
 
-            //Dictionary<string, Data.VerilogHeaderInstance> headerItems = new Dictionary<string, VerilogHeaderInstance>();
-            //foreach (var item in Items.Values)
-            //{
-            //    Data.VerilogHeaderInstance? vh = item as Data.VerilogHeaderInstance;
-            //    if (vh == null) continue;
-            //    headerItems.Add(item.ID, vh);
-            //}
-
-            //foreach (var includeFile in VerilogParsedDocument.IncludeFiles.Values)
-            //{
-            //    if (!headerItems.ContainsKey(includeFile.ID)) continue;
-            //    Data.VerilogHeaderInstance item = headerItems[includeFile.ID];
-            //    item.CodeDocument.CopyColorMarkFrom(includeFile.VerilogParsedDocument.CodeDocument);
-            //}
-
             Update(); // eliminated here
-            System.Diagnostics.Debug.Print("### Verilog File Parsed " + ID);
+            //System.Diagnostics.Debug.Print("### Verilog File Parsed " + ID);
         }
 
 

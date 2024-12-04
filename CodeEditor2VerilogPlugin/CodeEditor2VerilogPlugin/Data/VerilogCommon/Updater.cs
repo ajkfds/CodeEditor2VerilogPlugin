@@ -15,6 +15,7 @@ namespace pluginVerilog.Data.VerilogCommon
     {
         public static void Update(IVerilogRelatedFile targetItem)
         {
+            System.Diagnostics.Debug.Print("### VerilogCommon.Updater");
             // Update the Items member of this object according to the rootItem.ParsedDocument.
 
             Project project = targetItem.Project;
@@ -80,6 +81,7 @@ namespace pluginVerilog.Data.VerilogCommon
                     {
                         if (moduleName == null || moduleName == module.Name) // matched module
                         {
+                            System.Diagnostics.Debug.Print("### VerilogCommon.Updater UpdateInstance");
                             UpdateInstance(module, project, targetItem, keepItems, newItems); // targetItem.VerilogParsedDocument eliminated here
                         }
                     }
@@ -94,6 +96,7 @@ namespace pluginVerilog.Data.VerilogCommon
 
                     foreach (CodeEditor2.Data.Item item in removeItems)
                     {
+                        System.Diagnostics.Debug.Print("### VerilogCommon.Updater RemoveItem");
                         targetItem.Items.Remove(item.Name);
                     }
                 }
@@ -113,6 +116,7 @@ namespace pluginVerilog.Data.VerilogCommon
             {
                 if (targetItem.Items.ContainsKey(newInstantiation.Name))
                 { // already exist item
+                    System.Diagnostics.Debug.Print("### VerilogCommon.Updater UpdateInstance replace");
                     CodeEditor2.Data.Item oldItem = targetItem.Items[newInstantiation.Name];
                     VerilogModuleInstance? oldVerilogModuleInstance = oldItem as VerilogModuleInstance;
                     if(oldVerilogModuleInstance != null)
@@ -130,6 +134,7 @@ namespace pluginVerilog.Data.VerilogCommon
 
                     // re-generate (same module instance name, but different file or module name or parameter
                     {
+                        System.Diagnostics.Debug.Print("### VerilogCommon.Updater UpdateInstance regenerate");
                         // re-generate module instantiation
                         ModuleInstantiation? newModuleInstantiation = newInstantiation as ModuleInstantiation;
                         if (newModuleInstantiation == null) continue;
@@ -153,6 +158,8 @@ namespace pluginVerilog.Data.VerilogCommon
                 }
                 else
                 { // new item
+                    System.Diagnostics.Debug.Print("### VerilogCommon.Updater UpdateInstance new");
+
                     ModuleInstantiation? newModuleInstantiation = newInstantiation as ModuleInstantiation;
                     if (newModuleInstantiation == null) continue;
                     VerilogModuleInstance? newVerilogModuleInstance = VerilogModuleInstance.Create(newModuleInstantiation, project);
