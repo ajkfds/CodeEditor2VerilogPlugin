@@ -12,6 +12,7 @@ using System.Reflection.Metadata;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace pluginVerilog.Verilog.Expressions
 {
@@ -117,7 +118,7 @@ namespace pluginVerilog.Verilog.Expressions
             switch (word.WordType)
             {
                 case WordPointer.WordTypeEnum.Number:
-                    return Number.ParseCreate(word);
+                    return Number.ParseCreate(word, nameSpace, lValue);
                 case WordPointer.WordTypeEnum.Symbol:
                     if (word.GetCharAt(0) == '{')
                     {

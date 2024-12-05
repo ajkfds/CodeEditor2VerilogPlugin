@@ -243,7 +243,7 @@ namespace pluginVerilog.Data
                 //}
                 {
                     ParsedDocument = newParsedDocument; // should keep parseddocument 1st
-                    source.RegisterInstanceParsedDocument(ModuleName + ":" + ParameterId, newParsedDocument, this);
+                    source.RegisterInstanceParsedDocument(ParameterId, newParsedDocument, this);
                     acceptParameterizedParsedDocument(newParsedDocument);
                 }
                 if (oldParsedDocument != null) oldParsedDocument.Dispose();

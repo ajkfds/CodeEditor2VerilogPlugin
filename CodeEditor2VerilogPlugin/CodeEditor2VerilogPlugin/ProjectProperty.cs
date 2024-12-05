@@ -151,7 +151,7 @@ namespace pluginVerilog
             {
                 Data.VerilogFile? file = GetFileOfBuildingBlock(instantiation.SourceName) as Data.VerilogFile;
                 if (file == null) return null;
-                Verilog.ParsedDocument? parsedDocument = file.GetInstancedParsedDocument(instantiation.SourceName + ":" + instantiation.OverrideParameterID) as Verilog.ParsedDocument;
+                Verilog.ParsedDocument? parsedDocument = file.GetInstancedParsedDocument(instantiation.OverrideParameterID) as Verilog.ParsedDocument;
                 if (parsedDocument == null) return null;
                 if (parsedDocument.Root == null) return null;
                 if (!parsedDocument.Root.BuldingBlocks.ContainsKey(instantiation.SourceName)) return null;

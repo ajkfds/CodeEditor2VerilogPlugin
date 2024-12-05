@@ -80,7 +80,7 @@ namespace pluginVerilog.Verilog.Expressions
             stringBuilder.Append(Text);
         }
 
-        public static Number? ParseCreate(WordScanner word)
+        public static Number? ParseCreate(WordScanner word,NameSpace nameSpace, bool lValue)
         {
             word.Color(CodeDrawStyle.ColorType.Number);
             
@@ -137,17 +137,40 @@ namespace pluginVerilog.Verilog.Expressions
                 word.MoveNext();
 
                 if (!word.Text.StartsWith("\'")) return number;
-                Number? number2 = Number.ParseCreate(word);
-                if (number2 != null && number != null)
+                word.MoveNext();
+                if(word.Text != "(")
                 {
-                    number2.BitWidth = number.BitWidth;
-                    number2.Constant = true;
+                    word.AddError("illegal cast operator ( expected");
+                    return null;
                 }
-                return number2;
+                word.MoveNext();
+
+                Expression expression = Expression.parseCreate(word, nameSpace, lValue);
+                if(expression == null)
+                {
+                    word.AddError("illegal cast operator ( expected");
+                    return null;
+                }
+                if (word.Text != "(")
+                {
+                    word.AddError("illegal cast operator ( expected");
+                    return null;
+                }
+                word.MoveNext();
+
+                number.BitWidth = (int?)number.Value;
+                number.Value = expression.Value;
+                return number;
             }
             else
             {
                 index = apostropheIndex + 1;
+                if(index == word.Length)
+                {
+                    // cast
+                }
+
+
                 if (index >= word.Length) return null;
                 if( word.GetCharAt(index) == 's' || word.GetCharAt(index) == 'S')
                 {
