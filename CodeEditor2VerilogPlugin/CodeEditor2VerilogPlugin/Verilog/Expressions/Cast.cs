@@ -48,7 +48,6 @@ namespace pluginVerilog.Verilog.Expressions
             word.MoveNext();
 
             cast.Reference = WordReference.CreateReferenceRange(cast.Reference, word.GetReference());
-            word.MoveNext();
             cast.Expression = exp1;
             cast.Constant = exp1.Constant;
             cast.BitWidth = (int?)number.Value;
@@ -85,7 +84,6 @@ namespace pluginVerilog.Verilog.Expressions
             word.MoveNext();
 
             cast.Reference = WordReference.CreateReferenceRange(cast.Reference, word.GetReference());
-            word.MoveNext();
             cast.Expression = exp1;
             cast.Constant = exp1.Constant;
             cast.BitWidth = exp1.BitWidth;

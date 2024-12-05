@@ -216,7 +216,7 @@ namespace pluginVerilog.Parser
                 System.Diagnostics.Debugger.Break();
             }
             Root root = Root.ParseCreate(word,VerilogParsedDocument, File as Data.VerilogFile);
-            Document = word.RootParsedDocument.CodeDocument;
+            //Document = word.RootParsedDocument.CodeDocument;
 
             word.RootParsedDocument.UnlockDocument();
             word.Dispose();

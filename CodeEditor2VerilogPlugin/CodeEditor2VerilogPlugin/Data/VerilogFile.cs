@@ -99,17 +99,17 @@ namespace pluginVerilog.Data
         public override void AcceptParsedDocument(ParsedDocument newParsedDocument)
         {
             ParsedDocument? oldParsedDocument = ParsedDocument;
-            if (oldParsedDocument != null) oldParsedDocument.Dispose();
-
-            // copy include files
+            if (oldParsedDocument == newParsedDocument) return;
 
             ParsedDocument = newParsedDocument;
+            if (oldParsedDocument != null) oldParsedDocument.Dispose();
 
-            if(VerilogParsedDocument == null)
+            if (VerilogParsedDocument == null)
             {
                 Update();
                 return;
             }
+            CodeDocument.CopyColorMarkFrom(VerilogParsedDocument.CodeDocument);
 
             // Register New Building Block
             foreach (BuildingBlock buildingBlock in VerilogParsedDocument.Root.BuldingBlocks.Values)
