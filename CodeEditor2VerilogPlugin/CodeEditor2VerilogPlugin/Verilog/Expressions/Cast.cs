@@ -27,6 +27,40 @@ namespace pluginVerilog.Verilog.Expressions
             return label;
         }
 
+        public static Primary? ParseCreate(WordScanner word, NameSpace nameSpace,Number number)
+        {
+            Cast cast = new Cast();
+            cast.Reference = number.Reference;
+            word.MoveNext();
+            if (word.Eof || word.Text != "(")
+            {
+                word.AddError("illegal cast");
+                return null;
+            }
+            word.MoveNext();
+
+            Expression? exp1 = Expression.ParseCreate(word, nameSpace);
+            if (word.Eof || exp1 == null || word.Text != ")")
+            {
+                word.AddError("illegal cast");
+                return null;
+            }
+            word.MoveNext();
+
+            cast.Reference = WordReference.CreateReferenceRange(cast.Reference, word.GetReference());
+            word.MoveNext();
+            cast.Expression = exp1;
+            cast.Constant = exp1.Constant;
+            cast.BitWidth = (int?)number.Value;
+            cast.Value = exp1.Value;
+
+            if(cast.BitWidth != null && cast.Value != null)
+            {
+                if (cast.Value > Math.Pow(2, (double)cast.BitWidth)-1) cast.Reference.AddError("value overflow");
+            }
+            return cast;
+        }
+
         public static Primary? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             Cast cast = new Cast();
@@ -42,7 +76,7 @@ namespace pluginVerilog.Verilog.Expressions
             }
             word.MoveNext();
 
-            Expression exp1 = Expression.ParseCreate(word, nameSpace);
+            Expression? exp1 = Expression.ParseCreate(word, nameSpace);
             if (word.Eof || exp1 == null || word.Text!=")")
             {
                 word.AddError("illegal cast");

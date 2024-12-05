@@ -362,7 +362,7 @@ namespace pluginVerilog.Verilog
                 warning = false;
             }
 
-            if(wordPointer.ParsedDocument.Item != null) wordPointer.ParsedDocument.Item.Update();
+            //if(wordPointer.ParsedDocument.Item != null) wordPointer.ParsedDocument.Item.Update();
 
             if (!RootParsedDocument.LockedDocument.Contains(wordPointer.Document))
             {

@@ -118,7 +118,7 @@ namespace pluginVerilog.Verilog.Expressions
             switch (word.WordType)
             {
                 case WordPointer.WordTypeEnum.Number:
-                    return Number.ParseCreate(word, nameSpace, lValue);
+                    return Number.ParseCreateNumberOrCast(word, nameSpace, lValue);
                 case WordPointer.WordTypeEnum.Symbol:
                     if (word.GetCharAt(0) == '{')
                     {

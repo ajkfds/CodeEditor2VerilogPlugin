@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Avalonia.Controls.Documents;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -80,7 +81,7 @@ namespace pluginVerilog.Verilog.Expressions
             stringBuilder.Append(Text);
         }
 
-        public static Number? ParseCreate(WordScanner word,NameSpace nameSpace, bool lValue)
+        public static Primary? ParseCreateNumberOrCast(WordScanner word,NameSpace nameSpace, bool lValue)
         {
             word.Color(CodeDrawStyle.ColorType.Number);
             
@@ -136,30 +137,6 @@ namespace pluginVerilog.Verilog.Expressions
                 number.Constant = true;
                 word.MoveNext();
 
-                if (!word.Text.StartsWith("\'")) return number;
-                word.MoveNext();
-                if(word.Text != "(")
-                {
-                    word.AddError("illegal cast operator ( expected");
-                    return null;
-                }
-                word.MoveNext();
-
-                Expression expression = Expression.parseCreate(word, nameSpace, lValue);
-                if(expression == null)
-                {
-                    word.AddError("illegal cast operator ( expected");
-                    return null;
-                }
-                if (word.Text != "(")
-                {
-                    word.AddError("illegal cast operator ( expected");
-                    return null;
-                }
-                word.MoveNext();
-
-                number.BitWidth = (int?)number.Value;
-                number.Value = expression.Value;
                 return number;
             }
             else
@@ -168,6 +145,16 @@ namespace pluginVerilog.Verilog.Expressions
                 if(index == word.Length)
                 {
                     // cast
+                    int value;
+                    if (int.TryParse(sb.ToString(), out value))
+                    {
+                        number.Value = value;
+                        number.Constant = true;
+                    }
+
+                    sb.Append("'");
+
+                    return Cast.ParseCreate(word, nameSpace, number);
                 }
 
 
