@@ -27,6 +27,11 @@ namespace pluginVerilog.Verilog.Expressions
             return label;
         }
 
+// constant_cast    ::= casting_type ' ( constant_expression )
+// cast             ::=  casting_type ' ( expression )
+
+// casting_type     ::= simple_type | constant_primary | signing | "string" | "const"
+// simple_type      ::= integer_type | non_integer_type | ps_type_identifier | ps_parameter_identifier
         public static Primary? ParseCreate(WordScanner word, NameSpace nameSpace,Number number)
         {
             Cast cast = new Cast();
@@ -60,11 +65,18 @@ namespace pluginVerilog.Verilog.Expressions
             return cast;
         }
 
-        public static Primary? ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static new Primary? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             Cast cast = new Cast();
             cast.Reference = word.CrateWordReference();
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+
+            Verilog.INamedElement? namedElement = nameSpace.NamedElements.GetDataObject(word.Text);
+            if(namedElement == null)
+            {
+                word.AddError("illegal cast");
+                return null;
+            }
+            word.Color(namedElement.ColorType);
             word.MoveNext();
             if (word.Text != "'") throw new Exception();
             word.MoveNext();

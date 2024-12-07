@@ -225,7 +225,7 @@ namespace pluginVerilog.Verilog
                 registerPort(identifier, direction, expression);
             }
 
-            return false;
+            return true;
         }
 
         private void registerPort(string identifier,Port.DirectionEnum direction, Expression? expression)

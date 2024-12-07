@@ -336,13 +336,6 @@ namespace pluginVerilog.Verilog
                 if(dataObject!=null) dataObject.AppendLabel(ret);
             }
 
-            {
-                DataObjects.Constants.Constants param = space.GetConstants(text);
-                if (param != null)
-                {
-                    param.AppendLabel(ret);
-                }
-            }
 
             if (text.StartsWith("`") && iref.RootParsedDocument.Macros.ContainsKey(text.Substring(1)))
             {
