@@ -13,8 +13,9 @@ namespace pluginVerilog.Verilog.AutoComplete
         {
         }
  
-        public override void Apply(CodeEditor2.CodeEditor.CodeDocument codeDocument)
+        public override void Apply()
         {
+            if (codeDocument == null) return;
             int prevIndex = codeDocument.CaretIndex;
             if (codeDocument.GetLineStartIndex(codeDocument.GetLineAt(prevIndex)) != prevIndex && prevIndex != 0)
             {

@@ -13,8 +13,9 @@ namespace pluginVerilog.Verilog.AutoComplete
         {
         }
 
-        public override void Apply(CodeEditor2.CodeEditor.CodeDocument codeDocument)
+        public override void Apply()
         {
+            if (codeDocument == null) return;
             CodeEditor.CodeDocument? document = codeDocument as CodeEditor.CodeDocument;
             if (document == null) return;
 

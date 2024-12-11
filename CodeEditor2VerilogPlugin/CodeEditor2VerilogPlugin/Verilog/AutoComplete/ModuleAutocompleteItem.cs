@@ -12,8 +12,9 @@ namespace pluginVerilog.Verilog.AutoComplete
         public ModuleAutocompleteItem(string text, byte colorIndex, Avalonia.Media.Color color) : base(text, colorIndex, color)
         {
         }
-        public override void Apply(CodeEditor2.CodeEditor.CodeDocument codeDocument)
+        public override void Apply()
         {
+            if (codeDocument == null) return;
             CodeEditor.CodeDocument? vCodeDocument = codeDocument as CodeEditor.CodeDocument;
             if (vCodeDocument == null) return;
 
