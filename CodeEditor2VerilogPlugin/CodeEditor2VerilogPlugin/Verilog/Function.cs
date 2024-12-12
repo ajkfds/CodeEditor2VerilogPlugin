@@ -447,7 +447,7 @@ namespace pluginVerilog.Verilog
         //  ; { tf_item_declaration }
         private static void parse_function_items_non_ansi(WordScanner word, NameSpace nameSpace, Function function)
         {
-            if (word.Text != ";") System.Diagnostics.Debugger.Break();
+            if (word.Text != ";") throw new System.Exception();
             word.MoveNext();
 
             while (!word.Eof)

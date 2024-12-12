@@ -198,18 +198,20 @@ namespace pluginVerilog.Verilog.Statements
                         return VoidFunctionCall.ParseCreate(word, nameSpace);
                     }
 
-                    Expressions.Expression expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace);
+                    Expressions.Expression? expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace);
                     if(expression != null && expression is Expressions.TaskReference)// Expressions.TaskReference)
                     {
-                        Expressions.TaskReference taskReference = expression as Expressions.TaskReference;
+                        Expressions.TaskReference taskReference = (Expressions.TaskReference)expression;
                         return TaskEnable.ParseCreate(taskReference, word, nameSpace);
                     }
 
-                    IStatement statement;
                     if(expression == null)
                     {
-                        word.MoveNext();
+                        word.AddError("illegal statement");
+                        return null;
                     }
+
+                    IStatement? statement;
                     switch (word.Text)
                     {
                         // blocking_assignment ;
@@ -221,7 +223,7 @@ namespace pluginVerilog.Verilog.Statements
                             statement = NonBlockingAssignment.ParseCreate(word, nameSpace, expression);
                             break;
                         default:
-                            word.AddError("illegal module item");
+                            expression.Reference.AddError("illegal statement");
                             return null;
                     }
                     if(word.GetCharAt(0) != ';')

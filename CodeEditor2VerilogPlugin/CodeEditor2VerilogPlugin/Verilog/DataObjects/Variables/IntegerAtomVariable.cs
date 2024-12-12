@@ -11,7 +11,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     public class IntegerAtomVariable : ValueVariable
     {
         //integer_atom_type::= byte | shortint | int | longint | integer | time
-        public virtual CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
+        public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
         public bool Signed { get; set; }
 
         public new static IntegerAtomVariable Create(string name, IDataType dataType)

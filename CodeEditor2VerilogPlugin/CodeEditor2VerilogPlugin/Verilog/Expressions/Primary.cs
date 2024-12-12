@@ -175,7 +175,7 @@ namespace pluginVerilog.Verilog.Expressions
             // function call : for right side only
             if (!lValue && element is Function)
             {
-                return FunctionCall.ParseCreate(word, nameSpace.BuildingBlock, nameSpace);
+                return FunctionCall.ParseCreate(word, nameSpace);
             }
 
             if (element is NameSpace)
@@ -243,7 +243,7 @@ namespace pluginVerilog.Verilog.Expressions
             // function call : for right side only
             if (!lValue && element is Function)
             {
-                FunctionCall? func = FunctionCall.ParseCreate(word, nameSpace.BuildingBlock, nameSpace);
+                FunctionCall? func = FunctionCall.ParseCreate(word, nameSpace);
                 return func;
             }
 

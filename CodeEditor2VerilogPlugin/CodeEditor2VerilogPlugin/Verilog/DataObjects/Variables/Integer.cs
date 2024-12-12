@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
@@ -11,6 +12,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected Integer() { }
 
+//        public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
         public static new Integer Create(string name,IDataType dataType)
         {
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.Integer);

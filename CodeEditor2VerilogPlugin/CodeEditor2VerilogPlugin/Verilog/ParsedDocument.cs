@@ -554,7 +554,8 @@ namespace pluginVerilog.Verilog
 
         private void appendAutoCompleteINamedElements(List<AutocompleteItem> items, NameSpace nameSpace,string candidate)
         {
-            foreach(INamedElement element in nameSpace.NamedElements.Values)
+            bool add = false;
+            foreach (INamedElement element in nameSpace.NamedElements.Values)
             {
                 if (!element.Name.StartsWith(candidate)) continue;
                 items.Add(
@@ -564,15 +565,18 @@ namespace pluginVerilog.Verilog
                         Global.CodeDrawStyle.Color(element.ColorType)
                         )
                 );
+                add = true;
             }
 
+            if (add) return;
             if (nameSpace.Parent == null) return;
-            if (nameSpace == Root ) return;
+            if (nameSpace == Root) return;
             if (nameSpace is BuildingBlocks.BuildingBlock) return;
             if (nameSpace.Parent == nameSpace) return;
-            if (nameSpace.Parent is NameSpace) appendAutoCompleteINamedElements(items, nameSpace,candidate); 
-        }
 
+            // upward search if no items found in the namespace
+            if (nameSpace.Parent is NameSpace) appendAutoCompleteINamedElements(items, nameSpace.Parent, candidate);
+        }
 
         private static void appendKeywordAutoCompleteItems(List<AutocompleteItem> items,string cantidate)
         {

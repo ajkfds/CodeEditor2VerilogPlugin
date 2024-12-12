@@ -11,21 +11,17 @@ namespace pluginVerilog.Verilog.Expressions
         protected FunctionCall() { }
         public List<Expression> Expressions = new List<Expression>();
         public string FunctionName { get; protected set; }
-        public new static FunctionCall? ParseCreate(WordScanner word, NameSpace nameSpace)
-        {
-            return ParseCreate(word, nameSpace, nameSpace);
-        }
 
-        public static FunctionCall? ParseCreate(WordScanner word, NameSpace nameSpace,NameSpace functionNameSpace)
+        public new static FunctionCall? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             FunctionCall functionCall = new FunctionCall();
             functionCall.Reference = word.GetReference();
             functionCall.FunctionName = word.Text;
 
-            Function function = null;
-            if (functionNameSpace.BuildingBlock.NamedElements.ContainsFunction(functionCall.FunctionName))
+            Function? function = null;
+            if (nameSpace.BuildingBlock.NamedElements.ContainsFunction(functionCall.FunctionName))
             {
-                function = (Function)functionNameSpace.BuildingBlock.NamedElements[functionCall.FunctionName];
+                function = (Function)nameSpace.BuildingBlock.NamedElements[functionCall.FunctionName];
             }
             else if (word.RootParsedDocument.ProjectProperty.SystemFunctions.ContainsKey(word.Text))
             {
@@ -63,7 +59,7 @@ namespace pluginVerilog.Verilog.Expressions
             int i = 0;
             while (!word.Eof)
             {
-                Expression expression = Expression.ParseCreate(word, nameSpace);
+                Expression? expression = Expression.ParseCreate(word, nameSpace);
                 if(expression == null)
                 {
                     return null;

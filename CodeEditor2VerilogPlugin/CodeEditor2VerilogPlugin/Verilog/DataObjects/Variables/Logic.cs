@@ -11,6 +11,8 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected Logic() { }
 
+ //       public override CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Variable;
+
         public static new Logic Create(string name,IDataType dataType)
         {
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.Logic);
