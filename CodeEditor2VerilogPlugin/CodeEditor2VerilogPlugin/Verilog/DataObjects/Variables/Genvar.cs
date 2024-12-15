@@ -11,6 +11,8 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected Genvar() { }
 
+        public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
+
         [SetsRequiredMembers]
         public Genvar(string Name)
         {

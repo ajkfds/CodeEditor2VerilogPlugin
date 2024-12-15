@@ -43,7 +43,7 @@ namespace pluginVerilog.Verilog
 
                     if (iref.IsSmallerThan(function.BeginIndexReference)) continue;
                     if (iref.IsGreaterThan(function.LastIndexReference)) continue;
-                    return function.getHierarchyNameSpace2(iref);
+                    return function.GetHierarchyNameSpaceDownward(iref);
                 }
                 else if(namedElement is Task)
                 {
@@ -53,13 +53,13 @@ namespace pluginVerilog.Verilog
 
                     if (iref.IsSmallerThan(task.BeginIndexReference)) continue;
                     if (iref.IsGreaterThan(task.LastIndexReference)) continue;
-                    return task.getHierarchyNameSpace2(iref);
+                    return task.GetHierarchyNameSpaceDownward(iref);
                 }
             }
 
-            return getHierarchyNameSpace2(iref);
+            return GetHierarchyNameSpaceDownward(iref);
         }
-        private NameSpace getHierarchyNameSpace2(IndexReference iref)
+        public NameSpace GetHierarchyNameSpaceDownward(IndexReference iref)
         {
             foreach(INamedElement element in NamedElements.Values)
             {
@@ -70,7 +70,7 @@ namespace pluginVerilog.Verilog
 
                 if (iref.IsSmallerThan(nameSpace.BeginIndexReference)) continue;
                 if (iref.IsGreaterThan(nameSpace.LastIndexReference)) continue;
-                return nameSpace.GetHierarchyNameSpace(iref);
+                return nameSpace.GetHierarchyNameSpaceDownward(iref);
             }
             return this;
         }

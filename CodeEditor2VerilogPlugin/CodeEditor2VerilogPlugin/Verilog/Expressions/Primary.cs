@@ -133,35 +133,35 @@ namespace pluginVerilog.Verilog.Expressions
                 case WordPointer.WordTypeEnum.Text:
                     if (word.Text.StartsWith("$") && word.RootParsedDocument.ProjectProperty.SystemFunctions.Keys.Contains(word.Text))
                     {
-                        return FunctionCall.ParseCreate(word, nameSpace);
+                        return FunctionCall.ParseCreate(word, nameSpace,nameSpace);
                     }
                     if (word.NextText == "'") // cast
                     {
                         return Cast.ParseCreate(word, nameSpace);
                     }
 
-                    return searchNameSpace(word, nameSpace, lValue);
+                    return searchNameSpace(word, nameSpace, nameSpace, lValue);
             }
             return null;
         }
-        public static Primary? searchNameSpace(WordScanner word, NameSpace nameSpace, bool lValue)
+        public static Primary? searchNameSpace(WordScanner word, NameSpace searchedNameSpace, NameSpace nameSpace, bool lValue)
         {
-            if (nameSpace.NamedElements.ContainsKey(word.Text)) return parseText(word, nameSpace, lValue,"");
-            if (nameSpace.Parent == null) return null;
-            return searchNameSpace(word, nameSpace.Parent, lValue);
+            if (searchedNameSpace.NamedElements.ContainsKey(word.Text)) return parseText(word,searchedNameSpace, nameSpace, lValue,"");
+            if (searchedNameSpace.Parent == null) return null;
+            return searchNameSpace(word, searchedNameSpace.Parent,nameSpace, lValue);
         }
-        public static Primary? parseText(WordScanner word, NameSpace nameSpace, bool lValue, string nameSpaceText)
+        public static Primary? parseText(WordScanner word, NameSpace definedNameSpace,NameSpace nameSpace, bool lValue, string nameSpaceText)
         {
-            if (!nameSpace.NamedElements.ContainsKey(word.Text))
+            if (!definedNameSpace.NamedElements.ContainsKey(word.Text))
             {
                 word.AddError("illegal primitive");
                 return null;
             }
 
-            INamedElement element = nameSpace.NamedElements[word.Text];
+            INamedElement element = definedNameSpace.NamedElements[word.Text];
             if (element is DataObject)
             {
-                return parseDataObject(word, nameSpace, nameSpace, lValue,nameSpaceText);
+                return parseDataObject(word, nameSpace, definedNameSpace, lValue,nameSpaceText);
             }
 
             // Since Task and Function are also namespaces, they need to be processed before namespaces.
@@ -169,13 +169,13 @@ namespace pluginVerilog.Verilog.Expressions
             // task reference : for left side only
             if (lValue && element is Task)
             {
-                return TaskReference.ParseCreate(word, nameSpace.BuildingBlock, nameSpace);
+                return TaskReference.ParseCreate(word, definedNameSpace.BuildingBlock, nameSpace);
             }
 
             // function call : for right side only
             if (!lValue && element is Function)
             {
-                return FunctionCall.ParseCreate(word, nameSpace);
+                return FunctionCall.ParseCreate(word, definedNameSpace,nameSpace);
             }
 
             if (element is NameSpace)
@@ -183,12 +183,12 @@ namespace pluginVerilog.Verilog.Expressions
                 word.Color(CodeDrawStyle.ColorType.Identifier);
                 word.MoveNext();
                 NameSpace newNameSpace = (NameSpace)element;
-                return parseText(word, newNameSpace, lValue,nameSpaceText+"."+newNameSpace.Name);
+                return parseText(word,definedNameSpace, newNameSpace, lValue,nameSpaceText+"."+newNameSpace.Name);
             }
 
             if(element is DataObjects.Constants.Constants)
             {
-                return ParameterReference.ParseCreate(word, nameSpace);
+                return ParameterReference.ParseCreate(word, definedNameSpace);
             }
 
 
@@ -199,7 +199,7 @@ namespace pluginVerilog.Verilog.Expressions
                 IBuildingBlockInstantiation buildingBlockInstantiation = (IBuildingBlockInstantiation)element;
                 BuildingBlock? buildingBlock = buildingBlockInstantiation.GetInstancedBuildingBlock();
                 if (buildingBlock == null) return null;
-                return parseText(word, buildingBlock, lValue,buildingBlockInstantiation.Name);
+                return parseText(word, buildingBlock, buildingBlock, lValue, buildingBlockInstantiation.Name);
             }
 
             return null;
@@ -243,7 +243,7 @@ namespace pluginVerilog.Verilog.Expressions
             // function call : for right side only
             if (!lValue && element is Function)
             {
-                FunctionCall? func = FunctionCall.ParseCreate(word, nameSpace);
+                FunctionCall? func = FunctionCall.ParseCreate(word, nameSpace, nameSpace);
                 return func;
             }
 

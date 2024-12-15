@@ -28,7 +28,7 @@ namespace pluginVerilog.Verilog.Statements
             }
             word.MoveNext();
 
-            FunctionCall? func = FunctionCall.ParseCreate(word, nameSpace);
+            FunctionCall? func = FunctionCall.ParseCreate(word, nameSpace, nameSpace);
 
             if (word.Eof || func == null || word.Text != ")")
             {

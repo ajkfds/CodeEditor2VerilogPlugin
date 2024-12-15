@@ -151,6 +151,7 @@ namespace pluginVerilog.Verilog.Statements
             Expressions.Expression expression = Expressions.Expression.ParseCreate(word, nameSpace);
             if (expression == null)
             {
+                word.AddError("illegal expression");
                 word.SkipToKeyword(";");
                 word.AddError("illegal non blocking assignment");
                 return null;

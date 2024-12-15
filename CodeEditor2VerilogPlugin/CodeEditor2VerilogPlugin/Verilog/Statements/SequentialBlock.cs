@@ -145,8 +145,16 @@ namespace pluginVerilog.Verilog.Statements
                     namedBlock = (NamedSequentialBlock)nameSpace.NamedElements[word.Text];
                 }
                 else
-                {
-                    return null;
+                { // inside of task & function can skip parse. In this case namedBlock is not registered in namedElements
+                    namedBlock = new NamedSequentialBlock(nameSpace.BuildingBlock, nameSpace)
+                    {
+                        BeginIndexReference = beginIndex,
+                        DefinitionReference = word.CrateWordReference(),
+                        Name = word.Text,
+                        Parent = nameSpace,
+                        Project = word.Project
+                    };
+                    nameSpace.NamedElements.Add(namedBlock.Name, namedBlock);
                 }
                 word.MoveNext();
             }

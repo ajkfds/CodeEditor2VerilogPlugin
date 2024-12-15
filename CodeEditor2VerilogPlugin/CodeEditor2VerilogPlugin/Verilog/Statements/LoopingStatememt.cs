@@ -199,7 +199,7 @@ namespace pluginVerilog.Verilog.Statements
                 BeginIndexReference = word.CreateIndexReference(), 
                 DefinitionReference = word.CrateWordReference(), 
                 Name = "", 
-                Parent = word.RootParsedDocument.Root, 
+                Parent = nameSpace,
                 Project = word.Project 
             };
 
@@ -235,9 +235,15 @@ namespace pluginVerilog.Verilog.Statements
             }
 
             // for_initialization
-            if(!Verilog.DataObjects.Variables.Variable.ParseDeclaration(word, forStatement))
+            if(!Verilog.DataObjects.Variables.Variable.ParseDeclaration(word, forStatement)) // define index parameter
             {
-                Expressions.Expression expression = Expressions.Expression.ParseCreate(word, forStatement);
+                Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, forStatement);
+                if(expression == null)
+                {
+                    word.AddError("illegal for_initialization");
+                    return null;
+                }
+
                 switch (word.Text)
                 {
                     case "=":

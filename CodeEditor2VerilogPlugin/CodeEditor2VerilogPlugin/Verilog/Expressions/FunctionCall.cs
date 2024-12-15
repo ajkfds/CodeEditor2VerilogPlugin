@@ -14,14 +14,20 @@ namespace pluginVerilog.Verilog.Expressions
 
         public new static FunctionCall? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
+            throw new Exception();
+        }
+
+
+        public new static FunctionCall? ParseCreate(WordScanner word,NameSpace definedNameSpace, NameSpace nameSpace)
+        {
             FunctionCall functionCall = new FunctionCall();
             functionCall.Reference = word.GetReference();
             functionCall.FunctionName = word.Text;
 
             Function? function = null;
-            if (nameSpace.BuildingBlock.NamedElements.ContainsFunction(functionCall.FunctionName))
+            if (definedNameSpace.BuildingBlock.NamedElements.ContainsFunction(functionCall.FunctionName))
             {
-                function = (Function)nameSpace.BuildingBlock.NamedElements[functionCall.FunctionName];
+                function = (Function)definedNameSpace.BuildingBlock.NamedElements[functionCall.FunctionName];
             }
             else if (word.RootParsedDocument.ProjectProperty.SystemFunctions.ContainsKey(word.Text))
             {
