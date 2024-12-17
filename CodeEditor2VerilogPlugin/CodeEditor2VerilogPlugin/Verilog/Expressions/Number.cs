@@ -54,6 +54,81 @@ namespace pluginVerilog.Verilog.Expressions
         // x_digit ::= x | X 
         // z_digit ::= z | Z | ?
 
+        /*
+        primary_literal     ::= number | time_literal | unbased_unsized_literal | string_literal
+
+        time_literal        ::= unsigned_number time_unit
+                              | fixed_point_number time_unit
+
+        time_unit           ::= "s" | "ms" | "us" | "ns" | "ps" | "fs"
+        number              ::= integral_number
+                              | real_number
+        integral_number     ::= decimal_number
+                              | octal_number
+                              | binary_number
+                              | hex_number
+
+        decimal_number      ::= unsigned_number
+                              | [ size ] decimal_base unsigned_number
+                              | [ size ] decimal_base x_digit { _ }
+                              | [ size ] decimal_base z_digit { _ }
+        binary_number       ::= [ size ] binary_base binary_value
+        octal_number        ::= [ size ] octal_base octal_value
+        hex_number          ::= [ size ] hex_base hex_value
+        sign                ::= + | -
+        size                ::= non_zero_unsigned_number
+        non_zero_unsigned_number ::= non_zero_decimal_digit { _ | decimal_digit}
+        real_number         ::= fixed_point_number
+                              | unsigned_number [ . unsigned_number ] exp [ sign ] unsigned_number
+        fixed_point_number  ::= unsigned_number . unsigned_number
+        exp                 ::= e | E
+        unsigned_number     ::= decimal_digit { _ | decimal_digit }
+        binary_value        ::= binary_digit { _ | binary_digit }
+        octal_value         ::= octal_digit { _ | octal_digit }
+        hex_value           ::= hex_digit { _ | hex_digit }
+        decimal_base        ::= '[s|S]d | '[s|S]D
+        binary_base         ::= '[s|S]b | '[s|S]B
+        octal_base          ::= '[s|S]o | '[s|S]O
+        hex_base            ::= '[s|S]h | '[s|S]H
+        non_zero_decimal_digit  ::= 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+        decimal_digit           ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+        binary_digit            ::= x_digit | z_digit | 0 | 1
+        octal_digit             ::= x_digit | z_digit | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7
+        hex_digit               ::= x_digit | z_digit | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a | b | c | d | e | f | A | B | C | D | E | F
+        x_digit                 ::= x | X
+        z_digit                 ::= z | Z | ?
+        unbased_unsized_literal ::= '0 | '1 | 'z_or_x 48
+        string_literal          ::= " { Any_ASCII_Characters } " // from A.8.8
+         */
+
+        /*
+                Integer literal constants can be specified in decimal, hexadecimal, octal, or binary format.
+
+                There are two forms to express integer literal constants.The first form is a simple decimal number, which
+                shall be specified as a sequence of digits 0 through 9, optionally starting with a plus or minus unary
+                operator. The second form specifies a based literal constant, which shall be composed of up to three
+                tokens—an optional size constant, an apostrophe character (', ASCII 0x27) followed by a base format
+                character, and the digits representing the value of the number.It shall be legal to macro-substitute these three
+                tokens.
+
+                The first token, a size constant, shall specify the size of the integer literal constant in terms of its exact
+                number of bits.It shall be specified as a nonzero unsigned decimal number. For example, the size
+                specification for two hexadecimal digits is eight because one hexadecimal digit requires 4 bits.
+
+                The second token, a base_format, shall consist of a case insensitive letter specifying the base for the
+                number, optionally preceded by the single character s (or S) to indicate a signed quantity, preceded by the
+                apostrophe character.Legal base specifications are d, D, h, H, o, O, b, or B for the bases decimal,
+                hexadecimal, octal, and binary, respectively.
+                The apostrophe character and the base format character shall not be separated by any white space.
+
+                The third token, an unsigned number, shall consist of digits that are legal for the specified base format.The
+                unsigned number token shall immediately follow the base format, optionally preceded by white space.The
+                hexadecimal digits a to f shall be case insensitive.
+
+
+
+                size_constant base_format unsigned_number
+        */
         public bool Signed = false;
         public NumberTypeEnum NumberType = NumberTypeEnum.Decimal;
         public string Text = "";
@@ -130,84 +205,97 @@ namespace pluginVerilog.Verilog.Expressions
                 index++;
             }
 
-            if(apostropheIndex == -1)
+            if(apostropheIndex == -1) // no proceeding  apostrophe
             { // decimal
                 number.NumberType = NumberTypeEnum.Decimal;
                 number.Value = long.Parse(sb.ToString());
                 number.Constant = true;
                 word.MoveNext();
 
+                index = 0;
+                if (word.GetCharAt(index) != '\'') return number;
+                apostropheIndex = 0;
+                parseAfterApostrophe(word, nameSpace, index, apostropheIndex, number, sb);
+                word.Color(CodeDrawStyle.ColorType.Number);
+                number.Text = number.Text + word.Text;
+                word.MoveNext();
                 return number;
             }
             else
             {
-                index = apostropheIndex + 1;
-                if(index == word.Length)
-                {
-                    // cast
-                    int value;
-                    if (int.TryParse(sb.ToString(), out value))
-                    {
-                        number.Value = value;
-                        number.Constant = true;
-                    }
-
-                    sb.Append("'");
-
-                    return Cast.ParseCreate(word, nameSpace, number);
-                }
-
-
-                if (index >= word.Length) return null;
-                if( word.GetCharAt(index) == 's' || word.GetCharAt(index) == 'S')
-                {
-                    number.Signed = true;
-                    index++;
-                    if (index >= word.Length)
-                    {
-                        word.AddError("illegal number value");
-                        return null;
-                    }
-                }
-                if (sb.Length != 0)
-                {
-                    int bitWidth;
-                    if (int.TryParse(sb.ToString(), out bitWidth))
-                    {
-                        number.BitWidth = bitWidth;
-                    }
-                }
-                sb.Clear();
-                switch(word.GetCharAt(index))
-                {
-                    case 'd':
-                    case 'D':
-                        if (!parseDecimalValue(number, word, ref index, sb)) return null;
-                        break;
-                    case 'b':
-                    case 'B':
-                        if (!parseBinaryValue(number, word, ref index, sb)) return null;
-                        break;
-                    case 'o':
-                    case 'O':
-                        if (!parseOctalValue(number, word, ref index, sb)) return null;
-                        break;
-                    case 'h':
-                    case 'H':
-                        if (!parseHexValue(number, word, ref index, sb)) return null;
-                        break;
-                    case '1':
-                    case '0':
-                    case 'x':
-                    case 'z':
-                        if (word.Length == 2) return parseSingleBitPadding(word, index);
-                        return null;
-                    default:
-                        return null;
-                }
-
+                parseAfterApostrophe(word, nameSpace,index, apostropheIndex, number, sb);
+                word.MoveNext();
+                return number;
             }
-            word.MoveNext();
+        }
+
+        public static Primary? parseAfterApostrophe(WordScanner word, NameSpace nameSpace, int index,int apostropheIndex, Number number,StringBuilder sb)
+        {
+            // parse after apostrophe
+            index = apostropheIndex + 1;
+            if (index == word.Length)
+            {
+                // cast
+                int value;
+                if (int.TryParse(sb.ToString(), out value))
+                {
+                    number.Value = value;
+                    number.Constant = true;
+                }
+
+                sb.Append("'");
+
+                return Cast.ParseCreate(word, nameSpace, number);
+            }
+
+
+            if (index >= word.Length) return null;
+            if (word.GetCharAt(index) == 's' || word.GetCharAt(index) == 'S')
+            {
+                number.Signed = true;
+                index++;
+                if (index >= word.Length)
+                {
+                    word.AddError("illegal number value");
+                    return null;
+                }
+            }
+            if (sb.Length != 0)
+            {
+                int bitWidth;
+                if (int.TryParse(sb.ToString(), out bitWidth))
+                {
+                    number.BitWidth = bitWidth;
+                }
+            }
+            sb.Clear();
+            switch (word.GetCharAt(index))
+            {
+                case 'd':
+                case 'D':
+                    if (!parseDecimalValue(number, word, ref index, sb)) return null;
+                    break;
+                case 'b':
+                case 'B':
+                    if (!parseBinaryValue(number, word, ref index, sb)) return null;
+                    break;
+                case 'o':
+                case 'O':
+                    if (!parseOctalValue(number, word, ref index, sb)) return null;
+                    break;
+                case 'h':
+                case 'H':
+                    if (!parseHexValue(number, word, ref index, sb)) return null;
+                    break;
+                case '1':
+                case '0':
+                case 'x':
+                case 'z':
+                    if (word.Length == 2) return parseSingleBitPadding(word, index);
+                    return null;
+                default:
+                    return null;
+            }
             return number;
         }
 
@@ -311,6 +399,8 @@ namespace pluginVerilog.Verilog.Expressions
             sb.Clear();
             number.NumberType = NumberTypeEnum.Decimal;
             index++;
+
+            // if word is already end, move to next word
             if (index >= word.Length)
             {
                 word.MoveNext();
