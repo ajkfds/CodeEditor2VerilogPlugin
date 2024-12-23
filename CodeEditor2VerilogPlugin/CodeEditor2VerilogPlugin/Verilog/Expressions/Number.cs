@@ -1,4 +1,5 @@
 ﻿using Avalonia.Controls.Documents;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -97,7 +98,7 @@ namespace pluginVerilog.Verilog.Expressions
         hex_digit               ::= x_digit | z_digit | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | a | b | c | d | e | f | A | B | C | D | E | F
         x_digit                 ::= x | X
         z_digit                 ::= z | Z | ?
-        unbased_unsized_literal ::= '0 | '1 | 'z_or_x 48
+        unbased_unsized_literal ::= '0 | '1 | 'z_or_x
         string_literal          ::= " { Any_ASCII_Characters } " // from A.8.8
          */
 
@@ -205,7 +206,7 @@ namespace pluginVerilog.Verilog.Expressions
                 index++;
             }
 
-            if(apostropheIndex == -1) // no proceeding  apostrophe
+            if (apostropheIndex == -1) // no proceeding  apostrophe
             { // decimal
                 number.NumberType = NumberTypeEnum.Decimal;
                 number.Value = long.Parse(sb.ToString());
@@ -214,39 +215,75 @@ namespace pluginVerilog.Verilog.Expressions
 
                 index = 0;
                 if (word.GetCharAt(index) != '\'') return number;
-                apostropheIndex = 0;
-                parseAfterApostrophe(word, nameSpace, index, apostropheIndex, number, sb);
+
                 word.Color(CodeDrawStyle.ColorType.Number);
                 number.Text = number.Text + word.Text;
-                word.MoveNext();
+                apostropheIndex = 0;
+                parseAfterApostrophe(word, nameSpace, index, apostropheIndex, number, sb);
                 return number;
             }
-            else
-            {
+            //else if (apostropheIndex == 0)
+            //{
+            //    return parseUnbasedUnsizedLiteral(word, nameSpace, lValue);
+            //}
+        else {
+                if (apostropheIndex + 1 == word.Length)
+                {
+                    // cast
+                    int value;
+                    if (int.TryParse(sb.ToString(), out value))
+                    {
+                        number.Value = value;
+                        number.Constant = true;
+                    }
+
+                    sb.Append('\'');
+
+                    return Cast.ParseCreate(word, nameSpace, number);
+                }
                 parseAfterApostrophe(word, nameSpace,index, apostropheIndex, number, sb);
-                word.MoveNext();
                 return number;
             }
         }
+
+        //public static Primary? parseUnbasedUnsizedLiteral(WordScanner word, NameSpace nameSpace, bool lValue) 
+        //{
+        //    switch(word.Text){
+        //        case "'0":
+        //            word.Color(CodeDrawStyle.ColorType.Number);
+        //            word.MoveNext();
+        //            return new Number() { Value = 0, Constant = true, NumberType = NumberTypeEnum.Decimal };
+        //        case "'1":
+        //            word.Color(CodeDrawStyle.ColorType.Number);
+        //            word.MoveNext();
+        //            return new Number() { Value = 1, Constant = true, NumberType = NumberTypeEnum.Decimal };
+        //        case "'z":
+        //            word.Color(CodeDrawStyle.ColorType.Number);
+        //            word.MoveNext();
+        //            return new Number() { Value = null, Constant = true, NumberType = NumberTypeEnum.Decimal };
+        //        case "'Z":
+        //            word.Color(CodeDrawStyle.ColorType.Number);
+        //            word.MoveNext();
+        //            return new Number() { Value = null, Constant = true, NumberType = NumberTypeEnum.Decimal };
+        //        case "'x":
+        //            word.Color(CodeDrawStyle.ColorType.Number);
+        //            word.MoveNext();
+        //            return new Number() { Value = null, Constant = true, NumberType = NumberTypeEnum.Decimal };
+        //        case "'X":
+        //            word.Color(CodeDrawStyle.ColorType.Number);
+        //            word.MoveNext();
+        //            return new Number() { Value = null, Constant = true, NumberType = NumberTypeEnum.Decimal };
+        //        default:
+        //            word.AddError("illegal number value");
+        //            return null;
+        //    }
+        //}
+
 
         public static Primary? parseAfterApostrophe(WordScanner word, NameSpace nameSpace, int index,int apostropheIndex, Number number,StringBuilder sb)
         {
             // parse after apostrophe
             index = apostropheIndex + 1;
-            if (index == word.Length)
-            {
-                // cast
-                int value;
-                if (int.TryParse(sb.ToString(), out value))
-                {
-                    number.Value = value;
-                    number.Constant = true;
-                }
-
-                sb.Append("'");
-
-                return Cast.ParseCreate(word, nameSpace, number);
-            }
 
 
             if (index >= word.Length) return null;
@@ -291,7 +328,12 @@ namespace pluginVerilog.Verilog.Expressions
                 case '0':
                 case 'x':
                 case 'z':
-                    if (word.Length == 2) return parseSingleBitPadding(word, index);
+                case 'X':
+                case 'Z':
+                    if (word.Length == 2) {
+                        number = parseSingleBitPadding(word, index);
+                        return number;
+                    }
                     return null;
                 default:
                     return null;
@@ -323,6 +365,14 @@ namespace pluginVerilog.Verilog.Expressions
                     word.MoveNext();
                     return number;
                 case 'z':
+                    word.AddSystemVerilogError();
+                    word.MoveNext();
+                    return number;
+                case 'X':
+                    word.AddSystemVerilogError();
+                    word.MoveNext();
+                    return number;
+                case 'Z':
                     word.AddSystemVerilogError();
                     word.MoveNext();
                     return number;
@@ -391,6 +441,7 @@ namespace pluginVerilog.Verilog.Expressions
                 number.Value = value;
                 number.Constant = true;
             }
+            word.MoveNext();
             return true;
         }
 
@@ -404,9 +455,9 @@ namespace pluginVerilog.Verilog.Expressions
             if (index >= word.Length)
             {
                 word.MoveNext();
+                number.Text = number.Text + word.Text;
                 word.Color(CodeDrawStyle.ColorType.Number);
                 index = 0;
-                number.Text = number.Text + word.Text;
             }
 
             if (
@@ -443,6 +494,7 @@ namespace pluginVerilog.Verilog.Expressions
                 number.Value = value;
                 number.Constant = true;
             }
+            word.MoveNext();
             return true;
         }
 
@@ -454,9 +506,9 @@ namespace pluginVerilog.Verilog.Expressions
             if (index >= word.Length)
             {
                 word.MoveNext();
-                index = 0;
-                word.Color(CodeDrawStyle.ColorType.Number);
                 number.Text = number.Text + word.Text;
+                word.Color(CodeDrawStyle.ColorType.Number);
+                index = 0;
             }
 
             bool valueHeadError = false;
@@ -509,6 +561,7 @@ namespace pluginVerilog.Verilog.Expressions
                 }
             }
 
+            word.MoveNext();
             return true;
         }
 
@@ -520,10 +573,11 @@ namespace pluginVerilog.Verilog.Expressions
             if (index >= word.Length)
             {
                 word.MoveNext();
-                index = 0;
-                word.Color(CodeDrawStyle.ColorType.Number);
                 number.Text = number.Text + word.Text;
+                word.Color(CodeDrawStyle.ColorType.Number);
+                index = 0;
             }
+
             if (!isOctalDigit(word.GetCharAt(index)))
             {
                 word.AddError("iilegal octal digit");
@@ -553,6 +607,7 @@ namespace pluginVerilog.Verilog.Expressions
             {
 
             }
+            word.MoveNext();
             return true;
         }
 
@@ -564,9 +619,9 @@ namespace pluginVerilog.Verilog.Expressions
             if (index >= word.Length)
             {
                 word.MoveNext();
-                index = 0;
-                word.Color(CodeDrawStyle.ColorType.Number);
                 number.Text = number.Text + word.Text;
+                word.Color(CodeDrawStyle.ColorType.Number);
+                index = 0;
             }
 
             bool hexHeadError = false;
@@ -610,6 +665,7 @@ namespace pluginVerilog.Verilog.Expressions
             {
                 // overflow value
             }
+            word.MoveNext();
             return true;
         }
 

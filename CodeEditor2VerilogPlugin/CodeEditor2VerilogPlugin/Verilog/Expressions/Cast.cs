@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace pluginVerilog.Verilog.Expressions
 {
@@ -11,7 +12,6 @@ namespace pluginVerilog.Verilog.Expressions
         protected Cast() { }
 
         public Expression Expression { get; protected set; }
-
         public override void DisposeSubReference(bool keepThisReference)
         {
             base.DisposeSubReference(keepThisReference);
@@ -26,13 +26,30 @@ namespace pluginVerilog.Verilog.Expressions
             label.AppendText(")");
             return label;
         }
+        public override string CreateString()
+        {
+            return Text;
+        }
 
-// constant_cast    ::= casting_type ' ( constant_expression )
-// cast             ::=  casting_type ' ( expression )
+        public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        {
+            label.AppendText(Text, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Number));
+        }
 
-// casting_type     ::= simple_type | constant_primary | signing | "string" | "const"
-// simple_type      ::= integer_type | non_integer_type | ps_type_identifier | ps_parameter_identifier
-        public static Primary? ParseCreate(WordScanner word, NameSpace nameSpace,Number number)
+        public override void AppendString(StringBuilder stringBuilder)
+        {
+            stringBuilder.Append(Text);
+        }
+
+
+        string Text="";
+
+        // constant_cast    ::= casting_type ' ( constant_expression )
+        // cast             ::=  casting_type ' ( expression )
+
+        // casting_type     ::= simple_type | constant_primary | signing | "string" | "const"
+        // simple_type      ::= integer_type | non_integer_type | ps_type_identifier | ps_parameter_identifier
+        public static Primary? ParseCreate(WordScanner word, NameSpace nameSpace, Number number)
         {
             Cast cast = new Cast();
             cast.Reference = number.Reference;
