@@ -21,6 +21,8 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
         public bool IsVector { get { return false; } }
 
+        public virtual List<DataObjects.Arrays.PackedArray> PackedDimensions { get; protected set; } = new List<DataObjects.Arrays.PackedArray>();
+
         // IModuleOrInterfaceOrProgram
 
         // Port

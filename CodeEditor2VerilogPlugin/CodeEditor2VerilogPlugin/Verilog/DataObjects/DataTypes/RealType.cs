@@ -15,6 +15,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 return DataTypeEnum.Real;
             }
         }
+        public virtual List<DataObjects.Arrays.PackedArray> PackedDimensions { get; protected set; } = new List<DataObjects.Arrays.PackedArray>();
         public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
         public static RealType ParseCreate(WordScanner word, NameSpace nameSpace)
         {

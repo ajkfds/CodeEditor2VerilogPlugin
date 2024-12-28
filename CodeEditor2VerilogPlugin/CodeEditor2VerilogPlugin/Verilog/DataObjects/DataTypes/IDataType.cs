@@ -13,5 +13,8 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
         public CodeDrawStyle.ColorType ColorType { get; }
         public bool IsVector { get; }
+
+        public List<Arrays.PackedArray> PackedDimensions { get; }
+
     }
 }

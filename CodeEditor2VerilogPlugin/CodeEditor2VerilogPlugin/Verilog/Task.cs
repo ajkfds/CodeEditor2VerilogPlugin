@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using pluginVerilog.Verilog.DataObjects.Variables;
-using Microsoft.CodeAnalysis.Emit;
+//using Microsoft.CodeAnalysis.Emit;
 
 namespace pluginVerilog.Verilog
 {

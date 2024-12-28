@@ -207,16 +207,6 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 variable.DefinedReference = word.GetReference();
 
 
-                //switch (dataType.Type)
-                //{
-                //    case DataTypeEnum.Reg:
-                //        word.Color(CodeDrawStyle.ColorType.Register);
-                //        break;
-                //    default:
-                //        word.Color(CodeDrawStyle.ColorType.Variable);
-                //        break;
-                //}
-
                 word.Color(variable.ColorType);
                 word.MoveNext();
 

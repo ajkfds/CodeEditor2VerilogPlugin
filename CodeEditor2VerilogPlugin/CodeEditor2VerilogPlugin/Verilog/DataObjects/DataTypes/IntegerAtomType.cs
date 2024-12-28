@@ -12,6 +12,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
     {
         public required virtual DataTypeEnum Type { get; init; }
         public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
+        public virtual List<DataObjects.Arrays.PackedArray> PackedDimensions { get; protected set; } = new List<DataObjects.Arrays.PackedArray>();
         public virtual bool Signed { get; protected set; }
 
         // data_type            ::=   integer_atom_type[signing]

@@ -16,6 +16,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             }
         }
         public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
+        public virtual List<DataObjects.Arrays.PackedArray> PackedDimensions { get; protected set; } = new List<Arrays.PackedArray>();
 
 
         /*

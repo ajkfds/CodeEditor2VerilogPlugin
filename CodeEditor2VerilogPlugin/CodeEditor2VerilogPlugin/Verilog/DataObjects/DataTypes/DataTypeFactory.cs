@@ -1,4 +1,5 @@
-﻿using pluginVerilog.Verilog.DataObjects.Variables;
+﻿using pluginVerilog.Verilog.DataObjects.Arrays;
+using pluginVerilog.Verilog.DataObjects.Variables;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -94,6 +95,9 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             | ps_covergroup_identifier 
             | type_reference
 
+        type_reference ::=   "type" "(" expression ")"
+                           | "type" "(" data_type ")"
+
         integer_atom_type   ::= "byte" | "shortint" | "int" | "longint" | "integer" | "time"
         integer_vector_type ::= "bit" | "logic" | "reg"
         non_integer_type    ::= "shortreal" | "real" | "realtime"
@@ -124,6 +128,10 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             non_integer_type    ::= "shortreal" | "real" | "realtime"
 
             signing ::= "signed" | "unsigned"
+
+
+            14) When a type_reference is used in a net declaration, it shall be preceded by a net type keyword; and when it is used in a variable declaration, it shall be preceded by the var keyword.
+
             */
 
             // SystemVerilog data type does not include nets
@@ -203,23 +211,30 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                             {
                                 word.Color(CodeDrawStyle.ColorType.Keyword);
                                 word.MoveNext();
+
+                                // packed_dimension
+                                while (word.GetCharAt(0) == '[')
+                                {
+                                    PackedArray? range = PackedArray.ParseCreate(word, nameSpace);
+                                    if (word.Eof || range == null)
+                                    {
+                                        word.AddError("illegal reg declaration");
+                                        return null;
+                                    }
+
+                                    PackedArray? packedArray = range as Arrays.PackedArray;
+
+                                    if (packedArray != null)
+                                    {
+                                        dType.PackedDimensions.Add(packedArray);
+                                    }
+                                }
+
+
                                 return dType;
                             }
                         }
 
-                        //if (nameSpace.Typedefs.ContainsKey(word.Text))
-                        //{
-                        //}
-                        //else if (word.RootParsedDocument.Root != null && word.RootParsedDocument.Root.Typedefs.ContainsKey(word.Text))
-                        //{
-                        //    IDataType dType = word.RootParsedDocument.Root.Typedefs[word.Text].VariableType;
-                        //    if (dType != null)
-                        //    {
-                        //        word.Color(CodeDrawStyle.ColorType.Keyword);
-                        //        word.MoveNext();
-                        //        return dType;
-                        //    }
-                        //}
                     }else if(word.RootParsedDocument.Root != null && word.RootParsedDocument.Root.NamedElements.ContainsKey(word.Text))
                     {
                         INamedElement namedElement = word.RootParsedDocument.Root.NamedElements[word.Text];
@@ -274,45 +289,6 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             }
             return null;
         }
-
-        //private static IDataType Create(DataTypeEnum dataType)
-        //{
-        //    IDataType dType;
-        //    switch (dataType)
-        //    {
-        //        case DataTypeEnum.Bit:
-        //        case DataTypeEnum.Logic:
-        //        case DataTypeEnum.Reg:
-        //            dType = new IntegerVectorType() { Type = dataType };
-        //            break;
-        //        case DataTypeEnum.Byte:
-        //        case DataTypeEnum.Shortint:
-        //        case DataTypeEnum.Int:
-        //        case DataTypeEnum.Longint:
-        //        case DataTypeEnum.Integer:
-        //        case DataTypeEnum.Time:
-        //            dType = new IntegerAtomType() { Type = dataType };
-        //            break;
-        //        case DataTypeEnum.Shortreal:
-        //            dType = new ShortRealType();
-        //            break;
-        //        case DataTypeEnum.Real:
-        //            dType = new ShortRealType();
-        //            break;
-        //        case DataTypeEnum.Realtime:
-        //            dType = new RealTimeType();
-        //            break;
-        //        case DataTypeEnum.Enum:
-        //            return Enum.ParseCreate(word, nameSpace);
-        //        case DataTypeEnum.String:
-        //            return parseSimpleType(word, nameSpace, DataTypeEnum.String);
-        //        case DataTypeEnum.Chandle:
-        //            return Chandle.ParseCreate(word, nameSpace);
-        //        default:
-        //            return null;
-        //    }
-        //    return dType;
-        //}
 
         private static IDataType? parseTypeReference(WordScanner word, NameSpace nameSpace)
         {
