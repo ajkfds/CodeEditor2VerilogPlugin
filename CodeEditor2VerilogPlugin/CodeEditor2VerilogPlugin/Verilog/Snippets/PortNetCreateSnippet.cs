@@ -25,7 +25,7 @@ namespace pluginVerilog.Verilog.Snippets
             if (file == null) return;
             CodeEditor2.CodeEditor.CodeDocument codeDocument = file.CodeDocument;
 
-            CodeEditor2.Data.ITextFile iText = CodeEditor2.Controller.CodeEditor.GetTextFile();
+            CodeEditor2.Data.ITextFile? iText = CodeEditor2.Controller.CodeEditor.GetTextFile();
 
             if (!(iText is Data.IVerilogRelatedFile)) return;
             Data.IVerilogRelatedFile? vFile = iText as Data.IVerilogRelatedFile;
@@ -47,7 +47,7 @@ namespace pluginVerilog.Verilog.Snippets
                 if (moduleInstantiation == null) continue;
 
                 if (iref.IsSmallerThan(moduleInstantiation.BeginIndexReference)) continue;
-                if (iref.IsGreaterThan(moduleInstantiation.LastIndexReference)) continue;
+                if (moduleInstantiation.LastIndexReference==null || iref.IsGreaterThan(moduleInstantiation.LastIndexReference)) continue;
 
                 writeModuleInstance(codeDocument, index, moduleInstantiation);
                 return;
@@ -58,7 +58,10 @@ namespace pluginVerilog.Verilog.Snippets
         {
             CodeEditor.CodeDocument? vCodeDocument = codeDocument as CodeEditor.CodeDocument;
             if (vCodeDocument == null) return;
-            ProjectProperty? projectProperty = codeDocument.TextFile.Project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+            if (moduleInstantiation.LastIndexReference == null) return;
+            CodeEditor2.Data.ITextFile? iText = CodeEditor2.Controller.CodeEditor.GetTextFile();
+            if (iText == null) return;
+            ProjectProperty? projectProperty = iText.Project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
             if (projectProperty == null) return;
 
             string indent = vCodeDocument.GetIndentString(index);
@@ -152,9 +155,29 @@ namespace pluginVerilog.Verilog.Snippets
 
                     BuildingBlock? buildingBlock = moduleInstantiation.GetInstancedBuildingBlock();
                     if(buildingBlock != null && !buildingBlock.NamedElements.ContainsKey(valueName)){
+
+
                         if(port.DataObject != null)
                         {
-                            sbDefine.Append(port.DataObject.CreateDataTypeString() + "\t" + valueName);
+                            if(port.DataObject is DataObjects.Nets.Net)
+                            {
+                                DataObjects.Nets.Net net = (DataObjects.Nets.Net)port.DataObject;
+                                DataObjects.Nets.Net newNet = new DataObjects.Nets.Net() { Name = valueName };
+                            }
+                            else if(port.DataObject is DataObjects.Variables.IntegerVectorValueVariable)
+                            {
+                                DataObjects.Variables.IntegerVectorValueVariable vector = (DataObjects.Variables.IntegerVectorValueVariable)port.DataObject;
+                                DataObjects.Nets.Net newNet = new DataObjects.Nets.Net() { Name = valueName };
+
+                                sb.Append("wire");
+                            }
+                            else
+                            {
+                                sbDefine.Append(port.DataObject.CreateTypeString());
+                            }
+
+
+                            sbDefine.Append("\t" + valueName);
                             foreach (var dimension in port.DataObject.Dimensions)
                             {
                                 sbDefine.Append(dimension.CreateString());

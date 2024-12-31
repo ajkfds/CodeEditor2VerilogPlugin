@@ -141,6 +141,65 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             return net;
         }
 
+        public override string CreateTypeString()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            switch (NetType)
+            {
+                case NetTypeEnum.Supply0:
+                    sb.Append("supply0");
+                    break;
+                case NetTypeEnum.Supply1:
+                    sb.Append("supply1");
+                    break;
+                case NetTypeEnum.Tri:
+                    sb.Append("tri");
+                    break;
+                case NetTypeEnum.Triand:
+                    sb.Append("triand");
+                    break;
+                case NetTypeEnum.Trior:
+                    sb.Append("trior");
+                    break;
+                case NetTypeEnum.Trireg:
+                    sb.Append("trireg");
+                    break;
+                case NetTypeEnum.Tri0:
+                    sb.Append("tri0");
+                    break;
+                case NetTypeEnum.Tri1:
+                    sb.Append("tri1");
+                    break;
+                case NetTypeEnum.Uwire:
+                    sb.Append("uwire");
+                    break;
+                case NetTypeEnum.Wire:
+                    sb.Append("wire");
+                    break;
+                case NetTypeEnum.Wand:
+                    sb.Append("wand");
+                    break;
+                case NetTypeEnum.Wor:
+                    sb.Append("wor");
+                    break;
+            }
+
+            sb.Append(" ");
+            if (Signed)
+            {
+                sb.Append("signed ");
+            }
+
+            if (Range != null)
+            {
+                sb.Append(Range.CreateString());
+                sb.Append(" ");
+            }
+
+            if (DataType != null) sb.Append(DataType.CreateString());
+            return sb.ToString();
+        }
 
         public static NetTypeEnum? parseNetType(WordScanner word, NameSpace nameSpace)
         {

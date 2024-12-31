@@ -1,5 +1,7 @@
-﻿using System;
+﻿using pluginVerilog.Verilog.DataObjects.DataTypes;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -87,16 +89,31 @@ namespace pluginVerilog.Verilog.Expressions
             Cast cast = new Cast();
             cast.Reference = word.CrateWordReference();
 
+            IDataType? dataType = null;
+
             Verilog.INamedElement? namedElement = nameSpace.NamedElements.GetDataObject(word.Text);
-            if(namedElement == null)
+            if(namedElement != null)
+            {
+                word.Color(namedElement.ColorType);
+                word.MoveNext();
+                if (namedElement is IDataType)
+                {
+                    dataType = namedElement as IDataType;
+                }
+            }else
+            {
+                dataType = DataTypeFactory.ParseCreate(word, nameSpace, null);
+            }
+
+            if(dataType == null)
             {
                 word.AddError("illegal cast");
                 return null;
             }
-            word.Color(namedElement.ColorType);
-            word.MoveNext();
+
             if (word.Text != "'") throw new Exception();
             word.MoveNext();
+
             if (word.Eof || word.Text!="(")
             {
                 word.AddError("illegal cast");

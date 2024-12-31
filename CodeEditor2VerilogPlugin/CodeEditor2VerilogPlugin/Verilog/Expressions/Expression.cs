@@ -55,7 +55,9 @@ namespace pluginVerilog.Verilog.Expressions
         }
         public virtual string CreateString()
         {
-            return "";
+            StringBuilder sb = new StringBuilder();
+            AppendString(sb);
+            return sb.ToString();
         }
         public virtual void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
         {

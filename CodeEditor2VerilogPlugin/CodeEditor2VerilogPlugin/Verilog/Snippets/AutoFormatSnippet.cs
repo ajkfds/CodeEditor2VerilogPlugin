@@ -43,7 +43,7 @@ namespace pluginVerilog.Verilog.Snippets
                 if (moduleInstantiation == null) continue;
 
                 if (iref.IsSmallerThan(moduleInstantiation.BeginIndexReference)) continue;
-                if (iref.IsGreaterThan(moduleInstantiation.LastIndexReference)) continue;
+                if (moduleInstantiation.LastIndexReference == null || iref.IsGreaterThan(moduleInstantiation.LastIndexReference)) continue;
 
                 writeModuleInstance(codeDocument, index, moduleInstantiation);
 
@@ -56,6 +56,7 @@ namespace pluginVerilog.Verilog.Snippets
         {
             CodeEditor.CodeDocument? vCodeDocument = codeDocument as CodeEditor.CodeDocument;
             if (vCodeDocument == null) return;
+            if (moduleInstantiation.LastIndexReference == null) return;
 
             string indent = vCodeDocument.GetIndentString(index);
 

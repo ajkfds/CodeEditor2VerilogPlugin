@@ -220,7 +220,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                     int i = 0;
                     while (!word.Eof && word.Text != ")")
                     {
-                        Expressions.Expression expression = Expressions.Expression.ParseCreate(word, nameSpace);
+                        Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
                         if(instancedModule != null)
                         {
                             if (i >= instancedModule.PortParameterNameList.Count)
@@ -276,6 +276,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                     word.SkipToKeyword(";");
                 }
 
+                if(word.RootParsedDocument.Project==null) throw new Exception();
 
                 ModuleInstantiation moduleInstantiation = new ModuleInstantiation()
                 {
@@ -612,6 +613,14 @@ namespace pluginVerilog.Verilog.ModuleItems
                 }
             }
 
+
+            if (word.Text == ")")
+            {
+                word.MoveNext();
+                return;
+            }
+
+
             Expressions.Expression? expression;
             if (outPort)
             {
@@ -622,16 +631,38 @@ namespace pluginVerilog.Verilog.ModuleItems
                 expression = Expressions.Expression.ParseCreate(word, nameSpace);
             }
 
-            if(expression != null) connectPort(word, moduleInstantiation, instancedModule, pinName, expression);
-
-            if (word.Text == ")")
+            if (expression != null)
             {
-                word.MoveNext();
+                connectPort(word, moduleInstantiation, instancedModule, pinName, expression);
+                if (word.Text == ")")
+                {
+                    word.MoveNext();
+                }
+                else
+                {
+                    word.AddError(") expected");
+                }
             }
             else
             {
-                word.AddError(") expected");
+                word.AddError("illegal port connection");
+                if (word.Text == ")")
+                {
+                    word.MoveNext();
+                    return;
+                }
+                while (true)
+                {
+                    if (new List<string> { "endmodule", "endtask", "end", "endinterface", "endfunction" }.Contains(word.Text)) return;
+                    if (word.Text == ")")
+                    {
+                        word.MoveNext();
+                        return;
+                    }
+                    word.MoveNext();
+                }
             }
+
         }
 
         // 23.3.2.3 Connecting module instance using implicit named port connections

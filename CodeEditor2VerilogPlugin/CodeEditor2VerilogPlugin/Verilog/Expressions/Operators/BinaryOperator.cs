@@ -139,6 +139,13 @@ namespace pluginVerilog.Verilog.Expressions.Operators
             Primary2.AppendString(stringBuilder);
         }
 
+        public override string CreateString()
+        {
+            StringBuilder sb = new StringBuilder();
+            AppendString(sb);
+            return sb.ToString();
+        }
+
 
         Primary Primary1;
         Primary Primary2;
@@ -162,6 +169,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
             Constant = constant;
             Value = value;
             BitWidth = bitWidth;
+            
             Primary ret = this;
             if (Primary1 != null && Primary1.Reference != null && Primary2 != null && Primary2.Reference != null)
             {
