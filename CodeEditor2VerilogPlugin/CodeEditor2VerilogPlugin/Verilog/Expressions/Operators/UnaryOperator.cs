@@ -33,7 +33,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
             Primary.DisposeSubReference(false);
         }
 
-        public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
             label.AppendText(Text);
             Primary.AppendLabel(label);

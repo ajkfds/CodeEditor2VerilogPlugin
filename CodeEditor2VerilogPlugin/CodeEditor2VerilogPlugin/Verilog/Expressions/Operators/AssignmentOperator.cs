@@ -105,7 +105,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
             }
         }
 
-        public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
             Primary1.AppendLabel(label);
             label.AppendText(Text);

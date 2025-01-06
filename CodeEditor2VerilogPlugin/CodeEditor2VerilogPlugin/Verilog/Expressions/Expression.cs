@@ -47,9 +47,9 @@ namespace pluginVerilog.Verilog.Expressions
         /// get label object of this expression
         /// </summary>
         /// <returns></returns>
-        public virtual AjkAvaloniaLibs.Contorls.ColorLabel GetLabel()
+        public virtual AjkAvaloniaLibs.Controls.ColorLabel GetLabel()
         {
-            var label = new AjkAvaloniaLibs.Contorls.ColorLabel();
+            var label = new AjkAvaloniaLibs.Controls.ColorLabel();
             AppendLabel(label);
             return label;
         }
@@ -59,7 +59,7 @@ namespace pluginVerilog.Verilog.Expressions
             AppendString(sb);
             return sb.ToString();
         }
-        public virtual void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        public virtual void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
 
         }
@@ -157,12 +157,14 @@ namespace pluginVerilog.Verilog.Expressions
             mintypmax_expression | data_type | "$"
 
         */
+
+
         public static Expression? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             Expression? exp = parseCreate(word, nameSpace,false);
             if (exp == null) return null;
 
-            if(exp is AssignmentOperator)
+            if(exp is AssignmentOperator) // assignment operator should in ()
             {
                 exp.Reference.AddError("assignment operator needs ()");
             }

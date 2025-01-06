@@ -14,9 +14,9 @@ namespace pluginVerilog.Verilog.Expressions
         }
 
         private string text;
-        public override AjkAvaloniaLibs.Contorls.ColorLabel GetLabel()
+        public override AjkAvaloniaLibs.Controls.ColorLabel GetLabel()
         {
-            AjkAvaloniaLibs.Contorls.ColorLabel label = new AjkAvaloniaLibs.Contorls.ColorLabel();
+            AjkAvaloniaLibs.Controls.ColorLabel label = new AjkAvaloniaLibs.Controls.ColorLabel();
             AppendLabel(label);
             return label;
         }
@@ -27,7 +27,7 @@ namespace pluginVerilog.Verilog.Expressions
 //            return GetLabel().CreateString();
         }
 
-        public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
             label.AppendText(text);
         }

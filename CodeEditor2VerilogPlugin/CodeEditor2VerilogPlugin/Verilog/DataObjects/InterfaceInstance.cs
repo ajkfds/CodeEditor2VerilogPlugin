@@ -40,7 +40,7 @@ namespace pluginVerilog.Verilog.DataObjects
 
         public required IndexReference BeginIndexReference { get; init; }
         public IndexReference? LastIndexReference { get; set; }
-        public void AppendLabel(IndexReference iref, AjkAvaloniaLibs.Contorls.ColorLabel label)
+        public void AppendLabel(IndexReference iref, AjkAvaloniaLibs.Controls.ColorLabel label)
         {
         }
         public string OverrideParameterID

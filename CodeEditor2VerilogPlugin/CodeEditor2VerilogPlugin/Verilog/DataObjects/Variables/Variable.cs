@@ -111,12 +111,12 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
 
 
-        public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
             label.AppendText(Name);
         }
 
-        public override void AppendTypeLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        public override void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
 
         }

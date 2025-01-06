@@ -116,12 +116,12 @@ namespace pluginVerilog.Verilog.DataObjects
             return "";
         }
 
-        public virtual void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        public virtual void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
             label.AppendText(Name);
         }
 
-        public virtual void AppendTypeLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        public virtual void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
 
         }

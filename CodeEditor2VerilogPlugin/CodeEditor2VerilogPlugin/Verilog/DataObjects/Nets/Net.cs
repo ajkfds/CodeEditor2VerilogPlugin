@@ -44,7 +44,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             Wor
         }
 
-        public override void AppendTypeLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        public override void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
             switch (NetType)
             {
@@ -99,7 +99,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             }
         }
 
-        public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
             AppendTypeLabel(label);
             if (Name == null) return;

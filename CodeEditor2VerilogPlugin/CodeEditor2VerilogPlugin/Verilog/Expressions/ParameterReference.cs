@@ -11,13 +11,13 @@ namespace pluginVerilog.Verilog.Expressions
         protected ParameterReference() { }
         public string ParameterName { get; protected set; }
 
-        public override AjkAvaloniaLibs.Contorls.ColorLabel GetLabel()
+        public override AjkAvaloniaLibs.Controls.ColorLabel GetLabel()
         {
-            AjkAvaloniaLibs.Contorls.ColorLabel label = new AjkAvaloniaLibs.Contorls.ColorLabel();
+            AjkAvaloniaLibs.Controls.ColorLabel label = new AjkAvaloniaLibs.Controls.ColorLabel();
             AppendLabel(label);
             return label;
         }
-        public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
             label.AppendText(ParameterName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Parameter));
         }

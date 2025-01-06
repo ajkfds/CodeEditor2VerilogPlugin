@@ -20,9 +20,9 @@ namespace pluginVerilog.Verilog.Expressions
             Expression.DisposeSubReference(false);
         }
 
-        public override AjkAvaloniaLibs.Contorls.ColorLabel GetLabel()
+        public override AjkAvaloniaLibs.Controls.ColorLabel GetLabel()
         {
-            AjkAvaloniaLibs.Contorls.ColorLabel label = new AjkAvaloniaLibs.Contorls.ColorLabel();
+            AjkAvaloniaLibs.Controls.ColorLabel label = new AjkAvaloniaLibs.Controls.ColorLabel();
             label.AppendText("(");
             if (Expression != null) label.AppendLabel(Expression.GetLabel());
             label.AppendText(")");
@@ -33,7 +33,7 @@ namespace pluginVerilog.Verilog.Expressions
             return Text;
         }
 
-        public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
             label.AppendText(Text, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Number));
         }
@@ -51,10 +51,52 @@ namespace pluginVerilog.Verilog.Expressions
 
         // casting_type     ::= simple_type | constant_primary | signing | "string" | "const"
         // simple_type      ::= integer_type | non_integer_type | ps_type_identifier | ps_parameter_identifier
-        public static Primary? ParseCreate(WordScanner word, NameSpace nameSpace, Number number)
+        //public static Primary? ParseCreate(WordScanner word, NameSpace nameSpace, Number number)
+        //{
+        //    Cast cast = new Cast();
+        //    cast.Reference = number.Reference;
+        //    word.MoveNext();
+        //    if (word.Eof || word.Text != "(")
+        //    {
+        //        word.AddError("illegal cast");
+        //        return null;
+        //    }
+        //    word.MoveNext();
+
+        //    Expression? exp1 = Expression.ParseCreate(word, nameSpace);
+        //    if (word.Eof || exp1 == null || word.Text != ")")
+        //    {
+        //        word.AddError("illegal cast");
+        //        return null;
+        //    }
+        //    word.MoveNext();
+
+        //    cast.Reference = WordReference.CreateReferenceRange(cast.Reference, word.GetReference());
+        //    cast.Expression = exp1;
+        //    cast.Constant = exp1.Constant;
+        //    cast.BitWidth = (int?)number.Value;
+        //    cast.Value = exp1.Value;
+
+        //    if(cast.BitWidth != null && cast.Value != null)
+        //    {
+        //        if (cast.Value > Math.Pow(2, (double)cast.BitWidth)-1) cast.Reference.AddError("value overflow");
+        //    }
+        //    return cast;
+        //}
+        public static Primary? ParseCreate(WordScanner word, NameSpace nameSpace, Expressions.Expression constExpression)
         {
+            return ParseCreate(word, nameSpace, constExpression, constExpression.Reference);
+        }
+
+        public static Primary? ParseCreate(WordScanner word, NameSpace nameSpace, Expressions.Expression constExpression,WordReference reference)
+        {
+            if (!constExpression.Constant)
+            {
+                constExpression.Reference.AddError("must be constant");
+            }
+
             Cast cast = new Cast();
-            cast.Reference = number.Reference;
+            cast.Reference = reference;
             word.MoveNext();
             if (word.Eof || word.Text != "(")
             {
@@ -74,20 +116,23 @@ namespace pluginVerilog.Verilog.Expressions
             cast.Reference = WordReference.CreateReferenceRange(cast.Reference, word.GetReference());
             cast.Expression = exp1;
             cast.Constant = exp1.Constant;
-            cast.BitWidth = (int?)number.Value;
+            cast.BitWidth = (int?)constExpression.Value;
             cast.Value = exp1.Value;
+//            cast.ConstantValueString =cast.BitWidth.Value.ToString()
 
-            if(cast.BitWidth != null && cast.Value != null)
+            if (cast.BitWidth != null && cast.Value != null)
             {
-                if (cast.Value > Math.Pow(2, (double)cast.BitWidth)-1) cast.Reference.AddError("value overflow");
+                if (cast.Value > Math.Pow(2, (double)cast.BitWidth) - 1) cast.Reference.AddError("bitsize cast overflow");
             }
             return cast;
         }
+
 
         public static new Primary? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             Cast cast = new Cast();
             cast.Reference = word.CrateWordReference();
+
 
             IDataType? dataType = null;
 
@@ -100,16 +145,21 @@ namespace pluginVerilog.Verilog.Expressions
                 {
                     dataType = namedElement as IDataType;
                 }
+                else if(namedElement is DataObjects.Constants.Constants)
+                {
+                    DataObjects.Constants.Constants constant = (DataObjects.Constants.Constants)namedElement;
+                    return ParseCreate(word, nameSpace, constant.Expression,cast.Reference);
+                }
+                else
+                {
+                    word.AddError("illegal cast");
+                    return null;
+                }
             }else
             {
                 dataType = DataTypeFactory.ParseCreate(word, nameSpace, null);
             }
 
-            if(dataType == null)
-            {
-                word.AddError("illegal cast");
-                return null;
-            }
 
             if (word.Text != "'") throw new Exception();
             word.MoveNext();

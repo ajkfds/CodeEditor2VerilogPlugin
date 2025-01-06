@@ -49,7 +49,7 @@ namespace pluginVerilog.Verilog
         public List<string> Aurguments = null;
         public string MacroText;
 
-        public void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label,Dictionary<string,Macro> macros)
+        public void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label,Dictionary<string,Macro> macros)
         {
             if (Name == null) return;
             label.AppendText(Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Identifier));

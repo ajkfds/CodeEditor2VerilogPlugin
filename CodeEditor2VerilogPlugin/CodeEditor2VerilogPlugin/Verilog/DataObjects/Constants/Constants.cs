@@ -30,7 +30,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
         }
         public ConstantTypeEnum ConstantType = ConstantTypeEnum.parameter;
 
-        public override void AppendTypeLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        public override void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
             switch (ConstantType)
             {
@@ -50,7 +50,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
 
         }
 
-        public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
             AppendTypeLabel(label);
             label.AppendText(" ");

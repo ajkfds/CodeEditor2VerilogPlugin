@@ -37,7 +37,7 @@ namespace pluginVerilog
             {
                 // 0 error
                 new MarkDetail{
-                    Color = Avalonia.Media.Color.FromArgb(200,255,120,120),
+                    Color = Avalonia.Media.Color.FromArgb(200,255,120,120), // red
                     Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkDetail.MarkStyleEnum.WaveLine,
                     DecorationHeight = 1,
                     DecorationWidth = 4,
@@ -45,15 +45,15 @@ namespace pluginVerilog
                 },
                 // 1 warning
                 new MarkDetail{
-                    Color = Avalonia.Media.Color.FromArgb(150,255,250,100),
+                    Color = Avalonia.Media.Color.FromArgb(200,255,250,150), // yellow
                     Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkDetail.MarkStyleEnum.WaveLine,
-                    DecorationHeight = -2,
+                    DecorationHeight = -1,
                     DecorationWidth = 4,
-                    Thickness = 2,
+                    Thickness = 4,
                 },
                 // 2 notice
                 new MarkDetail{
-                    Color = Avalonia.Media.Color.FromArgb(200,20,255,20),
+                    Color = Avalonia.Media.Color.FromArgb(200,20,255,20),   // green
                     Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkDetail.MarkStyleEnum.WaveLine,
                     DecorationHeight = 1.5,
                     DecorationWidth = 6,
@@ -61,7 +61,7 @@ namespace pluginVerilog
                 },
                 // 3 hint
                 new MarkDetail{
-                    Color = Avalonia.Media.Color.FromArgb(200,106,176,224),
+                    Color = Avalonia.Media.Color.FromArgb(200,106,176,224), // cyan
                     Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkDetail.MarkStyleEnum.WaveLine,
                     DecorationHeight = -1.2,
                     DecorationWidth = 3,
@@ -69,21 +69,21 @@ namespace pluginVerilog
                 },
                 // 4
                 new MarkDetail{
-                    Color = Avalonia.Media.Color.FromRgb(  0,255,  0),
+                    Color = Avalonia.Media.Color.FromRgb(  0,255,  0),  // green
                     Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkDetail.MarkStyleEnum.WaveLine,
                     DecorationHeight = 4,
                     DecorationWidth = 4
                 },
                 // 5
                 new MarkDetail{
-                    Color = Avalonia.Media.Color.FromRgb(  0,255,  0),
+                    Color = Avalonia.Media.Color.FromRgb(  0,255,  0),  // green
                     Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkDetail.MarkStyleEnum.WaveLine,
                     DecorationHeight = 4,
                     DecorationWidth = 4
                 },
                 // 6
                 new MarkDetail{
-                    Color = Avalonia.Media.Color.FromRgb(  0,255,  0),
+                    Color = Avalonia.Media.Color.FromRgb(  0,255,  0),  // green
                     Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkDetail.MarkStyleEnum.WaveLine,
                     DecorationHeight = 4,
                     DecorationWidth = 4

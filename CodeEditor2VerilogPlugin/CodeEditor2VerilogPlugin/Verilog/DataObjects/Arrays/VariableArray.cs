@@ -25,11 +25,11 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
             throw new NotImplementedException();
         }
 
-        public virtual void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        public virtual void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
             throw new NotImplementedException();
         }
-        public virtual AjkAvaloniaLibs.Contorls.ColorLabel GetLabel()
+        public virtual AjkAvaloniaLibs.Controls.ColorLabel GetLabel()
         {
             throw new NotImplementedException();
         }

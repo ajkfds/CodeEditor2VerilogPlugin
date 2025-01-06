@@ -1,4 +1,4 @@
-﻿using AjkAvaloniaLibs.Contorls;
+﻿using AjkAvaloniaLibs.Controls;
 using CodeEditor2.Data;
 using CodeEditor2.NavigatePanel;
 using CodeEditor2;

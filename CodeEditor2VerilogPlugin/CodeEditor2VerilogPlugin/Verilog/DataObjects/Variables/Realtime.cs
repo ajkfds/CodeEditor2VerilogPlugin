@@ -27,7 +27,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             return val;
         }
 
-        public override void AppendTypeLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        public override void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
             label.AppendText("realtime ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
             label.AppendText(" ");

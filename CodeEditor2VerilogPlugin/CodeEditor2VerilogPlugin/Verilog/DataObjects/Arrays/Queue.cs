@@ -31,7 +31,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
             return sb.ToString();
         }
 
-        public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
             label.AppendText("[ $");
             if (MaxSizeExpression != null)
@@ -41,9 +41,9 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
             }
             label.AppendText(" ]");
         }
-        public override AjkAvaloniaLibs.Contorls.ColorLabel GetLabel()
+        public override AjkAvaloniaLibs.Controls.ColorLabel GetLabel()
         {
-            AjkAvaloniaLibs.Contorls.ColorLabel label = new AjkAvaloniaLibs.Contorls.ColorLabel();
+            AjkAvaloniaLibs.Controls.ColorLabel label = new AjkAvaloniaLibs.Controls.ColorLabel();
             AppendLabel(label);
             return label;
         }

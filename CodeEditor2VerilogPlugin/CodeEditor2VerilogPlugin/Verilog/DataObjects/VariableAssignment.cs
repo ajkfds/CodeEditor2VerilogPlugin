@@ -28,7 +28,7 @@ namespace pluginVerilog.Verilog.DataObjects
             //                          | variable_concatenation
 
             VariableAssignment variableAssign = new VariableAssignment();
-            Expressions.Expression? lExpression = Expressions.Expression.ParseCreate(word, nameSpace);
+            Expressions.Expression? lExpression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace);
             if (lExpression == null)
             {
                 return null;

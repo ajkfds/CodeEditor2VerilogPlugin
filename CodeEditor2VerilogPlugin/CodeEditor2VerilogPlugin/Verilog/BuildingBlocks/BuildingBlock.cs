@@ -57,6 +57,31 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
             foreach (var element in nameSpace.NamedElements.Values)
             {
+                if(element is Net)
+                {
+                    Net net = (Net)element;
+                    if (net.DefinedReference == null) continue;
+                    if (net.AssignedReferences.Count == 0)
+                    {
+                        if (net.UsedReferences.Count == 0)
+                        {
+                            net.DefinedReference.AddNotice("undriven & unused");
+                        }
+                        else
+                        {
+                            net.DefinedReference.AddNotice("undriven");
+                        }
+                    }
+                    else
+                    {
+                        if (net.UsedReferences.Count == 0)
+                        {
+                            net.DefinedReference.AddNotice("unused");
+                        }
+                    }
+                    continue;
+                }
+
                 DataObjects.Variables.ValueVariable? valueVar = element as DataObjects.Variables.ValueVariable;
                 if (valueVar == null) continue;
                 if (valueVar.DefinedReference == null) continue;

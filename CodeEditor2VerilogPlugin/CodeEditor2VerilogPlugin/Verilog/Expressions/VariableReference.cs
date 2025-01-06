@@ -20,7 +20,7 @@ namespace pluginVerilog.Verilog.Expressions
         public DataObjects.DataObject? Variable = null;
         public string NameSpaceText = "";
 
-        public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
             label.AppendText(NameSpaceText, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Variable));
 
@@ -90,7 +90,7 @@ namespace pluginVerilog.Verilog.Expressions
                 VariableName = variable.Name
             };
             val.Variable = variable;
-            val.Reference = variable.DefinedReference;
+            if(variable.DefinedReference != null) val.Reference = variable.DefinedReference;
 
             return val;
         }

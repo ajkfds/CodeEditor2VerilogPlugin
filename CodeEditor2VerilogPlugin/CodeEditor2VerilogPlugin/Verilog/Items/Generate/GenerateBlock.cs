@@ -13,6 +13,8 @@ namespace pluginVerilog.Verilog.Items.Generate
         {
             if (word.Text != "begin") return false;
 
+            string name = "";
+
             // generate_block ::= begin[ : generate_block_identifier]  { generate_item } end
             word.Color(CodeDrawStyle.ColorType.Keyword);
             WordReference beginRef = word.GetReference();
@@ -31,6 +33,7 @@ namespace pluginVerilog.Verilog.Items.Generate
                     word.AddError("identifier required");
                     return true;
                 }
+                name = word.Text;
                 word.Color(CodeDrawStyle.ColorType.Identifier);
                 word.MoveNext();
             }
@@ -71,6 +74,20 @@ namespace pluginVerilog.Verilog.Items.Generate
             {
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 word.MoveNext();
+
+                if(word.Text == ":")
+                {
+                    word.MoveNext();
+                    if (name == word.Text)
+                    {
+                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.MoveNext();
+                    }
+                    else
+                    {
+                        word.AddError("block identifier mismatch");
+                    }
+                }
                 return true;
             }
             else

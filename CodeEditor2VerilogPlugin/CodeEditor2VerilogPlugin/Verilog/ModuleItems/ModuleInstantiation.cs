@@ -68,7 +68,7 @@ namespace pluginVerilog.Verilog.ModuleItems
             public readonly IndexReference LastIndexReference;
             public readonly string Name;
         }
-        public void AppendLabel(IndexReference iref,AjkAvaloniaLibs.Contorls.ColorLabel label)
+        public void AppendLabel(IndexReference iref,AjkAvaloniaLibs.Controls.ColorLabel label)
         {
             PortReference? portRef = null;
             foreach(PortReference pRef in PortReferences)
@@ -616,6 +616,10 @@ namespace pluginVerilog.Verilog.ModuleItems
 
             if (word.Text == ")")
             {
+                if (!outPort)
+                {
+                    word.AddWarning("floating input");
+                }
                 word.MoveNext();
                 return;
             }

@@ -41,7 +41,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             }
         }
 
-        public override void AppendTypeLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        public override void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
             if (DataType == null) return;
 

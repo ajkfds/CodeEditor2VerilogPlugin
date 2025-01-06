@@ -28,7 +28,7 @@ namespace pluginVerilog.Verilog.Items.Generate
             }
             word.MoveNext();
 
-            Expressions.Expression expression = Expressions.Expression.ParseCreate(word, nameSpace as NameSpace);
+            Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace as NameSpace);
             if (word.Active && expression != null && !expression.Constant)
             {
                 word.AddError("should be constant");

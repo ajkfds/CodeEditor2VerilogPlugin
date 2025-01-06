@@ -14,14 +14,14 @@ namespace pluginVerilog.Verilog.Expressions
     public class RangeExpression
     {
         public int BitWidth;
-        public virtual AjkAvaloniaLibs.Contorls.ColorLabel GetLabel()
+        public virtual AjkAvaloniaLibs.Controls.ColorLabel GetLabel()
         {
-            AjkAvaloniaLibs.Contorls.ColorLabel label = new AjkAvaloniaLibs.Contorls.ColorLabel();
+            AjkAvaloniaLibs.Controls.ColorLabel label = new AjkAvaloniaLibs.Controls.ColorLabel();
             AppendLabel(label);
             return label;
         }
 
-        public virtual void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        public virtual void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
         }
         public virtual string CreateString()
@@ -39,7 +39,7 @@ namespace pluginVerilog.Verilog.Expressions
             BitWidth = 1;
         }
         public Expression? Expression;
-        public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
             if (Expression == null) return;
             label.AppendText("[");
@@ -68,7 +68,7 @@ namespace pluginVerilog.Verilog.Expressions
         public Expression? MsbExpression;
         public Expression? LsbExpression;
 
-        public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
             if (LsbExpression == null || MsbExpression == null) return;
             label.AppendText("[");
@@ -98,7 +98,7 @@ namespace pluginVerilog.Verilog.Expressions
         public Expression? BaseExpression;
         public Expression? WidthExpression;
 
-        public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
             if (BaseExpression == null || WidthExpression == null) return;
             label.AppendText("[");
@@ -128,7 +128,7 @@ namespace pluginVerilog.Verilog.Expressions
         public Expression? BaseExpression;
         public Expression? WidthExpression;
 
-        public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
+        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
             if (BaseExpression == null || WidthExpression == null) return;
             label.AppendText("[");

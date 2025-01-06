@@ -94,9 +94,9 @@ namespace pluginVerilog.Verilog.DataObjects
             return port;
         }
 
-        public AjkAvaloniaLibs.Contorls.ColorLabel GetLabel()
+        public AjkAvaloniaLibs.Controls.ColorLabel GetLabel()
         {
-            AjkAvaloniaLibs.Contorls.ColorLabel label = new AjkAvaloniaLibs.Contorls.ColorLabel();
+            AjkAvaloniaLibs.Controls.ColorLabel label = new AjkAvaloniaLibs.Controls.ColorLabel();
 
             switch (Direction)
             {
