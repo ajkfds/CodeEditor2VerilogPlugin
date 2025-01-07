@@ -190,65 +190,74 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     return parseTypeReference(word, nameSpace);
 
                 default:
-                    // class_type
-                    if (nameSpace.NamedElements.ContainsKey(word.Text))
                     {
-                        INamedElement namedElement = nameSpace.NamedElements[word.Text];
-
-                        // class
-                        if (namedElement is BuildingBlocks.Class)
+                        INamedElement? namedElement = nameSpace.GetNamedElementUpward(word.Text);
+                        if(namedElement != null)
                         {
-                            IDataType dType = (BuildingBlocks.Class)namedElement;
-                            word.Color(CodeDrawStyle.ColorType.Keyword);
-                            word.MoveNext();
-                            return dType;
-                        }
-                        // [class_scope | package_scope] type_identifier { packed_dimension }
-                        if(namedElement is Typedef)
-                        {
-                            IDataType dType = ((Typedef)namedElement).VariableType;
-                            if (dType != null)
+                            // class
+                            if (namedElement is BuildingBlocks.Class)
                             {
+                                IDataType dType = (BuildingBlocks.Class)namedElement;
                                 word.Color(CodeDrawStyle.ColorType.Keyword);
                                 word.MoveNext();
+                                return dType;
+                            }
+                            // [class_scope | package_scope] type_identifier { packed_dimension }
 
-                                // packed_dimension
-                                while (word.GetCharAt(0) == '[')
+                            // typedef
+                            if (namedElement is Typedef)
+                            {
+                                IDataType dType = ((Typedef)namedElement).VariableType;
+                                if (dType != null)
                                 {
-                                    PackedArray? range = PackedArray.ParseCreate(word, nameSpace);
-                                    if (word.Eof || range == null)
+                                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                                    word.MoveNext();
+
+                                    // packed_dimension
+                                    while (word.GetCharAt(0) == '[')
                                     {
-                                        word.AddError("illegal reg declaration");
-                                        return null;
+                                        PackedArray? range = PackedArray.ParseCreate(word, nameSpace);
+                                        if (word.Eof || range == null)
+                                        {
+                                            word.AddError("illegal reg declaration");
+                                            return null;
+                                        }
+
+                                        PackedArray? packedArray = range as Arrays.PackedArray;
+
+                                        if (packedArray != null)
+                                        {
+                                            dType.PackedDimensions.Add(packedArray);
+                                        }
                                     }
 
-                                    PackedArray? packedArray = range as Arrays.PackedArray;
 
-                                    if (packedArray != null)
-                                    {
-                                        dType.PackedDimensions.Add(packedArray);
-                                    }
+                                    return dType;
                                 }
-
-
-                                return dType;
                             }
+
                         }
 
-                    }else if(word.RootParsedDocument.Root != null && word.RootParsedDocument.Root.NamedElements.ContainsKey(word.Text))
-                    {
-                        INamedElement namedElement = word.RootParsedDocument.Root.NamedElements[word.Text];
-                        if (namedElement is Typedef)
-                        {
-                            IDataType dType = ((Typedef)namedElement).VariableType;
-                            if (dType != null)
-                            {
-                                word.Color(CodeDrawStyle.ColorType.Keyword);
-                                word.MoveNext();
-                                return dType;
-                            }
-                        }
                     }
+                    // class_type
+                    //if (nameSpace.NamedElements.ContainsKey(word.Text))
+                    //{
+                    //    INamedElement namedElement = nameSpace.NamedElements[word.Text];
+
+                    //}else if(word.RootParsedDocument.Root != null && word.RootParsedDocument.Root.NamedElements.ContainsKey(word.Text))
+                    //{
+                    //    INamedElement namedElement = word.RootParsedDocument.Root.NamedElements[word.Text];
+                    //    if (namedElement is Typedef)
+                    //    {
+                    //        IDataType dType = ((Typedef)namedElement).VariableType;
+                    //        if (dType != null)
+                    //        {
+                    //            word.Color(CodeDrawStyle.ColorType.Keyword);
+                    //            word.MoveNext();
+                    //            return dType;
+                    //        }
+                    //    }
+                    //}
 
                     if (defaultDataType == null) break;
                     DataTypeEnum dataTypeEnum = (DataTypeEnum)defaultDataType;

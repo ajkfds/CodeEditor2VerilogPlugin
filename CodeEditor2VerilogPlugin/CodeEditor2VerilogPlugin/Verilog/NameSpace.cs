@@ -31,6 +31,14 @@ namespace pluginVerilog.Verilog
 
         public BuildingBlocks.BuildingBlock BuildingBlock { get; protected set; }
 
+        public INamedElement? GetNamedElementUpward(string name)
+        {
+            if (NamedElements.ContainsKey(name)) return NamedElements[name];
+            if (Parent == null) return null;
+            return Parent.GetNamedElementUpward(name);
+        }
+
+
         public NameSpace GetHierarchyNameSpace(IndexReference iref)
         {
             foreach (INamedElement namedElement in BuildingBlock.NamedElements.Values)

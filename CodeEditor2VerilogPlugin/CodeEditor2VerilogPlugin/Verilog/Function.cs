@@ -288,6 +288,10 @@ namespace pluginVerilog.Verilog
                                     break;
                             }
                             Statements.IStatement statement = Statements.Statements.ParseCreateFunctionStatement(word, function);
+                            if(statement == null)
+                            {
+                                word.MoveNext();
+                            }
                         }
                     }
                     else
@@ -337,7 +341,7 @@ namespace pluginVerilog.Verilog
             word.MoveNext();
 
             // function_data_type_or_implicit   ::= data_type_or_void | implicit_data_type;
-            Variable retVal = null;
+            Variable? retVal = null;
             bool returnVoid = false;
 
             switch (word.Text)

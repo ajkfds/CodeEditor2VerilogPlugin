@@ -161,7 +161,12 @@ namespace pluginVerilog.Verilog.Expressions
             }
 
 
-            if (word.Text != "'") throw new Exception();
+            if (word.Text != "'")
+            {
+                word.AddError("illegal cast");
+                word.MoveNext();
+                return null;
+            }
             word.MoveNext();
 
             if (word.Eof || word.Text!="(")

@@ -84,9 +84,18 @@ namespace pluginVerilog.Verilog.Statements
                 }
                 while (!word.Eof && word.Text != "join")
                 {
-                    IStatement statement = Verilog.Statements.Statements.ParseCreateStatement(word, namedBlock);
-                    if (statement == null) break;
-                    namedBlock.Statements.Add(statement);
+                    IStatement? statement = null;
+                    if(namedBlock == null)
+                    {
+                        statement = Verilog.Statements.Statements.ParseCreateStatement(word, nameSpace);
+                        if (statement == null) break;
+                    }
+                    else
+                    {
+                        statement = Verilog.Statements.Statements.ParseCreateStatement(word, namedBlock);
+                        if (statement == null) break;
+                        namedBlock.Statements.Add(statement);
+                    }
                 }
                 if (word.Text != "join")
                 {
