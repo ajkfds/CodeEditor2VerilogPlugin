@@ -2,6 +2,7 @@
 using pluginVerilog.Verilog.DataObjects.Constants;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.DataObjects.Variables;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -114,9 +115,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             item.Identifier = word.Text;
             word.Color(CodeDrawStyle.ColorType.Parameter);
 
-            EnumConstants constants = EnumConstants.Create(item.Identifier,enum_.BaseType);
-            constants.DefinedReference = word.GetReference();
-            if (!nameSpace.NamedElements.ContainsKey(constants.Name)) nameSpace.NamedElements.Add(constants.Name, constants);
+            WordReference wordReference = word.GetReference();
 
             word.MoveNext();
 
@@ -137,7 +136,13 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             {
                 int.TryParse(exp.ConstantValueString(), out index);
             }
+
             item.Index = index;
+            if(enum_.BaseType != null)
+            {
+                EnumConstants constants = EnumConstants.Create(item.Identifier, enum_.BaseType, wordReference, Expressions.Expression.CreateTempExpression(index.ToString()));
+                if (!nameSpace.NamedElements.ContainsKey(constants.Name)) nameSpace.NamedElements.Add(constants.Name, constants);
+            }
 
             enum_.Items.Add(item);
 

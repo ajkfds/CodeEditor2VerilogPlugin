@@ -16,8 +16,8 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
     // parameter, localparam, and specparam.
     public class Constants : DataObject
     {
-        public Expressions.Expression Expression;
-        public WordReference DefinitionRefrecnce { get; set; }
+        public required Expressions.Expression Expression { get; set; }
+        public required WordReference DefinitionRefrecnce { get; set; }
 
         public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Parameter; } }
 
@@ -126,7 +126,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
-            DataObjects.DataTypes.IDataType dataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, (NameSpace)module, null);
+            DataObjects.DataTypes.IDataType? dataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, (NameSpace)module, null);
 
             switch (word.Text)
             {
@@ -170,7 +170,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
 
                 if (word.Text != "=") break;
                 word.MoveNext();
-                Expressions.Expression expression = Expressions.Expression.ParseCreate(word, (NameSpace)module);
+                Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, (NameSpace)module);
                 if (expression == null) break;
                 if (word.Active)
                 {
@@ -218,20 +218,18 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                                 switch (constantType)
                                 {
                                     case ConstantTypeEnum.localparam:
-                                        constants = new Localparam() { Name = identifier };
+                                        constants = new Localparam() { Name = identifier, Expression = expression, DefinitionRefrecnce= nameReference };
                                         break;
                                     case ConstantTypeEnum.parameter:
-                                        constants = new Parameter() { Name = identifier };
+                                        constants = new Parameter() { Name = identifier, Expression = expression, DefinitionRefrecnce = nameReference };
                                         break;
                                     case ConstantTypeEnum.specparam:
-                                        constants = new Specparam() { Name = identifier };
+                                        constants = new Specparam() { Name = identifier, Expression = expression, DefinitionRefrecnce = nameReference };
                                         break;
                                     default:
                                         System.Diagnostics.Debugger.Break();
                                         return;
                                 }
-                                constants.Expression = expression;
-                                constants.DefinitionRefrecnce = nameReference;
                                 constants.ConstantType = constantType;
                                 module.NamedElements.Add(constants.Name, constants);
 
@@ -334,17 +332,31 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                 if (!General.IsIdentifier(word.Text)) break;
                 string identifier = word.Text;
                 word.Color(CodeDrawStyle.ColorType.Parameter);
+                WordReference nameReference = word.GetReference();
+                word.MoveNext();
+
+                if (word.Text != "=") break;
+                word.MoveNext();
+
+                Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
+                if (expression == null) break;
+                if (!expression.Constant)
+                {
+                    expression.Reference.AddError("should be constant");
+                }
+
+
                 Constants constants;
                 switch (constantType)
                 {
                     case ConstantTypeEnum.localparam:
-                        constants = new Localparam() { Name = identifier };
+                        constants = new Localparam() { Name = identifier, DefinitionRefrecnce = nameReference, Expression= expression };
                         break;
                     case ConstantTypeEnum.parameter:
-                        constants = new Parameter() { Name = identifier };
+                        constants = new Parameter() { Name = identifier, DefinitionRefrecnce = nameReference, Expression = expression };
                         break;
                     case ConstantTypeEnum.specparam:
-                        constants = new Specparam() { Name = identifier };
+                        constants = new Specparam() { Name = identifier, DefinitionRefrecnce = nameReference, Expression = expression };
                         break;
                     default:
                         System.Diagnostics.Debugger.Break();
@@ -379,13 +391,6 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                         }
                     }
                 }
-                word.MoveNext();
-
-                if (word.Text != "=") break;
-                word.MoveNext();
-
-                constants.Expression = Expressions.Expression.ParseCreate(word, nameSpace);
-                if (constants.Expression == null) break;
 
                 if (word.Text != ",") break;
                 word.MoveNext();

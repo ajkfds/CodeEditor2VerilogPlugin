@@ -199,6 +199,12 @@ namespace pluginVerilog.Verilog.Expressions
                 IBuildingBlockInstantiation buildingBlockInstantiation = (IBuildingBlockInstantiation)element;
                 BuildingBlock? buildingBlock = buildingBlockInstantiation.GetInstancedBuildingBlock();
                 if (buildingBlock == null) return null;
+                if (word.Text == ".")
+                {
+                    word.MoveNext();
+                    return parseText(word, buildingBlock, buildingBlock, lValue, nameSpaceText+"."+buildingBlockInstantiation.Name);
+                }
+                return null;
                 return parseText(word, buildingBlock, buildingBlock, lValue, buildingBlockInstantiation.Name);
             }
 

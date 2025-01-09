@@ -277,8 +277,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                             }
 
                             class_.NamedElements.Remove(vkp.Key);
-                            DataObjects.Constants.Parameter param = new DataObjects.Constants.Parameter() { Name = vkp.Key };
-                            param.Expression = vkp.Value;
+                            DataObjects.Constants.Parameter param = new DataObjects.Constants.Parameter() { Name = vkp.Key, DefinitionRefrecnce = vkp.Value.Reference, Expression = vkp.Value };
                             class_.NamedElements.Add(param.Name, param);
                         }
                         else

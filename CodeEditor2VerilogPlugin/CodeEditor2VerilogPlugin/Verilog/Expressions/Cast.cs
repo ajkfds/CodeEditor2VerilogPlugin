@@ -13,7 +13,7 @@ namespace pluginVerilog.Verilog.Expressions
     {
         protected Cast() { }
 
-        public Expression Expression { get; protected set; }
+        public required Expression Expression { get; init; }
         public override void DisposeSubReference(bool keepThisReference)
         {
             base.DisposeSubReference(keepThisReference);
@@ -95,8 +95,7 @@ namespace pluginVerilog.Verilog.Expressions
                 constExpression.Reference.AddError("must be constant");
             }
 
-            Cast cast = new Cast();
-            cast.Reference = reference;
+
             word.MoveNext();
             if (word.Eof || word.Text != "(")
             {
@@ -113,8 +112,9 @@ namespace pluginVerilog.Verilog.Expressions
             }
             word.MoveNext();
 
+            Cast cast = new Cast() { Expression = exp1 };
+            cast.Reference = reference;
             cast.Reference = WordReference.CreateReferenceRange(cast.Reference, word.GetReference());
-            cast.Expression = exp1;
             cast.Constant = exp1.Constant;
             cast.BitWidth = (int?)constExpression.Value;
             cast.Value = exp1.Value;
@@ -130,8 +130,8 @@ namespace pluginVerilog.Verilog.Expressions
 
         public static new Primary? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
-            Cast cast = new Cast();
-            cast.Reference = word.CrateWordReference();
+            WordReference wordReference = word.CrateWordReference();
+
 
 
             IDataType? dataType = null;
@@ -148,7 +148,7 @@ namespace pluginVerilog.Verilog.Expressions
                 else if(namedElement is DataObjects.Constants.Constants)
                 {
                     DataObjects.Constants.Constants constant = (DataObjects.Constants.Constants)namedElement;
-                    return ParseCreate(word, nameSpace, constant.Expression,cast.Reference);
+                    return ParseCreate(word, nameSpace, constant.Expression,wordReference);
                 }
                 else
                 {
@@ -184,8 +184,9 @@ namespace pluginVerilog.Verilog.Expressions
             }
             word.MoveNext();
 
+            Cast cast = new Cast() { Expression = exp1 };
+            cast.Reference = wordReference;
             cast.Reference = WordReference.CreateReferenceRange(cast.Reference, word.GetReference());
-            cast.Expression = exp1;
             cast.Constant = exp1.Constant;
             cast.BitWidth = exp1.BitWidth;
             cast.Value = exp1.Value;
