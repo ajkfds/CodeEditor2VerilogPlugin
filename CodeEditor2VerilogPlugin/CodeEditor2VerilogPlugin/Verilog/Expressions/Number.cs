@@ -441,7 +441,7 @@ namespace pluginVerilog.Verilog.Expressions
                 number.Value = value;
                 number.Constant = true;
             }
-            word.MoveNext();
+//            word.MoveNext();
             return true;
         }
 

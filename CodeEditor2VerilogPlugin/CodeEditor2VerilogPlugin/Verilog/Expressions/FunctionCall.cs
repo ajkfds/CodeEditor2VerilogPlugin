@@ -1,4 +1,5 @@
-﻿using System;
+﻿using pluginVerilog.Verilog.DataObjects.Arrays;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +11,7 @@ namespace pluginVerilog.Verilog.Expressions
     {
         protected FunctionCall() { }
         public List<Expression> Expressions = new List<Expression>();
-        public string FunctionName { get; protected set; }
+        public required string FunctionName { get; init; }
 
         public new static FunctionCall? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
@@ -20,9 +21,9 @@ namespace pluginVerilog.Verilog.Expressions
 
         public new static FunctionCall? ParseCreate(WordScanner word,NameSpace definedNameSpace, NameSpace nameSpace)
         {
-            FunctionCall functionCall = new FunctionCall();
+            FunctionCall functionCall = new FunctionCall() { FunctionName = word.Text };
             functionCall.Reference = word.GetReference();
-            functionCall.FunctionName = word.Text;
+            bool returnConstant = true;
 
             Function? function = null;
             if (definedNameSpace.BuildingBlock.NamedElements.ContainsFunction(functionCall.FunctionName))
@@ -70,6 +71,7 @@ namespace pluginVerilog.Verilog.Expressions
                 {
                     return null;
                 }
+                if (!expression.Constant) returnConstant = false;
                 functionCall.Expressions.Add(expression);
                 if(function != null)
                 {
@@ -79,9 +81,15 @@ namespace pluginVerilog.Verilog.Expressions
                     }
                     else
                     {
-                        if(function.PortsList[i] != null && expression != null & function.PortsList[i].Range != null && function.PortsList[i].Range.Size != expression.BitWidth)
-                        {
-                            word.AddWarning("bitwidth mismatch");
+                        if (function.PortsList[i] != null 
+                            && expression != null 
+                            && function.PortsList[i].Range != null
+                        ){
+                            PackedArray? range = function.PortsList[i].Range;
+                            if(range != null && range.Size != expression.BitWidth)
+                            {
+                                word.AddWarning("bitwidth mismatch");
+                            }
                         }
                     }
                 }
@@ -90,6 +98,7 @@ namespace pluginVerilog.Verilog.Expressions
                 if(word.Text == ")")
                 {
                     functionCall.Reference = WordReference.CreateReferenceRange(functionCall.Reference,word.GetReference());
+                    functionCall.Constant = returnConstant;
                     word.MoveNext();
                     break;
                 }

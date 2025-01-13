@@ -164,7 +164,7 @@ namespace pluginVerilog.Verilog.Expressions
             Expression? exp = parseCreate(word, nameSpace,false);
             if (exp == null) return null;
 
-            if(exp is AssignmentOperator) // assignment operator should in ()
+            if(exp is AssignmentOperator)
             {
                 exp.Reference.AddError("assignment operator needs ()");
             }
@@ -460,7 +460,7 @@ namespace pluginVerilog.Verilog.Expressions
                 }
                 else
                 {
-                    UnaryOperator unaryOperator = UnaryOperator.ParseCreate(word);
+                    UnaryOperator? unaryOperator = UnaryOperator.ParseCreate(word);
                     if (unaryOperator != null)
                     {
                         if (word.Eof)
