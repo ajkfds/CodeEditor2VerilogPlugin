@@ -22,7 +22,7 @@ namespace pluginVerilog.Verilog
 {
     public class ParsedDocument : CodeEditor2.CodeEditor.ParsedDocument
     {
-        public ParsedDocument(Data.IVerilogRelatedFile file, IndexReference? indexReference, DocumentParser.ParseModeEnum parseMode) : base(file as CodeEditor2.Data.TextFile,file.CodeDocument.Version,parseMode)
+        public ParsedDocument(Data.IVerilogRelatedFile file, IndexReference? indexReference, DocumentParser.ParseModeEnum parseMode) : base((CodeEditor2.Data.TextFile)file,file.CodeDocument.Version,parseMode)
         {
             CodeDocument? document = file.CodeDocument as CodeDocument;
             if (document == null) throw new Exception();
@@ -61,11 +61,11 @@ namespace pluginVerilog.Verilog
         public string tag;
 
         private System.WeakReference<Data.IVerilogRelatedFile> fileRef;
-        public Data.IVerilogRelatedFile File
+        public Data.IVerilogRelatedFile? File
         {
             get
             {
-                Data.IVerilogRelatedFile ret;
+                Data.IVerilogRelatedFile? ret;
                 if (!fileRef.TryGetTarget(out ret)) return null;
                 return ret;
             }
@@ -84,10 +84,9 @@ namespace pluginVerilog.Verilog
         public Dictionary<string, Macro> Macros = new Dictionary<string, Macro>();
 
         public Dictionary<string, Verilog.Expressions.Expression> ParameterOverrides = new Dictionary<string, Expressions.Expression>();
-        public string TargetBuildingBlockName = null;
+        public string? TargetBuildingBlockName = null;
 
         // for IndexReference
-//        public Dictionary<int, ParsedDocument> ParsedDocumentIndexDictionary = new Dictionary<int, ParsedDocument>();
 
         private bool reparseRequested = false;
         public bool ReparseRequested
@@ -119,11 +118,11 @@ namespace pluginVerilog.Verilog
             }
         }
 
-        public ProjectProperty ProjectProperty
+        public ProjectProperty? ProjectProperty
         {
             get
             {
-                Data.IVerilogRelatedFile file = File;
+                Data.IVerilogRelatedFile? file = File;
                 if (file == null) return null;
                 return file.ProjectProperty;
             }
@@ -131,8 +130,9 @@ namespace pluginVerilog.Verilog
 
         public override void Dispose()
         {
-            Data.IVerilogRelatedFile file = File;
-            System.Diagnostics.Debug.Print("### pasedDocument.Disposed " + file.ID);
+            if (Root == null) return;
+
+            Data.IVerilogRelatedFile? file = File;
 
             if (!Instance)
             {
@@ -162,6 +162,8 @@ namespace pluginVerilog.Verilog
 
         public void AddError(int index,int length ,string message)
         {
+            if (Project == null) return;
+
             CodeDocument? document = CodeDocument;
             if (document == null) return;
 
@@ -188,6 +190,8 @@ namespace pluginVerilog.Verilog
 
         public void AddWarning(int index, int length, string message)
         {
+            if (Project == null) return;
+
             CodeDocument? document = CodeDocument;
             if (document == null) return;
 
@@ -213,6 +217,8 @@ namespace pluginVerilog.Verilog
         }
         public void AddNotice(int index, int length, string message)
         {
+            if (Project == null) return;
+
             CodeDocument? document = CodeDocument;
             if (document == null) return;
 
@@ -238,6 +244,8 @@ namespace pluginVerilog.Verilog
         }
         public void AddHint(int index, int length, string message)
         {
+            if (Project == null) return;
+
             CodeDocument? document = CodeDocument;
             if (document == null) return;
 
@@ -263,7 +271,7 @@ namespace pluginVerilog.Verilog
         }
 
 
-        public PopupItem GetPopupItem(int index, string text)
+        public PopupItem? GetPopupItem(int index, string text)
         {
             IndexReference iref = IndexReference.Create(this.IndexReference, index);
             if (iref.RootParsedDocument == null) return null;
@@ -293,9 +301,13 @@ namespace pluginVerilog.Verilog
                 }
             }
 
-            NameSpace? space = iref.RootParsedDocument.Root;
+            Root? root = iref.RootParsedDocument.Root;
+            if (root == null) return null;
 
-            foreach (BuildingBlock module in iref.RootParsedDocument.Root.BuldingBlocks.Values)
+            NameSpace? space = iref.RootParsedDocument.Root;
+            if (space == null) return null;
+
+            foreach (BuildingBlock module in root.BuldingBlocks.Values)
             {
                 if (module.BeginIndexReference == null) continue;
                 if (module.LastIndexReference == null) continue;
@@ -310,7 +322,7 @@ namespace pluginVerilog.Verilog
 
             if(space != null)
             {
-                foreach (IBuildingBlockInstantiation instantiation in space.BuildingBlock.NamedElements.Values.OfType<IBuildingBlockInstantiation>())
+                foreach (IBuildingBlockInstantiation instantiation in root.BuildingBlock.NamedElements.Values.OfType<IBuildingBlockInstantiation>())
                 {
                     if (instantiation.BeginIndexReference == null) continue;
                     if (instantiation.LastIndexReference == null) continue;
@@ -376,6 +388,7 @@ namespace pluginVerilog.Verilog
 
         public NameSpace? GetNameSpace(IndexReference iref)
         {
+            if(Root == null) return null;
             // get current buldingBlock
             NameSpace? space = null;
             foreach (BuildingBlock buildingBlock in Root.BuldingBlocks.Values)
@@ -392,6 +405,7 @@ namespace pluginVerilog.Verilog
 
         private NameSpace? getSearchNameSpace(NameSpace? nameSpace,List<string> hier)
         {
+            if (ProjectProperty == null) return null;
             if (nameSpace == null) return null;
             BuildingBlock? buildingBlock = nameSpace.BuildingBlock;
             if (buildingBlock == null) return null;
@@ -426,7 +440,7 @@ namespace pluginVerilog.Verilog
             }
             else if(nameSpace.NamedElements.ContainsKey(hier[0]))
             {
-                NameSpace space = nameSpace.NamedElements[hier[0]] as NameSpace;
+                NameSpace? space = nameSpace.NamedElements[hier[0]] as NameSpace;
                 hier.RemoveAt(0);
                 return getSearchNameSpace(space, hier);
             }
@@ -435,6 +449,7 @@ namespace pluginVerilog.Verilog
 
         public List<AutocompleteItem>? GetAutoCompleteItems(List<string> hierWords,int index,int line,CodeEditor.CodeDocument document,string candidateWord)
         {
+            if (ProjectProperty == null) return null;
             if (hierWords.Count == 0 && candidateWord == "") return null;
             if (hierWords.Count==0 && candidateWord.Length < 2) return null;
 

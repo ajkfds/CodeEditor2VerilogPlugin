@@ -228,11 +228,24 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                     }
                     else
                     {
-                        Expressions.Expression? exp = Expressions.Expression.ParseCreate(word, nameSpace);
-                        if(exp == null)
+                        Expressions.Expression? exp;
+                        if (word.Text == "'" && word.NextText == "{")
                         {
-                            word.AddError("expression required.");
-                            return true;
+                            exp = AssignmentPattern.ParseCreate(word, nameSpace, false);
+                            if (exp == null)
+                            {
+                                word.AddError("illegal assignment pattern.");
+                                return true;
+                            }
+                        }
+                        else
+                        {
+                            exp = Expressions.Expression.ParseCreate(word, nameSpace);
+                            if (exp == null)
+                            {
+                                word.AddError("expression required.");
+                                return true;
+                            }
                         }
                     }
                 }

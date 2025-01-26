@@ -102,6 +102,35 @@ namespace pluginVerilog.Verilog.Expressions
         casting_type    ::=  simple_type | constant_primary | signing | "string" | "const"
         simple_type     ::= integer_type | non_integer_type | ps_type_identifier | ps_parameter_identifier 
 
+
+
+
+constant_primary ::=
+primary_literal
+| ps_parameter_identifier constant_select
+| specparam_identifier [ [ constant_range_expression ] ]
+| genvar_identifier39
+| formal_port_identifier constant_select
+| [ package_scope | class_scope ] enum_identifier
+| constant_concatenation [ [ constant_range_expression ] ]
+| constant_multiple_concatenation [ [ constant_range_expression ] ]
+| constant_function_call
+| constant_let_expression
+| ( constant_mintypmax_expression )
+| constant_cast
+| constant_assignment_pattern_expression
+| type_reference40
+| "null"
+
+module_path_primary ::=
+number
+| identifier
+| module_path_concatenation
+| module_path_multiple_concatenation
+| function_subroutine_call
+| ( module_path_mintypmax_expression )
+
+
         */
         public static new Primary? ParseCreate(WordScanner word, NameSpace nameSpace)
         {

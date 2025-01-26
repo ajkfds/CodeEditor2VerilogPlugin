@@ -10,6 +10,7 @@ using Avalonia.Threading;
 using System.ComponentModel;
 using CodeEditor2.Tools;
 using System.Diagnostics.CodeAnalysis;
+using DynamicData;
 
 namespace pluginVerilog.NavigatePanel
 {
@@ -98,44 +99,39 @@ namespace pluginVerilog.NavigatePanel
 
         public override void UpdateVisual()
         {
-            List<CodeEditor2.Data.Item> targetDataItems = new List<CodeEditor2.Data.Item>();
-            List<CodeEditor2.Data.Item> addDataItems = new List<CodeEditor2.Data.Item>();
+
+            List<CodeEditor2.NavigatePanel.NavigatePanelNode> newNodes = new List<CodeEditor2.NavigatePanel.NavigatePanelNode>();
+
             lock (VerilogFile.Items)
             {
-                foreach (CodeEditor2.Data.Item item in VerilogFile.Items.Values)
+                foreach(CodeEditor2.Data.Item item in VerilogFile.Items.Values)
                 {
-                    targetDataItems.Add(item);
-                    addDataItems.Add(item);
+                    newNodes.Add(item.NavigatePanelNode);
                 }
+            }
 
-                List<CodeEditor2.NavigatePanel.NavigatePanelNode> removeNodes = new List<CodeEditor2.NavigatePanel.NavigatePanelNode>();
-                foreach (CodeEditor2.NavigatePanel.NavigatePanelNode node in Nodes)
+            List<CodeEditor2.NavigatePanel.NavigatePanelNode> removeNodes = new List<CodeEditor2.NavigatePanel.NavigatePanelNode>();
+            foreach (CodeEditor2.NavigatePanel.NavigatePanelNode node in Nodes)
+            {
+                if (!newNodes.Contains(node))
                 {
-                    if (node.Item != null && targetDataItems.Contains(node.Item))
-                    {
-                        addDataItems.Remove(node.Item);
-                    }
-                    else
-                    {
-                        removeNodes.Add(node);
-                    }
+                    removeNodes.Add(node);
                 }
-
+            }
+            lock (Nodes)
+            {
                 foreach (CodeEditor2.NavigatePanel.NavigatePanelNode node in removeNodes)
                 {
                     Nodes.Remove(node);
                     node.Dispose();
                 }
 
-                int treeIndex = 0;
-                foreach (CodeEditor2.Data.Item item in targetDataItems)
+                foreach (CodeEditor2.NavigatePanel.NavigatePanelNode node in newNodes)
                 {
-                    if (item == null) continue;
-                    if (addDataItems.Contains(item))
-                    {
-                        Nodes.Insert(treeIndex, item.NavigatePanelNode);
-                    }
-                    treeIndex++;
+                    if (Nodes.Contains(node)) continue;
+
+                    int index = newNodes.IndexOf(node);
+                    Nodes.Insert(index, node);
                 }
             }
 

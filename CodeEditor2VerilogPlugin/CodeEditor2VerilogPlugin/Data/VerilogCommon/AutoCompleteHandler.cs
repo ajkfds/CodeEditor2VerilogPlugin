@@ -42,7 +42,7 @@ namespace pluginVerilog.Data.VerilogCommon
         }
 
 
-        public static PopupItem GetPopupItem(IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, ulong version, int index)
+        public static PopupItem? GetPopupItem(IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, ulong version, int index)
         {
             if (parsedDocument == null) return null;
             if (parsedDocument.Version != version) return null;
@@ -58,12 +58,11 @@ namespace pluginVerilog.Data.VerilogCommon
         {
             List<ToolItem> toolItems = new List<ToolItem>();
             toolItems.Add(new Verilog.Snippets.AlwaysFFSnippet());
-//            toolItems.Add(new Verilog.Snippets.AutoConnectSnippet());
-            //            toolItems.Add(new Verilog.Snippets.ConnectionCheckSnippet());
             toolItems.Add(new Verilog.Snippets.AutoFormatSnippet());
             toolItems.Add(new Verilog.Snippets.ModuleInstanceMenuSnippet());
             toolItems.Add(new Verilog.Snippets.PortConnectionCreateSnippet());
             toolItems.Add(new Verilog.Snippets.ModPortSnippet());
+
             return toolItems;
         }
 

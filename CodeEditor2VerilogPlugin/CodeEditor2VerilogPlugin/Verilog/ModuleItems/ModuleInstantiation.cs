@@ -105,6 +105,7 @@ namespace pluginVerilog.Verilog.ModuleItems
             }
         }
 
+
         public bool Prototype { get; set; } = false;
 
         public required IndexReference BeginIndexReference { get; init; }
@@ -897,6 +898,22 @@ namespace pluginVerilog.Verilog.ModuleItems
         {
             return CreateString("\t");
 
+        }
+
+        public string ParameterId
+        {
+            get
+            {
+                StringBuilder sb = new StringBuilder();
+                foreach (var kvp in ParameterOverrides)
+                {
+                    sb.Append(kvp.Key);
+                    sb.Append("=");
+                    sb.Append(kvp.Value.Value.ToString());
+                    sb.Append(",");
+                }
+                return sb.ToString();
+            }
         }
         public string? CreateString(string indent)
         {

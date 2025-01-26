@@ -198,7 +198,12 @@ namespace pluginVerilog.Verilog
                                 default:
                                     break;
                             }
+                            var index =  word.CreateIndexReference();
                             Statements.IStatement statement = Statements.Statements.ParseCreateFunctionStatement(word, task);
+                            if (word.CreateIndexReference().IsSameAs(index))
+                            {
+                                word.MoveNext();
+                            }
                         }
                     }
                     else

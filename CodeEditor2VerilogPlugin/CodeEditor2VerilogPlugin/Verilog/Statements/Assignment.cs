@@ -1,4 +1,5 @@
-﻿using System;
+﻿using pluginVerilog.Verilog.DataObjects;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -28,7 +29,7 @@ namespace pluginVerilog.Verilog.Statements
                                                 | release net_lvalue
          */
         public delegate void NonBlockingAssignedAction(WordScanner word, NameSpace nameSpace, NonBlockingAssignment blockingAssignment);
-        public static NonBlockingAssignedAction Assigned;
+        public static NonBlockingAssignedAction? Assigned;
 
         public void DisposeSubReference()
         {
@@ -53,8 +54,18 @@ namespace pluginVerilog.Verilog.Statements
                 EventControl eventControl = EventControl.ParseCreate(word, nameSpace);
             }
 
-            Expressions.Expression expression = Expressions.Expression.ParseCreate(word, nameSpace);
-            if(expression == null)
+            Expressions.Expression? expression;
+
+            if(word.Text == "'" && word.NextText == "{")
+            {
+                expression = AssignmentPattern.ParseCreate(word, nameSpace,false);
+            }
+            else
+            {
+                expression = Expressions.Expression.ParseCreate(word, nameSpace);
+            }
+
+            if (expression == null)
             {
                 word.SkipToKeyword(";");
                 word.AddError("illegal non blocking assignment");
@@ -110,7 +121,7 @@ namespace pluginVerilog.Verilog.Statements
          */
 
         public delegate void BlockingAssignedAction(WordScanner word, NameSpace nameSpace, BlockingAssignment blockingAssignment);
-        public static BlockingAssignedAction Assigned;
+        public static BlockingAssignedAction? Assigned;
         public static BlockingAssignment? ParseCreate(WordScanner word, NameSpace nameSpace, Expressions.Expression lExpression)
         {
             if (word.Text != "=")
@@ -148,14 +159,30 @@ namespace pluginVerilog.Verilog.Statements
 
             // delay or event control
 
-            Expressions.Expression expression = Expressions.Expression.ParseCreate(word, nameSpace);
-            if (expression == null)
+            Expressions.Expression? expression;
+
+
+            if (word.Text=="'" && word.NextText == "{")
             {
-                word.AddError("illegal expression");
-                word.SkipToKeyword(";");
-                word.AddError("illegal non blocking assignment");
-                return null;
+                AssignmentPattern assignmentPattern = AssignmentPattern.ParseCreate(word, nameSpace,false);
+                BlockingAssignment assignment = new BlockingAssignment();
+                assignment.LValue = lExpression;
+//                assignment.Expression = expression;
+                if (Assigned != null) Assigned(word, nameSpace, assignment);
+                return assignment;
             }
+            else
+            {
+                expression = Expressions.Expression.ParseCreate(word, nameSpace);
+                if (expression == null)
+                {
+                    word.AddError("illegal expression");
+                    word.SkipToKeyword(";");
+                    word.AddError("illegal non blocking assignment");
+                    return null;
+                }
+            }
+
 
             if (!word.Prototype)
             {

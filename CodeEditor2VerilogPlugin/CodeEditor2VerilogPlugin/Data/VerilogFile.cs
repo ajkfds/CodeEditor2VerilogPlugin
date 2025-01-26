@@ -85,7 +85,7 @@ namespace pluginVerilog.Data
                         document = null;
                     }
                 }
-                if (document == null) throw new Exception();
+                if (document == null) throw new Exception(); // TODO:this exception raised @ file delete
                 return document;
             }
             protected set
@@ -98,6 +98,9 @@ namespace pluginVerilog.Data
         // accept new Parsed Document
         public override void AcceptParsedDocument(ParsedDocument newParsedDocument)
         {
+            if (VerilogParsedDocument == null) return;
+            if (VerilogParsedDocument.Root == null) return;
+
             ParsedDocument? oldParsedDocument = ParsedDocument;
             if (oldParsedDocument == newParsedDocument) return;
 
@@ -145,7 +148,7 @@ namespace pluginVerilog.Data
 
             // update navigate menu icons
             // update current node to update include file icon
-            CodeEditor2.NavigatePanel.NavigatePanelNode node = CodeEditor2.Controller.NavigatePanel.GetSelectedNode();
+            CodeEditor2.NavigatePanel.NavigatePanelNode? node = CodeEditor2.Controller.NavigatePanel.GetSelectedNode();
             if (node != null) node.UpdateVisual();
         }
 
@@ -253,7 +256,7 @@ namespace pluginVerilog.Data
         public ParsedDocument? GetInstancedParsedDocument(string parameterId)
         {
             cleanWeakRef();
-            ParsedDocument ret;
+            ParsedDocument? ret;
             if(parameterId == "")
             {
                 return ParsedDocument;
@@ -404,7 +407,6 @@ namespace pluginVerilog.Data
                     NavigatePanelNode.UpdateVisual();
                 })
                 );
-
         }
 
         // Auto Complete Handler
@@ -429,7 +431,7 @@ namespace pluginVerilog.Data
         //    VerilogCommon.AutoComplete.BeforeKeyDown(this, e);
         //}
 
-        public override PopupItem GetPopupItem(ulong version, int index)
+        public override PopupItem? GetPopupItem(ulong version, int index)
         {
             if (VerilogParsedDocument == null) return null;
             return VerilogCommon.AutoComplete.GetPopupItem(this, VerilogParsedDocument, version, index);
