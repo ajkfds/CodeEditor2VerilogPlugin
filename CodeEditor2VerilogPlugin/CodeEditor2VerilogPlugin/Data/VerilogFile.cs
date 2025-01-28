@@ -36,7 +36,7 @@ namespace pluginVerilog.Data
             }
 
             CodeEditor2.FileTypes.FileType fileType = CodeEditor2.Global.FileTypes[FileTypes.VerilogFile.TypeID];
-            VerilogFile fileItem = new VerilogFile() { Name = name, Project = project, RelativePath = relativePath};
+            VerilogFile fileItem = new VerilogFile() { Name = name, Project = project, RelativePath = relativePath };
 
             return fileItem;
         }
@@ -55,7 +55,7 @@ namespace pluginVerilog.Data
             }
 
             CodeEditor2.FileTypes.FileType fileType = CodeEditor2.Global.FileTypes[FileTypes.SystemVerilogFile.TypeID];
-            VerilogFile fileItem = new VerilogFile() { Name = name, Project = project, RelativePath = relativePath};
+            VerilogFile fileItem = new VerilogFile() { Name = name, Project = project, RelativePath = relativePath };
             fileItem.SystemVerilog = true;
             return fileItem;
         }
@@ -85,22 +85,19 @@ namespace pluginVerilog.Data
                         document = null;
                     }
                 }
-                if (document == null) throw new Exception(); // TODO:this exception raised @ file delete
+                if (document == null) throw new Exception();
                 return document;
             }
             protected set
             {
-                if (value != null &&  value as CodeEditor2.CodeEditor.CodeDocument == null) System.Diagnostics.Debugger.Break();
-                document = value as CodeEditor2.CodeEditor.CodeDocument ;
+                if (value != null && value as CodeEditor2.CodeEditor.CodeDocument == null) System.Diagnostics.Debugger.Break();
+                document = value as CodeEditor2.CodeEditor.CodeDocument;
             }
         }
 
         // accept new Parsed Document
         public override void AcceptParsedDocument(ParsedDocument newParsedDocument)
         {
-            if (VerilogParsedDocument == null) return;
-            if (VerilogParsedDocument.Root == null) return;
-
             ParsedDocument? oldParsedDocument = ParsedDocument;
             if (oldParsedDocument == newParsedDocument) return;
 
@@ -122,7 +119,7 @@ namespace pluginVerilog.Data
                     BuildingBlock? module = buildingBlock as Module;
                     if (module == null) continue;
 
-                    BuildingBlock? registeredModule = ProjectProperty.GetBuildingBlock(module.Name)as Module;
+                    BuildingBlock? registeredModule = ProjectProperty.GetBuildingBlock(module.Name) as Module;
                     if (registeredModule == null) continue;
                     if (registeredModule.File == null) continue;
                     if (registeredModule.File.RelativePath == module.File.RelativePath) continue;
@@ -148,11 +145,11 @@ namespace pluginVerilog.Data
 
             // update navigate menu icons
             // update current node to update include file icon
-            CodeEditor2.NavigatePanel.NavigatePanelNode? node = CodeEditor2.Controller.NavigatePanel.GetSelectedNode();
+            CodeEditor2.NavigatePanel.NavigatePanelNode node = CodeEditor2.Controller.NavigatePanel.GetSelectedNode();
             if (node != null) node.UpdateVisual();
         }
 
-        internal static void updateIncludeFiles(Verilog.ParsedDocument parsedDocument,ItemList items)
+        internal static void updateIncludeFiles(Verilog.ParsedDocument parsedDocument, ItemList items)
         {
             // create id table
             Dictionary<string, Data.VerilogHeaderInstance> headerItems = new Dictionary<string, VerilogHeaderInstance>();
@@ -202,7 +199,7 @@ namespace pluginVerilog.Data
         {
             try
             {
-                if(document == null) document = new CodeEditor.CodeDocument(this);
+                if (document == null) document = new CodeEditor.CodeDocument(this);
                 using (System.IO.StreamReader sr = new System.IO.StreamReader(Project.GetAbsolutePath(RelativePath)))
                 {
                     loadedFileLastWriteTime = System.IO.File.GetLastWriteTime(AbsolutePath);
@@ -224,8 +221,8 @@ namespace pluginVerilog.Data
         internal string DebugInfo()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("## " + Name+"\r\n");
-            if(Name == "MODULE3.v")
+            sb.Append("## " + Name + "\r\n");
+            if (Name == "MODULE3.v")
             {
                 string a = "";
             }
@@ -244,7 +241,7 @@ namespace pluginVerilog.Data
                 Verilog.ParsedDocument? iParsedDocument = pDoc as Verilog.ParsedDocument;
 
                 sb.Append(" instance key:" + kvPair.Key + ",ID:" + pDoc.ObjectID);
-                if(iParsedDocument != null)
+                if (iParsedDocument != null)
                 {
                     sb.Append(",pd.ReparseRequested:" + iParsedDocument.ReparseRequested + ",pd.Version" + iParsedDocument.Version);
                 }
@@ -256,8 +253,8 @@ namespace pluginVerilog.Data
         public ParsedDocument? GetInstancedParsedDocument(string parameterId)
         {
             cleanWeakRef();
-            ParsedDocument? ret;
-            if(parameterId == "")
+            ParsedDocument ret;
+            if (parameterId == "")
             {
                 return ParsedDocument;
             }
@@ -284,9 +281,9 @@ namespace pluginVerilog.Data
             }
         }
 
-        public void RegisterInstanceParsedDocument(string id, ParsedDocument parsedDocument,InstanceTextFile moduleInstance)
+        public void RegisterInstanceParsedDocument(string id, ParsedDocument parsedDocument, InstanceTextFile moduleInstance)
         {
-            System.Diagnostics.Debug.Print("#### RegisterInstanceParsedDocument " + id+"::"+parsedDocument.ObjectID);
+            System.Diagnostics.Debug.Print("#### RegisterInstanceParsedDocument " + id + "::" + parsedDocument.ObjectID);
             cleanWeakRef();
             if (id == "")
             {
@@ -299,13 +296,13 @@ namespace pluginVerilog.Data
                     if (instancedParsedDocumentRefs.ContainsKey(id))
                     {
                         instancedParsedDocumentRefs[id] = new WeakReference<ParsedDocument>(parsedDocument);
-                        System.Diagnostics.Debug.Print("#### RegisterInstanceParsedDocument replace to " + id+"::"+parsedDocument.ObjectID);
+                        System.Diagnostics.Debug.Print("#### RegisterInstanceParsedDocument replace to " + id + "::" + parsedDocument.ObjectID);
                     }
                     else
                     {
                         instancedParsedDocumentRefs.Add(id, new WeakReference<ParsedDocument>(parsedDocument));
                         //Project.AddReparseTarget(moduleInstance);
-                        System.Diagnostics.Debug.Print("#### Try RegisterInstanceParsedDocument.Add " + id+"::"+parsedDocument.ObjectID);
+                        System.Diagnostics.Debug.Print("#### Try RegisterInstanceParsedDocument.Add " + id + "::" + parsedDocument.ObjectID);
                     }
                 }
             }
@@ -317,14 +314,14 @@ namespace pluginVerilog.Data
             ParsedDocument? ret;
             lock (instancedParsedDocumentRefs)
             {
-                foreach(var r in instancedParsedDocumentRefs)
+                foreach (var r in instancedParsedDocumentRefs)
                 {
                     if (!r.Value.TryGetTarget(out ret)) removeKeys.Add(r.Key);
                 }
-                foreach(string key in removeKeys)
+                foreach (string key in removeKeys)
                 {
                     instancedParsedDocumentRefs.Remove(key);
-                    System.Diagnostics.Debug.Print("### remove key: "+key);
+                    System.Diagnostics.Debug.Print("### remove key: " + key);
                 }
             }
         }
@@ -339,7 +336,7 @@ namespace pluginVerilog.Data
 
         public void RemoveModuleInstance(InstanceTextFile verilogModuleInstance)
         {
-            for(int i = 0; i< moduleInstanceRefs.Count; i++)
+            for (int i = 0; i < moduleInstanceRefs.Count; i++)
             {
                 InstanceTextFile? ret;
                 if (!moduleInstanceRefs[i].TryGetTarget(out ret)) continue;
@@ -349,9 +346,9 @@ namespace pluginVerilog.Data
 
         public override void Dispose()
         {
-            if(VerilogParsedDocument != null)
+            if (VerilogParsedDocument != null)
             {
-                foreach(var incFile in VerilogParsedDocument.IncludeFiles.Values)
+                foreach (var incFile in VerilogParsedDocument.IncludeFiles.Values)
                 {
                     incFile.Dispose();
                 }
@@ -407,6 +404,7 @@ namespace pluginVerilog.Data
                     NavigatePanelNode.UpdateVisual();
                 })
                 );
+
         }
 
         // Auto Complete Handler
@@ -431,7 +429,7 @@ namespace pluginVerilog.Data
         //    VerilogCommon.AutoComplete.BeforeKeyDown(this, e);
         //}
 
-        public override PopupItem? GetPopupItem(ulong version, int index)
+        public override PopupItem GetPopupItem(ulong version, int index)
         {
             if (VerilogParsedDocument == null) return null;
             return VerilogCommon.AutoComplete.GetPopupItem(this, VerilogParsedDocument, version, index);
