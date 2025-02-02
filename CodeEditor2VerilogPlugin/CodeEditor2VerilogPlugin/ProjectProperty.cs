@@ -12,6 +12,7 @@ using System.Text.Json;
 using System.Globalization;
 using Avalonia.OpenGL;
 using pluginVerilog.Verilog.ModuleItems;
+using System.Reflection.Metadata;
 
 namespace pluginVerilog
 {
@@ -31,7 +32,7 @@ namespace pluginVerilog
 
         }
 
-        private CodeEditor2.Data.Project project;
+//        private CodeEditor2.Data.Project project;
 
         public Verilog.AutoComplete.Setup SnippetSetup = new Verilog.AutoComplete.Setup();
 
@@ -222,10 +223,10 @@ namespace pluginVerilog
             }
         }
 
-        public CodeEditor2.CodeEditor.ParsedDocument GetParsedDocument(string id)
+        public CodeEditor2.CodeEditor.ParsedDocument? GetParsedDocument(string id)
         {
-            if (id == null) System.Diagnostics.Debugger.Break();
-
+            if (id == null) throw new Exception();
+            
             if (pdocs.ContainsKey(id))
             {
                 return pdocs[id];
@@ -299,7 +300,7 @@ namespace pluginVerilog
         public Dictionary<string, Verilog.Macro> Macros = new Dictionary<string, Verilog.Macro>();
 
         // system tasks
-        public Dictionary<string, Func<Verilog.WordScanner, Verilog.NameSpace, Verilog.Statements.SystemTask.SystemTask>> SystemTaskParsers = new Dictionary<string, Func<Verilog.WordScanner, Verilog.NameSpace, Verilog.Statements.SystemTask.SystemTask>>
+        public Dictionary<string, Func<Verilog.WordScanner, Verilog.NameSpace, Verilog.Statements.SystemTask.SystemTask>?> SystemTaskParsers = new Dictionary<string, Func<Verilog.WordScanner, Verilog.NameSpace, Verilog.Statements.SystemTask.SystemTask>?>
         {
             // Display task
             {"$display",null },
@@ -385,9 +386,15 @@ namespace pluginVerilog
             {"$dumpvars", (word,nameSpace) =>{ return Verilog.Statements.SystemTask.SkipArguments.ParseCreate(word,nameSpace); }  },
             {"$dumpflush",null },
             {"$dumplimit",null },
+
+            // Elaboration system tasks
+            {"$fatal",null },
+            {"$error",null },
+            {"$warning",null },
+            {"$info",null }
         };
 
-        public Dictionary<string, Func<Verilog.DataObjects.Variables.Variable, Verilog.WordScanner>> SystemFunctions = new Dictionary<string, Func<Verilog.DataObjects.Variables.Variable, Verilog.WordScanner>>
+        public Dictionary<string, Func<Verilog.DataObjects.Variables.Variable, Verilog.WordScanner>?> SystemFunctions = new Dictionary<string, Func<Verilog.DataObjects.Variables.Variable, Verilog.WordScanner>?>
         {
             {"$sformat", null },
             {"$ferror", null },
@@ -433,7 +440,7 @@ namespace pluginVerilog
 
         };
 
-        public Dictionary<string, Action<Verilog.WordScanner>> InCommentTags = new Dictionary<string, Action<Verilog.WordScanner>>
+        public Dictionary<string, Action<Verilog.WordScanner>?> InCommentTags = new Dictionary<string, Action<Verilog.WordScanner>?>
         {
             { "@section",null }
         };

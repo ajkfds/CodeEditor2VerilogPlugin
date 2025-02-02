@@ -87,7 +87,6 @@ namespace pluginVerilog.Verilog.Statements
             */
 
             // inc_or_dec_expression ;
-            // wait_statement 
             // procedural_assertion_statement 
             // clocking_drive ;
             // randsequence_statement 
@@ -169,6 +168,10 @@ namespace pluginVerilog.Verilog.Statements
                     word.AddError("illegal module item");
                     word.MoveNext();
                     return null;
+                // wait_statement 
+                case "wait":
+                case "wait_order":
+                    return WaitStatement.ParseCreate(word, nameSpace);
                 default:
 
                     // subroutine_call_statement 

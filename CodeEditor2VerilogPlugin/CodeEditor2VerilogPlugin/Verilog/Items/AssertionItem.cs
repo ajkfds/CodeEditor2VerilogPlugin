@@ -6,39 +6,50 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Items
 {
-    internal class AssertionItem
+    public class AssertionItem
     {
         /*
 concurrent_assertion_item ::=
-[ block_identifier : ] concurrent_assertion_statement
-| checker_instantiation
+      [ block_identifier ":" ] concurrent_assertion_statement
+    | checker_instantiation
+
 concurrent_assertion_statement ::=
-assert_property_statement
-| assume_property_statement
-| cover_property_statement
-| cover_sequence_statement
-| restrict_property_statement
+      assert_property_statement
+    | assume_property_statement
+    | cover_property_statement
+    | cover_sequence_statement
+    | restrict_property_statement
+
 assert_property_statement::=
-assert property ( property_spec ) action_block
+    "assert" property ( property_spec ) action_block
+
 assume_property_statement::=
-assume property ( property_spec ) action_block
+    "assume" property ( property_spec ) action_block
+
 cover_property_statement::=
-cover property ( property_spec ) statement_or_null
+    "cover" property ( property_spec ) statement_or_null
+
 expect_property_statement ::=
-expect ( property_spec ) action_block
+    "expect" ( property_spec ) action_block
+
 cover_sequence_statement::=
-cover sequence ( [clocking_event ] [ disable iff ( expression_or_dist ) ]
-sequence_expr ) statement_or_null
+    cover sequence "("
+        [ clocking_event ] [ "disable" "iff" "(" expression_or_dist ")" sequence_expr 
+        ")" statement_or_null
+
 restrict_property_statement::=
-restrict property ( property_spec ) ;
+    restrict property ( property_spec ) ;
+
 property_instance ::=
-ps_or_hierarchical_property_identifier [ ( [ property_list_of_arguments ] ) ]
+    ps_or_hierarchical_property_identifier [ ( [ property_list_of_arguments ] ) ]
+
 property_list_of_arguments ::=
-[property_actual_arg] { , [property_actual_arg] } { , . identifier ( [property_actual_arg] ) }
-| . identifier ( [property_actual_arg] ) { , . identifier ( [property_actual_arg] ) }
+    [property_actual_arg] { , [property_actual_arg] } { , . identifier ( [property_actual_arg] ) }
+    | . identifier ( [property_actual_arg] ) { , . identifier ( [property_actual_arg] ) }
+
 property_actual_arg ::=
-property_expr
-| sequence_actual_arg
+    property_expr
+    | sequence_actual_arg
 
 assertion_item_declaration ::=
       property_declaration
@@ -106,11 +117,14 @@ sequence_expr
 property_case_item ::=
 expression_or_dist { , expression_or_dist } : property_expr ;
 | default [ : ] property_expr ;
+
+
 sequence_declaration ::=
-sequence sequence_identifier [ ( [ sequence_port_list ] ) ] ;
-{ assertion_variable_declaration }
-sequence_expr [ ; ]
-endsequence [ : sequence_identifier ]
+    "sequence" sequence_identifier [ ( [ sequence_port_list ] ) ] ;
+    { assertion_variable_declaration }
+    sequence_expr [ ; ]
+    "endsequence" [ : sequence_identifier ]
+
 sequence_port_list ::=
 sequence_port_item {, sequence_port_item}
 sequence_port_item ::=
