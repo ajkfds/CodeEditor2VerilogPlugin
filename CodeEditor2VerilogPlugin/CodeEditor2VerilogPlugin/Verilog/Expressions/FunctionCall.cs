@@ -19,8 +19,10 @@ namespace pluginVerilog.Verilog.Expressions
         }
 
 
-        public new static FunctionCall? ParseCreate(WordScanner word,NameSpace definedNameSpace, NameSpace nameSpace)
+        public static FunctionCall? ParseCreate(WordScanner word,NameSpace definedNameSpace, NameSpace nameSpace)
         {
+            if (word.RootParsedDocument.ProjectProperty == null) throw new Exception();
+
             FunctionCall functionCall = new FunctionCall() { FunctionName = word.Text };
             functionCall.Reference = word.GetReference();
             bool returnConstant = true;

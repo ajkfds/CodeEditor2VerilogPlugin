@@ -86,8 +86,8 @@ namespace pluginVerilog.Data
 
 
         private ulong cashedVersion = ulong.MaxValue;
-        CodeDocument cashedDocument = null;
-        public override CodeEditor2.CodeEditor.CodeDocument CodeDocument
+        CodeDocument? cashedDocument = null;
+        public override CodeEditor2.CodeEditor.CodeDocument? CodeDocument
         {
             get
             {
@@ -119,7 +119,7 @@ namespace pluginVerilog.Data
             }
         }
 
-        private Data.VerilogHeaderFile SourceVerilogFile
+        private Data.VerilogHeaderFile? SourceVerilogFile
         {
             get
             {

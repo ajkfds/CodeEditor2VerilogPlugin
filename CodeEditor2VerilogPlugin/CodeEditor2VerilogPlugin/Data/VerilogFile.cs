@@ -222,10 +222,6 @@ namespace pluginVerilog.Data
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("## " + Name + "\r\n");
-            if (Name == "MODULE3.v")
-            {
-                string a = "";
-            }
 
             Verilog.ParsedDocument? parsedDocument = VerilogParsedDocument;
             sb.Append(" path " + ",ID:" + ObjectID + ",ReparseRequested:" + ReparseRequested);

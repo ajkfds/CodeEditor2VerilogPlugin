@@ -44,7 +44,7 @@ namespace pluginVerilog.Data
                 return id;
             }
         }
-        public override CodeEditor2.CodeEditor.CodeDocument CodeDocument
+        public override CodeEditor2.CodeEditor.CodeDocument? CodeDocument
         {
             get
             {
