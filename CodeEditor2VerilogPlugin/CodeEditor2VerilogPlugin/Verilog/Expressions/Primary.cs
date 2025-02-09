@@ -234,7 +234,7 @@ number
                     return parseText(word, buildingBlock, buildingBlock, lValue, nameSpaceText+"."+buildingBlockInstantiation.Name);
                 }
                 return null;
-                return parseText(word, buildingBlock, buildingBlock, lValue, buildingBlockInstantiation.Name);
+//                return parseText(word, buildingBlock, buildingBlock, lValue, buildingBlockInstantiation.Name);
             }
 
             return null;
@@ -539,7 +539,8 @@ number
 
         private static Primary? subParseCreate(WordScanner word, NameSpace nameSpace,bool lValue)
         {
-            if (nameSpace == null) System.Diagnostics.Debugger.Break();
+            if (nameSpace == null) throw new Exception();
+
             switch (word.WordType)
             {
                 case WordPointer.WordTypeEnum.Number:
@@ -567,18 +568,20 @@ number
                                 nameSpace.BuildingBlock.NamedElements.ContainsIBuldingBlockInstantiation(word.Text)
                             ){ // module instance
 
-                                IBuildingBlockWithModuleInstance buildingBlock = nameSpace.BuildingBlock as IBuildingBlockWithModuleInstance;
-                                
+                                IBuildingBlockWithModuleInstance? buildingBlock = nameSpace.BuildingBlock as IBuildingBlockWithModuleInstance;
+                                if (buildingBlock == null) throw new Exception();
+
                                 word.Color(CodeDrawStyle.ColorType.Identifier);
                                 IBuildingBlockInstantiation instantiation = (IBuildingBlockInstantiation)nameSpace.BuildingBlock.NamedElements[word.Text];
 
                                 string moduleName = instantiation.SourceName;
-                                BuildingBlock module = word.RootParsedDocument.ProjectProperty.GetBuildingBlock(moduleName);
+                                if (word.RootParsedDocument.ProjectProperty == null) return null;
+                                BuildingBlock? module = word.RootParsedDocument.ProjectProperty.GetBuildingBlock(moduleName);
                                 if (module == null) return null;
                                 word.MoveNext();
                                 word.MoveNext(); // .
 
-                                Primary primary = subParseCreate(word, module,lValue);
+                                Primary? primary = subParseCreate(word, module,lValue);
                                 if (primary == null)
                                 {
                                     word.AddError("illegal variable");
@@ -592,7 +595,7 @@ number
                                 word.MoveNext();
                                 word.MoveNext(); // .
 
-                                Primary primary = subParseCreate(word, space, lValue);
+                                Primary? primary = subParseCreate(word, space, lValue);
                                 if (primary == null)
                                 {
                                     word.AddError("illegal variable");
@@ -605,20 +608,22 @@ number
                             if (
                                 nameSpace.BuildingBlock.NamedElements.ContainsIBuldingBlockInstantiation(word.Text)
                             ){ // module instance
-                                IBuildingBlockWithModuleInstance buildingBlock = nameSpace.BuildingBlock as IBuildingBlockWithModuleInstance;
+                                IBuildingBlockWithModuleInstance? buildingBlock = nameSpace.BuildingBlock as IBuildingBlockWithModuleInstance;
+                                if (buildingBlock == null) throw new Exception();
 
                                 word.Color(CodeDrawStyle.ColorType.Identifier);
                                 IBuildingBlockInstantiation instantiation = (IBuildingBlockInstantiation)nameSpace.BuildingBlock.NamedElements[word.Text];
                                 string moduleName = instantiation.SourceName;
 
-                                BuildingBlock module = word.RootParsedDocument.ProjectProperty.GetBuildingBlock(moduleName);
+                                if(word.RootParsedDocument.ProjectProperty == null) return null;
+                                BuildingBlock? module = word.RootParsedDocument.ProjectProperty.GetBuildingBlock(moduleName);
                                 if (module == null) return null;
                                 word.MoveNext();
 
                                 if(word.Text == ".")
                                 {
                                     word.MoveNext();
-                                    Primary primary = subParseCreate(word, module, lValue);
+                                    Primary? primary = subParseCreate(word, module, lValue);
                                     if (primary == null)
                                     {
                                         word.AddError("illegal variable");
