@@ -387,7 +387,7 @@ namespace pluginVerilog.Data
 
         public override DocumentParser CreateDocumentParser(DocumentParser.ParseModeEnum parseMode)
         {
-            return new Parser.VerilogParser(this, parseMode);
+            return new Parser.VerilogSingleBuildingBlockParser(this, parseMode);
         }
 
         // update sub-items from ParsedDocument

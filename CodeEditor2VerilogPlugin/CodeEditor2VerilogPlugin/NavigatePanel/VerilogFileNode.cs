@@ -111,15 +111,15 @@ namespace pluginVerilog.NavigatePanel
             }
 
             List<CodeEditor2.NavigatePanel.NavigatePanelNode> removeNodes = new List<CodeEditor2.NavigatePanel.NavigatePanelNode>();
-            foreach (CodeEditor2.NavigatePanel.NavigatePanelNode node in Nodes)
-            {
-                if (!newNodes.Contains(node))
-                {
-                    removeNodes.Add(node);
-                }
-            }
             lock (Nodes)
             {
+                foreach (CodeEditor2.NavigatePanel.NavigatePanelNode node in Nodes)
+                {
+                    if (!newNodes.Contains(node))
+                    {
+                        removeNodes.Add(node);
+                    }
+                }
                 foreach (CodeEditor2.NavigatePanel.NavigatePanelNode node in removeNodes)
                 {
                     Nodes.Remove(node);

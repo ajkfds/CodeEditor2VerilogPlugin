@@ -11,11 +11,11 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Parser
 {
-    public class VerilogParser : DocumentParser
+    public class VerilogSingleBuildingBlockParser : DocumentParser
     {
         // create parser
         [SetsRequiredMembers]
-        public VerilogParser(
+        public VerilogSingleBuildingBlockParser(
             Data.IVerilogRelatedFile verilogRelatedFile,
             DocumentParser.ParseModeEnum parseMode
             ) : base(verilogRelatedFile.ToTextFile(),parseMode)
@@ -65,15 +65,15 @@ namespace pluginVerilog.Parser
 
         // create parser with parameter override
         [SetsRequiredMembers]
-        public VerilogParser(
+        public VerilogSingleBuildingBlockParser(
             Data.IVerilogRelatedFile verilogRelatedFile,
             string moduleName,
             Dictionary<string, Verilog.Expressions.Expression> parameterOverrides,
             DocumentParser.ParseModeEnum parseMode
             ) : base(verilogRelatedFile.ToTextFile(), parseMode)
         {
-//            Document = new CodeEditor.CodeDocument(verilogRelatedFile); // use verilog codeDocument
-//            Document.CopyTextOnlyFrom(verilogRelatedFile.CodeDocument);
+            if (verilogRelatedFile == null) throw new Exception();
+            if (verilogRelatedFile.CodeDocument == null) throw new Exception();
 
             this.ParseMode = parseMode;
             CodeEditor2.Data.TextFile? textFile = verilogRelatedFile as CodeEditor2.Data.TextFile;

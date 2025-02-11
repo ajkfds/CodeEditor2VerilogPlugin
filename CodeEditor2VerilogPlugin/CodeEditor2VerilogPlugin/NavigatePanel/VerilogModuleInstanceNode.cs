@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Drawing;
 using pluginVerilog.Verilog.BuildingBlocks;
 using Avalonia.Media;
+using System.Security.AccessControl;
 
 namespace pluginVerilog.NavigatePanel
 {
@@ -70,6 +71,7 @@ namespace pluginVerilog.NavigatePanel
         {
             get
             {
+                if (Item == null) return "null";
                 Data.VerilogModuleInstance instance = Item as Data.VerilogModuleInstance;
                 return instance.Name + " - " + instance.ModuleName;
             }
@@ -84,8 +86,7 @@ namespace pluginVerilog.NavigatePanel
 
 
             System.Diagnostics.Debug.Print("## VerilogModuleInstanceNode.OnSelected");
-
-            if (ModuleInstance.ParseValid & !ModuleInstance.ReparseRequested)
+            if (ModuleInstance != null && ModuleInstance.ParseValid & !ModuleInstance.ReparseRequested)
             {
                 CodeEditor2.Controller.CodeEditor.SetTextFile(ModuleInstance, true);
                 Update();

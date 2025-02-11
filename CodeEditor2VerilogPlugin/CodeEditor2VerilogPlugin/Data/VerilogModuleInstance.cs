@@ -65,13 +65,13 @@ namespace pluginVerilog.Data
         {
             get
             {
-                if (ParameterId == "")
+                if (InstanceId == "")
                 {
                     return RelativePath + ":" + ModuleName;
                 }
                 else
                 {
-                    return RelativePath + ":" + ModuleName + ":" + ParameterId;
+                    return RelativePath + ":" + ModuleName + ":" + InstanceId;
                 }
             }
         }
@@ -95,7 +95,7 @@ namespace pluginVerilog.Data
             if (Project != project) return false;
             if (ModuleName != moduleInstantiation.SourceName) return false;
 
-            if (ParameterId != moduleInstantiation.OverrideParameterID) return false;
+            if (InstanceId != moduleInstantiation.OverrideParameterID) return false;
 
             // re-register
             //disposeItems();
@@ -141,10 +141,12 @@ namespace pluginVerilog.Data
             SourceVerilogFile.RemoveModuleInstance(this);
         }
 
-        public string ParameterId {
+        public string InstanceId {
             get
             {
                 StringBuilder sb = new StringBuilder();
+                sb.Append(ModuleName);
+                sb.Append(":");
                 foreach (var kvp in ParameterOverrides)
                 {
                     sb.Append(kvp.Key);
@@ -180,16 +182,16 @@ namespace pluginVerilog.Data
         {
             get
             {
-                if (ParameterOverrides.Count == 0)
-                {
-                    Data.VerilogFile file = SourceVerilogFile;
-                    if (file == null) return null;
-                    parsedDocument = file.ParsedDocument;
-                }
-                else
+                //if (ParameterOverrides.Count == 0)
+                //{
+                //    Data.VerilogFile file = SourceVerilogFile;
+                //    if (file == null) return null;
+                //    parsedDocument = file.ParsedDocument;
+                //}
+                //else
                 {
                     Data.VerilogFile source = SourceVerilogFile;
-                    parsedDocument = source.GetInstancedParsedDocument(ParameterId);
+                    parsedDocument = source.GetInstancedParsedDocument(InstanceId);
                 }
                 return parsedDocument;
             }
@@ -228,10 +230,10 @@ namespace pluginVerilog.Data
             Data.VerilogFile source = SourceVerilogFile;
             if (source == null) return;
 
-            if (ParameterOverrides.Count == 0)
+//            if (ParameterOverrides.Count == 0)
             {
-                source.AcceptParsedDocument(newParsedDocument);
-            }else{
+//                source.AcceptParsedDocument(newParsedDocument);
+//            }else{
                 ParsedDocument? oldParsedDocument = ParsedDocument;
                 //if (oldParsedDocument == null)
                 //{
@@ -243,7 +245,7 @@ namespace pluginVerilog.Data
                 //}
                 {
                     ParsedDocument = newParsedDocument; // should keep parseddocument 1st
-                    source.RegisterInstanceParsedDocument(ParameterId, newParsedDocument, this);
+                    source.RegisterInstanceParsedDocument(InstanceId, newParsedDocument, this);
                     acceptParameterizedParsedDocument(newParsedDocument);
                 }
                 if (oldParsedDocument != null) oldParsedDocument.Dispose();
@@ -305,7 +307,7 @@ namespace pluginVerilog.Data
 
         public override DocumentParser CreateDocumentParser(DocumentParser.ParseModeEnum parseMode)
         {
-            return new Parser.VerilogParser(this, ModuleName, ParameterOverrides, parseMode);
+            return new Parser.VerilogSingleBuildingBlockParser(this, ModuleName, ParameterOverrides, parseMode);
 //            return new Parser.VerilogParser(this.SourceVerilogFile , ModuleName, ParameterOverrides, parseMode);
         }
 

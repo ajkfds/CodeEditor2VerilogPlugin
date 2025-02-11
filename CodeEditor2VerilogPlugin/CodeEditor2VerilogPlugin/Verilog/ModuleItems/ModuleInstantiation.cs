@@ -17,7 +17,7 @@ namespace pluginVerilog.Verilog.ModuleItems
         public NamedElements NamedElements { get; } = new NamedElements();
 
         public virtual CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
-        protected ModuleInstantiation() { }
+        //protected ModuleInstantiation() { }
         /*
         A.4.1.1 Module instantiation 
 
@@ -92,8 +92,10 @@ namespace pluginVerilog.Verilog.ModuleItems
         {
             get
             {
-                if (ParameterOverrides.Count == 0) return "";
+//                if (ParameterOverrides.Count == 0) return "";
                 StringBuilder sb = new StringBuilder();
+                sb.Append(SourceName);
+                sb.Append(":");
                 foreach (var kvp in ParameterOverrides)
                 {
                     sb.Append(kvp.Key);
@@ -905,6 +907,8 @@ namespace pluginVerilog.Verilog.ModuleItems
             get
             {
                 StringBuilder sb = new StringBuilder();
+                sb.Append(SourceName);
+                sb.Append(":");
                 foreach (var kvp in ParameterOverrides)
                 {
                     sb.Append(kvp.Key);
