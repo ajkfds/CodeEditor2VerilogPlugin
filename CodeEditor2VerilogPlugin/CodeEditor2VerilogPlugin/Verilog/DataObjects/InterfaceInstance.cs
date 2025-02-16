@@ -113,7 +113,7 @@ namespace pluginVerilog.Verilog.DataObjects
             IModuleOrInterface? moduleOrInterface = nameSpace.BuildingBlock as IModuleOrInterface;
             if (moduleOrInterface == null) return false;
 
-            WordScanner moduleIdentifier = word.Clone();
+            WordReference moduleIdentifier = word.CrateWordReference();
             string interfaceName = word.Text;
             IndexReference beginIndexReference = word.CreateIndexReference();
             Interface? instancedInterface = word.ProjectProperty.GetBuildingBlock(interfaceName) as Interface;

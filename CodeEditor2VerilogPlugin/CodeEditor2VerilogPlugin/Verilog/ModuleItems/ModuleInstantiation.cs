@@ -121,7 +121,8 @@ namespace pluginVerilog.Verilog.ModuleItems
             BuildingBlock buildingBlock = nameSpace.BuildingBlock as BuildingBlock;
             if (buildingBlock == null) return false;
 
-            WordScanner moduleIdentifier = word.Clone();
+
+            var moduleIdentifier = word.CrateWordReference();
             string moduleName = word.Text;
             IndexReference beginIndexReference = word.CreateIndexReference();
             Module? instancedModule = word.ProjectProperty.GetBuildingBlock(moduleName) as Module;
@@ -392,7 +393,7 @@ namespace pluginVerilog.Verilog.ModuleItems
             NameSpace nameSpace, 
             Module? instancedModule, 
             ModuleInstantiation moduleInstantiation, 
-            WordScanner moduleIdentifier)
+            WordReference moduleIdentifier)
         {
             /*
             list_of_port_connections ::= 
@@ -415,7 +416,7 @@ namespace pluginVerilog.Verilog.ModuleItems
             NameSpace nameSpace,
             Module? instancedModule,
             ModuleInstantiation moduleInstantiation,
-            WordScanner moduleIdentifier)
+            WordReference moduleIdentifier)
         {
             /*
             ordered_port_connection ::= { attribute_instance } [ expression ]
@@ -451,7 +452,7 @@ namespace pluginVerilog.Verilog.ModuleItems
             NameSpace nameSpace,
             Module? instancedModule,
             ModuleInstantiation moduleInstantiation,
-            WordScanner moduleIdentifier)
+            WordReference moduleIdentifier)
         {
             /*
             named_port_connection ::= 
@@ -566,7 +567,7 @@ namespace pluginVerilog.Verilog.ModuleItems
             NameSpace nameSpace,
             Module? instancedModule,
             ModuleInstantiation moduleInstantiation,
-            WordScanner moduleIdentifier,
+            WordReference moduleIdentifier,
             List<string> notWrittenPortName
             )
         {
@@ -601,7 +602,7 @@ namespace pluginVerilog.Verilog.ModuleItems
         Module? instancedModule,
         ModuleInstantiation moduleInstantiation,
         string pinName,
-        WordScanner moduleIdentifier)
+        WordReference moduleIdentifier)
         {
             if (word.Text != "(") throw new Exception();
             word.MoveNext();
@@ -679,7 +680,7 @@ namespace pluginVerilog.Verilog.ModuleItems
             Module? instancedModule,
             ModuleInstantiation moduleInstantiation,
             string pinName,
-            WordScanner moduleIdentifier)
+            WordReference moduleIdentifier)
         {
             if (instancedModule == null) return;
             DataObject? targetObject = nameSpace.NamedElements.GetDataObject(pinName);

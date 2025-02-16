@@ -20,6 +20,9 @@ namespace pluginVerilog.Parser
             DocumentParser.ParseModeEnum parseMode
             ) : base(verilogRelatedFile.ToTextFile(),parseMode)
         {
+            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+            sw.Start();
+
             this.ParseMode = parseMode;
 
             CodeEditor2.Data.TextFile? textFile = verilogRelatedFile as CodeEditor2.Data.TextFile;
@@ -61,6 +64,8 @@ namespace pluginVerilog.Parser
             }
 
              word = new Verilog.WordScanner(VerilogDocument, parsedDocument, parsedDocument.SystemVerilog);
+
+            System.Diagnostics.Debug.Print("Parser Construct " + sw.ElapsedMilliseconds.ToString());
         }
 
         // create parser with parameter override
@@ -72,6 +77,9 @@ namespace pluginVerilog.Parser
             DocumentParser.ParseModeEnum parseMode
             ) : base(verilogRelatedFile.ToTextFile(), parseMode)
         {
+            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+            sw.Start();
+
             if (verilogRelatedFile == null) throw new Exception();
             if (verilogRelatedFile.CodeDocument == null) throw new Exception();
 
@@ -110,6 +118,8 @@ namespace pluginVerilog.Parser
             parsedDocument.ParameterOverrides = parameterOverrides;
             parsedDocument.TargetBuildingBlockName = moduleName;
             word = new Verilog.WordScanner(VerilogDocument, parsedDocument, parsedDocument.SystemVerilog);
+
+            System.Diagnostics.Debug.Print("Parser Construct " + sw.ElapsedMilliseconds.ToString());
         }
 
 
@@ -208,6 +218,9 @@ namespace pluginVerilog.Parser
 
         public override void Parse()
         {
+            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+            sw.Start();
+
             word.GetFirst();
 
             word.RootParsedDocument.LockedDocument.Add(word.Document);
@@ -220,6 +233,8 @@ namespace pluginVerilog.Parser
 
             word.RootParsedDocument.UnlockDocument();
             word.Dispose();
+
+            System.Diagnostics.Debug.Print("Parse " + sw.ElapsedMilliseconds.ToString());
         }
     }
 }

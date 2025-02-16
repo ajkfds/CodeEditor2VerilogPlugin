@@ -197,6 +197,7 @@ namespace pluginVerilog.Data
 
         private void loadDocumentFromFile()
         {
+            //System.Diagnostics.Debug.Print("loadDocumentFromFile "+RelativePath);
             try
             {
                 if (document == null) document = new CodeEditor.CodeDocument(this);

@@ -41,7 +41,7 @@ namespace pluginVerilog.Verilog.DataObjects
                 word.AddError("= expected.");
                 return null;
             }
-            WordScanner equalPointer = word.Clone();
+            WordReference equalPointer = word.CrateWordReference();
             word.MoveNext();
 
             Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);

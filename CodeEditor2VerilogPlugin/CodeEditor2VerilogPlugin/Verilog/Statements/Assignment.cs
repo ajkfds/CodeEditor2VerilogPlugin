@@ -124,12 +124,28 @@ namespace pluginVerilog.Verilog.Statements
         public static BlockingAssignedAction? Assigned;
         public static BlockingAssignment? ParseCreate(WordScanner word, NameSpace nameSpace, Expressions.Expression lExpression)
         {
-            if (word.Text != "=")
+            switch(word.Text)
             {
-                System.Diagnostics.Debugger.Break();
-                return null;
+                case "=":
+                case "+=":
+                case "-=":
+                case "*=":
+                case "/=":
+                case "%=":
+                case "&=":
+                case "|=":
+                case "^=":
+                case "<<=":
+                case ">>=":
+                case "<<<=":
+                case ">>>=":
+                    break;
+                default:
+                    throw new Exception();
             }
-            word.MoveNext();    // <=
+
+
+                word.MoveNext();    // <=
 
             if (word.GetCharAt(0) == '#')
             {

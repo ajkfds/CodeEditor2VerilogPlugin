@@ -225,6 +225,25 @@ namespace pluginVerilog.Verilog.Statements
                         case "<=":
                             statement = NonBlockingAssignment.ParseCreate(word, nameSpace, expression);
                             break;
+                        case "+=":
+                        case "-=":
+                        case "*=":
+                        case "/=":
+                        case "%=":
+                        case "&=":
+                        case "|=":
+                        case "^=":
+                        case "<<=":
+                        case ">>=":
+                        case "<<<=":
+                        case ">>>=":
+                            statement = BlockingAssignment.ParseCreate(word, nameSpace, expression);
+                            break;
+                        case "++":
+                        case "--":
+                            word.MoveNext();
+                            return null;
+                            break;
                         default:
                             expression.Reference.AddError("illegal statement");
                             return null;

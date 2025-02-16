@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -114,5 +115,10 @@ namespace pluginVerilog.Verilog
             parsedDocument.AddHint(Index, Length, message);
         }
 
+        public void Color(CodeDrawStyle.ColorType colorType)
+        {
+            if(Document == null) return;
+            Document.TextColors.SetColorAt(Index, CodeDrawStyle.ColorIndex(colorType), length);
+        }
     }
 }

@@ -16,6 +16,9 @@ namespace pluginVerilog.Data.VerilogCommon
     {
         public static void Update(IVerilogRelatedFile item)
         {
+//            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+//            sw.Start();
+
             // Update the Items member of this object according to the rootItem.ParsedDocument.
             Project project = item.Project;
             CodeEditor2.Data.Item? parent = item as CodeEditor2.Data.Item;
@@ -83,7 +86,8 @@ namespace pluginVerilog.Data.VerilogCommon
                 {
                     item.Items.Add(i.Name,i);
                 }
-           }
+            }
+//            System.Diagnostics.Debug.WriteLine("Update time:" + sw.ElapsedMilliseconds.ToString());
         }
 
         private static void addSubItemsMultiBuildingBlock(IVerilogRelatedFile item, Dictionary<string, CodeEditor2.Data.Item> newSubItems, CodeEditor2.Data.Item? parent, Project project)

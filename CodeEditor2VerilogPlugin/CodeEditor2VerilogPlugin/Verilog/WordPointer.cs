@@ -15,7 +15,7 @@ namespace pluginVerilog.Verilog
         {
             this.Document = document;
             this.ParsedDocument = parsedDocument;
-            if (this.ParsedDocument == null) System.Diagnostics.Debugger.Break();
+            if (this.ParsedDocument == null) throw new Exception();
             string sectionName = SectionName;
             fetchNext(this.Document,ref index, out length, out nextIndex, out wordType, ref sectionName, !InhibitColor);
             SectionName = sectionName;
