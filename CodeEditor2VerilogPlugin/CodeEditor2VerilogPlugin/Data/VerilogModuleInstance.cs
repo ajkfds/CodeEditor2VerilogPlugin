@@ -226,23 +226,11 @@ namespace pluginVerilog.Data
         public override void AcceptParsedDocument(ParsedDocument newParsedDocument)
         {
             if (newParsedDocument == null) throw new Exception();
-//            System.Diagnostics.Debug.Print("VerilogModuleInstance.AcceptParsedDocument "+ID+"::"+newParsedDocument.ObjectID);
             Data.VerilogFile source = SourceVerilogFile;
             if (source == null) return;
 
-//            if (ParameterOverrides.Count == 0)
             {
-//                source.AcceptParsedDocument(newParsedDocument);
-//            }else{
                 ParsedDocument? oldParsedDocument = ParsedDocument;
-                //if (oldParsedDocument == null)
-                //{
-                //    System.Diagnostics.Debug.Print("VerilogModuleInstance.AcceptParsedDocument from null");
-                //}
-                //else
-                //{
-                //    System.Diagnostics.Debug.Print("VerilogModuleInstance.AcceptParsedDocument from " + ID + "::" + oldParsedDocument.ObjectID);
-                //}
                 {
                     ParsedDocument = newParsedDocument; // should keep parseddocument 1st
                     source.RegisterInstanceParsedDocument(InstanceId, newParsedDocument, this);

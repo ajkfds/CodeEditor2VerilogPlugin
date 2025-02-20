@@ -29,111 +29,125 @@ namespace pluginVerilog.Verilog.Statements
         par_block               ::= fork [ : block_identifier { block_item_declaration } ] { statement } join
         seq_block          ::= begin[ : block_identifier { block_item_declaration } ] { statement } end  
         */
-        public static IStatement ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static IStatement? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
-            if (word.Text != "fork")
-            {
-                System.Diagnostics.Debugger.Break();
-            }
+            if (word.Text != "fork") throw new Exception();
             word.Color(CodeDrawStyle.ColorType.Keyword);
             IndexReference beginIndex = word.CreateIndexReference();
             word.MoveNext(); // begin
 
-            if (word.GetCharAt(0) == ':')
+            if (word.Text == ":")
             {
-                NamedParallelBlock? namedBlock = null;
-                string name = "";
-
-                word.MoveNext(); // :
-                if (!General.IsIdentifier(word.Text))
-                {
-                    word.AddError("illegal ifdentifier name");
-                }
-                else
-                {
-                    if (word.Prototype)
-                    { // protptype
-                        if (nameSpace.NamedElements.ContainsKey(word.Text))
-                        {
-                            word.AddError("duplicated name");
-                            name = word.Text;
-                        }
-                        else
-                        {
-                            namedBlock = new NamedParallelBlock(nameSpace.BuildingBlock, nameSpace)
-                            {
-                                BeginIndexReference = beginIndex,
-                                DefinitionReference = word.CrateWordReference(),
-                                Name = word.Text,
-                                Parent = nameSpace,
-                                Project = word.Project
-                            };
-                            nameSpace.NamedElements.Add(namedBlock.Name, namedBlock);
-                        }
-                    }
-                    else
-                    { // implementation
-                        if (nameSpace.NamedElements.ContainsKey(word.Text) && nameSpace.NamedElements[word.Text] is NamedParallelBlock)
-                        {
-                            word.Color(CodeDrawStyle.ColorType.Identifier);
-                            namedBlock = nameSpace.NamedElements[word.Text] as NamedParallelBlock;
-
-                        }
-                    }
-                    word.MoveNext();
-                }
-                while (!word.Eof && word.Text != "join")
-                {
-                    IStatement? statement = null;
-                    if(namedBlock == null)
-                    {
-                        statement = Verilog.Statements.Statements.ParseCreateStatement(word, nameSpace);
-                        if (statement == null) break;
-                    }
-                    else
-                    {
-                        statement = Verilog.Statements.Statements.ParseCreateStatement(word, namedBlock);
-                        if (statement == null) break;
-                        namedBlock.Statements.Add(statement);
-                    }
-                }
-                if (word.Text != "join")
-                {
-                    word.AddError("illegal sequential block");
-                    return null;
-                }
-                word.Color(CodeDrawStyle.ColorType.Keyword);
-                namedBlock.LastIndexReference = word.CreateIndexReference();
-                word.MoveNext(); // end
-
-                if (word.Active && namedBlock.Name != null && !nameSpace.NamedElements.ContainsKey(namedBlock.Name))
-                {
-                    nameSpace.NamedElements.Add(namedBlock.Name, namedBlock);
-                }
-
-                return namedBlock;
+                return parseNamedParallelBlock(word, nameSpace, beginIndex);
             }
             else
             {
-                ParallelBlock sequentialBlock = new ParallelBlock();
-                while (!word.Eof && word.Text != "join")
-                {
-                    IStatement statement = Verilog.Statements.Statements.ParseCreateStatement(word, nameSpace);
-                    if (statement == null) break;
-                    sequentialBlock.Statements.Add(statement);
-                }
-                if (word.Text != "join")
-                {
-                    word.AddError("illegal sequential block");
-                    return null;
-                }
-                word.Color(CodeDrawStyle.ColorType.Keyword);
-                word.MoveNext(); // end
-
-                return sequentialBlock;
+                return parseParallelBlock(word, nameSpace, beginIndex);
             }
         }
 
+        private static ParallelBlock parseParallelBlock(WordScanner word, NameSpace nameSpace, IndexReference beginIndex)
+        {
+            ParallelBlock sequentialBlock = new ParallelBlock();
+            while (!word.Eof && word.Text != "join")
+            {
+                IStatement? statement = Verilog.Statements.Statements.ParseCreateStatement(word, nameSpace);
+                if (statement == null) break;
+                sequentialBlock.Statements.Add(statement);
+            }
+            if (word.Text != "join")
+            {
+                word.AddError("illegal sequential block");
+                return null;
+            }
+            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.MoveNext(); // end
+
+            return sequentialBlock;
+        }
+
+        private static IStatement parseNamedParallelBlock(WordScanner word, NameSpace nameSpace, IndexReference beginIndex)
+        {
+            NamedParallelBlock namedBlock;
+            string name = "";
+
+            word.MoveNext(); // :
+            if (!General.IsIdentifier(word.Text))
+            {
+                word.AddError("illegal ifdentifier name");
+                return parseParallelBlock(word, nameSpace, beginIndex);
+            }
+
+            if (word.Prototype)
+            { // protptype
+                if (nameSpace.NamedElements.ContainsKey(word.Text))
+                {
+                    word.AddError("duplicated name");
+                    name = word.Text;
+                    word.MoveNext();
+                    return parseParallelBlock(word, nameSpace, beginIndex);
+                }
+                else
+                {
+                    namedBlock = new NamedParallelBlock(nameSpace.BuildingBlock, nameSpace)
+                    {
+                        BeginIndexReference = beginIndex,
+                        DefinitionReference = word.CrateWordReference(),
+                        Name = word.Text,
+                        Parent = nameSpace,
+                        Project = word.Project
+                    };
+                    nameSpace.NamedElements.Add(namedBlock.Name, namedBlock);
+                }
+            }
+            else
+            { // implementation
+                if (nameSpace.NamedElements.ContainsKey(word.Text) && nameSpace.NamedElements[word.Text] is NamedParallelBlock)
+                {
+                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    namedBlock = (NamedParallelBlock)nameSpace.NamedElements[word.Text];
+                }
+                else
+                {
+                    namedBlock = new NamedParallelBlock(nameSpace.BuildingBlock, nameSpace)
+                    {
+                        BeginIndexReference = beginIndex,
+                        DefinitionReference = word.CrateWordReference(),
+                        Name = word.Text,
+                        Parent = nameSpace,
+                        Project = word.Project
+                    };
+                    nameSpace.NamedElements.Add(namedBlock.Name, namedBlock);
+                }
+            }
+            word.MoveNext();
+            
+            while (!word.Eof && word.Text != "join")
+            {
+                IStatement? statement = null;
+                statement = Verilog.Statements.Statements.ParseCreateStatement(word, namedBlock);
+                if (statement == null) break;
+                namedBlock.Statements.Add(statement);
+            }
+
+            if (word.Text != "join")
+            {
+                word.AddError("illegal sequential block");
+                namedBlock.LastIndexReference = word.CreateIndexReference();
+                return namedBlock;
+            }
+            word.Color(CodeDrawStyle.ColorType.Keyword);
+            namedBlock.LastIndexReference = word.CreateIndexReference();
+            word.MoveNext(); // end
+
+            if (word.Active && namedBlock.Name != null && !nameSpace.NamedElements.ContainsKey(namedBlock.Name))
+            {
+                nameSpace.NamedElements.Add(namedBlock.Name, namedBlock);
+            }
+
+            return namedBlock;
+
+        }
     }
 
     public class NamedParallelBlock : Verilog.NameSpace, IStatement

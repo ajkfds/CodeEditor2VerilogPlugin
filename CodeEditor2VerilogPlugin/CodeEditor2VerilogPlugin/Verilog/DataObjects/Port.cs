@@ -486,11 +486,13 @@ ansi_port_declaration ::=
             {
                 Net net = Net.Create(port.Name,(Net.NetTypeEnum)netType, dataType);
                 net.PackedDimensions = packedDimensions;
+                net.DefinedReference = word.CrateWordReference();
                 port.DataObject = net;
             }
             else if(dataType != null)
             {
                 Variables.Variable variable = Variables.Variable.Create(port.Name, dataType);
+                variable.DefinedReference = word.CrateWordReference();
                 port.DataObject = variable;
             }
             else if(interface_ != null)
@@ -502,7 +504,6 @@ ansi_port_declaration ::=
 
             word.Color(CodeDrawStyle.ColorType.Variable);
             word.MoveNext();
-
 
             // Unpacked dimensions shall not be inherited from the previous port declaration
             //  and must be repeated for each port with the same dimensions.
