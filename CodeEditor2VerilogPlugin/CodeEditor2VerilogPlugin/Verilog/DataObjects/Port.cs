@@ -502,6 +502,29 @@ ansi_port_declaration ::=
 
             addPort(word, nameSpace, port);
 
+            if(port.DataObject != null)
+            {
+                switch (port.Direction)
+                {
+                    case DirectionEnum.Inout:
+//                        port.DataObject.AssignedReferences.Add(word.GetReference());
+//                        port.DataObject.UsedReferences.Add(word.GetReference());
+                        break;
+                    case DirectionEnum.Input:
+                        port.DataObject.AssignedReferences.Add(word.GetReference());
+                        break;
+                    case DirectionEnum.Undefined:
+                        break;
+                    case DirectionEnum.Ref:
+//                        port.DataObject.AssignedReferences.Add(word.GetReference());
+//                        port.DataObject.UsedReferences.Add(word.GetReference());
+                        break;
+                    case DirectionEnum.Output:
+                        port.DataObject.UsedReferences.Add(word.GetReference());
+                        break;
+                }
+            }
+
             word.Color(CodeDrawStyle.ColorType.Variable);
             word.MoveNext();
 

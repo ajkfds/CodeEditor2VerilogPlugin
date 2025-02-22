@@ -13,6 +13,8 @@ using System.Globalization;
 using Avalonia.OpenGL;
 using pluginVerilog.Verilog.ModuleItems;
 using System.Reflection.Metadata;
+using CodeEditor2.CodeEditor.PopupMenu;
+using pluginVerilog.Data;
 
 namespace pluginVerilog
 {
@@ -292,6 +294,10 @@ namespace pluginVerilog
             if (!file.VerilogParsedDocument.Root.BuldingBlocks.ContainsKey(buildingBlockName)) return null;
             return file.VerilogParsedDocument.Root.BuldingBlocks[buildingBlockName] as BuildingBlock;
         }
+
+        // Append Tools
+        public Action<List<ToolItem>, IVerilogRelatedFile, int> AppendTools;
+
 
         // inline comment
         public Dictionary<string, Action<Verilog.ParsedDocument>> InLineCommentCommands = new Dictionary<string, Action<Verilog.ParsedDocument>>();

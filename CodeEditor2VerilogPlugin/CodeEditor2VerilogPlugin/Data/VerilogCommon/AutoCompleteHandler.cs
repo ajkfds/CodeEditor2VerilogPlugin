@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Avalonia.Input;
+using CodeEditor2.CodeEditor;
 using CodeEditor2.CodeEditor.CodeComplete;
 using CodeEditor2.CodeEditor.PopupHint;
 using CodeEditor2.CodeEditor.PopupMenu;
@@ -46,6 +47,7 @@ namespace pluginVerilog.Data.VerilogCommon
         {
             if (parsedDocument == null) return null;
             if (parsedDocument.Version != version) return null;
+            if (item.CodeDocument == null) return null;
 
             int headIndex, length;
             item.CodeDocument.GetWord(index, out headIndex, out length);
@@ -62,6 +64,11 @@ namespace pluginVerilog.Data.VerilogCommon
             toolItems.Add(new Verilog.Snippets.ModuleInstanceMenuSnippet());
             toolItems.Add(new Verilog.Snippets.PortConnectionCreateSnippet());
             toolItems.Add(new Verilog.Snippets.ModPortSnippet());
+
+            if(item.VerilogParsedDocument.ProjectProperty != null && item.VerilogParsedDocument.ProjectProperty.AppendTools != null)
+            {
+                item.VerilogParsedDocument.ProjectProperty.AppendTools(toolItems, item, index);
+            }
 
             return toolItems;
         }

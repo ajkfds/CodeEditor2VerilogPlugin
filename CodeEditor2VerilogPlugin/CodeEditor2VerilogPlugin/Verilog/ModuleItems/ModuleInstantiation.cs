@@ -131,6 +131,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                 return false;
             }
             word.MoveNext();
+            
 
             string next = word.NextText;
             if(word.Text != "#" && next != "(" && next != ";" && General.IsIdentifier(word.Text))
