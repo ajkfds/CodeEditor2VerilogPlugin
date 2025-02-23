@@ -73,9 +73,9 @@ namespace pluginVerilog.Data.VerilogCommon
         public delegate void AppendToolItemDelegate (List<ToolItem> toolItems, IVerilogRelatedFile item, int index);
         public static AppendToolItemDelegate? AppendToolItems;
 
-        public static List<AutocompleteItem>? GetAutoCompleteItems(IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, int index, out string? candidateWord)
+        public static List<AutocompleteItem>? GetAutoCompleteItems(IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, int index, out string candidateWord)
         {
-            candidateWord = null;
+            candidateWord = "";
 
             if(item.VerilogParsedDocument == null) return null;
             if(item.CodeDocument == null) return null;
@@ -100,8 +100,13 @@ namespace pluginVerilog.Data.VerilogCommon
 
             List<AutocompleteItem>? items = parsedDocument.GetAutoCompleteItems(words, lineStartIndex, line, (CodeEditor.CodeDocument)item.CodeDocument, candidateWord);
 
+            if (AppendAutocompleteItems != null) AppendAutocompleteItems(items, item, parsedDocument, index, ref candidateWord);
+
             return items;
         }
+        // Append Tools
+        public delegate void AppendAutocompleteItemDelegate(List<AutocompleteItem>? toolItems, IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, int index, ref string? candidateWord);
+        public static AppendAutocompleteItemDelegate? AppendAutocompleteItems;
 
 
 

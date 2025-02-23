@@ -70,7 +70,6 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             if (word.Text != "module" && word.Text != "macromodule") throw new Exception();
             word.Color(CodeDrawStyle.ColorType.Keyword);
             IndexReference beginReference = word.CreateIndexReference();
-
             word.MoveNext();
 
 
@@ -106,7 +105,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 module.NameReference = word.GetReference();
             }
             word.MoveNext();
-
+            module.BlockBeginIndexReference = word.CreateIndexReference();
 
             if (!word.CellDefine && !protoType)
             {
@@ -134,7 +133,10 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 module.LastIndexReference = word.CreateIndexReference();
 
-                word.AppendBlock(module.BeginIndexReference, module.LastIndexReference);
+                if (module.BlockBeginIndexReference != null)
+                {
+                    word.AppendBlock(module.BlockBeginIndexReference, module.LastIndexReference);
+                }
                 word.MoveNext();
                 return module;
             }

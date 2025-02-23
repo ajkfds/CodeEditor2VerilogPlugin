@@ -215,6 +215,7 @@ namespace pluginVerilog.Verilog
             word.Color(CodeDrawStyle.ColorType.Identifier);
             word.MoveNext();
 
+            function.BlockBeginIndexReference = word.CreateIndexReference();
 
 
             /*            
@@ -305,7 +306,7 @@ namespace pluginVerilog.Verilog
             {
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 function.LastIndexReference = word.CreateIndexReference();
-                word.AppendBlock(function.BeginIndexReference, function.LastIndexReference);
+                if(function.BlockBeginIndexReference != null) word.AppendBlock(function.BlockBeginIndexReference, function.LastIndexReference);
                 word.MoveNext();
             }
             else

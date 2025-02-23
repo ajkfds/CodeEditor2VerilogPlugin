@@ -39,6 +39,7 @@ namespace pluginVerilog.Verilog.DataObjects
         public Dictionary<string, Expressions.Expression> PortConnection { get; set; } = new Dictionary<string, Expressions.Expression>();
 
         public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference BlockBeginIndexReference { get; set; }
         public IndexReference? LastIndexReference { get; set; }
         public void AppendLabel(IndexReference iref, AjkAvaloniaLibs.Controls.ColorLabel label)
         {
@@ -122,6 +123,7 @@ namespace pluginVerilog.Verilog.DataObjects
                 return false;
             }
             word.MoveNext();
+            IndexReference blockBeginIndexReference = word.CreateIndexReference();
 
             string next = word.NextText;
             if (word.Text != "#" && next != "(" && next != ";" && General.IsIdentifier(word.Text))
@@ -282,6 +284,7 @@ namespace pluginVerilog.Verilog.DataObjects
                     Project = word.RootParsedDocument.Project,
                     SourceName = interfaceName
                 };
+                interfaceInstance.BlockBeginIndexReference = blockBeginIndexReference;
 
                 // swap to parameter overrided module
                 if (instancedInterface != null)
@@ -482,7 +485,9 @@ namespace pluginVerilog.Verilog.DataObjects
                 word.MoveNext();
                 interfaceInstance.LastIndexReference = word.CreateIndexReference();
 
-                if (!word.Prototype && word.Active) word.AppendBlock(interfaceInstance.BeginIndexReference, interfaceInstance.LastIndexReference);
+                if (!word.Prototype && word.Active && interfaceInstance.BlockBeginIndexReference != null) {
+                    word.AppendBlock(interfaceInstance.BlockBeginIndexReference, interfaceInstance.LastIndexReference);
+                }
 
                 // copy items from interface
                 copyItems(interfaceInstance,instancedInterface);

@@ -25,6 +25,7 @@ namespace pluginVerilog.Verilog
         public NamedElements NamedElements { get; } = new NamedElements();
 
         public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? BlockBeginIndexReference = null;
         public IndexReference? LastIndexReference = null;
 
         public required NameSpace Parent { get; init; }

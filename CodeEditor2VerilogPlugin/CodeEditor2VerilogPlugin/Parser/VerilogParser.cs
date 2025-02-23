@@ -11,11 +11,11 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Parser
 {
-    public class VerilogSingleBuildingBlockParser : DocumentParser
+    public class VerilogParser : DocumentParser
     {
         // create parser
         [SetsRequiredMembers]
-        public VerilogSingleBuildingBlockParser(
+        public VerilogParser(
             Data.IVerilogRelatedFile verilogRelatedFile,
             DocumentParser.ParseModeEnum parseMode
             ) : base(verilogRelatedFile.ToTextFile(),parseMode)
@@ -70,7 +70,7 @@ namespace pluginVerilog.Parser
 
         // create parser with parameter override
         [SetsRequiredMembers]
-        public VerilogSingleBuildingBlockParser(
+        public VerilogParser(
             Data.IVerilogRelatedFile verilogRelatedFile,
             string moduleName,
             Dictionary<string, Verilog.Expressions.Expression> parameterOverrides,

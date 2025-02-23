@@ -14,7 +14,7 @@ namespace pluginVerilog.Verilog.Snippets
         {
         }
 
-        private CodeEditor2.CodeEditor.CodeDocument document;
+        private CodeEditor2.CodeEditor.CodeDocument? document;
 
         // initial value for {n}
         private List<string> initials = new List<string> { "clock", "reset_x", "reset_x", "" };
@@ -99,16 +99,17 @@ namespace pluginVerilog.Verilog.Snippets
                 }
             }
         }
-        public override void BeforeKeyDown(object sender, TextInputEventArgs e, CodeEditor2.Views.PopupMenuView popupMenuView)
+        public override void BeforeKeyDown(object? sender, TextInputEventArgs e, CodeEditor2.Views.PopupMenuView popupMenuView)
         {
             System.Diagnostics.Debug.Print("## AlwaysFFSnippet.BeforeKeyDown");
         }
-        public override void AfterKeyDown(object sender, TextInputEventArgs e, CodeEditor2.Views.PopupMenuView popupMenuView)
+        public override void AfterKeyDown(object? sender, TextInputEventArgs e, CodeEditor2.Views.PopupMenuView popupMenuView)
         {
             System.Diagnostics.Debug.Print("## AlwaysFFSnippet.AfterKeyDown");
         }
         public override void AfterAutoCompleteHandled(CodeEditor2.Views.PopupMenuView popupMenuView)
         {
+            if (document == null) return;
             System.Diagnostics.Debug.Print("## AlwaysFFSnippet.AfterAutoCompleteHandled");
 
             int i = CodeEditor2.Controller.CodeEditor.GetHighlightIndex(document.CaretIndex);
@@ -146,6 +147,8 @@ namespace pluginVerilog.Verilog.Snippets
         {
             System.Diagnostics.Debug.Print("## AlwaysFFSnippet.moveToNextHighlight");
             moved = false;
+            if (document == null) return;
+
             int i = CodeEditor2.Controller.CodeEditor.GetHighlightIndex(document.CaretIndex);
             if (i == -1) return;
             i++;

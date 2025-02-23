@@ -19,6 +19,7 @@ namespace pluginVerilog.Verilog.ModuleItems
         void AppendLabel(IndexReference iref, AjkAvaloniaLibs.Controls.ColorLabel label);
 
         IndexReference BeginIndexReference { get; }
+        IndexReference? BlockBeginIndexReference { get; }
         IndexReference? LastIndexReference { get; }
         // Item
         string Name { get; init; }

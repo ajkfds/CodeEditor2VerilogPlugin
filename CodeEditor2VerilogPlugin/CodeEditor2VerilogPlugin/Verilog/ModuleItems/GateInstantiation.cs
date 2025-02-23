@@ -247,10 +247,10 @@ namespace pluginVerilog.Verilog.ModuleItems
     {
         protected MosSwitchInstiation() { }
 
-        Delay3? delay3;
-        Expressions.Expression? OutputTerminal;
-        Expressions.Expression? InputTerminal;
-        Expressions.Expression? EnableTerminal;
+        public Delay3? delay3;
+        public Expressions.Expression? OutputTerminal;
+        public Expressions.Expression? InputTerminal;
+        public Expressions.Expression? EnableTerminal;
 
         // gate_instantiation::= mos_switchtype  [delay3]    mos_switch_instance         { , mos_switch_instance }; 
         public static new void Parse(WordScanner word, NameSpace nameSpace)

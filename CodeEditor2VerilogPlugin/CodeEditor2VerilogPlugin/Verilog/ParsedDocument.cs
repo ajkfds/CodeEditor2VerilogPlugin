@@ -772,11 +772,11 @@ namespace pluginVerilog.Verilog
             }
 
             private System.WeakReference<Data.IVerilogRelatedFile> fileRef;
-            public Data.IVerilogRelatedFile File
+            public Data.IVerilogRelatedFile? File
             {
                 get
                 {
-                    Data.IVerilogRelatedFile file;
+                    Data.IVerilogRelatedFile? file;
                     if (!fileRef.TryGetTarget(out file)) return null;
                     return file;
                 }

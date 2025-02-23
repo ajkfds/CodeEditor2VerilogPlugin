@@ -152,8 +152,7 @@ namespace pluginVerilog.Data
         }
         public override void Save()
         {
-            if (CodeDocument == null) return;
-
+            if(SourceTextFile == null) return;
             SourceTextFile.Save();
         }
 
@@ -161,6 +160,7 @@ namespace pluginVerilog.Data
         {
             get
             {
+                if(SourceTextFile == null) return null;
                 return SourceTextFile.LoadedFileLastWriteTime;
             }
         }
@@ -224,9 +224,9 @@ namespace pluginVerilog.Data
             return node;
         }
 
-        public override DocumentParser CreateDocumentParser(DocumentParser.ParseModeEnum parseMode)
+        public override DocumentParser? CreateDocumentParser(DocumentParser.ParseModeEnum parseMode)
         {
-            Data.IVerilogRelatedFile parentFile = Parent as Data.IVerilogRelatedFile;
+            Data.IVerilogRelatedFile? parentFile = Parent as Data.IVerilogRelatedFile;
             if (parentFile == null) return null;
             // do not parse again for background parse. header file is parsed with parent file.
             if (parseMode != DocumentParser.ParseModeEnum.EditParse) return null;
@@ -289,7 +289,7 @@ namespace pluginVerilog.Data
         //{
         //    return VerilogCommon.AutoComplete.GetPopupItems(this,VerilogParsedDocument, version, index);
         //}
-        public override PopupItem GetPopupItem(ulong version, int index)
+        public override PopupItem? GetPopupItem(ulong version, int index)
         {
             return VerilogCommon.AutoComplete.GetPopupItem(this, VerilogParsedDocument, version, index);
         }
@@ -299,7 +299,7 @@ namespace pluginVerilog.Data
             return VerilogCommon.AutoComplete.GetToolItems(this, index);
         }
 
-        public override List<AutocompleteItem> GetAutoCompleteItems(int index, out string cantidateWord)
+        public override List<AutocompleteItem>? GetAutoCompleteItems(int index, out string cantidateWord)
         {
             return VerilogCommon.AutoComplete.GetAutoCompleteItems(this, VerilogParsedDocument, index, out cantidateWord);
         }

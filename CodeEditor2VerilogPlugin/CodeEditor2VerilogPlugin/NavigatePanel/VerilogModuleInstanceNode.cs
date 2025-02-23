@@ -18,52 +18,54 @@ namespace pluginVerilog.NavigatePanel
         }
 
         private System.WeakReference<Data.VerilogModuleInstance> moduleInstanceRef;
-        public Data.VerilogModuleInstance ModuleInstance
+        public Data.VerilogModuleInstance? ModuleInstance
         {
             get
             {
-                Data.VerilogModuleInstance ret;
+                Data.VerilogModuleInstance? ret;
                 if (moduleInstanceRef == null) return null;
                 if (!moduleInstanceRef.TryGetTarget(out ret)) return null;
                 return ret;
             }
         }
 
-        public override CodeEditor2.Data.File FileItem
+        public override CodeEditor2.Data.File? FileItem
         {
             get
             {
-                Data.VerilogModuleInstance instance = ModuleInstance;
+                Data.VerilogModuleInstance? instance = ModuleInstance;
                 return instance;
             }
         }
 
-        public Data.IVerilogRelatedFile VerilogRelatedFile
+        public Data.IVerilogRelatedFile? VerilogRelatedFile
         {
-            get { return Item as Data.IVerilogRelatedFile; }
+            get 
+            {
+                if (Item == null) return null;
+                return (Data.IVerilogRelatedFile)Item; 
+            }
         }
-        public CodeEditor2.Data.ITextFile ITextFile
+        public CodeEditor2.Data.ITextFile? ITextFile
         {
             get { return Item as CodeEditor2.Data.ITextFile; }
         }
 
-        public virtual Data.VerilogFile VerilogFile
+        public virtual Data.VerilogFile? VerilogFile
         {
             get
             {
                 if (ModuleInstance == null) return null;
                 return ModuleInstance.SourceTextFile as Data.VerilogFile;
-                //                Data.VerilogModuleInstance instance = Project.GetRegisterdItem(ID) as Data.VerilogModuleInstance;
-                //                return Project.GetRegisterdItem(Data.VerilogFile.GetID(instance.RelativePath, Project)) as Data.VerilogFile;
-//                return null;
             }
         }
 
-        public Data.VerilogModuleInstance VerilogModuleInstance
+        public Data.VerilogModuleInstance? VerilogModuleInstance
         {
             get
             {
-                return Item as Data.VerilogModuleInstance;
+                if (Item == null) return null;
+                return (Data.VerilogModuleInstance)Item;
             }
         }
 
@@ -72,7 +74,7 @@ namespace pluginVerilog.NavigatePanel
             get
             {
                 if (Item == null) return "null";
-                Data.VerilogModuleInstance instance = Item as Data.VerilogModuleInstance;
+                Data.VerilogModuleInstance instance = (Data.VerilogModuleInstance)Item;
                 return instance.Name + " - " + instance.ModuleName;
             }
         }
@@ -94,7 +96,7 @@ namespace pluginVerilog.NavigatePanel
             else
             {
                 await parseHierarchy();
-                CodeEditor2.Controller.CodeEditor.SetTextFile(ModuleInstance, true);
+                if (ModuleInstance != null) CodeEditor2.Controller.CodeEditor.SetTextFile(ModuleInstance, true);
                 Update();
             }
 
@@ -103,6 +105,7 @@ namespace pluginVerilog.NavigatePanel
         private async Task parseHierarchy()
         {
             System.Diagnostics.Debug.Print("## VerilogFileNode.OnSelected.PharseHier.Run");
+            if(ModuleInstance == null) return;
             await CodeEditor2.Tools.ParseHierarchy.Run(ModuleInstance.NavigatePanelNode);
         }
 
@@ -119,10 +122,13 @@ namespace pluginVerilog.NavigatePanel
         {
             List<CodeEditor2.Data.Item> targetDataItems = new List<CodeEditor2.Data.Item>();
             List<CodeEditor2.Data.Item> addDataItems = new List<CodeEditor2.Data.Item>();
-            foreach (CodeEditor2.Data.Item item in VerilogModuleInstance.Items.Values)
+            if(VerilogModuleInstance != null)
             {
-                targetDataItems.Add(item);
-                addDataItems.Add(item);
+                foreach (CodeEditor2.Data.Item item in VerilogModuleInstance.Items.Values)
+                {
+                    targetDataItems.Add(item);
+                    addDataItems.Add(item);
+                }
             }
 
             List<CodeEditor2.NavigatePanel.NavigatePanelNode> removeNodes = new List<CodeEditor2.NavigatePanel.NavigatePanelNode>();

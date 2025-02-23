@@ -211,6 +211,7 @@ namespace pluginVerilog.Data
         {
             get
             {
+                if (SourceTextFile == null) return null;
                 return SourceTextFile.LoadedFileLastWriteTime;
             }
         }
@@ -309,7 +310,7 @@ namespace pluginVerilog.Data
 
         public override DocumentParser CreateDocumentParser(DocumentParser.ParseModeEnum parseMode)
         {
-            return new Parser.VerilogSingleBuildingBlockParser(this, ModuleName, ParameterOverrides, parseMode);
+            return new Parser.VerilogParser(this, ModuleName, ParameterOverrides, parseMode);
 //            return new Parser.VerilogParser(this.SourceVerilogFile , ModuleName, ParameterOverrides, parseMode);
         }
 
@@ -353,8 +354,10 @@ namespace pluginVerilog.Data
             return VerilogCommon.AutoComplete.GetToolItems(this, index);
         }
 
-        public override List<AutocompleteItem> GetAutoCompleteItems(int index, out string candidateWord)
+        public override List<AutocompleteItem>? GetAutoCompleteItems(int index, out string candidateWord)
         {
+            candidateWord = "";
+            if (VerilogParsedDocument == null) return null;
             return VerilogCommon.AutoComplete.GetAutoCompleteItems(this, VerilogParsedDocument, index, out candidateWord);
         }
 

@@ -111,6 +111,7 @@ namespace pluginVerilog.Verilog.ModuleItems
         public bool Prototype { get; set; } = false;
 
         public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? BlockBeginIndexReference { get; set; } = null;
         public IndexReference? LastIndexReference { get; set; }
 
         public Module InstancedModule { get; set; }
@@ -131,6 +132,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                 return false;
             }
             word.MoveNext();
+            IndexReference blockBeginIndexReference = word.CreateIndexReference();
             
 
             string next = word.NextText;
@@ -292,6 +294,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                     SourceName = moduleName,
                     ParameterOverrides = parameterOverrides
                 };
+                moduleInstantiation.BlockBeginIndexReference = blockBeginIndexReference;
 
                 // swap to parameter overrided module
                 if (instancedModule != null)
@@ -374,7 +377,10 @@ namespace pluginVerilog.Verilog.ModuleItems
                 word.MoveNext();
                 moduleInstantiation.LastIndexReference = word.CreateIndexReference();
 
-                if (!word.Prototype && word.Active) word.AppendBlock(moduleInstantiation.BeginIndexReference , moduleInstantiation.LastIndexReference);
+                if (!word.Prototype && word.Active && moduleInstantiation.BlockBeginIndexReference != null)
+                {
+                    word.AppendBlock(moduleInstantiation.BlockBeginIndexReference, moduleInstantiation.LastIndexReference);
+                }
                 if (word.Text != ",") break;
                 word.MoveNext();
             }

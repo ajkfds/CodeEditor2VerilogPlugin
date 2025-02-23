@@ -9,7 +9,7 @@ namespace pluginVerilog.NavigatePanel
 {
     public interface IVerilogNavigateNode
     {
-        Data.IVerilogRelatedFile VerilogRelatedFile { get; }
+        Data.IVerilogRelatedFile? VerilogRelatedFile { get; }
 
         string Text { get; }
 
