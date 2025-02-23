@@ -295,8 +295,6 @@ namespace pluginVerilog
             return file.VerilogParsedDocument.Root.BuldingBlocks[buildingBlockName] as BuildingBlock;
         }
 
-        // Append Tools
-        public Action<List<ToolItem>, IVerilogRelatedFile, int> AppendTools;
 
 
         // inline comment

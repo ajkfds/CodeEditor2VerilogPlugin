@@ -65,19 +65,21 @@ namespace pluginVerilog.Data.VerilogCommon
             toolItems.Add(new Verilog.Snippets.PortConnectionCreateSnippet());
             toolItems.Add(new Verilog.Snippets.ModPortSnippet());
 
-            if(item.VerilogParsedDocument.ProjectProperty != null && item.VerilogParsedDocument.ProjectProperty.AppendTools != null)
-            {
-                item.VerilogParsedDocument.ProjectProperty.AppendTools(toolItems, item, index);
-            }
+            if(AppendToolItems != null) AppendToolItems(toolItems, item, index);
 
             return toolItems;
         }
+        // Append Tools
+        public delegate void AppendToolItemDelegate (List<ToolItem> toolItems, IVerilogRelatedFile item, int index);
+        public static AppendToolItemDelegate? AppendToolItems;
 
         public static List<AutocompleteItem>? GetAutoCompleteItems(IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, int index, out string? candidateWord)
         {
             candidateWord = null;
 
-            if (item.VerilogParsedDocument == null) return null;
+            if(item.VerilogParsedDocument == null) return null;
+            if(item.CodeDocument == null) return null;
+
             int line = item.CodeDocument.GetLineAt(index);
             int lineStartIndex = item.CodeDocument.GetLineStartIndex(line);
             bool endWithDot;
@@ -105,6 +107,8 @@ namespace pluginVerilog.Data.VerilogCommon
 
         private static void applyAutoInput(IVerilogRelatedFile item)
         {
+            if (item.CodeDocument == null) return;
+
             int index = item.CodeDocument.CaretIndex;
             int line = item.CodeDocument.GetLineAt(index);
             if (line == 0) return;
@@ -179,6 +183,8 @@ namespace pluginVerilog.Data.VerilogCommon
 
         private static bool isPrevBegin(IVerilogRelatedFile item, int index)
         {
+            if (item.CodeDocument == null) return false;
+
             int prevInex = index;
             if (prevInex > 0) prevInex--;
 
@@ -199,6 +205,8 @@ namespace pluginVerilog.Data.VerilogCommon
 
         private static bool isNextEnd(IVerilogRelatedFile item, int index)
         {
+            if(item.CodeDocument == null) return false;
+
             int prevInex = index;
             if (prevInex < item.CodeDocument.Length &&
                 (
