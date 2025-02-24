@@ -22,21 +22,21 @@ namespace pluginVerilog.NavigatePanel
             UpdateVisual();
             if (NodeCreated != null) NodeCreated(this);
         }
-        public static Action<VerilogFileNode> NodeCreated;
+        public static Action<VerilogFileNode>? NodeCreated;
 
         public Action NodeSelected;
 
-        public Data.IVerilogRelatedFile VerilogRelatedFile
+        public Data.IVerilogRelatedFile? VerilogRelatedFile
         {
             get { return Item as Data.IVerilogRelatedFile; }
         }
 
-        public CodeEditor2.Data.TextFile TextFile
+        public CodeEditor2.Data.TextFile? TextFile
         {
             get { return Item as CodeEditor2.Data.TextFile; }
         }
 
-        public virtual Data.VerilogFile VerilogFile
+        public virtual Data.VerilogFile? VerilogFile
         {
             get { return Item as Data.VerilogFile; }
         }
@@ -60,7 +60,7 @@ namespace pluginVerilog.NavigatePanel
 
             System.Diagnostics.Debug.Print("## VerilogFileNode.OnSelected");
 
-            if(TextFile.ParseValid & !TextFile.ReparseRequested)
+            if(TextFile != null && TextFile.ParseValid && !TextFile.ReparseRequested)
             {
                 CodeEditor2.Controller.CodeEditor.SetTextFile(TextFile,true);
                 if (NodeSelected != null) NodeSelected();
@@ -71,7 +71,7 @@ namespace pluginVerilog.NavigatePanel
                 CodeEditor2.Global.StopBackGroundParse = true;
                 await parseHierarchy();
                 CodeEditor2.Global.StopBackGroundParse = false;
-                CodeEditor2.Controller.CodeEditor.SetTextFile(TextFile, true);
+                if(TextFile != null) CodeEditor2.Controller.CodeEditor.SetTextFile(TextFile, true);
                 if (NodeSelected != null) NodeSelected();
                 Update();
             }
@@ -82,7 +82,9 @@ namespace pluginVerilog.NavigatePanel
         {
             System.Diagnostics.Debug.Print("## VerilogFileNode.OnSelected.PharseHier.Run");
             await CodeEditor2.Tools.ParseHierarchy.Run(this);
+            CodeEditor2.Controller.GetMainWindow().Focus();
             if (NodeSelected != null) NodeSelected();
+            if (TextFile == null) return;
             CodeEditor2.Controller.CodeEditor.SetTextFile(TextFile, true);
         }
 
@@ -102,11 +104,13 @@ namespace pluginVerilog.NavigatePanel
 
             List<CodeEditor2.NavigatePanel.NavigatePanelNode> newNodes = new List<CodeEditor2.NavigatePanel.NavigatePanelNode>();
 
-            lock (VerilogFile.Items)
-            {
-                foreach(CodeEditor2.Data.Item item in VerilogFile.Items.Values)
+            if (VerilogFile != null) {
+                lock (VerilogFile.Items)
                 {
-                    newNodes.Add(item.NavigatePanelNode);
+                    foreach (CodeEditor2.Data.Item item in VerilogFile.Items.Values)
+                    {
+                        newNodes.Add(item.NavigatePanelNode);
+                    }
                 }
             }
 
