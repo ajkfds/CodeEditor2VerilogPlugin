@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace pluginVerilog.Verilog
 {
@@ -172,14 +173,31 @@ namespace pluginVerilog.Verilog
 
         public void AppendBlock(IndexReference startIndexReference, IndexReference lastIndexReference)
         {
+            appendBlock(startIndexReference, lastIndexReference, null, null);
+        }
+
+        public void AppendBlock(IndexReference startIndexReference, IndexReference lastIndexReference, string name,bool defaultClose)
+        {
+            appendBlock(startIndexReference, lastIndexReference, name, defaultClose);
+        }
+        public void appendBlock(IndexReference startIndexReference, IndexReference lastIndexReference, string? name,bool? defaultClose)
+        {
             if (startIndexReference.Indexes.Count != lastIndexReference.Indexes.Count) return;
-            for (int i= 0; i < startIndexReference.Indexes.Count - 1; i++)
+            for (int i = 0; i < startIndexReference.Indexes.Count - 1; i++)
             {
                 if (startIndexReference.Indexes[i] != lastIndexReference.Indexes[i]) return;
             }
 
             if (wordPointer.Document.GetLineAt(startIndexReference.Indexes.Last()) == wordPointer.Document.GetLineAt(lastIndexReference.Indexes.Last())) return;
-            wordPointer.AppendBlock(startIndexReference.Indexes.Last(), lastIndexReference.Indexes.Last());
+
+            if(name == null)
+            {
+                wordPointer.AppendBlock(startIndexReference.Indexes.Last(), lastIndexReference.Indexes.Last());
+            }
+            else if(defaultClose != null)
+            {
+                 wordPointer.AppendBlock(startIndexReference.Indexes.Last(), lastIndexReference.Indexes.Last(),name, (bool)defaultClose);
+            }
         }
 
         private bool systemVerilogError = false;

@@ -123,12 +123,14 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
             if (word.Text != "module" && word.Text != "macromodule") throw new Exception();
 
+            // skip block
             if (parsedDocument.TargetBuildingBlockName != null)
             {
                 string moduleName = word.NextText;
                 if (moduleName != parsedDocument.TargetBuildingBlockName)
                 {
                     word.MoveNext();
+                    IndexReference beginReference = word.CreateIndexReference();
 
                     List<string> stopWords = new List<string> { "endmodule" };
                     while (!word.Eof)
@@ -137,6 +139,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         word.Color(CodeDrawStyle.ColorType.Inactivated);
                         word.MoveNext();
                     }
+
+                    IndexReference lastReference = word.CreateIndexReference();
+
+                    word.AppendBlock(beginReference, lastReference, moduleName, true);
+
                     return;
                 }
             }

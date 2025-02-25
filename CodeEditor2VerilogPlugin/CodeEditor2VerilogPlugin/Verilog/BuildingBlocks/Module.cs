@@ -135,7 +135,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                 if (module.BlockBeginIndexReference != null)
                 {
-                    word.AppendBlock(module.BlockBeginIndexReference, module.LastIndexReference);
+                    word.AppendBlock(module.BlockBeginIndexReference, module.LastIndexReference,module.Name,false);
                 }
                 word.MoveNext();
                 return module;

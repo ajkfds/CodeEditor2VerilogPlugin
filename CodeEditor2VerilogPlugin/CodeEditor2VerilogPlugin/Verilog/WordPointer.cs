@@ -91,6 +91,10 @@ namespace pluginVerilog.Verilog
         {
             Document.AppendBlock(startIndex, lastIndex);
         }
+        public void AppendBlock(int startIndex, int lastIndex,string name,bool defaultClose)
+        {
+            Document.AppendBlock(startIndex, lastIndex,name,defaultClose);
+        }
 
         /// <summary>
         /// Char Position Index in the Document
