@@ -455,7 +455,7 @@ namespace pluginVerilog.Verilog
 
             List<AutocompleteItem> items = new List<AutocompleteItem>();
 
-            if (hierWords.Count == 0) appendKeywordAutoCompleteItems(items, candidateWord);
+            if (hierWords.Count == 0) AppendKeywordAutoCompleteItems(items, candidateWord);
 
             // on Root and sont have ant Building Blocks
             if (Root == null || Root.BuldingBlocks == null)
@@ -524,7 +524,7 @@ namespace pluginVerilog.Verilog
                 if (space != null) appendAutoCompleteINamedElements(items, space, candidateWord);
 
                 // special autocomplete tool
-                appendSpecialAutoCompleteItems(items, candidateWord);
+                AppendSpecialAutoCompleteItems(items, candidateWord);
             }
             else
             {
@@ -592,6 +592,9 @@ namespace pluginVerilog.Verilog
             // upward search if no items found in the namespace
             if (nameSpace.Parent is NameSpace) appendAutoCompleteINamedElements(items, nameSpace.Parent, candidate);
         }
+
+        public delegate void AppendKeywordAutoCompleteItemsDelegate(List<AutocompleteItem> items, string cantidate);
+        public static AppendKeywordAutoCompleteItemsDelegate AppendKeywordAutoCompleteItems = appendKeywordAutoCompleteItems;
 
         private static void appendKeywordAutoCompleteItems(List<AutocompleteItem> items,string cantidate)
         {
@@ -663,6 +666,8 @@ namespace pluginVerilog.Verilog
                 );
             }
         }
+        public delegate void AppendSpecialAutoCompleteItemsDelegate(List<AutocompleteItem> items, string cantidate);
+        public static AppendSpecialAutoCompleteItemsDelegate AppendSpecialAutoCompleteItems = appendSpecialAutoCompleteItems;
         private static void appendSpecialAutoCompleteItems(List<AutocompleteItem> items, string cantidate)
         {
             List<AutocompleteItem> specialItems = new List<AutocompleteItem>()
