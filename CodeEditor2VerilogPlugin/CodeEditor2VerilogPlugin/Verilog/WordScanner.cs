@@ -294,14 +294,14 @@ namespace pluginVerilog.Verilog
                 return wordPointer.SectionName;
             }
         }
-
         public void MoveNext()
         {
-            //if (nonGeneratedCount != 0)
-            //{
-            //    wordPointer.Color(CodeDrawStyle.ColorType.Inactivated);
-            //}
+            moveNext();
 
+        }
+
+        private void moveNext()
+        {
             if (wordPointer.Eof)
             {
                 while (wordPointer.Eof && stock.Count != 0)
@@ -324,7 +324,6 @@ namespace pluginVerilog.Verilog
 
         private void recheckWord()
         {
-
             // skip comments on the end of file
             while (!wordPointer.Eof)
             {

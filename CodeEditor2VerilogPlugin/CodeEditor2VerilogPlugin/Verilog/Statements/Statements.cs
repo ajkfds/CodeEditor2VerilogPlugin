@@ -96,7 +96,7 @@ namespace pluginVerilog.Verilog.Statements
             switch (word.Text)
             {
                 case "(*":
-                    Attribute attribute = Attribute.ParseCreate(word);
+                    Attribute attribute = Attribute.ParseCreate(word, nameSpace);
                     return Statements.ParseCreateStatement(word, nameSpace);
 
                 // unique_priority

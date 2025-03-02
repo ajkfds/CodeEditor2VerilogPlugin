@@ -29,22 +29,7 @@ namespace pluginVerilog.Verilog.Items
                     return GenerateRegion.Parse(word, nameSpace);
                 // specify_block
                 case "specify":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
-                    word.MoveNext();
-                    while(!word.Eof && word.Text != "endscpecify")
-                    {
-                        word.MoveNext();
-                    }
-                    if(word.Text == "endspecify")
-                    {
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
-                        word.MoveNext();
-                    }
-                    else
-                    {
-                        word.AddError("endspecify required");
-                    }
-                    return true;
+                    return SpecifyBlock.Parse(word, nameSpace);
                 // { attribute_instance }specparam_declaration
                 // program_declaration
                 // module_declaration

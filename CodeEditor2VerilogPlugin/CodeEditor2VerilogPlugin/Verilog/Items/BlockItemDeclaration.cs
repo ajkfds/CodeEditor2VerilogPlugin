@@ -64,7 +64,7 @@ namespace pluginVerilog.Verilog.Items
 
                 // etc
                 case "(*":
-                    Attribute attribute = Attribute.ParseCreate(word);
+                    Attribute attribute = Attribute.ParseCreate(word,nameSpace);
                     break;
                 // errpr trap
                 case "endgenerate":

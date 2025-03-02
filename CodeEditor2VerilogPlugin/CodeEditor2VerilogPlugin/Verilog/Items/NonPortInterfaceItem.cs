@@ -25,9 +25,7 @@ namespace pluginVerilog.Verilog.Items
                 case "generate":
                     return GenerateRegion.Parse(word, nameSpace);
                 case "specify":
-                    // TODO
-                    word.MoveNext();
-                    return true;
+                    return SpecifyBlock.Parse(word, nameSpace);
                 // modport_declaration
                 case "modport":
                     return ModPort.Parse(word, nameSpace);

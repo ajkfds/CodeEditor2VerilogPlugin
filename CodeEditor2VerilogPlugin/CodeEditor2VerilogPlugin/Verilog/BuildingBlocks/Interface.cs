@@ -409,7 +409,8 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             | { attribute_instance } generated_instantiation 
             | { attribute_instance } local_parameter_declaration
             | { attribute_instance } parameter_declaration
-            | { attribute_instance } specify_block 
+            | { attribute_instance } 
+        _block 
             | { attribute_instance } specparam_declaration  
         module_or_generate_item ::=   { attribute_instance } module_or_generate_item_declaration 
             | { attribute_instance } parameter_override 
