@@ -521,9 +521,9 @@ namespace pluginVerilog.Verilog.DataObjects
             }
         }
 
-        public BuildingBlock GetInstancedBuildingBlock()
+        public BuildingBlock? GetInstancedBuildingBlock()
         {
-            BuildingBlock instancedModule = ProjectProperty.GetBuildingBlock(SourceName);
+            BuildingBlock? instancedModule = ProjectProperty.GetBuildingBlock(SourceName);
 
             if (ParameterOverrides.Count != 0)
             {

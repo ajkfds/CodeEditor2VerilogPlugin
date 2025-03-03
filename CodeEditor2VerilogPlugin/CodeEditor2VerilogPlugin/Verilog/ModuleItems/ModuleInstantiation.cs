@@ -114,7 +114,6 @@ namespace pluginVerilog.Verilog.ModuleItems
         public IndexReference? BlockBeginIndexReference { get; set; } = null;
         public IndexReference? LastIndexReference { get; set; }
 
-        public Module InstancedModule { get; set; }
 
         public static bool Parse(WordScanner word, NameSpace nameSpace)
         {
@@ -310,7 +309,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                     }
                 }
 
-                moduleInstantiation.InstancedModule = instancedModule;
+//                moduleInstantiation.InstancedModule = instancedModule;
 
                 if (word.Prototype)
                 {

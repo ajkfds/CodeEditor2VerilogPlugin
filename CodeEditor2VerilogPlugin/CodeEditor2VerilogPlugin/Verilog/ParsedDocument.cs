@@ -557,6 +557,21 @@ namespace pluginVerilog.Verilog
                 {
                     INamedElement subElement = element.NamedElements[hierWords[0]];
                     hierWords.RemoveAt(0);
+                    if(subElement is IBuildingBlockInstantiation)
+                    {
+                        IBuildingBlockInstantiation inst = (IBuildingBlockInstantiation)subElement;
+                        BuildingBlock? buildingBlock = inst.GetInstancedBuildingBlock();
+                        if(buildingBlock != null)
+                        {
+                            appendHierElement(hierWords, items, buildingBlock, candidate);
+                            return;
+                        }
+                        else
+                        {
+                            return;
+                        }
+                    }
+
                     appendHierElement(hierWords, items, subElement, candidate);
                     return;
                 }
