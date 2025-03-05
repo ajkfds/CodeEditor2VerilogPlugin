@@ -82,7 +82,7 @@ namespace pluginVerilog.NavigatePanel
         {
             System.Diagnostics.Debug.Print("## VerilogFileNode.OnSelected.PharseHier.Run");
             await CodeEditor2.Tools.ParseHierarchy.Run(this);
-            CodeEditor2.Controller.GetMainWindow().Focus();
+//            CodeEditor2.Controller.GetMainWindow().Focus();
             if (NodeSelected != null) NodeSelected();
             if (TextFile == null) return;
             CodeEditor2.Controller.CodeEditor.SetTextFile(TextFile, true);
