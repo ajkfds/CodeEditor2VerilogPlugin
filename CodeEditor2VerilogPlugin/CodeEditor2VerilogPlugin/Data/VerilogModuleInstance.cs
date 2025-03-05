@@ -48,10 +48,6 @@ namespace pluginVerilog.Data
             {
                 Data.VerilogFile? vFile = file as Data.VerilogFile;
                 if (vFile == null) throw new Exception();
-                //if(fileItem.parsedDocument == null)
-                //{
-                //    fileItem.parsedDocument = vFile.GetInstancedParsedDocument(moduleInstantiation.OverrideParameterID);
-                //}
 
                 vFile.RegisterModuleInstance(fileItem);
 
@@ -60,6 +56,23 @@ namespace pluginVerilog.Data
             return fileItem;
         }
         public bool SystemVerilog { get; set; } = false;
+        public string InstanceId
+        {
+            get
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.Append(ModuleName);
+                sb.Append(":");
+                foreach (var kvp in ParameterOverrides)
+                {
+                    sb.Append(kvp.Key);
+                    sb.Append("=");
+                    sb.Append(kvp.Value.Value.ToString());
+                    sb.Append(",");
+                }
+                return sb.ToString();
+            }
+        }
 
         public override string ID
         {
@@ -141,23 +154,6 @@ namespace pluginVerilog.Data
             SourceVerilogFile.RemoveModuleInstance(this);
         }
 
-        public string InstanceId {
-            get
-            {
-                StringBuilder sb = new StringBuilder();
-                sb.Append(ModuleName);
-                sb.Append(":");
-                foreach (var kvp in ParameterOverrides)
-                {
-                    sb.Append(kvp.Key);
-                    sb.Append("=");
-                    sb.Append(kvp.Value.Value.ToString());
-                    sb.Append(",");
-                }
-                return sb.ToString();
-            }
-        }
-
         public Data.VerilogFile SourceVerilogFile
         {
             get
@@ -182,13 +178,6 @@ namespace pluginVerilog.Data
         {
             get
             {
-                //if (ParameterOverrides.Count == 0)
-                //{
-                //    Data.VerilogFile file = SourceVerilogFile;
-                //    if (file == null) return null;
-                //    parsedDocument = file.ParsedDocument;
-                //}
-                //else
                 {
                     Data.VerilogFile source = SourceVerilogFile;
                     parsedDocument = source.GetInstancedParsedDocument(InstanceId);

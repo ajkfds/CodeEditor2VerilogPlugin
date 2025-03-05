@@ -1,4 +1,5 @@
 ﻿//using Microsoft.CodeAnalysis.CSharp.Syntax;
+using CodeEditor2.CodeEditor;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.Variables;
@@ -91,7 +92,6 @@ namespace pluginVerilog.Verilog.ModuleItems
         {
             get
             {
-//                if (ParameterOverrides.Count == 0) return "";
                 StringBuilder sb = new StringBuilder();
                 sb.Append(SourceName);
                 sb.Append(":");
@@ -106,6 +106,23 @@ namespace pluginVerilog.Verilog.ModuleItems
             }
         }
 
+        public BuildingBlock? GetInstancedBuildingBlock()
+        {
+            Data.IVerilogRelatedFile? file = ProjectProperty.GetFileOfBuildingBlock(SourceName);
+            if(file == null) return null;
+            if (file is not Data.VerilogFile) return null;
+
+            Data.VerilogFile source = (Data.VerilogFile)file;
+            if (source == null) return null;
+
+            CodeEditor2.CodeEditor.ParsedDocument? codeEditorParsedDocument = source.GetInstancedParsedDocument(OverrideParameterID);
+            if (codeEditorParsedDocument is not ParsedDocument) return null;
+            ParsedDocument? parsedDocument = (ParsedDocument)codeEditorParsedDocument;
+            if (parsedDocument == null) return null;
+            if (parsedDocument.Root == null) return null;
+            if (!parsedDocument.Root.BuldingBlocks.ContainsKey(SourceName)) return null;
+            return parsedDocument.Root.BuldingBlocks[SourceName];
+        }
 
         public bool Prototype { get; set; } = false;
 
@@ -889,17 +906,6 @@ namespace pluginVerilog.Verilog.ModuleItems
         {
         }
 
-        public BuildingBlock? GetInstancedBuildingBlock()
-        {
-            BuildingBlock? instancedModule = ProjectProperty.GetBuildingBlock(SourceName);
-
-            if (ParameterOverrides.Count != 0)
-            {
-                instancedModule = ProjectProperty.GetInstancedBuildingBlock(this);
-            }
-
-            return instancedModule;
-        }
 
 
         public string? CreateString()
