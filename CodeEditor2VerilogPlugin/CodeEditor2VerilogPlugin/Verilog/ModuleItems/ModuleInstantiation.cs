@@ -16,7 +16,7 @@ namespace pluginVerilog.Verilog.ModuleItems
     {
         public NamedElements NamedElements { get; } = new NamedElements();
 
-        public virtual CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
+        public virtual CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Identifier; } }
         //protected ModuleInstantiation() { }
         /*
         A.4.1.1 Module instantiation 
@@ -48,7 +48,6 @@ namespace pluginVerilog.Verilog.ModuleItems
               { attribute_instance } "." port_identifier [ "(" [ expression ] ")" ] 
             | { attribute_instance } ".*"
         */
-
         public required string SourceName{ get; init; }
 
         public required Dictionary<string, Expressions.Expression> ParameterOverrides { get; init; }
