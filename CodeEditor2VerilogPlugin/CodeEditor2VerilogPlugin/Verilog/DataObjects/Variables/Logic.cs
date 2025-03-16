@@ -25,6 +25,15 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             return val;
         }
 
+        public override Variable Clone(string name)
+        {
+            Logic val = new Logic() {
+                Name = name,
+                DataType = DataType,
+                PackedDimensions = PackedDimensions
+            };
+            return val;
+        }
         public override Variable Clone()
         {
             Logic val = new Logic() { Name = Name };

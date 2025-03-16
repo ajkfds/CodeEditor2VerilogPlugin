@@ -127,7 +127,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             return val;
         }
 
-        public Variable Clone(string name)
+        public virtual Variable Clone(string name)
         {
             Variable val = new Variable() { Name = name };
             return val;

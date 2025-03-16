@@ -20,6 +20,15 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             val.DataType = dType;
             return val;
         }
+        public override Variable Clone(string name)
+        {
+            Longint val = new Longint()
+            {
+                Name = name,
+                DataType = DataType
+            };
+            return val;
+        }
 
         public override Variable Clone()
         {
