@@ -192,7 +192,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
                 case "+":
                     return maxWidth + 1;
                 case "-":
-                    return maxWidth;
+                    return maxWidth + 1;
                 case "*":
                     return bitWidth1 + bitWidth2;
                 case "/":
