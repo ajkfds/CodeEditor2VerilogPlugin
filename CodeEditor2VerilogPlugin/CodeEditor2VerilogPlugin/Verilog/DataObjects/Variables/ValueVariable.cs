@@ -10,6 +10,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     public class ValueVariable : Variable
     {
 
+        public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
 
         public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {

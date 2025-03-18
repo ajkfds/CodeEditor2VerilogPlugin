@@ -246,6 +246,10 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                                 word.AddError("expression required.");
                                 return true;
                             }
+                            else
+                            {
+                                variable.AssignedReferences.Add(variable.DefinedReference);
+                            }
                         }
                     }
                 }

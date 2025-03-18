@@ -16,6 +16,7 @@ namespace pluginVerilog.Data
         protected SimulationSetup() { }
 
         public string TopName;
+        public VerilogFile TopFile;
         public List<IVerilogRelatedFile> Files = new List<IVerilogRelatedFile>();
 
         public List<IVerilogRelatedFile> IncludeFiles = new List<IVerilogRelatedFile>();
@@ -26,6 +27,7 @@ namespace pluginVerilog.Data
         public static SimulationSetup? Create(pluginVerilog.Data.VerilogFile verilogFile)
         {
             SimulationSetup setup = new SimulationSetup();
+            setup.TopFile = verilogFile;
 
             List<string> ids = new List<string>();
 
