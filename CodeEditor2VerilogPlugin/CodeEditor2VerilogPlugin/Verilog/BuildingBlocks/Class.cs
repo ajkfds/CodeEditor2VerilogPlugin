@@ -216,7 +216,9 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             NameSpace nameSpace,
             //            string parameterOverrideModueName,
             Dictionary<string, Expressions.Expression> parameterOverrides,
-            Attribute attribute, Class class_)
+            Attribute? attribute, 
+            Class class_
+            )
         {
 
 

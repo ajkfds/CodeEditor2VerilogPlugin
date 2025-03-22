@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using CodeEditor2.CodeEditor.CodeComplete;
 using pluginVerilog.Verilog.ModuleItems;
+using Splat.ModeDetection;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
@@ -128,21 +129,35 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
 
             // endmodule keyword
-            if (word.Text == "endmodule")
+            if (word.Text != "endmodule")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.AddError("endmodule expected");
                 module.LastIndexReference = word.CreateIndexReference();
-
-                if (module.BlockBeginIndexReference != null)
-                {
-                    word.AppendBlock(module.BlockBeginIndexReference, module.LastIndexReference,module.Name,false);
-                }
-                word.MoveNext();
                 return module;
             }
 
+            word.Color(CodeDrawStyle.ColorType.Keyword);
+            module.LastIndexReference = word.CreateIndexReference();
+
+            if (module.BlockBeginIndexReference != null)
             {
-                word.AddError("endmodule expected");
+                word.AppendBlock(module.BlockBeginIndexReference, module.LastIndexReference,module.Name,false);
+            }
+            word.MoveNext();
+
+            if (word.Text == ":")
+            {
+                word.MoveNext();
+                if (word.Text == module.Name)
+                {
+                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.MoveNext();
+                }
+                else
+                {
+                    word.AddError("module name mismatch");
+                    word.MoveNext();
+                }
             }
 
             return module;
@@ -277,6 +292,8 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 //parseModuleItems(word, module);
                 break;
             }
+
+
 
             if (!word.Prototype)
             {
