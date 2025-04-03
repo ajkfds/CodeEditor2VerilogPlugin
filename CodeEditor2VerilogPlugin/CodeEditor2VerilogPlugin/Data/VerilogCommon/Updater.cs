@@ -14,10 +14,12 @@ namespace pluginVerilog.Data.VerilogCommon
 {
     public static class Updater
     {
+        /// <summary>
+        /// Update the Items member of this object according to the rootItem.ParsedDocument.
+        /// </summary>
+        /// <param name="item"></param>
         public static void Update(IVerilogRelatedFile item)
         {
-//            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
-//            sw.Start();
 
             // Update the Items member of this object according to the rootItem.ParsedDocument.
             Project project = item.Project;
@@ -87,7 +89,6 @@ namespace pluginVerilog.Data.VerilogCommon
                     item.Items.Add(i.Name,i);
                 }
             }
-//            System.Diagnostics.Debug.WriteLine("Update time:" + sw.ElapsedMilliseconds.ToString());
         }
 
         private static void addSubItemsMultiBuildingBlock(IVerilogRelatedFile item, Dictionary<string, CodeEditor2.Data.Item> newSubItems, CodeEditor2.Data.Item? parent, Project project)
@@ -115,38 +116,9 @@ namespace pluginVerilog.Data.VerilogCommon
                         }
                     }
 
-                    //if (buldingBlock is ModuleInstantiation)
-                    //{
-                    //    ModuleInstantiation moduleInstantiation = (ModuleInstantiation)instantiation;
-                    //    VerilogModuleInstance? moduleInstance = subItem as VerilogModuleInstance;
+                }
 
-                    //    if (
-                    //        moduleInstantiation != null &&
-                    //        moduleInstance != null &&
-                    //        moduleInstantiation.SourceName == moduleInstance.ModuleName &&
-                    //        moduleInstantiation.ParameterId == moduleInstance.ParameterId
-                    //        )
-                    //    {
-                    //        alreadyExist = true;
-
-                    //        if (!newSubItems.ContainsKey(subItem.Name))
-                    //        {
-                    //            newSubItems.Add(subItem.Name, subItem);
-                    //        }
-                    //        else
-                    //        {
-                    //            //System.Diagnostics.Debugger.Break();
-                    //        }
-                    //        continue;
-                    //    }
-                    //}
-                    //else if (instantiation is IBuildingBlockInstantiation)
-                    //{
-
-                    //}
-                    }
-
-                    if (!alreadyExist)
+                if (!alreadyExist)
                 {
                     if (buldingBlock is Module)
                     {
@@ -178,25 +150,6 @@ namespace pluginVerilog.Data.VerilogCommon
 
                     }
                 }
-                //if (alreadyExist)
-                //{
-                //    newSubItems.Add(instantiation.Name, (CodeEditor2.Data.Item)instantiation);
-                //}
-                //else
-                //{
-                //    if (instantiation is ModuleInstantiation)
-                //    {
-                //        VerilogModuleInstance? newVerilogModuleInstance = VerilogModuleInstance.Create((ModuleInstantiation)instantiation, project);
-                //        if (newSubItems.ContainsKey(instantiation.Name) || newVerilogModuleInstance == null) continue;
-                //        newVerilogModuleInstance.Parent = parent;
-                //        newSubItems.Add(instantiation.Name, newVerilogModuleInstance);
-                //    }
-                //    else if (instantiation is IBuildingBlockInstantiation)
-                //    {
-
-                //    }
-                //}
-
 
             }
         }

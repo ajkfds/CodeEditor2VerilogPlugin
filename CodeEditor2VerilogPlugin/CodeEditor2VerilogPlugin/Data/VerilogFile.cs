@@ -60,6 +60,13 @@ namespace pluginVerilog.Data
             return fileItem;
         }
 
+
+        /// <summary>
+        /// indicate this file is system verilog file.
+        /// true : system verilog file
+        /// failse : verilog file
+        /// </summary>
+
         public bool SystemVerilog { get; set; } = false;
 
         public string FileID
@@ -70,6 +77,10 @@ namespace pluginVerilog.Data
             }
         }
 
+        /// <summary>
+        /// CodeDocument Object to keep the text data of the file.
+        /// only single instance is created for a file, and the same instance is used for all IVerilogRelatedFile instances.
+        /// </summary>
         public override CodeEditor2.CodeEditor.CodeDocument CodeDocument
         {
             get
@@ -90,17 +101,20 @@ namespace pluginVerilog.Data
             }
             protected set
             {
-                if (value != null && value as CodeEditor2.CodeEditor.CodeDocument == null) System.Diagnostics.Debugger.Break();
                 document = value as CodeEditor2.CodeEditor.CodeDocument;
             }
         }
 
-        // accept new Parsed Document
+        /// <summary>
+        /// Accdept new Parsed Document for this Verilog File
+        /// </summary>
+        /// <param name="newParsedDocument"></param>
         public override void AcceptParsedDocument(ParsedDocument newParsedDocument)
         {
             ParsedDocument? oldParsedDocument = ParsedDocument;
             if (oldParsedDocument == newParsedDocument) return;
 
+            // swap ParsedDocument
             ParsedDocument = newParsedDocument;
             if (oldParsedDocument != null) oldParsedDocument.Dispose();
 
@@ -112,23 +126,26 @@ namespace pluginVerilog.Data
             CodeDocument.CopyColorMarkFrom(VerilogParsedDocument.CodeDocument);
 
             // Register New Building Block
-            foreach (BuildingBlock buildingBlock in VerilogParsedDocument.Root.BuldingBlocks.Values)
+            if(VerilogParsedDocument.Root != null)
             {
-                if (ProjectProperty.HasRegisteredBuildingBlock(buildingBlock.Name))
-                {   // swap building block
-                    BuildingBlock? module = buildingBlock as Module;
-                    if (module == null) continue;
+                foreach (BuildingBlock buildingBlock in VerilogParsedDocument.Root.BuldingBlocks.Values)
+                {
+                    if (ProjectProperty.HasRegisteredBuildingBlock(buildingBlock.Name))
+                    {   // swap building block
+                        BuildingBlock? module = buildingBlock as Module;
+                        if (module == null) continue;
 
-                    BuildingBlock? registeredModule = ProjectProperty.GetBuildingBlock(module.Name) as Module;
-                    if (registeredModule == null) continue;
-                    if (registeredModule.File == null) continue;
-                    if (registeredModule.File.RelativePath == module.File.RelativePath) continue;
+                        BuildingBlock? registeredModule = ProjectProperty.GetBuildingBlock(module.Name) as Module;
+                        if (registeredModule == null) continue;
+                        if (registeredModule.File == null) continue;
+                        if (registeredModule.File.RelativePath == module.File.RelativePath) continue;
 
-                    continue;
+                        continue;
+                    }
+
+                    // register new parsedDocument
+                    ProjectProperty.RegisterBuildingBlock(buildingBlock.Name, buildingBlock, this);
                 }
-
-                // register new parsedDocument
-                ProjectProperty.RegisterBuildingBlock(buildingBlock.Name, buildingBlock, this);
             }
 
             Verilog.ParsedDocument? vParsedDocument = ParsedDocument as Verilog.ParsedDocument;
@@ -140,12 +157,10 @@ namespace pluginVerilog.Data
 
             updateIncludeFiles(VerilogParsedDocument, Items);
 
-            Update(); // eliminated here
-            //System.Diagnostics.Debug.Print("### Verilog File Parsed "+ID);
+            Update();
 
-            // update navigate menu icons
-            // update current node to update include file icon
-            CodeEditor2.NavigatePanel.NavigatePanelNode node = CodeEditor2.Controller.NavigatePanel.GetSelectedNode();
+            // update Navigate panel node visual for this item
+            CodeEditor2.NavigatePanel.NavigatePanelNode? node = CodeEditor2.Controller.NavigatePanel.GetSelectedNode();
             if (node != null) node.UpdateVisual();
         }
 
@@ -170,6 +185,8 @@ namespace pluginVerilog.Data
             {
                 if (!headerItems.ContainsKey(includeFile.ID)) continue;
                 Data.VerilogHeaderInstance item = headerItems[includeFile.ID];
+                if(item.CodeDocument == null) continue;
+
                 item.CodeDocument.CopyColorMarkFrom(includeFile.VerilogParsedDocument.CodeDocument);
 
                 // If this include file is selected in the editor, update the editor display.
@@ -197,7 +214,6 @@ namespace pluginVerilog.Data
 
         private void loadDocumentFromFile()
         {
-            //System.Diagnostics.Debug.Print("loadDocumentFromFile "+RelativePath);
             try
             {
                 if (document == null) document = new CodeEditor.CodeDocument(this);
@@ -426,7 +442,7 @@ namespace pluginVerilog.Data
         //    VerilogCommon.AutoComplete.BeforeKeyDown(this, e);
         //}
 
-        public override PopupItem GetPopupItem(ulong version, int index)
+        public override PopupItem? GetPopupItem(ulong version, int index)
         {
             if (VerilogParsedDocument == null) return null;
             return VerilogCommon.AutoComplete.GetPopupItem(this, VerilogParsedDocument, version, index);

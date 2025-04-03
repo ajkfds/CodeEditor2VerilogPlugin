@@ -15,19 +15,21 @@ namespace pluginVerilog.NavigatePanel
         {
 
         }
-
-        public Data.IVerilogRelatedFile VerilogRelatedFile
+        public Data.IVerilogRelatedFile? VerilogRelatedFile
         {
             get { return Item as Data.IVerilogRelatedFile; }
         }
-        public CodeEditor2.Data.TextFile TextFile
+        public CodeEditor2.Data.TextFile? TextFile
         {
             get { return Item as CodeEditor2.Data.TextFile; }
         }
 
         public override string Text
         {
-            get { return FileItem.Name; }
+            get {
+                if(FileItem == null) return "?";
+                return FileItem.Name; 
+            }
         }
 
         public override void Update()
@@ -44,6 +46,7 @@ namespace pluginVerilog.NavigatePanel
         }
         public override void OnSelected()
         {
+            if(TextFile == null) return;
             CodeEditor2.Controller.CodeEditor.SetTextFile(TextFile);
         }
 

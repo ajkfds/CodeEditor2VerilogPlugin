@@ -322,7 +322,7 @@ namespace pluginVerilog.Verilog
 
             if(space != null)
             {
-                foreach (IBuildingBlockInstantiation instantiation in root.BuildingBlock.NamedElements.Values.OfType<IBuildingBlockInstantiation>())
+                foreach (IBuildingBlockInstantiation instantiation in space.BuildingBlock.NamedElements.Values.OfType<IBuildingBlockInstantiation>())
                 {
                     if (instantiation.BeginIndexReference == null) continue;
                     if (instantiation.LastIndexReference == null) continue;
@@ -334,25 +334,49 @@ namespace pluginVerilog.Verilog
                 }
             }
 
+            //if(space is Module)
+            //{
+            //    Module module = (Module)space;
+            //    List<INamedElement> instantiations = module.NamedElements.Values.FindAll(x => x is IBuildingBlockInstantiation);
+            //    foreach (IBuildingBlockInstantiation instantiation in instantiations)
+            //    {
+            //        if(instantiation.BeginIndexReference.IsGreaterThan(index))
+
+            //        items.Add(newItem(instantiation.Name, CodeDrawStyle.ColorType.Identifier));
+            //    }
+            //}
+
             if (ret.ItemCount != count) return ret;
 
-            if (text.StartsWith("`") && Macros.ContainsKey(text.Substring(1)))
+            if (text.StartsWith("`"))
             {
-                Macro macro = Macros[text.Substring(1)];
-                macro.AppendLabel(ret,Macros);
+                if (Macros.ContainsKey(text.Substring(1)))
+                {
+                    Macro macro = Macros[text.Substring(1)];
+                    macro.AppendLabel(ret, Macros);
+                }
+                else if(iref.RootParsedDocument.Macros.ContainsKey(text.Substring(1)))
+                {
+                    Macro macro = iref.RootParsedDocument.Macros[text.Substring(1)];
+                    macro.AppendLabel(ret, Macros);
+                }
             }
 
-            if (space != null && space.NamedElements.ContainsKey(text))
+
+            if (space != null)
             {
-                DataObject? dataObject = space.NamedElements.GetDataObject(text);
-                if(dataObject!=null) dataObject.AppendLabel(ret);
+                if (space.NamedElements.ContainsKey(text))
+                {
+                    DataObject? dataObject = space.NamedElements.GetDataObject(text);
+                    if (dataObject != null) dataObject.AppendLabel(ret);
+                }
+                else if(space.Parent != null)
+                {
+                    DataObject? dataObject = space.Parent.NamedElements.GetDataObject(text);
+                    if (dataObject != null) dataObject.AppendLabel(ret);
+                }
             }
 
-
-            if (text.StartsWith("`") && iref.RootParsedDocument.Macros.ContainsKey(text.Substring(1)))
-            {
-//                ret.Add(new Popup.MacroPopup(text.Substring(1), iref.RootParsedDocument.Macros[text.Substring(1)].MacroText));
-            }
 
 //            if (space.BuildingBlock.Functions.ContainsKey(text))
 //            {

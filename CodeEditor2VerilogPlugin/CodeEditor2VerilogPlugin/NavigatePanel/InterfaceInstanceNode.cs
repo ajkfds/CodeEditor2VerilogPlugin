@@ -16,6 +16,13 @@ namespace pluginVerilog.NavigatePanel
             moduleInstanceRef = new WeakReference<Data.InterfaceInstance>(verilogModuleInstance);
         }
 
+        public bool NeedUpdate
+        {
+            get
+            {
+                return false;
+            }
+        }
         private System.WeakReference<Data.InterfaceInstance> moduleInstanceRef;
         public Data.InterfaceInstance ModuleInstance
         {

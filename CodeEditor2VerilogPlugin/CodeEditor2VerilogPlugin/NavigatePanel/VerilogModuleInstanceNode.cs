@@ -28,7 +28,6 @@ namespace pluginVerilog.NavigatePanel
                 return ret;
             }
         }
-
         public override CodeEditor2.Data.File? FileItem
         {
             get

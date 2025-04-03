@@ -24,7 +24,7 @@ namespace pluginVerilog.NavigatePanel
         }
         public static Action<VerilogFileNode>? NodeCreated;
 
-        public Action NodeSelected;
+        public Action? NodeSelected;
 
         public Data.IVerilogRelatedFile? VerilogRelatedFile
         {
@@ -80,9 +80,7 @@ namespace pluginVerilog.NavigatePanel
         // stop edit and parse all hierachy module
         private async Task parseHierarchy()
         {
-            System.Diagnostics.Debug.Print("## VerilogFileNode.OnSelected.PharseHier.Run");
             await CodeEditor2.Tools.ParseHierarchy.Run(this);
-//            CodeEditor2.Controller.GetMainWindow().Focus();
             if (NodeSelected != null) NodeSelected();
             if (TextFile == null) return;
             CodeEditor2.Controller.CodeEditor.SetTextFile(TextFile, true);

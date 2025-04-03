@@ -15,18 +15,18 @@ namespace pluginVerilog.NavigatePanel
         {
 
         }
-        public Action NodeSelected;
+        public Action? NodeSelected;
 
-        public Data.IVerilogRelatedFile VerilogRelatedFile
+        public Data.IVerilogRelatedFile? VerilogRelatedFile
         {
             get { return Item as Data.IVerilogRelatedFile; }
         }
-        public CodeEditor2.Data.TextFile TextFile
+        public CodeEditor2.Data.TextFile? TextFile
         {
             get { return Item as CodeEditor2.Data.TextFile; }
         }
 
-        public Data.VerilogHeaderInstance VerilogHeaderInstance
+        public Data.VerilogHeaderInstance? VerilogHeaderInstance
         {
             get
             {
@@ -36,9 +36,7 @@ namespace pluginVerilog.NavigatePanel
 
         public override void OnSelected()
         {
-            // activate navigate panel context menu
-//            var menu = CodeEditor2.Controller.NavigatePanel.GetContextMenuStrip();
-//            if (menu.Items.ContainsKey("openWithExploererTsmi")) menu.Items["openWithExploererTsmi"].Visible = true;
+            if(TextFile == null) return;
 
             CodeEditor2.Controller.CodeEditor.SetTextFile(TextFile);
             if (NodeSelected != null) NodeSelected();
@@ -46,7 +44,10 @@ namespace pluginVerilog.NavigatePanel
 
         public override string Text
         {
-            get { return FileItem.Name; }
+            get { 
+                if(FileItem == null) return "?";
+                return FileItem.Name; 
+            }
         }
 
         public override void Update()
