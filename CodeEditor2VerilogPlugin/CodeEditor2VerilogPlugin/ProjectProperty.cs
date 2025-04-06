@@ -24,7 +24,6 @@ namespace pluginVerilog
         //{
         //    this.project = project;
         //}
-
         public ProjectProperty(Project project,ProjectProperty.Setup setup) : base(project,setup)
         {
 
@@ -34,7 +33,8 @@ namespace pluginVerilog
 
         }
 
-//        private CodeEditor2.Data.Project project;
+        public RuleSet RuleSet = new RuleSet();
+        //        private CodeEditor2.Data.Project project;
 
         public Verilog.AutoComplete.Setup SnippetSetup = new Verilog.AutoComplete.Setup();
 

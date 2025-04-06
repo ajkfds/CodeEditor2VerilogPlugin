@@ -1,4 +1,5 @@
-﻿using pluginVerilog.Verilog.BuildingBlocks;
+﻿using Avalonia.OpenGL;
+using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.Nets;
 using pluginVerilog.Verilog.DataObjects.Variables;
@@ -7,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Drawing.Text;
+using System.IO;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Text;
@@ -160,7 +162,7 @@ number
                 case WordPointer.WordTypeEnum.String:
                     return ConstantString.ParseCreate(word);
                 case WordPointer.WordTypeEnum.Text:
-                    if (word.Text.StartsWith("$") && word.RootParsedDocument.ProjectProperty.SystemFunctions.Keys.Contains(word.Text))
+                    if (word.Text.StartsWith("$") && word.ProjectProperty.SystemFunctions.Keys.Contains(word.Text))
                     {
                         return FunctionCall.ParseCreate(word, nameSpace,nameSpace);
                     }
@@ -169,7 +171,25 @@ number
                         return Cast.ParseCreate(word, nameSpace);
                     }
 
-                    return searchNameSpace(word, nameSpace, nameSpace, lValue);
+                    Primary? primary = searchNameSpace(word, nameSpace, nameSpace, lValue);
+
+                    if(General.ListOfKeywords.Contains(word.Text))
+                    {
+                        return null;
+                    }
+
+                    if (General.IsIdentifier(word.Text))
+                    {
+                        Net net = DataObjects.Nets.Net.Create(word.Text, DataObjects.Nets.Net.NetTypeEnum.Wire, null);
+                        net.DefinedReference = word.GetReference();
+
+                        nameSpace.NamedElements.Add(net.Name, net);
+                        word.ApplyProtorypeRule(word.ProjectProperty.RuleSet.ImplicitNetDeclaretion);
+
+                        primary = searchNameSpace(word, nameSpace, nameSpace, lValue);
+                    }
+
+                    return primary;
             }
             return null;
         }

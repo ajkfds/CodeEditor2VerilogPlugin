@@ -243,6 +243,27 @@ namespace pluginVerilog.Verilog
             wordPointer.AddHint(message);
         }
 
+        public void ApplyProtorypeRule(Rule rule)
+        {
+            switch (rule.Severity)
+            {
+                case Rule.SeverityEnum.Error:
+                    wordPointer.AddError(rule.Message);
+                    break;
+                case Rule.SeverityEnum.Warning:
+                    wordPointer.AddWarning(rule.Message);
+                    break;
+                case Rule.SeverityEnum.Notice:
+                    wordPointer.AddNotice(rule.Message);
+                    break;
+            }
+        }   
+        public void ApplyRule(Rule rule)
+        {
+            if (prototype) return;
+            ApplyProtorypeRule(rule);
+        }
+
         public int RootIndex
         {
             get
