@@ -7,6 +7,7 @@ using System.Drawing;
 using pluginVerilog.Verilog.BuildingBlocks;
 using Avalonia.Media;
 using System.Security.AccessControl;
+using Avalonia.Threading;
 
 namespace pluginVerilog.NavigatePanel
 {
@@ -119,59 +120,67 @@ namespace pluginVerilog.NavigatePanel
 
         public override void UpdateVisual()
         {
-            List<CodeEditor2.Data.Item> targetDataItems = new List<CodeEditor2.Data.Item>();
-            List<CodeEditor2.Data.Item> addDataItems = new List<CodeEditor2.Data.Item>();
-            if(VerilogModuleInstance != null)
+            Dispatcher.UIThread.InvokeAsync(() =>
             {
-                lock (VerilogModuleInstance.Items)
+                _updateVisual();
+            });
+        }
+        public void _updateVisual()
+        {
+            Dispatcher.UIThread.InvokeAsync(() => {
+                List<CodeEditor2.Data.Item> targetDataItems = new List<CodeEditor2.Data.Item>();
+                List<CodeEditor2.Data.Item> addDataItems = new List<CodeEditor2.Data.Item>();
+                if (VerilogModuleInstance != null)
                 {
-                    foreach (CodeEditor2.Data.Item item in VerilogModuleInstance.Items.Values)
+                    lock (VerilogModuleInstance.Items)
                     {
-                        targetDataItems.Add(item);
-                        addDataItems.Add(item);
-                    }
-                }
-            }
-
-            List<CodeEditor2.NavigatePanel.NavigatePanelNode> removeNodes = new List<CodeEditor2.NavigatePanel.NavigatePanelNode>();
-            lock (Nodes)
-            {
-                foreach (CodeEditor2.NavigatePanel.NavigatePanelNode node in Nodes)
-                {
-                    if (node.Item != null && targetDataItems.Contains(node.Item))
-                    {
-                        addDataItems.Remove(node.Item);
-                    }
-                    else
-                    {
-                        removeNodes.Add(node);
+                        foreach (CodeEditor2.Data.Item item in VerilogModuleInstance.Items.Values)
+                        {
+                            targetDataItems.Add(item);
+                            addDataItems.Add(item);
+                        }
                     }
                 }
 
-                foreach (CodeEditor2.NavigatePanel.NavigatePanelNode node in removeNodes)
+                List<CodeEditor2.NavigatePanel.NavigatePanelNode> removeNodes = new List<CodeEditor2.NavigatePanel.NavigatePanelNode>();
+                lock (Nodes)
                 {
-                    Nodes.Remove(node);
-                    node.Dispose();
-                }
-
-                int treeIndex = 0;
-                foreach (CodeEditor2.Data.Item item in targetDataItems)
-                {
-                    if (item == null) continue;
-                    if (addDataItems.Contains(item))
+                    foreach (CodeEditor2.NavigatePanel.NavigatePanelNode node in Nodes)
                     {
-                        Nodes.Insert(treeIndex, item.NavigatePanelNode);
+                        if (node.Item != null && targetDataItems.Contains(node.Item))
+                        {
+                            addDataItems.Remove(node.Item);
+                        }
+                        else
+                        {
+                            removeNodes.Add(node);
+                        }
                     }
-                    treeIndex++;
+
+                    foreach (CodeEditor2.NavigatePanel.NavigatePanelNode node in removeNodes)
+                    {
+                        Nodes.Remove(node);
+                        node.Dispose();
+                    }
+
+                    int treeIndex = 0;
+                    foreach (CodeEditor2.Data.Item item in targetDataItems)
+                    {
+                        if (item == null) continue;
+                        if (addDataItems.Contains(item))
+                        {
+                            Nodes.Insert(treeIndex, item.NavigatePanelNode);
+                        }
+                        treeIndex++;
+                    }
                 }
 
-            }
+                if (VerilogFile == null) return;
 
-            if (VerilogFile == null) return;
-
-            // Icon badge will update only in UI thread
-            if (System.Threading.Thread.CurrentThread.Name != "UI") return;
-            Image = VerilogFileNode.GetIcon(VerilogFile);
+                // Icon badge will update only in UI thread
+                if (System.Threading.Thread.CurrentThread.Name != "UI") return;
+                Image = VerilogFileNode.GetIcon(VerilogFile);
+            });
 
         }
 

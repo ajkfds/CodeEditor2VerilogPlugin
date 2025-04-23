@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Drawing;
 using Avalonia.Media;
 using pluginVerilog.Data;
+using Avalonia.Threading;
 
 namespace pluginVerilog.NavigatePanel
 {
@@ -37,6 +38,13 @@ namespace pluginVerilog.NavigatePanel
             UpdateVisual();
         }
         public override void UpdateVisual()
+        {
+            Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                _updateVisual();
+            });
+        }
+        public void _updateVisual()
         {
             if (System.Threading.Thread.CurrentThread.Name != "UI") return;
 

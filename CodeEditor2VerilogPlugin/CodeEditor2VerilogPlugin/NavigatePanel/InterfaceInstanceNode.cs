@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Drawing;
 using pluginVerilog.Verilog.BuildingBlocks;
 using Avalonia.Media;
+using Avalonia.Threading;
 
 namespace pluginVerilog.NavigatePanel
 {
@@ -120,8 +121,15 @@ namespace pluginVerilog.NavigatePanel
 
             UpdateVisual();
         }
-
         public override void UpdateVisual()
+        {
+            Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                _updateVisual();
+            });
+        }
+
+        public void _updateVisual()
         {
             List<CodeEditor2.Data.Item> targetDataItems = new List<CodeEditor2.Data.Item>();
             List<CodeEditor2.Data.Item> addDataItems = new List<CodeEditor2.Data.Item>();

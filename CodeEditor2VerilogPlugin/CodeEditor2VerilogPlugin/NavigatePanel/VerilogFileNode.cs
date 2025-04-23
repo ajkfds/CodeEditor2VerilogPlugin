@@ -99,10 +99,17 @@ namespace pluginVerilog.NavigatePanel
 
         public override void UpdateVisual()
         {
-
+            Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                _updateVisual();
+            });
+        }
+        public void _updateVisual()
+        {
             List<CodeEditor2.NavigatePanel.NavigatePanelNode> newNodes = new List<CodeEditor2.NavigatePanel.NavigatePanelNode>();
 
-            if (VerilogFile != null) {
+            if (VerilogFile != null)
+            {
                 lock (VerilogFile.Items)
                 {
                     foreach (CodeEditor2.Data.Item item in VerilogFile.Items.Values)
@@ -139,9 +146,8 @@ namespace pluginVerilog.NavigatePanel
 
             if (VerilogFile == null) return;
 
-            // Icon badge will update only in UI thread
-            if (System.Threading.Thread.CurrentThread.Name != "UI") return;
             Image = GetIcon(VerilogFile);
+
         }
 
         public static IImage? GetIcon(Data.VerilogFile verilogFile)

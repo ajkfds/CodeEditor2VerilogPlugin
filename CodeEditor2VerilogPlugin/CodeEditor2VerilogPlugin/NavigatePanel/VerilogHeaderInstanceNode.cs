@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Drawing;
 using Avalonia.Media;
 using pluginVerilog.Data;
+using Avalonia.Threading;
 
 namespace pluginVerilog.NavigatePanel
 {
@@ -55,6 +56,18 @@ namespace pluginVerilog.NavigatePanel
             if (VerilogHeaderInstance == null) return;
             //VerilogHeaderInstance.Update();
 
+            UpdateVisual();
+        }
+
+        public override void UpdateVisual()
+        {
+            Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                _updateVisual();
+            });
+        }
+        public void _updateVisual()
+        {
             List<CodeEditor2.Data.Item> targetDataItems = new List<CodeEditor2.Data.Item>();
             List<CodeEditor2.Data.Item> addDataItems = new List<CodeEditor2.Data.Item>();
             foreach (CodeEditor2.Data.Item item in VerilogHeaderInstance.Items.Values)
@@ -93,11 +106,8 @@ namespace pluginVerilog.NavigatePanel
                 treeIndex++;
             }
 
-            UpdateVisual();
-        }
 
-        public override void UpdateVisual()
-        {
+
             // Icon badge will update only in the UI thread
             if (System.Threading.Thread.CurrentThread.Name != "UI") return;
 
