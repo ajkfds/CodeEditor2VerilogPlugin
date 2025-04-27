@@ -61,16 +61,26 @@ namespace pluginVerilog.NavigatePanel
 
         public override void UpdateVisual()
         {
-            Dispatcher.UIThread.InvokeAsync(() =>
+            if (Dispatcher.UIThread.CheckAccess())
             {
                 _updateVisual();
-            });
+            }
+            else
+            {
+                Dispatcher.UIThread.Post(() =>
+                {
+                    _updateVisual();
+                });
+            }
         }
         public void _updateVisual()
         {
             List<CodeEditor2.Data.Item> targetDataItems = new List<CodeEditor2.Data.Item>();
             List<CodeEditor2.Data.Item> addDataItems = new List<CodeEditor2.Data.Item>();
-            foreach (CodeEditor2.Data.Item item in VerilogHeaderInstance.Items.Values)
+            VerilogHeaderInstance? header = VerilogHeaderInstance;
+            if (header == null) return;
+
+            foreach (CodeEditor2.Data.Item item in header.Items.Values)
             {
                 targetDataItems.Add(item);
                 addDataItems.Add(item);

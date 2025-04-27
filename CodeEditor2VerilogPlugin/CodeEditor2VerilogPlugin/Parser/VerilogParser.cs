@@ -65,7 +65,7 @@ namespace pluginVerilog.Parser
 
              word = new Verilog.WordScanner(VerilogDocument, parsedDocument, parsedDocument.SystemVerilog);
 
-            System.Diagnostics.Debug.Print("Parser Construct " + sw.ElapsedMilliseconds.ToString());
+//            System.Diagnostics.Debug.Print("Parser Construct " + sw.ElapsedMilliseconds.ToString());
         }
 
         // create parser with parameter override
@@ -119,7 +119,7 @@ namespace pluginVerilog.Parser
             parsedDocument.TargetBuildingBlockName = moduleName;
             word = new Verilog.WordScanner(VerilogDocument, parsedDocument, parsedDocument.SystemVerilog);
 
-            System.Diagnostics.Debug.Print("Parser Construct " + sw.ElapsedMilliseconds.ToString());
+//            System.Diagnostics.Debug.Print("Parser Construct " + sw.ElapsedMilliseconds.ToString());
         }
 
 
@@ -234,7 +234,7 @@ namespace pluginVerilog.Parser
             word.RootParsedDocument.UnlockDocument();
             word.Dispose();
 
-            System.Diagnostics.Debug.Print("Parse " + sw.ElapsedMilliseconds.ToString());
+//            System.Diagnostics.Debug.Print("Parse " + sw.ElapsedMilliseconds.ToString());
         }
     }
 }

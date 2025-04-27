@@ -168,11 +168,14 @@ namespace pluginVerilog.Data
         {
             // create id table
             Dictionary<string, Data.VerilogHeaderInstance> headerItems = new Dictionary<string, VerilogHeaderInstance>();
-            foreach (var item in items.Values)
+            lock (items)
             {
-                Data.VerilogHeaderInstance? vh = item as Data.VerilogHeaderInstance;
-                if (vh == null) continue;
-                headerItems.Add(item.ID, vh);
+                foreach (var item in items.Values)
+                {
+                    Data.VerilogHeaderInstance? vh = item as Data.VerilogHeaderInstance;
+                    if (vh == null) continue;
+                    headerItems.Add(item.ID, vh);
+                }
             }
 
             // get file selected in text editor
@@ -296,7 +299,7 @@ namespace pluginVerilog.Data
 
         public void RegisterInstanceParsedDocument(string id, ParsedDocument parsedDocument, InstanceTextFile moduleInstance)
         {
-            System.Diagnostics.Debug.Print("#### RegisterInstanceParsedDocument " + id + "::" + parsedDocument.ObjectID);
+//            System.Diagnostics.Debug.Print("#### RegisterInstanceParsedDocument " + id + "::" + parsedDocument.ObjectID);
             cleanWeakRef();
             if (id == "")
             {
@@ -309,13 +312,13 @@ namespace pluginVerilog.Data
                     if (instancedParsedDocumentRefs.ContainsKey(id))
                     {
                         instancedParsedDocumentRefs[id] = new WeakReference<ParsedDocument>(parsedDocument);
-                        System.Diagnostics.Debug.Print("#### RegisterInstanceParsedDocument replace to " + id + "::" + parsedDocument.ObjectID);
+//                        System.Diagnostics.Debug.Print("#### RegisterInstanceParsedDocument replace to " + id + "::" + parsedDocument.ObjectID);
                     }
                     else
                     {
                         instancedParsedDocumentRefs.Add(id, new WeakReference<ParsedDocument>(parsedDocument));
                         //Project.AddReparseTarget(moduleInstance);
-                        System.Diagnostics.Debug.Print("#### Try RegisterInstanceParsedDocument.Add " + id + "::" + parsedDocument.ObjectID);
+//                        System.Diagnostics.Debug.Print("#### Try RegisterInstanceParsedDocument.Add " + id + "::" + parsedDocument.ObjectID);
                     }
                 }
             }

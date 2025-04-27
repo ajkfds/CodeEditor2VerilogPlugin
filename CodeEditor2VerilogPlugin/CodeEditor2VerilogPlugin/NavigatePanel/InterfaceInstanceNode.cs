@@ -91,7 +91,7 @@ namespace pluginVerilog.NavigatePanel
             //if (menu.Items.ContainsKey("openWithExploererTsmi")) menu.Items["openWithExploererTsmi"].Visible = true;
 
 
-            System.Diagnostics.Debug.Print("## VerilogModuleInstanceNode.OnSelected");
+//            System.Diagnostics.Debug.Print("## VerilogModuleInstanceNode.OnSelected");
 
             if (ModuleInstance.ParseValid & !ModuleInstance.ReparseRequested)
             {
@@ -109,7 +109,7 @@ namespace pluginVerilog.NavigatePanel
 
         private async Task parseHierarchy()
         {
-            System.Diagnostics.Debug.Print("## VerilogFileNode.OnSelected.PharseHier.Run");
+//            System.Diagnostics.Debug.Print("## VerilogFileNode.OnSelected.PharseHier.Run");
             await CodeEditor2.Tools.ParseHierarchy.Run(ModuleInstance.NavigatePanelNode);
         }
 
@@ -123,10 +123,15 @@ namespace pluginVerilog.NavigatePanel
         }
         public override void UpdateVisual()
         {
-            Dispatcher.UIThread.InvokeAsync(() =>
-            {
+            if (Dispatcher.UIThread.CheckAccess()){
                 _updateVisual();
-            });
+            }
+            else {
+                Dispatcher.UIThread.Post(() =>
+                {
+                    _updateVisual();
+                });
+            }
         }
 
         public void _updateVisual()

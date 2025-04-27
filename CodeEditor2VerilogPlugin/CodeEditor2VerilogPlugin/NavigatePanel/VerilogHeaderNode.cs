@@ -39,10 +39,17 @@ namespace pluginVerilog.NavigatePanel
         }
         public override void UpdateVisual()
         {
-            Dispatcher.UIThread.InvokeAsync(() =>
+            if (Dispatcher.UIThread.CheckAccess())
             {
                 _updateVisual();
-            });
+            }
+            else
+            {
+                Dispatcher.UIThread.Post(() =>
+                {
+                    _updateVisual();
+                });
+            }
         }
         public void _updateVisual()
         {

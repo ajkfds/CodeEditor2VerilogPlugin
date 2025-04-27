@@ -58,7 +58,7 @@ namespace pluginVerilog.NavigatePanel
             //if (menu.Items.ContainsKey("icarusVerilogTsmi")) menu.Items["icarusVerilogTsmi"].Visible = true;
             //if (menu.Items.ContainsKey("VerilogDebugTsmi")) menu.Items["VerilogDebugTsmi"].Visible = true;
 
-            System.Diagnostics.Debug.Print("## VerilogFileNode.OnSelected");
+//            System.Diagnostics.Debug.Print("## VerilogFileNode.OnSelected");
 
             if(TextFile != null && TextFile.ParseValid && !TextFile.ReparseRequested)
             {
@@ -99,10 +99,17 @@ namespace pluginVerilog.NavigatePanel
 
         public override void UpdateVisual()
         {
-            Dispatcher.UIThread.InvokeAsync(() =>
+            if (Dispatcher.UIThread.CheckAccess())
             {
                 _updateVisual();
-            });
+            }
+            else
+            {
+                Dispatcher.UIThread.Post(() =>
+                {
+                    _updateVisual();
+                });
+            }
         }
         public void _updateVisual()
         {

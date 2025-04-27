@@ -54,7 +54,7 @@ namespace pluginVerilog.Verilog
         string id;
         ~ParsedDocument()
         {
-            System.Diagnostics.Debug.Print("### pasedDocument.Finalize " + id+"::"+ObjectID);
+//            System.Diagnostics.Debug.Print("### pasedDocument.Finalize " + id+"::"+ObjectID);
         }
 
         public static int tagCount = 0;
