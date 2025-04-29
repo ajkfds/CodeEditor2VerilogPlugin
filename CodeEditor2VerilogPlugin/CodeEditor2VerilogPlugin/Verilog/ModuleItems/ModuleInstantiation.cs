@@ -794,7 +794,24 @@ namespace pluginVerilog.Verilog.ModuleItems
 
             DataObject? portDataObject = instancedModule.Ports[pinName].DataObject;
 
-            if (portDataObject is InterfaceInstance)
+            if(portDataObject is ModportInstance)
+            {
+
+                // connect to modport
+                ModportInstance? modportInstantiation = instancedModule.Ports[pinName].DataObject as ModportInstance;
+                if (modportInstantiation == null) throw new Exception();
+                string interfaceName = modportInstantiation.InterfaceName;
+                Interface? interface_ = instancedModule.Project.GetPluginProperty().GetBuildingBlock(interfaceName) as Interface;
+                if (interface_ == null)
+                {
+                    expression.Reference.AddError("illegal interface");
+                }
+                else
+                {
+                    checkModPortConnection(expression, modportInstantiation, interface_, pinName, output);
+                }
+            }
+            else if (portDataObject is InterfaceInstance)
             {
                 InterfaceInstance? portInterfaceInstantiation = instancedModule.Ports[pinName].DataObject as InterfaceInstance;
                 if (portInterfaceInstantiation == null) throw new Exception();
@@ -874,32 +891,55 @@ namespace pluginVerilog.Verilog.ModuleItems
             bool output
             )
         {
-//            if (portInterfaceInstantiation.ModPortName == "")
-            { // interface
-                Expressions.InterfaceReference? expressionInterface = expression as Expressions.InterfaceReference;
-                if (expressionInterface == null)
-                {
-                    expression.Reference.AddError("should be " + portInterfaceInstantiation.SourceName);
-                }
-                else
-                {
-                    if (expressionInterface == null)
-                    {
-                        expression.Reference.AddError("should be " + portInterfaceInstantiation.SourceName);
-                    }
-                    else if (expressionInterface.interfaceInstantiation.SourceName != portInterfaceInstantiation.SourceName)
-                    {
-                        expression.Reference.AddError("should be " + portInterfaceInstantiation.SourceName);
-                    }
-                    else
-                    {
-                        // properly connected
-                    }
-                }
+            Expressions.VariableReference? variableReference = expression as Expressions.VariableReference;
+            if(variableReference == null)
+            {
+                expression.Reference.AddError("should be " + portInterfaceInstantiation.SourceName);
+                return;
             }
-            //else
-            //{ // modport
-            //}
+
+            InterfaceInstance? interfaceInstance = variableReference.Variable as InterfaceInstance;
+            if(interfaceInstance == null)
+            {
+                expression.Reference.AddError("should be " + portInterfaceInstantiation.SourceName);
+                return;
+            }
+
+            if(interfaceInstance.SourceName != portInterfaceInstantiation.SourceName)
+            {
+                expression.Reference.AddError("should be " + portInterfaceInstantiation.SourceName);
+                return;
+            }
+            // properly connected
+        }
+        private static void checkModPortConnection(
+            Expressions.Expression expression,
+            ModportInstance modportInstantiation,
+            Interface interface_,
+            string pinName,
+            bool output
+            )
+        {
+            Expressions.VariableReference? variableReference = expression as Expressions.VariableReference;
+            if (variableReference == null)
+            {
+                expression.Reference.AddError("should be " + interface_.Name+"."+ modportInstantiation.Name );
+                return;
+            }
+
+            ModportInstance? modportInstance = variableReference.Variable as ModportInstance;
+            if (modportInstance == null)
+            {
+                expression.Reference.AddError("should be " + interface_.Name + "." + modportInstantiation.Name);
+                return;
+            }
+
+            if(( interface_.Name != modportInstantiation.InterfaceName ) | (modportInstance.ModportName != modportInstantiation.ModportName))
+            {
+                expression.Reference.AddError("should be " + interface_.Name + "." + modportInstantiation.Name);
+                return;
+            }
+            // properly connected
         }
         private static void checkDataObjectPortConnection(
             Module? instancedModule, Expressions.Expression? expression, string pinName, bool output)

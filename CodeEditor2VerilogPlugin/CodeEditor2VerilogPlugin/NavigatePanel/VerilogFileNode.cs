@@ -58,23 +58,32 @@ namespace pluginVerilog.NavigatePanel
             //if (menu.Items.ContainsKey("icarusVerilogTsmi")) menu.Items["icarusVerilogTsmi"].Visible = true;
             //if (menu.Items.ContainsKey("VerilogDebugTsmi")) menu.Items["VerilogDebugTsmi"].Visible = true;
 
-//            System.Diagnostics.Debug.Print("## VerilogFileNode.OnSelected");
+            //            System.Diagnostics.Debug.Print("## VerilogFileNode.OnSelected");
 
-            if(TextFile != null && TextFile.ParseValid && !TextFile.ReparseRequested)
+            if(TextFile == null)
             {
-                CodeEditor2.Controller.CodeEditor.SetTextFile(TextFile,true);
                 if (NodeSelected != null) NodeSelected();
                 Update();
+                return;
             }
-            else
+
+            if (!CodeEditor2.Global.StopBackGroundParse)
             {
-                CodeEditor2.Global.StopBackGroundParse = true;
-                await parseHierarchy();
-                CodeEditor2.Global.StopBackGroundParse = false;
-                if(TextFile != null) CodeEditor2.Controller.CodeEditor.SetTextFile(TextFile, true);
-                if (NodeSelected != null) NodeSelected();
-                Update();
+                if(TextFile.ParseValid && !TextFile.ReparseRequested)
+                {
+                    // skip parse
+                }
+                else
+                {
+                    CodeEditor2.Global.StopBackGroundParse = true;
+                    await parseHierarchy();
+                    CodeEditor2.Global.StopBackGroundParse = false;
+                }
             }
+
+            CodeEditor2.Controller.CodeEditor.SetTextFile(TextFile, true);
+            if (NodeSelected != null) NodeSelected();
+            Update();
         }
 
         // stop edit and parse all hierachy module

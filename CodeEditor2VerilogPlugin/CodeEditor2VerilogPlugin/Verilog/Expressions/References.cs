@@ -95,23 +95,23 @@ namespace pluginVerilog.Verilog.Expressions
         }
     }
 
-    public class ModuleInstanceReference : Primary
-    {
-        IBuildingBlockInstantiation moduleInstantiation;
-        public ModuleInstanceReference(IBuildingBlockInstantiation moduleInstantiation)
-        {
-            this.moduleInstantiation = moduleInstantiation;
-        }
-    }
+    //public class ModuleInstanceReference : Primary
+    //{
+    //    IBuildingBlockInstantiation moduleInstantiation;
+    //    public ModuleInstanceReference(IBuildingBlockInstantiation moduleInstantiation)
+    //    {
+    //        this.moduleInstantiation = moduleInstantiation;
+    //    }
+    //}
 
-    public class InterfaceReference : Primary
-    {
-        public IBuildingBlockInstantiation interfaceInstantiation;
-        public InterfaceReference(IBuildingBlockInstantiation interfaceInstantiation)
-        {
-            this.interfaceInstantiation = interfaceInstantiation;
-        }
-    }
+    //public class InterfaceReference : Primary
+    //{
+    //    public IBuildingBlockInstantiation interfaceInstantiation;
+    //    public InterfaceReference(IBuildingBlockInstantiation interfaceInstantiation)
+    //    {
+    //        this.interfaceInstantiation = interfaceInstantiation;
+    //    }
+    //}
 
 
 }

@@ -18,7 +18,7 @@ namespace pluginVerilog.Verilog.DataObjects
         public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
         public static ModportInstance Create(string identifier,Interface interface_, ModPort modPort)
         {
-            ModportInstance modportInstance = new ModportInstance() { Name = identifier };
+            ModportInstance modportInstance = new ModportInstance() { Name = identifier, InterfaceName=interface_.Name, ModportName=modPort.Name };
 
             foreach (var element in modPort.NamedElements.Values)
             {
@@ -26,9 +26,12 @@ namespace pluginVerilog.Verilog.DataObjects
             }
             return modportInstance;
         }
+
+        public required string InterfaceName { init; get; }
+        public required string ModportName { init; get; }
         public override DataObject Clone()
         {
-            ModportInstance modportInstance = new ModportInstance() { Name = Name };
+            ModportInstance modportInstance = new ModportInstance() { Name = Name, InterfaceName = InterfaceName, ModportName = ModportName };
             return modportInstance;
         }
     }

@@ -207,7 +207,13 @@ number
                 return null;
             }
 
-            INamedElement element = definedNameSpace.NamedElements[word.Text];
+             INamedElement element = definedNameSpace.NamedElements[word.Text];
+
+            //if(element is InterfaceInstance)
+            //{
+            //    return new Expressions.InterfaceReference((InterfaceInstance)element);
+            //}
+
             if (element is DataObject)
             {
                 return parseDataObject(word, nameSpace, definedNameSpace, lValue,nameSpaceText);

@@ -93,6 +93,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 File = file,
                 DefinitionReference = word.CrateWordReference()
             };
+
             module.BuildingBlock = module;
 
             if (word.CellDefine) module.cellDefine = true;

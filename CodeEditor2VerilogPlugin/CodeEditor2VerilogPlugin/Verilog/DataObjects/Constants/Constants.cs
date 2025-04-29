@@ -410,7 +410,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
 
         public override DataObject Clone()
         {
-            throw new NotImplementedException();
+            return new Constants { DefinitionRefrecnce = DefinitionRefrecnce, Expression = Expression, Name = Name };
         }
     }
 }

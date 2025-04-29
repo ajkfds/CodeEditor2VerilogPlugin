@@ -86,20 +86,31 @@ namespace pluginVerilog.NavigatePanel
             //var menu = CodeEditor2.Controller.NavigatePanel.GetContextMenuStrip();
             //if (menu.Items.ContainsKey("openWithExploererTsmi")) menu.Items["openWithExploererTsmi"].Visible = true;
 
-
-            System.Diagnostics.Debug.Print("## VerilogModuleInstanceNode.OnSelected");
-            if (ModuleInstance != null && ModuleInstance.ParseValid & !ModuleInstance.ReparseRequested)
+            if (ModuleInstance == null)
             {
-                CodeEditor2.Controller.CodeEditor.SetTextFile(ModuleInstance, true);
                 Update();
-            }
-            else
-            {
-                await parseHierarchy();
-                if (ModuleInstance != null) CodeEditor2.Controller.CodeEditor.SetTextFile(ModuleInstance, true);
-                Update();
+                return;
             }
 
+            //System.Diagnostics.Debug.Print("## VerilogModuleInstanceNode.OnSelected");
+
+
+            if (!CodeEditor2.Global.StopBackGroundParse)
+            {
+                if (ModuleInstance.ParseValid & !ModuleInstance.ReparseRequested)
+                {
+                    // skip parse
+                }
+                else
+                {
+                    CodeEditor2.Global.StopBackGroundParse = true;
+                    await parseHierarchy();
+                    CodeEditor2.Global.StopBackGroundParse = false;
+                }
+            }
+
+            CodeEditor2.Controller.CodeEditor.SetTextFile(ModuleInstance, true);
+            Update();
         }
 
         private async Task parseHierarchy()
