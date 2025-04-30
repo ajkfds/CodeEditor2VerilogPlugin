@@ -351,14 +351,33 @@ namespace pluginVerilog.Verilog
                         break;
                     case 4: // double quote
                         wordType = WordTypeEnum.String;
-                        nextIndex++;
+                        nextIndex++;    // double quote
                         while (
                             docLength > nextIndex
                         )
                         {
+                            if(document.GetCharAt(nextIndex) == '\\' && document.Length> nextIndex+1 )
+                            {
+                                if (document.GetCharAt(nextIndex + 1) == '\\') // escaped backslash
+                                {
+                                    // When skipping an escaped double quote, the escaped backslash must also be skipped,
+                                    // otherwise there is a case where the double quote at the end of the string is mistakenly recognized as an escaped double quote.
+                                    // example : "//"
+                                    nextIndex++;
+                                    nextIndex++;
+                                    continue;
+                                }
+                                if (document.GetCharAt(nextIndex+1) == '\"') // escaped double quote
+                                {
+                                    nextIndex++;
+                                    nextIndex++;
+                                    continue;
+                                }
+                            }
+
                             if(document.GetCharAt(nextIndex) == '\"')
                             {
-                                if(document.Length > nextIndex) nextIndex++;
+                                if(document.Length > nextIndex) nextIndex++; // last double quote
                                 break;
                             }
                             nextIndex++;
