@@ -402,12 +402,30 @@ ansi_port_declaration ::=
             {
                 if (firstPort)
                 {
-                    //For the first port in the port list:
-                    //  — If the direction, port kind, and data type are all omitted, then the port shall be assumed to be a
-                    //    member of a non - ANSI style list_of_ports, and port direction and type declarations shall be declared
-                    //    after the port list. 
-                    nameSpace.BuildingBlock.AnsiStylePortDefinition = false;
-                    return false;
+                    if((word.NextText == "," || word.NextText == ")")) // Without this, a port of an undefined type will be recognized as a non-ANSI format.
+                    {
+                        //For the first port in the port list:
+                        //  — If the direction, port kind, and data type are all omitted, then the port shall be assumed to be a
+                        //    member of a non - ANSI style list_of_ports, and port direction and type declarations shall be declared
+                        //    after the port list. 
+                        nameSpace.BuildingBlock.AnsiStylePortDefinition = false;
+                        return false;
+                    }
+                    else
+                    { // non defined object
+                        while (!word.Eof)
+                        {
+                            word.MoveNext();
+                            if (word.Text == ".")
+                            {
+                                word.MoveNext();
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+                    }
                 }
                 else
                 {
