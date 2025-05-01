@@ -395,8 +395,66 @@ namespace pluginVerilog
             {"$fatal",null },
             {"$error",null },
             {"$warning",null },
-            {"$info",null }
+            {"$info",null },
+
+            // SystemVerilog
+            //Simulation control tasks (20.2)
+            //{"$finish",null },
+            //{"$stop",null },
+            {"$exit",null },
+            //Timescale tasks (20.4)
+            //{"$printtimescale",null },
+            //{"$timeformat",null },
+            //Severity tasks (20.10)
+            //{"$fatal",null },
+            //{"$error",null },
+            //{"$warning",null },
+            //{"$info",null },
+            //Elaboration tasks (20.11)
+            //{"$fatal",null },
+            //{"$error",null },
+            //{"$warning",null },
+            //{"$info",null },
+            //Assertion control tasks (20.12)
+            {"$asserton",null },
+            {"$assertoff",null },
+            {"$assertkill",null },
+            {"$assertcontrol",null },
+            {"$assertpasson",null },
+            {"$assertpassoff",null },
+            {"$assertfailon",null },
+            {"$assertfailoff",null },
+            {"$assertnonvacuouson",null },
+            {"$assertvacuousoff",null },
+            //Stochastic analysis tasks (20.16)
+            //{"$q_add",null },
+            //{"$q_remove",null },
+            //{"$q_initialize",null },
+            //{"$q_exam",null },
+            //PLA modeling tasks (20.17)
+            //{"$async$and$array",null },
+            //{"$async$and$plane",null },
+            //{"$async$nand$array",null },
+            //{"$async$nand$plane",null },
+            //{"$async$or$array",null },
+            //{"$async$or$plane",null },
+            //{"$async$nor$array",null },
+            //{"$async$nor$plane",null },
+            //{"$sync$and$array",null },
+            //{"$sync$and$plane",null },
+            //{"$sync$nand$array",null },
+            //{"$sync$nand$plane",null },
+            //{"$sync$or$array",null },
+            //{"$sync$or$plane",null },
+            //{"$sync$nor$array",null },
+            //{"$sync$nor$plane",null },
+            //Miscellaneous tasks and functions (20.18)
+            {"$system",null },
         };
+        /*
+
+         
+         */
 
         public Dictionary<string, Func<Verilog.DataObjects.Variables.Variable, Verilog.WordScanner>?> SystemFunctions = new Dictionary<string, Func<Verilog.DataObjects.Variables.Variable, Verilog.WordScanner>?>
         {
@@ -439,8 +497,101 @@ namespace pluginVerilog
             {"$test$plusargs",null },
             {"$value$plusargs",null },
 
-            // systemverilog
+            //SystemVerilog
+            //Simulation time functions (20.3)
+            //{"$realtime",null },
+            //{"$stime",null },
+            //{"$time",null },
+            //Conversion functions (20.5)
+            //{"$bitstoreal",null },
+            //{"$realtobits",null },
+            {"$bitstoshortreal",null },
+            {"$shortrealtobits",null },
+            //{"$itor",null },
+            //{"$rtoi",null },
+            //{"$signed",null },
+            //{"$unsigned",null },
+            {"$cast",null },
+            //Data query functions (20.6)
+            {"$bits",null },
+            {"$isunbounded",null },
+            {"$typename",null },
+            //Array query functions (20.7)
+            {"$unpacked_dimensions",null },
+            {"$dimensions",null },
+            {"$left",null },
+            {"$right",null },
+            {"$low",null },
+            {"$high",null },
+            {"$increment",null },
+            {"$size",null },
+            //Math functions (20.8)
             {"$clog2",null },
+            {"$asin",null },
+            {"$ln",null },
+            {"$acos",null },
+            {"$log10",null },
+            {"$atan",null },
+            {"$exp",null },
+            {"$atan2",null },
+            {"$sqrt",null },
+            {"$hypot",null },
+            {"$pow",null },
+            {"$sinh",null },
+            {"$floor",null },
+            {"$cosh",null },
+            {"$ceil",null },
+            {"$tanh",null },
+            {"$sin",null },
+            {"$asinh",null },
+            {"$cos",null },
+            {"$acosh",null },
+            {"$tan",null },
+            {"$atanh",null },
+            //Bit vector system functions (20.9)
+            {"$countbits",null },
+            {"$countones",null },
+            {"$onehot",null },
+            {"$onehot0",null },
+            {"$isunknown",null },
+
+            //Sampled value system functions (20.13)
+            {"$sampled",null },
+            {"$rose",null },
+            {"$fell",null },
+            {"$stable",null },
+            {"$changed",null },
+            {"$past",null },
+            {"$past_gclk",null },
+            {"$rose_gclk",null },
+            {"$fell_gclk",null },
+            {"$stable_gclk",null },
+            {"$changed_gclk",null },
+            {"$future_gclk",null },
+            {"$rising_gclk",null },
+            {"$falling_gclk",null },
+            {"$steady_gclk",null },
+            {"$changing_gclk",null },
+            //Coverage control functions (20.14)
+            {"$coverage_control",null },
+            {"$coverage_get_max",null },
+            {"$coverage_get",null },
+            {"$coverage_merge",null },
+            {"$coverage_save",null },
+            {"$get_coverage",null },
+            {"$set_coverage_db_name",null },
+            {"$load_coverage_db",null },
+            //Probabilistic distribution functions (20.15)
+            //{"$random",null },
+            //{"$dist_chi_square",null },
+            //{"$dist_erlang",null },
+            //{"$dist_exponential",null },
+            //{"$dist_normal",null },
+            //{"$dist_poisson",null },
+            //{"$dist_t",null },
+            //{"$dist_uniform",null },
+            //Stochastic analysis functions (20.16)
+            //{"$q_full",null },
 
         };
 
