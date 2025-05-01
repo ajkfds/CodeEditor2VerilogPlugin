@@ -25,14 +25,6 @@ namespace pluginVerilog.NavigatePanel
             get { return Item as CodeEditor2.Data.TextFile; }
         }
 
-        public override string Text
-        {
-            get {
-                if(FileItem == null) return "?";
-                return FileItem.Name; 
-            }
-        }
-
         public override void Update()
         {
             UpdateVisual();
@@ -53,7 +45,14 @@ namespace pluginVerilog.NavigatePanel
         }
         public void _updateVisual()
         {
-            if (System.Threading.Thread.CurrentThread.Name != "UI") return;
+            if (FileItem == null)
+            {
+                Text = "?";
+            }
+            else
+            {
+                Text = FileItem.Name;
+            }
 
             IVerilogRelatedFile? verilogRelatedFile = TextFile as IVerilogRelatedFile;
             if (verilogRelatedFile == null) return;

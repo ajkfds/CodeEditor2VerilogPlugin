@@ -12,6 +12,7 @@ namespace pluginVerilog.Data
         Verilog.ParsedDocument VerilogParsedDocument { get; }
 
         ProjectProperty ProjectProperty { get; }
+        bool SystemVerilog { get; }
 
     }
 }

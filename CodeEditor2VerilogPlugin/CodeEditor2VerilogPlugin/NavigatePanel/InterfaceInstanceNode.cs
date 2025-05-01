@@ -74,15 +74,6 @@ namespace pluginVerilog.NavigatePanel
             }
         }
 
-        public override string Text
-        {
-            get
-            {
-                Data.VerilogModuleInstance instance = Item as Data.VerilogModuleInstance;
-                return instance.Name + " - " + instance.ModuleName;
-            }
-        }
-
 
 
         public override async void OnSelected()
@@ -136,6 +127,10 @@ namespace pluginVerilog.NavigatePanel
 
         public void _updateVisual()
         {
+            Data.VerilogModuleInstance instance = Item as Data.VerilogModuleInstance;
+            Text = instance.Name + " - " + instance.ModuleName;
+
+
             List<CodeEditor2.Data.Item> targetDataItems = new List<CodeEditor2.Data.Item>();
             List<CodeEditor2.Data.Item> addDataItems = new List<CodeEditor2.Data.Item>();
             foreach (CodeEditor2.Data.Item item in VerilogModuleInstance.Items.Values)

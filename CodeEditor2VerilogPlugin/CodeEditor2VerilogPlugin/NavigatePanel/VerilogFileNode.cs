@@ -11,6 +11,8 @@ using System.ComponentModel;
 using CodeEditor2.Tools;
 using System.Diagnostics.CodeAnalysis;
 using DynamicData;
+using pluginVerilog.Data;
+using pluginVerilog.FileTypes;
 
 namespace pluginVerilog.NavigatePanel
 {
@@ -41,13 +43,7 @@ namespace pluginVerilog.NavigatePanel
             get { return Item as Data.VerilogFile; }
         }
 
-        public override string Text
-        {
-            get {
-                if (FileItem == null) return "-";
-                return FileItem.Name;
-            }
-        }
+
 
 
         public override async void OnSelected()
@@ -122,6 +118,10 @@ namespace pluginVerilog.NavigatePanel
         }
         public void _updateVisual()
         {
+            string text = "-";
+            if (FileItem != null) text=FileItem.Name;
+            Text = text;
+
             List<CodeEditor2.NavigatePanel.NavigatePanelNode> newNodes = new List<CodeEditor2.NavigatePanel.NavigatePanelNode>();
 
             if (VerilogFile != null)
@@ -166,7 +166,7 @@ namespace pluginVerilog.NavigatePanel
 
         }
 
-        public static IImage? GetIcon(Data.VerilogFile verilogFile)
+        public static IImage? GetIcon(IVerilogRelatedFile verilogRelatedFile)
         {
             // Icon badge will update only in UI thread
             if (System.Threading.Thread.CurrentThread.Name != "UI")
@@ -176,7 +176,7 @@ namespace pluginVerilog.NavigatePanel
 
             List<AjkAvaloniaLibs.Libs.Icons.OverrideIcon> overrideIcons = new List<AjkAvaloniaLibs.Libs.Icons.OverrideIcon>();
 
-            if (verilogFile.CodeDocument != null && verilogFile.CodeDocument.IsDirty)
+            if (verilogRelatedFile.CodeDocument != null && verilogRelatedFile.CodeDocument.IsDirty)
             {
                 overrideIcons.Add(new AjkAvaloniaLibs.Libs.Icons.OverrideIcon()
                 {
@@ -186,9 +186,9 @@ namespace pluginVerilog.NavigatePanel
                 });
             }
 
-            if (verilogFile != null && verilogFile.VerilogParsedDocument != null)
+            if (verilogRelatedFile != null && verilogRelatedFile.VerilogParsedDocument != null)
             {
-                if (verilogFile.VerilogParsedDocument.ErrorCount > 0)
+                if (verilogRelatedFile.VerilogParsedDocument.ErrorCount > 0)
                 {
                     overrideIcons.Add(new AjkAvaloniaLibs.Libs.Icons.OverrideIcon()
                     {
@@ -197,7 +197,7 @@ namespace pluginVerilog.NavigatePanel
                         OverridePosition = AjkAvaloniaLibs.Libs.Icons.OverridePosition.DownLeft
                     });
                 }
-                else if (verilogFile.VerilogParsedDocument.WarningCount > 0)
+                else if (verilogRelatedFile.VerilogParsedDocument.WarningCount > 0)
                 {
                     overrideIcons.Add(new AjkAvaloniaLibs.Libs.Icons.OverrideIcon()
                     {
@@ -208,8 +208,7 @@ namespace pluginVerilog.NavigatePanel
                 }
             }
 
-
-            if (verilogFile != null && verilogFile.SystemVerilog)
+            if (verilogRelatedFile != null && verilogRelatedFile.SystemVerilog)
             {
                 return AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
                     "CodeEditor2VerilogPlugin/Assets/Icons/systemVerilogDocument.svg",

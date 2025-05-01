@@ -69,15 +69,6 @@ namespace pluginVerilog.NavigatePanel
             }
         }
 
-        public override string Text
-        {
-            get
-            {
-                if (Item == null) return "null";
-                Data.VerilogModuleInstance instance = (Data.VerilogModuleInstance)Item;
-                return instance.Name + " - " + instance.ModuleName;
-            }
-        }
 
 
 
@@ -145,60 +136,66 @@ namespace pluginVerilog.NavigatePanel
         }
         public void _updateVisual()
         {
-            Dispatcher.UIThread.InvokeAsync(() => {
-                List<CodeEditor2.Data.Item> targetDataItems = new List<CodeEditor2.Data.Item>();
-                List<CodeEditor2.Data.Item> addDataItems = new List<CodeEditor2.Data.Item>();
-                if (VerilogModuleInstance != null)
+            if (Item == null)
+            {
+                Text = "null";
+            }
+            else
+            {
+                Data.VerilogModuleInstance instance = (Data.VerilogModuleInstance)Item;
+                Text = instance.Name + " - " + instance.ModuleName;
+            }
+
+            List<CodeEditor2.Data.Item> targetDataItems = new List<CodeEditor2.Data.Item>();
+            List<CodeEditor2.Data.Item> addDataItems = new List<CodeEditor2.Data.Item>();
+            if (VerilogModuleInstance != null)
+            {
+                lock (VerilogModuleInstance.Items)
                 {
-                    lock (VerilogModuleInstance.Items)
+                    foreach (CodeEditor2.Data.Item item in VerilogModuleInstance.Items.Values)
                     {
-                        foreach (CodeEditor2.Data.Item item in VerilogModuleInstance.Items.Values)
-                        {
-                            targetDataItems.Add(item);
-                            addDataItems.Add(item);
-                        }
+                        targetDataItems.Add(item);
+                        addDataItems.Add(item);
+                    }
+                }
+            }
+
+            List<CodeEditor2.NavigatePanel.NavigatePanelNode> removeNodes = new List<CodeEditor2.NavigatePanel.NavigatePanelNode>();
+            lock (Nodes)
+            {
+                foreach (CodeEditor2.NavigatePanel.NavigatePanelNode node in Nodes)
+                {
+                    if (node.Item != null && targetDataItems.Contains(node.Item))
+                    {
+                        addDataItems.Remove(node.Item);
+                    }
+                    else
+                    {
+                        removeNodes.Add(node);
                     }
                 }
 
-                List<CodeEditor2.NavigatePanel.NavigatePanelNode> removeNodes = new List<CodeEditor2.NavigatePanel.NavigatePanelNode>();
-                lock (Nodes)
+                foreach (CodeEditor2.NavigatePanel.NavigatePanelNode node in removeNodes)
                 {
-                    foreach (CodeEditor2.NavigatePanel.NavigatePanelNode node in Nodes)
-                    {
-                        if (node.Item != null && targetDataItems.Contains(node.Item))
-                        {
-                            addDataItems.Remove(node.Item);
-                        }
-                        else
-                        {
-                            removeNodes.Add(node);
-                        }
-                    }
-
-                    foreach (CodeEditor2.NavigatePanel.NavigatePanelNode node in removeNodes)
-                    {
-                        Nodes.Remove(node);
-                        node.Dispose();
-                    }
-
-                    int treeIndex = 0;
-                    foreach (CodeEditor2.Data.Item item in targetDataItems)
-                    {
-                        if (item == null) continue;
-                        if (addDataItems.Contains(item))
-                        {
-                            Nodes.Insert(treeIndex, item.NavigatePanelNode);
-                        }
-                        treeIndex++;
-                    }
+                    Nodes.Remove(node);
+                    node.Dispose();
                 }
 
-                if (VerilogFile == null) return;
+                int treeIndex = 0;
+                foreach (CodeEditor2.Data.Item item in targetDataItems)
+                {
+                    if (item == null) continue;
+                    if (addDataItems.Contains(item))
+                    {
+                        Nodes.Insert(treeIndex, item.NavigatePanelNode);
+                    }
+                    treeIndex++;
+                }
+            }
 
-                // Icon badge will update only in UI thread
-                if (System.Threading.Thread.CurrentThread.Name != "UI") return;
-                Image = VerilogFileNode.GetIcon(VerilogFile);
-            });
+            if (VerilogFile == null) return;
+
+            if(VerilogModuleInstance != null) Image = VerilogFileNode.GetIcon(VerilogModuleInstance);
 
         }
 

@@ -71,6 +71,7 @@ namespace pluginVerilog.Data
             }
         }
 
+        public bool SystemVerilog { get { return RootFile.SystemVerilog; } }
 
         public bool ReplaceBy(
             VerilogHeaderInstance file

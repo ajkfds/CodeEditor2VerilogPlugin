@@ -43,13 +43,6 @@ namespace pluginVerilog.NavigatePanel
             if (NodeSelected != null) NodeSelected();
         }
 
-        public override string Text
-        {
-            get { 
-                if(FileItem == null) return "?";
-                return FileItem.Name; 
-            }
-        }
 
         public override void Update()
         {
@@ -75,6 +68,16 @@ namespace pluginVerilog.NavigatePanel
         }
         public void _updateVisual()
         {
+            if (FileItem == null)
+            {
+                Text = "?";
+            }
+            else
+            {
+                Text = FileItem.Name;
+            }
+
+
             List<CodeEditor2.Data.Item> targetDataItems = new List<CodeEditor2.Data.Item>();
             List<CodeEditor2.Data.Item> addDataItems = new List<CodeEditor2.Data.Item>();
             VerilogHeaderInstance? header = VerilogHeaderInstance;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -44,6 +45,8 @@ namespace pluginVerilog.Data
                 return id;
             }
         }
+
+        public bool SystemVerilog { get { return false; } }
         public override CodeEditor2.CodeEditor.CodeDocument? CodeDocument
         {
             get
