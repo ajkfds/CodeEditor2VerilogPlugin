@@ -619,6 +619,15 @@ namespace pluginVerilog.Verilog.DataObjects
 
         public override DataObject Clone()
         {
+            return new InterfaceInstance() { 
+                BeginIndexReference = BeginIndexReference, 
+                DefinitionReference = DefinitionReference, 
+                Name = Name, 
+                ParameterOverrides = ParameterOverrides, 
+                Project = Project, 
+                SourceName = SourceName 
+            };
+
             throw new NotImplementedException();
         }
 

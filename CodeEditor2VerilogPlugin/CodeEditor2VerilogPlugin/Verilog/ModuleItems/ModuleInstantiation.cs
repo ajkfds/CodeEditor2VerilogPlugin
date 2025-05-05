@@ -712,7 +712,11 @@ namespace pluginVerilog.Verilog.ModuleItems
                 word.AddError("illegal port connection");
                 return;
             }
-
+            if (!instancedModule.Ports.ContainsKey(pinName))
+            {
+                word.AddError("illegal port connection : "+pinName);
+                return;
+            }
             Port port = instancedModule.Ports[pinName];
             Variable? variable = targetObject as Variable;
 
