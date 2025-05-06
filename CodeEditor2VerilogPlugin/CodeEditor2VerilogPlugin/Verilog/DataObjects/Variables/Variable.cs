@@ -348,18 +348,6 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 commentAnnotations.Add(key, value);
             }
         }
-        public List<string> GetAnnotations(string key)
-        {
-            if (commentAnnotations.ContainsKey(key))
-            {
-                string values = commentAnnotations[key];
-                return values.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList<string>();
-            }
-            else
-            {
-                return new List<string>();
-            }
-        }
 
     }
 

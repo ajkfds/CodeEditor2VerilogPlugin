@@ -1,4 +1,5 @@
-﻿using pluginVerilog.Verilog.BuildingBlocks;
+﻿using Avalonia.Controls;
+using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.DataObjects.Nets;
 using pluginVerilog.Verilog.ModuleItems;
@@ -61,18 +62,6 @@ namespace pluginVerilog.Verilog.DataObjects
             else
             {
                 commentAnnotations.Add(key, value);
-            }
-        }
-        public List<string> GetAnnotations(string key)
-        {
-            if (commentAnnotations.ContainsKey(key))
-            {
-                string values = commentAnnotations[key];
-                return values.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries).ToList<string>();
-            }
-            else
-            {
-                return null;
             }
         }
 
@@ -249,22 +238,22 @@ ansi_port_declaration ::=
             IDataType? prevDataType = null;
             Net.NetTypeEnum? prevNetType = null;
             DirectionEnum? prevDirection = null;
-
+            string? portGroup = null;
             Port? definedPort;
 
             if (ParsePortDeclaration(word, nameSpace, true, ref prevDataType, ref prevNetType, ref prevDirection,out definedPort))
             {
-                if (definedPort != null) checkCommentAnnotation(word, nameSpace, definedPort);
+                if (definedPort != null) checkCommentAnnotation(word, nameSpace, definedPort,portGroup);
                 if (word.Text != ",") return;
                 word.MoveNext();
-                if (definedPort != null) checkCommentAnnotation(word, nameSpace, definedPort);
+                if (definedPort != null) checkCommentAnnotation(word, nameSpace, definedPort, portGroup);
                 while (!word.Eof)
                 {
                     if (!ParsePortDeclaration(word, nameSpace, false, ref prevDataType, ref prevNetType, ref prevDirection, out definedPort)) return;
-                    if(definedPort!=null) checkCommentAnnotation(word, nameSpace, definedPort);
+                    if(definedPort!=null) checkCommentAnnotation(word, nameSpace, definedPort, portGroup);
                     if (word.Text != ",") return;
                     word.MoveNext();
-                    if (definedPort != null) checkCommentAnnotation(word, nameSpace, definedPort);
+                    if (definedPort != null) checkCommentAnnotation(word, nameSpace, definedPort, portGroup);
                 }
             }
             else if(!nameSpace.BuildingBlock.AnsiStylePortDefinition)
@@ -278,24 +267,45 @@ ansi_port_declaration ::=
             }
         }
 
-        private static void checkCommentAnnotation(WordScanner word, NameSpace nameSpace,Port port)
+
+
+        /// <summary>
+        /// Check for comment annotations
+        /// </summary>
+        private static void checkCommentAnnotation(WordScanner word, NameSpace nameSpace,Port? port,string? portGroup)
         {
             string commentText = word.GetFollowedComment();
-            if (commentText.Contains(word.ProjectProperty.AnnotationCommands.Synchronized))
+            if (!commentText.Contains("@")) return;
+
+            var comment = word.GetCommentScanner();
+            while (!comment.EOC)
             {
-                var comment = word.GetCommentScanner();
-                while (!comment.EOC)
+                if (!comment.Text.StartsWith("@"))
                 {
-                    if(comment.Text == word.ProjectProperty.AnnotationCommands.Synchronized)
+                    comment.MoveNext();
+                    continue;
+                }
+
+                if (commentText.Contains(word.ProjectProperty.AnnotationCommands.PortGroup))
+                {
+                    pasePortGroup(comment, nameSpace, portGroup);
+                }
+                else
+                {
+                    if (port != null)
                     {
-                        comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
-                        comment.MoveNext();
-                        if (comment.Text == ":")
+                        if (commentText.Contains(word.ProjectProperty.AnnotationCommands.Synchronized))
                         {
-                            comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
-                            comment.MoveNext();
-                            port.AppendAnnotation("sync", comment.Text);
-                            comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                            parseSyncAnnotation(comment, nameSpace, port);
+                        }else if (commentText.Contains(word.ProjectProperty.AnnotationCommands.Clock))
+                        {
+                            parseClockAnnotation(comment, nameSpace, port);
+                        }else if (commentText.Contains(word.ProjectProperty.AnnotationCommands.Reset))
+                        {
+                            parseResetAnnotation(comment, nameSpace, port);
+                        }
+                        else
+                        {
                             comment.MoveNext();
                         }
                     }
@@ -306,41 +316,89 @@ ansi_port_declaration ::=
                 }
             }
 
-            if (commentText.Contains(word.ProjectProperty.AnnotationCommands.Clock))
-            {
-                var scanner = word.GetCommentScanner();
-                while (!scanner.EOC)
-                {
-                    if (scanner.Text == word.ProjectProperty.AnnotationCommands.Clock)
-                    {
-                        scanner.Color(CodeDrawStyle.ColorType.CommentAnnotation);
-                        scanner.MoveNext();
-                        port.AppendAnnotation("clock", scanner.Text);
-                    }
-                    else
-                    {
-                        scanner.MoveNext();
-                    }
-                }
-            }
+        }
 
-            if (commentText.Contains(word.ProjectProperty.AnnotationCommands.Reset))
+        private static void pasePortGroup(CommentScanner comment, NameSpace nameSpace, string? portGroup)
+        {
+            comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+            comment.MoveNext();
+            if (comment.Text == ":")
             {
-                var scanner = word.GetCommentScanner();
-                while (!scanner.EOC)
+                comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                comment.MoveNext(); // :
+
+                while (!comment.EOC)
                 {
-                    if (scanner.Text == word.ProjectProperty.AnnotationCommands.Reset)
+                    comment.MoveNextUntilEol();
+                    comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                    portGroup = comment.Text;
+                    break;
+                }
+            }
+        }
+
+        private static void parseSyncAnnotation(CommentScanner comment, NameSpace nameSpace, Port port)
+        {
+            comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+            comment.MoveNext();
+            if (comment.Text == ":")
+            {
+                comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                comment.MoveNext(); // :
+
+                while (!comment.EOC)
+                {
+                    if(!nameSpace.BuildingBlock.NamedElements.ContainsDataObject(comment.Text))
                     {
-                        scanner.Color(CodeDrawStyle.ColorType.CommentAnnotation);
-                        scanner.MoveNext();
-                        port.AppendAnnotation("reset", scanner.Text);
+                        break;
+                    }
+                    port.AppendAnnotation("sync", comment.Text);
+                    comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                    comment.MoveNext();
+
+                    if (comment.Text != ",") break;
+                    comment.MoveNext(); // ,
+
+                    if (comment.Text.StartsWith("@")) break;
+                }
+            }
+        }
+
+        private static void parseClockAnnotation(CommentScanner comment, NameSpace nameSpace, Port port)
+        {
+            comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+            comment.MoveNext();
+            if (comment.Text == ":")
+            {
+                comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                comment.MoveNext(); // :
+
+                while (!comment.EOC)
+                {
+                    if(comment.Text == "posedge"|| comment.Text=="negedge")
+                    {
+                        port.AppendAnnotation("clock", comment.Text);
+                        comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                        comment.MoveNext();
                     }
                     else
                     {
-                        scanner.MoveNext();
+                        break;
                     }
+
+                    if (comment.Text != ",") break;
+                    comment.MoveNext(); // ,
+
+                    if (comment.Text.StartsWith("@")) break;
                 }
             }
+        }
+
+        private static void parseResetAnnotation(CommentScanner comment, NameSpace nameSpace, Port port)
+        {
+            comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+            comment.MoveNext();
+            port.AppendAnnotation("reset", "");
         }
 
         private static bool ParseNonAnsiPortDeclaration(WordScanner word, NameSpace nameSpace)

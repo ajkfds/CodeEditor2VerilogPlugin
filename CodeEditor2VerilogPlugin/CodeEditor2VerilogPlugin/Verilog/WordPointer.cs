@@ -190,6 +190,10 @@ namespace pluginVerilog.Verilog
         {
             return new CommentScanner(Document, commentIndex, index);
         }
+        public CommentScanner GetPreviousCommentScanner()
+        {
+            return new CommentScanner(Document, commentIndexPrev, index);
+        }
         public void MoveNextUntilEol()
         {
             index = nextIndex;

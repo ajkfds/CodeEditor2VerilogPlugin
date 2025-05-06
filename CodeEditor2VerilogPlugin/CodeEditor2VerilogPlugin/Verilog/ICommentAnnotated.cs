@@ -10,7 +10,6 @@ namespace pluginVerilog.Verilog
     {
         Dictionary<string, string> CommentAnnotations { get; }
         void AppendAnnotation(string key, string value);
-        List<string> GetAnnotations(string  key);
 
     }
 }

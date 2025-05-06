@@ -42,6 +42,36 @@ namespace pluginVerilog.Verilog
             getNext();
         }
 
+        public void MoveNextUntilEol()
+        {
+            index = indexEnd;
+            char ch;
+
+            // skip to 1st of next word
+            while (index < commentEnd)
+            {
+                ch = document.GetCharAt(index);
+                if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r')
+                {
+                    index++;
+                    continue;
+                }
+                break;
+            }
+
+            // get end index
+            indexEnd = index;
+            while (indexEnd < commentEnd)
+            {
+                ch = document.GetCharAt(indexEnd);
+                if (ch == '\n' || ch == '\r')
+                {
+                    break;
+                }
+                indexEnd++;
+            }
+        }
+
         public void Color(CodeDrawStyle.ColorType colorType)
         {
             document.TextColors.SetColorAt(index, CodeDrawStyle.ColorIndex(colorType),indexEnd-index);
