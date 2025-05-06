@@ -525,8 +525,8 @@ ansi_port_declaration ::=
                 switch (port.Direction)
                 {
                     case DirectionEnum.Inout:
-//                        port.DataObject.AssignedReferences.Add(word.GetReference());
-//                        port.DataObject.UsedReferences.Add(word.GetReference());
+                        port.DataObject.AssignedReferences.Add(word.GetReference());
+                        port.DataObject.UsedReferences.Add(word.GetReference());
                         break;
                     case DirectionEnum.Input:
                         port.DataObject.AssignedReferences.Add(word.GetReference());
