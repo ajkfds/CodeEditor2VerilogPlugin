@@ -44,10 +44,7 @@ namespace pluginVerilog.Verilog
 
         public void Color(CodeDrawStyle.ColorType colorType)
         {
-            for (int i = index; i < indexEnd; i++)
-            {
-                document.TextColors.SetColorAt(i, CodeDrawStyle.ColorIndex(colorType));
-            }
+            document.TextColors.SetColorAt(index, CodeDrawStyle.ColorIndex(colorType),indexEnd-index);
         }
         public string Text
         {
@@ -89,6 +86,21 @@ namespace pluginVerilog.Verilog
             {
                 ch = document.GetCharAt(indexEnd);
                 if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r')
+                {
+                    break;
+                }
+                indexEnd++;
+                if (ch == ':')
+                {
+                    return;
+                }
+                break;
+            }
+
+            while (indexEnd < commentEnd)
+            {
+                ch = document.GetCharAt(indexEnd);
+                if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' || ch == ':')
                 {
                     break;
                 }

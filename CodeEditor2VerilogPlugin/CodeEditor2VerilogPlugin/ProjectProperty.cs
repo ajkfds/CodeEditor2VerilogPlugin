@@ -70,13 +70,15 @@ namespace pluginVerilog
 
         }
 
-        public static class AnnotationCommands
+        public AnnotationCommandsClass AnnotationCommands { get; set; } = new AnnotationCommandsClass();
+
+        public class AnnotationCommandsClass
         {
-            public static string Synchronized = "@sync:";
-            public static string Clock = "@clock:";
-            public static string Reset = "@reset:";
-            public static string PortGroup = "@portgroup:";
-            public static string Discard = "@discard:";
+            public string Synchronized = "@sync";
+            public string Clock = "@clock";
+            public string Reset = "@reset";
+            public string PortGroup = "@portgroup";
+            public string Discard = "@discard";
         }
 
         //public new class Setup : CodeEditor2.Data.ProjectProperty.Setup

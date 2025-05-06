@@ -250,15 +250,21 @@ ansi_port_declaration ::=
             Net.NetTypeEnum? prevNetType = null;
             DirectionEnum? prevDirection = null;
 
-            if (ParsePortDeclaration(word, nameSpace, true, ref prevDataType, ref prevNetType, ref prevDirection))
+            Port? definedPort;
+
+            if (ParsePortDeclaration(word, nameSpace, true, ref prevDataType, ref prevNetType, ref prevDirection,out definedPort))
             {
+                if (definedPort != null) checkCommentAnnotation(word, nameSpace, definedPort);
                 if (word.Text != ",") return;
                 word.MoveNext();
+                if (definedPort != null) checkCommentAnnotation(word, nameSpace, definedPort);
                 while (!word.Eof)
                 {
-                    if (!ParsePortDeclaration(word, nameSpace, false, ref prevDataType, ref prevNetType, ref prevDirection)) return;
+                    if (!ParsePortDeclaration(word, nameSpace, false, ref prevDataType, ref prevNetType, ref prevDirection, out definedPort)) return;
+                    if(definedPort!=null) checkCommentAnnotation(word, nameSpace, definedPort);
                     if (word.Text != ",") return;
                     word.MoveNext();
+                    if (definedPort != null) checkCommentAnnotation(word, nameSpace, definedPort);
                 }
             }
             else if(!nameSpace.BuildingBlock.AnsiStylePortDefinition)
@@ -268,6 +274,71 @@ ansi_port_declaration ::=
                     if (!ParseNonAnsiPortDeclaration(word, nameSpace)) return;
                     if (word.Text != ",") return;
                     word.MoveNext();
+                }
+            }
+        }
+
+        private static void checkCommentAnnotation(WordScanner word, NameSpace nameSpace,Port port)
+        {
+            string commentText = word.GetFollowedComment();
+            if (commentText.Contains(word.ProjectProperty.AnnotationCommands.Synchronized))
+            {
+                var comment = word.GetCommentScanner();
+                while (!comment.EOC)
+                {
+                    if(comment.Text == word.ProjectProperty.AnnotationCommands.Synchronized)
+                    {
+                        comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                        comment.MoveNext();
+                        if (comment.Text == ":")
+                        {
+                            comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                            comment.MoveNext();
+                            port.AppendAnnotation("sync", comment.Text);
+                            comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                            comment.MoveNext();
+                        }
+                    }
+                    else
+                    {
+                        comment.MoveNext();
+                    }
+                }
+            }
+
+            if (commentText.Contains(word.ProjectProperty.AnnotationCommands.Clock))
+            {
+                var scanner = word.GetCommentScanner();
+                while (!scanner.EOC)
+                {
+                    if (scanner.Text == word.ProjectProperty.AnnotationCommands.Clock)
+                    {
+                        scanner.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                        scanner.MoveNext();
+                        port.AppendAnnotation("clock", scanner.Text);
+                    }
+                    else
+                    {
+                        scanner.MoveNext();
+                    }
+                }
+            }
+
+            if (commentText.Contains(word.ProjectProperty.AnnotationCommands.Reset))
+            {
+                var scanner = word.GetCommentScanner();
+                while (!scanner.EOC)
+                {
+                    if (scanner.Text == word.ProjectProperty.AnnotationCommands.Reset)
+                    {
+                        scanner.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                        scanner.MoveNext();
+                        port.AppendAnnotation("reset", scanner.Text);
+                    }
+                    else
+                    {
+                        scanner.MoveNext();
+                    }
                 }
             }
         }
@@ -291,7 +362,7 @@ ansi_port_declaration ::=
             return true;
         }
 
-        private static bool ParsePortDeclaration(WordScanner word, NameSpace nameSpace, bool firstPort, ref IDataType? prevDataType, ref Net.NetTypeEnum? prevNetType, ref DirectionEnum? prevDirection)
+        private static bool ParsePortDeclaration(WordScanner word, NameSpace nameSpace, bool firstPort, ref IDataType? prevDataType, ref Net.NetTypeEnum? prevNetType, ref DirectionEnum? prevDirection,out Port? definedPort)
         {
 
 
@@ -355,6 +426,7 @@ ansi_port_declaration ::=
             data type  = explicit and implicit data type declarations
                          and does not include unpacked dimensions.
              */
+            definedPort = null;
 
             BuildingBlock buildingBlock = nameSpace.BuildingBlock;
             DirectionEnum? direction = null;
@@ -518,7 +590,9 @@ ansi_port_declaration ::=
 //                Interface interface_instance = interface_ .
             }
 
+
             addPort(word, nameSpace, port);
+            definedPort = port;
 
             if(port.DataObject != null)
             {
@@ -552,7 +626,7 @@ ansi_port_declaration ::=
             while (!word.Eof && word.Text == "[")
             {
                 Verilog.DataObjects.Arrays.VariableArray? dimension = Verilog.DataObjects.Arrays.UnPackedArray.ParseCreate(word, nameSpace);
-                if(dimension != null)
+                if(dimension != null && port.DataObject != null)
                 {
                     port.DataObject.Dimensions.Add(dimension);
                 }
