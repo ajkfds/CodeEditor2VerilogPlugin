@@ -171,13 +171,17 @@ number
                         return Cast.ParseCreate(word, nameSpace);
                     }
 
-                    Primary? primary = searchNameSpace(word, nameSpace, nameSpace, lValue);
-
-                    if(General.ListOfKeywords.Contains(word.Text))
+                    // keyword
+                    if (General.ListOfKeywords.Contains(word.Text))
                     {
                         return null;
                     }
 
+                    // variable reference
+                    Primary? primary = searchNameSpace(word, nameSpace, nameSpace, lValue);
+                    if (primary != null) return primary;
+
+                    // implicit net declaration
                     if (General.IsIdentifier(word.Text))
                     {
                         Net net = DataObjects.Nets.Net.Create(word.Text, DataObjects.Nets.Net.NetTypeEnum.Wire, null);
@@ -187,9 +191,10 @@ number
                         word.ApplyProtorypeRule(word.ProjectProperty.RuleSet.ImplicitNetDeclaretion);
 
                         primary = searchNameSpace(word, nameSpace, nameSpace, lValue);
+                        return primary;
                     }
 
-                    return primary;
+                    return null;
             }
             return null;
         }
