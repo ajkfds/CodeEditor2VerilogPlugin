@@ -78,11 +78,6 @@ namespace pluginVerilog.Verilog.Expressions
         }
 
 
-        public new static VariableReference ParseCreate(WordScanner word, INamedElement nameSpace)
-        {
-            throw new Exception("illegal access");
-        }
-
         public static VariableReference Create(DataObjects.Variables.Variable variable,NameSpace nameSpace)
         {
             VariableReference val = new VariableReference()
@@ -123,6 +118,11 @@ namespace pluginVerilog.Verilog.Expressions
             {
                 val.Variable.UsedReferences.Add(word.GetReference());
             }
+            if (val.Variable.CommentAnnotation_Discarded)
+            {
+                word.AddError("Disarded.");
+            }
+
             word.MoveNext();
 
             // parse dimensions

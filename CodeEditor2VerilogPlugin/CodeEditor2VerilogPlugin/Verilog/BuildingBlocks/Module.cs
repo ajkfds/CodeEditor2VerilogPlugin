@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using CodeEditor2.CodeEditor.CodeComplete;
+using pluginVerilog.Verilog.Items;
 using pluginVerilog.Verilog.ModuleItems;
 using Splat.ModeDetection;
 
@@ -289,6 +290,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                             word.MoveNext();
                         }
                     }
+                    CommentAnnotationItem.Parse(word, module);
                 }
                 //parseModuleItems(word, module);
                 break;

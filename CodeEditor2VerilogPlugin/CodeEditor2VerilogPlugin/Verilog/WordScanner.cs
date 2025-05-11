@@ -154,6 +154,11 @@ namespace pluginVerilog.Verilog
         {
             return wordPointer.GetCommentScanner();
         }
+
+        public CommentScanner GetPreviousCommentScanner()
+        {
+            return wordPointer.GetPreviousCommentScanner();
+        }
         public WordReference GetReference()
         {
             return CrateWordReference();
@@ -341,6 +346,10 @@ namespace pluginVerilog.Verilog
         public string GetFollowedComment()
         {
             return wordPointer.GetFollowedComment();
+        }
+        public string GetPreviousComment()
+        {
+            return wordPointer.GetPreviousComment();
         }
 
         private void recheckWord()

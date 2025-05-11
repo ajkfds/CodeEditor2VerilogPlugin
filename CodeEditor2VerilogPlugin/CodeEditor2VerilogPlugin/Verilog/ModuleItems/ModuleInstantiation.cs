@@ -1023,16 +1023,16 @@ namespace pluginVerilog.Verilog.ModuleItems
             sb.Append(" (\r\n");
 
             first = true;
-            string? sectionName = null;
+            string? portGroup = null;
             foreach (var port in instancedModule.Ports.Values)
             {
                 if (!first) sb.Append(",\r\n");
 
-                if(port.SectionName != sectionName && sectionName != "")
+                if(port.PortGroupName != portGroup && portGroup != "")
                 {
-                    sectionName = port.SectionName;
+                    portGroup = port.PortGroupName;
                     sb.Append("// ");
-                    sb.Append(sectionName);
+                    sb.Append(portGroup);
                     sb.Append("\r\n");
                 }
                 sb.Append(indent);

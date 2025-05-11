@@ -43,6 +43,7 @@ namespace pluginVerilog.Verilog.DataObjects
         // 
         public virtual CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Normal; } }
 
+        public bool CommentAnnotation_Discarded = false;
         public NamedElements NamedElements { get; } = new NamedElements();
         public static DataObject Create(string name,DataTypes.IDataType dataType)
         {

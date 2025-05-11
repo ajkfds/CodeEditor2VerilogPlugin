@@ -587,16 +587,16 @@ namespace pluginVerilog.Verilog.DataObjects
             sb.Append(" (\r\n");
 
             first = true;
-            string sectionName = null;
+            string? portGroupName = null;
             foreach (var port in instancedModule.Ports.Values)
             {
                 if (!first) sb.Append(",\r\n");
 
-                if (port.SectionName != sectionName)
+                if (port.PortGroupName != portGroupName)
                 {
-                    sectionName = port.SectionName;
+                    portGroupName = port.PortGroupName;
                     sb.Append("// ");
-                    sb.Append(sectionName);
+                    sb.Append(portGroupName);
                     sb.Append("\r\n");
                 }
                 sb.Append(indent);

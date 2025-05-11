@@ -79,81 +79,11 @@ namespace pluginVerilog
             public string Reset = "@reset";
             public string PortGroup = "@portgroup";
             public string Discard = "@discard";
+            public string Unused = "@unused";
+            public string RefInstance = "@ref_instance";
+            public string Markdown = "@markdown";
+            public string ToolOption = "@tool_option";
         }
-
-        //public new class Setup : CodeEditor2.Data.ProjectProperty.Setup
-        //{
-        //    public Setup(CodeEditor2.Data.ProjectProperty projectProperty) : base(projectProperty)
-        //    {
-
-        //    }
-
-        //    public override string ID { get => Plugin.StaticID;  }
-
-        //    [JsonInclude]
-        //    string Name = "VerilogPulgin";
-
-
-        //}
-
-        //public override void AddJsonConverter(JsonSerializerOptions options)
-        //{
-        //    options.Converters.Add(new ProjectPropertyJsonConverter());
-        //}
-        //public class ProjectPropertyJsonConverter : JsonConverter<CodeEditor2.Data.ProjectPropertySetup>
-        //{
-        //    public override ProjectPropertySetup Read(
-        //        ref Utf8JsonReader reader,
-        //        Type typeToConvert,
-        //        JsonSerializerOptions options)
-        //    {
-        //        return (ProjectPropertySetup)JsonSerializer.Deserialize(ref reader, typeof(ProjectPropertySetup), options);
-        //    }
-
-        //    public override void Write(
-        //        Utf8JsonWriter writer,
-        //        ProjectPropertySetup value,
-        //        JsonSerializerOptions options)
-        //    {
-        //        ProjectPropertySetup val = value as ProjectPropertySetup;
-        //        JsonSerializer.Serialize(writer, value as ProjectPropertySetup, typeof(pluginVerilog.ProjectProperty.Setup), options);
-        //    }
-        //}
-
-        //public override void SaveSetup(JsonWriter writer)
-        //{
-        //    using (var macroWriter = writer.GetObjectWriter("Macros"))
-        //    {
-        //        foreach (var kvp in Macros)
-        //        {
-        //            macroWriter.writeKeyValue(kvp.Key, kvp.Value.MacroText);
-        //        }
-        //    }
-        //}
-
-        // VerilogModuleParsedData
-        //public override void LoadSetup(JsonReader jsonReader)
-        //{
-        //    Macros.Clear();
-        //    using(var reader = jsonReader.GetNextObjectReader())
-        //    {
-        //        while (true)
-        //        {
-        //            string key = reader.GetNextKey();
-        //            if (key == null) break;
-
-        //            switch (key)
-        //            {
-        //                case "Macros":
-        //                    loadMacros(reader);
-        //                    break;
-        //                default:
-        //                    reader.SkipValue();
-        //                    break;
-        //            }
-        //        }
-        //    }
-        //}
 
         public BuildingBlock? GetInstancedBuildingBlock(IBuildingBlockInstantiation instantiation)
         {
@@ -606,10 +536,6 @@ namespace pluginVerilog
 
         };
 
-        public Dictionary<string, Action<Verilog.WordScanner>?> InCommentTags = new Dictionary<string, Action<Verilog.WordScanner>?>
-        {
-            { "@section",null }
-        };
 
     }
 }
