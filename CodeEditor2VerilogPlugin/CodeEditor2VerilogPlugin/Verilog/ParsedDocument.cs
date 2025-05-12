@@ -22,7 +22,7 @@ namespace pluginVerilog.Verilog
 {
     public class ParsedDocument : CodeEditor2.CodeEditor.ParsedDocument
     {
-        public ParsedDocument(Data.IVerilogRelatedFile file, IndexReference? indexReference, DocumentParser.ParseModeEnum parseMode) : base((CodeEditor2.Data.TextFile)file,file.CodeDocument.Version,parseMode)
+        public ParsedDocument(Data.IVerilogRelatedFile file, IndexReference? indexReference, DocumentParser.ParseModeEnum parseMode) : base((CodeEditor2.Data.TextFile)file, getCodeDocument(file).Version,parseMode)
         {
             CodeDocument? document = file.CodeDocument as CodeDocument;
             if (document == null) throw new Exception();
@@ -48,6 +48,17 @@ namespace pluginVerilog.Verilog
                 tagCount++;
             }
             id = file.ID;
+        }
+
+        private static CodeDocument getCodeDocument(Data.IVerilogRelatedFile file)
+        {
+            CodeDocument? codeDocument;
+            codeDocument = file.CodeDocument as CodeDocument;
+            if(codeDocument == null)
+            {
+                System.Diagnostics.Debugger.Break();
+            }
+            return codeDocument;
         }
 
 
