@@ -95,6 +95,7 @@ namespace pluginVerilog.Verilog
 
         private void getNext()
         {
+            if (EOC) return;
             index = indexEnd;
             char ch;
 

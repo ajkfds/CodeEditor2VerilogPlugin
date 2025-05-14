@@ -381,10 +381,13 @@ namespace pluginVerilog.Verilog
                     DataObject? dataObject = space.NamedElements.GetDataObject(text);
                     if (dataObject != null) dataObject.AppendLabel(ret);
                 }
-                else if(space.Parent != null)
+                else if (space.Parent != null)
                 {
                     DataObject? dataObject = space.Parent.NamedElements.GetDataObject(text);
                     if (dataObject != null) dataObject.AppendLabel(ret);
+                }else if (Macros.ContainsKey(text))
+                {
+                    Macros[text].AppendLabel(ret, Macros);
                 }
             }
 

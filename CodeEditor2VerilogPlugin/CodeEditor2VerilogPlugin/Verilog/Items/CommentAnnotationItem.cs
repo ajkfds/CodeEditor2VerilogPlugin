@@ -13,7 +13,7 @@ namespace pluginVerilog.Verilog.Items
         {
             if (!word.GetPreviousComment().Contains("@")) return;
 
-            CommentScanner comment = word.GetCommentScanner();
+            CommentScanner comment = word.GetPreviousCommentScanner();
             while (!comment.EOC)
             {
                 if (comment.Text.StartsWith("@"))
