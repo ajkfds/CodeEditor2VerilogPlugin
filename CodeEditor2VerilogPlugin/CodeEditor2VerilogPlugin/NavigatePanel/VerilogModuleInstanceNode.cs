@@ -8,6 +8,7 @@ using pluginVerilog.Verilog.BuildingBlocks;
 using Avalonia.Media;
 using System.Security.AccessControl;
 using Avalonia.Threading;
+using Avalonia.Controls;
 
 namespace pluginVerilog.NavigatePanel
 {
@@ -16,6 +17,14 @@ namespace pluginVerilog.NavigatePanel
         public VerilogModuleInstanceNode(Data.VerilogModuleInstance verilogModuleInstance) : base(verilogModuleInstance)
         {
             moduleInstanceRef = new WeakReference<Data.VerilogModuleInstance>(verilogModuleInstance);
+        }
+        static VerilogModuleInstanceNode()
+        {
+            CustomizeNavigateNodeContextMenu += CustomizeNavigateNodeContextMenuHandler;
+        }
+        public static void CustomizeNavigateNodeContextMenuHandler(ContextMenu contextMenu)
+        {
+            NavigatePanelMenu.Customize(contextMenu);
         }
 
         private System.WeakReference<Data.VerilogModuleInstance> moduleInstanceRef;
@@ -59,7 +68,6 @@ namespace pluginVerilog.NavigatePanel
                 return ModuleInstance.SourceTextFile as Data.VerilogFile;
             }
         }
-
         public Data.VerilogModuleInstance? VerilogModuleInstance
         {
             get
@@ -74,8 +82,7 @@ namespace pluginVerilog.NavigatePanel
 
         public override async void OnSelected()
         {
-            //var menu = CodeEditor2.Controller.NavigatePanel.GetContextMenuStrip();
-            //if (menu.Items.ContainsKey("openWithExploererTsmi")) menu.Items["openWithExploererTsmi"].Visible = true;
+            base.OnSelected(); // update context enu
 
             if (ModuleInstance == null)
             {

@@ -17,8 +17,6 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
     public class Constants : DataObject
     {
         public required Expressions.Expression Expression { get; set; }
-        public required WordReference DefinitionRefrecnce { get; set; }
-
         public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Parameter; } }
 
         public enum ConstantTypeEnum
@@ -218,13 +216,13 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                                 switch (constantType)
                                 {
                                     case ConstantTypeEnum.localparam:
-                                        constants = new Localparam() { Name = identifier, Expression = expression, DefinitionRefrecnce= nameReference };
+                                        constants = new Localparam() { Name = identifier, Expression = expression, DefinedReference = nameReference };
                                         break;
                                     case ConstantTypeEnum.parameter:
-                                        constants = new Parameter() { Name = identifier, Expression = expression, DefinitionRefrecnce = nameReference };
+                                        constants = new Parameter() { Name = identifier, Expression = expression, DefinedReference = nameReference };
                                         break;
                                     case ConstantTypeEnum.specparam:
-                                        constants = new Specparam() { Name = identifier, Expression = expression, DefinitionRefrecnce = nameReference };
+                                        constants = new Specparam() { Name = identifier, Expression = expression, DefinedReference = nameReference };
                                         break;
                                     default:
                                         System.Diagnostics.Debugger.Break();
@@ -350,13 +348,13 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                 switch (constantType)
                 {
                     case ConstantTypeEnum.localparam:
-                        constants = new Localparam() { Name = identifier, DefinitionRefrecnce = nameReference, Expression= expression };
+                        constants = new Localparam() { Name = identifier, DefinedReference = nameReference, Expression= expression };
                         break;
                     case ConstantTypeEnum.parameter:
-                        constants = new Parameter() { Name = identifier, DefinitionRefrecnce = nameReference, Expression = expression };
+                        constants = new Parameter() { Name = identifier, DefinedReference = nameReference, Expression = expression };
                         break;
                     case ConstantTypeEnum.specparam:
-                        constants = new Specparam() { Name = identifier, DefinitionRefrecnce = nameReference, Expression = expression };
+                        constants = new Specparam() { Name = identifier, DefinedReference = nameReference, Expression = expression };
                         break;
                     default:
                         System.Diagnostics.Debugger.Break();
@@ -410,7 +408,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
 
         public override DataObject Clone()
         {
-            return new Constants { DefinitionRefrecnce = DefinitionRefrecnce, Expression = Expression, Name = Name };
+            return new Constants { DefinedReference = DefinedReference, Expression = Expression, Name = Name };
         }
     }
 }

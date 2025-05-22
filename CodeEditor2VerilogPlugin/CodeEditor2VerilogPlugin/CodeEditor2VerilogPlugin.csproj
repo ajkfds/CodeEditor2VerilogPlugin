@@ -13,6 +13,14 @@
     <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
 
+  
+  <ItemGroup>
+    <AvaloniaXaml Remove="NavigatePanel\NewFolder\**" />
+    <Compile Remove="NavigatePanel\NewFolder\**" />
+    <EmbeddedResource Remove="NavigatePanel\NewFolder\**" />
+    <None Remove="NavigatePanel\NewFolder\**" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.2.3" />
     <PackageReference Include="Avalonia.Controls.TreeDataGrid" Version="11.1.1" />

@@ -10,16 +10,32 @@ using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using pluginVerilog.Verilog.BuildingBlocks;
+using System.Security.Cryptography.X509Certificates;
 
 namespace pluginVerilog.NavigatePanel
 {
     public static class NavigatePanelMenu
     {
-        public static void Register()
+        public static void Customize(ContextMenu contextMenu)
         {
-            MenuItem? menuItem_Add = CodeEditor2.Controller.NavigatePanel.GetContextMenuItem(new List<string> { "Add" });
-            if (menuItem_Add == null) return;
+            MenuItem? menuItem_Add = contextMenu.Items.FirstOrDefault(m =>
+            {
+                if (m is not MenuItem) return false;
+                MenuItem? menuItem = m as MenuItem;
+                if (menuItem == null) return false;
+                if (menuItem.Header is string && (string)menuItem.Header == "Add") return true;
+                return false;
+            }) as MenuItem;
 
+            if(menuItem_Add == null)
+            {
+                menuItem_Add = CodeEditor2.Global.CreateMenuItem(
+                    "Add", "MenuItem_Add"
+                    );
+                contextMenu.Items.Add(menuItem_Add);
+            }
+
+            if (menuItem_Add == null) return;
             {
                 MenuItem menuItem_AddFile = CodeEditor2.Global.CreateMenuItem("verilog module", "MenuItem_AddVerilogModule",
                     "CodeEditor2VerilogPlugin/Assets/Icons/verilogDocument.svg",

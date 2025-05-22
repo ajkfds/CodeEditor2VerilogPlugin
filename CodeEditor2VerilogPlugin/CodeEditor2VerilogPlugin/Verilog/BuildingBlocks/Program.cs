@@ -266,13 +266,13 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         if (program.NamedElements.ContainsKey(vkp.Key) && program.NamedElements[vkp.Key] is DataObjects.Constants.Constants)
                         {
                             DataObjects.Constants.Constants constants = (DataObjects.Constants.Constants)program.NamedElements[vkp.Key];
-                            if (constants.DefinitionRefrecnce != null)
+                            if (constants.DefinedReference != null)
                             {
-                                constants.DefinitionRefrecnce.AddHint("override " + vkp.Value.Value.ToString());
+                                constants.DefinedReference.AddHint("override " + vkp.Value.Value.ToString());
                             }
 
                             program.NamedElements.Remove(vkp.Key);
-                            DataObjects.Constants.Parameter param = new DataObjects.Constants.Parameter() { Name = vkp.Key, DefinitionRefrecnce=vkp.Value.Reference, Expression=vkp.Value };
+                            DataObjects.Constants.Parameter param = new DataObjects.Constants.Parameter() { Name = vkp.Key, DefinedReference = vkp.Value.Reference, Expression=vkp.Value };
                             program.NamedElements.Add(param.Name, param);
                         }
                         else

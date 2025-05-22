@@ -16,6 +16,7 @@ using CodeEditor2.Data;
 using CodeEditor2.Tools;
 using DynamicData;
 using pluginVerilog.CodeEditor;
+using pluginVerilog.Data.VerilogCommon;
 using pluginVerilog.Verilog.BuildingBlocks;
 using Splat;
 
@@ -41,6 +42,10 @@ namespace pluginVerilog.Data
             return fileItem;
         }
 
+        static VerilogFile()
+        {
+            CustomizeItemEditorContextMenu += (x => EditorContextMenu.CustomizeEditorContextMenu(x));
+        }
 
         public static VerilogFile CreateSystemVerilog(string relativePath, CodeEditor2.Data.Project project)
         {
@@ -101,6 +106,7 @@ namespace pluginVerilog.Data
             }
             protected set
             {
+                if (value is not pluginVerilog.CodeEditor.CodeDocument) throw new Exception();
                 document = value as CodeEditor2.CodeEditor.CodeDocument;
             }
         }

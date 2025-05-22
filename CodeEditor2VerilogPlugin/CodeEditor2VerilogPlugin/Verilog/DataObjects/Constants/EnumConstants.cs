@@ -10,7 +10,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
     {
         public static EnumConstants Create(string name,DataTypes.IDataType dataType,WordReference definitionReference, Expressions.Expression expression)
         {
-            EnumConstants constants = new EnumConstants() { Name = name, DefinitionRefrecnce = definitionReference, Expression = expression };
+            EnumConstants constants = new EnumConstants() { Name = name, DefinedReference = definitionReference, Expression = expression };
             constants.DataType = dataType;
             constants.ConstantType = ConstantTypeEnum.enum_;
             return constants;

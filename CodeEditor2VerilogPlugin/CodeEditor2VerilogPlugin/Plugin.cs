@@ -92,19 +92,6 @@ namespace pluginVerilog
                 menuItem.Items.Add(newMenuItem);
                 newMenuItem.Click += MenuItem_CreateSnapShot_Click;
             }
-
-
-            ContextMenu contextMenu = Controller.NavigatePanel.GetContextMenu();
-            {
-                //MenuItem menuItem_RunSimulation = CodeEditor2.Global.CreateMenuItem("Run Simulation", "menuItem_RunSimulation","play",Avalonia.Media.Colors.Red);
-                //contextMenu.Items.Add(menuItem_RunSimulation);
-                //menuItem_RunSimulation.Click += MenuItem_RunSimulation_Click;
-            }
-            // register project property form tab
-            //            CodeEditor.Tools.ProjectPropertyForm.FormCreated += Tools.ProjectPropertyTab.ProjectPropertyFromCreated;
-
-            NavigatePanel.NavigatePanelMenu.Register();
-
             return true;
         }
         private void MenuItem_CreateSnapShot_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)

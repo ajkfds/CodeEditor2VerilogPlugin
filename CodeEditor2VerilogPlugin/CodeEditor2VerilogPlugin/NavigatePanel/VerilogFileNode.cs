@@ -13,17 +13,28 @@ using System.Diagnostics.CodeAnalysis;
 using DynamicData;
 using pluginVerilog.Data;
 using pluginVerilog.FileTypes;
+using Avalonia.Controls;
 
 namespace pluginVerilog.NavigatePanel
 {
     public class VerilogFileNode : CodeEditor2.NavigatePanel.FileNode, IVerilogNavigateNode
     {
+        static VerilogFileNode()
+        {
+            CustomizeNavigateNodeContextMenu += CustomizeNavigateNodeContextMenuHandler;
+        }
+        public static void CustomizeNavigateNodeContextMenuHandler(ContextMenu contextMenu)
+        {
+            NavigatePanelMenu.Customize(contextMenu);
+        }
+
         [SetsRequiredMembers]
         public VerilogFileNode(Data.VerilogFile verilogFile) : base(verilogFile)
         {
             UpdateVisual();
             if (NodeCreated != null) NodeCreated(this);
         }
+
         public static Action<VerilogFileNode>? NodeCreated;
 
         public Action? NodeSelected;
@@ -48,13 +59,7 @@ namespace pluginVerilog.NavigatePanel
 
         public override async void OnSelected()
         {
-            // activate navigate panel context menu
-            //var menu = CodeEditor2.Controller.NavigatePanel.GetContextMenuStrip();
-            //if (menu.Items.ContainsKey("openWithExploererTsmi")) menu.Items["openWithExploererTsmi"].Visible = true;
-            //if (menu.Items.ContainsKey("icarusVerilogTsmi")) menu.Items["icarusVerilogTsmi"].Visible = true;
-            //if (menu.Items.ContainsKey("VerilogDebugTsmi")) menu.Items["VerilogDebugTsmi"].Visible = true;
-
-            //            System.Diagnostics.Debug.Print("## VerilogFileNode.OnSelected");
+            base.OnSelected(); // update context menu
 
             if(TextFile == null)
             {
@@ -71,6 +76,7 @@ namespace pluginVerilog.NavigatePanel
                 }
                 else
                 {
+                    // Hierarchy parse (non-async)
                     CodeEditor2.Global.StopBackGroundParse = true;
                     await parseHierarchy();
                     CodeEditor2.Global.StopBackGroundParse = false;
@@ -101,6 +107,7 @@ namespace pluginVerilog.NavigatePanel
             VerilogFile.Update();
             UpdateVisual();
         }
+
 
         public override void UpdateVisual()
         {
