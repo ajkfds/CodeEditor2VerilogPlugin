@@ -4,6 +4,7 @@ using CodeEditor2.CodeEditor.Parser;
 using CodeEditor2.CodeEditor.PopupHint;
 using ExCSS;
 using pluginVerilog.CodeEditor;
+using pluginVerilog.NavigatePanel;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.ModuleItems;
@@ -49,6 +50,28 @@ namespace pluginVerilog.Verilog
             }
             id = file.ID;
         }
+
+        //private WeakReference<IVerilogNavigateNode>? refNavigateNode = null;
+        //public IVerilogNavigateNode? NavigateNodeWeakRef
+        //{
+        //    get
+        //    {
+        //        if (refNavigateNode == null) return null;
+        //        refNavigateNode.TryGetTarget(out IVerilogNavigateNode? target);
+        //        return target;
+        //    }
+        //    set
+        //    {
+        //        if(value == null)
+        //        {
+        //            refNavigateNode = null;
+        //        }
+        //        else
+        //        {
+        //            refNavigateNode = new WeakReference<IVerilogNavigateNode>(value);
+        //        }
+        //    }
+        //}
 
         private static CodeDocument getCodeDocument(Data.IVerilogRelatedFile file)
         {

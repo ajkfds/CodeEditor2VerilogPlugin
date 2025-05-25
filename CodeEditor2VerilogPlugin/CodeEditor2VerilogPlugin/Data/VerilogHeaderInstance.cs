@@ -9,6 +9,7 @@ using CodeEditor2.CodeEditor.Parser;
 using CodeEditor2.CodeEditor.PopupHint;
 using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
+using pluginVerilog.Data.VerilogCommon;
 using pluginVerilog.Verilog;
 using pluginVerilog.Verilog.ModuleItems;
 using static CodeEditor2.Controller;
@@ -58,6 +59,10 @@ namespace pluginVerilog.Data
             instance.InstancedReference = instancedReference;
 
             return instance;
+        }
+        static VerilogHeaderInstance()
+        {
+            CustomizeItemEditorContextMenu += (x => EditorContextMenu.CustomizeEditorContextMenu(x));
         }
         public IVerilogRelatedFile RootFile { get; protected set; }
         public IndexReference InstancedReference { get; protected set; }

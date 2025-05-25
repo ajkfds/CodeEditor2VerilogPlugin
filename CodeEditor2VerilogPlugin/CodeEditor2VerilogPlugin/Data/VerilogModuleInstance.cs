@@ -9,6 +9,7 @@ using CodeEditor2.CodeEditor.Parser;
 using CodeEditor2.CodeEditor.PopupHint;
 using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
+using pluginVerilog.Data.VerilogCommon;
 using pluginVerilog.Verilog.BuildingBlocks;
 
 namespace pluginVerilog.Data
@@ -54,6 +55,10 @@ namespace pluginVerilog.Data
                 if (vFile.SystemVerilog) fileItem.SystemVerilog = true;
             }
             return fileItem;
+        }
+        static VerilogModuleInstance()
+        {
+            CustomizeItemEditorContextMenu += (x => EditorContextMenu.CustomizeEditorContextMenu(x));
         }
         public bool SystemVerilog { get; set; } = false;
         public string InstanceId

@@ -18,15 +18,6 @@ namespace pluginVerilog.NavigatePanel
         {
             moduleInstanceRef = new WeakReference<Data.VerilogModuleInstance>(verilogModuleInstance);
         }
-        static VerilogModuleInstanceNode()
-        {
-            CustomizeNavigateNodeContextMenu += CustomizeNavigateNodeContextMenuHandler;
-        }
-        public static void CustomizeNavigateNodeContextMenuHandler(ContextMenu contextMenu)
-        {
-            NavigatePanelMenu.Customize(contextMenu);
-        }
-
         private System.WeakReference<Data.VerilogModuleInstance> moduleInstanceRef;
         public Data.VerilogModuleInstance? ModuleInstance
         {
