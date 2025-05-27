@@ -44,7 +44,7 @@ namespace pluginVerilog.Data.VerilogCommon
                     "CodeEditor2VerilogPlugin/Assets/Icons/ArrowRightBend.svg",
                     Avalonia.Media.Color.FromArgb(100, 200, 200, 255)
                     );
-                menuItem_GoToDriver.Click += MenuItem_GoToDefinition_Click;
+                menuItem_GoToDriver.Click += MenuItem_GoToDriver_Click;
                 contextMenu.Items.Add(menuItem_GoToDriver);
                 if (!TryGetGotoDriver(out _, out _))
                 {
