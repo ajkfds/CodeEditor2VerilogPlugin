@@ -16,7 +16,6 @@ using CodeEditor2.Data;
 using CodeEditor2.Tools;
 using DynamicData;
 using pluginVerilog.CodeEditor;
-using pluginVerilog.Data.VerilogCommon;
 using pluginVerilog.Verilog.BuildingBlocks;
 using Splat;
 

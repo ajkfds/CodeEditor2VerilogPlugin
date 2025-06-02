@@ -9,7 +9,7 @@ using CodeEditor2.CodeEditor.Parser;
 using CodeEditor2.CodeEditor.PopupHint;
 using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
-using pluginVerilog.Data.VerilogCommon;
+using pluginVerilog.CodeEditor;
 using pluginVerilog.Verilog.BuildingBlocks;
 
 namespace pluginVerilog.Data
