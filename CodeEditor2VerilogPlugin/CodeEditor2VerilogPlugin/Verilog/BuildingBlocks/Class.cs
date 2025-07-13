@@ -64,7 +64,9 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         }
         public static void ParseDeclaration(WordScanner word, NameSpace nameSpace)
         {
-            Class class_ = Create(word, nameSpace);
+            Class? class_ = Create(word, nameSpace);
+            if (class_ == null) return;
+
             if (word.Prototype)
             {
                 if (!nameSpace.NamedElements.ContainsKey(class_.Name))

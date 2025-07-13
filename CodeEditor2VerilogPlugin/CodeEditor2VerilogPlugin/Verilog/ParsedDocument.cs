@@ -341,14 +341,14 @@ namespace pluginVerilog.Verilog
             NameSpace? space = iref.RootParsedDocument.Root;
             if (space == null) return null;
 
-            foreach (BuildingBlock module in root.BuldingBlocks.Values)
+            foreach (BuildingBlock buildingBlock in root.BuldingBlocks.Values)
             {
-                if (module.BeginIndexReference == null) continue;
-                if (module.LastIndexReference == null) continue;
+                if (buildingBlock.BeginIndexReference == null) continue;
+                if (buildingBlock.LastIndexReference == null) continue;
 
-                if (iref.IsSmallerThan(module.BeginIndexReference)) continue;
-                if (iref.IsGreaterThan(module.LastIndexReference)) continue;
-                space = module.GetHierarchyNameSpace(iref);
+                if (iref.IsSmallerThan(buildingBlock.BeginIndexReference)) continue;
+                if (iref.IsGreaterThan(buildingBlock.LastIndexReference)) continue;
+                space = buildingBlock.GetHierarchyNameSpace(iref);
                 break;
             }
 

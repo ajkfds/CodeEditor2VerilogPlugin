@@ -1,4 +1,5 @@
 ﻿using pluginVerilog.Verilog.DataObjects.DataTypes;
+using pluginVerilog.Verilog.ModuleItems;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,26 @@ namespace pluginVerilog.Verilog
     {
         private List<INamedElement> itemList = new List<INamedElement>();
         private Dictionary<string, INamedElement> itemDict = new Dictionary<string, INamedElement>();
+
+        public bool TryGetValue(string key, out INamedElement? namedElement)
+        {
+            if (!itemDict.TryGetValue(key, out namedElement))
+            {
+                return false;
+            }
+            return true;
+        }
+
+        public bool TryGetModuleInstantiation(string key, out ModuleInstantiation? moduleInstantiation)
+        {
+            moduleInstantiation = null;
+            if (!itemDict.TryGetValue(key, out INamedElement? namedElement))
+            {
+                moduleInstantiation = namedElement as ModuleInstantiation;
+                return false;
+            }
+            return true;
+        }
 
         public void Add(string key, INamedElement item)
         {

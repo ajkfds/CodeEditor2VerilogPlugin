@@ -182,13 +182,16 @@ number
                     if (primary != null) return primary;
 
                     // implicit net declaration
-                    if (General.IsIdentifier(word.Text))
+                    if (General.IsIdentifier(word.Text)
+                        && !General.ListOfKeywords.Contains(word.Text)
+                        && nameSpace.GetNamedElementUpward(word.Text) == null
+                        )
                     {
                         Net net = DataObjects.Nets.Net.Create(word.Text, DataObjects.Nets.Net.NetTypeEnum.Wire, null);
                         net.DefinedReference = word.GetReference();
 
                         nameSpace.NamedElements.Add(net.Name, net);
-                        word.ApplyProtorypeRule(word.ProjectProperty.RuleSet.ImplicitNetDeclaretion);
+                        word.ApplyPrototypeRule(word.ProjectProperty.RuleSet.ImplicitNetDeclaretion);
 
                         primary = searchNameSpace(word, nameSpace, nameSpace, lValue);
                         return primary;

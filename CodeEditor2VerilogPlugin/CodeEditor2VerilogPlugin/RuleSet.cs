@@ -16,5 +16,13 @@ namespace pluginVerilog
             Description = "Implicit net declaration. It is recommended to declare the net type explicitly."
         };
 
+        public Rule AssignmentBitwidthMismatch = new Rule
+        {
+            Name = "AssignmentBitwidthMismatch",
+            Severity = Rule.SeverityEnum.Warning,
+            Message = "Assignment bitwidth mismatch",
+            Description = "The bitwidth of the left-hand side and right-hand side of an assignment do not match."
+        };
+
     }
 }

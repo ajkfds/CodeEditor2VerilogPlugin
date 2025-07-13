@@ -248,25 +248,38 @@ namespace pluginVerilog.Verilog
             wordPointer.AddHint(message);
         }
 
-        public void ApplyProtorypeRule(Rule rule)
+        public void ApplyPrototypeRule(Rule rule)
+        {
+            ApplyPrototypeRule(rule, "");
+        }
+        public void ApplyPrototypeRule(Rule rule,string message)
+        {
+//            if (!prototype) System.Diagnostics.Debugger.Break();
+            applyRule(rule, message);
+        }
+        public void ApplyRule(Rule rule)
+        {
+            ApplyRule(rule, "");
+        }
+        public void ApplyRule(Rule rule, string message)
+        {
+            if (prototype) return;
+            applyRule(rule,message);
+        }
+        private void applyRule(Rule rule,string message)
         {
             switch (rule.Severity)
             {
                 case Rule.SeverityEnum.Error:
-                    wordPointer.AddError(rule.Message);
+                    wordPointer.AddError(rule.Message + message);
                     break;
                 case Rule.SeverityEnum.Warning:
-                    wordPointer.AddWarning(rule.Message);
+                    wordPointer.AddWarning(rule.Message + message);
                     break;
                 case Rule.SeverityEnum.Notice:
-                    wordPointer.AddNotice(rule.Message);
+                    wordPointer.AddNotice(rule.Message + message);
                     break;
             }
-        }   
-        public void ApplyRule(Rule rule)
-        {
-            if (prototype) return;
-            ApplyProtorypeRule(rule);
         }
 
         public int RootIndex

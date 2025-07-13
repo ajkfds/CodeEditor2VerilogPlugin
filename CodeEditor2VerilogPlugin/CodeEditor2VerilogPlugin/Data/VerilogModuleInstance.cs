@@ -11,6 +11,7 @@ using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
 using pluginVerilog.CodeEditor;
 using pluginVerilog.Verilog.BuildingBlocks;
+using pluginVerilog.Verilog.ModuleItems;
 
 namespace pluginVerilog.Data
 {
@@ -34,7 +35,7 @@ namespace pluginVerilog.Data
             Data.IVerilogRelatedFile? file = projectProperty.GetFileOfBuildingBlock(moduleInstantiation.SourceName);
             if (file == null) return null;
 
-            CodeEditor2.Data.TextFile? textFile = file as CodeEditor2.Data.TextFile;
+           CodeEditor2.Data.TextFile? textFile = file as CodeEditor2.Data.TextFile;
             if (textFile == null) throw new Exception();
             VerilogModuleInstance fileItem = new VerilogModuleInstance(textFile) 
             {
@@ -54,6 +55,8 @@ namespace pluginVerilog.Data
 
                 if (vFile.SystemVerilog) fileItem.SystemVerilog = true;
             }
+
+            fileItem.weakInstantiating = new WeakReference<ModuleInstantiation>(moduleInstantiation);
             return fileItem;
         }
         static VerilogModuleInstance()
@@ -61,6 +64,14 @@ namespace pluginVerilog.Data
             CustomizeItemEditorContextMenu += (x => EditorContextMenu.CustomizeEditorContextMenu(x));
         }
         public bool SystemVerilog { get; set; } = false;
+
+        protected WeakReference<Verilog.ModuleItems.ModuleInstantiation> weakInstantiating;
+        public Verilog.ModuleItems.ModuleInstantiation? GetParentInstanciatiation()
+        {
+            if (weakInstantiating == null) return null;
+            weakInstantiating.TryGetTarget(out var moduleInstantiation);
+            return moduleInstantiation;
+        }
         public string InstanceId
         {
             get
@@ -76,6 +87,19 @@ namespace pluginVerilog.Data
                     sb.Append(",");
                 }
                 return sb.ToString();
+            }
+        }
+
+        public Module? Module
+        {
+            get
+            {
+                if (VerilogParsedDocument?.Root == null) return null;
+                if (VerilogParsedDocument.Root.BuldingBlocks.TryGetValue(ModuleName, out var block))
+                {
+                    return block as Module;
+                }
+                return null;
             }
         }
 
@@ -127,6 +151,7 @@ namespace pluginVerilog.Data
                 vFile.RegisterModuleInstance(this);
             }
 
+            weakInstantiating = new WeakReference<ModuleInstantiation>(moduleInstantiation);
             return true;
         }
 

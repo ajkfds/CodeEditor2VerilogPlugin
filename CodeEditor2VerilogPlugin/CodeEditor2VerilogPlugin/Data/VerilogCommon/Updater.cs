@@ -91,9 +91,10 @@ namespace pluginVerilog.Data.VerilogCommon
             }
         }
 
+
         private static void addSubItemsMultiBuildingBlock(IVerilogRelatedFile item, Dictionary<string, CodeEditor2.Data.Item> newSubItems, CodeEditor2.Data.Item? parent, Project project)
         {
-            if (item.VerilogParsedDocument.Root == null) throw new Exception();
+            if (item.VerilogParsedDocument?.Root == null) throw new Exception();
 
             // add building block instance
             foreach (BuildingBlock buldingBlock in item.VerilogParsedDocument.Root.BuldingBlocks.Values)
@@ -156,7 +157,7 @@ namespace pluginVerilog.Data.VerilogCommon
 
         private static void addSubItemsSingleBuldingBlock(IVerilogRelatedFile item,string? moduleName, Dictionary<string, CodeEditor2.Data.Item> newSubItems, CodeEditor2.Data.Item? parent,Project project)
         {
-            if (item.VerilogParsedDocument.Root == null) throw new Exception();
+            if (item.VerilogParsedDocument?.Root == null) throw new Exception();
 
             // add building block instance
             foreach (BuildingBlock newModule in item.VerilogParsedDocument.Root.BuldingBlocks.Values)

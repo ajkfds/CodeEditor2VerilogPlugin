@@ -179,7 +179,10 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 }
             }
 
-            if (!parsedDocument.Root.BuldingBlocks.ContainsKey(module.Name))
+            if (parsedDocument?.Root == null)
+            {
+
+            }else if (!parsedDocument.Root.BuldingBlocks.ContainsKey(module.Name))
             {
                 parsedDocument.Root.BuldingBlocks.Add(module.Name, module);
                 if (module.ReparseRequested) parsedDocument.ReparseRequested = true;
@@ -189,6 +192,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 word.AddError("duplicated module name");
             }
         }
+
         private static void parsePackage(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
         {
             if (word.Text != "package") System.Diagnostics.Debugger.Break();

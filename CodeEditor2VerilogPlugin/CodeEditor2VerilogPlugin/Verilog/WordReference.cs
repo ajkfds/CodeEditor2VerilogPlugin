@@ -88,6 +88,25 @@ namespace pluginVerilog.Verilog
                 return indexReference.Document;
             }
         }
+        public void ApplyRule(Rule rule)
+        {
+            ApplyRule(rule, "");
+        }
+        public void ApplyRule(Rule rule,string message)
+        {
+            switch (rule.Severity)
+            {
+                case Rule.SeverityEnum.Error:
+                    AddError(rule.Message + message);
+                    break;
+                case Rule.SeverityEnum.Warning:
+                    AddWarning(rule.Message + message);
+                    break;
+                case Rule.SeverityEnum.Notice:
+                    AddNotice(rule.Message + message);
+                    break;
+            }
+        }
 
         public void AddError(string message)
         {

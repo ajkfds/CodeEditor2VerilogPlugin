@@ -56,7 +56,24 @@ namespace pluginVerilog.CodeEditor
                     menuItem_GoToDriver.IsEnabled = false;
                 }
             }
+
+            if (contextMenu.Items.FirstOrDefault(x =>
+            {
+                if (x is MenuItem menuItem && menuItem.Name == "MenuItem_CheckConnection") return true;
+                return false;
+            }) == null)
+            {
+                MenuItem MenuItem_CheckConnection = CodeEditor2.Global.CreateMenuItem(
+                    "Check Connection",
+                    "MenuItem_CheckConnection",
+                    "CodeEditor2VerilogPlugin/Assets/Icons/ArrowRightBend.svg",
+                    Avalonia.Media.Color.FromArgb(100, 200, 200, 255)
+                    );
+                MenuItem_CheckConnection.Click += MenuItem_CheckConnection_Click;
+                contextMenu.Items.Add(MenuItem_CheckConnection);
+            }
         }
+
 
         private static Verilog.DataObjects.DataObject? getDataObject()
         {
@@ -132,6 +149,21 @@ namespace pluginVerilog.CodeEditor
             start = wordRef.Index;
             length = wordRef.Length;
             return true;
+        }
+
+        private static void MenuItem_CheckConnection_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            TextFile? textFile = CodeEditor2.Controller.CodeEditor.GetTextFile();
+            IVerilogRelatedFile? file = textFile as IVerilogRelatedFile;
+            if (file == null) return;
+            Verilog.DataObjects.DataObject? dataObject = getDataObject();
+            if (dataObject == null) return;
+
+            HierarchyConnection hierarchyConnection = new HierarchyConnection(file, dataObject);
+
+
+
+
         }
 
         private static void MenuItem_GoToDefinition_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
