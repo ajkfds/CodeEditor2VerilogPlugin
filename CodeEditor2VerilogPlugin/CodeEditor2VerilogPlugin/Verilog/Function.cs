@@ -25,7 +25,7 @@ namespace pluginVerilog.Verilog
         private List<DataObjects.Port> portsList = new List<DataObjects.Port>();
         public List<DataObjects.Port> PortsList { get { return portsList; } }
 
-        public DataObjects.Variables.Variable ReturnVariable = null;
+        public DataObjects.Variables.Variable? ReturnVariable = null;
 
         public Statements.IStatement Statement;
 
@@ -44,6 +44,14 @@ namespace pluginVerilog.Verilog
         public static void ParseFunctionOrConstructor(WordScanner word, NameSpace nameSpace)
         {
             Parse(word, nameSpace, true);
+        }
+        public virtual void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        {
+            //if (ReturnVariable != null && ReturnVariable.DataType != null) {
+            //    ReturnVariable.DataType.
+            //}
+
+            label.AppendText(Name);
         }
 
         private static void Parse(WordScanner word, NameSpace nameSpace,bool acceptClassConstructor)

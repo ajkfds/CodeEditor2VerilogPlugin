@@ -96,7 +96,6 @@ namespace pluginVerilog.CodeEditor
             NameSpace? nameSpace = parsedDocument.GetNameSpace(iref);
             if (nameSpace == null) return null;
 
-            if (!nameSpace.NamedElements.ContainsDataObject(word)) return null;
             INamedElement? namedElement = nameSpace.GetNamedElementUpward(word);
             if (namedElement == null) return null;
 

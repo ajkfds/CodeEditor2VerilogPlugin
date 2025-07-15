@@ -190,8 +190,11 @@ number
                         Net net = DataObjects.Nets.Net.Create(word.Text, DataObjects.Nets.Net.NetTypeEnum.Wire, null);
                         net.DefinedReference = word.GetReference();
 
-                        nameSpace.NamedElements.Add(net.Name, net);
-                        word.ApplyPrototypeRule(word.ProjectProperty.RuleSet.ImplicitNetDeclaretion);
+                        if (!word.Prototype)
+                        {
+                            nameSpace.NamedElements.Add(net.Name, net);
+                            word.ApplyRule(word.ProjectProperty.RuleSet.ImplicitNetDeclaretion);
+                        }
 
                         primary = searchNameSpace(word, nameSpace, nameSpace, lValue);
                         return primary;

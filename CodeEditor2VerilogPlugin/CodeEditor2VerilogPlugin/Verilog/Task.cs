@@ -68,6 +68,12 @@ namespace pluginVerilog.Verilog
         public List<DataObjects.Port> PortsList { get { return portsList; } }
 
         public Statements.IStatement Statement;
+        public virtual void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        {
+            //            if(ReturnVariable != null && ReturnVariable.DataType != null) ReturnVariable.DataType.
+
+            label.AppendText(Name);
+        }
 
         public static void Parse(WordScanner word, NameSpace nameSpace)
         {

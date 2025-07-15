@@ -341,15 +341,9 @@ namespace pluginVerilog.Verilog
             NameSpace? space = iref.RootParsedDocument.Root;
             if (space == null) return null;
 
-            foreach (BuildingBlock buildingBlock in root.BuldingBlocks.Values)
             {
-                if (buildingBlock.BeginIndexReference == null) continue;
-                if (buildingBlock.LastIndexReference == null) continue;
-
-                if (iref.IsSmallerThan(buildingBlock.BeginIndexReference)) continue;
-                if (iref.IsGreaterThan(buildingBlock.LastIndexReference)) continue;
-                space = buildingBlock.GetHierarchyNameSpace(iref);
-                break;
+                BuildingBlock? buildingBlock = root.GetBuildingBlock(iref);
+                if(buildingBlock != null) space = buildingBlock.GetHierarchyNameSpace(iref);
             }
 
             int count = ret.ItemCount;
@@ -367,18 +361,6 @@ namespace pluginVerilog.Verilog
                     break;
                 }
             }
-
-            //if(space is Module)
-            //{
-            //    Module module = (Module)space;
-            //    List<INamedElement> instantiations = module.NamedElements.Values.FindAll(x => x is IBuildingBlockInstantiation);
-            //    foreach (IBuildingBlockInstantiation instantiation in instantiations)
-            //    {
-            //        if(instantiation.BeginIndexReference.IsGreaterThan(index))
-
-            //        items.Add(newItem(instantiation.Name, CodeDrawStyle.ColorType.Identifier));
-            //    }
-            //}
 
             if (ret.ItemCount != count) return ret;
 
@@ -399,16 +381,30 @@ namespace pluginVerilog.Verilog
 
             if (space != null)
             {
-                if (space.NamedElements.ContainsKey(text))
-                {
-                    DataObject? dataObject = space.NamedElements.GetDataObject(text);
-                    if (dataObject != null) dataObject.AppendLabel(ret);
+                INamedElement? namedElement = space.GetNamedElementUpward(text);
+                if (namedElement != null) { 
+                    if(namedElement is DataObject)
+                    {
+                        ((DataObject)namedElement).AppendLabel(ret);
+                    } else if(namedElement is Function)
+                    {
+                        ((Function)namedElement).AppendLabel(ret) ;
+                    } else if(namedElement is Task)
+                    {
+                        ((Task)namedElement).AppendLabel(ret);
+                    }
                 }
-                else if (space.Parent != null)
-                {
-                    DataObject? dataObject = space.Parent.NamedElements.GetDataObject(text);
-                    if (dataObject != null) dataObject.AppendLabel(ret);
-                }else if (Macros.ContainsKey(text))
+
+                //if (space.NamedElements.ContainsKey(text))
+                //{
+                //    DataObject? dataObject = space.NamedElements.GetDataObject(text);
+                //    if (dataObject != null) dataObject.AppendLabel(ret);
+                //}
+                //else if (space.Parent != null)
+                //{
+                //    DataObject? dataObject = space.Parent.NamedElements.GetDataObject(text);
+                //    if (dataObject != null) dataObject.AppendLabel(ret);
+                if (Macros.ContainsKey(text))
                 {
                     Macros[text].AppendLabel(ret, Macros);
                 }

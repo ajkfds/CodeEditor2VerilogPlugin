@@ -63,7 +63,6 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                     break;
                 default:
                     throw new Exception();
-                    break;
             }
             label.AppendText(" ");
             if (Signed)

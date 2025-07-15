@@ -41,7 +41,7 @@ namespace pluginVerilog.Verilog.Expressions
                 word.AddError("undefined");
             }
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(CodeDrawStyle.ColorType.Identifier);
             word.MoveNext();
 
             if(word.GetCharAt(0) != '(')
@@ -60,6 +60,10 @@ namespace pluginVerilog.Verilog.Expressions
 
             if (word.Text == ")")
             {
+                if (function != null && function.Ports.Count !=0)
+                {
+                    word.AddError("too few arguments");
+                }
                 functionCall.Reference = WordReference.CreateReferenceRange(functionCall.Reference, word.GetReference());
                 word.MoveNext();
                 return functionCall;
@@ -79,7 +83,7 @@ namespace pluginVerilog.Verilog.Expressions
                 {
                     if (i >= function.Ports.Count)
                     {
-                        word.AddError("illegal argument");
+                        expression.Reference.AddError("illegal argument");
                     }
                     else
                     {
@@ -99,6 +103,10 @@ namespace pluginVerilog.Verilog.Expressions
 
                 if(word.Text == ")")
                 {
+                    if (function != null && i < function.Ports.Count-1)
+                    {
+                        word.AddError("too few arguments");
+                    }
                     functionCall.Reference = WordReference.CreateReferenceRange(functionCall.Reference,word.GetReference());
                     functionCall.Constant = returnConstant;
                     word.MoveNext();

@@ -66,6 +66,20 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
         public Dictionary<string, BuildingBlock> BuldingBlocks = new Dictionary<string, BuildingBlock>();
 
+
+        public BuildingBlock? GetBuildingBlock(IndexReference indexReference)
+        {
+            foreach (BuildingBlock buildingBlock in BuldingBlocks.Values)
+            {
+                if (buildingBlock.BeginIndexReference == null) continue;
+                if (buildingBlock.LastIndexReference == null) continue;
+
+                if (indexReference.IsSmallerThan(buildingBlock.BeginIndexReference)) continue;
+                if (indexReference.IsGreaterThan(buildingBlock.LastIndexReference)) continue;
+                return buildingBlock;
+            }
+            return null;
+        }
         public static Root ParseCreate(WordScanner word, ParsedDocument parsedDocument,Data.VerilogFile file)
         {
             Root root = new Root()
