@@ -17,6 +17,7 @@ using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using static AjkAvaloniaLibs.Controls.ColorLabel;
 using CodeComplete = CodeEditor2.CodeEditor.CodeComplete;
 
 namespace pluginVerilog.Verilog
@@ -321,15 +322,31 @@ namespace pluginVerilog.Verilog
                 switch (message.Type)
                 {
                     case Message.MessageType.Error:
+                        ret.AppendIconImage(AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
+                            "CodeEditor2/Assets/Icons/exclamation_triangle.svg",
+                            Avalonia.Media.Color.FromArgb(100, 255, 150, 150)
+                            ));
                         ret.AppendText(message.Text+"\n", Avalonia.Media.Colors.Pink);
                         break;
                     case Message.MessageType.Warning:
+                        ret.AppendIconImage(AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
+                            "CodeEditor2/Assets/Icons/exclamation_triangle.svg",
+                            Avalonia.Media.Color.FromArgb(100, 255, 255, 150)
+                            ));
                         ret.AppendText(message.Text + "\n", Avalonia.Media.Colors.Orange);
                         break;
                     case Message.MessageType.Notice:
+                        ret.AppendIconImage(AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
+                            "CodeEditor2/Assets/Icons/exclamation_triangle.svg",
+                            Avalonia.Media.Color.FromArgb(100, 150, 255, 150)
+                            ));
                         ret.AppendText(message.Text + "\n", Avalonia.Media.Colors.LimeGreen);
                         break;
                     case Message.MessageType.Hint:
+                        ret.AppendIconImage(AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
+                            "CodeEditor2/Assets/Icons/exclamation_triangle.svg",
+                            Avalonia.Media.Color.FromArgb(100, 150, 150, 255)
+                            ));
                         ret.AppendText(message.Text + "\n", Avalonia.Media.Colors.LightCyan);
                         break;
                 }
