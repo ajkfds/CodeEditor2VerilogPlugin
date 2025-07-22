@@ -35,6 +35,7 @@ namespace pluginVerilog.Data
                 RelativePath = relativePath,
                 Name = name
             };
+            fileItem.readFromFile();
             return fileItem;
         }
 
