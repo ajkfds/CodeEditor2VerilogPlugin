@@ -24,5 +24,21 @@ namespace pluginVerilog
             Description = "The bitwidth of the left-hand side and right-hand side of an assignment do not match."
         };
 
+        public Rule ImplicitModportDirection = new Rule
+        {
+            Name = "ImplicitModportDirection",
+            Severity = Rule.SeverityEnum.Warning,
+            Message = "Implicit Modport direction",
+            Description = "The direction of modport declaration is missing. inout direction is used for this port."
+        };
+
+        public Rule ImplicitModportInterfaceConnectionToInstance = new Rule
+        {
+            Name = "ImplicitModportInterfaceConnectionToInstance",
+            Severity = Rule.SeverityEnum.Warning,
+            Message = "Implicit Modport connection",
+            Description = "The implicit modport is connected to modport.use modport to connect to instances."
+        };
+
     }
 }

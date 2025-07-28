@@ -1,5 +1,6 @@
 ﻿//using Microsoft.CodeAnalysis.CSharp.Syntax;
 using CodeEditor2.CodeEditor;
+using CodeEditor2.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.Variables;
@@ -756,7 +757,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                 {
                     moduleInstantiation.PortConnection.Add(pinName, expression);
                 }
-                if (!word.Prototype) checkPortConnection(instancedModule, expression, pinName, true);
+                if (!word.Prototype) checkPortConnection(word.ProjectProperty, instancedModule, expression, pinName, true);
             }
             else
             {
@@ -764,7 +765,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                 {
                     moduleInstantiation.PortConnection.Add(pinName, expression);
                 }
-                if (!word.Prototype) checkPortConnection(instancedModule, expression, pinName, false);
+                if (!word.Prototype) checkPortConnection(word.ProjectProperty, instancedModule, expression, pinName, false);
             }
         }
 
@@ -788,7 +789,7 @@ namespace pluginVerilog.Verilog.ModuleItems
         //    }
         //}
 
-        private static void checkPortConnection(Module? instancedModule,Expressions.Expression? expression,string pinName,bool output)
+        private static void checkPortConnection(ProjectProperty projectProperty,Module? instancedModule,Expressions.Expression? expression,string pinName,bool output)
         {
             if (instancedModule == null) return;
             if (expression == null) return;
@@ -812,7 +813,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                 }
                 else
                 {
-                    checkModPortConnection(expression, modportInstantiation, interface_, pinName, output);
+                    checkModPortConnection(projectProperty, expression, modportInstantiation, interface_, pinName, output);
                 }
             }
             else if (portDataObject is InterfaceInstance)
@@ -826,7 +827,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                 }
                 else
                 {
-                    checkInterfacePortConnection(expression, portInterfaceInstantiation, interface_, pinName, output);
+                    checkInterfacePortConnection(projectProperty, expression, portInterfaceInstantiation, interface_, pinName, output);
                 }
             }
             else if( portDataObject is Variable)
@@ -834,18 +835,19 @@ namespace pluginVerilog.Verilog.ModuleItems
                 Variable? variable = portDataObject as Variable;
                 if (variable == null) throw new Exception();
 
-                checkVariablePortConnection( expression, port, variable, pinName, output);
+                checkVariablePortConnection(projectProperty, expression, port, variable, pinName, output);
             }
             else if(portDataObject is DataObjects.Nets.Net)
             {
                 DataObjects.Nets.Net? net = portDataObject as DataObjects.Nets.Net;
                 if (net == null) throw new Exception();
 
-                checkNetPortConnection(expression, port, net, pinName, output);
+                checkNetPortConnection(projectProperty, expression, port, net, pinName, output);
             }
 
         }
         private static void checkNetPortConnection(
+            ProjectProperty projectProperty,
             Expressions.Expression expression,
             Port port,
             DataObjects.Nets.Net net,
@@ -859,7 +861,6 @@ namespace pluginVerilog.Verilog.ModuleItems
                 {
                     expression.Reference.AddWarning("bit width mismatch 1 <- " + expression.BitWidth);
                 }
-
             }
             else if (port.Range.Size != expression.BitWidth && expression.Reference != null)
             {
@@ -867,6 +868,7 @@ namespace pluginVerilog.Verilog.ModuleItems
             }
         }
         private static void checkVariablePortConnection(
+            ProjectProperty projectProperty,
             Expressions.Expression expression,
             Port port,
             Variable variable,
@@ -888,6 +890,7 @@ namespace pluginVerilog.Verilog.ModuleItems
             }
         }
         private static void checkInterfacePortConnection(
+            ProjectProperty projectProperty,
             Expressions.Expression expression,
             InterfaceInstance portInterfaceInstantiation,
             Interface interface_,
@@ -917,6 +920,7 @@ namespace pluginVerilog.Verilog.ModuleItems
             // properly connected
         }
         private static void checkModPortConnection(
+            ProjectProperty projectProperty,
             Expressions.Expression expression,
             ModportInstance modportInstantiation,
             Interface interface_,
@@ -927,20 +931,22 @@ namespace pluginVerilog.Verilog.ModuleItems
             Expressions.VariableReference? variableReference = expression as Expressions.VariableReference;
             if (variableReference == null)
             {
-                expression.Reference.AddError("should be " + interface_.Name+"."+ modportInstantiation.Name );
+                expression.Reference.AddError("should be " + interface_.Name+"."+ modportInstantiation.ModportName);
                 return;
             }
 
             ModportInstance? modportInstance = variableReference.Variable as ModportInstance;
             if (modportInstance == null)
             {
-                expression.Reference.AddError("should be " + interface_.Name + "." + modportInstantiation.Name);
+                expression.Reference.ApplyRule(projectProperty.RuleSet.ImplicitModportInterfaceConnectionToInstance,
+                    "\nshould be " + interface_.Name + "." + modportInstantiation.ModportName
+                    );
                 return;
             }
 
             if(( interface_.Name != modportInstantiation.InterfaceName ) | (modportInstance.ModportName != modportInstantiation.ModportName))
             {
-                expression.Reference.AddError("should be " + interface_.Name + "." + modportInstantiation.Name);
+                expression.Reference.AddError("should be " + interface_.Name + "." + modportInstantiation.ModportName);
                 return;
             }
             // properly connected

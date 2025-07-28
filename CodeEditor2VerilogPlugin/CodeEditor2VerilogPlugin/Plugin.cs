@@ -44,29 +44,6 @@ namespace pluginVerilog
                     (je, op) => { return ProjectProperty.DeserializeSetup(je, op); }
                     );
             }
-            // append navigate context menu items
-
-//            CodeEditor2.Controller.NavigatePanel.
-
-//            contextMenu.Items.Add()
-
-
-            //System.Windows.Forms.ContextMenuStrip menu = CodeEditor.Controller.NavigatePanel.GetContextMenuStrip();
-            //menu.Items.Insert(0,Global.SetupForm.IcarusVerilogTsmi);
-            //menu.Items.Insert(0, Global.SetupForm.VerilogDebugTsmi);
-
-            //foreach (var menuItem in menu.Items)
-            //{
-            //    if(menuItem is System.Windows.Forms.ToolStripMenuItem)
-            //    {
-            //        var tsmi = menuItem as System.Windows.Forms.ToolStripMenuItem;
-            //        if(tsmi.Text == "Add")
-            //        {
-            //            tsmi.DropDownItems.Add(Global.SetupForm.CreateVerilogFileTsmi);
-            //        }
-            //    }
-            //}
-
             // register project property creator
             CodeEditor2.Data.Project.Created += projectCreated;
 

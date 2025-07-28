@@ -85,7 +85,7 @@ namespace pluginVerilog.Data
         /// CodeDocument Object to keep the text data of the file.
         /// only single instance is created for a file, and the same instance is used for all IVerilogRelatedFile instances.
         /// </summary>
-        public override CodeEditor2.CodeEditor.CodeDocument CodeDocument
+        public override CodeEditor2.CodeEditor.CodeDocument? CodeDocument
         {
             get
             {
@@ -97,10 +97,10 @@ namespace pluginVerilog.Data
                     }
                     catch
                     {
+
                         document = null;
                     }
                 }
-                if (document == null) throw new Exception();
                 return document;
             }
             protected set
@@ -114,7 +114,7 @@ namespace pluginVerilog.Data
         /// Accdept new Parsed Document for this Verilog File
         /// </summary>
         /// <param name="newParsedDocument"></param>
-        public override void AcceptParsedDocument(ParsedDocument newParsedDocument)
+        public override void AcceptParsedDocument(ParsedDocument? newParsedDocument)
         {
             ParsedDocument? oldParsedDocument = ParsedDocument;
             if (oldParsedDocument == newParsedDocument) return;
@@ -235,9 +235,12 @@ namespace pluginVerilog.Data
                     document.Clean();
                 }
             }
-            catch
+            catch(Exception e)
             {
                 document = null;
+                Console.Error.WriteLine("**error VerilogFile.loadDocumentFromFile");
+                Console.Error.WriteLine("* " + AbsolutePath);
+                Console.Error.WriteLine("* "+ e.Message);
             }
         }
 

@@ -165,10 +165,10 @@ namespace pluginVerilog.Verilog
 
             return true;
         }
-        //modport_simple_port::= port_identifier | "." port_identifier([expression] )
+        //modport_simple_port::= port_identifier | "." port_identifier([expression])
         internal bool parse_modport_simple_port(WordScanner word, NameSpace nameSpace, Port.DirectionEnum direction)
         {
-            if (word.Text == ".") // modport expression
+            if (word.Text == ".") // "." port_identifier([expression])
             {
                 word.MoveNext();
 
@@ -178,6 +178,7 @@ namespace pluginVerilog.Verilog
                 }
                 string name = word.Text;
                 word.Color(CodeDrawStyle.ColorType.Variable);
+                if (direction == Port.DirectionEnum.Undefined) word.ApplyRule(word.Project.GetPluginProperty().RuleSet.ImplicitModportDirection);
                 word.MoveNext();
 
                 if (word.Text != "(")
@@ -204,11 +205,13 @@ namespace pluginVerilog.Verilog
                 word.MoveNext();
 
                 registerPort(name, direction, expression);
+                return true;
             }
 
 
             if (!General.IsIdentifier(word.Text)) return false;
-            {
+
+            { // port_identifier
                 string identifier = word.Text;
 
                 Expressions.Expression? expression;
@@ -220,7 +223,8 @@ namespace pluginVerilog.Verilog
                 {
                     expression = Expressions.Expression.ParseCreate(word, nameSpace);
                 }
-                if (expression == null) return true;
+                if (expression == null) return false;
+                if (direction == Port.DirectionEnum.Undefined) expression.Reference.ApplyRule(word.Project.GetPluginProperty().RuleSet.ImplicitModportDirection);
 
                 registerPort(identifier, direction, expression);
             }
