@@ -3,6 +3,7 @@ using CodeEditor2.CodeEditor;
 using CodeEditor2.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
+using pluginVerilog.Verilog.DataObjects.Nets;
 using pluginVerilog.Verilog.DataObjects.Variables;
 using System;
 using System.Collections.Generic;
@@ -498,7 +499,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                 notWrittenPortName = instancedModule.Ports.Keys.ToList();
             }
 
-
+            WordReference? wildcardRef = null;
             while (!word.Eof && word.Text == ".")
             {
                 word.MoveNext();    // .
@@ -506,6 +507,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                 {
                     wildcardConnection = true;
                     word.Color(CodeDrawStyle.ColorType.Identifier);
+                    wildcardRef = word.GetReference();
                     word.MoveNext();
                     if (word.Text != ",")
                     {
@@ -521,7 +523,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                 string pinName = word.Text;
                 IndexReference startRef = word.CreateIndexReference();
                 if (notWrittenPortName.Contains(pinName)) notWrittenPortName.Remove(pinName);
-
+                WordReference pinReference = word.GetReference();
                 word.Color(CodeDrawStyle.ColorType.Identifier);
 
                 if (word.Prototype)
@@ -558,7 +560,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                 else
                 {
                     // 23.3.2.3 Connecting module instance using implicit named port connections
-                    parseImplicitPortConnection(word, nameSpace, instancedModule, moduleInstantiation, pinName, moduleIdentifier);
+                    parseImplicitPortConnection(word, nameSpace, instancedModule, moduleInstantiation, pinName, pinReference, moduleIdentifier);
                 }
 
                 if (word.Text != ",")
@@ -575,7 +577,7 @@ namespace pluginVerilog.Verilog.ModuleItems
             {
                 if (wildcardConnection)
                 {
-                    parseWidCardPortConnection(word, nameSpace, instancedModule, moduleInstantiation, moduleIdentifier, notWrittenPortName);
+                    parseWidCardPortConnection(word, nameSpace, instancedModule, moduleInstantiation, moduleIdentifier, notWrittenPortName,wildcardRef);
                 }
                 else
                 {
@@ -591,26 +593,38 @@ namespace pluginVerilog.Verilog.ModuleItems
             Module? instancedModule,
             ModuleInstantiation moduleInstantiation,
             WordReference moduleIdentifier,
-            List<string> notWrittenPortName
+            List<string> notWrittenPortName,
+            WordReference? wildcardRef
             )
         {
             if (instancedModule == null) return;
+            if (wildcardRef == null) throw new Exception();
 
             foreach (string pinName in notWrittenPortName)
             {
                 DataObject? targetObject = nameSpace.NamedElements.GetDataObject(pinName);
-                if (targetObject == null) continue;
+                if (targetObject == null)
+                {
+                    if(!word.Prototype) wildcardRef.ApplyRule(word.ProjectProperty.RuleSet.NotAllPortConnectedWithWildcardNamedPortConnections, "\nport :" + pinName);
+                    continue;
+                }
                 Port port = instancedModule.Ports[pinName];
-                Variable? variable = targetObject as Variable;
 
                 Expressions.Expression? expression;
-                if (variable != null)
+
+                expression = Expressions.DataObjectReference.Create(targetObject, nameSpace);
+                if (port.Direction == Port.DirectionEnum.Output)
                 {
-                    expression = Expressions.VariableReference.Create(variable, nameSpace);// Expressions.Expression.CreateTempExpression(pinName);
+                    targetObject.AssignedReferences.Add(wildcardRef);
                 }
                 else
                 {
-                    expression = Expressions.Expression.CreateTempExpression(pinName);
+                    targetObject.UsedReferences.Add(wildcardRef);
+                }
+
+                if (targetObject.CommentAnnotation_Discarded)
+                {
+                    if (!word.Prototype) word.AddError("Disarded.");
                 }
 
                 connectPort(word, moduleInstantiation, instancedModule, pinName, expression);
@@ -703,6 +717,7 @@ namespace pluginVerilog.Verilog.ModuleItems
             Module? instancedModule,
             ModuleInstantiation moduleInstantiation,
             string pinName,
+            WordReference pinReference,
             WordReference moduleIdentifier)
         {
             if (instancedModule == null) return;
@@ -719,16 +734,22 @@ namespace pluginVerilog.Verilog.ModuleItems
                 return;
             }
             Port port = instancedModule.Ports[pinName];
-            Variable? variable = targetObject as Variable;
 
             Expressions.Expression? expression;
-            if (variable != null)
+
+            expression = Expressions.DataObjectReference.Create(targetObject, nameSpace);
+            if(port.Direction == Port.DirectionEnum.Output)
             {
-                expression = Expressions.VariableReference.Create(variable, nameSpace);// Expressions.Expression.CreateTempExpression(pinName);
+                targetObject.AssignedReferences.Add(pinReference);
             }
             else
             {
-                expression = Expressions.Expression.CreateTempExpression(pinName);
+                targetObject.UsedReferences.Add(pinReference);
+            }
+
+            if (targetObject.CommentAnnotation_Discarded)
+            {
+                word.AddError("Disarded.");
             }
 
             connectPort(word, moduleInstantiation, instancedModule, pinName, expression);
@@ -898,14 +919,14 @@ namespace pluginVerilog.Verilog.ModuleItems
             bool output
             )
         {
-            Expressions.VariableReference? variableReference = expression as Expressions.VariableReference;
+            Expressions.DataObjectReference? variableReference = expression as Expressions.DataObjectReference;
             if(variableReference == null)
             {
                 expression.Reference.AddError("should be " + portInterfaceInstantiation.SourceName);
                 return;
             }
 
-            InterfaceInstance? interfaceInstance = variableReference.Variable as InterfaceInstance;
+            InterfaceInstance? interfaceInstance = variableReference.DataObject as InterfaceInstance;
             if(interfaceInstance == null)
             {
                 expression.Reference.AddError("should be " + portInterfaceInstantiation.SourceName);
@@ -928,14 +949,14 @@ namespace pluginVerilog.Verilog.ModuleItems
             bool output
             )
         {
-            Expressions.VariableReference? variableReference = expression as Expressions.VariableReference;
+            Expressions.DataObjectReference? variableReference = expression as Expressions.DataObjectReference;
             if (variableReference == null)
             {
                 expression.Reference.AddError("should be " + interface_.Name+"."+ modportInstantiation.ModportName);
                 return;
             }
 
-            ModportInstance? modportInstance = variableReference.Variable as ModportInstance;
+            ModportInstance? modportInstance = variableReference.DataObject as ModportInstance;
             if (modportInstance == null)
             {
                 expression.Reference.ApplyRule(projectProperty.RuleSet.ImplicitModportInterfaceConnectionToInstance,

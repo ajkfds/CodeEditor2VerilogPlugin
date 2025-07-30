@@ -259,7 +259,7 @@ namespace pluginVerilog.Data
                 if (oldParsedDocument != null) oldParsedDocument.Dispose();
             }
 
-            if(source.ParsedDocument != null && source.ParsedDocument.Version != newParsedDocument.Version)
+            if(source.ParsedDocument != null)// && source.ParsedDocument.Version != newParsedDocument.Version)
             {
                 Verilog.ParsedDocument vParsedDocument = (Verilog.ParsedDocument)newParsedDocument;
                 if(vParsedDocument.Root != null && vParsedDocument.Root.BuldingBlocks.Count == 1)

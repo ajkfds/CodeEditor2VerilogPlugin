@@ -27,10 +27,10 @@ namespace pluginVerilog.Verilog.Statements
 
             Expressions.Expression ex = Expressions.Expression.ParseCreate(word, nameSpace);
 
-            if(ex is Verilog.Expressions.VariableReference)
+            if(ex is Verilog.Expressions.DataObjectReference)
             {
-                var valRef = ex as Expressions.VariableReference;
-                if (valRef.Variable is DataObjects.Variables.Event)
+                var valRef = ex as Expressions.DataObjectReference;
+                if (valRef.DataObject is DataObjects.Variables.Event)
                 {
                     // event expression
                 }

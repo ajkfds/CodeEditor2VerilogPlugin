@@ -103,9 +103,16 @@ namespace pluginVerilog.NavigatePanel
             }
             else
             {
-                using (System.IO.StreamWriter sw = new System.IO.StreamWriter(path))
+                try
                 {
-                    streamWriter(sw, name);
+                    using (System.IO.StreamWriter sw = new System.IO.StreamWriter(path))
+                    {
+                        streamWriter(sw, name);
+                    }
+                }catch (Exception ex)
+                {
+                    Controller.AppendLog("** error : NavigatePanelMenu.generateFile", Avalonia.Media.Colors.Red);
+                    Controller.AppendLog(ex.Message, Avalonia.Media.Colors.Red);
                 }
             }
 

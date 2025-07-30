@@ -1,6 +1,8 @@
-﻿using System;
+﻿using pluginVerilog.Verilog.DataObjects.Variables;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,13 +12,13 @@ namespace pluginVerilog.Verilog.Items.Generate
     {
         public static bool Parse(WordScanner word, NameSpace nameSpace)
         {
-            //    genvar_assignment::= genvar_identifier = constant_expression
-            // genvar_initialization ::= 
-            //      ["genvar"] genvar_identifier = constant_expression
+            // loop_generate_construct::= for (genvar_initialization; genvar_expression; genvar_iteration) generate_block
+            // genvar_initialization ::= [genvar] genvar_identifier = constant_expression
 
-            Expressions.VariableReference genvar;
+            Expressions.DataObjectReference? genvar;
             if (word.Text == "genvar")
             {
+                // define new genvar
                 if (!word.SystemVerilog) word.AddSystemVerilogError();
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 word.MoveNext();
@@ -33,26 +35,30 @@ namespace pluginVerilog.Verilog.Items.Generate
                     nameSpace.NamedElements.Add(gvar.Name, gvar);
                 }
                 word.MoveNext();
-                genvar = Expressions.VariableReference.Create(gvar, nameSpace);
+                genvar = Expressions.DataObjectReference.Create(gvar, nameSpace);
                 if (genvar == null) return true;
             }
             else
             {
-                genvar = Expressions.VariableReference.ParseCreate(word, nameSpace, nameSpace, true);
-                if (genvar == null) return false;
+                genvar = Expressions.DataObjectReference.ParseCreate(word, nameSpace, nameSpace, true);
+                if (genvar == null)
+                {
+                    word.AddError("must be genvar");
+                    return false;
+                }
+                if (genvar.DataObject is not Genvar)
+                {
+                    genvar.Reference.AddError("must be genvar");
+                }
             }
 
-            if (!(genvar.Variable is DataObjects.Variables.Genvar))
-            {
-                word.AddError("should be genvar");
-            }
             if (word.Text != "=")
             {
                 word.AddError("( expected");
                 return true;
             }
             word.MoveNext();
-            Expressions.Expression constant = Expressions.Expression.ParseCreate(word, nameSpace);
+            Expressions.Expression? constant = Expressions.Expression.ParseCreate(word, nameSpace);
             if (constant == null) return false;
             if (!constant.Constant)
             {

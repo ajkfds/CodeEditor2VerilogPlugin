@@ -40,5 +40,12 @@ namespace pluginVerilog
             Description = "The implicit modport is connected to modport.use modport to connect to instances."
         };
 
+        public Rule NotAllPortConnectedWithWildcardNamedPortConnections = new Rule
+        {
+            Name = "NotAllPortConnectedWithWildcardNamedPortConnections",
+            Severity = Rule.SeverityEnum.Warning,
+            Message = "Not all ports connected with wildcard named port connections",
+            Description = "Not all ports are connected with wildcard named port connections. It is recommended to connect all ports."
+        };
     }
 }

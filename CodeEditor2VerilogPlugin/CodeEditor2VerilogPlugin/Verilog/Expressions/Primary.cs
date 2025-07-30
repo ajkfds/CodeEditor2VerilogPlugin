@@ -279,28 +279,28 @@ number
 
         public static Primary? parseDataObject(WordScanner word, NameSpace nameSpace, INamedElement owner, bool lValue,string nameSpaceText)
         {
-            var variable = VariableReference.ParseCreate(word, nameSpace, owner, lValue);
+            var variable = DataObjectReference.ParseCreate(word, nameSpace, owner, lValue);
             if(variable != null) variable.NameSpaceText = nameSpaceText;
 
             if (variable == null) return null;
-            if (variable.Variable == null) return null;
+            if (variable.DataObject == null) return null;
 
             if (word.Text != ".") return variable;
             word.MoveNext();
 
-            if (!variable.Variable.NamedElements.ContainsKey(word.Text))
+            if (!variable.DataObject.NamedElements.ContainsKey(word.Text))
             {
                 word.AddError("illegal primitive");
                 return null;
             }
-            INamedElement? element = variable.Variable.NamedElements[word.Text];
+            INamedElement? element = variable.DataObject.NamedElements[word.Text];
 
             // Since ModPort are also namespaces, they need to be processed before namespaces.
             if (element is DataObject)
             {
                 if (nameSpaceText != "") nameSpaceText = nameSpaceText + ".";
                 nameSpaceText = nameSpaceText + variable.VariableName + ".";
-                return parseDataObject(word, nameSpace, variable.Variable, lValue,nameSpaceText);
+                return parseDataObject(word, nameSpace, variable.DataObject, lValue,nameSpaceText);
             }
 
             // Since Task and Function are also namespaces, they need to be processed before namespaces.
@@ -588,7 +588,7 @@ number
                     return null;
                 case WordPointer.WordTypeEnum.Text:
                     {
-                        var variable = VariableReference.ParseCreate(word, nameSpace, nameSpace, lValue);
+                        var variable = DataObjectReference.ParseCreate(word, nameSpace, nameSpace, lValue);
                         if (variable != null) return variable;
 
                         var parameter = ParameterReference.ParseCreate(word, nameSpace);

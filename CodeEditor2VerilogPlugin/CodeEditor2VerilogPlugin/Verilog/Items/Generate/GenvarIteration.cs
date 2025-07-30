@@ -17,9 +17,9 @@ namespace pluginVerilog.Verilog.Items.Generate
         public static bool Parse(WordScanner word, NameSpace nameSpace)
         {
             //    genvar_assignment::= genvar_identifier = constant_expression
-            Expressions.VariableReference genvar = Expressions.VariableReference.ParseCreate(word, nameSpace, nameSpace, true);
+            Expressions.DataObjectReference genvar = Expressions.DataObjectReference.ParseCreate(word, nameSpace, nameSpace, true);
             if (genvar == null) return false;
-            if (!(genvar.Variable is DataObjects.Variables.Genvar))
+            if (!(genvar.DataObject is DataObjects.Variables.Genvar))
             {
                 word.AddError("should be genvar");
             }

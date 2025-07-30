@@ -11,28 +11,28 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Expressions
 {
-    public class VariableReference : Primary
+    public class DataObjectReference : Primary
     {
-        protected VariableReference() { }
+        protected DataObjectReference() { }
         public string VariableName { get; init; }
         public RangeExpression? RangeExpression { get; protected set; }
         public List<Expression> Dimensions = new List<Expression>();
-        public DataObjects.DataObject? Variable = null;
+        public DataObjects.DataObject? DataObject = null;
         public string NameSpaceText = "";
 
         public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
             label.AppendText(NameSpaceText, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Variable));
 
-            if(Variable is Reg || Variable is Bit || Variable is Logic)
+            if(DataObject is Reg || DataObject is Bit || DataObject is Logic)
             {
                 label.AppendText(VariableName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Register));
             }
-            else if (Variable is Net)
+            else if (DataObject is Net)
             {
                 label.AppendText(VariableName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Net));
             }
-            else if(Variable is DataObjects.Constants.Constants)
+            else if(DataObject is DataObjects.Constants.Constants)
             {
                 label.AppendText(VariableName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Parameter));
             }
@@ -77,30 +77,47 @@ namespace pluginVerilog.Verilog.Expressions
             return sb.ToString();
         }
 
-
-        public static VariableReference Create(DataObjects.Variables.Variable variable,NameSpace nameSpace)
+        /// <summary>
+        /// create DataObject Reference from DataObject
+        /// </summary>
+        /// <param name="dataObject"></param>
+        /// <param name="nameSpace"></param>
+        /// <returns></returns>
+        public static DataObjectReference Create(DataObjects.DataObject dataObject, NameSpace nameSpace)
         {
-            VariableReference val = new VariableReference()
+            DataObjectReference val = new DataObjectReference()
             {
-                VariableName = variable.Name
+                VariableName = dataObject.Name
             };
-            val.Variable = variable;
-            if(variable.DefinedReference != null) val.Reference = variable.DefinedReference;
+            val.DataObject = dataObject;
+            if (dataObject.DefinedReference != null) val.Reference = dataObject.DefinedReference;
+            if (dataObject is DataObjects.Constants.Constants)
+            {
+                val.Constant = true;
+            }
 
             return val;
         }
 
-        // nameSpace is reqired for range expression parse
-        public static VariableReference? ParseCreate(WordScanner word,NameSpace nameSpace, INamedElement owner, bool assigned)
+        /// <summary>
+        /// Parse and Create DataObject Reference
+        /// </summary>
+        /// <param name="word"></param>
+        /// <param name="nameSpace">nameSpace is reqired for range expression parse</param>
+        /// <param name="owner"></param>
+        /// <param name="assigned"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public static DataObjectReference? ParseCreate(WordScanner word,NameSpace nameSpace, INamedElement owner, bool assigned)
         {
             if (!owner.NamedElements.ContainsDataObject(word.Text)) return null;
             DataObjects.DataObject dataObject = (DataObjects.DataObject)owner.NamedElements[word.Text];
 
-            VariableReference val = new VariableReference()
+            DataObjectReference val = new DataObjectReference()
             {
                 VariableName = dataObject.Name
             };
-            val.Variable = dataObject;
+            val.DataObject = dataObject;
             val.Reference = word.GetReference();
 
             word.Color(dataObject.ColorType);
@@ -112,13 +129,13 @@ namespace pluginVerilog.Verilog.Expressions
 
             if (assigned)
             {
-                val.Variable.AssignedReferences.Add(word.GetReference());
+                val.DataObject.AssignedReferences.Add(word.GetReference());
             }
             else
             {
-                val.Variable.UsedReferences.Add(word.GetReference());
+                val.DataObject.UsedReferences.Add(word.GetReference());
             }
-            if (val.Variable.CommentAnnotation_Discarded)
+            if (val.DataObject.CommentAnnotation_Discarded)
             {
                 word.AddError("Disarded.");
             }
@@ -181,137 +198,7 @@ namespace pluginVerilog.Verilog.Expressions
 
             return val;
         }
-
-
-        //public static VariableReference? ParseCreate(WordScanner word, NameSpace nameSpace,INamedElement owner, bool assigned)
-        //{
-        //    if (nameSpace == null) System.Diagnostics.Debugger.Break();
-        //    DataObjects.DataObject? dataObject = getDataObject(word, word.Text, nameSpace);
-        //    if (dataObject == null) return null;
-
-        //    VariableReference val = new VariableReference() {
-        //        VariableName = dataObject.Name
-        //    };
-        //    val.Variable = dataObject;
-        //    val.Reference = word.GetReference();
-
-
-        //    word.Color(dataObject.ColorType);
-        //    if(dataObject is DataObjects.Constants.Constants)
-        //    {
-        //        val.Constant = true;
-        //    }
-
-        //    if (assigned)
-        //    {
-        //        val.Variable.AssignedReferences.Add(word.GetReference());
-        //    }
-        //    else
-        //    {
-        //        val.Variable.UsedReferences.Add(word.GetReference());
-        //    }
-        //    word.MoveNext();
-
-        //    // parse dimensions
-        //    while (!word.Eof && val.Dimensions.Count < dataObject.Dimensions.Count)
-        //    {
-        //        if (word.GetCharAt(0) != '[')
-        //        {
-        //            word.AddError("lacked dimension");
-        //            break;
-        //        }
-        //        word.MoveNext();
-        //        Expression? exp = Expression.ParseCreate(word, nameSpace);
-        //        if(exp != null) val.Dimensions.Add(exp);
-        //        if (word.GetCharAt(0) != ']')
-        //        {
-        //            word.AddError("illegal dimension");
-        //            break;
-        //        }
-        //        word.MoveNext();
-        //    }
-
-        //    // parse ranges
-        //    if (word.GetCharAt(0) == '[')
-        //    {
-        //        if (!parseRange(word, nameSpace, val)) return null;
-        //    }
-        //    else
-        //    {   // w/o range
-        //        if (dataObject is DataObjects.Variables.IntegerVectorValueVariable)
-        //        {
-        //            var original = dataObject as DataObjects.Variables.IntegerVectorValueVariable;
-        //            if (original == null) throw new Exception();
-        //            if (original.Range != null) val.BitWidth = original.Range.Size;
-        //            else val.BitWidth = 1;
-        //        }
-        //        else if(dataObject is DataObjects.Constants.Parameter)
-        //        {
-        //            var constants = (DataObjects.Constants.Parameter)dataObject;
-        //            if(constants.Expression != null)
-        //            {
-        //                val.Value = constants.Expression.Value;
-        //                val.BitWidth = constants.Expression.BitWidth;
-        //            }
-        //        }
-        //        else if (dataObject is Net)
-        //        {
-        //            if (((Net)dataObject).Range != null) val.BitWidth = ((Net)dataObject).Range.Size;
-        //            else val.BitWidth = 1;
-        //        }
-        //        else if (dataObject is DataObjects.Variables.Genvar)
-        //        {
-        //            val.Constant = true;
-        //        }
-        //    }
-
-
-        //    return val;
-        //}
-
-        //private static DataObjects.DataObject? getDataObject(WordScanner word, string identifier, INamedElement owner)
-        //{
-        //    if (owner.NamedElements.ContainsKey(identifier))
-        //    {
-        //        return owner.NamedElements.GetDataObject(identifier);
-        //    }
-
-        //    if (owner is Function)
-        //    {
-        //        Function function = (Function)owner;
-        //        if (function.Parent != null)
-        //        {
-        //            DataObjects.DataObject? val = function.Parent.NamedElements.GetDataObject(identifier);
-        //            if(function.BuildingBlock is BuildingBlocks.Interface || function.BuildingBlock is BuildingBlocks.Program)
-        //            {
-
-        //            }
-        //            else
-        //            {
-        //                if (val != null && !(val is DataObjects.Constants.Constants)) word.AddWarning("external function reference");
-        //            }
-        //            return val;
-        //        }
-        //    }else if(owner is IDataObject)
-        //    {
-        //        //IDataObject dataObject = (IDataObject)owner;
-
-
-        //    }else if(owner is NameSpace)
-        //    {
-        //        NameSpace nameSpace = (NameSpace)owner;
-        //        if (nameSpace.Parent != null)
-        //        {
-        //            return nameSpace.Parent.NamedElements.GetDataObject(identifier);
-        //        }
-        //        else
-        //        {
-        //            return nameSpace.NamedElements.GetDataObject(identifier);
-        //        }
-        //    }
-        //    return null;
-        //}
-        private static bool parseRange(WordScanner word, NameSpace nameSpace, VariableReference val)
+        private static bool parseRange(WordScanner word, NameSpace nameSpace, DataObjectReference val)
         {
             if (word.Text != "[") throw new Exception();
             word.MoveNext();

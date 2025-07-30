@@ -64,10 +64,10 @@ namespace pluginVerilog.Verilog
 
                 if (port.Direction == Port.DirectionEnum.Input)
                 {
-                    if(connextionExpression is VariableReference)
+                    if(connextionExpression is DataObjectReference)
                     {
-                        VariableReference variableReference = (VariableReference)connextionExpression;
-                        DataObject? connectionDataObject = variableReference.Variable;
+                        DataObjectReference variableReference = (DataObjectReference)connextionExpression;
+                        DataObject? connectionDataObject = variableReference.DataObject;
                         if(connectionDataObject is null) return;
                         foreach( var assign in connectionDataObject.AssignedReferences)
                         {
