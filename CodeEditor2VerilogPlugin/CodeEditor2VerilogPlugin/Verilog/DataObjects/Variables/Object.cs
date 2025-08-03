@@ -14,6 +14,8 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public required BuildingBlocks.Class Class { get; init; }
 
+        public override NamedElements NamedElements { get { return Class.NamedElements; } }
+
         public static new Object Create(string name,IDataType dataType)
         {
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.Class);

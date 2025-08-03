@@ -1,4 +1,5 @@
-﻿using pluginVerilog.Verilog.DataObjects;
+﻿using pluginVerilog.Verilog.BuildingBlocks;
+using pluginVerilog.Verilog.DataObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -106,6 +107,12 @@ namespace pluginVerilog.Verilog.Statements
         }
         public Expressions.Expression LValue { get; protected set; }
         public Expressions.Expression Expression { get; protected set; }
+        /* IEEE1800-2017
+        blocking_assignment ::=   variable_lvalue = delay_or_event_control expression
+                                | nonrange_variable_lvalue = dynamic_array_new
+                                | [ implicit_class_handle . | class_scope | package_scope ] hierarchical_variable_identifier select = class_new
+                                | operator_assignment         
+         */
         /*
         A.6.2 Procedural blocks and assignments
         initial_construct   ::= initial statement
@@ -158,25 +165,12 @@ namespace pluginVerilog.Verilog.Statements
 
             if (word.Text == "new")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
-                word.MoveNext();
-                if (word.Text != ";")
-                {
-                    word.AddError("; expected");
-                    return null;
-                }
-                BlockingAssignment assignment = new BlockingAssignment();
-                assignment.LValue = lExpression;
-                assignment.Expression = null; // new
-                if (Assigned != null) Assigned(word, nameSpace, assignment);
-                return assignment;
-
+                return parseCreateClassNewAssignment(word, nameSpace,lExpression);
             }
 
             // delay or event control
 
             Expressions.Expression? expression;
-
 
             if (word.Text=="'" && word.NextText == "{")
             {
@@ -192,6 +186,10 @@ namespace pluginVerilog.Verilog.Statements
                 expression = Expressions.Expression.ParseCreate(word, nameSpace);
                 if (expression == null)
                 {
+                    // classname :: new ();
+                    BlockingAssignment? assignment = parseCreateClassNewAssignment(word, nameSpace, lExpression);
+                    if(assignment != null) return assignment;
+
                     word.AddError("illegal expression");
                     word.SkipToKeyword(";");
                     word.AddError("illegal non blocking assignment");
@@ -224,6 +222,68 @@ namespace pluginVerilog.Verilog.Statements
                 if (Assigned != null) Assigned(word, nameSpace, assignment);
                 return assignment;
             }
+        }
+
+        public static BlockingAssignment? parseCreateClassNewAssignment(WordScanner word, NameSpace nameSpace, Expressions.Expression lExpression)
+        {
+            BuildingBlocks.Class? class_ = word.ProjectProperty.GetBuildingBlock(word.Text) as BuildingBlocks.Class;
+            if(class_ != null)
+            {
+                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.MoveNext();
+                if(word.Text != "::")
+                {
+                    word.AddError(":: required");
+                    return null;
+                }
+                word.MoveNext();
+            }
+            else
+            {
+                if(lExpression is Expressions.DataObjectReference)
+                {
+                    Expressions.DataObjectReference dref = (Expressions.DataObjectReference)lExpression;
+                    if(dref.DataObject is DataObjects.Variables.Object)
+                    {
+                        DataObjects.Variables.Object? obj = (DataObjects.Variables.Object)dref.DataObject;
+                        class_ = obj.Class;
+                    }
+                }
+            }
+
+            if (word.Text != "new") return null;
+
+            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.MoveNext();
+            if (word.Text == "(")
+            {
+                word.MoveNext();
+                while(word.Text!=")" && !word.Eof)
+                {
+                    Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
+                    if (expression == null) break;
+                    if (word.Text != ",") break;
+                    word.MoveNext();
+                }
+                if (word.Text != ")")
+                {
+                    word.AddError(") expected");
+                    return null;
+                }
+                word.MoveNext();
+            }
+
+            if (word.Text != ";")
+            {
+                word.AddError("; expected");
+                return null;
+            }
+            BlockingAssignment assignment = new BlockingAssignment();
+            assignment.LValue = lExpression;
+            assignment.Expression = null; // new
+            if (Assigned != null) Assigned(word, nameSpace, assignment);
+            return assignment;
+
         }
     }
 }

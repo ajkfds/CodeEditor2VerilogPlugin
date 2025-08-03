@@ -286,6 +286,12 @@ number
             if (variable.DataObject == null) return null;
 
             if (word.Text != ".") return variable;
+            
+            if(!variable.DataObject.NamedElements.ContainsKey(word.NextText))
+            {
+                return variable;
+            }
+
             word.MoveNext();
 
             if (!variable.DataObject.NamedElements.ContainsKey(word.Text))

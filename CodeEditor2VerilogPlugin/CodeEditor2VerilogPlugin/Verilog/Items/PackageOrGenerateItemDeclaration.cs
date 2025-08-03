@@ -95,6 +95,7 @@ namespace pluginVerilog.Verilog.Items
                 // TODO
 
                 // class_declaration
+                case "virtual":
                 case "class":
                     BuildingBlocks.Class.ParseDeclaration(word, nameSpace);
                     break;

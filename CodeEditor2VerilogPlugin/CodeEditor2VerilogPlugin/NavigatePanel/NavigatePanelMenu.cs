@@ -76,7 +76,7 @@ namespace pluginVerilog.NavigatePanel
             Project project = CodeEditor2.Controller.NavigatePanel.GetProject(node);
 
             string relativePath = getRelativeFolderPath(node);
-            if (!relativePath.EndsWith(System.IO.Path.DirectorySeparatorChar)) relativePath += System.IO.Path.DirectorySeparatorChar;
+            if (!relativePath.EndsWith(System.IO.Path.DirectorySeparatorChar) && relativePath != "") relativePath += System.IO.Path.DirectorySeparatorChar;
 
             CodeEditor2.Tools.InputWindow window = new CodeEditor2.Tools.InputWindow("Create new "+typeName, "new "+typeName+" name");
             await window.ShowDialog(Controller.GetMainWindow());
@@ -90,7 +90,7 @@ namespace pluginVerilog.NavigatePanel
             BuildingBlock? buildingBlock = projectProperty.GetBuildingBlock(name);
             if (buildingBlock != null)
             {
-                CodeEditor2.Controller.AppendLog("Duplicate BuildingBlock Name ;" + name);
+                CodeEditor2.Controller.AppendLog("Duplicate BuildingBlock Name ;" + buildingBlock.File.RelativePath, Avalonia.Media.Colors.Red );
                 return;
             }
 
