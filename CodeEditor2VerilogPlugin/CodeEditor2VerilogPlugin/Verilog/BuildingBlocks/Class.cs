@@ -3,6 +3,7 @@ using CodeEditor2.CodeEditor.CodeComplete;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.ModuleItems;
+using Svg;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +21,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         }
         public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
         public bool IsVector { get { return false; } }
+        public bool IsVirtual { get; set; }
 
         public virtual List<DataObjects.Arrays.PackedArray> PackedDimensions { get; protected set; } = new List<DataObjects.Arrays.PackedArray>();
 
@@ -100,8 +102,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             bool protoType = false;
             /*
             class_declaration ::=  
-                    [ "virtual" ] "class" [ lifetime ] class_identifier [ parameter_port_list ]  
-                    [ "extends" class_type [ ( list_of_arguments ) ] ]  
+                    [ "virtual" ] "class" [ lifetime ] class_identifier [ parameter_port_list ] [ "extends" class_type [ ( list_of_arguments ) ] ]  
                     [ "implements" interface_class_type { , interface_class_type } ] ;  
                     { class_item } "endclass" [ ":" class_identifier]  
 
@@ -120,6 +121,18 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 | #( )   
              
              */
+            bool virtial = false;
+            if(word.Text == "virtual")
+            {
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext();
+                virtial = true;
+                if (word.Text != "class")
+                {
+                    word.AddError("mist be class");
+                    return null;
+                }
+            }
 
             if (word.Text != "class") System.Diagnostics.Debugger.Break();
             word.Color(CodeDrawStyle.ColorType.Keyword);
@@ -149,7 +162,8 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 File = word.RootParsedDocument.File,
                 Name = word.Text,
                 Parent = word.RootParsedDocument.Root,
-                Project = word.Project
+                Project = word.Project,
+                IsVirtual = virtial
             };
             class_.NameReference = word.GetReference();
             class_.BuildingBlock = class_;
