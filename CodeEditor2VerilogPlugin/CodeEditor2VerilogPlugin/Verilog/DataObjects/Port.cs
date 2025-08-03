@@ -3,6 +3,7 @@ using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.DataObjects.Nets;
 using pluginVerilog.Verilog.ModuleItems;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -137,54 +138,21 @@ namespace pluginVerilog.Verilog.DataObjects
         }
 
 
-        /*
-         * 
+        /* IEEE 1800-2017
 
 
+        interface_ansi_header   ::= {attribute_instance } interface [ lifetime ] interface_identifier { package_import_declaration } [ parameter_port_list ] [ list_of_port_declarations ] ;
+        program_ansi_header     ::= {attribute_instance } program [ lifetime ] program_identifier { package_import_declaration } [ parameter_port_list ] [ list_of_port_declarations ] ;
+        module_ansi_header      ::= { attribute_instance } module_keyword [ lifetime ] module_identifier { package_import_declaration }1 [ parameter_port_list ] [ list_of_port_declarations ] ;
 
-        interface_port_declaration ::=    interface_identifier list_of_interface_identifiers 
-                                        | interface_identifier . modport_identifier list_of_interface_identifiers 
-        ref_declaration ::=       ref variable_port_type list_of_variable_identifiers 
+        list_of_port_declarations ::= ( [ { attribute_instance} ansi_port_declaration { , { attribute_instance} ansi_port_declaration } ] )
 
-parameter_port_list ::= 
-# ( list_of_param_assignments { , parameter_port_declaration } )
-| # ( parameter_port_declaration { , parameter_port_declaration } )
-| #( )
-parameter_port_declaration ::= 
-parameter_declaration 
-| local_parameter_declaration 
-| data_type list_of_param_assignments 
-| type list_of_type_assignments 
-list_of_ports ::= ( port { , port } )
-list_of_port_declarations2 ::= 
-( [ { attribute_instance} ansi_port_declaration { , { attribute_instance} ansi_port_declaration } ] 
+        ansi_port_declaration ::=     [ net_port_header | interface_port_header ] port_identifier { unpacked_dimension } [ = constant_expression ]
+                                    | [ variable_port_header ] port_identifier { variable_dimension } [ = constant_expression ]
+                                    | [ port_direction ] . port_identifier ( [ expression ] )        
 
-port_declaration ::= 
-{ attribute_instance } inout_declaration 
-| { attribute_instance } input_declaration 
-| { attribute_instance } output_declaration 
-| { attribute_instance } ref_declaration 
-| { attribute_instance } interface_port_declaration 
-port ::= 
-[ port_expression ] 
-| . port_identifier ( [ port_expression ] )
-port_expression ::= 
-port_reference 
-| { port_reference { , port_reference } }
-port_reference ::= 
-port_identifier constant_select 
-port_direction ::= input | output | inout | ref
-net_port_header ::= [ port_direction ] net_port_type 
-variable_port_header ::= [ port_direction ] variable_port_type 
-interface_port_header ::= 
-interface_identifier [ . modport_identifier ] 
-| interface [ . modport_identifier ] 
-ansi_port_declaration ::= 
-[ net_port_header | interface_port_header ] port_identifier { unpacked_dimension } 
-[ = constant_expression ] 
-| [ variable_port_header ] port_identifier { variable_dimension } [ = constant_expression ] 
-| [ port_direction ] . port_identifier ( [ expression ] )         
-         */
+
+        */
 
 
         // ## verilog 2001
@@ -202,6 +170,8 @@ ansi_port_declaration ::=
 
         public static void ParsePortDeclarations(WordScanner word,NameSpace nameSpace)
         {
+            // end with ) or ;
+
             IDataType? prevDataType = null;
             Net.NetTypeEnum? prevNetType = null;
             DirectionEnum? prevDirection = null;
@@ -768,11 +738,25 @@ ansi_port_declaration ::=
 
         private static bool parseInterfacePort(WordScanner word, NameSpace nameSpace)
         {
-            string identifier = word.Text;
 
+
+            string identifier = word.Text;
             Interface? interface_ = null;
             interface_ = word.ProjectProperty.GetBuildingBlock(identifier) as Interface;
-            if (interface_ == null) return false;
+            if (interface_ == null)
+            {
+                string nextText = word.NextText;
+                if (nextText == ",") return false;
+                if (nextText == ";") return false;
+                if (nextText == ")") return false;
+                if (nextText == "input") return false;
+                if (nextText == "output") return false;
+                if (nextText == "inout") return false;
+                if (nextText == "ref") return false;
+
+
+//                return false;
+            }
 //            string? modPortName = null;
 
             BuildingBlock buildingBlock = nameSpace.BuildingBlock;
@@ -784,14 +768,18 @@ ansi_port_declaration ::=
                 word.MoveNext();
 
                 word.Color(CodeDrawStyle.ColorType.Identifier);
-                if(!interface_.NamedElements.ContainsModPort(word.Text))
+                if(interface_ != null && !interface_.NamedElements.ContainsModPort(word.Text))
                 {
                     word.AddError("illegal modport name");
                     return true;
                 }
-                ModPort modPort = (ModPort)interface_.NamedElements[word.Text];
+                if(interface_!= null)
+                {
+                    ModPort modPort = (ModPort)interface_.NamedElements[word.Text];
+                    word.MoveNext();
+                    return parseModPort(word, nameSpace, interface_, modPort);
+                }
                 word.MoveNext();
-                return parseModPort(word, nameSpace, interface_, modPort);
             }
 
 
@@ -800,7 +788,7 @@ ansi_port_declaration ::=
                 word.AddError("illegal identifier");
                 return true;
             }
-            InterfaceInstance iInst = InterfaceInstance.CreatePortInstance(word,interface_.Name);
+            InterfaceInstance iInst = InterfaceInstance.CreatePortInstance(word, identifier);
 //            iInst.ModPortName = modPortName;
             word.Color(CodeDrawStyle.ColorType.Variable);
             word.MoveNext();
@@ -905,7 +893,7 @@ ansi_port_declaration ::=
                     word.Color(CodeDrawStyle.ColorType.Keyword);
                     word.MoveNext();
                     break;
-                case "const":
+                case "ref":
                     direction = DirectionEnum.Ref;
                     word.Color(CodeDrawStyle.ColorType.Keyword);
                     word.MoveNext();
@@ -995,7 +983,7 @@ ansi_port_declaration ::=
                 word.MoveNext();
 
                 if (word.Text != ",") return true;
-                word.MoveNext();
+                word.MoveNext();    // skip ,
             }
             return true;
         }
