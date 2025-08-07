@@ -26,14 +26,22 @@ namespace pluginVerilog.Verilog.Items.Generate
                 if (word.Eof) return true;
                 DataObjects.Variables.Genvar gvar = new DataObjects.Variables.Genvar(word.Text);
                 gvar.DefinedReference = word.GetReference();
-                if (nameSpace.NamedElements.ContainsKey(gvar.Name))
+                if (word.Prototype)
                 {
-                    word.AddError("iillegal genvar name");
+                    if (nameSpace.NamedElements.ContainsKey(gvar.Name))
+                    {
+                        word.AddError("iillegal genvar name");
+                    }
+                    else
+                    {
+                        nameSpace.NamedElements.Add(gvar.Name, gvar);
+                    }
                 }
                 else
                 {
-                    nameSpace.NamedElements.Add(gvar.Name, gvar);
+                    nameSpace.NamedElements.Replace(gvar.Name, gvar);
                 }
+                word.Color(CodeDrawStyle.ColorType.Variable);
                 word.MoveNext();
                 genvar = Expressions.DataObjectReference.Create(gvar, nameSpace);
                 if (genvar == null) return true;

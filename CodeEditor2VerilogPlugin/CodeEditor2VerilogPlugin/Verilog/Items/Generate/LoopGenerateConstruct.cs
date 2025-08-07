@@ -52,7 +52,7 @@ namespace pluginVerilog.Verilog.Items.Generate
             }
             word.MoveNext();
 
-            Expressions.Expression constant = Expressions.Expression.ParseCreate(word, module as NameSpace);
+            Expressions.Expression? constant = Expressions.Expression.ParseCreate(word, module as NameSpace);
             if (constant == null) return true;
             if (!constant.Constant)
             {
