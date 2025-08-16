@@ -177,6 +177,12 @@ number
                         return null;
                     }
 
+                    // It shall be illegal to omit the parentheses in a tf_call unless the subroutine is a task, void function, or class method. If the subroutine is a nonvoid class function method, it shall be illegal to omit the parentheses if the call is directly recursive.
+                    // function call (function recarsive call)
+                    if (word.NextText=="(" && word.Text == nameSpace.Name)
+                    {
+                        return FunctionCall.ParseCreate(word, nameSpace, nameSpace);
+                    }
                     // variable reference
                     Primary? primary = searchNameSpace(word, nameSpace, nameSpace, lValue);
                     if (primary != null) return primary;
@@ -285,6 +291,12 @@ number
             if (variable == null) return null;
             if (variable.DataObject == null) return null;
 
+            DataObjects.Variables.Object? obj = null;
+            if (variable.DataObject is DataObjects.Variables.Object)
+            {
+                obj = (DataObjects.Variables.Object)variable.DataObject;
+            }
+
             if (word.Text != ".") return variable;
             
             if(!variable.DataObject.NamedElements.ContainsKey(word.NextText))
@@ -301,6 +313,7 @@ number
             }
             INamedElement? element = variable.DataObject.NamedElements[word.Text];
 
+
             // Since ModPort are also namespaces, they need to be processed before namespaces.
             if (element is DataObject)
             {
@@ -312,16 +325,24 @@ number
             // Since Task and Function are also namespaces, they need to be processed before namespaces.
 
             // task reference : for left side only
-            if (lValue && element is Task)
+            if (lValue && element is Task && obj != null)
             {
-                TaskReference task =TaskReference.ParseCreate(word, nameSpace.BuildingBlock, nameSpace);
+                TaskReference task =TaskReference.ParseCreate(word, nameSpace.BuildingBlock,obj.Class);
                 return task;
             }
 
-            // function call : for right side only
-            if (!lValue && element is Function)
+            // void function call : for left side only
+            if (lValue && element is Function && obj != null)
             {
-                FunctionCall? func = FunctionCall.ParseCreate(word, nameSpace, nameSpace);
+                FunctionCall? func = FunctionCall.ParseCreate(word, nameSpace, obj.Class);
+                Function? function = func?.Function;
+                if(function!= null && function.ReturnVariable == null) return func;
+            }
+
+            // function call : for right side only
+            if (!lValue && element is Function && obj != null)
+            {
+                FunctionCall? func = FunctionCall.ParseCreate(word, nameSpace, obj.Class);
                 return func;
             }
 

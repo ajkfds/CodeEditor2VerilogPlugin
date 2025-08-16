@@ -104,7 +104,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
         {
             word.MoveNext(); // [
 
-            Expressions.Expression? expression = Expressions.Expression.parseCreate(word, nameSpace, false);
+            Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace, false);
 
             if (expression == null) return null;
             if (word.Text != ":")
@@ -114,7 +114,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
             }
             word.MoveNext();
 
-            Expressions.Expression? expression1 = Expressions.Expression.parseCreate(word, nameSpace, false);
+            Expressions.Expression? expression1 = Expressions.Expression.ParseCreate(word, nameSpace, false);
             if (expression1 == null)
             {
                 word.AddError("expression expected");

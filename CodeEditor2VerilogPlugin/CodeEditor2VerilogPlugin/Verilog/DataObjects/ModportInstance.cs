@@ -31,7 +31,11 @@ namespace pluginVerilog.Verilog.DataObjects
         public required string ModportName { init; get; }
         public override DataObject Clone()
         {
-            ModportInstance modportInstance = new ModportInstance() { Name = Name, InterfaceName = InterfaceName, ModportName = ModportName };
+            return Clone(Name);
+        }
+        public override DataObject Clone(string name)
+        {
+            ModportInstance modportInstance = new ModportInstance() { Name = name, InterfaceName = InterfaceName, ModportName = ModportName };
             return modportInstance;
         }
     }

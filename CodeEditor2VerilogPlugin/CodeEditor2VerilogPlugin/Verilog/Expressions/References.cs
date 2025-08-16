@@ -59,7 +59,7 @@ namespace pluginVerilog.Verilog.Expressions
                     ret.Task = function;
                 }
             }
-            else
+            else if(!word.Prototype)
             {
                 word.AddError("illegal task name");
             }

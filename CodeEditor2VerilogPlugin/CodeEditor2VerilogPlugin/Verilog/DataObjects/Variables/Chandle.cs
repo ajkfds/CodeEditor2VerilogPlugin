@@ -12,6 +12,17 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public List<DataObjects.Arrays.PackedArray> PackedDimensions { get; set; } = new List<DataObjects.Arrays.PackedArray>();
 
+        public override Chandle Clone()
+        {
+            return Clone(Name);
+        }
+
+        public override Chandle Clone(string name)
+        {
+            Chandle val = new Chandle() { Name = name };
+            val.PackedDimensions = PackedDimensions;
+            return val;
+        }
 
         public DataObjects.Arrays.PackedArray? Range
         {

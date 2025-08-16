@@ -39,6 +39,19 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected Enum() { }
 
+        public override Enum Clone()
+        {
+            return Clone(Name);
+        }
+
+        public override Enum Clone(string name)
+        {
+            Enum val = new Enum() { Name = name };
+            val.PackedDimensions = PackedDimensions;
+            val.BaseType = BaseType;
+            val.Items = Items;
+            return val;
+        }
         public List<DataObjects.Arrays.PackedArray> PackedDimensions { get; set; } = new List<DataObjects.Arrays.PackedArray>();
 
         public IDataType? BaseType { get; protected set; } = null;

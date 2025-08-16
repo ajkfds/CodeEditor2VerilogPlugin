@@ -16,6 +16,16 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             this.Name = Name;
         }
 
+        public override Event Clone()
+        {
+            return Clone(Name);
+        }
+
+        public override Event Clone(string name)
+        {
+            Event val = new Event() { Name = name };
+            return val;
+        }
         public static void ParseCreateFromDeclaration(WordScanner word, NameSpace nameSpace)
         {
             //            event_declaration::= event list_of_event_identifiers ;

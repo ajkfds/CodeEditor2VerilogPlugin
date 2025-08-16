@@ -8,28 +8,46 @@ namespace pluginVerilog.Verilog.Statements
 {
     public class TaskEnable : IStatement
     {
+        /*
+            SystemVerilog IEEE1800-2017
+        subroutine_call_statement ::=     subroutine_call ;
+                                        | void ' ( function_subroutine_call ) ;
+        subroutine_call ::=               tf_call
+                                        | system_tf_call
+                                        | method_call
+                                        | [ std :: ] randomize_call
+        tf_call ::=                     ps_or_hierarchical_tf_identifier { attribute_instance } [ ( list_of_arguments ) ]
+        list_of_arguments ::=             [ expression ] { , [ expression ] } { , . identifier ( [ expression ] ) }
+                                        | .identifier ( [ expression ] ) { , . identifier ( [ expression ] ) }
+        ps_or_hierarchical_tf_identifier ::=      [ package_scope ] tf_identifier
+                                                | hierarchical_tf_identifier
+         
+         */
+
+
+
         // task_enable ::= (From Annex A - A.6.9) hierarchical_task_identifier [ ( expression { , expression } ) ] ;
         public void DisposeSubReference()
         {
         }
-        public static TaskEnable ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static TaskEnable? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             return ParseCreate(word, nameSpace, nameSpace);
         }
-        public static TaskEnable ParseCreate(WordScanner word, NameSpace nameSpace,NameSpace taskNameSpace)
+        public static TaskEnable? ParseCreate(WordScanner word, NameSpace nameSpace,NameSpace taskNameSpace)
         {
             Expressions.TaskReference taskReference = Verilog.Expressions.TaskReference.ParseCreate(word, nameSpace, taskNameSpace);
             return ParseCreate(taskReference, word, nameSpace);
         }
 
-        public static TaskEnable ParseCreate(Expressions.TaskReference taskReference,WordScanner word,NameSpace nameSpace)
+        public static TaskEnable? ParseCreate(Expressions.TaskReference taskReference,WordScanner word,NameSpace nameSpace)
         {
 
             IPortNameSpace task = taskReference.Task;
             return parseCreate(task, word, nameSpace);
         }
 
-        private static TaskEnable parseCreate(IPortNameSpace task, WordScanner word, NameSpace nameSpace)
+        private static TaskEnable? parseCreate(IPortNameSpace task, WordScanner word, NameSpace nameSpace)
         {
             TaskEnable taskEnable = new TaskEnable();
             int portCount = 0;
@@ -39,17 +57,23 @@ namespace pluginVerilog.Verilog.Statements
                 word.MoveNext();
                 while (!word.Eof)
                 {
-                    Expressions.Expression expression;
+                    Expressions.Expression? expression = null;
                     if (task == null)
-                    {
+                    {   // undefined task
                         expression = Expressions.Expression.ParseCreate(word, nameSpace);
                     }
+                    else if(portCount == 0 && task.PortsList.Count ==0 && word.Text == ")")
+                    {   // blank ()
+                        if (!word.SystemVerilog)
+                        {
+                            word.AddError("blank () is not acceptable for verilog");
+                        }
+                        break;
+                    }
                     else if (portCount == task.PortsList.Count)
-                    {
+                    {   // next of last portcount
                         word.AddError("too many expressions");
-                        word.SkipToKeyword(";");
                         return null;
-//                        expression = Expressions.Expression.ParseCreate(word, nameSpace);
                     }
                     else if (portCount > task.PortsList.Count)
                     {
@@ -66,14 +90,14 @@ namespace pluginVerilog.Verilog.Statements
                         {
                             expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace);
                         }
+                        if (expression == null)
+                        {
+                            word.AddError("missed expression");
+                            word.SkipToKeyword(";");
+                            return null;
+                        }
                     }
 
-                    if (expression == null)
-                    {
-                        word.AddError("missed expression");
-                        word.SkipToKeyword(";");
-                        return null;
-                    }
                     if (word.Text == ")")
                     {
                         break;

@@ -1,29 +1,51 @@
-﻿using pluginVerilog.Verilog.DataObjects.Arrays;
+﻿using CodeEditor2.Data;
+using pluginVerilog.Verilog.DataObjects.Arrays;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace pluginVerilog.Verilog.Expressions
 {
     public class FunctionCall : Primary
     {
         protected FunctionCall() { }
+
         public List<Expression> Expressions = new List<Expression>();
         public required string FunctionName { get; init; }
-
         public new static FunctionCall? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             throw new Exception();
         }
 
+        public required NameSpace DefinedNameSpace { init; get; }
+        public required ProjectProperty ProjectProperty { init; get; }
+        public Function? Function
+        {
+            get
+            {
+                Function? function = null;
+                if (DefinedNameSpace.BuildingBlock.NamedElements.ContainsFunction(FunctionName))
+                {
+                    function = (Function)DefinedNameSpace.BuildingBlock.NamedElements[FunctionName];
+                }
+                //else if (ProjectProperty.SystemFunctions.ContainsKey(FunctionName))
+                //{
+                //    function = ProjectProperty.SystemFunctions[FunctionName];
+                //}
+                return function;
+            }
+        }
 
-        public static FunctionCall? ParseCreate(WordScanner word,NameSpace definedNameSpace, NameSpace nameSpace)
+
+        public static FunctionCall? ParseCreate(WordScanner word,NameSpace usedNameSpace, NameSpace definedNameSpace)
         {
             if (word.RootParsedDocument.ProjectProperty == null) throw new Exception();
 
-            FunctionCall functionCall = new FunctionCall() { FunctionName = word.Text };
+            FunctionCall functionCall = new FunctionCall() { FunctionName = word.Text, DefinedNameSpace = definedNameSpace,ProjectProperty=word.ProjectProperty };
             functionCall.Reference = word.GetReference();
             bool returnConstant = true;
 
@@ -72,7 +94,7 @@ namespace pluginVerilog.Verilog.Expressions
             int i = 0;
             while (!word.Eof)
             {
-                Expression? expression = Expression.ParseCreate(word, nameSpace);
+                Expression? expression = Expression.ParseCreate(word, definedNameSpace);
                 if(expression == null)
                 {
                     return null;

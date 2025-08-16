@@ -1,4 +1,6 @@
-﻿using System;
+﻿using pluginVerilog.Verilog.Expressions;
+using pluginVerilog.Verilog.Expressions.Operators;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +10,33 @@ namespace pluginVerilog.Verilog.Statements
 {
     public static class Statements
     {
+        /* Systemverilog IEEE 1800-2017
+            statement ::= [ block_identifier : ] { attribute_instance } statement_item
+            statement_item ::=    blocking_assignment ;
+                                | nonblocking_assignment ;
+                                | procedural_continuous_assignment ;         
+                                | case_statement
+                                | conditional_statement
+                                | inc_or_dec_expression ;
+                                | subroutine_call_statement
+                                | disable_statement
+                                | event_trigger
+                                | loop_statement
+                                | jump_statement
+                                | par_block
+                                | procedural_timing_control_statement
+                                | seq_block
+                                | wait_statement
+                                | procedural_assertion_statement
+                                | clocking_drive ;
+                                | randsequence_statement
+                                | randcase_statement
+                                | expect_property_statement         
+            function_statement ::= statement
+            function_statement_or_null ::=
+                                function_statement
+                                | { attribute_instance } ;
+                                variable_identifier_list ::= variable_identifier { , variable_identifier }         */
         /*
         A.6.4 Statements
         statement   ::= { attribute_instance } blocking_assignment ;
@@ -175,6 +204,27 @@ namespace pluginVerilog.Verilog.Statements
                 default:
 
                     // subroutine_call_statement 
+                    /*
+                        SystemVerilog IEEE1800-2017
+                    subroutine_call_statement ::=     subroutine_call ;
+                                                    | void ' ( function_subroutine_call ) ;
+                    function_subroutine_call ::= subroutine_call
+
+                    subroutine_call ::=               tf_call
+                                                    | system_tf_call
+                                                    | method_call
+                                                    | [ std :: ] randomize_call
+
+                    tf_call ::=                     ps_or_hierarchical_tf_identifier { attribute_instance } [ ( list_of_arguments ) ]
+                    list_of_arguments ::=             [ expression ] { , [ expression ] } { , . identifier ( [ expression ] ) }
+                                                    | .identifier ( [ expression ] ) { , . identifier ( [ expression ] ) }
+                    ps_or_hierarchical_tf_identifier ::=      [ package_scope ] tf_identifier
+                                                            | hierarchical_tf_identifier
+                    hierarchical_tf_identifier ::= hierarchical_identifier
+                    hierarchical_identifier ::= [ $root . ] { identifier constant_bit_select . } identifier
+                    tf_identifier ::= identifier
+                     */
+
                     string nextText = word.NextText;
                     if (nextText == "(" || nextText == ";")
                     {
@@ -201,11 +251,38 @@ namespace pluginVerilog.Verilog.Statements
                         return VoidFunctionCall.ParseCreate(word, nameSpace);
                     }
 
+                    IncOrDecExpression? incOrDecExpression = IncOrDecExpression.ParseCreate(word, nameSpace);
+                    if (incOrDecExpression != null)
+                    {
+                        if (word.Text != ";")
+                        {
+                            word.AddError("; missing");
+                        }
+                        else
+                        {
+                            word.MoveNext();
+                        }
+                        return incOrDecExpression;
+                    }
+
                     Expressions.Expression? expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace);
                     if(expression != null && expression is Expressions.TaskReference)// Expressions.TaskReference)
                     {
                         Expressions.TaskReference taskReference = (Expressions.TaskReference)expression;
                         return TaskEnable.ParseCreate(taskReference, word, nameSpace);
+                    }
+                    if(expression != null && expression is Expressions.FunctionCall)
+                    {
+                        Expressions.FunctionCall functionCall = (Expressions.FunctionCall)expression;
+                        if (word.Text == ";")
+                        {
+                            word.MoveNext();
+                        }
+                        else
+                        {
+                            word.AddError("; missing");
+                        }
+                        if (functionCall.Function?.ReturnVariable == null) return VoidFunctionCall.Create(functionCall);
                     }
 
                     if(expression == null)
@@ -213,6 +290,7 @@ namespace pluginVerilog.Verilog.Statements
                         word.AddError("illegal statement");
                         return null;
                     }
+
 
                     IStatement? statement;
                     switch (word.Text)
@@ -241,9 +319,9 @@ namespace pluginVerilog.Verilog.Statements
                             break;
                         case "++":
                         case "--":
+                            word.AddError("illegal operator");
                             word.MoveNext();
                             return null;
-                            break;
                         default:
                             expression.Reference.AddError("illegal statement");
                             return null;
@@ -308,7 +386,7 @@ namespace pluginVerilog.Verilog.Statements
             return getSpace(identifier, nameSpace.Parent);
         }
 
-        public static IStatement ParseCreateStatementOrNull(WordScanner word, NameSpace nameSpace)
+        public static IStatement? ParseCreateStatementOrNull(WordScanner word, NameSpace nameSpace)
         {
             if(word.GetCharAt(0) == ';')
             {
@@ -319,7 +397,7 @@ namespace pluginVerilog.Verilog.Statements
         }
 
 
-        public static IStatement ParseCreateFunctionStatement(WordScanner word, NameSpace nameSpace)
+        public static IStatement? ParseCreateFunctionStatement(WordScanner word, NameSpace nameSpace)
         {
             return ParseCreateStatement(word,nameSpace);
         }

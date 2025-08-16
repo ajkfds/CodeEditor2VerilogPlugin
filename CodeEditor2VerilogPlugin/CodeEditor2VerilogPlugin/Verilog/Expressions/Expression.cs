@@ -161,7 +161,7 @@ namespace pluginVerilog.Verilog.Expressions
 
         public static Expression? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
-            Expression? exp = parseCreate(word, nameSpace,false);
+            Expression? exp = ParseCreate(word, nameSpace,false);
             if (exp == null) return null;
 
             if(exp is AssignmentOperator)
@@ -187,13 +187,13 @@ namespace pluginVerilog.Verilog.Expressions
 
         public static Expression? ParseCreateInBracket(WordScanner word, NameSpace nameSpace)
         {
-            Expression? exp = parseCreate(word, nameSpace,true);
+            Expression? exp = ParseCreate(word, nameSpace,true);
             if (exp == null) return null;
 
             return exp;
         }
 
-        public static Expression? parseCreate(WordScanner word, NameSpace nameSpace,bool acceptAssignment)
+        public static Expression? ParseCreate(WordScanner word, NameSpace nameSpace,bool acceptAssignment)
         {
             Expression expression = new Expression();
             List<Operator> operatorsStock = new List<Operator>();

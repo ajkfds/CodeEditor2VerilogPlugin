@@ -252,6 +252,39 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
 
         public static bool ParseDeclaration(WordScanner word, NameSpace nameSpace)
         {
+            /* systemverilog 1800-2017
+            
+            net_declaration::=  
+                      net_type [drive_strength | charge_strength] ["vectored" | "scalared"] data_type_or_implicit[delay3] list_of_net_decl_assignments;
+                    | net_type_identifier[delay_control] list_of_net_decl_assignments;
+                    | "interconnect" implicit_data_type[ "#" delay_value ] net_identifier { unpacked_dimension } [ "," net_identifier { unpacked_dimension }] ;
+
+            net_type ::= 
+                    "supply0" | "supply1" | "tri" | "triand" | "trior" | "trireg" | "tri0" | "tri1" | "uwire" | "wire" | "wand" | "wor"
+            drive_strength ::=
+                      ( strength0 , strength1 )
+                    | ( strength1 , strength0 )
+                    | ( strength0 , highz1 )
+                    | ( strength1 , highz0 )
+                    | ( highz0 , strength1 )
+                    | ( highz1 , strength0 )
+            strength0 ::= supply0 | strong0 | pull0 | weak0
+            strength1 ::= supply1 | strong1 | pull1 | weak1
+            charge_strength ::= ( small ) | ( medium ) | ( large )
+            delay3 ::= // from A.2.2.3
+            # delay_value | # ( mintypmax_expression [ , mintypmax_expression [ , mintypmax_expression ] ] )
+            delay2 ::= # delay_value | # ( mintypmax_expression [ , mintypmax_expression ] )
+            delay_value ::=
+            unsigned_number
+            | real_number
+            | ps_identifier
+            | time_literal
+            | 1step
+            list_of_net_decl_assignments ::= net_decl_assignment { , net_decl_assignment } // from A.2.3
+            net_decl_assignment ::= net_identifier { unpacked_dimension } [ = expression ]
+            */
+
+
             // ### Verilog 2001
 
             // net_declaration ::=    net_type                                          [signed]        [delay3] list_of_net_identifiers;
@@ -346,9 +379,12 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                 return true;
             }
 
+
+            // data type
+
             // [range]
             DataObjects.Arrays.PackedArray? range = null;
-            if (word.GetCharAt(0) == '[')
+            while(!word.Eof && word.GetCharAt(0) == '[')
             {
                 range = DataObjects.Arrays.PackedArray.ParseCreate(word, nameSpace);
                 if (word.Eof || range == null)
@@ -356,10 +392,6 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                     word.AddError("illegal net declaration");
                     return true;
                 }
-            }
-            else
-            {
-//                DataTypes.DataType dataType = DataTypes.DataType.ParseCreate(word, nameSpace,DataTypes.DataTypeEnum.Logic);
             }
 
 
@@ -486,8 +518,11 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
 
         public override DataObject Clone()
         {
-            return new Net() { Name = Name, DefinedReference = DefinedReference, PackedDimensions = PackedDimensions };
-//            throw new NotImplementedException();
+            return Clone(Name);
+        }
+        public override DataObject Clone(string name)
+        {
+            return new Net() { Name = name, DefinedReference = DefinedReference, PackedDimensions = PackedDimensions };
         }
     }
 }

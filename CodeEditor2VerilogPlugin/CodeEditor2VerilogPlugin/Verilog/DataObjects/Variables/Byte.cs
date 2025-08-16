@@ -11,6 +11,18 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected Byte() { }
 
+        public override Byte Clone()
+        {
+            return Clone(Name);
+        }
+
+        public override Byte Clone(string name)
+        {
+            Byte val = new Byte() { Name = name };
+            val.DataType = DataType;
+            val.Signed = Signed;
+            return val;
+        }
         public static new Byte Create(string name,IDataType dataType)
         {
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.Byte);
@@ -19,14 +31,6 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
             Byte val = new Byte() { Name = name };
             val.DataType = dType;
-            return val;
-        }
-
-        public override Variable Clone()
-        {
-            Byte val = new Byte() { Name = Name };
-            val.DataType = DataType;
-            val.Signed = Signed;
             return val;
         }
 

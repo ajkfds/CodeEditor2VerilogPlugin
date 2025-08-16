@@ -16,6 +16,16 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public override NamedElements NamedElements { get { return Class.NamedElements; } }
 
+        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        {
+            AppendTypeLabel(label);
+            label.AppendText(Name);
+        }
+        public override void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        {
+            label.AppendText(Class.Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+            label.AppendText(" ");
+        }
         public static new Object Create(string name,IDataType dataType)
         {
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.Class);

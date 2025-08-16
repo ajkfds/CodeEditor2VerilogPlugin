@@ -408,7 +408,11 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
 
         public override DataObject Clone()
         {
-            return new Constants { DefinedReference = DefinedReference, Expression = Expression, Name = Name };
+            return Clone(Name);
+        }
+        public override DataObject Clone(string name)
+        {
+            return new Constants { DefinedReference = DefinedReference, Expression = Expression, Name = name };
         }
     }
 }

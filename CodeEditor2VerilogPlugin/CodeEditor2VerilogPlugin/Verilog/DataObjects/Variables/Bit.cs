@@ -10,6 +10,19 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected Bit() { }
 
+        public override Bit Clone()
+        {
+            return Clone(Name);
+        }
+
+        public override Bit Clone(string name)
+        {
+            Bit val = new Bit() { Name = name };
+            val.DataType = DataType;
+            val.PackedDimensions = PackedDimensions;
+            val.Signed = Signed;
+            return val;
+        }
         public static new Bit Create(string name,DataTypes.IDataType dataType)
         {
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypes.DataTypeEnum.Bit);
@@ -18,15 +31,6 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             Bit val = new Bit() { Name = name };
             val.PackedDimensions = dType.PackedDimensions;
             val.DataType = dType;
-            return val;
-        }
-
-        public override Variable Clone()
-        {
-            Bit val = new Bit() { Name = Name };
-            val.DataType = DataType;
-            val.PackedDimensions = PackedDimensions;
-            val.Signed = Signed;
             return val;
         }
 

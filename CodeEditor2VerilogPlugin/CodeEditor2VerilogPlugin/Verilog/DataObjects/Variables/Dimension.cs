@@ -1,8 +1,10 @@
-﻿using System;
+﻿using SkiaSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
@@ -12,10 +14,8 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
 
 
-
-
-        public Expressions.Expression MsbBitExpression { get; protected set; }
-        public Expressions.Expression LsbBitExpression { get; protected set; }
+        public required Expressions.Expression MsbBitExpression { get; init; }
+        public required Expressions.Expression LsbBitExpression { get; init; }
         /*
         A.2.5 Declaration ranges
         dimension ::= [ dimension_constant_expression : dimension_constant_expression ]
@@ -34,12 +34,12 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         //    return label;
         //}
 
-        public static Dimension ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static Dimension? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             if (word.GetCharAt(0) != '[') System.Diagnostics.Debugger.Break();
             word.MoveNext(); // [
 
-            Expressions.Expression msbExpression = Expressions.Expression.ParseCreate(word, nameSpace);
+            Expressions.Expression? msbExpression = Expressions.Expression.ParseCreate(word, nameSpace);
             if (word.Eof || msbExpression == null)
             {
                 word.AddError("illegal range");
@@ -48,10 +48,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             if (word.GetCharAt(0) == ']')
             {
                 word.MoveNext();
-                Dimension range = new Dimension();
-                range.MsbBitExpression = msbExpression;
-                range.LsbBitExpression = msbExpression;
-
+                Dimension range = new Dimension() { MsbBitExpression = msbExpression,LsbBitExpression = msbExpression };
                 return range;
             }
 
@@ -66,7 +63,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 word.AddError("illegal range");
                 return null;
             }
-            Expressions.Expression lsbExpression = Expressions.Expression.ParseCreate(word, nameSpace);
+            Expressions.Expression? lsbExpression = Expressions.Expression.ParseCreate(word, nameSpace);
             if (word.Eof || lsbExpression == null)
             {
                 word.AddError("illegal range");
@@ -79,10 +76,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             }
             word.MoveNext(); // [
             {
-                Dimension range = new Dimension();
-                range.MsbBitExpression = msbExpression;
-                range.LsbBitExpression = lsbExpression;
-
+                Dimension range = new Dimension() { MsbBitExpression=msbExpression,LsbBitExpression = msbExpression };
                 return range;
             }
         }

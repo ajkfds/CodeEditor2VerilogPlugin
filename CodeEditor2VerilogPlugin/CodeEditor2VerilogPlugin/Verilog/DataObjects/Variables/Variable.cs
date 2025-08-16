@@ -103,10 +103,9 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 case DataTypeEnum.Chandle:
                     return Chandle.Create(name, dataType);
                 default:
-                    System.Diagnostics.Debugger.Break();
+                    throw new Exception();
                     break;
             }
-            throw new Exception();
         }
 
 
@@ -127,7 +126,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             return val;
         }
 
-        public virtual Variable Clone(string name)
+        public override Variable Clone(string name)
         {
             Variable val = new Variable() { Name = name };
             return val;

@@ -24,12 +24,16 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public override Variable Clone()
         {
-            Int val = new Int() { Name = Name };
+            return Clone(Name);
+        }
+
+        public override Variable Clone(string name)
+        {
+            Int val = new Int() { Name = name };
             val.DataType = DataType;
             val.Signed = Signed;
             return val;
         }
-
 
     }
 }

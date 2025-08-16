@@ -32,7 +32,7 @@ namespace pluginVerilog.Verilog.Statements.SystemTask
 
                     while (!word.Eof)
                     {
-                        Expressions.Expression expression = Expressions.Expression.ParseCreate(word, nameSpace);
+                        Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
                         if (expression == null)
                         {
                             word.AddError("missed expression");

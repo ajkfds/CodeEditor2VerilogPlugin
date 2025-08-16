@@ -13,6 +13,13 @@ namespace pluginVerilog.Verilog.Statements
         {
         }
 
+        public FunctionCall? FunctionCall { get; private set; } = null!; // Initialized in Create method
+        public static VoidFunctionCall Create(FunctionCall functionCall)
+        {
+            VoidFunctionCall voidFunctionCall = new VoidFunctionCall();
+            voidFunctionCall.FunctionCall = functionCall;
+            return voidFunctionCall;
+        }
         public static VoidFunctionCall? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "void") throw new Exception();
@@ -29,6 +36,7 @@ namespace pluginVerilog.Verilog.Statements
             word.MoveNext();
 
             FunctionCall? func = FunctionCall.ParseCreate(word, nameSpace, nameSpace);
+            voidFunctionCall.FunctionCall = func;
 
             if (word.Eof || func == null || word.Text != ")")
             {

@@ -1,4 +1,5 @@
 ﻿using pluginVerilog.Verilog.DataObjects;
+using pluginVerilog.Verilog.Expressions;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -105,11 +106,11 @@ namespace pluginVerilog.Verilog.Statements
         public void DisposeSubReference()
         {
             Expression.DisposeSubReference(true);
-            Statement.DisposeSubReference();
+            if(Statement!=null) Statement.DisposeSubReference();
         }
 
         public Expressions.Expression Expression;
-        public IStatement Statement;
+        public IStatement? Statement;
         //A.6.8 Looping statements
         //function_loop_statement ::= forever function_statement          
         //                            | repeat(expression ) function_statement
@@ -206,17 +207,15 @@ namespace pluginVerilog.Verilog.Statements
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
             /*
-            loop_statement ::=    forever statement_or_null 
-                                | repeat ( expression ) statement_or_null 
-                                | while ( expression ) statement_or_null 
-                                | for ( [ for_initialization ] ; [ expression ] ; [ for_step ] ) statement_or_null 
-                                | do statement_or_null while ( expression ) ;
-                                | foreach ( ps_or_hierarchical_array_identifier [ loop_variables ] ) statement 
+            loop_statement ::=    for ( [ for_initialization ] ; [ expression ] ; [ for_step ] ) statement_or_null 
+                                | ...
             for_initialization ::=    list_of_variable_assignments 
                                     | for_variable_declaration { , for_variable_declaration } 
             for_variable_declaration ::=
                         [ var ] data_type variable_identifier = expression { , variable_identifier = expression }
-            for_step ::= for_step_assignment { , for_step_assignment } 
+
+            for_step ::= for_step_assignment { , for_step_assignment }
+
             for_step_assignment ::=       operator_assignment 
                                         | inc_or_dec_expression 
                                         | function_subroutine_call 
@@ -281,11 +280,20 @@ namespace pluginVerilog.Verilog.Statements
             }
 
             // for_step
-            DataObjects.VariableAssignment assign = Verilog.DataObjects.VariableAssignment.ParseCreate(word, forStatement);
-            if(assign == null)
+            IncOrDecExpression? incOrDecExpression = IncOrDecExpression.ParseCreate(word, forStatement);
+            if(incOrDecExpression != null)
             {
-                forStatement.Expression = Expressions.Expression.ParseCreate(word, forStatement);
+
             }
+            else
+            {
+                DataObjects.VariableAssignment? assign = Verilog.DataObjects.VariableAssignment.ParseCreate(word, forStatement);
+                if (assign == null)
+                {
+                    forStatement.Expression = Expressions.Expression.ParseCreate(word, forStatement);
+                }
+            }
+
 
             if (word.GetCharAt(0) != ')')
             {

@@ -10,7 +10,7 @@ namespace pluginVerilog.Verilog.ModuleItems
     public class InitialConstruct
     {
         protected InitialConstruct() { }
-        public Statements.IStatement Statement { get; protected set; }
+        public Statements.IStatement? Statement { get; protected set; }
 
         public static bool Parse(WordScanner word, NameSpace nameSpace)
         {
