@@ -438,7 +438,12 @@ namespace pluginVerilog
             {"$test$plusargs",null },
             {"$value$plusargs",null },
 
+
             //SystemVerilog
+            // 18.13 Random number system functions and methods
+            {"$urandom",null },
+            {"$urandom_range",null },
+
             //Simulation time functions (20.3)
             //{"$realtime",null },
             //{"$stime",null },

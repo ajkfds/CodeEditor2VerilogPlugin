@@ -202,6 +202,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 }
 
                 Variable variable = Variable.Create(word.Text,dataType);
+                variable.DefinedNameSpace = nameSpace;
                 if (variable == null) return true;
                 variable.DefinedReference = word.GetReference();
 
@@ -256,13 +257,19 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 if (word.Prototype)
                 {
                     if (!nameSpace.NamedElements.ContainsKey(variable.Name))
-                    {
+                    {   // new variable
                         nameSpace.NamedElements.Add(variable.Name, variable);
                     }
                     else
-                    {
-                        if (nameSpace.BuildingBlock.AnsiStylePortDefinition)
-                        {
+                    {   // duplicated name
+                        INamedElement oldNamedElect = nameSpace.NamedElements[variable.Name];
+                        DataObject? oldDataObject = oldNamedElect as DataObject;
+                        
+                        if(oldDataObject != null && oldDataObject.DefinedNameSpace?.BuildingBlock != nameSpace.BuildingBlock)
+                        { // override base class
+
+                        }else if (nameSpace.BuildingBlock.AnsiStylePortDefinition)
+                        {   
                             variable.DefinedReference.AddError("duplicate");
                         }
                         else

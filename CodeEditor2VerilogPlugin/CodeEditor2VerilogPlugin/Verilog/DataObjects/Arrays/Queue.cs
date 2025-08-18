@@ -47,6 +47,15 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
             AppendLabel(label);
             return label;
         }
+        /* queue methods
+        function int size(); 
+        function void insert(input integer index, input element_t item);
+        function void delete( [input integer index] );
+        function element_t pop_front();
+        function element_t pop_back();
+        function void push_front(input element_t item);
+        function void push_back(input element_t item);
+         */
 
         public static new Queue? ParseCreate(WordScanner word, NameSpace nameSpace)
         {

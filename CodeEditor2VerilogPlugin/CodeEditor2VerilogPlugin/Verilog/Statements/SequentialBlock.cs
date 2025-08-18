@@ -74,6 +74,13 @@ namespace pluginVerilog.Verilog.Statements
         private static IStatement? parseCreateUnnamedSequentialBlock(WordScanner word, NameSpace nameSpace, IndexReference beginIndex)
         {
             SequentialBlock sequentialBlock = new SequentialBlock();
+
+            // local item declaration
+            while (word.SystemVerilog && !word.Eof && word.Text != "end")
+            {
+                if (!Items.BlockItemDeclaration.Parse(word, nameSpace)) break;
+            }
+
             while (!word.Eof && word.Text != "end")
             {
                 IStatement? statement = Verilog.Statements.Statements.ParseCreateStatement(word, nameSpace);

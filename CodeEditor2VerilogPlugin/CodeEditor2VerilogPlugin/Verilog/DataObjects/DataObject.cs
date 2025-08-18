@@ -45,6 +45,24 @@ namespace pluginVerilog.Verilog.DataObjects
 
         public bool CommentAnnotation_Discarded = false;
         public virtual NamedElements NamedElements { get; } = new NamedElements();
+
+        private WeakReference<NameSpace>? wr_DefinedNameSpace = null;
+        public NameSpace? DefinedNameSpace
+        {
+            get
+            {
+                if (wr_DefinedNameSpace == null) return null;
+                if(!wr_DefinedNameSpace.TryGetTarget(out NameSpace? nameSpace))
+                {
+                    return null;
+                }
+                return nameSpace;
+            }
+            set
+            {
+                wr_DefinedNameSpace = new WeakReference<NameSpace>(value);
+            }
+        }
         public static DataObject Create(string name,DataTypes.IDataType dataType)
         {
             switch (dataType.Type)

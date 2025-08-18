@@ -134,7 +134,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 }
             }
 
-            if (word.Text != "class") System.Diagnostics.Debugger.Break();
+            if (word.Text != "class") throw new Exception();
             word.Color(CodeDrawStyle.ColorType.Keyword);
             IndexReference beginReference = word.CreateIndexReference();
             word.MoveNext();
@@ -205,6 +205,29 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     nameSpace.BuildingBlock.NamedElements.Add(class_.Name, class_);
                 }
 
+                if(word.Text == ":")
+                {
+                    word.MoveNext();
+                    if( class_!= null && word.Text == class_.Name)
+                    {
+                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.MoveNext();
+                    }
+                    else
+                    {
+                        if (General.IsIdentifier(word.Text))
+                        {
+                            word.AddError("illegal clas name");
+                        }
+                        else
+                        {
+                            word.Color(CodeDrawStyle.ColorType.Identifier);
+                            word.AddError("illegal clas name");
+                            word.MoveNext();
+                        }
+                    }
+                }
+
                 return class_;
             }
 
@@ -231,7 +254,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             WordScanner word,
             NameSpace nameSpace,
             //            string parameterOverrideModueName,
-            Dictionary<string, Expressions.Expression> parameterOverrides,
+            Dictionary<string, Expressions.Expression>? parameterOverrides,
             Attribute? attribute, 
             Class class_
             )
