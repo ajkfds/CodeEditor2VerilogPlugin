@@ -160,6 +160,8 @@ namespace pluginVerilog.Verilog.Statements
                     return WhileStatememt.ParseCreate(word, nameSpace);
                 case "for":
                     return ForStatememt.ParseCreate(word, nameSpace);
+                case "do":
+                    return DoStatement.ParseCreate(word, nameSpace);
 
                 // case_statement 
                 case "case":

@@ -16,7 +16,7 @@ namespace pluginVerilog.Verilog.Statements
         protected DelayControl() { }
 
         public Expressions.Expression DelayValue { get; protected set; }
-        public static DelayControl ParseCreate(WordScanner word,NameSpace nameSpace)
+        public static DelayControl? ParseCreate(WordScanner word,NameSpace nameSpace)
         {
             /*
             delay_control   ::= # delay_value
@@ -30,7 +30,7 @@ namespace pluginVerilog.Verilog.Statements
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
-            Expressions.Expression expression = Expressions.Expression.ParseCreate(word, nameSpace);
+            Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
             if(expression == null)
             {
                 word.AddError("illegal delay control");
@@ -48,7 +48,7 @@ namespace pluginVerilog.Verilog.Statements
         protected EventControl() { }
         public List<EventExpression> EventExpressions { get; protected set; }
 
-        public static EventControl ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static EventControl? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             /*
             event_control       ::= @ event_identifier
@@ -121,7 +121,7 @@ namespace pluginVerilog.Verilog.Statements
         protected EventExpression() { }
 
         public EventTypeEnum EventType { get; protected set; }
-        public Expressions.Expression Expression { get; protected set; }
+        public Expressions.Expression? Expression { get; protected set; }
 
         public enum EventTypeEnum
         {
@@ -143,7 +143,7 @@ namespace pluginVerilog.Verilog.Statements
 
             List<EventExpression> eventExpressions = new List<EventExpression>();
 
-            EventExpression eventExpression = EventExpression.ParseCreateSingle(word, nameSpace);
+            EventExpression? eventExpression = EventExpression.ParseCreateSingle(word, nameSpace);
             eventExpressions.Add(eventExpression);
 
             while (!word.Eof)
@@ -171,9 +171,9 @@ namespace pluginVerilog.Verilog.Statements
             return eventExpressions;
         }
 
-        public static EventExpression ParseCreateSingle(WordScanner word, NameSpace nameSpace)
+        public static EventExpression? ParseCreateSingle(WordScanner word, NameSpace nameSpace)
         {
-            EventExpression eventExpression = new EventExpression();
+            EventExpression? eventExpression = new EventExpression();
             switch (word.Text)
             {
                 case "posedge":

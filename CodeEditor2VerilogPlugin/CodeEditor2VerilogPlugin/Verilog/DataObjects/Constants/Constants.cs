@@ -152,7 +152,14 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                     }
                     if (word.GetCharAt(0) == '[')
                     {
-                        DataObjects.Arrays.VariableArray? range = DataObjects.Arrays.VariableArray.ParseCreate(word, (NameSpace)module);
+                        IArray? array = DataObjects.Arrays.PackedArray.ParseCreate(word, (NameSpace)module);
+                        if(array is UnPackedArray)
+                        {
+                            // TODO : implement
+                        }else if(array != null)
+                        {
+                            word.AddError("only unpacked array is acceptable");
+                        }
                     }
                     break;
             }

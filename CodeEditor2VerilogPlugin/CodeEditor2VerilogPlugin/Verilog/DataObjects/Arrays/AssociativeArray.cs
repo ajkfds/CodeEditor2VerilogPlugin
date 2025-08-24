@@ -7,26 +7,43 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.Arrays
 {
-    public class AssociativeArray : VariableArray
+    public class AssociativeArray : DataObject,IArray
     {
-        public AssociativeArray(DataTypes.IDataType? indexDataType)
+        protected AssociativeArray() { }
+        public int? Size { get; protected set; } = null;
+        public bool Constant { get; protected set; } = false;
+
+        
+        public static AssociativeArray Create(DataObject dataObject, DataTypes.IDataType? indexDataType)
         {
-            IndexDataType = indexDataType;
+            AssociativeArray associativeArray = new AssociativeArray() { Name = dataObject.Name };
+            associativeArray.IndexDataType = indexDataType;
 
             DataTypes.IntegerVectorType? integerVectorType = indexDataType as DataTypes.IntegerVectorType;
-            if(integerVectorType != null)
+            if (integerVectorType != null)
             {
-                Size = integerVectorType.BitWidth;
-                return;
+                associativeArray.Size = integerVectorType.BitWidth;
+                return associativeArray;
             }
 
             DataTypes.IntegerAtomType? integerAtomType = indexDataType as DataTypes.IntegerAtomType;
-            if(integerAtomType != null)
+            if (integerAtomType != null)
             {
-                Size = integerAtomType.BitWidth;
+                associativeArray.Size = integerAtomType.BitWidth;
             }
+            return associativeArray;
         }
+
         public DataTypes.IDataType? IndexDataType { get; set; } = null;
 
+        public override DataObject Clone()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override DataObject Clone(string name)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -15,10 +15,10 @@ namespace pluginVerilog.Verilog.Statements
 
         public void DisposeSubReference()
         {
-            Statement.DisposeSubReference();
+            if(Statement != null) Statement.DisposeSubReference();
         }
 
-        public IStatement Statement;
+        public IStatement? Statement;
         //A.6.8 Looping statements
         //function_loop_statement ::= forever function_statement          
         //                            | repeat(expression ) function_statement
@@ -30,12 +30,12 @@ namespace pluginVerilog.Verilog.Statements
         //                            | for (variable_assignment ; expression ; variable_assignment ) statement
 
         /* # SystemVerilog
-        loop_statement ::=    forever statement_or_null 
-                            | repeat ( expression ) statement_or_null 
-                            | while ( expression ) statement_or_null 
-                            | for ( [ for_initialization ] ; [ expression ] ; [ for_step ] ) statement_or_null 
-                            | do statement_or_null while ( expression ) ;
-                            | foreach ( ps_or_hierarchical_array_identifier [ loop_variables ] ) statement
+        loop_statement ::=    "forever" statement_or_null 
+                            | "repeat" "(" expression ")" statement_or_null 
+                            | "while" "(" expression ")" statement_or_null 
+                            | "for" "(" [ for_initialization ] ";" [ expression ] ";" [ for_step ] ")" statement_or_null 
+                            | "do" statement_or_null "while" "(" expression ")" ";"
+                            | "foreach" "(" ps_or_hierarchical_array_identifier "[" loop_variables "]" ")" statement
         */
 
         public static ForeverStatement ParseCreate(WordScanner word, NameSpace nameSpace)
@@ -50,6 +50,72 @@ namespace pluginVerilog.Verilog.Statements
         }
     }
 
+    public class DoStatement : IStatement
+    {
+        protected DoStatement() { }
+
+        public void DisposeSubReference()
+        {
+            if (Statement != null) Statement.DisposeSubReference();
+        }
+
+        public IStatement? Statement;
+        public Expression? Condition;
+        /* # SystemVerilog
+        loop_statement ::=    "do" statement_or_null "while" "(" expression ")" ";"
+                            | ...
+        */
+
+        public static DoStatement ParseCreate(WordScanner word, NameSpace nameSpace)
+        {
+            if (word.Text != "do") throw new Exception();
+            if (!word.SystemVerilog) word.AddError("SystemVerilog expression");
+
+            DoStatement doStatement = new DoStatement();
+            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.MoveNext();
+
+            doStatement.Statement = Statements.ParseCreateStatement(word, nameSpace);
+
+            if(word.Eof || word.Text != "while")
+            {
+                word.AddError("while required");
+                word.SkipToKeyword(";");
+                return doStatement;
+            }
+            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.MoveNext();
+            if(word.Eof || word.Text != "(")
+            {
+                word.AddError("(expression) required");
+                word.SkipToKeyword(";");
+                return doStatement;
+            }
+            word.MoveNext();
+
+            doStatement.Condition = Expression.ParseCreate(word, nameSpace);
+            if (doStatement.Condition == null) word.AddError("expression required");
+
+            if (word.Eof || word.Text != ")")
+            {
+                word.AddError(") required");
+                word.SkipToKeyword(";");
+                return doStatement;
+            }
+            word.MoveNext();
+
+            if (word.Text == ";")
+            {
+                word.MoveNext();
+            }
+            else
+            {
+                word.AddError("; requited");
+            }
+
+                return doStatement;
+        }
+    }
     public class RepeatStatement : IStatement
     {
         protected RepeatStatement() { }

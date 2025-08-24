@@ -325,6 +325,15 @@ namespace pluginVerilog.Verilog
                 MoveNext();
             }
         }
+        public void SkipToKeywords(List<string> stopKeywords)
+        {
+            while (!Eof)
+            {
+                if (stopKeywords.Contains(Text)) return;
+                if (General.ListOfStatementStopKeywords.Contains(Text)) return;
+                MoveNext();
+            }
+        }
 
         public string SectionName
         {

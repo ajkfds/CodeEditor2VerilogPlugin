@@ -7,6 +7,7 @@ using pluginVerilog.Verilog.Items;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -28,6 +29,14 @@ namespace pluginVerilog.Verilog
         public DataObjects.Variables.Variable? ReturnVariable = null;
 
         public Statements.IStatement Statement;
+
+        public Function Create(
+            NameSpace parent
+            )
+        {
+            Function function = new Function(parent);
+            return function;
+        }
 
         private enum valType
         {

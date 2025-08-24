@@ -10,7 +10,7 @@ namespace pluginVerilog.Verilog
     {
         public required string Name { get; init;  }
         public Attribute? Attribute { get; set; }
-        public required WordReference DefinitionReference { get; init; }
+        public required WordReference? DefinitionReference { get; init; }
         public required CodeEditor2.Data.Project Project { get; init; }
 
         public Dictionary<string, string> Properties = new Dictionary<string, string>();

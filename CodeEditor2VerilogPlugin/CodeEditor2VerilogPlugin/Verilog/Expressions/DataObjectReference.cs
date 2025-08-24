@@ -143,7 +143,7 @@ namespace pluginVerilog.Verilog.Expressions
             word.MoveNext();
 
             // parse dimensions
-            while (!word.Eof && val.Dimensions.Count < dataObject.Dimensions.Count)
+            while (!word.Eof && val.Dimensions.Count < dataObject.UnpackedArrays.Count)
             {
                 if (word.GetCharAt(0) != '[')
                 {

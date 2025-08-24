@@ -1,4 +1,5 @@
-﻿using pluginVerilog.Verilog.DataObjects.Variables;
+﻿using pluginVerilog.Verilog.DataObjects.Arrays;
+using pluginVerilog.Verilog.DataObjects.Variables;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -106,7 +107,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
 
             label.AppendText(Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Net));
 
-            foreach (DataObjects.Arrays.VariableArray dimension in Dimensions)
+            foreach (DataObjects.Arrays.VariableArray dimension in UnpackedArrays)
             {
                 label.AppendText(" ");
                 label.AppendLabel(dimension.GetLabel());
@@ -476,12 +477,22 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                 }
                 else if (word.Text == "[")
                 {
-                    net.Dimensions.Clear();
+                    net.UnpackedArrays.Clear();
                     // { variable_dimension }
                     while (word.Text == "[" && !word.Eof)
                     {
-                        DataObjects.Arrays.VariableArray? uPrange = DataObjects.Arrays.VariableArray.ParseCreate(word, nameSpace);
-                        if (uPrange != null) net.Dimensions.Add(uPrange);
+                        IArray? array = DataObjects.Arrays.UnPackedArray.ParseCreate(word, nameSpace);
+                        if(array is not null)
+                        {
+                            if(array is UnPackedArray)
+                            {
+                                net.UnpackedArrays.Add((UnPackedArray)array);
+                            }
+                            else
+                            {
+                                word.AddError("illegal array");
+                            }
+                        }
                     }
 
 

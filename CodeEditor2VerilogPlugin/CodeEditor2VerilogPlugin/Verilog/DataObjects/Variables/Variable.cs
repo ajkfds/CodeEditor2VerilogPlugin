@@ -1,14 +1,16 @@
-﻿using System;
+﻿using pluginVerilog.Verilog.DataObjects.Arrays;
+using pluginVerilog.Verilog.DataObjects.DataTypes;
+using pluginVerilog.Verilog.Statements;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Data;
+using System.Drawing;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
-using System.Drawing;
-using pluginVerilog.Verilog.DataObjects.DataTypes;
-using System.Data;
-using pluginVerilog.Verilog.Statements;
-using System.Linq.Expressions;
-using System.ComponentModel.DataAnnotations;
+using TextMateSharp.Model;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
@@ -190,7 +192,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             IDataType? dataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, null);
             if (dataType == null) return pointerMoved;
 
-            List<Variable> vars = new List<Variable>();
+            List<DataObject> vars = new List<DataObject>();
 
             while (!word.Eof && word.Text !=";")
             {
@@ -201,7 +203,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                     break;
                 }
 
-                Variable variable = Variable.Create(word.Text,dataType);
+                DataObject variable = Variable.Create(word.Text,dataType);
                 variable.DefinedNameSpace = nameSpace;
                 if (variable == null) return true;
                 variable.DefinedReference = word.GetReference();
@@ -213,8 +215,20 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 // { variable_dimension }
                 while(word.Text == "[" && !word.Eof)
                 {
-                    DataObjects.Arrays.VariableArray? range = DataObjects.Arrays.VariableArray.ParseCreate(word, nameSpace);
-                    if(range != null )variable.Dimensions.Add(range);
+                    IArray? array = DataObjects.Arrays.VariableArray.ParseCreate(variable,word, nameSpace);
+                    if(array is UnPackedArray)
+                    {
+                        UnPackedArray unPackedArray = (UnPackedArray)array;
+                        variable.UnpackedArrays.Add(unPackedArray);
+                    }else if(array is Queue)
+                    {
+                        Queue queue = (Queue)array;
+                        variable = queue;
+                    }else if(array is AssociativeArray)
+                    {
+                        AssociativeArray associativeArray = (AssociativeArray)array;
+                        variable = associativeArray;
+                    }
                 }
 
 
@@ -327,7 +341,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
             if(comment != "")
             {
-                foreach (Variable variable in vars)
+                foreach (DataObject variable in vars)
                 {
                     variable.Comment = comment;
                 }

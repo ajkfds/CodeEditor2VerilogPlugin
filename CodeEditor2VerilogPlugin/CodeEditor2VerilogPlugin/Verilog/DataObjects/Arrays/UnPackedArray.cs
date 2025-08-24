@@ -6,8 +6,83 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.Arrays
 {
-    public class UnPackedArray : VariableArray
+    public class UnPackedArray : VariableArray, IArray
     {
+        public static UnPackedArray? ParseCreate(WordScanner word, NameSpace nameSpace, Expressions.Expression expression)
+        {
+            // unpacked_dimension   ::= [constant_range] | [constant_expression]
+            // constant_range       ::= constant_expression : constant_expression
+
+            if (word.Text == "]")
+            {
+                word.MoveNext();
+                return new UnPackedArray(expression);
+            }
+
+            if (word.Text != ":")
+            {
+                word.AddError(": expected");
+                return null;
+            }
+            word.MoveNext();
+
+            Expressions.Expression? expression1 = Expressions.Expression.ParseCreate(word, nameSpace, false);
+            if (expression1 == null)
+            {
+                word.AddError("expression expected");
+                return null;
+            }
+            if (word.Text == "]")
+            {
+                word.MoveNext();
+                return new UnPackedArray(expression, expression1);
+            }
+
+            return null;
+        }
+        public static UnPackedArray? ParseCreate(WordScanner word, NameSpace nameSpace)
+        {
+            // unpacked_dimension   ::= [constant_range] | [constant_expression]
+            // constant_range       ::= constant_expression : constant_expression
+
+            if (word.Text != "[") return null;
+            word.MoveNext();
+
+            Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
+
+            if (expression == null)
+            {
+                word.AddError("illegal unpacked array");
+                return null;
+            }
+
+            if (word.Text == "]")
+            {
+                word.MoveNext();
+                return new UnPackedArray(expression);
+            }
+
+            if (word.Text != ":")
+            {
+                word.AddError(": expected");
+                return null;
+            }
+            word.MoveNext();
+
+            Expressions.Expression? expression1 = Expressions.Expression.ParseCreate(word, nameSpace, false);
+            if (expression1 == null)
+            {
+                word.AddError("expression expected");
+                return null;
+            }
+            if (word.Text == "]")
+            {
+                word.MoveNext();
+                return new UnPackedArray(expression, expression1);
+            }
+
+            return null;
+        }
         public UnPackedArray(Expressions.Expression widthExpression) 
         {
             if (widthExpression == null) return;

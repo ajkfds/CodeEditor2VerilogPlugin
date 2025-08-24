@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.Arrays
 {
-    public class PackedArray
+    public class PackedArray : IArray
     {
+        public bool Constant { get; protected set; } = false;
+
+
         public PackedArray(Expressions.Expression? expression0, Expressions.Expression? expression1)
         {
             if (expression0 == null || expression1 == null) return;

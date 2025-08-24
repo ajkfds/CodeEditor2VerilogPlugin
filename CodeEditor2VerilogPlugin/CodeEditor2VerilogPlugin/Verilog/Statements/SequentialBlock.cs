@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace pluginVerilog.Verilog.Statements
 {
@@ -51,8 +52,6 @@ namespace pluginVerilog.Verilog.Statements
 
             if (word.GetCharAt(0) == ':')
             {
-                NamedSequentialBlock? namedBlock = null;
-
                 word.MoveNext(); // :
                 if (!General.IsIdentifier(word.Text))
                 {
@@ -75,10 +74,61 @@ namespace pluginVerilog.Verilog.Statements
         {
             SequentialBlock sequentialBlock = new SequentialBlock();
 
+            // An unnamed block creates a new hierarchy scope only if it directly contains a block item declaration, 
+            // such as a variable declaration or a type declaration. This hierarchy scope is unnamed and the items declared in it cannot be hierarchically referenced.
+
             // local item declaration
-            while (word.SystemVerilog && !word.Eof && word.Text != "end")
+
+            // create temporary name
             {
-                if (!Items.BlockItemDeclaration.Parse(word, nameSpace)) break;
+                IndexReference startRef = word.CreateIndexReference();
+                string name = "\0" + startRef.GetIndexID();
+                NamedSequentialBlock namedBlock = createNamedSequentialBlock(word, nameSpace, beginIndex, name);
+                while (word.SystemVerilog && !word.Eof && word.Text != "end")
+                {
+                    if (!Items.BlockItemDeclaration.Parse(word, namedBlock)) break;
+                }
+                if (!startRef.IsSameAs(word.CreateIndexReference()))
+                {
+                    // parse statements
+                    while (!word.Eof && word.Text != "end")
+                    {
+                        IStatement? statement = Verilog.Statements.Statements.ParseCreateStatement(word, namedBlock);
+                        if (statement != null)
+                        {
+                            namedBlock.Statements.Add(statement);
+                        }
+                        else
+                        {
+                            if (endKeyword.Contains(word.Text)) break;
+                            while (!word.Eof && word.Text != "end" && !endKeyword.Contains(word.Text))
+                            {
+                                if (word.Text == ";")
+                                {
+                                    word.MoveNext();
+                                    break;
+                                }
+                                word.MoveNext();
+                            }
+                        }
+                    }
+                    if (word.Text != "end")
+                    {
+                        word.AddError("'end' required");
+                        return null;
+                    }
+                    namedBlock.LastIndexReference = word.CreateIndexReference();
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext(); // end
+
+                    if (!nameSpace.NamedElements.ContainsKey(namedBlock.Name))
+                    {
+                        nameSpace.NamedElements.Add(namedBlock.Name, namedBlock);
+                    }
+
+                    return namedBlock;
+
+                }
             }
 
             while (!word.Eof && word.Text != "end")
@@ -110,10 +160,9 @@ namespace pluginVerilog.Verilog.Statements
 
             return sequentialBlock;
         }
-        private static IStatement? parseCreateNamedSequentialBlock(WordScanner word, NameSpace nameSpace, IndexReference beginIndex)
-        {
-            // start at identifier
 
+        private static NamedSequentialBlock createNamedSequentialBlock(WordScanner word, NameSpace nameSpace, IndexReference beginIndex, string name)
+        {
             // create namedBlock
             NamedSequentialBlock namedBlock;
             if (word.Prototype)
@@ -125,7 +174,7 @@ namespace pluginVerilog.Verilog.Statements
                     {
                         BeginIndexReference = beginIndex,
                         DefinitionReference = word.CrateWordReference(),
-                        Name = word.Text,
+                        Name = name,
                         Parent = nameSpace,
                         Project = word.Project
                     };
@@ -136,20 +185,19 @@ namespace pluginVerilog.Verilog.Statements
                     {
                         BeginIndexReference = beginIndex,
                         DefinitionReference = word.CrateWordReference(),
-                        Name = word.Text,
+                        Name = name,
                         Parent = nameSpace,
                         Project = word.Project
                     };
                     nameSpace.NamedElements.Add(namedBlock.Name, namedBlock);
                 }
-                word.MoveNext();
             }
             else
             { // implementation
-                if (nameSpace.NamedElements.ContainsKey(word.Text) && nameSpace.NamedElements[word.Text] is NamedSequentialBlock)
+                if (nameSpace.NamedElements.ContainsKey(name) && nameSpace.NamedElements[name] is NamedSequentialBlock)
                 {
                     word.Color(CodeDrawStyle.ColorType.Identifier);
-                    namedBlock = (NamedSequentialBlock)nameSpace.NamedElements[word.Text];
+                    namedBlock = (NamedSequentialBlock)nameSpace.NamedElements[name];
                 }
                 else
                 { // inside of task & function can skip parse. In this case namedBlock is not registered in namedElements
@@ -157,14 +205,24 @@ namespace pluginVerilog.Verilog.Statements
                     {
                         BeginIndexReference = beginIndex,
                         DefinitionReference = word.CrateWordReference(),
-                        Name = word.Text,
+                        Name = name,
                         Parent = nameSpace,
                         Project = word.Project
                     };
                     nameSpace.NamedElements.Add(namedBlock.Name, namedBlock);
                 }
-                word.MoveNext();
             }
+            return namedBlock;
+        }
+        private static IStatement? parseCreateNamedSequentialBlock(WordScanner word, NameSpace nameSpace, IndexReference beginIndex)
+        {
+            // start at identifier
+            string name = word.Text;
+            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.MoveNext();
+
+            // create namedBlock
+            NamedSequentialBlock namedBlock = createNamedSequentialBlock(word, nameSpace, beginIndex, name);
 
             // local item declaration
             while (!word.Eof && word.Text != "end")

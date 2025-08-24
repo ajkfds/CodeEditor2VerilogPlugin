@@ -189,7 +189,7 @@ namespace pluginVerilog.Verilog.Snippets
 
 
                             sbDefine.Append("\t" + valueName);
-                            foreach (var dimension in port.DataObject.Dimensions)
+                            foreach (var dimension in port.DataObject.UnpackedArrays)
                             {
                                 sbDefine.Append(dimension.CreateString());
                             }

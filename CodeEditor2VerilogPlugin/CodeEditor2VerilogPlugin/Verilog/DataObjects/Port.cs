@@ -1,7 +1,10 @@
 ﻿using Avalonia.Controls;
+using CodeEditor2.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
+using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.DataObjects.Nets;
+using pluginVerilog.Verilog.DataObjects.Variables;
 using pluginVerilog.Verilog.ModuleItems;
 using ReactiveUI;
 using System;
@@ -75,12 +78,9 @@ namespace pluginVerilog.Verilog.DataObjects
             Ref
         }
 
-        public static Port? Create(WordScanner word, Attribute attribute)
+        public static Port? Create(string name, Project project,DirectionEnum direction,DataObject dataObject)
         {
-            if (!General.IsIdentifier(word.Text)) return null;
-            Port port = new Port() { DefinitionReference = word.CrateWordReference(), Name = word.Text, Project = word.Project };
-            word.Color(CodeDrawStyle.ColorType.Net);
-            word.MoveNext();
+            Port port = new Port() { DefinitionReference = null, Name = name, Project = project, Direction = direction,DataObject = dataObject };
             return port;
         }
 
@@ -624,10 +624,14 @@ namespace pluginVerilog.Verilog.DataObjects
             // { dimension } 
             while (!word.Eof && word.Text == "[")
             {
-                Verilog.DataObjects.Arrays.VariableArray? dimension = Verilog.DataObjects.Arrays.UnPackedArray.ParseCreate(word, nameSpace);
-                if(dimension != null && port.DataObject != null)
+                IArray? array = UnPackedArray.ParseCreate(word, nameSpace);
+                if(array is UnPackedArray)
                 {
-                    port.DataObject.Dimensions.Add(dimension);
+                    UnPackedArray unPackedArray = (UnPackedArray)array;
+                    if (port.DataObject != null)
+                    {
+                        port.DataObject.UnpackedArrays.Add(unPackedArray);
+                    }
                 }
             }
 

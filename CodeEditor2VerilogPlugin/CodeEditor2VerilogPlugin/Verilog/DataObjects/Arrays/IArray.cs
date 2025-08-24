@@ -6,7 +6,27 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.Arrays
 {
-    internal interface IArray
+    public interface IArray
     {
+        public int? Size { get; }
+        public bool Constant { get; }
+
+        public virtual string CreateString()
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        {
+            throw new NotImplementedException();
+        }
+        public virtual AjkAvaloniaLibs.Controls.ColorLabel GetLabel()
+        {
+            throw new NotImplementedException();
+        }
+        public virtual bool CheckIndexRangeError(Expressions.Expression indexExpression)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

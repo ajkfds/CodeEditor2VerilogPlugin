@@ -39,13 +39,13 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
         }
 
         // Constructors
-        public static VariableArray? ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static IArray? ParseCreate(DataObject dataObject,WordScanner word, NameSpace nameSpace)
         {
             word.MoveNext(); // [
 
             if (word.Text == "$")
-            {
-                return Queue.ParseCreate(word, nameSpace);
+            {   // [$]
+                return Queue.ParseCreate(dataObject, word, nameSpace);
             }
 
             // associative_dimension    ::= [data_type] | [ * ]
@@ -57,7 +57,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
                 if (word.Text == "]")
                 {
                     word.MoveNext();
-                    return new AssociativeArray(null);
+                    return AssociativeArray.Create(dataObject,null);
                 }
                 else
                 {
@@ -66,60 +66,29 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
                 }
             }
 
-            Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace, false);
-            if(expression != null)
-            {
-                return parseCreateUnpackedArray(word, nameSpace, expression);
-            }
-
             DataTypes.IDataType? indexDataType = DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, null);
-            if(indexDataType != null)
+            if (indexDataType != null)
             {
                 if (word.Text == "]")
                 {
                     word.MoveNext();
-                    return new AssociativeArray(indexDataType);
+                    return AssociativeArray.Create(dataObject, indexDataType);
                 }
                 else
                 {
                     word.AddError("] expected");
                 }
             }
-            return null;
-        }
 
-        private static UnPackedArray? parseCreateUnpackedArray(WordScanner word, NameSpace nameSpace,Expressions.Expression expression)
-        {
-            // unpacked_dimension   ::= [constant_range] | [constant_expression]
-            // constant_range       ::= constant_expression : constant_expression
-
-            if (word.Text == "]")
+            Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace, false);
+            if(expression != null)
             {
-                word.MoveNext();
-                return new UnPackedArray(expression);
-            }
-
-            if (word.Text != ":")
-            {
-                word.AddError(": expected");
-                return null;
-            }
-            word.MoveNext();
-
-            Expressions.Expression? expression1 = Expressions.Expression.ParseCreate(word, nameSpace, false);
-            if(expression1 == null)
-            {
-                word.AddError("expression expected");
-                return null;
-            }
-            if (word.Text == "]")
-            {
-                word.MoveNext();
-                return new UnPackedArray(expression, expression1);
+                return UnPackedArray.ParseCreate(word, nameSpace, expression);
             }
 
             return null;
         }
+
 
     }
 }

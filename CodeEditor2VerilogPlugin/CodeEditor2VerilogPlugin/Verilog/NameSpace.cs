@@ -39,6 +39,18 @@ namespace pluginVerilog.Verilog
             return Parent.GetNamedElementUpward(name);
         }
 
+        public INamedElement? GetNamedElementUpward(string name,out NameSpace? nameSpace)
+        {
+            nameSpace = null;
+            if (NamedElements.ContainsKey(name))
+            {
+                nameSpace = this;
+                return NamedElements[name];
+            }
+            if (Parent == null) return null;
+            return Parent.GetNamedElementUpward(name,out nameSpace);
+        }
+
 
         public NameSpace GetHierarchyNameSpace(IndexReference iref)
         {

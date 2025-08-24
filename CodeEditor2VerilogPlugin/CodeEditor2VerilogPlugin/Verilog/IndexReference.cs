@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -70,6 +71,17 @@ namespace pluginVerilog.Verilog
                 ret.indexes.Add(index);
             }
             return ret;
+        }
+
+        public string GetIndexID()
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+            foreach (int index in indexes)
+            {
+                stringBuilder.Append(index.ToString());
+                stringBuilder.Append('_');
+            }
+            return stringBuilder.ToString();
         }
 
         protected WeakReference<ParsedDocument> parsedDocumentRef;
