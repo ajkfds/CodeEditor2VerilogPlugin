@@ -90,6 +90,12 @@ namespace pluginVerilog.Verilog.Expressions
                 VariableName = dataObject.Name
             };
             val.DataObject = dataObject;
+            if(dataObject is DataObjects.Variables.IntegerVectorValueVariable)
+            {
+                IntegerVectorValueVariable integerVectorValueVariable = (IntegerVectorValueVariable)dataObject;
+                if(integerVectorValueVariable.Range != null)
+                    val.BitWidth = integerVectorValueVariable.Range.MaxIndex - integerVectorValueVariable.Range.MinIndex+1;
+            }
             if (dataObject.DefinedReference != null) val.Reference = dataObject.DefinedReference;
             if (dataObject is DataObjects.Constants.Constants)
             {

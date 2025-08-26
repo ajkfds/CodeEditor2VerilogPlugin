@@ -13,7 +13,8 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
         public int? Size { get; protected set; } = null;
         public bool Constant { get; protected set; } = false;
 
-        
+        public override CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Variable;
+
         public static AssociativeArray Create(DataObject dataObject, DataTypes.IDataType? indexDataType)
         {
             AssociativeArray associativeArray = new AssociativeArray() { Name = dataObject.Name };

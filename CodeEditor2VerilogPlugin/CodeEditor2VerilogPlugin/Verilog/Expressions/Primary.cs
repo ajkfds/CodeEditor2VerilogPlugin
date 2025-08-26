@@ -11,6 +11,7 @@ using System.Drawing.Text;
 using System.IO;
 using System.Linq;
 using System.Reflection.Metadata;
+using System.Security.AccessControl;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -216,7 +217,7 @@ number
                         NameSpace? searchDownwardNameSpace = searchNameSpace(word, targetNameSpace, ref nameSpaceText);
                         if (searchDownwardNameSpace != null)
                         {
-                            acceptImplicitNet = false;
+                            if(nameSpaceText != "") acceptImplicitNet = false;
                             targetNameSpace = searchDownwardNameSpace;
                         }
                         else
@@ -387,50 +388,51 @@ number
 
         public static Primary? parseDataObject(WordScanner word, NameSpace nameSpace, INamedElement owner, bool lValue,string nameSpaceText)
         {
-            var variable = DataObjectReference.ParseCreate(word, nameSpace, owner, lValue);
-            if(variable != null) variable.NameSpaceText = nameSpaceText;
+            DataObjectReference? dataObjectReference = DataObjectReference.ParseCreate(word, nameSpace, owner, lValue);
+            if(dataObjectReference != null) dataObjectReference.NameSpaceText = nameSpaceText;
 
-            if (variable == null) return null;
-            if (variable.DataObject == null) return null;
+            if (dataObjectReference == null) return null;
+            if (dataObjectReference.DataObject == null) return null;
 
             DataObjects.Variables.Object? obj = null;
-            if (variable.DataObject is DataObjects.Variables.Object)
+            if (dataObjectReference.DataObject is DataObjects.Variables.Object)
             {
-                obj = (DataObjects.Variables.Object)variable.DataObject;
+                obj = (DataObjects.Variables.Object)dataObjectReference.DataObject;
             }
 
-            if (word.Text != ".") return variable;
+            if (word.Text != ".") return dataObjectReference;
             word.MoveNext();
 
-            if (!variable.DataObject.NamedElements.ContainsKey(word.Text))
+            if (!dataObjectReference.DataObject.NamedElements.ContainsKey(word.Text))
             {
                 if(word.NextText=="(" || word.NextText == ";")
                 {
                     return parseUndefinedFunction(word);
                 }
-                return variable;
+                return dataObjectReference;
             }
 
             //if (!variable.DataObject.NamedElements.ContainsKey(word.Text))
             //{ // undefined primitive
             //    return parseUndefinedDataObject(word, nameSpace, owner, lValue, nameSpaceText);
             //}
-            INamedElement? element = variable.DataObject.NamedElements[word.Text];
+            INamedElement? element = dataObjectReference.DataObject.NamedElements[word.Text];
 
 
             // Since ModPort are also namespaces, they need to be processed before namespaces.
             if (element is DataObject)
             {
                 if (nameSpaceText != "") nameSpaceText = nameSpaceText + ".";
-                nameSpaceText = nameSpaceText + variable.VariableName + ".";
-                return parseDataObject(word, nameSpace, variable.DataObject, lValue,nameSpaceText);
+                nameSpaceText = nameSpaceText + dataObjectReference.VariableName + ".";
+                return parseDataObject(word, nameSpace, dataObjectReference.DataObject, lValue,nameSpaceText);
             }
 
             // Since Task and Function are also namespaces, they need to be processed before namespaces.
 
             if (element is BuiltInMethod)
             {
-                BuiltinMethodCall? builtinMethodCall = BuiltinMethodCall.ParseCreate(word, nameSpace, obj.Class);
+                BuiltinMethodCall? builtinMethodCall = BuiltinMethodCall.ParseCreate(word, nameSpace,dataObjectReference.DataObject);
+                return builtinMethodCall;
             }
 
             // task reference : for left side only

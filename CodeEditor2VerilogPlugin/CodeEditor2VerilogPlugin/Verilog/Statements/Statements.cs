@@ -286,8 +286,21 @@ namespace pluginVerilog.Verilog.Statements
                         }
                         if (functionCall.Function?.ReturnVariable == null) return VoidFunctionCall.Create(functionCall);
                     }
+                    if(expression != null && expression is BuiltinMethodCall)
+                    {
+                        Expressions.BuiltinMethodCall methodCall = (Expressions.BuiltinMethodCall)expression;
+                        if (word.Text == ";")
+                        {
+                            word.MoveNext();
+                        }
+                        else
+                        {
+                            word.AddError("; missing");
+                        }
+                        if (methodCall.BuiltInMethod.ReturnVariable == null) return VoidBuiltInMethodCall.Create(methodCall);
+                    }
 
-                    if(expression == null)
+                    if (expression == null)
                     {
                         word.AddError("illegal statement");
                         return null;

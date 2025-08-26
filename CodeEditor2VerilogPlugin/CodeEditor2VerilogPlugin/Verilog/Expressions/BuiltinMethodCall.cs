@@ -1,4 +1,5 @@
-﻿using CodeEditor2.Data;
+﻿using Avalonia.Input;
+using CodeEditor2.Data;
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using System;
 using System.Collections.Generic;
@@ -16,40 +17,43 @@ namespace pluginVerilog.Verilog.Expressions
 
         public List<Expression> Expressions = new List<Expression>();
         public required string FunctionName { get; init; }
-        public new static BuiltinMethodCall? ParseCreate(WordScanner word, NameSpace nameSpace)
-        {
-            throw new Exception();
-        }
 
-        public required NameSpace DefinedNameSpace { init; get; }
+//        public required NameSpace DefinedNameSpace { init; get; }
+
+        public required BuiltInMethod BuiltInMethod { init; get; }
         public required ProjectProperty ProjectProperty { init; get; }
-        public Function? Function
+        //public Function? Function
+        //{
+        //    get
+        //    {
+        //        Function? function = null;
+        //        if (DefinedNameSpace.BuildingBlock.NamedElements.ContainsFunction(FunctionName))
+        //        {
+        //            function = (Function)DefinedNameSpace.BuildingBlock.NamedElements[FunctionName];
+        //        }
+        //        //else if (ProjectProperty.SystemFunctions.ContainsKey(FunctionName))
+        //        //{
+        //        //    function = ProjectProperty.SystemFunctions[FunctionName];
+        //        //}
+        //        return function;
+        //    }
+        //}
+
+        protected new static BuiltinMethodCall? ParseCreate(WordScanner word, NameSpace usedNameSpace)
         {
-            get
-            {
-                Function? function = null;
-                if (DefinedNameSpace.BuildingBlock.NamedElements.ContainsFunction(FunctionName))
-                {
-                    function = (Function)DefinedNameSpace.BuildingBlock.NamedElements[FunctionName];
-                }
-                //else if (ProjectProperty.SystemFunctions.ContainsKey(FunctionName))
-                //{
-                //    function = ProjectProperty.SystemFunctions[FunctionName];
-                //}
-                return function;
-            }
+            throw new NotImplementedException();
         }
 
-
-        public static BuiltinMethodCall? ParseCreate(WordScanner word,NameSpace usedNameSpace, NameSpace definedNameSpace)
+        public static BuiltinMethodCall? ParseCreate(WordScanner word, NameSpace usedNameSpace, DataObjects.DataObject dataObject)
         {
             if (word.RootParsedDocument.ProjectProperty == null) throw new Exception();
-            if (!definedNameSpace.NamedElements.ContainsKey(word.Text)) return null;
-            INamedElement element = definedNameSpace.NamedElements[word.Text];
-            if (element is not BuiltInMethod) return null;
-            var method = (BuiltInMethod)element;
 
-            BuiltinMethodCall methodCall = new BuiltinMethodCall() { FunctionName = word.Text, DefinedNameSpace = definedNameSpace,ProjectProperty=word.ProjectProperty };
+            if (!dataObject.NamedElements.ContainsKey(word.Text)) return null;
+            INamedElement element = dataObject.NamedElements[word.Text];
+            if (element is not Verilog.BuiltInMethod) return null;
+            var method = (Verilog.BuiltInMethod)element;
+
+            BuiltinMethodCall methodCall = new BuiltinMethodCall() { FunctionName = word.Text, ProjectProperty = word.ProjectProperty, BuiltInMethod = method };
             methodCall.Reference = word.GetReference();
             bool returnConstant = true;
 
@@ -84,7 +88,7 @@ namespace pluginVerilog.Verilog.Expressions
             int i = 0;
             while (!word.Eof)
             {
-                Expression? expression = Expression.ParseCreate(word, definedNameSpace);
+                Expression? expression = Expression.ParseCreate(word, usedNameSpace);
                 if(expression == null)
                 {
                     return null;
