@@ -159,18 +159,6 @@ namespace pluginVerilog.Verilog.Expressions
         */
 
 
-        public static Expression? ParseCreate(WordScanner word, NameSpace nameSpace)
-        {
-            Expression? exp = ParseCreate(word, nameSpace,false);
-            if (exp == null) return null;
-
-            if(exp is AssignmentOperator)
-            {
-                exp.Reference.AddError("assignment operator needs ()");
-            }
-
-            return exp;
-        }
 
         public static Expression? Create(string text, ParsedDocument parsedDocument, bool systemVerilog,NameSpace nameSpace)
         {
@@ -189,6 +177,18 @@ namespace pluginVerilog.Verilog.Expressions
         {
             Expression? exp = ParseCreate(word, nameSpace,true);
             if (exp == null) return null;
+
+            return exp;
+        }
+        public static Expression? ParseCreate(WordScanner word, NameSpace nameSpace)
+        {
+            Expression? exp = ParseCreate(word, nameSpace, false);
+            if (exp == null) return null;
+
+            if (exp is AssignmentOperator)
+            {
+                exp.Reference.AddError("assignment operator needs ()");
+            }
 
             return exp;
         }
