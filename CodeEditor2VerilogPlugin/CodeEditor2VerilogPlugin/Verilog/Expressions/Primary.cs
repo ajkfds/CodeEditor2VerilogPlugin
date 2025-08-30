@@ -105,7 +105,9 @@ namespace pluginVerilog.Verilog.Expressions
         casting_type    ::=  simple_type | constant_primary | signing | "string" | "const"
         simple_type     ::= integer_type | non_integer_type | ps_type_identifier | ps_parameter_identifier 
 
-
+41) implicit_class_handle shall only appear within the scope of a class_declaration or out-of-block method declaration.
+42) The $ primary shall be legal only in a select for a queue variable, in an open_value_range, covergroup_value_
+range, integer_covergroup_expression, or as an entire sequence_actual_arg or property_actual_arg.
 
 
 constant_primary ::=
@@ -135,15 +137,15 @@ number
 
 
         */
-        public static new Primary? ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static new Primary? ParseCreate(WordScanner word, NameSpace nameSpace, bool acceptImplicitNet)
         {
-            return parseCreate(word, nameSpace, false);
+            return parseCreate(word, nameSpace, false, acceptImplicitNet);
         }
-        public static Primary? ParseCreateLValue(WordScanner word, NameSpace nameSpace)
+        public static Primary? ParseCreateLValue(WordScanner word, NameSpace nameSpace, bool acceptImplicitNet)
         {
-            return parseCreate(word, nameSpace, true);
+            return parseCreate(word, nameSpace, true, acceptImplicitNet);
         }
-        private static Primary? parseCreate(WordScanner word, NameSpace nameSpace,bool lValue)
+        private static Primary? parseCreate(WordScanner word, NameSpace nameSpace,bool lValue,bool acceptImplicitNet)
         {
             //if (word.Text == "srif") System.Diagnostics.Debugger.Break();
 
@@ -154,7 +156,7 @@ number
                 case WordPointer.WordTypeEnum.Symbol:
                     if (word.GetCharAt(0) == '{')
                     {
-                        return Concatenation.ParseCreateConcatenationOrMultipleConcatenation(word, nameSpace, lValue);
+                        return Concatenation.ParseCreateConcatenationOrMultipleConcatenation(word, nameSpace, lValue, acceptImplicitNet);
                     }else if(word.GetCharAt(0) == '(')
                     {
                         return Bracket.ParseCreateBracketOrMinTypMax(word, nameSpace);
@@ -163,8 +165,13 @@ number
                 case WordPointer.WordTypeEnum.String:
                     return ConstantString.ParseCreate(word);
                 case WordPointer.WordTypeEnum.Text:
+                    // dollar primitive
+                    if(word.Text == "$")
+                    {
+                        return DollarMark.ParseCreate(word, nameSpace);
+                    }
                     // system function call
-                    if (word.Text.StartsWith("$") && word.ProjectProperty.SystemFunctions.Keys.Contains(word.Text))
+                    if (word.Text.StartsWith("$"))// && word.ProjectProperty.SystemFunctions.Keys.Contains(word.Text))
                     {
                         return FunctionCall.ParseCreate(word, nameSpace,nameSpace);
                     }
@@ -197,10 +204,17 @@ number
                     }
 
                     string nameSpaceText = "";
-                    bool acceptImplicitNet = true;
-
-
                     NameSpace? targetNameSpace = nameSpace;
+
+                    if (word.Text == "this" && word.NextText == ".")
+                    {
+                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.MoveNext();
+                        word.MoveNext();
+                        targetNameSpace = nameSpace.BuildingBlock;
+                        nameSpaceText = "this.";
+                    }
+
 
                     { // search upward
                         NameSpace? searchUpwardNameSpace = null;
@@ -490,7 +504,7 @@ number
         }
 
 
-        private static Primary? subParseCreate(WordScanner word, NameSpace nameSpace,bool lValue)
+        private static Primary? subParseCreate(WordScanner word, NameSpace nameSpace,bool lValue, bool acceptImplicitNet)
         {
             if (nameSpace == null) throw new Exception();
 
@@ -534,7 +548,7 @@ number
                                 word.MoveNext();
                                 word.MoveNext(); // .
 
-                                Primary? primary = subParseCreate(word, module,lValue);
+                                Primary? primary = subParseCreate(word, module, lValue, acceptImplicitNet);
                                 if (primary == null)
                                 {
                                     word.AddError("illegal variable");
@@ -548,7 +562,7 @@ number
                                 word.MoveNext();
                                 word.MoveNext(); // .
 
-                                Primary? primary = subParseCreate(word, space, lValue);
+                                Primary? primary = subParseCreate(word, space, lValue, acceptImplicitNet);
                                 if (primary == null)
                                 {
                                     word.AddError("illegal variable");
@@ -576,7 +590,7 @@ number
                                 if(word.Text == ".")
                                 {
                                     word.MoveNext();
-                                    Primary? primary = subParseCreate(word, module, lValue);
+                                    Primary? primary = subParseCreate(word, module, lValue, acceptImplicitNet);
                                     if (primary == null)
                                     {
                                         word.AddError("illegal variable");
@@ -590,7 +604,7 @@ number
 
                             }else if(nameSpace is BuildingBlock && nameSpace.BuildingBlock.NamedElements.ContainsKey(word.Text) && nameSpace.BuildingBlock.NamedElements[word.Text] is Task)
                             {
-                                return TaskReference.ParseCreate(word, nameSpace.BuildingBlock);
+                                return TaskReference.ParseCreate(word, nameSpace.BuildingBlock, acceptImplicitNet);
                             }
                             else if (nameSpace.NamedElements.ContainsKey(word.Text) && nameSpace.NamedElements[word.Text] is NameSpace)
                             {

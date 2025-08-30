@@ -283,7 +283,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                 {
                     word.MoveNext();
 
-                    Expressions.Expression? output_terminal = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace as NameSpace);
+                    Expressions.Expression? output_terminal = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace as NameSpace,true);
                     if(word.Text != ",")
                     {
                         word.AddError(", required");

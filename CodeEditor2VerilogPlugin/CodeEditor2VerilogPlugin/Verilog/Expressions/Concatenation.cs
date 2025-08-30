@@ -11,12 +11,12 @@ namespace pluginVerilog.Verilog.Expressions
         protected Concatenation() { }
         public List<Expression> Expressions = new List<Expression>();
 
-        public static Primary ParseCreateConcatenationOrMultipleConcatenation(WordScanner word, NameSpace nameSpace)
-        {
-            return ParseCreateConcatenationOrMultipleConcatenation(word, nameSpace, false);
-        }
+        //public static Primary ParseCreateConcatenationOrMultipleConcatenation(WordScanner word, NameSpace nameSpace,boo)
+        //{
+        //    return ParseCreateConcatenationOrMultipleConcatenation(word, nameSpace, false);
+        //}
 
-        public static Primary ParseCreateConcatenationOrMultipleConcatenation(WordScanner word, NameSpace nameSpace, bool lValue)
+        public static Primary ParseCreateConcatenationOrMultipleConcatenation(WordScanner word, NameSpace nameSpace, bool lValue,bool acceptImplicitNet)
         {
             WordReference reference = word.GetReference();
             word.MoveNext(); // {
@@ -24,7 +24,7 @@ namespace pluginVerilog.Verilog.Expressions
             Expression exp1;
             if (lValue)
             {
-                exp1 = Expression.ParseCreateVariableLValue(word, nameSpace);
+                exp1 = Expression.ParseCreateVariableLValue(word, nameSpace, acceptImplicitNet);
             }
             else
             {
@@ -59,7 +59,7 @@ namespace pluginVerilog.Verilog.Expressions
                 }
                 if (lValue)
                 {
-                    exp1 = Expression.ParseCreateVariableLValue(word, nameSpace);
+                    exp1 = Expression.ParseCreateVariableLValue(word, nameSpace,acceptImplicitNet);
                 }
                 else
                 {

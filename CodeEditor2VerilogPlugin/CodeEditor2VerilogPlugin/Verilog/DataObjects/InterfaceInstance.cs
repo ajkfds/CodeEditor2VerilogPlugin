@@ -386,7 +386,7 @@ namespace pluginVerilog.Verilog.DataObjects
                         }
                         if (outPort)
                         {
-                            Expressions.Expression expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace);
+                            Expressions.Expression? expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace,false);
                             if (word.Prototype && expression != null && !interfaceInstance.PortConnection.ContainsKey(pinName)) interfaceInstance.PortConnection.Add(pinName, expression);
 
                             if (!word.Prototype)

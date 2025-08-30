@@ -34,7 +34,7 @@ namespace pluginVerilog.Verilog.Statements
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
-            ret.LValue = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace);
+            ret.LValue = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace,false);
             if(ret.LValue == null)
             {
                 word.SkipToKeyword(";");

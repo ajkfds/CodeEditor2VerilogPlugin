@@ -345,7 +345,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
 
                 Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
                 if (expression == null) break;
-                if (!expression.Constant)
+                if (!expression.Constant && expression.Reference != null)
                 {
                     expression.Reference.AddError("should be constant");
                 }

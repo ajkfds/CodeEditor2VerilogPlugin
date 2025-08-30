@@ -18,7 +18,7 @@ namespace pluginVerilog.Verilog.Expressions
         public DataObjectReference? DataObjectReference { get; set; }
         public bool Increment = false;
         public required WordReference WordReference { get; init; }
-        public static IncOrDecExpression? ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static IncOrDecExpression? ParseCreate(WordScanner word, NameSpace nameSpace, bool acceptImplicitNet)
         {
             if (!word.SystemVerilog) return null;
             if (word.Text != "++" && word.Text != "--" && word.NextText != "++" && word.NextText != "--") return null;
@@ -46,7 +46,7 @@ namespace pluginVerilog.Verilog.Expressions
                     return null;
                 }
                 word.MoveNext();
-                Primary? primary = Primary.ParseCreate(word, nameSpace);
+                Primary? primary = Primary.ParseCreate(word, nameSpace, acceptImplicitNet);
                 if (primary != null) wref = WordReference.CreateReferenceRange(wref, primary.Reference);
 
                 if (primary is DataObjectReference)
@@ -66,7 +66,7 @@ namespace pluginVerilog.Verilog.Expressions
             else if(word.NextText=="++" || word.NextText == "--")
             {
                 wref = word.GetReference();
-                Primary? primary = Primary.ParseCreate(word, nameSpace);
+                Primary? primary = Primary.ParseCreate(word, nameSpace, acceptImplicitNet);
                 if (primary is DataObjectReference)
                 {
                     dataObjectReference = (DataObjectReference)primary;

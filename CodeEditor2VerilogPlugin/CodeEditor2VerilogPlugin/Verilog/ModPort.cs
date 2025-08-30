@@ -190,7 +190,7 @@ namespace pluginVerilog.Verilog
                 Expressions.Expression? expression;
                 if(direction == Port.DirectionEnum.Output)
                 {
-                    expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace);
+                    expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace,false);
                 }
                 else
                 {
@@ -217,7 +217,7 @@ namespace pluginVerilog.Verilog
                 Expressions.Expression? expression;
                 if (direction == Port.DirectionEnum.Output)
                 {
-                    expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace);
+                    expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace,false);
                 }
                 else
                 {

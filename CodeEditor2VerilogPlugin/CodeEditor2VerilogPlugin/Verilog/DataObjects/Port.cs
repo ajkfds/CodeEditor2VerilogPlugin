@@ -53,6 +53,8 @@ namespace pluginVerilog.Verilog.DataObjects
         public string Comment = "";
         public string? PortGroupName = null;
 
+        public Expressions.Expression? DefaultArgument = null;
+
         private Dictionary<string, string> commentAnnotations = new Dictionary<string, string>();
         public Dictionary<string, string> CommentAnnotations { get { return commentAnnotations; } }
         public void AppendAnnotation(string key, string value)
@@ -647,7 +649,7 @@ namespace pluginVerilog.Verilog.DataObjects
                 }
                 else
                 {
-                    // TODO constant value assignment
+                    port.DefaultArgument = ex;
                 }
             }
 

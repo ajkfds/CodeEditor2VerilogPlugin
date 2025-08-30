@@ -253,7 +253,7 @@ namespace pluginVerilog.Verilog.Statements
                         return VoidFunctionCall.ParseCreate(word, nameSpace);
                     }
 
-                    IncOrDecExpression? incOrDecExpression = IncOrDecExpression.ParseCreate(word, nameSpace);
+                    IncOrDecExpression? incOrDecExpression = IncOrDecExpression.ParseCreate(word, nameSpace,false);
                     if (incOrDecExpression != null)
                     {
                         if (word.Text != ";")
@@ -267,7 +267,7 @@ namespace pluginVerilog.Verilog.Statements
                         return incOrDecExpression;
                     }
 
-                    Expressions.Expression? expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace);
+                    Expressions.Expression? expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace,false);
                     if(expression != null && expression is Expressions.TaskReference)// Expressions.TaskReference)
                     {
                         Expressions.TaskReference taskReference = (Expressions.TaskReference)expression;

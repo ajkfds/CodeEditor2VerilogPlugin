@@ -669,11 +669,11 @@ namespace pluginVerilog.Verilog.ModuleItems
             Expressions.Expression? expression;
             if (outPort)
             {
-                expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace);
+                expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace,true);
             }
             else
             {
-                expression = Expressions.Expression.ParseCreate(word, nameSpace);
+                expression = Expressions.Expression.ParseCreateAcceptImplicitNet(word, nameSpace,false);
             }
 
             if (expression != null)

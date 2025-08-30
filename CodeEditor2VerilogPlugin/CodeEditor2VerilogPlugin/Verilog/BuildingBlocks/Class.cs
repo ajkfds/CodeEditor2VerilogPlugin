@@ -1,4 +1,5 @@
 ﻿using Avalonia.Input;
+using CodeEditor2.CodeEditor;
 using CodeEditor2.CodeEditor.CodeComplete;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
@@ -192,7 +193,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
 
             // endclass keyword
-            if (word.Text == "endclass")
+            if(word.Text != "endclass")
+            {
+                word.AddError("endclass expected");
+            }
+            else
             {
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 class_.LastIndexReference = word.CreateIndexReference();
@@ -205,10 +210,10 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     nameSpace.BuildingBlock.NamedElements.Add(class_.Name, class_);
                 }
 
-                if(word.Text == ":")
+                if (word.Text == ":")
                 {
                     word.MoveNext();
-                    if( class_!= null && word.Text == class_.Name)
+                    if (class_ != null && word.Text == class_.Name)
                     {
                         word.Color(CodeDrawStyle.ColorType.Identifier);
                         word.MoveNext();
@@ -227,12 +232,20 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         }
                     }
                 }
-
-                return class_;
             }
 
+            if (word.RootParsedDocument?.Root == null)
             {
-                word.AddError("endclass expected");
+
+            }
+            else if (!word.RootParsedDocument.Root.BuldingBlocks.ContainsKey(class_.Name))
+            {
+                word.RootParsedDocument.Root.BuldingBlocks.Add(class_.Name, class_);
+                if (class_.ReparseRequested) word.RootParsedDocument.ReparseRequested = true;
+            }
+            else
+            {
+                word.AddError("duplicated class name");
             }
 
             return class_;

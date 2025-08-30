@@ -38,7 +38,12 @@ namespace pluginVerilog.Verilog.ModuleItems
             continuousAssign.DriveStrength = DriveStrength.ParseCreate(word, nameSpace);
             continuousAssign.Delay3 = Delay3.ParseCreate(word, nameSpace);
 
-            DataObjects.VariableAssignment? assignment = DataObjects.VariableAssignment.ParseCreate(word, nameSpace);
+            DataObjects.VariableAssignment? assignment = DataObjects.VariableAssignment.ParseCreate(
+                word,
+                nameSpace,
+                true    // should accept implicit net declaration
+                );
+
             if(assignment != null)
             {
                 continuousAssign.VariableAssignment = assignment;

@@ -1,4 +1,5 @@
-﻿using pluginVerilog.Verilog.DataObjects.Arrays;
+﻿using pluginVerilog.Verilog.BuildingBlocks;
+using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.DataObjects.Variables;
 using System;
 using System.Collections.Generic;
@@ -230,16 +231,22 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                                             dType.PackedDimensions.Add(packedArray);
                                         }
                                     }
-
-
                                     return dType;
                                 }
                             }
-
                         }
-
                     }
+
                     // class_type
+                    IBuildingBlock? buildingBlock = word.ProjectProperty.GetBuildingBlock(word.Text);
+                    if (buildingBlock is Class)
+                    {
+                        Class class_ =(Class) buildingBlock;
+                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.MoveNext();
+                        return class_;
+                    }
+
                     //if (nameSpace.NamedElements.ContainsKey(word.Text))
                     //{
                     //    INamedElement namedElement = nameSpace.NamedElements[word.Text];

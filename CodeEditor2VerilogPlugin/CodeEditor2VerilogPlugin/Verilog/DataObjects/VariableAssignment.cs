@@ -18,7 +18,7 @@ namespace pluginVerilog.Verilog.DataObjects
         public Expressions.Expression NetLValue { get; protected set; }
         public Expressions.Expression Expression { get; protected set; }
  
-        public static VariableAssignment? ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static VariableAssignment? ParseCreate(WordScanner word, NameSpace nameSpace,bool acceptImplicitNet)
         {
             // variable_assignment  ::= variable_lvalue = expression
             // variable_lvalue      ::= hierarchical_variable_identifier
@@ -28,7 +28,7 @@ namespace pluginVerilog.Verilog.DataObjects
             //                          | variable_concatenation
 
             VariableAssignment variableAssign = new VariableAssignment();
-            Expressions.Expression? lExpression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace);
+            Expressions.Expression? lExpression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace, acceptImplicitNet);
             if (lExpression == null)
             {
                 return null;

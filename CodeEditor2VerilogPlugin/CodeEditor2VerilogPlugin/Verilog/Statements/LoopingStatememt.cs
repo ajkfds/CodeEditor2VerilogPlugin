@@ -346,14 +346,14 @@ namespace pluginVerilog.Verilog.Statements
             }
 
             // for_step
-            IncOrDecExpression? incOrDecExpression = IncOrDecExpression.ParseCreate(word, forStatement);
+            IncOrDecExpression? incOrDecExpression = IncOrDecExpression.ParseCreate(word, forStatement,false);
             if(incOrDecExpression != null)
             {
 
             }
             else
             {
-                DataObjects.VariableAssignment? assign = Verilog.DataObjects.VariableAssignment.ParseCreate(word, forStatement);
+                DataObjects.VariableAssignment? assign = Verilog.DataObjects.VariableAssignment.ParseCreate(word, forStatement,false);
                 if (assign == null)
                 {
                     forStatement.Expression = Expressions.Expression.ParseCreate(word, forStatement);

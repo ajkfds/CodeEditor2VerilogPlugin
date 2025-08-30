@@ -192,8 +192,16 @@ namespace pluginVerilog.Verilog.Expressions
 
             return exp;
         }
+        public static Expression? ParseCreate(WordScanner word, NameSpace nameSpace, bool acceptAssignment)
+        {
+            return parseCreate(word, nameSpace, acceptAssignment, false);
+        }
+        public static Expression? ParseCreateAcceptImplicitNet(WordScanner word, NameSpace nameSpace, bool acceptAssignment)
+        {
+            return parseCreate(word, nameSpace, acceptAssignment, true);
+        }
 
-        public static Expression? ParseCreate(WordScanner word, NameSpace nameSpace,bool acceptAssignment)
+        private static Expression? parseCreate(WordScanner word, NameSpace nameSpace,bool acceptAssignment, bool acceptmplicitNet)
         {
             Expression expression = new Expression();
             List<Operator> operatorsStock = new List<Operator>();
@@ -201,7 +209,7 @@ namespace pluginVerilog.Verilog.Expressions
 
             List<Primary> rpnPrimaries = new List<Primary>();
 
-            parseExpressionPrimaries(word, nameSpace, rpnPrimaries, operatorsStock, ref reference,acceptAssignment);
+            parseExpressionPrimaries(word, nameSpace, rpnPrimaries, operatorsStock, ref reference,acceptAssignment, acceptmplicitNet);
             expression.Reference = reference;
             while (operatorsStock.Count != 0)
             {
@@ -327,7 +335,7 @@ namespace pluginVerilog.Verilog.Expressions
 
 
         // parse lvalue expression or task reference
-        public static Expression? ParseCreateVariableLValue(WordScanner word, NameSpace nameSpace)
+        public static Expression? ParseCreateVariableLValue(WordScanner word, NameSpace nameSpace,bool acceptImplicitNet)
         {
             Expression expression = new Expression();
             List<Operator> operatorsStock = new List<Operator>();
@@ -335,7 +343,7 @@ namespace pluginVerilog.Verilog.Expressions
 
             WordReference reference = word.GetReference();
 
-            parseVariableLValue(word, nameSpace, rpnPrimaries, operatorsStock);
+            parseVariableLValue(word, nameSpace, rpnPrimaries, operatorsStock, acceptImplicitNet);
             expression.Reference = reference;
             while (operatorsStock.Count != 0)
             {
@@ -425,10 +433,10 @@ namespace pluginVerilog.Verilog.Expressions
 
         }
 
-        private static bool parseExpressionPrimaries(WordScanner word, NameSpace nameSpace, List<Primary> Primaries, List<Operator> operatorStock, ref WordReference reference,bool acceptAssignment)
+        private static bool parseExpressionPrimaries(WordScanner word, NameSpace nameSpace, List<Primary> Primaries, List<Operator> operatorStock, ref WordReference reference,bool acceptAssignment,bool acceptImplicitNet)
         {
             // ++(primary),--(primary)
-            Primary? primary = Primary.ParseCreate(word, nameSpace);
+            Primary? primary = Primary.ParseCreate(word, nameSpace, acceptImplicitNet);
             if (primary != null)
             {
                 Primaries.Add(primary);
@@ -449,7 +457,7 @@ namespace pluginVerilog.Verilog.Expressions
                         word.AddError("illegal unary Operator");
                         return false;
                     }
-                    primary = Primary.ParseCreate(word, nameSpace);
+                    primary = Primary.ParseCreate(word, nameSpace, acceptImplicitNet);
                     if (primary == null)
                     {
                         word.AddError("illegal unary Operator");
@@ -468,7 +476,7 @@ namespace pluginVerilog.Verilog.Expressions
                             word.AddError("illegal unary Operator");
                             return false;
                         }
-                        primary = Primary.ParseCreate(word, nameSpace);
+                        primary = Primary.ParseCreate(word, nameSpace, acceptImplicitNet);
                         if (primary == null)
                         {
                             word.AddError("illegal unary Operator");
@@ -492,7 +500,7 @@ namespace pluginVerilog.Verilog.Expressions
                 word.MoveNext();
                 do
                 {
-                    if (!parseExpressionPrimaries(word, nameSpace, Primaries, operatorStock, ref reference, false))
+                    if (!parseExpressionPrimaries(word, nameSpace, Primaries, operatorStock, ref reference, false, acceptImplicitNet))
                     {
                         word.AddError("illegal binary Operator");
                         break;
@@ -506,7 +514,7 @@ namespace pluginVerilog.Verilog.Expressions
                         word.AddError(": expected");
                         break;
                     }
-                    if (!parseExpressionPrimaries(word, nameSpace, Primaries, operatorStock, ref reference, false))
+                    if (!parseExpressionPrimaries(word, nameSpace, Primaries, operatorStock, ref reference, false, acceptImplicitNet))
                     {
                         word.AddError("illegal binary Operator");
                         break;
@@ -543,7 +551,7 @@ namespace pluginVerilog.Verilog.Expressions
                 return true;
             }
 
-            if (!parseExpressionPrimaries(word, nameSpace, Primaries, operatorStock, ref reference,false))
+            if (!parseExpressionPrimaries(word, nameSpace, Primaries, operatorStock, ref reference,false, acceptImplicitNet))
             {
                 word.AddError("illegal binary Operator");
             }
@@ -551,9 +559,9 @@ namespace pluginVerilog.Verilog.Expressions
             return true;
         }
 
-        private static bool parseVariableLValue(WordScanner word, NameSpace nameSpace, List<Primary> Primaries, List<Operator> operatorStock)
+        private static bool parseVariableLValue(WordScanner word, NameSpace nameSpace, List<Primary> Primaries, List<Operator> operatorStock,bool acceptImplicitNet)
         {
-            Primary? primary = Primary.ParseCreateLValue(word, nameSpace);
+            Primary? primary = Primary.ParseCreateLValue(word, nameSpace, acceptImplicitNet);
             if (primary != null)
             {
                 Primaries.Add(primary);

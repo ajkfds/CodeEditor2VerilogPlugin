@@ -88,7 +88,7 @@ namespace pluginVerilog.Verilog.Statements
                         }
                         else
                         {
-                            expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace);
+                            expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace,false);
                         }
                         if (expression == null)
                         {
