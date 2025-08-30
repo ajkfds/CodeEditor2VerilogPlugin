@@ -29,14 +29,15 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         public bool AnsiPortStyle = false;
         public bool Static = true;
 
-        public static Program Create(WordScanner word, Attribute attribute, Data.IVerilogRelatedFile file, bool protoType)
+        public static Program Parse(WordScanner word, Attribute attribute, BuildingBlock parent, Data.IVerilogRelatedFile file, bool protoType)
         {
-            return Create(word, null, attribute, file, protoType);
+            return Parse(word, null, attribute, parent, file, protoType);
         }
-        public static Program Create(
+        public static Program Parse(
             WordScanner word,
             Dictionary<string, Expressions.Expression>? parameterOverrides,
             Attribute attribute,
+            BuildingBlock parent,
             Data.IVerilogRelatedFile file,
             bool protoType
             )
@@ -117,7 +118,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 DefinitionReference = word.CrateWordReference(),
                 File = file,
                 Name = word.Text,
-                Parent = word.RootParsedDocument.Root,
+                Parent = parent,
                 Project = word.Project
             };
             program.Static = static_;
@@ -155,18 +156,52 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
 
             // endprogram keyword
-            if (word.Text == "endprogram")
+            if (word.Text != "endprogram")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.AddError("endprogram expected");
                 program.LastIndexReference = word.CreateIndexReference();
-
-                word.AppendBlock(program.BeginIndexReference, program.LastIndexReference);
-                word.MoveNext();
                 return program;
             }
 
+            word.Color(CodeDrawStyle.ColorType.Keyword);
+            program.LastIndexReference = word.CreateIndexReference();
+
+            if (program.BlockBeginIndexReference != null)
             {
-                word.AddError("endprogram expected");
+                word.AppendBlock(program.BlockBeginIndexReference, program.LastIndexReference, program.Name, false);
+            }
+            word.MoveNext();
+
+            if (word.Text == ":")
+            {
+                word.MoveNext();
+                if (word.Text == program.Name)
+                {
+                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.MoveNext();
+                }
+                else
+                {
+                    word.AddError("program name mismatch");
+                    word.MoveNext();
+                }
+            }
+
+            // register with the parent bulidingblock
+            if (!parent.BuldingBlocks.ContainsKey(program.Name))
+            {
+                parent.BuldingBlocks.Add(program.Name, program);
+            }
+            else
+            {
+                if (protoType)
+                {
+                    program.NameReference.AddError("duplicated program name");
+                }
+                else
+                {
+                    program.BuldingBlocks[program.Name] = program;
+                }
             }
 
             return program;

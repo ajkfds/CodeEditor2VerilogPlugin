@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -32,9 +33,20 @@ namespace pluginVerilog.Verilog.Items
                     return SpecifyBlock.Parse(word, nameSpace);
                 // { attribute_instance }specparam_declaration
                 // program_declaration
+                case "program":
+                    BuildingBlocks.Program.Parse(word, null, nameSpace.BuildingBlock, word.RootParsedDocument.File, word.Prototype);
+                    return true;
                 // module_declaration
-
+                case "module":
+                case "macromodule":
+                    BuildingBlocks.Module.ParseCreate(word, null, nameSpace.BuildingBlock, word.RootParsedDocument.File,word.Prototype);
+                    return true;
                 // interface_declaration
+                case "interface":
+                    BuildingBlocks.Interface.Create(word, nameSpace, null, nameSpace.BuildingBlock, word.RootParsedDocument.File, word.Prototype);
+                    return true;
+
+
                 // timeunits_declaration
                 // module_or_generate_item
                 default:

@@ -18,8 +18,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
         #region IDesignElementContainer
 
-
-//        public Dictionary<string, IBuildingBlockInstantiation> Instantiations { get; } = new Dictionary<string, IBuildingBlockInstantiation>();
+        public Dictionary<string, BuildingBlock> BuldingBlocks = new Dictionary<string, BuildingBlock>();
 
 
         public virtual string FileId { get; protected set; }

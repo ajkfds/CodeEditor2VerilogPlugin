@@ -105,8 +105,8 @@ namespace pluginVerilog.Verilog.DataObjects
 //                    return .Create(dataType);
                 case DataTypeEnum.Class:
                     return DataObject.Create(name,dataType);
-//                case DataTypeEnum.InterfaceInstance:
-//                    return InterfaceInstance.Create(dataType);
+//                case DataTypeEnum.Interface:
+//                    return InterfaceInstance.Create(name,dataType);
                 case DataTypeEnum.Event:
                     return Event.Create(name,dataType);
 //                case DataTypeEnum.CoverGroup:

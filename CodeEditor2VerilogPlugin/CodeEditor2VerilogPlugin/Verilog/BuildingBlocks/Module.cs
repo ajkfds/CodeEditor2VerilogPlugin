@@ -1,9 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using CodeEditor2.CodeEditor;
 using CodeEditor2.CodeEditor.CodeComplete;
 using pluginVerilog.Verilog.Items;
 using pluginVerilog.Verilog.ModuleItems;
 using Splat.ModeDetection;
+using System;
+using System.Collections.Generic;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
@@ -42,14 +43,15 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
 
 
-        public static Module Create(WordScanner word, Attribute attribute, Data.IVerilogRelatedFile file, bool protoType)
+        public static Module ParseCreate(WordScanner word, Attribute attribute, BuildingBlock parent, Data.IVerilogRelatedFile file, bool protoType)
         {
-            return Create(word, null, attribute, file, protoType);
+            return ParseCreate(word, null, attribute,parent, file, protoType);
         }
-        public static Module Create(
+        public static Module ParseCreate(
             WordScanner word,
             Dictionary<string, Expressions.Expression>? parameterOverrides,
             Attribute attribute,
+            BuildingBlock parent,
             Data.IVerilogRelatedFile file,
             bool protoType
             )
@@ -89,7 +91,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
                 BeginIndexReference = beginReference,
                 Name = word.Text,
-                Parent = word.RootParsedDocument.Root,
+                Parent = parent,
                 Project = word.Project,
                 File = file,
                 DefinitionReference = word.CrateWordReference()
@@ -159,6 +161,23 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 {
                     word.AddError("module name mismatch");
                     word.MoveNext();
+                }
+            }
+
+            // register with the parent module
+            if (!parent.BuldingBlocks.ContainsKey(module.Name))
+            {
+                parent.BuldingBlocks.Add(module.Name, module);
+            }
+            else
+            {
+                if (protoType)
+                {
+                    module.NameReference.AddError("duplicated module name");
+                }
+                else
+                {
+                    module.BuldingBlocks[module.Name] = module;
                 }
             }
 

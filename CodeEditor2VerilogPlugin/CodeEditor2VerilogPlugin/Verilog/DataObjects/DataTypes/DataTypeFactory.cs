@@ -66,7 +66,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         Chandle,
         Virtual,
         Class,
-        InterfaceInstance,
+        Interface,
         Event,
         CoverGroup,
         Struct,
@@ -204,6 +204,16 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                                 return dType;
                             }
                             // [class_scope | package_scope] type_identifier { packed_dimension }
+
+
+                            // "virtual"["interface"] interface_identifier[parameter_value_assignment][ . modport_identifier]
+                            //if(namedElement is BuildingBlocks.Interface)
+                            //{
+                            //    IDataType dType = (BuildingBlocks.Interface)namedElement;
+                            //    word.Color(CodeDrawStyle.ColorType.Keyword);
+                            //    word.MoveNext();
+                            //    return dType;
+                            //}
 
                             // typedef
                             if (namedElement is Typedef)

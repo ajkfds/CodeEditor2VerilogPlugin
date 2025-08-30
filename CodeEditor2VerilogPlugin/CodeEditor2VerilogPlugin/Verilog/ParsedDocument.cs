@@ -113,7 +113,7 @@ namespace pluginVerilog.Verilog
         public bool SystemVerilog = false;
         public bool Instance = false;
 
-        public Root? Root;
+        public Root Root;
 
         public Dictionary<string, Data.VerilogHeaderInstance> IncludeFiles = new Dictionary<string, Data.VerilogHeaderInstance>();
         public Dictionary<string, Macro> Macros = new Dictionary<string, Macro>();

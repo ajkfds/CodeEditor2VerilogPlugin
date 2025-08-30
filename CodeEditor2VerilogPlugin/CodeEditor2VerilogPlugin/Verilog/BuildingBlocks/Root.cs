@@ -64,7 +64,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
         }
 
-        public Dictionary<string, BuildingBlock> BuldingBlocks = new Dictionary<string, BuildingBlock>();
+//        public Dictionary<string, BuildingBlock> BuldingBlocks = new Dictionary<string, BuildingBlock>();
 
 
         public BuildingBlock? GetBuildingBlock(IndexReference indexReference)
@@ -170,11 +170,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
                 if (parsedDocument.ParameterOverrides == null)
                 {
-                    module = Module.Create(word, null, file, true);
+                    module = Module.ParseCreate(word, null, parsedDocument.Root, file, true);
                 }
                 else
                 {
-                    module = Module.Create(word, parsedDocument.ParameterOverrides, null , file, true);
+                    module = Module.ParseCreate(word, parsedDocument.ParameterOverrides, null , parsedDocument.Root, file, true);
                 }
                 //if (module.Instantiations.Count != 0) // prepare reparse (instanced module could have un-refferenced link)
                 {
@@ -185,26 +185,14 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
                 if (parsedDocument.ParameterOverrides == null)
                 {
-                    module = Module.Create(word, null, file, false);
+                    module = Module.ParseCreate(word, null, parsedDocument.Root, file, false);
                 }
                 else
                 {
-                    module = Module.Create(word, parsedDocument.ParameterOverrides, null, file, false);
+                    module = Module.ParseCreate(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, false);
                 }
             }
 
-            if (parsedDocument?.Root == null)
-            {
-
-            }else if (!parsedDocument.Root.BuldingBlocks.ContainsKey(module.Name))
-            {
-                parsedDocument.Root.BuldingBlocks.Add(module.Name, module);
-                if (module.ReparseRequested) parsedDocument.ReparseRequested = true;
-            }
-            else
-            {
-                word.AddError("duplicated module name");
-            }
         }
 
         private static void parsePackage(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
@@ -230,11 +218,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
                 if (parsedDocument.ParameterOverrides == null)
                 {
-                    package = Package.Create(word, null, file, true);
+                    package = Package.Create(word, null, parsedDocument.Root, file, true);
                 }
                 else
                 {
-                    package = Package.Create(word, parsedDocument.ParameterOverrides, null, file, true);
+                    package = Package.Create(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, true);
                 }
                 //if (package.Instantiations.Count != 0) // prepare reparse (instanced module could have un-refferenced link)
                 {
@@ -245,22 +233,12 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
                 if (parsedDocument.ParameterOverrides == null)
                 {
-                    package = Package.Create(word, null, file, false);
+                    package = Package.Create(word, null, parsedDocument.Root, file, false);
                 }
                 else
                 {
-                    package = Package.Create(word, parsedDocument.ParameterOverrides, null, file, false);
+                    package = Package.Create(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, false);
                 }
-            }
-
-            if (!parsedDocument.Root.BuldingBlocks.ContainsKey(package.Name))
-            {
-                parsedDocument.Root.BuldingBlocks.Add(package.Name, package);
-                if (package.ReparseRequested) parsedDocument.ReparseRequested = true;
-            }
-            else
-            {
-                word.AddError("duplicated module name");
             }
         }
 
@@ -287,11 +265,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
                 if (parsedDocument.ParameterOverrides == null)
                 {
-                    program = Program.Create(word, null, file, true);
+                    program = Program.Parse(word, null, parsedDocument.Root, file, true);
                 }
                 else
                 {
-                    program = Program.Create(word, parsedDocument.ParameterOverrides, null, file, true);
+                    program = Program.Parse(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, true);
                 }
                 //if (program.Instantiations.Count != 0) // prepare reparse (instanced module could have un-referenced link)
                 {
@@ -302,11 +280,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
                 if (parsedDocument.ParameterOverrides == null)
                 {
-                    program = Program.Create(word, null, file, false);
+                    program = Program.Parse(word, null, parsedDocument.Root, file,  false);
                 }
                 else
                 {
-                    program = Program.Create(word, parsedDocument.ParameterOverrides, null, file, false);
+                    program = Program.Parse(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, false);
                 }
             }
 
@@ -343,11 +321,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
                 if (parsedDocument.ParameterOverrides == null)
                 {
-                    module = Interface.Create(word, parsedDocument.Root, null, file, true);
+                    module = Interface.Create(word, parsedDocument.Root, null, parsedDocument.Root, file, true);
                 }
                 else
                 {
-                    module = Interface.Create(word, parsedDocument.Root, parsedDocument.ParameterOverrides, null, file, true);
+                    module = Interface.Create(word, parsedDocument.Root, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, true);
                 }
 //                if (module.Instantiations.Count != 0) // prepare reparse (instanced module could have un-refferenced link)
                 {
@@ -358,11 +336,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
                 if (parsedDocument.ParameterOverrides == null)
                 {
-                    module = Interface.Create(word, parsedDocument.Root, null, file, false);
+                    module = Interface.Create(word, parsedDocument.Root, null, parsedDocument.Root, file, false);
                 }
                 else
                 {
-                    module = Interface.Create(word, parsedDocument.Root, parsedDocument.ParameterOverrides, null, file, false);
+                    module = Interface.Create(word, parsedDocument.Root, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, false);
                 }
             }
 

@@ -39,14 +39,15 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
 
 
-        public static Package Create(WordScanner word, Attribute attribute, Data.IVerilogRelatedFile file, bool protoType)
+        public static Package Create(WordScanner word, Attribute attribute, BuildingBlock parent, Data.IVerilogRelatedFile file, bool protoType)
         {
-            return Create(word, null, attribute, file, protoType);
+            return Create(word, null, attribute, parent, file, protoType);
         }
         public static Package Create(
             WordScanner word,
             Dictionary<string, Expressions.Expression>? parameterOverrides,
             Attribute attribute,
+            BuildingBlock parent,
             Data.IVerilogRelatedFile file,
             bool protoType
             )
@@ -131,13 +132,21 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                 word.AppendBlock(package.BeginIndexReference, package.LastIndexReference);
                 word.MoveNext();
-                return package;
             }
-
+            else
             {
                 word.AddError("endpackage expected");
             }
 
+            // register with the parent module
+            if (!parent.BuldingBlocks.ContainsKey(package.Name))
+            {
+                parent.BuldingBlocks.Add(package.Name, package);
+            }
+            else
+            {
+                package.NameReference.AddError("duplicated package name");
+            }
             return package;
         }
 

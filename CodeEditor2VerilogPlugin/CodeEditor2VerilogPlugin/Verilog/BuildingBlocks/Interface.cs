@@ -1,4 +1,6 @@
 ﻿using CodeEditor2.CodeEditor.CodeComplete;
+using pluginVerilog.Verilog.DataObjects.Arrays;
+using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.DataObjects.Variables;
 using pluginVerilog.Verilog.ModuleItems;
 using System;
@@ -9,13 +11,17 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
-    public class Interface : BuildingBlock, IModuleOrInterface
+    public class Interface : BuildingBlock, IModuleOrInterface//, IDataType
     {
         protected Interface() : base(null, null)
         {
 
         }
 
+        //string IDataType.CreateString()
+        //{
+        //    throw new NotImplementedException();
+        //}
         // IModuleOrInterfaceOrProgram
 
         // Port
@@ -52,17 +58,22 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             get { return cellDefine; }
         }
 
+        //DataTypeEnum IDataType.Type => DataTypeEnum.Interface;
 
+        //bool IDataType.IsVector => false;
 
-        public static Interface Create(WordScanner word, NameSpace nameSpace, Attribute? attribute, Data.IVerilogRelatedFile file, bool protoType)
+        //List<PackedArray> IDataType.PackedDimensions => new List<PackedArray>();
+
+        public static Interface Create(WordScanner word, NameSpace nameSpace, Attribute? attribute, BuildingBlock parent, Data.IVerilogRelatedFile file, bool protoType)
         {
-            return Create(word,nameSpace, null, attribute, file, protoType);
+            return Create(word,nameSpace, null, attribute, parent, file, protoType);
         }
         public static Interface Create(
             WordScanner word,
             NameSpace nameSpace,
             Dictionary<string, Expressions.Expression>? parameterOverrides,
             Attribute? attribute,
+            BuildingBlock parent,
             Data.IVerilogRelatedFile file,
             bool protoType
             )
@@ -91,7 +102,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             Interface interface_ = new Interface() {
                 BeginIndexReference = beginReference,
                 Name = word.Text,
-                Parent = nameSpace,
+                Parent = parent,
                 Project = word.Project,
                 File = file,
                 DefinitionReference = word.CrateWordReference()
@@ -136,39 +147,76 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 word.Prototype = false;
             }
 
-            // endmodule keyword
-            if (word.Text == "endinterface")
+
+            // endinterface keyword
+            if (word.Text != "endinterface")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.AddError("endmodule expected");
                 interface_.LastIndexReference = word.CreateIndexReference();
-
-                if (interface_.Parent != null)
-                {
-                    if (interface_.Parent.NamedElements.ContainsKey(interface_.Name))
-                    {
-                        if(protoType)
-                        {
-                            word.AddError("duplicate interface");
-                        }
-                        else
-                        {
-                            interface_.Parent.NamedElements .Replace(interface_.Name,interface_);
-                        }
-
-                    }
-                    else
-                    {
-                        interface_.Parent.NamedElements.Add(interface_.Name, interface_);
-                    }
-                }
-
-                word.AppendBlock(interface_.BeginIndexReference, interface_.LastIndexReference);
-                word.MoveNext();
                 return interface_;
             }
 
+            word.Color(CodeDrawStyle.ColorType.Keyword);
+            interface_.LastIndexReference = word.CreateIndexReference();
+
+            if (interface_.BlockBeginIndexReference != null)
             {
-                word.AddError("endmodule expected");
+                word.AppendBlock(interface_.BlockBeginIndexReference, interface_.LastIndexReference, interface_.Name, false);
+            }
+            word.MoveNext();
+
+            if (word.Text == ":")
+            {
+                word.MoveNext();
+                if (word.Text == interface_.Name)
+                {
+                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.MoveNext();
+                }
+                else
+                {
+                    word.AddError("interface name mismatch");
+                    word.MoveNext();
+                }
+            }
+
+
+            if (interface_.Parent != null)
+            {
+                if (interface_.Parent.NamedElements.ContainsKey(interface_.Name))
+                {
+                    if(protoType)
+                    {
+                        word.AddError("duplicate interface");
+                    }
+                    else
+                    {
+                        interface_.Parent.NamedElements .Replace(interface_.Name,interface_);
+                    }
+
+                }
+                else
+                {
+                    interface_.Parent.NamedElements.Add(interface_.Name, interface_);
+                }
+            }
+
+
+            // register with the parent module
+            if (!parent.BuldingBlocks.ContainsKey(interface_.Name))
+            {
+                parent.BuldingBlocks.Add(interface_.Name, interface_);
+            }
+            else
+            {
+                if (protoType)
+                {
+                    interface_.NameReference.AddError("duplicated interface name");
+                }
+                else
+                {
+                    interface_.BuldingBlocks[interface_.Name] = interface_;
+                }
             }
 
             return interface_;
@@ -401,6 +449,8 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 word.AddError(") expected");
             }
         }
+
+
 
         /*
         ##Verilog 2001

@@ -72,7 +72,29 @@ namespace pluginVerilog.Verilog.DataObjects
         //    instantiation.Project = project;
         //    return instantiation;
         //}
+        //public static DataObject Create(string name, DataTypes.IDataType dataType)
+        //{
+        //    if (dataType is not BuildingBlocks.Interface) throw new Exception();
+        //    BuildingBlocks.Interface interface_ = (BuildingBlocks.Interface)dataType;
 
+        //    InterfaceInstance interfaceInstantiation = new InterfaceInstance()
+        //    {
+        //        BeginIndexReference = interface_.BeginIndexReference,
+        //        DefinitionReference = interface_.DefinitionReference,
+        //        Name = name,
+        //        ParameterOverrides = new Dictionary<string, Expressions.Expression>(),
+        //        Project = null,
+        //        SourceName = interface_.Name
+        //    };
+        //    if (interface_ == null) return interfaceInstantiation;
+        //    //foreach (var modPort in interface_.NamedElements.Values.OfType<ModPort>())
+        //    //{
+        //    //    interface_.ModPorts.cl
+        //    //}
+        //    copyItems(interfaceInstantiation, interface_);
+
+        //    return interfaceInstantiation;
+        //}
         public static InterfaceInstance CreatePortInstance(WordScanner word,string sourceInterfaceName)
         {
             InterfaceInstance interfaceInstantiation = new InterfaceInstance() {
