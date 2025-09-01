@@ -69,7 +69,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
         public BuildingBlock? GetBuildingBlock(IndexReference indexReference)
         {
-            foreach (BuildingBlock buildingBlock in BuldingBlocks.Values)
+            foreach (BuildingBlock buildingBlock in BuildingBlocks.Values)
             {
                 if (buildingBlock.BeginIndexReference == null) continue;
                 if (buildingBlock.LastIndexReference == null) continue;
@@ -288,9 +288,9 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 }
             }
 
-            if (!parsedDocument.Root.BuldingBlocks.ContainsKey(program.Name))
+            if (!parsedDocument.Root.BuildingBlocks.ContainsKey(program.Name))
             {
-                parsedDocument.Root.BuldingBlocks.Add(program.Name, program);
+                parsedDocument.Root.BuildingBlocks.Add(program.Name, program);
                 if (program.ReparseRequested) parsedDocument.ReparseRequested = true;
             }
             else
@@ -344,9 +344,9 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 }
             }
 
-            if (!parsedDocument.Root.BuldingBlocks.ContainsKey(module.Name))
+            if (!parsedDocument.Root.BuildingBlocks.ContainsKey(module.Name))
             {
-                parsedDocument.Root.BuldingBlocks.Add(module.Name, module);
+                parsedDocument.Root.BuildingBlocks.Add(module.Name, module);
                 if (module.ReparseRequested) parsedDocument.ReparseRequested = true;
             }
             else

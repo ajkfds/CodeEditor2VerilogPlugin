@@ -139,9 +139,9 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
 
             // register with the parent module
-            if (!parent.BuldingBlocks.ContainsKey(package.Name))
+            if (!parent.BuildingBlocks.ContainsKey(package.Name))
             {
-                parent.BuldingBlocks.Add(package.Name, package);
+                parent.BuildingBlocks.Add(package.Name, package);
             }
             else
             {

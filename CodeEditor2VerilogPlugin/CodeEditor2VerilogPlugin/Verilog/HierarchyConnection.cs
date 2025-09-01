@@ -51,8 +51,8 @@ namespace pluginVerilog.Verilog
                 if (parentParsedDocument == null) return;
                 if (parentParsedDocument.Root == null) return;
 
-                if (parentParsedDocument.Root.BuldingBlocks.Count != 1) return;
-                BuildingBlocks.Module? module = parentParsedDocument.Root.BuldingBlocks.First().Value as BuildingBlocks.Module;
+                if (parentParsedDocument.Root.BuildingBlocks.Count != 1) return;
+                BuildingBlocks.Module? module = parentParsedDocument.Root.BuildingBlocks.First().Value as BuildingBlocks.Module;
                 if (module == null) return;
 
                 if (!module.NamedElements.ContainsKey(moduleInstance.Name)) return;

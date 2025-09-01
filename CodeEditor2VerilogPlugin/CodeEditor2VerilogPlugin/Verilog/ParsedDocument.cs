@@ -176,7 +176,7 @@ namespace pluginVerilog.Verilog
                     Data.VerilogFile? verilogFile = file as Data.VerilogFile;
                     if (verilogFile != null)
                     {
-                        foreach (BuildingBlock module in Root.BuldingBlocks.Values)
+                        foreach (BuildingBlock module in Root.BuildingBlocks.Values)
                         {
                             verilogFile.ProjectProperty.RemoveBuildingBlock(module.Name);
                         }
@@ -450,7 +450,7 @@ namespace pluginVerilog.Verilog
         {
             if (Root == null) return null;
             IndexReference iref = IndexReference.Create(this.IndexReference, index);
-            foreach (BuildingBlock module in Root.BuldingBlocks.Values)
+            foreach (BuildingBlock module in Root.BuildingBlocks.Values)
             {
                 if (iref.IsSmallerThan(module.BeginIndexReference)) continue;
                 if (module.LastIndexReference == null) continue;
@@ -465,7 +465,7 @@ namespace pluginVerilog.Verilog
             if(Root == null) return null;
             // get current buldingBlock
             NameSpace? space = null;
-            foreach (BuildingBlock buildingBlock in Root.BuldingBlocks.Values)
+            foreach (BuildingBlock buildingBlock in Root.BuildingBlocks.Values)
             {
                 if (iref.IsSmallerThan(buildingBlock.BeginIndexReference)) continue;
                 if (buildingBlock.LastIndexReference == null) break;
@@ -532,7 +532,7 @@ namespace pluginVerilog.Verilog
             if (hierWords.Count == 0) AppendKeywordAutoCompleteItems(items, candidateWord);
 
             // on Root and sont have ant Building Blocks
-            if (Root == null || Root.BuldingBlocks == null)
+            if (Root == null || Root.BuildingBlocks == null)
             {
                 return items;
             }

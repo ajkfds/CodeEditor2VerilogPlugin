@@ -133,7 +133,7 @@ namespace pluginVerilog.Data
             // Register New Building Block
             if(VerilogParsedDocument.Root != null)
             {
-                foreach (BuildingBlock buildingBlock in VerilogParsedDocument.Root.BuldingBlocks.Values)
+                foreach (BuildingBlock buildingBlock in VerilogParsedDocument.Root.BuildingBlocks.Values)
                 {
                     if (ProjectProperty.HasRegisteredBuildingBlock(buildingBlock.Name))
                     {   // swap building block

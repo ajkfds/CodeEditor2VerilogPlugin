@@ -238,9 +238,9 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
 
             }
-            else if (!word.RootParsedDocument.Root.BuldingBlocks.ContainsKey(class_.Name))
+            else if (!word.RootParsedDocument.Root.BuildingBlocks.ContainsKey(class_.Name))
             {
-                word.RootParsedDocument.Root.BuldingBlocks.Add(class_.Name, class_);
+                word.RootParsedDocument.Root.BuildingBlocks.Add(class_.Name, class_);
                 if (class_.ReparseRequested) word.RootParsedDocument.ReparseRequested = true;
             }
             else

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
-    public class BuildingBlock : NameSpace, IBuildingBlock,INamedElement
+    public class BuildingBlock : NameSpace, INamedElement
     {
         protected BuildingBlock(BuildingBlock buildingBlock, NameSpace parent) :base(buildingBlock, parent)
         {
@@ -18,7 +18,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
         #region IDesignElementContainer
 
-        public Dictionary<string, BuildingBlock> BuldingBlocks = new Dictionary<string, BuildingBlock>();
+        public Dictionary<string, BuildingBlock> BuildingBlocks { get; set; } = new Dictionary<string, BuildingBlock>();
 
 
         public virtual string FileId { get; protected set; }
@@ -29,6 +29,14 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         public virtual List<string> GetExitKeywords()
         {
             return new List<string> { };
+        }
+
+        public BuildingBlock? SearchBuildingBlockUpward(string name)
+        {
+            if (Parent == null || Parent.BuildingBlock == null) return null;
+            if (Name == name) return this;
+            if (this.BuildingBlocks.ContainsKey(name)) return this.BuildingBlocks[name];
+            return Parent.BuildingBlock.SearchBuildingBlockUpward(name);
         }
 
         public bool AnsiStylePortDefinition { get; set; } = false;

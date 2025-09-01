@@ -248,7 +248,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     }
 
                     // class_type
-                    IBuildingBlock? buildingBlock = word.ProjectProperty.GetBuildingBlock(word.Text);
+                    BuildingBlock? buildingBlock = word.ProjectProperty.GetBuildingBlock(word.Text);
                     if (buildingBlock is Class)
                     {
                         Class class_ =(Class) buildingBlock;

@@ -203,9 +203,9 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
 
             // register with the parent module
-            if (!parent.BuldingBlocks.ContainsKey(interface_.Name))
+            if (!parent.BuildingBlocks.ContainsKey(interface_.Name))
             {
-                parent.BuldingBlocks.Add(interface_.Name, interface_);
+                parent.BuildingBlocks.Add(interface_.Name, interface_);
             }
             else
             {
@@ -215,7 +215,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 }
                 else
                 {
-                    interface_.BuldingBlocks[interface_.Name] = interface_;
+                    interface_.BuildingBlocks[interface_.Name] = interface_;
                 }
             }
 

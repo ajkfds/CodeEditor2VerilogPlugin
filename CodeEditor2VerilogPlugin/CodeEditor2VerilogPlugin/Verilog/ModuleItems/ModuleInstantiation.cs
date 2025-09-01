@@ -122,8 +122,8 @@ namespace pluginVerilog.Verilog.ModuleItems
             ParsedDocument? parsedDocument = (ParsedDocument)codeEditorParsedDocument;
             if (parsedDocument == null) return null;
             if (parsedDocument.Root == null) return null;
-            if (!parsedDocument.Root.BuldingBlocks.ContainsKey(SourceName)) return null;
-            return parsedDocument.Root.BuldingBlocks[SourceName];
+            if (!parsedDocument.Root.BuildingBlocks.ContainsKey(SourceName)) return null;
+            return parsedDocument.Root.BuildingBlocks[SourceName];
         }
 
         public bool Prototype { get; set; } = false;

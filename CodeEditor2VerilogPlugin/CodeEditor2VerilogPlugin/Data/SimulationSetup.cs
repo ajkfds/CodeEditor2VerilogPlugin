@@ -35,7 +35,7 @@ namespace pluginVerilog.Data
             if (verilogFile.VerilogParsedDocument.Root == null) return null;
 
             setup.Project = verilogFile.Project;
-            BuildingBlock? buildingBlock = verilogFile.VerilogParsedDocument.Root.BuldingBlocks.Values.FirstOrDefault();
+            BuildingBlock? buildingBlock = verilogFile.VerilogParsedDocument.Root.BuildingBlocks.Values.FirstOrDefault();
 
             setup.TopName = buildingBlock?.Name;
             searchHier(verilogFile,ids,setup);

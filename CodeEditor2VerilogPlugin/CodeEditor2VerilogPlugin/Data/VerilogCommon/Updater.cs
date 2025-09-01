@@ -73,7 +73,7 @@ namespace pluginVerilog.Data.VerilogCommon
                 }
                 else if( item is VerilogFile )
                 {
-                    if (item.VerilogParsedDocument.Root.BuldingBlocks.Count == 1)
+                    if (item.VerilogParsedDocument.Root.BuildingBlocks.Count == 1)
                     {
                         addSubItemsSingleBuldingBlock(item, null, newSubItems, parent, project);
                     }
@@ -97,7 +97,7 @@ namespace pluginVerilog.Data.VerilogCommon
             if (item.VerilogParsedDocument?.Root == null) throw new Exception();
 
             // add building block instance
-            foreach (BuildingBlock buldingBlock in item.VerilogParsedDocument.Root.BuldingBlocks.Values)
+            foreach (BuildingBlock buldingBlock in item.VerilogParsedDocument.Root.BuildingBlocks.Values)
             {
                 bool alreadyExist = false;
 
@@ -160,7 +160,7 @@ namespace pluginVerilog.Data.VerilogCommon
             if (item.VerilogParsedDocument?.Root == null) throw new Exception();
 
             // add building block instance
-            foreach (BuildingBlock newModule in item.VerilogParsedDocument.Root.BuldingBlocks.Values)
+            foreach (BuildingBlock newModule in item.VerilogParsedDocument.Root.BuildingBlocks.Values)
             {
                 if (moduleName != null && moduleName != newModule.Name)
                 {

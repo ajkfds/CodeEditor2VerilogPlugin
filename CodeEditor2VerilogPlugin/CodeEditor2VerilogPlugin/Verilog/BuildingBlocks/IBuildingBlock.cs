@@ -8,10 +8,15 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 {
     public interface IBuildingBlock
     {
-        // NameSpace
+        // IModuleOrInterfaceOrProgram にbuilding blockのinterfaceをもたせるために使用
 
         NamedElements NamedElements { get; }
+
+        // definition tree parents
         NameSpace Parent { get; }
+        // definition tree chiledren
+        Dictionary<string,BuildingBlock> BuildingBlocks { get; }
+
         NameSpace? GetHierarchyNameSpace(IndexReference index);
         DataObjects.Constants.Constants? GetConstants(string identifier);
 

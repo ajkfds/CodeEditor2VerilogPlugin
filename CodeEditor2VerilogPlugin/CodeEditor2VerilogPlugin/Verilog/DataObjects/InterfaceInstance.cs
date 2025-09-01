@@ -20,6 +20,8 @@ namespace pluginVerilog.Verilog.DataObjects
         public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
         public Attribute? Attribute { get; set; }
         public required WordReference DefinitionReference { get; init; }
+
+        public required NameSpace InstancedNameSpace { get; init; }
         public required Project Project { get; init; }
 
         public Dictionary<string, string> Properties = new Dictionary<string, string>();
@@ -95,7 +97,7 @@ namespace pluginVerilog.Verilog.DataObjects
 
         //    return interfaceInstantiation;
         //}
-        public static InterfaceInstance CreatePortInstance(WordScanner word,string sourceInterfaceName)
+        public static InterfaceInstance CreatePortInstance(WordScanner word,string sourceInterfaceName,NameSpace nameSpace)
         {
             InterfaceInstance interfaceInstantiation = new InterfaceInstance() {
                 BeginIndexReference = word.CreateIndexReference(),
@@ -103,7 +105,8 @@ namespace pluginVerilog.Verilog.DataObjects
                 Name = word.Text,
                 ParameterOverrides = new Dictionary<string, Expressions.Expression>(),
                 Project = word.Project,
-                SourceName = sourceInterfaceName
+                SourceName = sourceInterfaceName,
+                InstancedNameSpace = nameSpace
             };
             Interface? interface_ = interfaceInstantiation.Interface;
             if (interface_ == null) return interfaceInstantiation;
@@ -119,8 +122,16 @@ namespace pluginVerilog.Verilog.DataObjects
         public Interface? Interface { 
             get
             {
+                Interface? instancedInterface;
+                BuildingBlock buildingBlock = InstancedNameSpace.BuildingBlock.SearchBuildingBlockUpward(SourceName);
+                if(buildingBlock is Interface)
+                {
+                    instancedInterface = (Interface)buildingBlock;
+                    return instancedInterface;
+                }
+
                 ProjectProperty projectProperty = (ProjectProperty)Project.ProjectProperties[Plugin.StaticID];
-                Interface? instancedInterface = projectProperty.GetBuildingBlock(SourceName) as Interface;
+                instancedInterface = projectProperty.GetBuildingBlock(SourceName) as Interface;
                 return instancedInterface;
             } 
         }
@@ -304,7 +315,8 @@ namespace pluginVerilog.Verilog.DataObjects
                     Name = word.Text,
                     ParameterOverrides = parameterOverrides,
                     Project = word.RootParsedDocument.Project,
-                    SourceName = interfaceName
+                    SourceName = interfaceName,
+                    InstancedNameSpace = nameSpace
                 };
                 interfaceInstance.BlockBeginIndexReference = blockBeginIndexReference;
 
@@ -545,7 +557,18 @@ namespace pluginVerilog.Verilog.DataObjects
 
         public BuildingBlock? GetInstancedBuildingBlock()
         {
-            BuildingBlock? instancedModule = ProjectProperty.GetBuildingBlock(SourceName);
+            BuildingBlock? instancedModule;
+            {
+                BuildingBlock? buildingBlock = InstancedNameSpace.BuildingBlock.SearchBuildingBlockUpward(SourceName);
+                if(buildingBlock != null)
+                {
+                    instancedModule = buildingBlock;
+                }
+                else
+                {
+                    instancedModule = ProjectProperty.GetBuildingBlock(SourceName);
+                }
+            }
 
             if (ParameterOverrides.Count != 0)
             {
@@ -652,7 +675,8 @@ namespace pluginVerilog.Verilog.DataObjects
                 Name = name,
                 ParameterOverrides = ParameterOverrides,
                 Project = Project,
-                SourceName = SourceName
+                SourceName = SourceName,
+                InstancedNameSpace = InstancedNameSpace
             };
         }
 

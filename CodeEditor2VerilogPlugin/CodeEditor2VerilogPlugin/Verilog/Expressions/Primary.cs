@@ -1,4 +1,7 @@
-﻿using Avalonia.OpenGL;
+﻿using Avalonia.Controls;
+using Avalonia.Controls.Documents;
+using Avalonia.Markup.Xaml.MarkupExtensions;
+using Avalonia.OpenGL;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.Nets;
@@ -11,6 +14,7 @@ using System.Drawing.Text;
 using System.IO;
 using System.Linq;
 using System.Reflection.Metadata;
+using System.Runtime.Intrinsics.X86;
 using System.Security.AccessControl;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -206,39 +210,58 @@ number
                     string nameSpaceText = "";
                     NameSpace? targetNameSpace = nameSpace;
 
+                    // Class scope resolution operator
+                    if (word.NextText == "::")
+                    {
+
+                    }
+
                     if (word.Text == "this" && word.NextText == ".")
                     {
+
+                        // The this keyword shall only be used within
+                        // non -static class methods,
+                        // constraints,
+                        // inlined constraint methods, or covergroups embedded within classes(see 19.4);
+                        // otherwise, an error shall be issued.
+
                         word.Color(CodeDrawStyle.ColorType.Identifier);
                         word.MoveNext();
                         word.MoveNext();
                         targetNameSpace = nameSpace.BuildingBlock;
                         nameSpaceText = "this.";
                     }
+                    else
+                    {
 
-
-                    { // search upward
-                        NameSpace? searchUpwardNameSpace = null;
-                        INamedElement? upwardElement = nameSpace.GetNamedElementUpward(word.Text,out searchUpwardNameSpace);
-                        if (upwardElement != null)
-                        {
-                            acceptImplicitNet = false;
-                            targetNameSpace = searchUpwardNameSpace;
+                        { // search upward
+                            NameSpace? searchUpwardNameSpace = null;
+                            INamedElement? upwardElement = nameSpace.GetNamedElementUpward(word.Text, out searchUpwardNameSpace);
+                            if (upwardElement != null)
+                            {
+                                acceptImplicitNet = false;
+                                targetNameSpace = searchUpwardNameSpace;
+                            }
+                            if (targetNameSpace == null) targetNameSpace = nameSpace;
                         }
-                        if (targetNameSpace == null) targetNameSpace = nameSpace;
-                    }
 
-                    { // search downward
+                        // search downward
                         NameSpace? searchDownwardNameSpace = searchNameSpace(word, targetNameSpace, ref nameSpaceText);
                         if (searchDownwardNameSpace != null)
                         {
-                            if(nameSpaceText != "") acceptImplicitNet = false;
+                            if (nameSpaceText != "") acceptImplicitNet = false;
                             targetNameSpace = searchDownwardNameSpace;
                         }
                         else
                         {
-                            if(targetNameSpace == null) targetNameSpace = nameSpace;
+                            if (targetNameSpace == null)
+                            {
+                                targetNameSpace = nameSpace;
+                            }
                         }
                     }
+
+
 
                     INamedElement? element = null;
                     if (targetNameSpace.NamedElements.ContainsKey(word.Text))

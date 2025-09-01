@@ -188,9 +188,9 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
 
             // register with the parent bulidingblock
-            if (!parent.BuldingBlocks.ContainsKey(program.Name))
+            if (!parent.BuildingBlocks.ContainsKey(program.Name))
             {
-                parent.BuldingBlocks.Add(program.Name, program);
+                parent.BuildingBlocks.Add(program.Name, program);
             }
             else
             {
@@ -200,7 +200,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 }
                 else
                 {
-                    program.BuldingBlocks[program.Name] = program;
+                    program.BuildingBlocks[program.Name] = program;
                 }
             }
 

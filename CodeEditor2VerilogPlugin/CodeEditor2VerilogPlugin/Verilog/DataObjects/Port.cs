@@ -748,7 +748,18 @@ namespace pluginVerilog.Verilog.DataObjects
 
             string identifier = word.Text;
             Interface? interface_ = null;
-            interface_ = word.ProjectProperty.GetBuildingBlock(identifier) as Interface;
+            {
+                BuildingBlock? upperBuldingBlock = nameSpace.BuildingBlock.SearchBuildingBlockUpward(word.Text);
+                if(upperBuldingBlock is Interface)
+                {
+                    interface_ = (Interface)upperBuldingBlock;
+                }
+            }
+            if (interface_ == null)
+            {
+                interface_ = word.ProjectProperty.GetBuildingBlock(identifier) as Interface;
+            }
+
             if (interface_ == null)
             {
                 string nextText = word.NextText;
@@ -759,6 +770,7 @@ namespace pluginVerilog.Verilog.DataObjects
                 if (nextText == "output") return false;
                 if (nextText == "inout") return false;
                 if (nextText == "ref") return false;
+                word.AddError("undefined interface");
 
 
 //                return false;
@@ -794,7 +806,7 @@ namespace pluginVerilog.Verilog.DataObjects
                 word.AddError("illegal identifier");
                 return true;
             }
-            InterfaceInstance iInst = InterfaceInstance.CreatePortInstance(word, identifier);
+            InterfaceInstance iInst = InterfaceInstance.CreatePortInstance(word, identifier,nameSpace);
 //            iInst.ModPortName = modPortName;
             word.Color(CodeDrawStyle.ColorType.Variable);
             word.MoveNext();

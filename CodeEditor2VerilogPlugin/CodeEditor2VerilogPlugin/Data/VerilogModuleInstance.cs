@@ -95,7 +95,7 @@ namespace pluginVerilog.Data
             get
             {
                 if (VerilogParsedDocument?.Root == null) return null;
-                if (VerilogParsedDocument.Root.BuldingBlocks.TryGetValue(ModuleName, out var block))
+                if (VerilogParsedDocument.Root.BuildingBlocks.TryGetValue(ModuleName, out var block))
                 {
                     return block as Module;
                 }
@@ -262,7 +262,7 @@ namespace pluginVerilog.Data
             if(source.ParsedDocument != null)// && source.ParsedDocument.Version != newParsedDocument.Version)
             {
                 Verilog.ParsedDocument vParsedDocument = (Verilog.ParsedDocument)newParsedDocument;
-                if(vParsedDocument.Root != null && vParsedDocument.Root.BuldingBlocks.Count == 1)
+                if(vParsedDocument.Root != null && vParsedDocument.Root.BuildingBlocks.Count == 1)
                 {
                     source.AcceptParsedDocument(newParsedDocument);
                 }
