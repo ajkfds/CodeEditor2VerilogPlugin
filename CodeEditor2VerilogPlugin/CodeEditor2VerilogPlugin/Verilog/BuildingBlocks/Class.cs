@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
-    public class Class : BuildingBlock, IModuleOrInterface, DataObjects.DataTypes.IDataType
+    public class Class : BuildingBlock, IModuleOrInterface, IModuleOrInterfaceOrCheckerOrClass, DataObjects.DataTypes.IDataType
     {
         protected Class() : base(null, null)
         {
@@ -100,7 +100,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             Dictionary<string, Expressions.Expression>? parameterOverrides
             )
         {
-            bool protoType = false;
+//            bool protoType = false;
             /*
             class_declaration ::=  
                     [ "virtual" ] "class" [ lifetime ] class_identifier [ parameter_port_list ] [ "extends" class_type [ ( list_of_arguments ) ] ]  
@@ -172,7 +172,27 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             if (word.CellDefine) class_.cellDefine = true;
             word.MoveNext();
 
-            if (!word.CellDefine && !protoType)
+            if(nameSpace.BuildingBlock is Root)
+            {
+                // prototype parse
+                WordScanner prototypeWord = word.Clone();
+//                WordScanner prototypeWord = word;
+                prototypeWord.Prototype = true;
+                parseClassItems(prototypeWord, nameSpace, parameterOverrides, null, class_);
+                prototypeWord.Dispose();
+
+                // parse
+                word.RootParsedDocument.Macros = macroKeep;
+                parseClassItems(word, nameSpace, parameterOverrides, null, class_);
+            }
+            else
+            {
+                parseClassItems(word, nameSpace, parameterOverrides, null, class_);
+            }
+
+            parseClassItems(word, nameSpace, parameterOverrides, null, class_);
+            /*
+            if (!word.CellDefine && !word.Prototype)
             {
                 // prototype parse
                 WordScanner prototypeWord = word.Clone();
@@ -191,9 +211,10 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 parseClassItems(word, nameSpace, parameterOverrides, null, class_);
                 word.Prototype = false;
             }
+            */
 
             // endclass keyword
-            if(word.Text != "endclass")
+            if (word.Text != "endclass")
             {
                 word.AddError("endclass expected");
             }
@@ -243,9 +264,13 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 word.RootParsedDocument.Root.BuildingBlocks.Add(class_.Name, class_);
                 if (class_.ReparseRequested) word.RootParsedDocument.ReparseRequested = true;
             }
-            else
+            else if(word.Prototype)
             {
                 word.AddError("duplicated class name");
+            }
+            else
+            {
+                word.RootParsedDocument.Root.BuildingBlocks[class_.Name]=class_;
             }
 
             return class_;

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
-    public class Interface : BuildingBlock, IModuleOrInterface//, IDataType
+    public class Interface : BuildingBlock, IModuleOrInterface, IModuleOrInterfaceOrCheckerOrClass
     {
         protected Interface() : base(null, null)
         {

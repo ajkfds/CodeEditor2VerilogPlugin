@@ -621,18 +621,52 @@ namespace pluginVerilog.Verilog.DataObjects
             word.Color(CodeDrawStyle.ColorType.Variable);
             word.MoveNext();
 
-            // Unpacked dimensions shall not be inherited from the previous port declaration
-            //  and must be repeated for each port with the same dimensions.
-            // { dimension } 
-            while (!word.Eof && word.Text == "[")
-            {
-                IArray? array = UnPackedArray.ParseCreate(word, nameSpace);
-                if(array is UnPackedArray)
+            // ansi_port_declaration		::=   [ net_port_header | interface_port_header ] port_identifier { unpacked_dimension } [ = constant_expression ] 
+            //								    | [ variable_port_header ]                    port_identifier { variable_dimension } [ = constant_expression ]
+
+            if(dataType != null)
+            { // variable port
+                // { variable_dimension }
+                while (!word.Eof && word.Text == "[")
                 {
-                    UnPackedArray unPackedArray = (UnPackedArray)array;
-                    if (port.DataObject != null)
+                    IArray? array = null;
+                    if (port.DataObject != null) array = VariableArray.ParseCreate(port.DataObject, word, nameSpace);
+
+                    if (array is UnPackedArray)
                     {
-                        port.DataObject.UnpackedArrays.Add(unPackedArray);
+                        UnPackedArray unPackedArray = (UnPackedArray)array;
+                        if (port.DataObject != null)
+                        {
+                            port.DataObject.UnpackedArrays.Add(unPackedArray);
+                        }
+                    } else if (array is Queue)
+                    {
+                        port.DataObject = (Queue)array;
+                    } else if (array is AssociativeArray)
+                    {
+                        port.DataObject = (AssociativeArray)array;
+                    }else if(array is DynamicArray)
+                    {
+                        port.DataObject = (DynamicArray)array;
+                    }
+                }
+
+            }
+            else
+            { // net/interface port
+                // Unpacked dimensions shall not be inherited from the previous port declaration
+                //  and must be repeated for each port with the same dimensions.
+                // { dimension } 
+                while (!word.Eof && word.Text == "[")
+                {
+                    IArray? array = UnPackedArray.ParseCreate(word, nameSpace);
+                    if (array is UnPackedArray)
+                    {
+                        UnPackedArray unPackedArray = (UnPackedArray)array;
+                        if (port.DataObject != null)
+                        {
+                            port.DataObject.UnpackedArrays.Add(unPackedArray);
+                        }
                     }
                 }
             }
@@ -1037,6 +1071,7 @@ namespace pluginVerilog.Verilog.DataObjects
 
             BuildingBlock buildingBlock = nameSpace.BuildingBlock;
             DirectionEnum? direction = null;
+            // [ tf_port_direction ]
             switch (word.Text)
             {
                 case "input":
@@ -1072,12 +1107,14 @@ namespace pluginVerilog.Verilog.DataObjects
                     break;
             }
 
-            if(word.Text == "var")
+            // [ var ]
+            if (word.Text == "var")
             {
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 word.MoveNext();
             }
 
+            // data_type_or_implicit
             IDataType? dataType = DataTypeFactory.ParseCreate(word, nameSpace, null);
 
             // Each formal argument has a data type that can be explicitly declared or inherited from the previous argument.
@@ -1115,6 +1152,7 @@ namespace pluginVerilog.Verilog.DataObjects
                 direction = DirectionEnum.Input;
             }
 
+            //  [ port_identifier { variable_dimension } [ = expression ] ]
             if (!General.IsIdentifier(word.Text))
             {
                 word.AddError("illegal port name");
@@ -1157,6 +1195,38 @@ namespace pluginVerilog.Verilog.DataObjects
 
             word.MoveNext();
 
+            // variable_dimension   ::=   unsized_dimension
+            //                          | unpacked_dimension
+            //                          | associative_dimension
+            //                          | queue_dimension
+
+            // { variable_dimension }
+            while (!word.Eof && word.Text == "[")
+            {
+                IArray? array = null;
+                if (port.DataObject != null) array = VariableArray.ParseCreate(port.DataObject, word, nameSpace);
+
+                if (array is UnPackedArray)
+                {
+                    UnPackedArray unPackedArray = (UnPackedArray)array;
+                    if (port.DataObject != null)
+                    {
+                        port.DataObject.UnpackedArrays.Add(unPackedArray);
+                    }
+                }
+                else if (array is Queue)
+                {
+                    port.DataObject = (Queue)array;
+                }
+                else if (array is AssociativeArray)
+                {
+                    port.DataObject = (AssociativeArray)array;
+                }
+                else if (array is DynamicArray)
+                {
+                    port.DataObject = (DynamicArray)array;
+                }
+            }
 
             if(word.Text == "=")
             {

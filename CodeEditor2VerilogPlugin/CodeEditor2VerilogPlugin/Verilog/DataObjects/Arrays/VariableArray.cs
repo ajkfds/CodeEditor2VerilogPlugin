@@ -43,6 +43,12 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
         {
             word.MoveNext(); // [
 
+            if (word.Text == "]")
+            {
+                word.MoveNext();
+                return DynamicArray.Create(dataObject);
+            }
+
             if (word.Text == "$")
             {   // [$]
                 return Queue.ParseCreate(dataObject, word, nameSpace);

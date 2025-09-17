@@ -1,4 +1,5 @@
-﻿using System;
+﻿using pluginVerilog.Verilog.BuildingBlocks;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,26 +20,32 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         public virtual List<DataObjects.Arrays.PackedArray> PackedDimensions { get; protected set; } = new List<Arrays.PackedArray>();
 
 
-        /*
-        class_type ::= 
-            ps_class_identifier [ parameter_value_assignment ] 
-            { "::" class_identifier [ parameter_value_assignment ] }
 
-            parameter_value_assignment ::= # ( [ list_of_parameter_assignments ] ) 
+        //public Class? Class
+        //{
+        //    get
+        //    {
+
+        //    }
+        //}
+
+        /*
+        class_type ::=  ps_class_identifier [ parameter_value_assignment ] 
+                        { "::" class_identifier [ parameter_value_assignment ] }
+
+        parameter_value_assignment ::= # ( [ list_of_parameter_assignments ] ) 
         */
 
-        public static ClassType ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static ClassType? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
-            ClassType dType = new ClassType();
-            if (word.Text != "class") throw new Exception();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
-            word.MoveNext();
-
+            if (word.NextText != ":" && word.NextText != "#") throw new Exception();
             if (!General.IsIdentifier(word.Text))
             {
                 word.AddError("illegal class name");
                 return null;
             }
+
+            ClassType dType = new ClassType();
             word.Color(CodeDrawStyle.ColorType.Identifier);
             word.MoveNext();
 
@@ -48,7 +55,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
         public virtual string CreateString()
         {
-            return "chandle";
+            return "class";
         }
 
     }

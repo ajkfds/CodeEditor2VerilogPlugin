@@ -18,6 +18,9 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
         #region IDesignElementContainer
 
+        /// <summary>
+        /// Sub building block container
+        /// </summary>
         public Dictionary<string, BuildingBlock> BuildingBlocks { get; set; } = new Dictionary<string, BuildingBlock>();
 
 

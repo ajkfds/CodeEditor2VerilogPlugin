@@ -391,6 +391,9 @@ namespace pluginVerilog
             //{"$sync$nor$plane",null },
             //Miscellaneous tasks and functions (20.18)
             {"$system",null },
+
+
+            // undefined in systemverilog standard
         };
         /*
 

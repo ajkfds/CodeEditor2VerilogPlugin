@@ -38,8 +38,6 @@ namespace pluginVerilog.Verilog.Items
 
             switch (word.Text)
             {
-                // interface_instantiation
-                // program_instantiation
                 // assertion_item
                 // bind_directive
                 // net_alias
@@ -67,7 +65,10 @@ namespace pluginVerilog.Verilog.Items
                     return Generate.IfGenerateConstruct.Parse(word, nameSpace);
             }
 
+            // interface_instantiation
             if (InterfaceInstance.Parse(word, nameSpace)) return true;
+
+            // program_instantiation
 
             return false;
         }

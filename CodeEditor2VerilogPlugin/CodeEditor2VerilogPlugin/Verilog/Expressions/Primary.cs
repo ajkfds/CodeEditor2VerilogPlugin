@@ -233,7 +233,6 @@ number
                     }
                     else
                     {
-
                         { // search upward
                             NameSpace? searchUpwardNameSpace = null;
                             INamedElement? upwardElement = nameSpace.GetNamedElementUpward(word.Text, out searchUpwardNameSpace);
@@ -261,12 +260,14 @@ number
                         }
                     }
 
-
-
                     INamedElement? element = null;
                     if (targetNameSpace.NamedElements.ContainsKey(word.Text))
                     {
                         element = targetNameSpace.NamedElements[word.Text];
+                    }
+                    else
+                    {
+                        element = targetNameSpace.GetNamedElementUpward(word.Text);
                     }
                     
                     // variable reference
@@ -392,7 +393,7 @@ number
                 }
                 return null;
             }
-            return null;
+            return nameSpace;
         }
         public static NameSpace? searchUnfoundNameSpace(WordScanner word, ref string nameSpaceText)
         {

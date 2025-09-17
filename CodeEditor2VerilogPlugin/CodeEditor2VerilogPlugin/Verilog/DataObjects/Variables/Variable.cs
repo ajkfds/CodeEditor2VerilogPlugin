@@ -239,6 +239,44 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                     {
                         word.Color(CodeDrawStyle.ColorType.Keyword);
                         word.MoveNext();
+                        if(word.Text == "[") // dynamic array size
+                        {
+                            word.MoveNext();
+
+                            Expressions.Expression? exp = Expressions.Expression.ParseCreate(word, nameSpace);
+
+                            if (word.Text != "]")
+                            {
+                                word.AddError("] required");
+                            }
+                            else
+                            {
+                                word.MoveNext();
+                            }
+                        }
+
+                        if(word.Text == "(")
+                        {
+                            word.MoveNext();
+                            while (!word.Eof && word.Text !=")")
+                            {
+                                Expressions.Expression? exp = Expressions.Expression.ParseCreate(word, nameSpace);
+                                if (word.Text == ",")
+                                {
+                                    word.MoveNext();
+                                    continue;
+                                }else if(word.Text == ")")
+                                {
+                                    break;
+                                }
+                                else
+                                {
+                                    word.AddError("illegal arguments");
+                                    break;
+                                }
+                            }
+                            if(word.Text ==")") word.MoveNext();
+                        }
                     }
                     else
                     {

@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
-    public class Module : BuildingBlock, IModuleOrInterface, IPortNameSpace , IBuildingBlockWithModuleInstance
+    public class Module : BuildingBlock, IModuleOrInterface, IPortNameSpace , IBuildingBlockWithModuleInstance, IModuleOrInterfaceOrCheckerOrClass
     {
         protected Module() : base(null, null)
         {

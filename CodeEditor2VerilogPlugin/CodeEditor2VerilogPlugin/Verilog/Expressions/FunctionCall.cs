@@ -2,6 +2,7 @@
 using ExCSS;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.Arrays;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -62,7 +63,15 @@ namespace pluginVerilog.Verilog.Expressions
             }
             else
             {
-                word.AddError("undefined");
+               INamedElement? namedElement = usedNameSpace.GetNamedElementUpward(functionCall.FunctionName);
+                if(namedElement is Function)
+                {
+                    function = (Function)namedElement;
+                }
+                else
+                {
+                    word.AddError("undefined");
+                }
             }
 
             word.Color(CodeDrawStyle.ColorType.Identifier);
