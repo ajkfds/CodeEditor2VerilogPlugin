@@ -191,11 +191,11 @@ namespace pluginVerilog.Verilog
                 BeginIndexReference = beginReference
             };
 
-            //if (acceptClassConstructor)
-            //{
+            if (acceptClassConstructor)
+            {
 
-            //}
-            //else
+            }
+            else
             {
                 if (!returnVoid && retVal == null)
                 {

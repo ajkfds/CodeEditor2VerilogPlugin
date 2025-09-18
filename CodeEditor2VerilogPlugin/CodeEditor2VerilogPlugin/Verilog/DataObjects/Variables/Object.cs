@@ -44,6 +44,13 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             return val;
         }
 
+        public override Variable Clone(string name)
+        {
+            Object val = new Object() { Class = Class, Name = name };
+            val.DataType = DataType;
+            return val;
+        }
+
         // IInstance
         public override Task? GetTask(string identifier)
         {
