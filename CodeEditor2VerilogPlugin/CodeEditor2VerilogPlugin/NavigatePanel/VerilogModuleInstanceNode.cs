@@ -112,10 +112,10 @@ namespace pluginVerilog.NavigatePanel
         public override void Update()
         {
             if (VerilogModuleInstance == null) return;
-            VerilogModuleInstance.Update();
+            VerilogModuleInstance.Update(); // UpdateVisual called in this method on the  UI thread
 
 
-            UpdateVisual();
+//            UpdateVisual();
         }
 
         public override void UpdateVisual()
@@ -175,6 +175,10 @@ namespace pluginVerilog.NavigatePanel
 
                 foreach (CodeEditor2.NavigatePanel.NavigatePanelNode node in removeNodes)
                 {
+                    if (!Nodes.Contains(node))
+                    {
+                        System.Diagnostics.Debugger.Break();
+                    }
                     Nodes.Remove(node);
                     node.Dispose();
                 }

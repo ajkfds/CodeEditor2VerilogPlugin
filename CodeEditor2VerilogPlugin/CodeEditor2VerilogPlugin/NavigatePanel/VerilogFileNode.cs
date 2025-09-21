@@ -104,8 +104,8 @@ namespace pluginVerilog.NavigatePanel
             {
                 return;
             }
-            VerilogFile.Update();
-            UpdateVisual();
+            VerilogFile.Update(); // UpdateVisual called in this method on the  UI thread
+//            UpdateVisual();
         }
 
 
@@ -154,6 +154,10 @@ namespace pluginVerilog.NavigatePanel
                 }
                 foreach (CodeEditor2.NavigatePanel.NavigatePanelNode node in removeNodes)
                 {
+                    if (!Nodes.Contains(node))
+                    {
+                        System.Diagnostics.Debugger.Break();
+                    }
                     Nodes.Remove(node);
                     node.Dispose();
                 }

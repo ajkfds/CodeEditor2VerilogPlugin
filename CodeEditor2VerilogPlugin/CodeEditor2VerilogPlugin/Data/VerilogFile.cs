@@ -421,13 +421,19 @@ namespace pluginVerilog.Data
         // update sub-items from ParsedDocument
         public override void Update()
         {
-            VerilogCommon.Updater.Update(this);
             Dispatcher.UIThread.Post(
                 new Action(() =>
                 {
+                    VerilogCommon.Updater.Update(this);
                     NavigatePanelNode.UpdateVisual();
                 })
                 );
+            //Dispatcher.UIThread.Post(
+            //    new Action(() =>
+            //    {
+            //        NavigatePanelNode.UpdateVisual();
+            //    })
+            //    );
 
         }
 

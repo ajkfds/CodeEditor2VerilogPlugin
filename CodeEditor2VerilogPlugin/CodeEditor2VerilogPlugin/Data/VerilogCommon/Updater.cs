@@ -53,7 +53,7 @@ namespace pluginVerilog.Data.VerilogCommon
                         string keyName = newVhInstance.Name;
                         { // If the names are duplicated, append a number to the end
                             int i = 0;
-                            while (item.Items.ContainsKey(keyName + "_" + i.ToString()) || newSubItems.ContainsKey(keyName + "_" + i.ToString()))
+                            while (newSubItems.ContainsKey(keyName + "_" + i.ToString()))
                             {
                                 i++;
                             }
