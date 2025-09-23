@@ -226,6 +226,9 @@ namespace pluginVerilog.Verilog.Statements
 
         public static BlockingAssignment? parseCreateClassNewAssignment(WordScanner word, NameSpace nameSpace, Expressions.Expression lExpression)
         {
+            // class_new ::= [ class_scope ] "new" [ ( list_of_arguments ) ] | "new" expression
+            // dynamic_array_new ::= "new" [ expression ] [ ( expression ) ]
+
             BuildingBlocks.Class? class_ = word.ProjectProperty.GetBuildingBlock(word.Text) as BuildingBlocks.Class;
             if(class_ != null)
             {
@@ -271,6 +274,14 @@ namespace pluginVerilog.Verilog.Statements
                     return null;
                 }
                 word.MoveNext();
+            }
+            else
+            {
+                Expressions.Expression? exp = Expressions.Expression.ParseCreate(word, nameSpace);
+                while (!word.Eof && word.Text !=";")
+                {
+                    exp = Expressions.Expression.ParseCreate(word, nameSpace);
+                }
             }
 
             if (word.Text != ";")
