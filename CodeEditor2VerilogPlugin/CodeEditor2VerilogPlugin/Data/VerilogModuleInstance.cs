@@ -1,17 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Avalonia.Threading;
 using CodeEditor2.CodeEditor;
 using CodeEditor2.CodeEditor.CodeComplete;
 using CodeEditor2.CodeEditor.Parser;
 using CodeEditor2.CodeEditor.PopupHint;
 using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
+using DynamicData;
 using pluginVerilog.CodeEditor;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.ModuleItems;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace pluginVerilog.Data
 {
@@ -337,8 +339,83 @@ namespace pluginVerilog.Data
         // update sub-items from ParsedDocument
         public override void Update()
         {
-            VerilogCommon.Updater.Update(this);
+            Dispatcher.UIThread.Post(
+                new Action(() =>
+                {
+                    VerilogCommon.Updater.Update(this);
+                    NavigatePanelNode.UpdateVisual();
+                })
+                );
+
+//            VerilogCommon.Updater.Update(this);
         }
+
+        protected Dictionary<WeakReference<CodeEditor2.Data.Item?>, WeakReference<CodeEditor2.NavigatePanel.NavigatePanelNode>> nodeRefDictionary
+            = new Dictionary<WeakReference<Item?>, WeakReference<CodeEditor2.NavigatePanel.NavigatePanelNode>>();
+        public override CodeEditor2.NavigatePanel.NavigatePanelNode NavigatePanelNode
+        {
+            get
+            {
+                CodeEditor2.NavigatePanel.NavigatePanelNode? node = null;
+                List<WeakReference<CodeEditor2.Data.Item?>> disposeRefs = new List<WeakReference<Item?>>();
+
+                // search parent based table
+                foreach (var pair in nodeRefDictionary)
+                {
+                    var parentRef = pair.Key;
+                    if (!parentRef.TryGetTarget(out var parent))
+                    {
+                        disposeRefs.Add(parentRef);
+                        continue;
+                    }
+                    if (parent != Parent) continue;
+
+                    var nodeRef = pair.Value;
+                    if (nodeRef.TryGetTarget(out node)) break;
+                }
+
+                // remove unconnected weakRefs
+                foreach(var disposeRef in disposeRefs)
+                {
+                    nodeRefDictionary.Remove(disposeRef);
+                }
+
+                if(node == null)
+                {
+                    node = CreateNode();
+                    if (node == null) throw new Exception();
+
+                    WeakReference<CodeEditor2.Data.Item?> parent = new WeakReference<Item?>(Parent);
+                    nodeRefDictionary.Add(parent, new WeakReference<CodeEditor2.NavigatePanel.NavigatePanelNode>(node));
+                }
+
+                return node;
+            }
+            protected set
+            {
+                WeakReference<CodeEditor2.Data.Item?>? indexRef = null;
+
+                // search parent based table
+                foreach (var pair in nodeRefDictionary)
+                {
+                    var parentRef = pair.Key;
+                    if (!parentRef.TryGetTarget(out var parent))
+                    {
+                        continue;
+                    }
+                    if (parent != Parent) continue;
+                    indexRef = parentRef;
+                }
+
+                if(indexRef != null)
+                {
+                    nodeRefDictionary.Remove(indexRef);
+                }
+                WeakReference<CodeEditor2.Data.Item?> parentNewRef = new WeakReference<Item?>(Parent);
+                nodeRefDictionary.Add(parentNewRef, new WeakReference<CodeEditor2.NavigatePanel.NavigatePanelNode>(value));
+            }
+        }
+
 
         // Auto Complete Handler
 
