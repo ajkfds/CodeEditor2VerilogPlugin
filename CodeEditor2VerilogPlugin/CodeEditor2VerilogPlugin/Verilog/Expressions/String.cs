@@ -9,7 +9,7 @@ namespace pluginVerilog.Verilog.Expressions
     public class ConstantString : Primary
     {
         protected ConstantString() { }
-        public static ConstantString ParseCreate(WordScanner word)
+        public static new ConstantString ParseCreate(WordScanner word,NameSpace nameSpace)
         {
             word.Color(CodeDrawStyle.ColorType.Number);
             ConstantString str = new ConstantString();

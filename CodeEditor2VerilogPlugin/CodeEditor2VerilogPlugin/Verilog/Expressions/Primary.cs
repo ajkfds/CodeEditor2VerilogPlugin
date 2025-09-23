@@ -167,8 +167,13 @@ number
                     }
                     return null;
                 case WordPointer.WordTypeEnum.String:
-                    return ConstantString.ParseCreate(word);
+                    return ConstantString.ParseCreate(word,nameSpace);
                 case WordPointer.WordTypeEnum.Text:
+                    // null
+                    if(word.Text == "null")
+                    {
+                        return Null.ParseCreate(word, nameSpace);
+                    }
                     // dollar primitive
                     if(word.Text == "$")
                     {
@@ -178,6 +183,11 @@ number
                     if (word.Text.StartsWith("$"))// && word.ProjectProperty.SystemFunctions.Keys.Contains(word.Text))
                     {
                         return FunctionCall.ParseCreate(word, nameSpace,nameSpace);
+                    }
+
+                    if(word.Text == "MyObject")
+                    {
+                        string a = "";
                     }
 
                     // cast
@@ -213,7 +223,7 @@ number
                     // Class scope resolution operator
                     if (word.NextText == "::")
                     {
-
+                        string a = "";
                     }
 
                     if (word.Text == "this" && word.NextText == ".")
