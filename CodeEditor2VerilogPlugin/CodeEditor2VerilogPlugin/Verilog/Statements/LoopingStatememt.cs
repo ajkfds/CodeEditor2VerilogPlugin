@@ -2,6 +2,7 @@
 using pluginVerilog.Verilog.Expressions;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
@@ -375,5 +376,58 @@ namespace pluginVerilog.Verilog.Statements
 
 
     }
+
+    public class ForeachStatement : IStatement
+    {
+        protected ForeachStatement() { }
+
+        public void DisposeSubReference()
+        {
+            Expression.DisposeSubReference(true);
+            Statement.DisposeSubReference();
+        }
+
+        public Expressions.Expression Expression;
+        public IStatement? Statement;
+
+        // "foreach" "(" ps_or_hierarchical_array_identifier [ loop_variables ] ")" statement
+        public static ForeachStatement ParseCreate(WordScanner word, NameSpace nameSpace)
+        {
+            ForeachStatement foreachStatement = new ForeachStatement();
+            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.MoveNext();
+
+            if (word.Text != "(")
+            {
+                word.AddError("( expected");
+                return foreachStatement;
+            }
+            word.MoveNext();
+
+            foreachStatement.Expression = Expressions.Expression.ParseCreate(word, nameSpace);
+
+            if(word.Text!="[")
+            {
+                word.AddError("[ expected");
+                word.SkipToKeyword(";");
+                return foreachStatement;
+            }
+
+            word.MoveNext(); //"["
+
+
+            if (word.Text != ")")
+            {
+                word.AddError(") expected");
+                return null;
+            }
+            word.MoveNext();
+
+            foreachStatement.Statement = Statements.ParseCreateStatement(word, nameSpace);
+
+            return foreachStatement;
+        }
+    }
+
 
 }
