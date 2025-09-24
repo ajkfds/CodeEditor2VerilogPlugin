@@ -1089,6 +1089,11 @@ namespace pluginVerilog.Verilog.DataObjects
                     word.Color(CodeDrawStyle.ColorType.Keyword);
                     word.MoveNext();
                     break;
+                case "ref":
+                    direction = DirectionEnum.Ref;
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+                    break;
                 case "const":
                     direction = DirectionEnum.Ref;
                     word.Color(CodeDrawStyle.ColorType.Keyword);
