@@ -1,14 +1,15 @@
-﻿using System;
+﻿using Avalonia.Controls;
+using Avalonia.Media;
+using Avalonia.Threading;
+using CodeEditor2.NavigatePanel;
+using pluginVerilog.Verilog.BuildingBlocks;
+using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
+using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
-using System.Drawing;
-using pluginVerilog.Verilog.BuildingBlocks;
-using Avalonia.Media;
-using System.Security.AccessControl;
-using Avalonia.Threading;
-using Avalonia.Controls;
 
 namespace pluginVerilog.NavigatePanel
 {
@@ -100,6 +101,15 @@ namespace pluginVerilog.NavigatePanel
 
             CodeEditor2.Controller.CodeEditor.SetTextFile(ModuleInstance, true);
             Update();
+
+            foreach (NavigatePanelNode node in Nodes)
+            {
+                if (node is VerilogModuleInstanceNode)
+                {
+                    ((VerilogModuleInstanceNode)node).Update();
+                }
+//                node.UpdateVisual();
+            }
         }
 
         private async Task parseHierarchy()

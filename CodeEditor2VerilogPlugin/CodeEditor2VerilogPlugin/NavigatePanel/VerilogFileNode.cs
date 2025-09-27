@@ -14,6 +14,7 @@ using DynamicData;
 using pluginVerilog.Data;
 using pluginVerilog.FileTypes;
 using Avalonia.Controls;
+using CodeEditor2.NavigatePanel;
 
 namespace pluginVerilog.NavigatePanel
 {
@@ -55,8 +56,6 @@ namespace pluginVerilog.NavigatePanel
         }
 
 
-
-
         public override async void OnSelected()
         {
             base.OnSelected(); // update context menu
@@ -86,6 +85,15 @@ namespace pluginVerilog.NavigatePanel
             CodeEditor2.Controller.CodeEditor.SetTextFile(TextFile, true);
             if (NodeSelected != null) NodeSelected();
             Update();
+
+            foreach(NavigatePanelNode node in Nodes)
+            {
+                if(node is VerilogModuleInstanceNode)
+                {
+                    ((VerilogModuleInstanceNode)node).Update();
+                }
+//                node.UpdateVisual();
+            }
         }
 
         // stop edit and parse all hierachy module
