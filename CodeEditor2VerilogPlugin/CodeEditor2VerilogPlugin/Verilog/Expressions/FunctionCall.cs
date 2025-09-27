@@ -267,7 +267,7 @@ namespace pluginVerilog.Verilog.Expressions
         private static void parseUndefinedPort(WordScanner word, NameSpace usedNameSpace, NameSpace definedNameSpace)
         {
             if (word.Text == ")" || word.Text == ".") throw new Exception();
-            if (word.Text == ",")
+            if (word.Text == ",") // blank argument
             {
                 word.MoveNext();
                 return;

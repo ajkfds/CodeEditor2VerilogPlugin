@@ -268,6 +268,17 @@ number
                                 targetNameSpace = nameSpace;
                             }
                         }
+                        if(targetNameSpace is BuildingBlocks.Class)
+                        {
+                            if(word.Text == "::")
+                            {
+                                word.MoveNext();
+                            }
+                        }else if(targetNameSpace is BuildingBlocks.Module)
+                        {
+
+                        }
+
                     }
 
                     INamedElement? element = null;

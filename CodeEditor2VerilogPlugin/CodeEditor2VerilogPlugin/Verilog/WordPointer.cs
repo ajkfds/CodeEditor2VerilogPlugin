@@ -713,7 +713,8 @@ namespace pluginVerilog.Verilog
                 op2 == "^=" ||
                 op2 == "->" ||
                 op2 == "++" ||
-                op2 == "--"
+                op2 == "--" ||
+                op2 == "::"
             )
             {
                 nextIndex = nextIndex + 2;

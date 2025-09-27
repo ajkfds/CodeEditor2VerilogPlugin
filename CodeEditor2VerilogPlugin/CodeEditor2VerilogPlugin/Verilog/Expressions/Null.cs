@@ -14,6 +14,7 @@ namespace pluginVerilog.Verilog.Expressions
             word.Color(CodeDrawStyle.ColorType.Variable);
             Null null_ = new Null();
             null_.Constant = true;
+            null_.Reference = word.GetReference();
             word.MoveNext();
             return null_;
         }

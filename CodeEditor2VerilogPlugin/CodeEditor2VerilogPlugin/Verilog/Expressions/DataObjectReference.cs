@@ -105,6 +105,17 @@ namespace pluginVerilog.Verilog.Expressions
             return val;
         }
 
+        public static DataObjectReference? ParseCreate(WordScanner word, NameSpace nameSpace, INamedElement owner, bool assigned)
+        {
+            return parseCreate(word, nameSpace, owner, assigned, true);
+        }
+
+        // for foreach parse. get DataObject reference w/o range parse
+        public static DataObjectReference? ParseCreateWoRange(WordScanner word, NameSpace nameSpace, INamedElement owner, bool assigned)
+        {
+            return parseCreate(word, nameSpace, owner, assigned, false);
+        }
+
         /// <summary>
         /// Parse and Create DataObject Reference
         /// </summary>
@@ -114,7 +125,7 @@ namespace pluginVerilog.Verilog.Expressions
         /// <param name="assigned"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public static DataObjectReference? ParseCreate(WordScanner word,NameSpace nameSpace, INamedElement owner, bool assigned)
+        private static DataObjectReference? parseCreate(WordScanner word,NameSpace nameSpace, INamedElement owner, bool assigned,bool acceptRange)
         {
             if (!owner.NamedElements.ContainsDataObject(word.Text)) return null;
             DataObjects.DataObject dataObject = (DataObjects.DataObject)owner.NamedElements[word.Text];
@@ -168,7 +179,7 @@ namespace pluginVerilog.Verilog.Expressions
             }
 
             // parse ranges
-            if (word.GetCharAt(0) == '[')
+            if (word.GetCharAt(0) == '[' && acceptRange)
             {
                 if (!parseRange(word, nameSpace, val)) return null;
             }
