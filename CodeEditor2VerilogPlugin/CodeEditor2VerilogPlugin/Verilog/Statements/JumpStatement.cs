@@ -12,6 +12,9 @@ namespace pluginVerilog.Verilog.Statements
     public class ReturnStatement : IStatement
     {
         protected ReturnStatement() { }
+        public string Name { get; protected set; }
+        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public NamedElements NamedElements => new NamedElements();
         public void DisposeSubReference()
         {
             Expression.DisposeSubReference(true);
@@ -19,7 +22,7 @@ namespace pluginVerilog.Verilog.Statements
 
         public Expressions.Expression Expression;
 
-        public static ReturnStatement ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static ReturnStatement ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             if (word.Text != "return") System.Diagnostics.Debugger.Break();
             ReturnStatement jumpStatement = new ReturnStatement();
@@ -49,11 +52,14 @@ namespace pluginVerilog.Verilog.Statements
     public class BreakStatement : IStatement
     {
         protected BreakStatement() { }
+        public string Name { get; protected set; }
+        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public NamedElements NamedElements => new NamedElements();
         public void DisposeSubReference()
         {
         }
 
-        public static BreakStatement ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static BreakStatement ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             if (word.Text != "break") System.Diagnostics.Debugger.Break();
             BreakStatement jumpStatement = new BreakStatement();
@@ -76,11 +82,14 @@ namespace pluginVerilog.Verilog.Statements
     public class ContinueStatement : IStatement
     {
         protected ContinueStatement() { }
+        public string Name { get; protected set; }
+        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public NamedElements NamedElements => new NamedElements();
         public void DisposeSubReference()
         {
         }
 
-        public static ContinueStatement ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static ContinueStatement ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             if (word.Text != "continue") System.Diagnostics.Debugger.Break();
             ContinueStatement jumpStatement = new ContinueStatement();

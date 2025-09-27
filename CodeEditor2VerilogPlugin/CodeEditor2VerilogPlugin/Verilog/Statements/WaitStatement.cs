@@ -11,6 +11,9 @@ namespace pluginVerilog.Verilog.Statements
         public void DisposeSubReference()
         {
         }
+        public string Name { get; protected set; }
+        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public NamedElements NamedElements => new NamedElements();
         /*
         wait_statement ::=
             "wait" "(" expression ")" statement_or_null
@@ -22,7 +25,7 @@ namespace pluginVerilog.Verilog.Statements
               statement_or_null
             | [ statement ] "else" statement_or_null         
          */
-        public static WaitStatement? ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static WaitStatement? ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             if(word.Text =="wait_order") return parseCreate_wait_fork(word, nameSpace);
 

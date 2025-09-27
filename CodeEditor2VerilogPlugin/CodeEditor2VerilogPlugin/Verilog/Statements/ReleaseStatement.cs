@@ -17,6 +17,10 @@ namespace pluginVerilog.Verilog.Statements
             | release variable_lvalue 
             | release net_lvalue
         */
+        public string Name { get; protected set; }
+        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public NamedElements NamedElements => new NamedElements();
+
         public Expressions.Expression Value;
 
         public void DisposeSubReference()
@@ -24,7 +28,7 @@ namespace pluginVerilog.Verilog.Statements
             Value.DisposeSubReference(true);
         }
         protected ReleaseStatement() { }
-        public static ReleaseStatement ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static ReleaseStatement ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             ReleaseStatement ret = new ReleaseStatement();
 

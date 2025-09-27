@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Statements
 {
-    public interface IStatement
+    public interface IStatement: INamedElement
     {
         void DisposeSubReference();
 

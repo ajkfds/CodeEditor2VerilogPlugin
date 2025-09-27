@@ -10,6 +10,9 @@ namespace pluginVerilog.Verilog.Statements
     {
         protected DisableStatement() { }
 
+        public string Name { get; protected set; }
+        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public NamedElements NamedElements => new NamedElements();
         public void DisposeSubReference()
         {
         }
@@ -19,7 +22,7 @@ namespace pluginVerilog.Verilog.Statements
         // disable_statement::= (From Annex A - A.6.5)  
         //                    disable hierarchical_task_identifier; 
         //                    | disable hierarchical_block_identifier;
-        public static DisableStatement ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static DisableStatement ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             DisableStatement disableStatement = new DisableStatement();
             word.Color(CodeDrawStyle.ColorType.Keyword);

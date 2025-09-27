@@ -12,6 +12,9 @@ namespace pluginVerilog.Verilog.Statements
     {
         protected ParallelBlock() { }
 
+        public string Name { get; protected set; }
+        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public NamedElements NamedElements => new NamedElements();
         public void DisposeSubReference()
         {
             foreach(IStatement statement in Statements)
@@ -29,7 +32,7 @@ namespace pluginVerilog.Verilog.Statements
         par_block               ::= fork [ : block_identifier { block_item_declaration } ] { statement } join
         seq_block          ::= begin[ : block_identifier { block_item_declaration } ] { statement } end  
         */
-        public static IStatement? ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static IStatement? ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             if (word.Text != "fork") throw new Exception();
             word.Color(CodeDrawStyle.ColorType.Keyword);

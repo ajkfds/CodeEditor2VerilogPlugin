@@ -12,6 +12,10 @@ namespace pluginVerilog.Verilog.Statements
         public Expressions.Expression Expression;
         public List<CaseItem> CaseItems = new List<CaseItem>();
 
+        public string Name { get; protected set; }
+        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public NamedElements NamedElements => new NamedElements();
+
         public void DisposeSubReference()
         {
             Expression.DisposeSubReference(true);
@@ -20,7 +24,7 @@ namespace pluginVerilog.Verilog.Statements
                 caseItem.DisposeSubRefrence();
             }
         }
-        public static CaseStatement ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static CaseStatement ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             /*
             case_statement ::=  case ( expression ) case_item { case_item } endcase          

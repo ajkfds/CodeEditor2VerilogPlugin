@@ -8,6 +8,11 @@ namespace pluginVerilog.Verilog.Statements
 {
     public class DeassignStatement : IStatement
     {
+        protected DeassignStatement() { }
+        public string Name { get; protected set; }
+        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public NamedElements NamedElements => new NamedElements();
+
         /*
         procedural_continuous_assignments ::=
             assign variable_assignment 
@@ -24,8 +29,7 @@ namespace pluginVerilog.Verilog.Statements
             LValue.DisposeSubReference(true);
         }
 
-        protected DeassignStatement() { }
-        public static DeassignStatement ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static DeassignStatement ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             DeassignStatement ret = new DeassignStatement();
 

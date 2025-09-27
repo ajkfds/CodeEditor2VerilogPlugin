@@ -9,7 +9,9 @@ namespace pluginVerilog.Verilog.Statements
     public class ConditionalStatement : IStatement
     {
         protected ConditionalStatement() { }
-
+        public string Name { get; protected set; }
+        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public NamedElements NamedElements => new NamedElements();
         public void DisposeSubReference()
         {
             foreach(ConditionStatementPair pair in ConditionStatementPairs)
@@ -42,13 +44,14 @@ namespace pluginVerilog.Verilog.Statements
                                             | function_if_else_if_statement
         function_if_else_if_statement   ::= if (expression ) function_statement_or_null { else if (expression) function_statement_or_null } [ else function_statement_or_null]
         */
-        public static ConditionalStatement ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static ConditionalStatement ParseCreate(WordScanner word, NameSpace nameSpace,string? statement_label)
         {
             System.Diagnostics.Debug.Assert(word.Text == "if");
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext(); // if
 
-            ConditionalStatement conditionalStatement = new ConditionalStatement();
+            ConditionalStatement conditionalStatement = new ConditionalStatement() { Name = "" };
+            if(statement_label != null) { conditionalStatement.Name = statement_label; }
 
             if (word.GetCharAt(0) != '(')
             {

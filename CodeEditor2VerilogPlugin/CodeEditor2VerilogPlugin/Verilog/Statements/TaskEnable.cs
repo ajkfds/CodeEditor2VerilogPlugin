@@ -25,7 +25,9 @@ namespace pluginVerilog.Verilog.Statements
          */
 
 
-
+        public string Name { get; protected set; }
+        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public NamedElements NamedElements => new NamedElements();
         // task_enable ::= (From Annex A - A.6.9) hierarchical_task_identifier [ ( expression { , expression } ) ] ;
         public void DisposeSubReference()
         {

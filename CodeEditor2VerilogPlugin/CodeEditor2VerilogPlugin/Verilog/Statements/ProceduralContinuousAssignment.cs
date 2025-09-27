@@ -8,6 +8,10 @@ namespace pluginVerilog.Verilog.Statements
 {
     public class ProceduralContinuousAssignment : IStatement
     {
+        protected ProceduralContinuousAssignment() { }
+        public string Name { get; protected set; }
+        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public NamedElements NamedElements => new NamedElements();
         /*
         procedural_continuous_assignments ::=
             assign variable_assignment 
@@ -20,7 +24,6 @@ namespace pluginVerilog.Verilog.Statements
         public Expressions.Expression LValue;
         public Expressions.Expression Value;
 
-        protected ProceduralContinuousAssignment() { }
 
         public void DisposeSubReference()
         {
@@ -28,7 +31,7 @@ namespace pluginVerilog.Verilog.Statements
             Value.DisposeSubReference(true);
         }
 
-        public static ProceduralContinuousAssignment ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static ProceduralContinuousAssignment ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             ProceduralContinuousAssignment ret = new ProceduralContinuousAssignment();
 

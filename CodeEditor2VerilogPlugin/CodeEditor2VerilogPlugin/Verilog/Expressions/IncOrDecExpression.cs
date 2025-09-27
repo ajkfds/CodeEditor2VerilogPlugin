@@ -11,7 +11,9 @@ namespace pluginVerilog.Verilog.Expressions
     public class IncOrDecExpression : IStatement
     {
         protected IncOrDecExpression() { }
-
+        public string Name { get; protected set; }
+        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public NamedElements NamedElements => new NamedElements();
         void IStatement.DisposeSubReference()
         {
         }

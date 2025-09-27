@@ -8,6 +8,9 @@ namespace pluginVerilog.Verilog.Statements.SystemTask
 {
     public class SystemTask : IStatement
     {
+        public string Name { get; protected set; }
+        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public NamedElements NamedElements => new NamedElements();
         public void DisposeSubReference()
         {
             return;

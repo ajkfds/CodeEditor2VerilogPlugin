@@ -13,7 +13,9 @@ namespace pluginVerilog.Verilog.Statements
     public class ForeverStatement : IStatement
     {
         protected ForeverStatement() { }
-
+        public string Name { get; protected set; }
+        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public NamedElements NamedElements => new NamedElements();
         public void DisposeSubReference()
         {
             if(Statement != null) Statement.DisposeSubReference();
@@ -39,7 +41,7 @@ namespace pluginVerilog.Verilog.Statements
                             | "foreach" "(" ps_or_hierarchical_array_identifier "[" loop_variables "]" ")" statement
         */
 
-        public static ForeverStatement ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static ForeverStatement ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             ForeverStatement foreverStatement = new ForeverStatement();
             word.Color(CodeDrawStyle.ColorType.Keyword);
@@ -55,6 +57,9 @@ namespace pluginVerilog.Verilog.Statements
     {
         protected DoStatement() { }
 
+        public string Name { get; protected set; }
+        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public NamedElements NamedElements => new NamedElements();
         public void DisposeSubReference()
         {
             if (Statement != null) Statement.DisposeSubReference();
@@ -67,7 +72,7 @@ namespace pluginVerilog.Verilog.Statements
                             | ...
         */
 
-        public static DoStatement ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static DoStatement ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             if (word.Text != "do") throw new Exception();
             if (!word.SystemVerilog) word.AddError("SystemVerilog expression");
@@ -121,6 +126,9 @@ namespace pluginVerilog.Verilog.Statements
     {
         protected RepeatStatement() { }
 
+        public string Name { get; protected set; }
+        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public NamedElements NamedElements => new NamedElements();
         public void DisposeSubReference()
         {
             Expression.DisposeSubReference(true);
@@ -138,7 +146,7 @@ namespace pluginVerilog.Verilog.Statements
         //                            | repeat (expression ) statement
         //                            | while (expression ) statement
         //                            | for (variable_assignment ; expression ; variable_assignment ) statement
-        public static RepeatStatement ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static RepeatStatement ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             RepeatStatement repeatStatement = new RepeatStatement();
             word.Color(CodeDrawStyle.ColorType.Keyword);
@@ -170,6 +178,9 @@ namespace pluginVerilog.Verilog.Statements
     {
         protected WhileStatememt() { }
 
+        public string Name { get; protected set; }
+        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public NamedElements NamedElements => new NamedElements();
         public void DisposeSubReference()
         {
             Expression.DisposeSubReference(true);
@@ -187,7 +198,7 @@ namespace pluginVerilog.Verilog.Statements
         //                            | repeat (expression ) statement
         //                            | while (expression ) statement
         //                            | for (variable_assignment ; expression ; variable_assignment ) statement
-        public static WhileStatememt ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static WhileStatememt ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             WhileStatememt whileStatement = new WhileStatememt();
             word.Color(CodeDrawStyle.ColorType.Keyword);
@@ -261,7 +272,7 @@ namespace pluginVerilog.Verilog.Statements
         // operator_assignment          ::= variable_lvalue assignment_operator expression
         // assignment_operator          ::= = | += | -= | *= | /= | %= | &= | |= | ^= | <<= | >>= | <<<= | >>>=
 
-        public static ForStatememt? ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static ForStatememt? ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             ForStatememt forStatement = new ForStatememt(nameSpace.BuildingBlock, nameSpace) {
                 BeginIndexReference = word.CreateIndexReference(), 
@@ -377,24 +388,36 @@ namespace pluginVerilog.Verilog.Statements
 
     }
 
-    public class ForeachStatement : IStatement
+    public class ForeachStatement : NameSpace, IStatement
     {
-        protected ForeachStatement() { }
+        protected ForeachStatement(BuildingBlocks.BuildingBlock buildingBlock, NameSpace nameSpace) : base(buildingBlock, nameSpace)
+        {
+
+        }
 
         public void DisposeSubReference()
         {
-            Expression.DisposeSubReference(true);
-            Statement.DisposeSubReference();
+            if(Statement != null) Statement.DisposeSubReference();
         }
 
-        public Expressions.Expression Expression;
+
+        public Expressions.DataObjectReference? TargetReference;
+        public List<DataObjects.DataObject> LoopVariables = new List<DataObject>(); 
         public IStatement? Statement;
 
         // "foreach" "(" ps_or_hierarchical_array_identifier [ loop_variables ] ")" statement
-        public static ForeachStatement ParseCreate(WordScanner word, NameSpace nameSpace)
+        // ps_or_hierarchical_array_identifier ::= [implicit_class_handle. | class_scope | package_scope] hierarchical_array_identifier
+        public static ForeachStatement ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
-            ForeachStatement foreachStatement = new ForeachStatement();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            ForeachStatement foreachStatement = new ForeachStatement(nameSpace.BuildingBlock,nameSpace)
+            {
+                BeginIndexReference = word.CreateIndexReference(),
+                DefinitionReference = word.CrateWordReference(),
+                Name = "",
+                Parent = nameSpace,
+                Project = word.Project
+            };
+            word.Color(CodeDrawStyle.ColorType.Keyword);    // foreach keyword
             word.MoveNext();
 
             if (word.Text != "(")
@@ -404,7 +427,7 @@ namespace pluginVerilog.Verilog.Statements
             }
             word.MoveNext();
 
-            foreachStatement.Expression = Expressions.Expression.ParseCreate(word, nameSpace);
+            foreachStatement.TargetReference = Expressions.DataObjectReference.ParseCreateWoRange(word, nameSpace, foreachStatement, true);
 
             if(word.Text!="[")
             {
@@ -413,8 +436,35 @@ namespace pluginVerilog.Verilog.Statements
                 return foreachStatement;
             }
 
-            word.MoveNext(); //"["
+            while (!word.Eof && word.Text != "[")
+            {
+                string name = word.Text;
+                if (General.ListOfKeywords.Contains(name))
+                {
+                    word.AddError("illegal loop variables");
+                    break;
+                }
+                DataObjects.DataTypes.IDataType dataType = DataObjects.DataTypes.IntegerAtomType.Create(DataObjects.DataTypes.DataTypeEnum.Int, false);
+                DataObjects.DataObject.Create(name, dataType);
+                word.Color(CodeDrawStyle.ColorType.Variable);
+                word.MoveNext();
 
+                if (word.Text == "]") break;
+                if(word.Text != ",")
+                {
+                    word.AddError("illegal loop variables");
+                    break;
+                }
+                word.MoveNext();
+            }
+
+            if(word.Text == "]")
+            {
+                word.MoveNext(); //"["
+            }else
+            {
+                word.AddError("] required");
+            }
 
             if (word.Text != ")")
             {

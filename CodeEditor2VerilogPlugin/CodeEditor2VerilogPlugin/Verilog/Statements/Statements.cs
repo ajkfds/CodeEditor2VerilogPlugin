@@ -10,33 +10,35 @@ namespace pluginVerilog.Verilog.Statements
 {
     public static class Statements
     {
+
         /* Systemverilog IEEE 1800-2017
-            statement ::= [ block_identifier : ] { attribute_instance } statement_item
-            statement_item ::=    blocking_assignment ;
-                                | nonblocking_assignment ;
-                                | procedural_continuous_assignment ;         
-                                | case_statement
-                                | conditional_statement
-                                | inc_or_dec_expression ;
-                                | subroutine_call_statement
-                                | disable_statement
-                                | event_trigger
-                                | loop_statement
-                                | jump_statement
-                                | par_block
-                                | procedural_timing_control_statement
-                                | seq_block
-                                | wait_statement
-                                | procedural_assertion_statement
-                                | clocking_drive ;
-                                | randsequence_statement
-                                | randcase_statement
-                                | expect_property_statement         
-            function_statement ::= statement
-            function_statement_or_null ::=
-                                function_statement
-                                | { attribute_instance } ;
-                                variable_identifier_list ::= variable_identifier { , variable_identifier }         */
+        statement ::= [ block_identifier : ] { attribute_instance } statement_item
+        statement_item ::=    blocking_assignment ;
+        | nonblocking_assignment ;
+        | procedural_continuous_assignment ;         
+        | case_statement
+        | conditional_statement
+        | inc_or_dec_expression ;
+        | subroutine_call_statement
+        | disable_statement
+        | event_trigger
+        | loop_statement
+        | jump_statement
+        | par_block
+        | procedural_timing_control_statement
+        | seq_block
+        | wait_statement
+        | procedural_assertion_statement
+        | clocking_drive ;
+        | randsequence_statement
+        | randcase_statement
+        | expect_property_statement         
+        function_statement ::= statement
+        function_statement_or_null ::=
+        function_statement
+        | { attribute_instance } ;
+        variable_identifier_list ::= variable_identifier { , variable_identifier }         
+        */
         /*
         A.6.4 Statements
         statement   ::= { attribute_instance } blocking_assignment ;
@@ -90,6 +92,8 @@ namespace pluginVerilog.Verilog.Statements
             procedural_timing_control_statement ::= delay_or_event_control statement_or_null 
             */
             /* # SystemVerilog
+            statement_or_null ::= statement | { attribute_instance } ;
+            statement ::= [ block_identifier : ] { attribute_instance } statement_item
             statement_item ::=    blocking_assignment ;
 	                            | nonblocking_assignment ;
 	                            | procedural_continuous_assignment ;
@@ -122,6 +126,17 @@ namespace pluginVerilog.Verilog.Statements
             // randcase_statement 
             // expect_property_statement 
 
+            string? statement_label = null;
+
+            if(word.NextText == ":" && !General.ListOfKeywords.Contains(word.Text) && !General.IsIdentifier(word.Text))
+            {
+                word.MoveNext();
+                statement_label = word.Text;
+                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.MoveNext();
+                word.MoveNext(); //:
+            }
+
             switch (word.Text)
             {
                 case "(*":
@@ -132,69 +147,77 @@ namespace pluginVerilog.Verilog.Statements
                 case "unique":
                 case "unique0":
                 case "priority":
-                    return ParseUniquePriority(word, nameSpace);
+                    return ParseUniquePriority(word, nameSpace, statement_label);
 
                 // conditional_statement 
                 case "if":
-                    return ConditionalStatement.ParseCreate(word, nameSpace);
+                    return ConditionalStatement.ParseCreate(word, nameSpace, statement_label);
 
                 // procedural_timing_control_statement 
                 case "#":
                 case "@":
-                    return ProceduralTimingControlStatement.ParseCreate(word, nameSpace);
+                    return ProceduralTimingControlStatement.ParseCreate(word, nameSpace, statement_label);
 
                 // seq_block 
                 case "begin":
-                    return SequentialBlock.ParseCreate(word, nameSpace);
+                    return SequentialBlock.ParseCreate(word, nameSpace, statement_label);
 
                 // par_block 
                 case "fork":
-                    return ParallelBlock.ParseCreate(word, nameSpace);
+                    return ParallelBlock.ParseCreate(word, nameSpace, statement_label);
 
-                // loop_statement 
+                // ## loop_statement 
+                // forever statement_or_null
                 case "forever":
-                    return ForeverStatement.ParseCreate(word, nameSpace);
+                    return ForeverStatement.ParseCreate(word, nameSpace, statement_label);
+                // repeat(expression) statement_or_null
                 case "repeat":
-                    return RepeatStatement.ParseCreate(word, nameSpace);
+                    return RepeatStatement.ParseCreate(word, nameSpace, statement_label);
+                // while (expression) statement_or_null
                 case "while":
-                    return WhileStatememt.ParseCreate(word, nameSpace);
+                    return WhileStatememt.ParseCreate(word, nameSpace, statement_label);
+                // ([for_initialization]; [expression]; [for_step]) statement_or_null
                 case "for":
-                    return ForStatememt.ParseCreate(word, nameSpace);
+                    return ForStatememt.ParseCreate(word, nameSpace, statement_label);
+                // do statement_or_null while (expression);
                 case "do":
-                    return DoStatement.ParseCreate(word, nameSpace);
+                    return DoStatement.ParseCreate(word, nameSpace, statement_label);
+                // foreach (ps_or_hierarchical_array_identifier[loop_variables] ) statement
+                case "foreach":
+                    return ForeachStatement.ParseCreate(word, nameSpace, statement_label);
 
                 // case_statement 
                 case "case":
                 case "casex":
                 case "casez":
-                    return CaseStatement.ParseCreate(word, nameSpace);
+                    return CaseStatement.ParseCreate(word, nameSpace, statement_label);
 
                 // disable_statement 
                 case "disable":
-                    return DisableStatement.ParseCreate(word,nameSpace);
+                    return DisableStatement.ParseCreate(word,nameSpace, statement_label);
 
                 case "force":
-                    return ForceStatement.ParseCreate(word,nameSpace);
+                    return ForceStatement.ParseCreate(word,nameSpace, statement_label);
                 case "release":
-                    return ReleaseStatement.ParseCreate(word, nameSpace);
+                    return ReleaseStatement.ParseCreate(word, nameSpace, statement_label);
 
                 // jump_statement 
                 case "return":
-                    return ReturnStatement.ParseCreate(word, nameSpace);
+                    return ReturnStatement.ParseCreate(word, nameSpace, statement_label);
                 case "break":
-                    return BreakStatement.ParseCreate(word, nameSpace);
+                    return BreakStatement.ParseCreate(word, nameSpace, statement_label);
                 case "continue":
-                    return ContinueStatement.ParseCreate(word, nameSpace);
+                    return ContinueStatement.ParseCreate(word, nameSpace, statement_label);
 
                 // procedural_continuous_assignment ;
                 case "assign":
-                    return ProceduralContinuousAssignment.ParseCreate(word, nameSpace);
+                    return ProceduralContinuousAssignment.ParseCreate(word, nameSpace, statement_label);
 
                 case "deassign":
-                    return DeassignStatement.ParseCreate(word, nameSpace);
+                    return DeassignStatement.ParseCreate(word, nameSpace, statement_label);
                 // event_trigger 
                 case "->":
-                    return EventTrigger.ParseCreate(word, nameSpace);
+                    return EventTrigger.ParseCreate(word, nameSpace, statement_label);
                 case ";":
                     word.AddError("illegal module item");
                     word.MoveNext();
@@ -202,7 +225,7 @@ namespace pluginVerilog.Verilog.Statements
                 // wait_statement 
                 case "wait":
                 case "wait_order":
-                    return WaitStatement.ParseCreate(word, nameSpace);
+                    return WaitStatement.ParseCreate(word, nameSpace, statement_label);
                 default:
 
                     // subroutine_call_statement 
@@ -353,7 +376,7 @@ namespace pluginVerilog.Verilog.Statements
             }
         }
 
-        private static IStatement ParseUniquePriority(WordScanner word, NameSpace nameSpace)
+        private static IStatement ParseUniquePriority(WordScanner word, NameSpace nameSpace,string? statement_label)
         {
             switch (word.Text)
             {
@@ -377,13 +400,13 @@ namespace pluginVerilog.Verilog.Statements
             {
                 // conditional_statement 
                 case "if":
-                    return ConditionalStatement.ParseCreate(word, nameSpace);
+                    return ConditionalStatement.ParseCreate(word, nameSpace,statement_label);
 
                 // case_statement 
                 case "case":
                 case "casex":
                 case "casez":
-                    return CaseStatement.ParseCreate(word, nameSpace);
+                    return CaseStatement.ParseCreate(word, nameSpace, statement_label);
 
                 default:
                     word.AddError("if or case required");

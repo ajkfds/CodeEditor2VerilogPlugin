@@ -12,7 +12,9 @@ namespace pluginVerilog.Verilog.Statements
     public class NonBlockingAssignment : IStatement
     {
         protected NonBlockingAssignment() { }
-
+        public string Name { get; protected set; }
+        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public NamedElements NamedElements => new NamedElements();
         public Expressions.Expression LValue { get; protected set; }
         public Expressions.Expression Expression { get; protected set; }
 
@@ -99,6 +101,9 @@ namespace pluginVerilog.Verilog.Statements
     public class BlockingAssignment : IStatement
     {
         protected BlockingAssignment() { }
+        public string Name { get; protected set; }
+        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public NamedElements NamedElements => new NamedElements();
 
         public void DisposeSubReference()
         {
@@ -278,9 +283,9 @@ namespace pluginVerilog.Verilog.Statements
             else
             {
                 Expressions.Expression? exp = Expressions.Expression.ParseCreate(word, nameSpace);
-                while (!word.Eof && word.Text !=";")
+                if(exp != null)
                 {
-                    exp = Expressions.Expression.ParseCreate(word, nameSpace);
+                    // shallow clone
                 }
             }
 

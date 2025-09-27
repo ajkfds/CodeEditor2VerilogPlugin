@@ -10,6 +10,9 @@ namespace pluginVerilog.Verilog.Statements
     {
         protected EventTrigger() { }
 
+        public string Name { get; protected set; }
+        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public NamedElements NamedElements => new NamedElements();
         public void DisposeSubReference()
         {
         }
@@ -19,7 +22,7 @@ namespace pluginVerilog.Verilog.Statements
         // disable_statement::= (From Annex A - A.6.5)  
         //                    disable hierarchical_task_identifier; 
         //                    | disable hierarchical_block_identifier;
-        public static EventTrigger ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static EventTrigger ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             EventTrigger eventTrigger = new EventTrigger();
             word.Color(CodeDrawStyle.ColorType.Keyword);
