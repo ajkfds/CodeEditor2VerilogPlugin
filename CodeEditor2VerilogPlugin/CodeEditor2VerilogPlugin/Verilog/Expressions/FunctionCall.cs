@@ -117,7 +117,9 @@ namespace pluginVerilog.Verilog.Expressions
 
                 if(function == null)
                 {
+                    var index = word.CreateIndexReference();
                     parseUndefinedPort(word, usedNameSpace,definedNameSpace);
+                    if (word.CreateIndexReference().IsSameAs(index)) break;
                     continue;
                 }
 
