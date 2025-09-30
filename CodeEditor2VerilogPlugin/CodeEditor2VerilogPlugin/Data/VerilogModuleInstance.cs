@@ -346,9 +346,8 @@ namespace pluginVerilog.Data
                     NavigatePanelNode.UpdateVisual();
                 })
                 );
-
-//            VerilogCommon.Updater.Update(this);
         }
+
 
         protected Dictionary<WeakReference<CodeEditor2.Data.Item?>, WeakReference<CodeEditor2.NavigatePanel.NavigatePanelNode>> nodeRefDictionary
             = new Dictionary<WeakReference<Item?>, WeakReference<CodeEditor2.NavigatePanel.NavigatePanelNode>>();

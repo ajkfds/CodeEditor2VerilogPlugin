@@ -78,31 +78,29 @@ namespace pluginVerilog.NavigatePanel
 
         public override async void OnSelected()
         {
-            //var menu = CodeEditor2.Controller.NavigatePanel.GetContextMenuStrip();
-            //if (menu.Items.ContainsKey("openWithExploererTsmi")) menu.Items["openWithExploererTsmi"].Visible = true;
-
-
-//            System.Diagnostics.Debug.Print("## VerilogModuleInstanceNode.OnSelected");
-
-            if (ModuleInstance.ParseValid & !ModuleInstance.ReparseRequested)
+            base.OnSelected(); // update context menu
+            if (ModuleInstance == null)
             {
-                CodeEditor2.Controller.CodeEditor.SetTextFile(ModuleInstance, true);
                 Update();
+                return;
+            }
+
+
+            CodeEditor2.Controller.CodeEditor.SetTextFile(ModuleInstance, true);
+
+            UpdateVisual();
+
+            if (ModuleInstance.ParseValid && !ModuleInstance.ReparseRequested)
+            {
+                // skip parse
             }
             else
             {
-                await parseHierarchy();
-                CodeEditor2.Controller.CodeEditor.SetTextFile(ModuleInstance, true);
-                Update();
+                if (ModuleInstance == null) return;
+                await Tool.ParseHierarchy.Parse(ModuleInstance);
             }
-
         }
 
-        private async Task parseHierarchy()
-        {
-//            System.Diagnostics.Debug.Print("## VerilogFileNode.OnSelected.PharseHier.Run");
-            await CodeEditor2.Tools.ParseHierarchy.Run(ModuleInstance.NavigatePanelNode);
-        }
 
         public override void Update()
         {

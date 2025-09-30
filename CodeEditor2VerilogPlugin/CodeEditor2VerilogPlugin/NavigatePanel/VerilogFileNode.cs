@@ -67,43 +67,23 @@ namespace pluginVerilog.NavigatePanel
                 return;
             }
 
-            if (!CodeEditor2.Global.StopBackGroundParse)
-            {
-                if(TextFile.ParseValid && !TextFile.ReparseRequested)
-                {
-                    // skip parse
-                }
-                else
-                {
-                    // Hierarchy parse (non-async)
-                    CodeEditor2.Global.StopBackGroundParse = true;
-                    await parseHierarchy();
-                    CodeEditor2.Global.StopBackGroundParse = false;
-                }
-            }
 
             CodeEditor2.Controller.CodeEditor.SetTextFile(TextFile, true);
             if (NodeSelected != null) NodeSelected();
-            Update();
 
-            foreach(NavigatePanelNode node in Nodes)
+            UpdateVisual();
+
+            if (TextFile.ParseValid && !TextFile.ReparseRequested)
             {
-                if(node is VerilogModuleInstanceNode)
-                {
-                    ((VerilogModuleInstanceNode)node).Update();
-                }
-//                node.UpdateVisual();
+                // skip parse
+            }
+            else
+            {
+                if (TextFile == null) return;
+                await Tool.ParseHierarchy.Parse(TextFile);
             }
         }
 
-        // stop edit and parse all hierachy module
-        private async Task parseHierarchy()
-        {
-            await CodeEditor2.Tools.ParseHierarchy.Run(this);
-            if (NodeSelected != null) NodeSelected();
-            if (TextFile == null) return;
-            CodeEditor2.Controller.CodeEditor.SetTextFile(TextFile, true);
-        }
 
 
         public override void Update()
