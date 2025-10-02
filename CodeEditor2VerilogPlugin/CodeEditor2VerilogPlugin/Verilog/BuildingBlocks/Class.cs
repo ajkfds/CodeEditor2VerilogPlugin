@@ -20,6 +20,8 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
 
         }
+
+        public int? BitWidth { get; } = null;
         public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
         public bool IsVector { get { return false; } }
         public bool IsVirtual { get; set; }

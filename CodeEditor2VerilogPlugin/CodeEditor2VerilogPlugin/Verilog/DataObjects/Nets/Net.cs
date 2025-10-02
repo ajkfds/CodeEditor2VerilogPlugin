@@ -464,12 +464,12 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                     {
                         if(net.Range == null)
                         {
-                            if (assignValue.BitWidth != 1)
+                            if (assignValue.BitWidth != 1 & !word.Prototype)
                             {
                                 assignValue.Reference.AddWarning("Size mismatch 1 <- " + assignValue.BitWidth.ToString());
                             }
                         }
-                        else if(assignValue.BitWidth != net.Range.Size)
+                        else if(assignValue.BitWidth != net.Range.Size & !word.Prototype)
                         {
                             assignValue.Reference.AddWarning("Size mismatch "+ net.Range.Size.ToString() +" <- "+assignValue.BitWidth.ToString() );
                         }

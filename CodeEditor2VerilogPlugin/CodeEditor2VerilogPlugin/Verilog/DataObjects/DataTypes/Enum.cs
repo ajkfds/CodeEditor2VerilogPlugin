@@ -23,6 +23,13 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         public IDataType? BaseType { get; protected set; } = null;
         public List<Item> Items = new List<Item>();
         public virtual List<DataObjects.Arrays.PackedArray> PackedDimensions { get; protected set; } = new List<DataObjects.Arrays.PackedArray>();
+        public int? BitWidth
+        {
+            get
+            {
+                return BaseType?.BitWidth;
+            }
+        }
 
         public virtual string CreateString()
         {

@@ -20,6 +20,43 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         // integer_atom_type    ::=   "byte" | "shortint" | "int" | "longint" | "integer" | "time"
         // signing              ::=   "signed" | "unsigned"
 
+        public int? BitWidth
+        {
+            get
+            {
+                int size = 0;
+                switch (Type)
+                {
+                    case DataTypeEnum.Byte:
+                        size = 8;
+                        break;
+                    case DataTypeEnum.Shortint:
+                        size = 16;
+                        break;
+                    case DataTypeEnum.Int:
+                        size = 32;
+                        break;
+                    case DataTypeEnum.Longint:
+                        size = 64;
+                        break;
+                    case DataTypeEnum.Integer:
+                        size = 32;
+                        break;
+                    case DataTypeEnum.Time:
+                        size = 64;
+                        break;
+                    default:
+                        return null;
+                }
+
+                foreach (Arrays.PackedArray array in PackedDimensions)
+                {
+                    if (array.Size == null) return null;
+                    size = size * (int)array.Size;
+                }
+                return null;
+            }
+        }
 
         public static IntegerAtomType? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
@@ -39,29 +76,6 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     return parse(word, nameSpace, DataTypeEnum.Time);
                 default:
                     return null;
-            }
-        }
-
-        public virtual int? BitWidth
-        {
-            get
-            {
-                switch (Type)
-                {
-                    case DataTypeEnum.Byte:
-                        return 8;
-                    case DataTypeEnum.Shortint:
-                        return 16;
-                    case DataTypeEnum.Int:
-                        return 32;
-                    case DataTypeEnum.Longint:
-                        return 64;
-                    case DataTypeEnum.Integer:
-                        return 32;
-                    case DataTypeEnum.Time:
-                        return 64;
-                }
-                return null;
             }
         }
 

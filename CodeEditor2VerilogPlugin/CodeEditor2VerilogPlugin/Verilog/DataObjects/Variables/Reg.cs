@@ -11,6 +11,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected Reg() { }
 
+
         public static new Reg Create(string name,IDataType dataType)
         {
             DataTypes.IntegerVectorType dType = (DataTypes.IntegerVectorType)dataType;

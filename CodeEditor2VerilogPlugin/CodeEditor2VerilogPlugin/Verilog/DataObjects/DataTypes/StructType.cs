@@ -20,6 +20,23 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 return DataTypeEnum.Struct;
             }
         }
+
+        public int? BitWidth
+        {
+            get
+            {
+                int size = 0;
+                foreach(Member member in Members.Values)
+                {
+                    if (member.DatType.BitWidth == null)
+                    {
+                        return null;
+                    }
+                    size = size + (int)member.DatType.BitWidth;
+                }
+                return size;
+            }
+        }
         public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
         public virtual List<DataObjects.Arrays.PackedArray> PackedDimensions { get; protected set; } = new List<DataObjects.Arrays.PackedArray>();
 

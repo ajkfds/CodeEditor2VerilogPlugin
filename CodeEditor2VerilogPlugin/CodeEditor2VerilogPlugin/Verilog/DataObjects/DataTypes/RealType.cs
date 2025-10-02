@@ -15,6 +15,20 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 return DataTypeEnum.Real;
             }
         }
+
+        public int? BitWidth
+        {
+            get
+            {
+                int size = 64;
+                foreach (Arrays.PackedArray array in PackedDimensions)
+                {
+                    if (array.Size == null) return null;
+                    size = size * (int)array.Size;
+                }
+                return null;
+            }
+        }
         public virtual List<DataObjects.Arrays.PackedArray> PackedDimensions { get; protected set; } = new List<DataObjects.Arrays.PackedArray>();
         public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
         public static RealType ParseCreate(WordScanner word, NameSpace nameSpace)

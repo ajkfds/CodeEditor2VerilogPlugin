@@ -26,11 +26,31 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         // logic        4state  >=1bit      
         // bit          2state  >=1bit      
 
-        public virtual int? BitWidth {
+        public int? BitWidth {
             get 
             {
-                if (PackedDimensions.Count == 0) return 0;
-                return PackedDimensions[0].Size;
+                int size = 0;
+                switch (Type)
+                {
+                    case DataTypeEnum.Bit:
+                        size = 1;
+                        break;
+                    case DataTypeEnum.Logic:
+                        size = 1;
+                        break;
+                    case DataTypeEnum.Real:
+                        size = 1;
+                        break;
+                    default:
+                        return null;
+                }
+
+                foreach(Arrays.PackedArray array in PackedDimensions)
+                {
+                    if (array.Size == null) return null;
+                    size = size * (int)array.Size;
+                }
+                return null;
             } 
         }
         public bool IsVector { get { return true; } }

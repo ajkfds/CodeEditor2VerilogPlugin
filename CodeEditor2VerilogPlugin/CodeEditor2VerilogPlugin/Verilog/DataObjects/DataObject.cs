@@ -46,6 +46,7 @@ namespace pluginVerilog.Verilog.DataObjects
         public bool CommentAnnotation_Discarded = false;
         public virtual NamedElements NamedElements { get; } = new NamedElements();
 
+
         private WeakReference<NameSpace>? wr_DefinedNameSpace = null;
         public NameSpace? DefinedNameSpace
         {
@@ -124,8 +125,15 @@ namespace pluginVerilog.Verilog.DataObjects
         public string Comment { set; get; } = "";
         public WordReference? DefinedReference { set; get; } = null;
         public IDataType? DataType;
+        public int? BitWidth
+        {
+            get {
+                return DataType?.BitWidth;
+            }
+        }
         public List<Arrays.UnPackedArray> UnpackedArrays { get; set; } = new List<Arrays.UnPackedArray>();
 
+ 
         public List<WordReference> UsedReferences { set; get; } = new List<WordReference>();
         public List<WordReference> AssignedReferences { set; get; } = new List<WordReference>();
         public int DisposedIndex = -1;

@@ -12,6 +12,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         protected Struct() { }
         public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
         public required StructType StructType { get; init; }
+
         public new static Struct Create(string name, IDataType dataType)
         {
             StructType structType = (StructType)dataType;

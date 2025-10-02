@@ -73,6 +73,7 @@ namespace pluginVerilog.Verilog.Expressions
                     word.AddError("undefined");
                 }
             }
+            functionCall.BitWidth = function?.ReturnVariable?.BitWidth;
 
             word.Color(CodeDrawStyle.ColorType.Identifier);
             word.MoveNext();
