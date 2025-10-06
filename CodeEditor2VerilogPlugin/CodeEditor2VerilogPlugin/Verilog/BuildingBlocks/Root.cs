@@ -351,7 +351,14 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
             else
             {
-                word.AddError("duplicated module name");
+                if (word.Prototype)
+                {
+                    word.AddPrototypeError("duplicated buldingblock name");
+                }
+                else
+                {
+                    parsedDocument.Root.BuildingBlocks[module.Name] = module;
+                }
             }
         }
 
