@@ -50,7 +50,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     if (array.Size == null) return null;
                     size = size * (int)array.Size;
                 }
-                return null;
+                return size;
             } 
         }
         public bool IsVector { get { return true; } }

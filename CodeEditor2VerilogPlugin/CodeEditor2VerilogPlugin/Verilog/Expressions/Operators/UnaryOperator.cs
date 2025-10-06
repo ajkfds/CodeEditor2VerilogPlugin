@@ -119,6 +119,10 @@ namespace pluginVerilog.Verilog.Expressions.Operators
                 case "!":
                     return null;
 
+                // not
+                case "~":
+                    return null;
+
                 // reduction operators
                 case "&":
                 case "|":
@@ -145,6 +149,10 @@ namespace pluginVerilog.Verilog.Expressions.Operators
 
                 // logical negation
                 case "!":
+                    return bitWidth;
+
+                // not
+                case "~":
                     return bitWidth;
 
                 // reduction operators
