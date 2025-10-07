@@ -63,7 +63,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
 
             Constant = constant;
             Value = value;
-            BitWidth = BitWidth;
+            BitWidth = bitWidth;
             if (Primary2.Reference != null && Condition.Reference != null)
             {
                 Reference = WordReference.CreateReferenceRange(Condition.Reference, Primary2.Reference);

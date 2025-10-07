@@ -96,7 +96,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
 
             Constant = constant;
             Value = value;
-            BitWidth = BitWidth;
+            BitWidth = bitWidth;
             if (Primary.Reference != null)
             {
                 Reference = Primary.Reference;
