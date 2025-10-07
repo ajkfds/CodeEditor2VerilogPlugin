@@ -33,6 +33,7 @@ namespace pluginVerilog.Verilog.Expressions
             if (exp1 == null)
             {
                 word.AddError("illegal concatenation");
+                word.SkipToKeyword(";");
                 return null;
             }
             if (word.GetCharAt(0) == '{')
@@ -113,19 +114,13 @@ namespace pluginVerilog.Verilog.Expressions
         protected MultipleConcatenation() { }
 
         public Expression MultipleExpression { get; protected set; }
-        public Expression Expression { get; protected set; }
+        public Expression? Expression { get; protected set; }
 
         public static MultipleConcatenation ParseCreate(WordScanner word, NameSpace nameSpace, Expression multipleExpression,WordReference reference)
         {
-            word.MoveNext(); // {
+            //word.MoveNext(); // {
 
-            Expression exp = Expression.ParseCreate(word, nameSpace);
-            if (word.Eof || word.GetCharAt(0) != '}')
-            {
-                word.AddError("illegal multiple concatenation");
-                return null;
-            }
-            word.MoveNext(); // }
+            Expression? exp = Concatenation.ParseCreate(word, nameSpace);
 
             if (word.Eof || word.GetCharAt(0) != '}')
             {
