@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using static System.Net.Mime.MediaTypeNames;
@@ -13,32 +14,66 @@ namespace pluginVerilog.Tool
 {
     public class ParseHierarchy
     {
+        private static Task? _currentTask;
+        private static CancellationTokenSource? _cts;
         public static async Task Parse(CodeEditor2.Data.TextFile textFile)
         {
             if (textFile.ParseValid && !textFile.ReparseRequested) return;
 
-            for(int i = 0; i < 2; i++)
+            if (_cts != null)
             {
-                if (textFile is Data.VerilogModuleInstance)
+                CodeEditor2.Controller.AppendLog("Cancelling previous parse...");
+                _cts.Cancel();
+
+                try
                 {
-                    await Task.Run(() => parseVerilogModule((Data.VerilogModuleInstance)textFile));
+//                    if (_currentTask != null)
+//                        await _currentTask;
                 }
-                else if (textFile is Data.VerilogFile)
-                {
-                    await Task.Run(() => parseVerilogModule((Data.VerilogFile)textFile));
-                }
-                else if(textFile is Data.InterfaceInstance)
-                {
-                    await Task.Run(() => parseVerilogModule((Data.InterfaceInstance)textFile));
-                }
+                catch (OperationCanceledException) { }
             }
 
+            _cts = new CancellationTokenSource();
+            CancellationToken token = _cts.Token;
+
+            _currentTask = Task.Run(async () =>
+            {
+                await runParse(textFile, token);
+            }, token);
+
+            try
+            {
+                await _currentTask;
+            }
+            catch (OperationCanceledException)
+            {
+            }
             return;
         }
 
-        private static async Task parseVerilogModule(Data.IVerilogRelatedFile verilogFile)
+        private static async Task runParse(CodeEditor2.Data.TextFile textFile, CancellationToken token)
+        {
+            for (int i = 0; i < 2; i++)
+            {
+                if (textFile is Data.VerilogModuleInstance)
+                {
+                    await parseVerilogModule((Data.VerilogModuleInstance)textFile,token);
+                }
+                else if (textFile is Data.VerilogFile)
+                {
+                    await parseVerilogModule((Data.VerilogFile)textFile, token);
+                }
+                else if (textFile is Data.InterfaceInstance)
+                {
+                    await parseVerilogModule((Data.InterfaceInstance)textFile, token);
+                }
+            }
+        }
+
+        private static async Task parseVerilogModule(Data.IVerilogRelatedFile verilogFile, CancellationToken token)
         {
             CodeEditor2.Controller.AppendLog("parseHier : " + verilogFile.ID);
+            token.ThrowIfCancellationRequested();
 
             var parser = verilogFile.CreateDocumentParser(CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.BackgroundParse);
             if (parser == null) return;
