@@ -48,9 +48,9 @@ namespace pluginVerilog.Verilog
         protected bool commentSkipped = false;
         protected int commentIndex = -1;
 
-        protected int indexPrev = 0;
-        protected bool commentSkippedPrev = false;
-        protected int commentIndexPrev = -1;
+        //protected int indexPrev = 0;
+        //protected bool commentSkippedPrev = false;
+        //protected int commentIndexPrev = -1;
 
         protected WordTypeEnum wordType = WordTypeEnum.Eof;
 
@@ -72,6 +72,8 @@ namespace pluginVerilog.Verilog
             ret.length = length;
             ret.nextIndex = nextIndex;
             ret.wordType = wordType;
+            ret.commentSkipped = commentSkipped;
+            ret.commentIndex = commentIndex;
             return ret;
         }
 
@@ -140,15 +142,12 @@ namespace pluginVerilog.Verilog
 
         public void MoveNext()
         {
-            indexPrev = index;
             index = nextIndex;
             if (Eof) return;
 
             string sectionName = SectionName;
             fetchNext(Document, ref index, out length, out nextIndex, out wordType,ref sectionName, !InhibitColor);
             SectionName = sectionName;
-            commentSkippedPrev = commentSkipped;
-            commentIndexPrev = commentIndex;
 
             commentSkipped = false;
             commentIndex = index;
@@ -176,23 +175,14 @@ namespace pluginVerilog.Verilog
 
         public string GetPreviousComment()
         {
-            if (!commentSkippedPrev) return "";
-            return Document.CreateString(commentIndexPrev, indexPrev - commentIndexPrev);
-        }
-
-        public string GetFollowedComment()
-        {
             if (!commentSkipped) return "";
-            return Document.CreateString(commentIndex, index-commentIndex);
+            return Document.CreateString(commentIndex, index - commentIndex);
         }
 
-        public CommentScanner GetCommentScanner()
-        {
-            return new CommentScanner(Document, commentIndex, index);
-        }
+
         public CommentScanner GetPreviousCommentScanner()
         {
-            return new CommentScanner(Document, commentIndexPrev, index);
+            return new CommentScanner(Document, commentIndex, index);
         }
         public void MoveNextUntilEol()
         {

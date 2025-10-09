@@ -152,7 +152,46 @@ namespace pluginVerilog.Verilog
         }
         public CommentScanner GetCommentScanner()
         {
-            return wordPointer.GetCommentScanner();
+            CommentScanner commentScanner;
+            // keep current status
+            WordPointer _wp = wordPointer.Clone();
+            int _nonGeneratedCount = nonGeneratedCount;
+            bool _prototype = prototype;
+            List<WordPointer> _stock = new List<WordPointer>();
+
+            foreach (var wp in stock)
+            {
+                _stock.Add(wp.Clone());
+            }
+
+
+            if (wordPointer.Eof)
+            {
+                while (wordPointer.Eof && stock.Count != 0)
+                {
+                    returnHierarchy();
+                }
+            }
+            else
+            {
+                wordPointer.MoveNext();
+            }
+
+            recheckWord();
+            commentScanner = wordPointer.GetPreviousCommentScanner();
+
+            wordPointer = _wp;
+            nonGeneratedCount = _nonGeneratedCount;
+            prototype = _prototype;
+            if (stock.Count != _stock.Count)
+            {
+                stock.Clear();
+                foreach (var wp in _stock)
+                {
+                    stock.Add(wp);
+                }
+            }
+            return commentScanner;
         }
 
         public CommentScanner GetPreviousCommentScanner()
@@ -367,7 +406,45 @@ namespace pluginVerilog.Verilog
 
         public string GetFollowedComment()
         {
-            return wordPointer.GetFollowedComment();
+            // keep current status
+            WordPointer _wp = wordPointer.Clone();
+            int _nonGeneratedCount = nonGeneratedCount;
+            bool _prototype = prototype;
+            List<WordPointer> _stock = new List<WordPointer>();
+
+            foreach (var wp in stock)
+            {
+                _stock.Add(wp.Clone());
+            }
+
+
+            if (wordPointer.Eof)
+            {
+                while (wordPointer.Eof && stock.Count != 0)
+                {
+                    returnHierarchy();
+                }
+            }
+            else
+            {
+                wordPointer.MoveNext();
+            }
+
+            recheckWord();
+            string text = wordPointer.GetPreviousComment();
+
+            wordPointer = _wp;
+            nonGeneratedCount = _nonGeneratedCount;
+            prototype = _prototype;
+            if (stock.Count != _stock.Count)
+            {
+                stock.Clear();
+                foreach (var wp in _stock)
+                {
+                    stock.Add(wp);
+                }
+            }
+            return text;
         }
         public string GetPreviousComment()
         {

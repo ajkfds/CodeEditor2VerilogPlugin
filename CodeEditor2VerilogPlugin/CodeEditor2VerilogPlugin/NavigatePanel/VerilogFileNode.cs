@@ -207,11 +207,22 @@ namespace pluginVerilog.NavigatePanel
                 }
             }
 
+            Avalonia.Media.Color color = Avalonia.Media.Color.FromArgb(100, 200, 240, 240);
+
+            if (verilogRelatedFile != null && verilogRelatedFile is VerilogModuleInstance)
+            {
+                VerilogModuleInstance moduleInstance = (VerilogModuleInstance)verilogRelatedFile;
+                if (moduleInstance.ExternalProject)
+                {
+                    color = Avalonia.Media.Color.FromArgb(100, 240, 200, 200);
+                }
+            }
+
             if (verilogRelatedFile != null && verilogRelatedFile.SystemVerilog)
             {
                 return AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
                     "CodeEditor2VerilogPlugin/Assets/Icons/systemVerilogDocument.svg",
-                    Avalonia.Media.Color.FromArgb(100, 200, 240, 240),
+                    color,
                     overrideIcons
                     );
             }
@@ -219,7 +230,7 @@ namespace pluginVerilog.NavigatePanel
             {
                 return AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
                     "CodeEditor2VerilogPlugin/Assets/Icons/verilogDocument.svg",
-                    Avalonia.Media.Color.FromArgb(100, 200, 240, 240),
+                    color,
                     overrideIcons
                     );
             }

@@ -14,7 +14,6 @@ namespace pluginVerilog.Verilog
 
         public NamedElements NamedElements { get; }
 
-        
 
     }
 }

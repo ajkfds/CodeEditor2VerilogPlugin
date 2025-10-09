@@ -23,15 +23,17 @@ namespace pluginVerilog.Data
 
         public required Dictionary<string, Verilog.Expressions.Expression> ParameterOverrides;
 
+        public bool ExternalProject { set; get; } = false;
+
         protected VerilogModuleInstance(CodeEditor2.Data.TextFile sourceTextFile) : base(sourceTextFile)
         {
 
         }
         public static VerilogModuleInstance? Create(
-            Verilog.ModuleItems.ModuleInstantiation moduleInstantiation,
-            CodeEditor2.Data.Project project
+            Verilog.ModuleItems.ModuleInstantiation moduleInstantiation
             )
         {
+            CodeEditor2.Data.Project project = moduleInstantiation.GetInstancedBuildingBlockProject();
             ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
             if (projectProperty == null) throw new Exception();
             Data.IVerilogRelatedFile? file = projectProperty.GetFileOfBuildingBlock(moduleInstantiation.SourceName);
@@ -47,6 +49,10 @@ namespace pluginVerilog.Data
                 RelativePath = file.RelativePath,
                 Name = moduleInstantiation.Name
             };
+            if(moduleInstantiation.Project != project)
+            {
+                fileItem.ExternalProject = true;
+            }
 
             if (file is Data.VerilogFile)
             {
@@ -415,28 +421,6 @@ namespace pluginVerilog.Data
             }
         }
 
-
-        // Auto Complete Handler
-
-        //public override void AfterKeyDown(System.Windows.Forms.KeyEventArgs e)
-        //{
-        //    VerilogCommon.AutoComplete.AfterKeyDown(this, e);
-        //}
-
-        //public override void AfterKeyPressed(System.Windows.Forms.KeyPressEventArgs e)
-        //{
-        //    VerilogCommon.AutoComplete.AfterKeyPressed(this, e);
-        //}
-
-        //public override void BeforeKeyPressed(System.Windows.Forms.KeyPressEventArgs e)
-        //{
-        //    VerilogCommon.AutoComplete.BeforeKeyPressed(this, e);
-        //}
-
-        //public override void BeforeKeyDown(System.Windows.Forms.KeyEventArgs e)
-        //{
-        //    VerilogCommon.AutoComplete.BeforeKeyDown(this, e);
-        //}
 
         public override PopupItem? GetPopupItem(ulong version, int index)
         {

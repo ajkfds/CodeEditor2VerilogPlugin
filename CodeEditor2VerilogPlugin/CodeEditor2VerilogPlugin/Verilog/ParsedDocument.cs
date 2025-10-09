@@ -602,13 +602,13 @@ namespace pluginVerilog.Verilog
             }
             else
             {
-                if(space!=null) appendHierElement(hierWords, items, space, candidateWord);
+                if(space!=null) appendHierElement(hierWords, items, space, candidateWord,true);
             }
 
             return items;
         }
 
-        private void appendHierElement(List<string> hierWords, List<AutocompleteItem> items, INamedElement element, string candidate)
+        private void appendHierElement(List<string> hierWords, List<AutocompleteItem> items, INamedElement element, string candidate, bool first)
         {
             if (hierWords.Count == 0)
             {
@@ -627,17 +627,25 @@ namespace pluginVerilog.Verilog
             }
             else
             {
+                INamedElement? subElement = null;
                 if (element.NamedElements.ContainsKey(hierWords[0]))
                 {
-                    INamedElement subElement = element.NamedElements[hierWords[0]];
+                    subElement = element.NamedElements[hierWords[0]];
+                } else if(element is NameSpace && first)
+                {
+                    subElement = ((NameSpace)element).GetNamedElementUpward(hierWords[0]);
+                }
+
+                if (subElement != null)
+                {
                     hierWords.RemoveAt(0);
-                    if(subElement is IBuildingBlockInstantiation)
+                    if (subElement is IBuildingBlockInstantiation)
                     {
                         IBuildingBlockInstantiation inst = (IBuildingBlockInstantiation)subElement;
                         BuildingBlock? buildingBlock = inst.GetInstancedBuildingBlock();
-                        if(buildingBlock != null)
+                        if (buildingBlock != null)
                         {
-                            appendHierElement(hierWords, items, buildingBlock, candidate);
+                            appendHierElement(hierWords, items, buildingBlock, candidate, false);
                             return;
                         }
                         else
@@ -646,7 +654,7 @@ namespace pluginVerilog.Verilog
                         }
                     }
 
-                    appendHierElement(hierWords, items, subElement, candidate);
+                    appendHierElement(hierWords, items, subElement, candidate, false);
                     return;
                 }
                 else

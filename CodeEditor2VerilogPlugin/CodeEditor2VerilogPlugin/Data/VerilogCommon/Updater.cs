@@ -136,10 +136,11 @@ namespace pluginVerilog.Data.VerilogCommon
                             Name = module.Name,
                             ParameterOverrides = new Dictionary<string, Verilog.Expressions.Expression>(),
                             Project = project,
-                            SourceName = module.Name
+                            SourceName = module.Name,
+                            SourceProjectName = module.Project.Name
                         };
 
-                        VerilogModuleInstance? instance = VerilogModuleInstance.Create(moduleInstantiation, project);
+                        VerilogModuleInstance? instance = VerilogModuleInstance.Create(moduleInstantiation);
                         if (instance == null) throw new Exception();
                         instance.ModuleName = module.Name;
 //                        instance.SourceTextFile = module.File;
@@ -218,7 +219,7 @@ namespace pluginVerilog.Data.VerilogCommon
                     {
                         if (instantiation is ModuleInstantiation)
                         {
-                            VerilogModuleInstance? newVerilogModuleInstance = VerilogModuleInstance.Create((ModuleInstantiation)instantiation, project);
+                            VerilogModuleInstance? newVerilogModuleInstance = VerilogModuleInstance.Create((ModuleInstantiation)instantiation);
                             if (newSubItems.ContainsKey(instantiation.Name) || newVerilogModuleInstance == null) continue;
                             newVerilogModuleInstance.Parent = parent;
                             newSubItems.Add(instantiation.Name, newVerilogModuleInstance);

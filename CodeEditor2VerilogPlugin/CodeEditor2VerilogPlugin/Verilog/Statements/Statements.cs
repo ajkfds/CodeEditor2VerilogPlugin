@@ -226,6 +226,17 @@ namespace pluginVerilog.Verilog.Statements
                 case "wait":
                 case "wait_order":
                     return WaitStatement.ParseCreate(word, nameSpace, statement_label);
+                case "reg":
+                case "logic":
+                case "wire":
+                case "int":
+                case "real":
+                case "realtime":
+                case "integer":
+                case "shortint":
+                    word.AddError("variable definition must not place here");
+                    word.SkipToKeyword(";");
+                    return null;
                 default:
 
                     // subroutine_call_statement 

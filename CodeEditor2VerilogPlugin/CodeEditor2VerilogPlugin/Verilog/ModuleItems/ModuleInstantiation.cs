@@ -52,6 +52,7 @@ namespace pluginVerilog.Verilog.ModuleItems
             | { attribute_instance } ".*"
         */
         public required string SourceName{ get; init; }
+        public required string SourceProjectName { get;init; }
 
         public required Dictionary<string, Expressions.Expression> ParameterOverrides { get; init; }
             
@@ -108,9 +109,26 @@ namespace pluginVerilog.Verilog.ModuleItems
             }
         }
 
+        public Project GetInstancedBuildingBlockProject()
+        {
+            Project sourceProject = Project;
+            if (CodeEditor2.Global.Projects.ContainsKey(SourceProjectName))
+            {
+                sourceProject = CodeEditor2.Global.Projects[SourceProjectName];
+            }
+            return sourceProject;
+        }
         public BuildingBlock? GetInstancedBuildingBlock()
         {
-            Data.IVerilogRelatedFile? file = ProjectProperty.GetFileOfBuildingBlock(SourceName);
+            ProjectProperty projectProperty = ProjectProperty;
+            Project sourceProject = Project;
+            if (CodeEditor2.Global.Projects.ContainsKey(SourceProjectName)) 
+            {
+                sourceProject = CodeEditor2.Global.Projects[SourceProjectName];
+                projectProperty = (ProjectProperty)sourceProject.GetPluginProperty();
+            }
+
+            Data.IVerilogRelatedFile? file = projectProperty.GetFileOfBuildingBlock(SourceName);
             if(file == null) return null;
             if (file is not Data.VerilogFile) return null;
 
@@ -139,6 +157,7 @@ namespace pluginVerilog.Verilog.ModuleItems
             BuildingBlock buildingBlock = nameSpace.BuildingBlock as BuildingBlock;
             if (buildingBlock == null) return false;
 
+            Project sourceProject = word.Project;
 
             var moduleIdentifier = word.CrateWordReference();
             string moduleName = word.Text;
@@ -146,7 +165,35 @@ namespace pluginVerilog.Verilog.ModuleItems
             Module? instancedModule = word.ProjectProperty.GetBuildingBlock(moduleName) as Module;
             if (instancedModule == null)
             {
-                return false;
+                if (word.GetFollowedComment().Contains("@project"))
+                {
+                    var comment = word.GetCommentScanner();
+                    while (!comment.EOC)
+                    {
+                        if(comment.Text != "@project")
+                        {
+                            comment.MoveNext();
+                            continue;
+                        }
+                        comment.Color(CodeDrawStyle.ColorType.HighLightedComment);
+                        comment.MoveNext();
+                        comment.Color(CodeDrawStyle.ColorType.HighLightedComment);
+                        if (!CodeEditor2.Global.Projects.ContainsKey(comment.Text)) break;
+
+                        sourceProject = CodeEditor2.Global.Projects[comment.Text];
+                        instancedModule = ((ProjectProperty)sourceProject.GetPluginProperty()).GetBuildingBlock(moduleName) as Module;
+
+                        break;
+                    }
+                    if(instancedModule == null)
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    return false;
+                }
             }
             word.MoveNext();
             IndexReference blockBeginIndexReference = word.CreateIndexReference();
@@ -190,7 +237,8 @@ namespace pluginVerilog.Verilog.ModuleItems
                     Name = word.Text,
                     Project = word.RootParsedDocument.Project,
                     SourceName = moduleName,
-                    ParameterOverrides = parameterOverrides
+                    ParameterOverrides = parameterOverrides,
+                    SourceProjectName = sourceProject.Name
                 };
                 moduleInstantiation.BlockBeginIndexReference = blockBeginIndexReference;
 
@@ -885,7 +933,7 @@ namespace pluginVerilog.Verilog.ModuleItems
         }
         public string? CreateString(string indent)
         {
-            Module? instancedModule = ProjectProperty.GetBuildingBlock(SourceName) as Module;
+            Module? instancedModule = GetInstancedBuildingBlock() as Module;
             if (instancedModule == null) return null;
 
             StringBuilder sb = new StringBuilder();
