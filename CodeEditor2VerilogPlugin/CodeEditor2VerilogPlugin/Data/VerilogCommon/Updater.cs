@@ -222,6 +222,10 @@ namespace pluginVerilog.Data.VerilogCommon
                             VerilogModuleInstance? newVerilogModuleInstance = VerilogModuleInstance.Create((ModuleInstantiation)instantiation);
                             if (newSubItems.ContainsKey(instantiation.Name) || newVerilogModuleInstance == null) continue;
                             newVerilogModuleInstance.Parent = parent;
+                            if(parent is VerilogModuleInstance && ((VerilogModuleInstance)parent).ExternalProject)
+                            {
+                                newVerilogModuleInstance.ExternalProject = true;
+                            }
                             newSubItems.Add(instantiation.Name, newVerilogModuleInstance);
                         }
                         else if (instantiation is IBuildingBlockInstantiation)
