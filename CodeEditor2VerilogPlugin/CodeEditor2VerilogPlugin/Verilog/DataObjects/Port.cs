@@ -222,10 +222,10 @@ namespace pluginVerilog.Verilog.DataObjects
         /// </summary>
         private static void checkCommentAnnotation(WordScanner word, NameSpace nameSpace,Port? port,ref string? portGroup)
         {
-            string commentText = word.GetFollowedComment();
+            string commentText = word.GetNextComment();
             if (!commentText.Contains("@")) return;
 
-            var comment = word.GetCommentScanner();
+            var comment = word.GetNextCommentScanner();
             while (!comment.EOC)
             {
                 if (!comment.Text.StartsWith("@"))

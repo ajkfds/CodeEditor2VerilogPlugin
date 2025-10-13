@@ -59,6 +59,10 @@ namespace pluginVerilog.Data.VerilogCommon
                             }
                             keyName = keyName + "_" + i.ToString();
                         }
+                        if(item is InstanceTextFile && ((InstanceTextFile)item).ExternalProject)
+                        {
+                            newVhInstance.ExternalProject = true;
+                        }
                         newSubItems.Add(keyName, newVhInstance);
                         newVhInstance.Parent = parent;
                     }

@@ -23,7 +23,6 @@ namespace pluginVerilog.Data
 
         public required Dictionary<string, Verilog.Expressions.Expression> ParameterOverrides;
 
-        public bool ExternalProject { set; get; } = false;
 
         protected VerilogModuleInstance(CodeEditor2.Data.TextFile sourceTextFile) : base(sourceTextFile)
         {

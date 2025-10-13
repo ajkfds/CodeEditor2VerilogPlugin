@@ -375,7 +375,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 word.AddError("; required");
             }
 
-            string comment = word.GetFollowedComment();
+            string comment = word.GetNextComment();
 
             if(comment != "")
             {

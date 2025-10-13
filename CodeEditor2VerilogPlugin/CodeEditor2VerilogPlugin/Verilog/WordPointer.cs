@@ -45,8 +45,13 @@ namespace pluginVerilog.Verilog
         protected int index = 0;
         protected int length = 0;
         protected int nextIndex;
-        protected bool commentSkipped = false;
-        protected int commentIndex = -1;
+        protected string nextSection = "";
+        protected bool commentSkippedPrev = false;
+        protected int commentIndexPrev = -1;
+
+        protected bool commentNextFetched = false;
+        protected int commentNextAfterIndex;
+
 
         //protected int indexPrev = 0;
         //protected bool commentSkippedPrev = false;
@@ -71,9 +76,10 @@ namespace pluginVerilog.Verilog
             ret.index = index;
             ret.length = length;
             ret.nextIndex = nextIndex;
+            ret.nextSection = nextSection;
             ret.wordType = wordType;
-            ret.commentSkipped = commentSkipped;
-            ret.commentIndex = commentIndex;
+            ret.commentSkippedPrev = commentSkippedPrev;
+            ret.commentIndexPrev = commentIndexPrev;
             return ret;
         }
 
@@ -142,57 +148,186 @@ namespace pluginVerilog.Verilog
 
         public void MoveNext()
         {
+            /*
+                        |commentIndexPrev|index     |commentIndex|nextIndex      |next2Index
+                        v                v          v            v               v
+            text        comment         text        comment      nexttext        text      
+                        |-------------->|---------->|----------->|
+                                         length     
+                         commentSkippedPrev          commentSkipped
+
+                        |commentIndexPrev|index     |nextIndex   |next2Index     
+                        v                v          v            v               
+            text        comment         text        text         text      
+                        |-------------->|---------->|----------->|
+                                         length     
+                         commentSkippedPrev          commentSkipped
+
+            */
+
             index = nextIndex;
-            if (Eof) return;
-
-            string sectionName = SectionName;
-            fetchNext(Document, ref index, out length, out nextIndex, out wordType,ref sectionName, !InhibitColor);
-            SectionName = sectionName;
-
-            commentSkipped = false;
-            commentIndex = index;
-
-            while (wordType == WordTypeEnum.Comment)
+            SectionName = nextSection;
+            
+            if (Eof)
             {
-                if (!Eof)
+                commentSkippedPrev = false;
+                if (Document.Length <= index + length)
                 {
-                    commentSkipped = true;
-                    index = nextIndex;
-                    sectionName = SectionName;
-                    fetchNext(Document, ref index, out length, out nextIndex, out wordType, ref sectionName, !InhibitColor);
-                    SectionName = sectionName;
+                    length = Document.Length - index;
                 }
-                else
+                return;
+            }
+
+            // get next Index
+            if (commentNextFetched)
+            {
+                fetchNext(Document, ref index, out length, out nextIndex, out wordType, ref nextSection, false);
+            }
+            else
+            {
+                fetchNext(Document, ref index, out length, out nextIndex, out wordType, ref nextSection, (!InhibitColor));
+            }
+
+            if (wordType == WordTypeEnum.Comment){ // fist word is comment
+                commentSkippedPrev = true;
+                commentIndexPrev = index;
+                while (wordType == WordTypeEnum.Comment)
                 {
-                    commentSkipped = true;
-                    index = nextIndex;
-                    sectionName = SectionName;
-                    break;
+                    if (Eof)
+                    {
+                        commentSkippedPrev = false;
+                        if (Document.Length <= index + length)
+                        {
+                            length = Document.Length - index;
+                        }
+                        return;
+                    }
+                    else
+                    {
+                        // get next Index
+                        index = nextIndex;
+                        fetchNext(Document, ref index, out length, out nextIndex, out wordType, ref nextSection, !InhibitColor);
+                        SectionName = nextSection;
+                    }
                 }
             }
-            if (!commentSkipped) commentIndex = -1;
+
+            if (Eof)
+            {
+                commentSkippedPrev = false;
+                if (Document.Length <= index + length)
+                {
+                    length = 0;
+                }
+                return;
+            }
+            SectionName = nextSection;
+            commentNextFetched = false;
         }
 
+        public void fetchNextComment()
+        {
+            /*
+                        |commentIndexPrev|index     |commentIndex|nextIndex      |next2Index
+                        v                v          v            v               v
+            text        comment         text        comment      nexttext        text      
+                        |-------------->|---------->|----------->|
+                                         length     
+                         commentSkippedPrev          commentSkipped
+
+                        |commentIndexPrev|index     |nextIndex   |next2Index     
+                        v                v          v            v               
+            text        comment         text        text         text      
+                        |-------------->|---------->|----------->|
+                                         length     
+                         commentSkippedPrev          commentSkipped
+
+            */
+            commentNextFetched = true;
+            commentNextAfterIndex = nextIndex;
+            int index_temp = nextIndex;
+            string section_temp = nextSection;
+            int length_temp = 0;
+            WordTypeEnum wordTypeEnum_temp;
+
+            if (Eof)
+            {
+                return;
+            }
+
+            // get next Index
+            fetchNext(Document, ref index_temp, out length_temp, out commentNextAfterIndex, out wordTypeEnum_temp, ref section_temp, !InhibitColor);
+
+            if (wordType == WordTypeEnum.Comment)
+            { // fist word is comment
+                commentNextFetched = true;
+                while (wordType == WordTypeEnum.Comment)
+                {
+                    if (Eof)
+                    {
+                        commentSkippedPrev = false;
+                        return;
+                    }
+                    else
+                    {
+
+                        // get next Index
+                        index_temp = commentNextAfterIndex;
+                        fetchNext(Document, ref index_temp, out length_temp, out commentNextAfterIndex, out wordTypeEnum_temp, ref section_temp, !InhibitColor);
+                    }
+                }
+            }
+
+            if (Eof)
+            {
+                return;
+            }
+        }
+        public string Text
+        {
+            get
+            {
+                if (index + length > Document.Length) return "";
+                return Document.CreateString(index, length);
+            }
+        }
+        /*
+                    |commentIndexPrev|index     |commentIndex|nextIndex
+                    v                v          v            v
+        text        comment         text        comment      text        comment      
+                    |-------------->|---------->|----------->|
+                                     length     
+                     commentSkippedPrev          commentSkipped
+        */
         public string GetPreviousComment()
         {
-            if (!commentSkipped) return "";
-            return Document.CreateString(commentIndex, index - commentIndex);
+            if (!commentSkippedPrev) return "";
+            return Document.CreateString(commentIndexPrev, index - commentIndexPrev);
         }
 
+        public string GetNextComment()
+        {
+            if (!commentNextFetched) fetchNextComment();
+            return Document.CreateString(nextIndex, commentNextAfterIndex-nextIndex);
+        }
 
         public CommentScanner GetPreviousCommentScanner()
         {
-            return new CommentScanner(Document, commentIndex, index);
+            return new CommentScanner(Document, commentIndexPrev, index);
+        }
+        public CommentScanner GetNextCommentScanner()
+        {
+            if (!commentNextFetched) fetchNextComment();
+            return new CommentScanner(Document, nextIndex, commentNextAfterIndex);
         }
         public void MoveNextUntilEol()
         {
             index = nextIndex;
+
             FetchNextUntilEol(Document, ref index, out length, out nextIndex, out wordType);
-            commentSkipped = false;
 
             while (!Eof && wordType == WordTypeEnum.Comment)
             {
-                commentSkipped = true;
                 index = nextIndex;
                 string sectionName = SectionName;
                 fetchNext(Document, ref index, out length, out nextIndex, out wordType, ref sectionName, !InhibitColor);
@@ -215,14 +350,6 @@ namespace pluginVerilog.Verilog
             }
         }
 
-        public string Text
-        {
-            get
-            {
-                if (index + length > Document.Length) return "";
-                return Document.CreateString(index, length);
-            }
-        }
 
         public WordTypeEnum WordType
         {

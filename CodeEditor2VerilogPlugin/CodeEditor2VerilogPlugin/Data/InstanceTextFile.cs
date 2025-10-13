@@ -13,6 +13,7 @@ namespace pluginVerilog.Data
             sourceFileRef = new WeakReference<CodeEditor2.Data.TextFile>(sourceTextFile);
         }
 
+        public bool ExternalProject { set; get; } = false;
         private System.WeakReference<CodeEditor2.Data.TextFile> sourceFileRef;
         public CodeEditor2.Data.TextFile? SourceTextFile
         {

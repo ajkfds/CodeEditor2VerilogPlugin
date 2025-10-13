@@ -5,6 +5,7 @@ using pluginVerilog.Verilog.BuildingBlocks;
 using Svg.FilterEffects;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,6 +24,8 @@ namespace pluginVerilog.Data
         public List<string> IncludePaths = new List<string>();
 
         public CodeEditor2.Data.Project Project;
+
+        public Dictionary<CodeEditor2.Data.Project, SimulationSetup> ExternalProjectReferences = new Dictionary<Project, SimulationSetup>();
 
         public static SimulationSetup? Create(pluginVerilog.Data.VerilogFile verilogFile)
         {
@@ -72,18 +75,60 @@ namespace pluginVerilog.Data
                 if (instance == null) return;
                 IVerilogRelatedFile? sourceFile = instance.SourceTextFile as IVerilogRelatedFile;
                 if (sourceFile == null) return;
-                if (setup.Files.Contains(sourceFile)) return;
-                setup.Files.Add(sourceFile);
+
+                if (sourceFile.Project == setup.Project)
+                {
+                    if (setup.Files.Contains(sourceFile)) return;
+                    setup.Files.Add(sourceFile);
+                } else
+                {
+                    CodeEditor2.Data.Project project = sourceFile.Project;
+                    SimulationSetup pSetup;
+                    if (!setup.ExternalProjectReferences.ContainsKey(project))
+                    {
+                        pSetup = new SimulationSetup() { Project = project };
+                        setup.ExternalProjectReferences.Add(project, pSetup);
+                    }
+                    else
+                    {
+                        pSetup = setup.ExternalProjectReferences[project];
+                    }
+                    if (pSetup.Files.Contains(sourceFile)) return;
+                    pSetup.Files.Add(sourceFile);
+                }
                 return;
             }
             if (file is VerilogHeaderInstance)
             {
-                if (setup.IncludeFiles.Contains(file)) return;
-                setup.IncludeFiles.Add(file);
-                string? path = System.IO.Path.GetDirectoryName(file.Project.GetAbsolutePath(file.RelativePath));
-                if (path == null) return;
-                if (!setup.IncludePaths.Contains(path)) setup.IncludePaths.Add(path);
-                return;
+                if (file.Project == setup.Project)
+                {
+                    if (setup.IncludeFiles.Contains(file)) return;
+                    setup.IncludeFiles.Add(file);
+                    string? path = System.IO.Path.GetDirectoryName(file.Project.GetAbsolutePath(file.RelativePath));
+                    if (path == null) return;
+                    if (!setup.IncludePaths.Contains(path)) setup.IncludePaths.Add(path);
+                    return;
+                }
+                else
+                {
+                    CodeEditor2.Data.Project project = file.Project;
+                    SimulationSetup pSetup;
+                    if (!setup.ExternalProjectReferences.ContainsKey(project))
+                    {
+                        pSetup = new SimulationSetup() { Project = project };
+                        setup.ExternalProjectReferences.Add(project, pSetup);
+                    }
+                    else
+                    {
+                        pSetup = setup.ExternalProjectReferences[project];
+                    }
+                    if (pSetup.IncludeFiles.Contains(file)) return;
+                    pSetup.IncludeFiles.Add(file);
+                    string? path = System.IO.Path.GetDirectoryName(file.Project.GetAbsolutePath(file.RelativePath));
+                    if (path == null) return;
+                    if (!pSetup.IncludePaths.Contains(path)) pSetup.IncludePaths.Add(path);
+                    return;
+                }
             }
         }
 

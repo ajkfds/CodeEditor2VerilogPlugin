@@ -150,54 +150,25 @@ namespace pluginVerilog.Verilog
             }
             return ret;
         }
-        public CommentScanner GetCommentScanner()
-        {
-            CommentScanner commentScanner;
-            // keep current status
-            WordPointer _wp = wordPointer.Clone();
-            int _nonGeneratedCount = nonGeneratedCount;
-            bool _prototype = prototype;
-            List<WordPointer> _stock = new List<WordPointer>();
-
-            foreach (var wp in stock)
-            {
-                _stock.Add(wp.Clone());
-            }
-
-
-            if (wordPointer.Eof)
-            {
-                while (wordPointer.Eof && stock.Count != 0)
-                {
-                    returnHierarchy();
-                }
-            }
-            else
-            {
-                wordPointer.MoveNext();
-            }
-
-            recheckWord();
-            commentScanner = wordPointer.GetPreviousCommentScanner();
-
-            wordPointer = _wp;
-            nonGeneratedCount = _nonGeneratedCount;
-            prototype = _prototype;
-            if (stock.Count != _stock.Count)
-            {
-                stock.Clear();
-                foreach (var wp in _stock)
-                {
-                    stock.Add(wp);
-                }
-            }
-            return commentScanner;
-        }
 
         public CommentScanner GetPreviousCommentScanner()
         {
             return wordPointer.GetPreviousCommentScanner();
         }
+        public CommentScanner GetNextCommentScanner()
+        {
+            return wordPointer.GetNextCommentScanner();
+        }
+
+        public string GetNextComment()
+        {
+            return wordPointer.GetNextComment();
+        }
+        public string GetPreviousComment()
+        {
+            return wordPointer.GetPreviousComment();
+        }
+
         public WordReference GetReference()
         {
             return CrateWordReference();
@@ -404,52 +375,6 @@ namespace pluginVerilog.Verilog
             }
         }
 
-        public string GetFollowedComment()
-        {
-            // keep current status
-            WordPointer _wp = wordPointer.Clone();
-            int _nonGeneratedCount = nonGeneratedCount;
-            bool _prototype = prototype;
-            List<WordPointer> _stock = new List<WordPointer>();
-
-            foreach (var wp in stock)
-            {
-                _stock.Add(wp.Clone());
-            }
-
-
-            if (wordPointer.Eof)
-            {
-                while (wordPointer.Eof && stock.Count != 0)
-                {
-                    returnHierarchy();
-                }
-            }
-            else
-            {
-                wordPointer.MoveNext();
-            }
-
-            recheckWord();
-            string text = wordPointer.GetPreviousComment();
-
-            wordPointer = _wp;
-            nonGeneratedCount = _nonGeneratedCount;
-            prototype = _prototype;
-            if (stock.Count != _stock.Count)
-            {
-                stock.Clear();
-                foreach (var wp in _stock)
-                {
-                    stock.Add(wp);
-                }
-            }
-            return text;
-        }
-        public string GetPreviousComment()
-        {
-            return wordPointer.GetPreviousComment();
-        }
 
         private void recheckWord()
         {
@@ -953,7 +878,7 @@ namespace pluginVerilog.Verilog
         {
             wordPointer.Color(CodeDrawStyle.ColorType.Keyword);
             wordPointer.MoveNext();
-            if(wordPointer.WordType != WordPointer.WordTypeEnum.String)
+            if(wordPointer.WordType != WordPointer.WordTypeEnum.String || wordPointer.Text.Length<=2)
             {
                 wordPointer.AddError("\" expected");
                 wordPointer.MoveNextUntilEol();
@@ -1331,6 +1256,7 @@ namespace pluginVerilog.Verilog
                 name = name + ":" + count.ToString();
             }
 
+
             Data.VerilogHeaderInstance vhInstance = Data.VerilogHeaderInstance.Create(
                                             relativeFilePath,
                                             name,
@@ -1339,7 +1265,6 @@ namespace pluginVerilog.Verilog
                                             wordPointer.ParsedDocument.Project,
                                             id
                                             );
-
 
             if (vhInstance == null)
             {

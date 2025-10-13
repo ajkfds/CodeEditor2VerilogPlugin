@@ -165,9 +165,9 @@ namespace pluginVerilog.Verilog.ModuleItems
             Module? instancedModule = word.ProjectProperty.GetBuildingBlock(moduleName) as Module;
             if (instancedModule == null)
             {
-                if (word.GetFollowedComment().Contains("@project"))
+                if (word.GetNextComment().Contains("@project"))
                 {
-                    var comment = word.GetCommentScanner();
+                    var comment = word.GetNextCommentScanner();
                     while (!comment.EOC)
                     {
                         if(comment.Text != "@project")

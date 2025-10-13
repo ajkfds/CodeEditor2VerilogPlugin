@@ -517,7 +517,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             else
             {
                 word.MoveNext();
-                string comment = word.GetFollowedComment();
+                string comment = word.GetNextComment();
                 foreach (Net net in nets)
                 {
                     net.Comment = comment;

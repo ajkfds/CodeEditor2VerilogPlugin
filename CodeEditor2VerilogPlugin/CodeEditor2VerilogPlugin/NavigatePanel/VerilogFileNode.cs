@@ -209,12 +209,11 @@ namespace pluginVerilog.NavigatePanel
 
             Avalonia.Media.Color color = Avalonia.Media.Color.FromArgb(100, 200, 240, 240);
 
-            if (verilogRelatedFile != null && verilogRelatedFile is VerilogModuleInstance)
+            if (verilogRelatedFile != null && verilogRelatedFile is InstanceTextFile)
             {
-                VerilogModuleInstance moduleInstance = (VerilogModuleInstance)verilogRelatedFile;
-                if (moduleInstance.ExternalProject)
+                if (((InstanceTextFile)verilogRelatedFile).ExternalProject)
                 {
-                    color = Avalonia.Media.Color.FromArgb(100, 240, 200, 200);
+                    color = Avalonia.Media.Color.FromArgb(100, 250, 200, 200);
                 }
             }
 
