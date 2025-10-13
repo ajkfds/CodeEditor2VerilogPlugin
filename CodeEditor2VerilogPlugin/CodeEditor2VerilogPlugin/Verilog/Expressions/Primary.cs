@@ -190,6 +190,12 @@ number
                         string a = "";
                     }
 
+                    // assignment pattern
+                    if(word.Text =="'" && word.NextText == "{")
+                    {
+                        return AssignmentPattern.ParseCreate(word, nameSpace);
+                    }
+
                     // cast
                     if (word.NextText == "'") // cast
                     {
