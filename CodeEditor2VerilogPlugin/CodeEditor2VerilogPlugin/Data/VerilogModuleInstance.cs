@@ -279,6 +279,7 @@ namespace pluginVerilog.Data
                 }
             }
 
+            NavigatePanelNode.UpdateVisual();
         }
 
         private void acceptParameterizedParsedDocument(ParsedDocument newParsedDocument)

@@ -165,8 +165,7 @@ namespace pluginVerilog.Data
             Update();
 
             // update Navigate panel node visual for this item
-            CodeEditor2.NavigatePanel.NavigatePanelNode? node = CodeEditor2.Controller.NavigatePanel.GetSelectedNode();
-            if (node != null) node.UpdateVisual();
+            NavigatePanelNode.UpdateVisual();
         }
 
         internal static void updateIncludeFiles(Verilog.ParsedDocument parsedDocument, ItemList items)

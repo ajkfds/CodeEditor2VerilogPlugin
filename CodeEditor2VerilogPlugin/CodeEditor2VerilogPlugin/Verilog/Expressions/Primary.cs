@@ -193,7 +193,7 @@ number
                     // assignment pattern
                     if(word.Text =="'" && word.NextText == "{")
                     {
-                        return AssignmentPattern.ParseCreate(word, nameSpace);
+                        return AssignmentPattern.ParseCreate(word, nameSpace,lValue);
                     }
 
                     // cast

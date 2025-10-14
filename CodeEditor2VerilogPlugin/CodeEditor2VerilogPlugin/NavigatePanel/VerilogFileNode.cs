@@ -80,7 +80,7 @@ namespace pluginVerilog.NavigatePanel
             else
             {
                 if (TextFile == null) return;
-                await Tool.ParseHierarchy.Parse(TextFile);
+                await Tool.ParseHierarchy.ParseAsync(TextFile);
             }
         }
 
