@@ -164,6 +164,13 @@ namespace pluginVerilog.Verilog
                          commentSkippedPrev          commentSkipped
 
             */
+            if(nextIndex >= Document.Length)
+            {
+                commentSkippedPrev = false;
+                index = Document.Length+1;
+                nextIndex = Document.Length+1;
+                return;
+            }
 
             index = nextIndex;
             SectionName = nextSection;
@@ -171,10 +178,6 @@ namespace pluginVerilog.Verilog
             if (Eof)
             {
                 commentSkippedPrev = false;
-                if (Document.Length <= index + length)
-                {
-                    length = Document.Length - index;
-                }
                 return;
             }
 
@@ -215,10 +218,6 @@ namespace pluginVerilog.Verilog
             if (Eof)
             {
                 commentSkippedPrev = false;
-                if (Document.Length <= index + length)
-                {
-                    length = 0;
-                }
                 return;
             }
             SectionName = nextSection;
@@ -339,7 +338,7 @@ namespace pluginVerilog.Verilog
         {
             get
             {
-                if (nextIndex >= Document.Length)
+                if (nextIndex > Document.Length)
                 {
                     return true;
                 }

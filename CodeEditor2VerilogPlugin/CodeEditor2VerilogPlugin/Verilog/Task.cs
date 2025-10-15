@@ -311,6 +311,7 @@ namespace pluginVerilog.Verilog
                 switch (word.Text)
                 {
                     case "input": // tf_input_declaration
+                    case "output": // tf_output_declaration
 
                         Verilog.DataObjects.Port.ParseTfPortDeclaration(word, function);
                         if (word.Text != ";")

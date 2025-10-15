@@ -297,7 +297,12 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         {
                             if (word.Text == "endmodule") break;
                             word.AddError("illegal module item");
-                            word.MoveNext();
+                            while (!word.Eof)
+                            {
+                                if (word.Text == "endmodule") break;
+                                if (word.Text == ";") break;
+                                word.MoveNext();
+                            }
                         }
                     }
                     else
@@ -306,7 +311,12 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         {
                             if (word.Text == "endmodule") break;
                             word.AddError("illegal module item");
-                            word.MoveNext();
+                            while (!word.Eof)
+                            {
+                                if (word.Text == "endmodule") break;
+                                if (word.Text == ";") break;
+                                word.MoveNext();
+                            }
                         }
                     }
                     CommentAnnotationItem.Parse(word, module);
