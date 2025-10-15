@@ -326,23 +326,29 @@ namespace pluginVerilog.Verilog
             }
         }
 
-        public void SkipToKeyword(string stopWord)
+        public bool SkipToKeyword(string stopWord)
         {
+            bool skipped = false;
             while (!Eof)
             {
-                if (Text == stopWord) return;
-                if (General.ListOfStatementStopKeywords.Contains(Text)) return;
+                if (Text == stopWord) return skipped;
+                if (General.ListOfStatementStopKeywords.Contains(Text)) return skipped;
                 MoveNext();
+                skipped = true;
             }
+            return skipped;
         }
-        public void SkipToKeywords(List<string> stopKeywords)
+        public bool SkipToKeywords(List<string> stopKeywords)
         {
+            bool skipped = false;
             while (!Eof)
             {
-                if (stopKeywords.Contains(Text)) return;
-                if (General.ListOfStatementStopKeywords.Contains(Text)) return;
+                if (stopKeywords.Contains(Text)) return skipped;
+                if (General.ListOfStatementStopKeywords.Contains(Text)) return skipped;
                 MoveNext();
+                skipped = true;
             }
+            return skipped;
         }
 
         public string SectionName

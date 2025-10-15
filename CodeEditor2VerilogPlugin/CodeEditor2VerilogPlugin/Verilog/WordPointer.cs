@@ -167,8 +167,8 @@ namespace pluginVerilog.Verilog
             if(nextIndex >= Document.Length)
             {
                 commentSkippedPrev = false;
-                index = Document.Length+1;
-                nextIndex = Document.Length+1;
+                index = Document.Length;
+                nextIndex = Document.Length;
                 return;
             }
 
@@ -338,7 +338,7 @@ namespace pluginVerilog.Verilog
         {
             get
             {
-                if (nextIndex > Document.Length)
+                if (index >= Document.Length)
                 {
                     return true;
                 }

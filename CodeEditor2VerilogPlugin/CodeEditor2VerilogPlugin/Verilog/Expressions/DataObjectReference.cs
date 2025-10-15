@@ -141,7 +141,12 @@ namespace pluginVerilog.Verilog.Expressions
 
             if (dataObject is DataObjects.Constants.Constants)
             {
+                DataObjects.Constants.Constants constants = (DataObjects.Constants.Constants)dataObject;
                 val.Constant = true;
+                if(constants.Expression.Constant && constants.Expression.Value != null)
+                {
+                    val.Value = constants.Expression.Value;
+                }
             }
 
             if (assigned)

@@ -297,10 +297,8 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         {
                             if (word.Text == "endmodule") break;
                             word.AddError("illegal module item");
-                            while (!word.Eof)
+                            if (!word.SkipToKeyword(";"))
                             {
-                                if (word.Text == "endmodule") break;
-                                if (word.Text == ";") break;
                                 word.MoveNext();
                             }
                         }
@@ -311,10 +309,8 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         {
                             if (word.Text == "endmodule") break;
                             word.AddError("illegal module item");
-                            while (!word.Eof)
+                            if (!word.SkipToKeyword(";"))
                             {
-                                if (word.Text == "endmodule") break;
-                                if (word.Text == ";") break;
                                 word.MoveNext();
                             }
                         }
