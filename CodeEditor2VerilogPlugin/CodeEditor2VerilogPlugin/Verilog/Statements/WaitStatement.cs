@@ -13,6 +13,8 @@ namespace pluginVerilog.Verilog.Statements
         }
         public string Name { get; protected set; }
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public IStatement? Statement { get; protected set; }
+        public Expressions.Expression? Expression {  get; protected set; }
         public NamedElements NamedElements => new NamedElements();
         /*
         wait_statement ::=
@@ -50,8 +52,13 @@ namespace pluginVerilog.Verilog.Statements
                 return null;
             }
             word.MoveNext();
+
+            WaitStatement waitStatement = new WaitStatement();
+
             Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
             if (expression == null) return null;
+
+            waitStatement.Expression = expression;
             if (word.Text != ")")
             {
                 word.AddError("expecting )");
@@ -59,7 +66,14 @@ namespace pluginVerilog.Verilog.Statements
             }
             word.MoveNext();
 
+            if (word.Text == ";")
+            {
+                word.MoveNext();
+                return waitStatement;
+            }
+
             IStatement? statement = Statements.ParseCreateStatement(word, nameSpace);
+            waitStatement.Statement = statement;
 
             if (word.Text != ";")
             {
@@ -69,7 +83,7 @@ namespace pluginVerilog.Verilog.Statements
             {
                 word.MoveNext();
             }
-            return new WaitStatement();
+            return waitStatement;
         }
 
         public static WaitStatement? parseCreate_wait_fork(WordScanner word, NameSpace nameSpace)
