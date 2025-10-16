@@ -1047,9 +1047,10 @@ namespace pluginVerilog.Verilog
                 return;
             }
 
-            CodeEditor.CodeDocument codeDocument = new CodeEditor.CodeDocument(macroText);
-            WordPointer newPointer = new WordPointer(codeDocument, wordPointer.ParsedDocument);
             stock.Add(wordPointer);
+            CodeEditor.CodeDocument codeDocument = new CodeEditor.CodeDocument(macroText);
+            ParsedDocument newParsedDocument = new ParsedDocument((IVerilogRelatedFile)wordPointer.ParsedDocument.TextFile, null, wordPointer.ParsedDocument.ParseMode);
+            WordPointer newPointer = new WordPointer(codeDocument, newParsedDocument );// wordPointer.ParsedDocument);
 
             wordPointer = newPointer;
 
