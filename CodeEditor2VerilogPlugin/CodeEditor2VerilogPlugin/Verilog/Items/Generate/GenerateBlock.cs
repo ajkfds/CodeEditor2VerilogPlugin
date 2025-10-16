@@ -38,6 +38,8 @@ namespace pluginVerilog.Verilog.Items.Generate
                 word.MoveNext();
             }
 
+            IndexReference startBlock = word.CreateIndexReference();
+
             if (word.Active)
             {
                 while (!word.Eof)
@@ -69,6 +71,8 @@ namespace pluginVerilog.Verilog.Items.Generate
                     word.MoveNext();
                 }
             }
+
+            word.AppendBlock(startBlock, word.CreateIndexReference());
 
             if (word.Text == "end")
             {

@@ -59,11 +59,28 @@ namespace pluginVerilog.Verilog.Items.Generate
                 }
             }
 
-            if (word.Text == "else")
-            {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
-                word.MoveNext();
+            if (word.Text != "else") return true;
 
+            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.MoveNext();
+
+            if(word.Text == "if")
+            {
+                if (word.Active && expression != null && expression.Constant && expression.Value != 0)
+                {
+                    // false
+                    word.StartNonGenerated();
+                    Parse(word, nameSpace);
+                    word.EndNonGenerated();
+                }
+                else
+                {
+                    Parse(word, nameSpace);
+                }
+                return true;
+            }
+            else
+            {
                 if (word.Active && expression != null && expression.Constant && expression.Value != 0)
                 {
                     // false
