@@ -351,7 +351,26 @@ namespace pluginVerilog.Data
                     VerilogCommon.Updater.Update(this);
                     NavigatePanelNode.UpdateVisual();
                 })
+            );
+
+        }
+        public async Task UpdateAsync()
+        {
+            if (Dispatcher.UIThread.CheckAccess())
+            {
+                VerilogCommon.Updater.Update(this);
+                NavigatePanelNode.UpdateVisual();
+            }
+            else
+            {
+                await Dispatcher.UIThread.InvokeAsync(
+                    () =>
+                    {
+                        VerilogCommon.Updater.Update(this);
+                        NavigatePanelNode.UpdateVisual();
+                    }
                 );
+            }
         }
 
 

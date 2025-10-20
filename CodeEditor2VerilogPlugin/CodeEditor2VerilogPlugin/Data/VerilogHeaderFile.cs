@@ -1,15 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Avalonia.Threading;
 using CodeEditor2.CodeEditor;
 using CodeEditor2.CodeEditor.Parser;
 using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
 using pluginVerilog.CodeEditor;
 using pluginVerilog.Verilog;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using static CodeEditor2.Controller;
 
 namespace pluginVerilog.Data
@@ -87,6 +88,22 @@ namespace pluginVerilog.Data
         public override void Update()
         {
             VerilogCommon.Updater.Update(this);
+        }
+        public async System.Threading.Tasks.Task UpdateAsync()
+        {
+            if (Dispatcher.UIThread.CheckAccess())
+            {
+                Update();
+            }
+            else
+            {
+                await Dispatcher.UIThread.InvokeAsync(
+                    () =>
+                    {
+                        Update();
+                    }
+                );
+            }
         }
 
         // read text document from file

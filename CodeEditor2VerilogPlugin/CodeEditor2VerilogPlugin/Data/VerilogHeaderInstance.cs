@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Avalonia.Threading;
 //using CodeEditor2.CodeEditor;
 using CodeEditor2.CodeEditor.CodeComplete;
 using CodeEditor2.CodeEditor.Parser;
@@ -12,6 +8,11 @@ using CodeEditor2.Data;
 using pluginVerilog.CodeEditor;
 using pluginVerilog.Verilog;
 using pluginVerilog.Verilog.ModuleItems;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using static CodeEditor2.Controller;
 
 namespace pluginVerilog.Data
@@ -336,6 +337,22 @@ namespace pluginVerilog.Data
             }
         }
 
+        public async System.Threading.Tasks.Task UpdateAsync()
+        {
+            if (Dispatcher.UIThread.CheckAccess())
+            {
+                Update();
+            }
+            else
+            {
+                await Dispatcher.UIThread.InvokeAsync(
+                    () =>
+                    {
+                        Update();
+                    }
+                );
+            }
+        }
         // Auto Complete Handler
 
         //public override void AfterKeyDown(System.Windows.Forms.KeyEventArgs e)

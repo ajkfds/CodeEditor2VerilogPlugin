@@ -19,26 +19,19 @@ namespace pluginVerilog.Tool
         private static CancellationTokenSource? _cts;
         public static async Task ParseAsync(CodeEditor2.Data.TextFile textFile)
         {
-            System.Diagnostics.Debug.Print("ParseAsync "+textFile.RelativePath);
             if (textFile.ParseValid && !textFile.ReparseRequested) return;
 
-            System.Diagnostics.Debug.Print("Start " + textFile.RelativePath);
             if (_cts != null)
             {
-                System.Diagnostics.Debug.Print("Cancel " + textFile.RelativePath);
-
-                CodeEditor2.Controller.AppendLog("Cancelling previous parse...");
                 textFile.ReparseRequested = true;
                 _cts.Cancel();
 
-                System.Diagnostics.Debug.Print("WaitCancel " + textFile.RelativePath);
                 try
                 {
                     // wait completion of the previous task
                     if (_currentTask != null) await _currentTask;
                 }
                 catch (OperationCanceledException) { }
-                System.Diagnostics.Debug.Print("CompleteCancel " + textFile.RelativePath);
             }
 
             System.Diagnostics.Debug.Print("Start2 " + textFile.RelativePath);
@@ -54,12 +47,10 @@ namespace pluginVerilog.Tool
             try
             {
                 await _currentTask;
-                System.Diagnostics.Debug.Print("Compelete " + textFile.RelativePath);
             }
             catch (OperationCanceledException)
             {
                 _currentTask = null;
-                System.Diagnostics.Debug.Print("Cancelled " + textFile.RelativePath);
             }
             finally
             {
@@ -131,20 +122,15 @@ namespace pluginVerilog.Tool
                     await Dispatcher.UIThread.InvokeAsync(
                         async () =>
                         {
-                            await Task.Run(
-                                () =>
+                            verilogFile.AcceptParsedDocument(parser.ParsedDocument);
+                            await verilogFile.UpdateAsync();
+                            lock (verilogFile.Items)
+                            {
+                                foreach (var item in verilogFile.Items.Values)
                                 {
-                                    verilogFile.AcceptParsedDocument(parser.ParsedDocument);
-                                    verilogFile.Update();
-                                    lock (verilogFile.Items)
-                                    {
-                                        foreach (var item in verilogFile.Items.Values)
-                                        {
-                                            items.Add(item);
-                                        }
-                                    }
+                                    items.Add(item);
                                 }
-                            );
+                            }
                         }
                     );
                 }
@@ -203,20 +189,15 @@ namespace pluginVerilog.Tool
                     await Dispatcher.UIThread.InvokeAsync(
                         async () =>
                         {
-                            await Task.Run(
-                                () =>
+                            verilogFile.AcceptParsedDocument(parser.ParsedDocument);
+                            await verilogFile.UpdateAsync();
+                            lock (verilogFile.Items)
+                            {
+                                foreach (var item in verilogFile.Items.Values)
                                 {
-                                    verilogFile.AcceptParsedDocument(parser.ParsedDocument);
-                                    verilogFile.Update();
-                                    lock (verilogFile.Items)
-                                    {
-                                        foreach (var item in verilogFile.Items.Values)
-                                        {
-                                            items.Add(item);
-                                        }
-                                    }
+                                    items.Add(item);
                                 }
-                            );
+                            }
                         }
                     );
                 }

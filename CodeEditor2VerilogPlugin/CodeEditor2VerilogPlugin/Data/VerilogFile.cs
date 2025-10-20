@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using Avalonia.Threading;
+﻿using Avalonia.Threading;
 using CodeEditor2;
 using CodeEditor2.CodeEditor;
 using CodeEditor2.CodeEditor.CodeComplete;
@@ -16,8 +9,16 @@ using CodeEditor2.Data;
 using CodeEditor2.Tools;
 using DynamicData;
 using pluginVerilog.CodeEditor;
+using pluginVerilog.FileTypes;
 using pluginVerilog.Verilog.BuildingBlocks;
 using Splat;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace pluginVerilog.Data
 {
@@ -426,14 +427,26 @@ namespace pluginVerilog.Data
                     VerilogCommon.Updater.Update(this);
                     NavigatePanelNode.UpdateVisual();
                 })
-                );
-            //Dispatcher.UIThread.Post(
-            //    new Action(() =>
-            //    {
-            //        NavigatePanelNode.UpdateVisual();
-            //    })
-            //    );
+            );
 
+        }
+        public async Task UpdateAsync()
+        {
+            if (Dispatcher.UIThread.CheckAccess())
+            {
+                VerilogCommon.Updater.Update(this);
+                NavigatePanelNode.UpdateVisual();
+            }
+            else
+            {
+                await Dispatcher.UIThread.InvokeAsync(
+                    () =>
+                    {
+                        VerilogCommon.Updater.Update(this);
+                        NavigatePanelNode.UpdateVisual();
+                    }
+                );
+            }
         }
 
         // Auto Complete Handler
