@@ -17,7 +17,17 @@ namespace pluginVerilog.Tool
     {
         private static Task? _currentTask;
         private static CancellationTokenSource? _cts;
-        public static async Task ParseAsync(CodeEditor2.Data.TextFile textFile)
+
+        public enum ParseMode
+        {
+            SearchReparseReqestedTree,
+            ForceAllFiles,
+            ThisFileOnly,
+            SearchAllAndParseReparseReqested
+        }
+
+
+        public static async Task ParseAsync(CodeEditor2.Data.TextFile textFile,ParseMode parseMode)
         {
             if (textFile.ParseValid && !textFile.ReparseRequested) return;
 
@@ -34,14 +44,12 @@ namespace pluginVerilog.Tool
                 catch (OperationCanceledException) { }
             }
 
-            System.Diagnostics.Debug.Print("Start2 " + textFile.RelativePath);
-
             _cts = new CancellationTokenSource();
             CancellationToken token = _cts.Token;
 
             _currentTask = Task.Run(async () =>
             {
-                await runParse(textFile, token);
+                await runParse(textFile, token, Tool.ParseHierarchy.ParseMode.SearchReparseReqestedTree);
             }, token);
 
             try
@@ -59,22 +67,22 @@ namespace pluginVerilog.Tool
             return;
         }
 
-        private static async Task runParse(TextFile textFile, CancellationToken token)
+        private static async Task runParse(TextFile textFile, CancellationToken token, ParseMode parseMode)
         {
             List<TextFile> fileStack = new List<TextFile>(); 
 
-            await parseText(textFile,token, fileStack);
+            await parseText(textFile,token, fileStack,parseMode);
 
             while(fileStack.Count != 0)
             {
                 TextFile reparseTextFile = fileStack.Last();
                 fileStack.RemoveAt(fileStack.Count - 1);
                 token.ThrowIfCancellationRequested();
-                await reparseText(reparseTextFile);
+                await reparseText(reparseTextFile,parseMode);
             }
         }
 
-        private static async Task parseText(TextFile textFile, CancellationToken token, List<TextFile> fileStack)
+        private static async Task parseText(TextFile textFile, CancellationToken token, List<TextFile> fileStack, ParseMode parseMode)
         {
             Data.IVerilogRelatedFile? verilogFile = null;
             if (textFile is Data.VerilogModuleInstance)
@@ -92,6 +100,10 @@ namespace pluginVerilog.Tool
             if (verilogFile == null) return;
 
             token.ThrowIfCancellationRequested();
+            if (fileStack.Contains((TextFile)verilogFile)) return;
+
+            if (parseMode == ParseMode.SearchReparseReqestedTree
+                && verilogFile.ParseValid && !verilogFile.ReparseRequested) return;
 
             CodeEditor2.Controller.AppendLog("parseHier : " + verilogFile.ID);
 
@@ -103,7 +115,17 @@ namespace pluginVerilog.Tool
             var parser = verilogFile.CreateDocumentParser(CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.BackgroundParse);
             if (parser == null) return;
 
-            parser.Parse();
+            if(parseMode == ParseMode.SearchAllAndParseReparseReqested
+                && verilogFile.ParseValid && !verilogFile.ReparseRequested
+                )
+            { // skip parse
+
+            }
+            else
+            {
+                parser.Parse();
+            }
+
             List<Item> items = new List<Item>();
             if (parser.ParsedDocument != null)
             {
@@ -138,17 +160,18 @@ namespace pluginVerilog.Tool
                 }
             }
             textFile.ReparseRequested = true;
+            if (parseMode == ParseMode.ThisFileOnly) return;
 
-            foreach (var item in items)
+                foreach (var item in items)
             {
                 if(item is CodeEditor2.Data.TextFile)
                 {
-                    await parseText((CodeEditor2.Data.TextFile)item,token,fileStack);
+                    await parseText((CodeEditor2.Data.TextFile)item,token,fileStack, parseMode);
                 }
             }
         }
 
-        private static async Task reparseText(TextFile textFile)
+        private static async Task reparseText(TextFile textFile, ParseMode parseMode)
         {
             Data.IVerilogRelatedFile? verilogFile = null;
             if (textFile is Data.VerilogModuleInstance)
@@ -171,20 +194,12 @@ namespace pluginVerilog.Tool
             if (parser == null) return;
 
             parser.Parse();
-            List<Item> items = new List<Item>();
             if (parser.ParsedDocument != null)
             {
                 if (Dispatcher.UIThread.CheckAccess())
                 {
                     verilogFile.AcceptParsedDocument(parser.ParsedDocument);
                     verilogFile.Update();
-                    lock (verilogFile.Items)
-                    {
-                        foreach (var item in verilogFile.Items.Values)
-                        {
-                            items.Add(item);
-                        }
-                    }
                 }
                 else
                 {
@@ -193,13 +208,6 @@ namespace pluginVerilog.Tool
                         {
                             verilogFile.AcceptParsedDocument(parser.ParsedDocument);
                             await verilogFile.UpdateAsync();
-                            lock (verilogFile.Items)
-                            {
-                                foreach (var item in verilogFile.Items.Values)
-                                {
-                                    items.Add(item);
-                                }
-                            }
                         }
                     );
                 }

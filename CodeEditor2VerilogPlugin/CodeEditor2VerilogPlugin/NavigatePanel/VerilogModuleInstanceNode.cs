@@ -106,7 +106,7 @@ namespace pluginVerilog.NavigatePanel
             }
             else
             {
-                await Tool.ParseHierarchy.ParseAsync(ModuleInstance);
+                await Tool.ParseHierarchy.ParseAsync(ModuleInstance, Tool.ParseHierarchy.ParseMode.SearchReparseReqestedTree);
             }
 
         }
