@@ -93,6 +93,8 @@ namespace pluginVerilog.Tool
 
             token.ThrowIfCancellationRequested();
 
+            CodeEditor2.Controller.AppendLog("parseHier : " + verilogFile.ID);
+
             if (!fileStack.Contains(textFile))
             {
                 fileStack.Add(textFile);
