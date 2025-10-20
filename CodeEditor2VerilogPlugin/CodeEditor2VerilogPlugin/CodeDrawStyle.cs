@@ -27,7 +27,7 @@ namespace pluginVerilog
                     Avalonia.Media.Color.FromRgb(255,150,200),     // Net
                     Avalonia.Media.Color.FromRgb(200,255,100),     // highlighted comment
                     Avalonia.Media.Color.FromRgb(255,200,200),     // Variable
-                    Avalonia.Media.Color.FromRgb(73,108,62),      // comment annotation
+                    Avalonia.Media.Color.FromRgb(200,255,100),           // comment annotation
 //                    Avalonia.Media.Color.FromRgb(86,123,65),      // comment annotation
                     Avalonia.Media.Colors.Black,                   // 13
                     Avalonia.Media.Colors.Black,                   // 14
