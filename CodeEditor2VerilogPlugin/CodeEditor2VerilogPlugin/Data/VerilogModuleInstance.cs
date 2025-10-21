@@ -345,29 +345,32 @@ namespace pluginVerilog.Data
         // update sub-items from ParsedDocument
         public override void Update()
         {
+            VerilogCommon.Updater.Update(this);
+            NavigatePanelNode.UpdateVisual();
+
             Dispatcher.UIThread.Post(
                 new Action(() =>
                 {
-                    VerilogCommon.Updater.Update(this);
-                    NavigatePanelNode.UpdateVisual();
+                    if (CodeEditor2.Controller.NavigatePanel.GetSelectedFile() == this)
+                    {
+                        CodeEditor2.Controller.CodeEditor.Refresh();
+                        if(ParsedDocument!=null) CodeEditor2.Controller.MessageView.Update(ParsedDocument);
+                    }
                 })
             );
-
         }
         public async Task UpdateAsync()
         {
             if (Dispatcher.UIThread.CheckAccess())
             {
-                VerilogCommon.Updater.Update(this);
-                NavigatePanelNode.UpdateVisual();
+                Update();
             }
             else
             {
                 await Dispatcher.UIThread.InvokeAsync(
                     () =>
                     {
-                        VerilogCommon.Updater.Update(this);
-                        NavigatePanelNode.UpdateVisual();
+                        Update();
                     }
                 );
             }

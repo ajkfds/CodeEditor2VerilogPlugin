@@ -421,11 +421,21 @@ namespace pluginVerilog.Data
         // update sub-items from ParsedDocument
         public override void Update()
         {
+            //if (!Dispatcher.UIThread.CheckAccess())
+            //{
+            //    throw new Exception();
+            //}
+            VerilogCommon.Updater.Update(this);
+            NavigatePanelNode.UpdateVisual();
+
             Dispatcher.UIThread.Post(
                 new Action(() =>
                 {
-                    VerilogCommon.Updater.Update(this);
-                    NavigatePanelNode.UpdateVisual();
+                    if(CodeEditor2.Controller.NavigatePanel.GetSelectedFile() == this)
+                    {
+                        CodeEditor2.Controller.CodeEditor.Refresh();
+                        if (ParsedDocument != null) CodeEditor2.Controller.MessageView.Update(ParsedDocument);
+                    }
                 })
             );
 
@@ -434,16 +444,14 @@ namespace pluginVerilog.Data
         {
             if (Dispatcher.UIThread.CheckAccess())
             {
-                VerilogCommon.Updater.Update(this);
-                NavigatePanelNode.UpdateVisual();
+                Update();
             }
             else
             {
                 await Dispatcher.UIThread.InvokeAsync(
                     () =>
                     {
-                        VerilogCommon.Updater.Update(this);
-                        NavigatePanelNode.UpdateVisual();
+                        Update();
                     }
                 );
             }
