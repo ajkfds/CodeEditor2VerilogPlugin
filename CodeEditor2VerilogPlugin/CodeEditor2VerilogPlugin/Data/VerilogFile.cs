@@ -216,7 +216,6 @@ namespace pluginVerilog.Data
         {
             loadDocumentFromFile();
             AcceptParsedDocument(null);
-            Project.AddReparseTarget(this);
             if (NavigatePanelNode != null) NavigatePanelNode.Update();
         }
 

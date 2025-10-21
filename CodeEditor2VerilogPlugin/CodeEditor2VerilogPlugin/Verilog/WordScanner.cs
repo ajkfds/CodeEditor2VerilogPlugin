@@ -23,7 +23,13 @@ namespace pluginVerilog.Verilog
         }
 
         public DefaultNetTypeEnum DefaultNetType = WordScanner.DefaultNetTypeEnum.none;
+        public System.Threading.CancellationToken? Token;
 
+        public void CheckToken()
+        {
+            if (Token == null) return;
+            ((System.Threading.CancellationToken)Token).ThrowIfCancellationRequested();
+        }
         public enum DefaultNetTypeEnum
         {
             wire,

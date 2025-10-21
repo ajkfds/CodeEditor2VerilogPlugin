@@ -119,6 +119,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 prototypeWord.Prototype = true;
                 parseModule(prototypeWord, parameterOverrides, null, module);
                 prototypeWord.Dispose();
+                word.CheckToken();
 
                 // parse
                 word.RootParsedDocument.Macros = macroKeep;
@@ -295,6 +296,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     {
                         if (!Items.NonPortModuleItem.Parse(word, module))
                         {
+                            word.CheckToken();
                             if (word.Text == "endmodule") break;
                             word.AddError("illegal module item");
                             if (!word.SkipToKeyword(";"))
@@ -307,6 +309,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     {
                         if (!Items.ModuleItem.Parse(word, module))
                         {
+                            word.CheckToken();
                             if (word.Text == "endmodule") break;
                             word.AddError("illegal module item");
                             if (!word.SkipToKeyword(";"))
@@ -316,6 +319,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         }
                     }
                     CommentAnnotationItem.Parse(word, module);
+                    word.CheckToken();
                 }
                 //parseModuleItems(word, module);
                 break;

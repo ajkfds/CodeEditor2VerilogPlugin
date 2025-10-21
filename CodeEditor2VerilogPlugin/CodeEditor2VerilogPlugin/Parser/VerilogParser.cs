@@ -64,7 +64,8 @@ namespace pluginVerilog.Parser
                 if (file.SystemVerilog) parsedDocument.SystemVerilog = true;
             }
 
-             word = new Verilog.WordScanner(VerilogDocument, parsedDocument, parsedDocument.SystemVerilog);
+            word = new Verilog.WordScanner(VerilogDocument, parsedDocument, parsedDocument.SystemVerilog);
+            word.Token = token;
 
 //            System.Diagnostics.Debug.Print("Parser Construct " + sw.ElapsedMilliseconds.ToString());
         }
