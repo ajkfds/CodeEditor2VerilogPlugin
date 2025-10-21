@@ -307,7 +307,7 @@ number
                     // task reference : for left side only
                     if (lValue && element is Task)
                     {
-                        return TaskReference.ParseCreate(word, targetNameSpace.BuildingBlock, nameSpace);
+                        return TaskReference.ParseCreate(word, nameSpace,targetNameSpace);
                     }
 
                     // function call : for right side only
@@ -387,18 +387,23 @@ number
                 word.Color(CodeDrawStyle.ColorType.Identifier);
                 word.MoveNext();
                 NameSpace newNameSpace = (NameSpace)element;
-                if(nameSpaceText =="")
+                if (word.Text == ".")
                 {
-                    nameSpaceText = newNameSpace.Name;
+                    word.MoveNext();
+                    if (nameSpaceText == "")
+                    {
+                        nameSpaceText = newNameSpace.Name;
+                    }
+                    else
+                    {
+                        nameSpaceText = nameSpaceText + "." + newNameSpace.Name;
+                    }
+                    return searchNameSpace(word, newNameSpace, ref nameSpaceText);
                 }
-                else
-                {
-                    nameSpaceText = nameSpaceText + "." + newNameSpace.Name;
-                }
-                return searchNameSpace(word,newNameSpace, ref nameSpaceText);
+                return nameSpace;
             }
 
-            if(element is IBuildingBlockInstantiation)
+            if (element is IBuildingBlockInstantiation)
             {
                 word.Color(CodeDrawStyle.ColorType.Identifier);
                 word.MoveNext();
@@ -418,7 +423,7 @@ number
                     }
                     return searchNameSpace(word, buildingBlock, ref nameSpaceText);
                 }
-                return null;
+                return nameSpace;
             }
             return nameSpace;
         }

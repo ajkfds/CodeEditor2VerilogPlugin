@@ -96,6 +96,28 @@ namespace pluginVerilog.Verilog
             return this;
         }
 
+        public virtual List<ModuleItems.IBuildingBlockInstantiation> GetBuildingBlockInstantiations()
+        {
+            List<ModuleItems.IBuildingBlockInstantiation> list = new List<ModuleItems.IBuildingBlockInstantiation>();
+            return getBuildingBlockInstantiations(this, list);
+        }
+        private List<ModuleItems.IBuildingBlockInstantiation> getBuildingBlockInstantiations(NameSpace nameSpace,List<ModuleItems.IBuildingBlockInstantiation> list)
+        {
+            foreach (INamedElement namedElement in nameSpace.NamedElements.Values)
+            {
+                if (namedElement is ModuleItems.IBuildingBlockInstantiation)
+                {
+                    list.Add((ModuleItems.IBuildingBlockInstantiation)namedElement);
+                }
+                else if (namedElement is NameSpace)
+                {
+                    getBuildingBlockInstantiations((NameSpace)namedElement, list);
+                }
+            }
+            return list;
+        }
+
+
         private AutocompleteItem newItem(string text, CodeDrawStyle.ColorType colorType)
         {
             return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(text, CodeDrawStyle.ColorIndex(colorType), Global.CodeDrawStyle.Color(colorType));

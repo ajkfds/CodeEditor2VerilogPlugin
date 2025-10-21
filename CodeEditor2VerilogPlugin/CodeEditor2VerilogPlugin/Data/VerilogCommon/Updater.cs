@@ -174,7 +174,8 @@ namespace pluginVerilog.Data.VerilogCommon
                 }
 
                 // get instanciations on this module
-                List<INamedElement> newInstantiations = newModule.NamedElements.Values.FindAll(x => x is IBuildingBlockInstantiation);
+                List<IBuildingBlockInstantiation> newInstantiations = newModule.GetBuildingBlockInstantiations();
+                //List<INamedElement> newInstantiations = newModule.NamedElements.Values.FindAll(x => x is IBuildingBlockInstantiation);
 
                 foreach (IBuildingBlockInstantiation instantiation in newInstantiations)
                 {

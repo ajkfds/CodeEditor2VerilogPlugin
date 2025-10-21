@@ -39,7 +39,7 @@ namespace pluginVerilog.Tool
                 try
                 {
                     // wait completion of the previous task
-                    if (_currentTask != null) await _currentTask;
+                    //if (_currentTask != null) await _currentTask;
                 }
                 catch (OperationCanceledException) { }
             }
@@ -78,7 +78,7 @@ namespace pluginVerilog.Tool
                 TextFile reparseTextFile = fileStack.Last();
                 fileStack.RemoveAt(fileStack.Count - 1);
                 token.ThrowIfCancellationRequested();
-                await reparseText(reparseTextFile,parseMode);
+                await reparseText(reparseTextFile,parseMode, token);
             }
         }
 
@@ -112,7 +112,7 @@ namespace pluginVerilog.Tool
                 fileStack.Add(textFile);
             }
 
-            var parser = verilogFile.CreateDocumentParser(CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.BackgroundParse);
+            var parser = verilogFile.CreateDocumentParser(CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.BackgroundParse,token);
             if (parser == null) return;
 
             if(parseMode == ParseMode.SearchAllAndParseReparseReqested
@@ -171,7 +171,7 @@ namespace pluginVerilog.Tool
             }
         }
 
-        private static async Task reparseText(TextFile textFile, ParseMode parseMode)
+        private static async Task reparseText(TextFile textFile, ParseMode parseMode, CancellationToken token)
         {
             Data.IVerilogRelatedFile? verilogFile = null;
             if (textFile is Data.VerilogModuleInstance)
@@ -190,7 +190,7 @@ namespace pluginVerilog.Tool
 
             CodeEditor2.Controller.AppendLog("reparseHier : " + verilogFile.ID);
 
-            var parser = verilogFile.CreateDocumentParser(CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.BackgroundParse);
+            var parser = verilogFile.CreateDocumentParser(CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.BackgroundParse, token);
             if (parser == null) return;
 
             parser.Parse();

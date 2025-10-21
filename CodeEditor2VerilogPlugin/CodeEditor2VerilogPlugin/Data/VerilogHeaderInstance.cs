@@ -298,7 +298,7 @@ namespace pluginVerilog.Data
             return node;
         }
 
-        public override DocumentParser? CreateDocumentParser(DocumentParser.ParseModeEnum parseMode)
+        public override DocumentParser? CreateDocumentParser(DocumentParser.ParseModeEnum parseMode, System.Threading.CancellationToken? token)
         {
             Data.IVerilogRelatedFile? parentFile = Parent as Data.IVerilogRelatedFile;
             if (parentFile == null) return null;
@@ -306,7 +306,7 @@ namespace pluginVerilog.Data
             if (parseMode != DocumentParser.ParseModeEnum.EditParse) return null;
 
             // Use Parent File Parser for Edit Parse
-            return parentFile.CreateDocumentParser(parseMode);
+            return parentFile.CreateDocumentParser(parseMode,token);
         }
 
         // update sub-items from ParsedDocument

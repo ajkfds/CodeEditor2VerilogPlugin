@@ -266,13 +266,21 @@ namespace pluginVerilog.Verilog.ModuleItems
                     {
                         // 
                     }
-                    else if (buildingBlock.NamedElements.ContainsIBuldingBlockInstantiation(moduleInstantiation.Name))
+                    //else if (buildingBlock.NamedElements.ContainsIBuldingBlockInstantiation(moduleInstantiation.Name))
+                    //{   // duplicated
+                    //    word.AddPrototypeError("instance name duplicated");
+                    //}
+                    //else
+                    //{
+                    //    buildingBlock.NamedElements.Add(moduleInstantiation.Name, moduleInstantiation);
+                    //}
+                    else if (nameSpace.NamedElements.ContainsIBuldingBlockInstantiation(moduleInstantiation.Name))
                     {   // duplicated
                         word.AddPrototypeError("instance name duplicated");
                     }
                     else
                     {
-                        buildingBlock.NamedElements.Add(moduleInstantiation.Name, moduleInstantiation);
+                        nameSpace.NamedElements.Add(moduleInstantiation.Name, moduleInstantiation);
                     }
                 }
                 else
@@ -281,12 +289,27 @@ namespace pluginVerilog.Verilog.ModuleItems
                     {
                         // 
                     }
-                    else if (buildingBlock.NamedElements.ContainsIBuldingBlockInstantiation(moduleInstantiation.Name))
+                    //else if (buildingBlock.NamedElements.ContainsIBuldingBlockInstantiation(moduleInstantiation.Name))
+                    //{   // duplicated
+                    //    if (((IBuildingBlockInstantiation)buildingBlock.NamedElements[moduleInstantiation.Name]).Prototype)
+                    //    {
+                    //        ModuleInstantiation? mod = buildingBlock.NamedElements[moduleInstantiation.Name] as ModuleInstantiation;
+                    //        if (mod != null)
+                    //        {
+                    //            moduleInstantiation = mod;
+                    //            moduleInstantiation.Prototype = false;
+                    //        }
+                    //    }
+                    //    else
+                    //    {
+                    //    }
+                    //}
+                    else if (nameSpace.NamedElements.ContainsIBuldingBlockInstantiation(moduleInstantiation.Name))
                     {   // duplicated
-                        if (((IBuildingBlockInstantiation)buildingBlock.NamedElements[moduleInstantiation.Name]).Prototype)
+                        if (((IBuildingBlockInstantiation)nameSpace.NamedElements[moduleInstantiation.Name]).Prototype)
                         {
-                            ModuleInstantiation? mod = buildingBlock.NamedElements[moduleInstantiation.Name] as ModuleInstantiation;
-                            if(mod != null)
+                            ModuleInstantiation? mod = nameSpace.NamedElements[moduleInstantiation.Name] as ModuleInstantiation;
+                            if (mod != null)
                             {
                                 moduleInstantiation = mod;
                                 moduleInstantiation.Prototype = false;

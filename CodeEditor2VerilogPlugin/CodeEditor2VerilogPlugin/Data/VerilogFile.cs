@@ -413,9 +413,9 @@ namespace pluginVerilog.Data
             return node;
         }
 
-        public override DocumentParser CreateDocumentParser(DocumentParser.ParseModeEnum parseMode)
+        public override DocumentParser CreateDocumentParser(DocumentParser.ParseModeEnum parseMode, System.Threading.CancellationToken? token)
         {
-            return new Parser.VerilogParser(this, parseMode);
+            return new Parser.VerilogParser(this, parseMode,token);
         }
 
         // update sub-items from ParsedDocument

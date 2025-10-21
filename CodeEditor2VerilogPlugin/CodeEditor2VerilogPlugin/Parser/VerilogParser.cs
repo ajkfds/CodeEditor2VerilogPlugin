@@ -17,8 +17,9 @@ namespace pluginVerilog.Parser
         [SetsRequiredMembers]
         public VerilogParser(
             Data.IVerilogRelatedFile verilogRelatedFile,
-            DocumentParser.ParseModeEnum parseMode
-            ) : base(verilogRelatedFile.ToTextFile(),parseMode)
+            DocumentParser.ParseModeEnum parseMode,
+            System.Threading.CancellationToken? token
+            ) : base(verilogRelatedFile.ToTextFile(),parseMode, token)
         {
             System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
             sw.Start();
@@ -74,8 +75,9 @@ namespace pluginVerilog.Parser
             Data.IVerilogRelatedFile verilogRelatedFile,
             string moduleName,
             Dictionary<string, Verilog.Expressions.Expression> parameterOverrides,
-            DocumentParser.ParseModeEnum parseMode
-            ) : base(verilogRelatedFile.ToTextFile(), parseMode)
+            DocumentParser.ParseModeEnum parseMode,
+            System.Threading.CancellationToken? token
+            ) : base(verilogRelatedFile.ToTextFile(), parseMode,token)
         {
             System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
             sw.Start();
