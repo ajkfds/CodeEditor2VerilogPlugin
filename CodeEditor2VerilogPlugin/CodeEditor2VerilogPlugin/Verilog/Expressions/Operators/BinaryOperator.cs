@@ -176,6 +176,19 @@ namespace pluginVerilog.Verilog.Expressions.Operators
                 Reference = WordReference.CreateReferenceRange(Primary1.Reference, Primary2.Reference);
             }
             //            Primary ret = Primary.Create(constant, value, bitWidth);
+
+            if (!prototype)
+            {
+                if (Text == "+" && (primary1.BitWidth == 1) || primary2.BitWidth == 1)
+                {
+
+                }
+                else if(primary1.BitWidth != primary2.BitWidth)
+                {
+                    if (Reference != null) Reference.AddWarning("bitwidth mismatch " + primary1.BitWidth.ToString() + " " + Text + " " + primary2.BitWidth.ToString());
+                }
+            }
+
             if (Operated != null) Operated(this);
             return this;
         }

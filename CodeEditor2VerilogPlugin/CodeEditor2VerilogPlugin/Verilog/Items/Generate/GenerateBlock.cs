@@ -42,53 +42,60 @@ namespace pluginVerilog.Verilog.Items.Generate
                 }
                 name = word.Text;
 
-                if (word.Prototype)
+                if (word.Active)
                 {
-                    if (nameSpace.NamedElements.ContainsKey(name))
+                    if (word.Prototype)
                     {
-                        word.AddPrototypeError("duplicated block name");
-                    }
-                    else
-                    {
-                        generateBlock = new GenerateBlock(nameSpace.BuildingBlock, nameSpace)
+                        if (nameSpace.NamedElements.ContainsKey(name))
                         {
-                            BeginIndexReference = beginIdexRef,
-                            DefinitionReference = beginRef,
-                            Name = name,
-                            Parent = nameSpace,
-                            Project = word.Project
-                        };
-                        nameSpace.NamedElements.Add(name, generateBlock);
-                    }
-                }
-                else
-                {
-                    if (nameSpace.NamedElements.ContainsKey(name))
-                    {
-                        INamedElement namedElement = nameSpace.NamedElements[name];
-                        if(namedElement is GenerateBlock)
-                        {
-                            generateBlock = (GenerateBlock)namedElement;
+                            word.AddPrototypeError("duplicated block name");
                         }
                         else
                         {
-                            word.AddError("duplicated block name");
+                            generateBlock = new GenerateBlock(nameSpace.BuildingBlock, nameSpace)
+                            {
+                                BeginIndexReference = beginIdexRef,
+                                DefinitionReference = beginRef,
+                                Name = name,
+                                Parent = nameSpace,
+                                Project = word.Project
+                            };
+                            nameSpace.NamedElements.Add(name, generateBlock);
                         }
                     }
                     else
                     {
-                        generateBlock = new GenerateBlock(nameSpace.BuildingBlock, nameSpace)
+                        if (nameSpace.NamedElements.ContainsKey(name))
                         {
-                            BeginIndexReference = beginIdexRef,
-                            DefinitionReference = beginRef,
-                            Name = name,
-                            Parent = nameSpace,
-                            Project = word.Project
-                        };
-                        nameSpace.NamedElements.Add(name, generateBlock);
+                            INamedElement namedElement = nameSpace.NamedElements[name];
+                            if (namedElement is GenerateBlock)
+                            {
+                                generateBlock = (GenerateBlock)namedElement;
+                            }
+                            else
+                            {
+                                word.AddError("duplicated block name");
+                            }
+                        }
+                        else
+                        {
+                            generateBlock = new GenerateBlock(nameSpace.BuildingBlock, nameSpace)
+                            {
+                                BeginIndexReference = beginIdexRef,
+                                DefinitionReference = beginRef,
+                                Name = name,
+                                Parent = nameSpace,
+                                Project = word.Project
+                            };
+                            nameSpace.NamedElements.Add(name, generateBlock);
+                        }
                     }
+                    word.Color(CodeDrawStyle.ColorType.Identifier);
                 }
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                else
+                {
+                    word.Color(CodeDrawStyle.ColorType.Inactivated);
+                }
                 word.MoveNext();
             }
 
@@ -125,10 +132,7 @@ namespace pluginVerilog.Verilog.Items.Generate
                         }
                         beginCount--;
                     }
-                    else
-                    {
-                        word.Color(CodeDrawStyle.ColorType.Inactivated);
-                    }
+                    word.Color(CodeDrawStyle.ColorType.Inactivated);
                     word.MoveNext();
                 }
             }

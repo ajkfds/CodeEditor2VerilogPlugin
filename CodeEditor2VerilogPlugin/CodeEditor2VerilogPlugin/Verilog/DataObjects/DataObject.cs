@@ -125,7 +125,7 @@ namespace pluginVerilog.Verilog.DataObjects
         public string Comment { set; get; } = "";
         public WordReference? DefinedReference { set; get; } = null;
         public IDataType? DataType;
-        public int? BitWidth
+        public virtual int? BitWidth
         {
             get {
                 return DataType?.BitWidth;

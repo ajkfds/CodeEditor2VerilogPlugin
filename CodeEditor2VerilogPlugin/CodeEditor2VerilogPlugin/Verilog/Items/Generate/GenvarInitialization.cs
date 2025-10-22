@@ -48,7 +48,8 @@ namespace pluginVerilog.Verilog.Items.Generate
             }
             else
             {
-                genvar = Expressions.DataObjectReference.ParseCreate(word, nameSpace, nameSpace, true);
+                genvar = Expressions.DataObjectReference.ParseCreate(word, nameSpace, nameSpace.BuildingBlock, true);
+
                 if (genvar == null)
                 {
                     word.AddError("must be genvar");
@@ -74,5 +75,6 @@ namespace pluginVerilog.Verilog.Items.Generate
             }
             return true;
         }
+
     }
 }

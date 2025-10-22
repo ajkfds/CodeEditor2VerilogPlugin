@@ -5,6 +5,7 @@ using pluginVerilog.Verilog.ModuleItems;
 using Splat.ModeDetection;
 using System;
 using System.Collections.Generic;
+using System.Net;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
@@ -112,7 +113,14 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             word.MoveNext();
             module.BlockBeginIndexReference = word.CreateIndexReference();
 
-            if (!word.CellDefine && !protoType)
+            if (word.RootParsedDocument.ParseMode == CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.LoadParse)
+            {
+                while (!word.Eof)
+                {
+                    if (word.Text == "endmodule") break;
+                    word.MoveNext();
+                }
+            } else if (!word.CellDefine && !protoType)
             {
                 // prototype parse
                 WordScanner prototypeWord = word.Clone();

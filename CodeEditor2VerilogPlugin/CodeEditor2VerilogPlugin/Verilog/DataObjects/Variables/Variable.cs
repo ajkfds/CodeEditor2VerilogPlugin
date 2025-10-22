@@ -301,6 +301,10 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                             else
                             {
                                 variable.AssignedReferences.Add(variable.DefinedReference);
+                                if(variable.BitWidth != exp.BitWidth && !word.Prototype)
+                                {
+                                    exp.Reference.AddWarning("Bitwidth mismatch "+variable.BitWidth.ToString()+" = "+exp.BitWidth.ToString());
+                                }
                             }
                         }
                     }

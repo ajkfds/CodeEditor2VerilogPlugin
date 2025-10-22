@@ -20,6 +20,7 @@ namespace pluginVerilog.Verilog.Expressions
         public DataObjects.DataObject? DataObject = null;
         public string NameSpaceText = "";
 
+
         public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
             label.AppendText(NameSpaceText, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Variable));
@@ -147,6 +148,7 @@ namespace pluginVerilog.Verilog.Expressions
                 {
                     val.Value = constants.Expression.Value;
                 }
+                if (constants.Expression.Constant) val.BitWidth = constants.Expression.BitWidth;
             }
 
             if (assigned)

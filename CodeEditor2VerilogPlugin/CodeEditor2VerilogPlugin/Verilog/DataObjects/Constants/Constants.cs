@@ -45,8 +45,9 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                     label.AppendText("enum", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
                     break;
             }
-
         }
+
+        public override int? BitWidth { get { return Expression.BitWidth; } }
 
         public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {

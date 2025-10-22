@@ -38,7 +38,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     case DataTypeEnum.Logic:
                         size = 1;
                         break;
-                    case DataTypeEnum.Real:
+                    case DataTypeEnum.Reg:
                         size = 1;
                         break;
                     default:
@@ -137,7 +137,6 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 word.AddError("illegal reg declaration");
                 return null;
             }
-
 
             while (word.GetCharAt(0) == '[')
             {

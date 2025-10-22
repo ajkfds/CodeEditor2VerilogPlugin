@@ -185,10 +185,7 @@ namespace pluginVerilog.Verilog
         {
             if (prototype) return;
             //            if (nonGeneratedCount != 0 || prototype) return;
-            if (wordPointer.VerilogFile != null && wordPointer.VerilogFile.RelativePath.EndsWith(".vh"))
-            {
-                string s = "";
-            }
+            if (prototype) return;
             wordPointer.Color(colorType);
         }
 
