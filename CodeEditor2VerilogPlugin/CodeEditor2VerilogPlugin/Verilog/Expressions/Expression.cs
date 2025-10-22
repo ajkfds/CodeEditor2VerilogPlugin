@@ -253,7 +253,7 @@ namespace pluginVerilog.Verilog.Expressions
                     if (primaries.Count < 2) return null;
                     BinaryOperator? op = item as BinaryOperator;
                     if (op == null) throw new Exception();
-                    Primary primary = op.Operate(primaries[primaries.Count - 2], primaries[primaries.Count - 1]);
+                    Primary primary = op.Operate(primaries[primaries.Count - 2], primaries[primaries.Count - 1], word.Prototype);
                     primaries.RemoveAt(primaries.Count - 1);
                     primaries.RemoveAt(primaries.Count - 1);
                     primaries.Add(primary);
@@ -263,7 +263,7 @@ namespace pluginVerilog.Verilog.Expressions
                     if (primaries.Count < 2) return null;
                     AssignmentOperator? op = item as AssignmentOperator;
                     if (op == null) throw new Exception();
-                    Primary primary = op.Operate(primaries[primaries.Count - 2], primaries[primaries.Count - 1]);
+                    Primary primary = op.Operate(primaries[primaries.Count - 2], primaries[primaries.Count - 1], word.Prototype);
                     primaries.RemoveAt(primaries.Count - 1);
                     primaries.RemoveAt(primaries.Count - 1);
                     primaries.Add(primary);
@@ -277,7 +277,7 @@ namespace pluginVerilog.Verilog.Expressions
                     if (primaries.Count < 1) return null;
                     UnaryOperator? op = item as UnaryOperator;
                     if (op == null) throw new Exception();
-                    Primary primary = op.Operate(primaries[0]);
+                    Primary primary = op.Operate(primaries[0], word.Prototype);
                     primaries.RemoveAt(0);
                     primaries.Add(primary);
                 }
@@ -286,7 +286,7 @@ namespace pluginVerilog.Verilog.Expressions
                     if (primaries.Count < 1) return null;
                     InsideOperator? op = item as InsideOperator;
                     if (op == null) throw new Exception();
-                    Primary primary = op.Operate(primaries[0]);
+                    Primary primary = op.Operate(primaries[0], word.Prototype);
                     primaries.RemoveAt(0);
                     primaries.Add(primary);
                 }
@@ -295,7 +295,7 @@ namespace pluginVerilog.Verilog.Expressions
                     if (primaries.Count < 1) return null;
                     IncDecOperator? op = item as IncDecOperator;
                     if (op == null) throw new Exception();
-                    Primary primary = op.Operate(primaries[0]);
+                    Primary primary = op.Operate(primaries[0], word.Prototype);
                     primaries.RemoveAt(0);
                     primaries.Add(primary);
                 }
@@ -304,7 +304,7 @@ namespace pluginVerilog.Verilog.Expressions
                     if (primaries.Count < 3) return null;
                     TenaryOperator? op = item as TenaryOperator;
                     if (op == null) throw new Exception();
-                    Primary primary = op.Operate(primaries[primaries.Count - 3], primaries[primaries.Count - 2], primaries[primaries.Count - 1]);
+                    Primary primary = op.Operate(primaries[primaries.Count - 3], primaries[primaries.Count - 2], primaries[primaries.Count - 1], word.Prototype);
                     primaries.RemoveAt(primaries.Count - 1);
                     primaries.RemoveAt(primaries.Count - 1);
                     primaries.RemoveAt(primaries.Count - 1);
@@ -379,7 +379,7 @@ namespace pluginVerilog.Verilog.Expressions
                     if (Primaries.Count < 2) return null;
                     BinaryOperator? op = item as BinaryOperator;
                     if (op == null) throw new Exception();
-                    Primary primary = op.Operate(Primaries[0], Primaries[1]);
+                    Primary primary = op.Operate(Primaries[0], Primaries[1], word.Prototype);
                     Primaries.RemoveAt(0);
                     Primaries.RemoveAt(0);
                     Primaries.Add(primary);
@@ -389,7 +389,7 @@ namespace pluginVerilog.Verilog.Expressions
                     if (Primaries.Count < 2) return null;
                     AssignmentOperator? op = item as AssignmentOperator;
                     if (op == null) throw new Exception();
-                    Primary primary = op.Operate(Primaries[0], Primaries[1]);
+                    Primary primary = op.Operate(Primaries[0], Primaries[1], word.Prototype);
                     Primaries.RemoveAt(0);
                     Primaries.RemoveAt(0);
                     Primaries.Add(primary);
@@ -399,7 +399,7 @@ namespace pluginVerilog.Verilog.Expressions
                     if (Primaries.Count < 1) return null;
                     UnaryOperator? op = item as UnaryOperator;
                     if (op == null) throw new Exception();
-                    Primary primary = op.Operate(Primaries[0]);
+                    Primary primary = op.Operate(Primaries[0], word.Prototype);
                     Primaries.RemoveAt(0);
                     Primaries.Add(primary);
                 }
@@ -408,7 +408,7 @@ namespace pluginVerilog.Verilog.Expressions
                     if (Primaries.Count < 3) return null;
                     TenaryOperator? op = item as TenaryOperator;
                     if (op == null) throw new Exception();
-                    Primary primary = op.Operate(Primaries[0], Primaries[1], Primaries[2]);
+                    Primary primary = op.Operate(Primaries[0], Primaries[1], Primaries[2], word.Prototype);
                     Primaries.RemoveAt(0);
                     Primaries.RemoveAt(0);
                     Primaries.RemoveAt(0);

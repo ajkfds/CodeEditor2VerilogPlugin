@@ -62,7 +62,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
         public delegate void OperatedAction(IncDecOperator unaryOperator);
         public static OperatedAction Operated;
 
-        public IncDecOperator Operate(Primary primary)
+        public IncDecOperator Operate(Primary primary, bool prototype)
         {
             Primary = primary;
             bool constant = false;

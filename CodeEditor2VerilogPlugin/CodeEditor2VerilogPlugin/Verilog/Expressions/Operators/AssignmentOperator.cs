@@ -126,7 +126,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
         public delegate void OperatedAction(AssignmentOperator binaryOperator);
         public static OperatedAction Operated;
 
-        public AssignmentOperator Operate(Primary primary1, Primary primary2)
+        public AssignmentOperator Operate(Primary primary1, Primary primary2,bool prototype)
         {
             Primary1 = primary1;
             Primary2 = primary2;

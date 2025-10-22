@@ -47,7 +47,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
         public Primary Condition;
         public Primary Primary1;
         public Primary Primary2;
-        public TenaryOperator Operate(Primary condition, Primary primary1, Primary primary2)
+        public TenaryOperator Operate(Primary condition, Primary primary1, Primary primary2, bool prototype)
         {
             Condition = condition;
             Primary1 = primary1;

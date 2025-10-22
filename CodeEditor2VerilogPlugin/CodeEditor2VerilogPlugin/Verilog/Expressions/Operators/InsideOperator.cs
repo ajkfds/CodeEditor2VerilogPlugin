@@ -91,7 +91,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
         public delegate void OperatedAction(InsideOperator unaryOperator);
         public static OperatedAction? Operated;
 
-        public InsideOperator Operate(Primary primary)
+        public InsideOperator Operate(Primary primary,bool prototype)
         {
             Primary = primary;
             bool constant = false;
