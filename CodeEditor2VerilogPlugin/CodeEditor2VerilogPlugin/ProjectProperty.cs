@@ -1,20 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AjkAvaloniaLibs.Libs.Json;
+﻿using AjkAvaloniaLibs.Libs.Json;
+using Avalonia.Controls;
 using Avalonia.Controls.Platform;
-using CodeEditor2.Data;
-using pluginVerilog.Verilog.BuildingBlocks;
-using System.Text.Json.Serialization;
-using System.Text.Json;
-using System.Globalization;
+using Avalonia.Input;
 using Avalonia.OpenGL;
-using pluginVerilog.Verilog.ModuleItems;
-using System.Reflection.Metadata;
 using CodeEditor2.CodeEditor.PopupMenu;
+using CodeEditor2.Data;
+using CodeEditor2.Tools;
 using pluginVerilog.Data;
+using pluginVerilog.Verilog.BuildingBlocks;
+using pluginVerilog.Verilog.ModuleItems;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Reflection.Metadata;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 
 namespace pluginVerilog
 {
@@ -24,19 +27,23 @@ namespace pluginVerilog
         //{
         //    this.project = project;
         //}
-        public ProjectProperty(Project project,ProjectProperty.Setup setup) : base(project,setup)
+        public ProjectProperty(Project project, ProjectProperty.Setup setup) : base(project,setup)
         {
-
+            CompileOption = setup.CompileOption;
         }
-        public ProjectProperty(Project project) : base(project)
-        {
-
-        }
-
         public RuleSet RuleSet = new RuleSet();
-        //        private CodeEditor2.Data.Project project;
+        public string CompileOption { get; set; } = "";
 
         public Verilog.AutoComplete.Setup SnippetSetup = new Verilog.AutoComplete.Setup();
+
+        public override void InitializePropertyForm(ItemPropertyForm form, CodeEditor2.NavigatePanel.NavigatePanelNode node,Project project)
+        {
+            base.InitializePropertyForm(form, node,project);
+            if (node is CodeEditor2.NavigatePanel.ProjectNode)
+            {
+                Views.ProjectPropertyTab tab = new Views.ProjectPropertyTab(this, form, node, project);
+            }
+        }
 
         public override Setup CreateSetup()
         {
@@ -56,10 +63,12 @@ namespace pluginVerilog
             public Setup() { }
             public Setup(ProjectProperty projectProperty)
             {
-
+                this.CompileOption = projectProperty.CompileOption;
             }
             public override string ID { get; set; } = Plugin.StaticID;
             public string test { get; set; } = "verilogTest";
+
+            public string CompileOption { get; set; } = "";
             public override void Write(
                 Utf8JsonWriter writer,
                 JsonSerializerOptions options)
