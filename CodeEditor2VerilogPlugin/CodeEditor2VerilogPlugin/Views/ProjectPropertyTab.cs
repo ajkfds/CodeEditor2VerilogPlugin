@@ -31,40 +31,19 @@ namespace pluginVerilog.Views
             tab = new TabItem() { Name = "verilog", Header = "Verilog", FontSize = 14 };
             form.TabControl.Items.Add(tab);
 
-            Grid grid = new Grid() { Margin = new Avalonia.Thickness(4) };
-            tab.Content = grid;
+            CodeEditor2.Tools.VerticalGridConstructor gridConstructor = new VerticalGridConstructor();
+            tab.Content = gridConstructor.Grid;
 
-            grid.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
-            grid.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
-            grid.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
-            grid.RowDefinitions.Add(new RowDefinition(GridLength.Star));
-
-            TextBlock text0 = new TextBlock();
-            {
-                Bold bold = new Bold();
-                bold.Inlines.Add(new Run("Compile Option"));
-                text0.Inlines?.Add(bold);
-            }
-            Grid.SetRow(text0, 0);
-            grid.Children.Add(text0);
-
-            TextBlock text1 = new TextBlock() { Text = "%IncludeFiles% : list of include files" };
-            Grid.SetRow(text1, 1);
-            grid.Children.Add(text1);
-
-            TextBlock text2 = new TextBlock() { Text = "%Files% : list of files" };
-            Grid.SetRow(text2, 2);
-            grid.Children.Add(text2);
+            gridConstructor.AppendText("Parse Option",true);
+            gridConstructor.AppendText("option");
 
             compileOptionText = new TextBox() { 
                 AcceptsReturn = true,
                 TextWrapping = TextWrapping.Wrap
             };
-            Grid.SetRow(compileOptionText, 3);
-            grid.Children.Add(compileOptionText);
+            gridConstructor.AppendContolFill(compileOptionText);
 
             form.OkButtonControl.Click += OkButtonControl_Click;
-
             compileOptionText.Text = projectProperty.CompileOption;
         }
         private void OkButtonControl_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
