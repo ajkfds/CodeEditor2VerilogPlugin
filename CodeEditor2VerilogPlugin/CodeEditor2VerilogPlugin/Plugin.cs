@@ -3,6 +3,7 @@ using CodeEditor2;
 using CodeEditor2.FileTypes;
 using CodeEditor2.Views;
 using CodeEditor2Plugin;
+using pluginVerilog.NavigatePanel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +18,8 @@ namespace pluginVerilog
     {
         public static string StaticID = "Verilog";
         public string Id { get { return StaticID; } }
+
+        public static Avalonia.Media.Color ThemeColor = Avalonia.Media.Color.FromArgb(255, 50, 150,150);
 
         public bool Register()
         {
@@ -50,16 +53,9 @@ namespace pluginVerilog
             return true;
         }
 
-        private void projectCreated(CodeEditor2.Data.Project project, CodeEditor2.Data.Project.Setup? setup)
-        {
-            pluginVerilog.ProjectProperty.Setup? psetup = setup?.ProjectProperties[Id] as pluginVerilog.ProjectProperty.Setup;
-            if (psetup == null) psetup = new pluginVerilog.ProjectProperty.Setup();
-            project.ProjectProperties.Add(Id, new ProjectProperty(project,psetup));
-        }
-
-
         public bool Initialize()
         {
+            // Menu
             {
                 MenuItem menuItem = CodeEditor2.Controller.Menu.Tool;
                 MenuItem newMenuItem = CodeEditor2.Global.CreateMenuItem(
@@ -71,8 +67,37 @@ namespace pluginVerilog
                 menuItem.Items.Add(newMenuItem);
                 newMenuItem.Click += MenuItem_CreateSnapShot_Click;
             }
+
+            pluginVerilog.NavigatePanel.VerilogFileNode.CustomizeNavigateNodeContextMenu += CustomizeNavigateNodeContextMenuHandler;
             return true;
         }
+
+        public static void CustomizeNavigateNodeContextMenuHandler(Avalonia.Controls.ContextMenu contextMenu)
+        {
+            MenuItem menuItem_ParseHier = CodeEditor2.Global.CreateMenuItem(
+                "Parse All", "menuItem_ParseHier",
+                "CodeEditor2/Assets/Icons/flame.svg",
+                ThemeColor
+                );
+            contextMenu.Items.Add(menuItem_ParseHier);
+            menuItem_ParseHier.Click += MenuItem_ParseHier_Click;
+        }
+
+        private static async void MenuItem_ParseHier_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            Data.VerilogFile? vfile = (CodeEditor2.Controller.NavigatePanel.GetSelectedNode() as VerilogFileNode)?.VerilogFile;
+            if (vfile == null) return;
+
+            await Tool.ParseHierarchy.ParseAsync(vfile, Tool.ParseHierarchy.ParseMode.ForceAllFiles);
+        }
+
+        private void projectCreated(CodeEditor2.Data.Project project, CodeEditor2.Data.Project.Setup? setup)
+        {
+            pluginVerilog.ProjectProperty.Setup? psetup = setup?.ProjectProperties[Id] as pluginVerilog.ProjectProperty.Setup;
+            if (psetup == null) psetup = new pluginVerilog.ProjectProperty.Setup();
+            project.ProjectProperties.Add(Id, new ProjectProperty(project, psetup));
+        }
+
         private void MenuItem_CreateSnapShot_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
             Global.CreateSnapShot();

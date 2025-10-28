@@ -8,6 +8,7 @@ using System.Data;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
@@ -23,12 +24,11 @@ namespace pluginVerilog.Verilog
         }
 
         public DefaultNetTypeEnum DefaultNetType = WordScanner.DefaultNetTypeEnum.none;
-        public System.Threading.CancellationToken? Token;
+        public CancellationToken? CancellationToken { get; set; }
 
-        public void CheckToken()
+        public void CheckCancelToken()
         {
-            if (Token == null) return;
-            ((System.Threading.CancellationToken)Token).ThrowIfCancellationRequested();
+            CancellationToken?.ThrowIfCancellationRequested();
         }
         public enum DefaultNetTypeEnum
         {

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Parser
@@ -65,7 +66,7 @@ namespace pluginVerilog.Parser
             }
 
             word = new Verilog.WordScanner(VerilogDocument, parsedDocument, parsedDocument.SystemVerilog);
-            word.Token = token;
+            word.CancellationToken = token;
 
 //            System.Diagnostics.Debug.Print("Parser Construct " + sw.ElapsedMilliseconds.ToString());
         }
@@ -219,25 +220,20 @@ namespace pluginVerilog.Parser
 
         */
 
-        public override void Parse()
+        public override void Parse(CancellationToken? cancellationToken)
         {
             System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
             sw.Start();
 
             word.GetFirst();
-
+            word.CancellationToken = cancellationToken;
             word.RootParsedDocument.LockedDocument.Add(word.Document);
-            if((File as Data.VerilogFile) == null)
-            {
-                System.Diagnostics.Debugger.Break();
-            }
-            Root root = Root.ParseCreate(word,VerilogParsedDocument, File as Data.VerilogFile);
-            //Document = word.RootParsedDocument.CodeDocument;
+            if (File is not Data.VerilogFile) throw new Exception();
+
+            Root root = Root.ParseCreate(word,VerilogParsedDocument, File);
 
             word.RootParsedDocument.UnlockDocument();
             word.Dispose();
-
-//            System.Diagnostics.Debug.Print("Parse " + sw.ElapsedMilliseconds.ToString());
         }
     }
 }

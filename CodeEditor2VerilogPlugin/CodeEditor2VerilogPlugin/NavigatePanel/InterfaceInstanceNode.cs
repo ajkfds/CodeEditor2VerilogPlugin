@@ -112,15 +112,18 @@ namespace pluginVerilog.NavigatePanel
         }
         public override void UpdateVisual()
         {
-            if (Dispatcher.UIThread.CheckAccess()){
-                _updateVisual();
-            }
-            else {
-                Dispatcher.UIThread.Post(() =>
+            Dispatcher.UIThread.Post(() =>
+            {
+                try
                 {
                     _updateVisual();
-                });
-            }
+                }
+                catch (Exception ex)
+                {
+                    CodeEditor2.Controller.AppendLog("#Exception " + ex.Message, Avalonia.Media.Colors.Red);
+                    throw;
+                }
+            });
         }
 
         public void _updateVisual()

@@ -204,6 +204,7 @@ namespace pluginVerilog.Verilog.ModuleItems
             {
                 moduleIdentifier.AddError("illegal module item");
                 word.SkipToKeyword(";");
+                if (word.Text == ";") word.MoveNext();
                 return true;
             }
             moduleIdentifier.Color(CodeDrawStyle.ColorType.Keyword);

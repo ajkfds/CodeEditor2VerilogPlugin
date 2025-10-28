@@ -18,19 +18,25 @@ namespace pluginVerilog.Tool
     {
         private static Task? _currentTask;
         private static CancellationTokenSource? _cts;
-
+        
         public enum ParseMode
         {
             SearchReparseReqestedTree,
             ForceAllFiles,
-            ThisFileOnly,
-            SearchAllAndParseReparseReqested
+            ThisFileOnly
         }
-
-
+        
         public static async Task ParseAsync(CodeEditor2.Data.TextFile textFile,ParseMode parseMode)
         {
-            if (textFile.ParseValid && !textFile.ReparseRequested) return;
+            if(parseMode == ParseMode.ForceAllFiles) // dont cancel
+            {
+                await Task.Run(async () =>
+                {
+                    await runParse(textFile,parseMode, null);
+                });
+                return;
+            }
+
 
             if (_cts != null)
             {
@@ -50,7 +56,7 @@ namespace pluginVerilog.Tool
 
             _currentTask = Task.Run(async () =>
             {
-                await runParse(textFile, token, Tool.ParseHierarchy.ParseMode.SearchReparseReqestedTree);
+                await runParse(textFile,parseMode, token);
             }, token);
 
             try
@@ -68,19 +74,19 @@ namespace pluginVerilog.Tool
             return;
         }
 
-        private static async Task runParse(TextFile textFile, CancellationToken token, ParseMode parseMode)
+        private static async Task runParse(TextFile textFile, ParseMode parseMode, CancellationToken? token)
         {
             ConcurrentStack<TextFile> reparseTargetFiles = new ConcurrentStack<TextFile>();
             ConcurrentDictionary<string, byte> completeIDList = new ConcurrentDictionary<string, byte>();
 
-            await parseTextFile(textFile,reparseTargetFiles,completeIDList, parseMode,token);
+            await parseTextFile(textFile,reparseTargetFiles,completeIDList, parseMode, token);
 
             while (reparseTargetFiles.Count > 0)
             {
                 reparseTargetFiles.TryPop(out TextFile? tfile);
                 if (tfile == null) continue;
-                token.ThrowIfCancellationRequested();
-                await reparseText(tfile, parseMode, token);
+                token?.ThrowIfCancellationRequested();
+                await reparseText(tfile,parseMode, token);
             }
         }
 
@@ -89,7 +95,7 @@ namespace pluginVerilog.Tool
             ConcurrentStack<TextFile> reparseTargetFiles,
             ConcurrentDictionary<string, byte> completeIDList,
             ParseMode parseMode,
-            CancellationToken token 
+            CancellationToken? token 
             )
         {
             Data.IVerilogRelatedFile? verilogFile = null;
@@ -110,13 +116,12 @@ namespace pluginVerilog.Tool
             if (completeIDList.ContainsKey(verilogFile.ID)) return;
             completeIDList.TryAdd(verilogFile.ID,0);
 
-            token.ThrowIfCancellationRequested();
+            token?.ThrowIfCancellationRequested();
 
             //if (parseMode == ParseMode.SearchReparseReqestedTree
             //    && verilogFile.ParseValid && !verilogFile.ReparseRequested) return;
 
 
-            
             bool doParse = false;
             if (!verilogFile.ParseValid) doParse = true;
             if(verilogFile.ReparseRequested) doParse = true;
@@ -140,12 +145,11 @@ namespace pluginVerilog.Tool
                 }
             }
 
-            bool needParse = false;
-            if (!verilogFile.ParseValid) needParse = true;
-            if (verilogFile.ReparseRequested) needParse = true;
-            if (verilogFile.VerilogParsedDocument != null && verilogFile.VerilogParsedDocument.ErrorCount > 0) needParse = true;
-            if (needParse) reparseTargetFiles.Push((TextFile)verilogFile);
-
+            bool needReparse = false;
+            if (!verilogFile.ParseValid) needReparse = true;
+            if (verilogFile.ReparseRequested) needReparse = true;
+            if (verilogFile.VerilogParsedDocument != null && verilogFile.VerilogParsedDocument.ErrorCount > 0) needReparse = true;
+            if (needReparse) reparseTargetFiles.Push((TextFile)verilogFile);
 
             List<Item> items = new List<Item>();
             await Dispatcher.UIThread.InvokeAsync(
@@ -170,7 +174,7 @@ namespace pluginVerilog.Tool
             }
         }
 
-        private static async Task reparseText(TextFile textFile, ParseMode parseMode, CancellationToken token)
+        private static async Task reparseText(TextFile textFile, ParseMode parseMode,CancellationToken? token)
         {
             Data.IVerilogRelatedFile? verilogFile = null;
             if (textFile is Data.VerilogModuleInstance)

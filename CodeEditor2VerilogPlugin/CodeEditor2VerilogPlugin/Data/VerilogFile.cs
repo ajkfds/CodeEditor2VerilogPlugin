@@ -1,4 +1,5 @@
-﻿using Avalonia.Threading;
+﻿using Avalonia.Media;
+using Avalonia.Threading;
 using CodeEditor2;
 using CodeEditor2.CodeEditor;
 using CodeEditor2.CodeEditor.CodeComplete;
@@ -430,10 +431,17 @@ namespace pluginVerilog.Data
             Dispatcher.UIThread.Post(
                 new Action(() =>
                 {
-                    if(CodeEditor2.Controller.NavigatePanel.GetSelectedFile() == this)
+                    try
                     {
-                        CodeEditor2.Controller.CodeEditor.Refresh();
-                        if (ParsedDocument != null) CodeEditor2.Controller.MessageView.Update(ParsedDocument);
+                        if (CodeEditor2.Controller.NavigatePanel.GetSelectedFile() == this)
+                        {
+                            CodeEditor2.Controller.CodeEditor.Refresh();
+                            if (ParsedDocument != null) CodeEditor2.Controller.MessageView.Update(ParsedDocument);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        CodeEditor2.Controller.AppendLog("#Exception " + ex.Message, Colors.Red);
                     }
                 })
             );

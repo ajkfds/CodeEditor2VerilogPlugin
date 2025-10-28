@@ -164,7 +164,6 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
 
             Module module;
-            //IndexReference iref = IndexReference.Create(parsedDocument);
 
             if (parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse)
             {
@@ -176,7 +175,6 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 {
                     module = Module.ParseCreate(word, parsedDocument.ParameterOverrides, null , parsedDocument.Root, file, true);
                 }
-                //if (module.Instantiations.Count != 0) // prepare reparse (instanced module could have un-refferenced link)
                 {
                     module.ReparseRequested = true;
                 }
