@@ -93,7 +93,11 @@ namespace pluginVerilog
 
         private void projectCreated(CodeEditor2.Data.Project project, CodeEditor2.Data.Project.Setup? setup)
         {
-            pluginVerilog.ProjectProperty.Setup? psetup = setup?.ProjectProperties[Id] as pluginVerilog.ProjectProperty.Setup;
+            pluginVerilog.ProjectProperty.Setup? psetup = null;
+            if (setup != null && setup.ProjectProperties.ContainsKey(Id))
+            {
+                psetup = setup?.ProjectProperties[Id] as pluginVerilog.ProjectProperty.Setup;
+            }
             if (psetup == null) psetup = new pluginVerilog.ProjectProperty.Setup();
             project.ProjectProperties.Add(Id, new ProjectProperty(project, psetup));
         }
