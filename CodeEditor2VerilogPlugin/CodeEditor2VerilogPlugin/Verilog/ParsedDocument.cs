@@ -16,6 +16,7 @@ using System.Net.Http.Headers;
 using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using static AjkAvaloniaLibs.Controls.ColorLabel;
 using CodeComplete = CodeEditor2.CodeEditor.CodeComplete;
@@ -96,6 +97,7 @@ namespace pluginVerilog.Verilog
         public string tag;
 
         private System.WeakReference<Data.IVerilogRelatedFile> fileRef;
+        [Newtonsoft.Json.JsonIgnore]
         public Data.IVerilogRelatedFile? File
         {
             get
@@ -113,8 +115,10 @@ namespace pluginVerilog.Verilog
         public bool SystemVerilog = false;
         public bool Instance = false;
 
+        [Newtonsoft.Json.JsonProperty]
         public Root Root;
 
+        [Newtonsoft.Json.JsonIgnore]
         public Dictionary<string, Data.VerilogHeaderInstance> IncludeFiles = new Dictionary<string, Data.VerilogHeaderInstance>();
         public Dictionary<string, Macro> Macros = new Dictionary<string, Macro>();
 
@@ -141,6 +145,7 @@ namespace pluginVerilog.Verilog
         }
 
         CodeDocument codeDocument;
+        [Newtonsoft.Json.JsonIgnore]
         public CodeDocument CodeDocument
         {
             get
@@ -153,6 +158,7 @@ namespace pluginVerilog.Verilog
             }
         }
 
+        [Newtonsoft.Json.JsonIgnore]
         public ProjectProperty? ProjectProperty
         {
             get
@@ -874,6 +880,7 @@ namespace pluginVerilog.Verilog
             }
 
             private System.WeakReference<Data.IVerilogRelatedFile> fileRef;
+            [Newtonsoft.Json.JsonIgnore]
             public Data.IVerilogRelatedFile? File
             {
                 get

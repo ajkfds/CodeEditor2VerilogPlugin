@@ -9,6 +9,7 @@ using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
 using CodeEditor2.Tools;
 using DynamicData;
+using Newtonsoft.Json;
 using pluginVerilog.CodeEditor;
 using pluginVerilog.FileTypes;
 using pluginVerilog.Verilog.BuildingBlocks;
@@ -19,7 +20,9 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
+using Tmds.DBus.Protocol;
 
 namespace pluginVerilog.Data
 {
@@ -168,6 +171,23 @@ namespace pluginVerilog.Data
 
             // update Navigate panel node visual for this item
             NavigatePanelNode.UpdateVisual();
+
+            Task.Run(
+                async () =>
+                {
+                    try
+                    {
+                        await CreateCashe();
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debugger.Break();
+                        Controller.AppendLog(ex.Message, Avalonia.Media.Colors.Red);
+                    }
+                }
+            );
+
+
         }
 
         internal static void updateIncludeFiles(Verilog.ParsedDocument parsedDocument, ItemList items)
@@ -501,6 +521,27 @@ namespace pluginVerilog.Data
             candidateWord = "";
             if (VerilogParsedDocument == null) return null;
             return VerilogCommon.AutoComplete.GetAutoCompleteItems(this, VerilogParsedDocument, index, out candidateWord);
+        }
+
+        public override async Task<bool> CreateCashe()
+        {
+            //if (VerilogParsedDocument == null) return false;
+            //Verilog.ParsedDocument casheObject = VerilogParsedDocument;
+            //string path = Project.RootPath + System.IO.Path.DirectorySeparatorChar + ".cashe";
+            //if (!System.IO.Path.Exists(path)) System.IO.Directory.CreateDirectory(path);
+
+            //path = path + System.IO.Path.DirectorySeparatorChar + CasheId;
+            //var settings = new Newtonsoft.Json.JsonSerializerSettings
+            //{
+            //    TypeNameHandling = TypeNameHandling.All,
+            //    Formatting = Formatting.Indented
+            //};
+            //string json = Newtonsoft.Json.JsonConvert.SerializeObject(casheObject, settings);
+            //using (System.IO.StreamWriter sw = new System.IO.StreamWriter(path))
+            //{
+            //    await sw.WriteAsync(json);
+            //}
+            return true;
         }
 
     }

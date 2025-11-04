@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -20,16 +21,24 @@ namespace pluginVerilog.Verilog
             BuildingBlock = buildingBlock;
             Parent = parent;
         }
+
+        [JsonConstructor]
+        private NameSpace()
+        {
+        }
         public virtual CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable ; } }
 
+        [JsonInclude]
         public NamedElements NamedElements { get; } = new NamedElements();
 
-        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference BeginIndexReference { get; init; }
         public IndexReference? BlockBeginIndexReference = null;
         public IndexReference? LastIndexReference = null;
 
-        public required NameSpace Parent { get; init; }
+        [Newtonsoft.Json.JsonIgnore]
+        public NameSpace Parent { get; init; } = null;
 
+        [Newtonsoft.Json.JsonIgnore]
         public BuildingBlocks.BuildingBlock BuildingBlock { get; protected set; }
 
         public INamedElement? GetNamedElementUpward(string name)

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog
@@ -13,7 +14,6 @@ namespace pluginVerilog.Verilog
     public class IndexReference
     {
         protected IndexReference() { }
-
 
         public static IndexReference Create(WordPointer wordPointer,List<WordPointer> stocks)
         {
@@ -85,6 +85,7 @@ namespace pluginVerilog.Verilog
         }
 
         protected WeakReference<ParsedDocument> parsedDocumentRef;
+        [Newtonsoft.Json.JsonIgnore]
         public ParsedDocument? ParsedDocument
         {
             get
@@ -95,6 +96,7 @@ namespace pluginVerilog.Verilog
             }
         }
 
+        [Newtonsoft.Json.JsonIgnore]
         public pluginVerilog.CodeEditor.CodeDocument? Document
         {
             get
@@ -105,27 +107,9 @@ namespace pluginVerilog.Verilog
             }
         }
 
-        //public static IndexReference Create(ParsedDocument rootParsedDocument)
-        //{
-        //    IndexReference ret = new IndexReference();
-        //    ret.RootParsedDocument = rootParsedDocument;
-        //    return ret;
-        //}
-
-        //public ParsedDocument GetNodeParsedDocument()
-        //{
-        //    ParsedDocument pDocument = RootParsedDocument;
-        //    foreach(int index in Indexes)
-        //    {
-        //        if (!pDocument.ParsedDocumentIndexDictionary.ContainsKey(index)) return null;
-        //        pDocument = pDocument.ParsedDocumentIndexDictionary[index];
-        //    }
-        //    return pDocument;
-        //}
-
-
 
         private System.WeakReference<ParsedDocument> rootParsedDocumentRef;
+        [Newtonsoft.Json.JsonIgnore]
         public ParsedDocument RootParsedDocument
         {
             get

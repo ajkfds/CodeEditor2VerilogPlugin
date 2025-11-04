@@ -21,6 +21,7 @@ namespace pluginVerilog.Verilog.Expressions
 //        public required NameSpace DefinedNameSpace { init; get; }
 
         public required BuiltInMethod BuiltInMethod { init; get; }
+        [Newtonsoft.Json.JsonIgnore]
         public required ProjectProperty ProjectProperty { init; get; }
         //public Function? Function
         //{

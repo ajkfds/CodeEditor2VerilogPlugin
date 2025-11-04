@@ -21,10 +21,14 @@ namespace pluginVerilog.Verilog.DataObjects
         public Attribute? Attribute { get; set; }
         public required WordReference DefinitionReference { get; init; }
 
+        [Newtonsoft.Json.JsonIgnore]
         public required NameSpace InstancedNameSpace { get; init; }
+
+        [Newtonsoft.Json.JsonIgnore]
         public required Project Project { get; init; }
 
         public Dictionary<string, string> Properties = new Dictionary<string, string>();
+        [Newtonsoft.Json.JsonIgnore]
         public ProjectProperty ProjectProperty
         {
             get

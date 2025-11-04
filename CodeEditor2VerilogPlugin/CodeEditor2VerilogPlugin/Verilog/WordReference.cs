@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog
@@ -75,12 +76,14 @@ namespace pluginVerilog.Verilog
             return ret;
         }
 
+        [Newtonsoft.Json.JsonIgnore]
         public CodeEditor2.CodeEditor.ParsedDocument? ParsedDocument {
             get
             {
                 return indexReference.ParsedDocument;
             }
         }
+        [Newtonsoft.Json.JsonIgnore]
         public pluginVerilog.CodeEditor.CodeDocument? Document
         {
             get

@@ -14,6 +14,8 @@ namespace pluginVerilog.Verilog.Statements
     public class Scope
     {
         public string Name { get; set; } = string.Empty;
+        
+        [Newtonsoft.Json.JsonIgnore]
         private ProjectProperty projectProperty { init; get; }
         public Scope? ParseCreate(WordScanner word, NameSpace nameSpace)
         {

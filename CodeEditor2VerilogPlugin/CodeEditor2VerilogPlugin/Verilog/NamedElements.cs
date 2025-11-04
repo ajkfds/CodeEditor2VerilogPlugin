@@ -6,13 +6,16 @@ using System.Linq;
 using System.Net.Http.Headers;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog
 {
     public class NamedElements
     {
+        [JsonInclude]
         private List<INamedElement> itemList = new List<INamedElement>();
+        [JsonInclude]
         private Dictionary<string, INamedElement> itemDict = new Dictionary<string, INamedElement>();
 
         public bool TryGetValue(string key, out INamedElement? namedElement)

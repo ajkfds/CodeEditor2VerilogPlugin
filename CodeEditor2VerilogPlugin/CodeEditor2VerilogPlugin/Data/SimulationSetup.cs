@@ -6,7 +6,9 @@ using Svg.FilterEffects;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -26,7 +28,7 @@ namespace pluginVerilog.Data
         public CodeEditor2.Data.Project Project;
 
         public Dictionary<CodeEditor2.Data.Project, SimulationSetup> ExternalProjectReferences = new Dictionary<Project, SimulationSetup>();
-
+        public Dictionary<string, CodeEditor2.Data.Project> ExternalProjectEntryInstance = new Dictionary<string, Project>();
         public static SimulationSetup? Create(pluginVerilog.Data.VerilogFile verilogFile)
         {
             SimulationSetup setup = new SimulationSetup();
@@ -53,6 +55,14 @@ namespace pluginVerilog.Data
             appendFile(file,setup);
             foreach(var item in file.Items.Values)
             {
+                if(file.Project != item.Project && item is VerilogModuleInstance)
+                {
+                    VerilogModuleInstance? instance = file as VerilogModuleInstance;
+                    if (instance != null)
+                    {
+                        //setup.ExternalProjectEntryInstance.Add(getHierName(instance), instance.Project);
+                    }
+                }
                 if(item is IVerilogRelatedFile)
                 {
                     searchHier((IVerilogRelatedFile)item, ids, setup);
@@ -60,6 +70,18 @@ namespace pluginVerilog.Data
             }
         }
 
+        //private static string getHierName(VerilogModuleInstance instance)
+        //{
+        //    List<string> hierNames = new List<string>();
+        //    searchHierUpward(hierNames,instance);
+        //    StringBuilder sb = new StringBuilder();
+
+        //}
+
+        //private static string searchHierUpward(List<string> hierNames, VerilogModuleInstance instance)
+        //{
+
+        //}
 
         private static void appendFile(IVerilogRelatedFile file, SimulationSetup setup)
         {

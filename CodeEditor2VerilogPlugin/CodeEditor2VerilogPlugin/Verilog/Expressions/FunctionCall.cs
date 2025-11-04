@@ -25,7 +25,9 @@ namespace pluginVerilog.Verilog.Expressions
         }
         public Dictionary<string, Expressions.Expression> PortConnection { get; set; } = new Dictionary<string, Expressions.Expression>();
 
+        [Newtonsoft.Json.JsonIgnore]
         public required NameSpace DefinedNameSpace { init; get; }
+        [Newtonsoft.Json.JsonIgnore]
         public required ProjectProperty ProjectProperty { init; get; }
         public Function? Function
         {

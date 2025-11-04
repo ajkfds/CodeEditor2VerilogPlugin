@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
@@ -45,10 +46,12 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         public bool AnsiStylePortDefinition { get; set; } = false;
         public Net.NetTypeEnum DefaultNetType = Net.NetTypeEnum.Wire;
 
-        public required virtual Data.IVerilogRelatedFile File { get; init; }
+        [Newtonsoft.Json.JsonIgnore]
+        public virtual Data.IVerilogRelatedFile File { get; init; }
 
 
         private bool reparseRequested = false;
+        [Newtonsoft.Json.JsonIgnore]
         public bool ReparseRequested
         {
             get

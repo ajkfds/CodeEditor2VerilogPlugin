@@ -48,6 +48,7 @@ namespace pluginVerilog.Verilog.DataObjects
 
 
         private WeakReference<NameSpace>? wr_DefinedNameSpace = null;
+        [Newtonsoft.Json.JsonIgnore]
         public NameSpace? DefinedNameSpace
         {
             get

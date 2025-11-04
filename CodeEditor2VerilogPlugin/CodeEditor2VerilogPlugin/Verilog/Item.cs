@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog
@@ -11,9 +12,13 @@ namespace pluginVerilog.Verilog
         public required string Name { get; init;  }
         public Attribute? Attribute { get; set; }
         public required WordReference? DefinitionReference { get; init; }
-        public required CodeEditor2.Data.Project Project { get; init; }
+
+        [Newtonsoft.Json.JsonIgnore]
+        public CodeEditor2.Data.Project Project { get; init; }
 
         public Dictionary<string, string> Properties = new Dictionary<string, string>();
+
+        [Newtonsoft.Json.JsonIgnore]
         public ProjectProperty ProjectProperty
         {
             get
