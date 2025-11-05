@@ -473,6 +473,7 @@ namespace pluginVerilog.Verilog.Expressions
                     if (word.GetCharAt(index) != '_') return false;
                     index++;
                 }
+                word.MoveNext();
                 return true;
             }
 
