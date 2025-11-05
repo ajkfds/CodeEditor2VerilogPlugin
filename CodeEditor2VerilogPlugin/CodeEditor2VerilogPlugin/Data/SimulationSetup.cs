@@ -1,7 +1,10 @@
-﻿using CodeEditor2.Data;
+﻿using CodeEditor2;
+using CodeEditor2.Data;
 using pluginVerilog.Data;
 using pluginVerilog.FileTypes;
+using pluginVerilog.Verilog;
 using pluginVerilog.Verilog.BuildingBlocks;
+using pluginVerilog.Verilog.ModuleItems;
 using Svg.FilterEffects;
 using System;
 using System.Collections.Generic;
@@ -41,31 +44,66 @@ namespace pluginVerilog.Data
 
             setup.Project = verilogFile.Project;
             BuildingBlock? buildingBlock = verilogFile.VerilogParsedDocument.Root.BuildingBlocks.Values.FirstOrDefault();
+            if (buildingBlock == null) return null;
 
-            setup.TopName = buildingBlock?.Name;
-            searchHier(verilogFile,ids,setup);
+            setup.TopName = buildingBlock.Name;
+            searchHier(verilogFile,setup.TopName,ids,setup,"");
 
             return setup;
         }
 
-        private static void searchHier(IVerilogRelatedFile file,List<string> ids,SimulationSetup setup)
+        private static void searchHier(IVerilogRelatedFile file,string buildingBlockName,List<string> ids,SimulationSetup setup,string path)
         {
             if (ids.Contains(file.ID)) return;
+            ParsedDocument? parsedDocument = file.VerilogParsedDocument;
+            if (parsedDocument == null) return;
 
             appendFile(file,setup);
-            foreach(var item in file.Items.Values)
+
+            if (!parsedDocument.Root.BuildingBlocks.ContainsKey(buildingBlockName)) return;
+            BuildingBlock buildingBlock = parsedDocument.Root.BuildingBlocks[buildingBlockName];
+
+            searchNameSpace(file, ids, buildingBlock, setup,path);
+            //foreach(var item in file.Items.Values)
+            //{
+            //    if(item is IVerilogRelatedFile)
+            //    {
+            //        searchHier((IVerilogRelatedFile)item, ids, setup);
+            //    }
+            //}
+        }
+
+        private static void searchNameSpace(IVerilogRelatedFile file, List<string> ids, NameSpace nameSpace, SimulationSetup setup,string path)
+        {
+            foreach(INamedElement element in nameSpace.NamedElements.Values)
             {
-                if(file.Project != item.Project && item is VerilogModuleInstance)
+                if(element is NameSpace)
                 {
-                    VerilogModuleInstance? instance = file as VerilogModuleInstance;
-                    if (instance != null)
-                    {
-                        //setup.ExternalProjectEntryInstance.Add(getHierName(instance), instance.Project);
-                    }
+                    NameSpace subNameSpace = (NameSpace)element;
+                    string newPath = subNameSpace.Name;
+                    if (path != "") newPath = path + "." + newPath;
+                    searchNameSpace(file,ids,subNameSpace, setup, newPath);
                 }
-                if(item is IVerilogRelatedFile)
+                else if(element is ModuleInstantiation)
                 {
-                    searchHier((IVerilogRelatedFile)item, ids, setup);
+                    ModuleInstantiation moduleInstantiation = (ModuleInstantiation)element;
+                    if(nameSpace.BuildingBlock.Project.Name != moduleInstantiation.SourceProjectName)
+                    {
+                        string newPath = moduleInstantiation.Name;
+                        if (path != "") newPath = path + "." + newPath;
+                        setup.ExternalProjectEntryInstance.Add(
+                            newPath,
+                            CodeEditor2.Global.Projects[moduleInstantiation.SourceProjectName]
+                            );
+                    }
+                    if (file.Items.ContainsKey(moduleInstantiation.Name))
+                    {
+                        string newPath = moduleInstantiation.Name;
+                        if (path != "") newPath = path + "." + newPath;
+
+                        var subfile = file.Items[moduleInstantiation.Name] as IVerilogRelatedFile;
+                        if(subfile != null) searchHier(subfile,moduleInstantiation.SourceName, ids, setup, newPath);
+                    }
                 }
             }
         }
