@@ -1,8 +1,11 @@
-﻿using System;
+﻿using CodeEditor2.Shells;
+using ExCSS;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TextMateSharp.Model;
 
 namespace pluginVerilog.Verilog
 {
@@ -67,6 +70,125 @@ namespace pluginVerilog.Verilog
     //    }
     //}
 
+    public class ChargeStrength
+    {
+        protected ChargeStrength() { }
+        public Strengths Strength;
+
+        public static ChargeStrength? ParseCreate(WordScanner word, NameSpace nameSpace)
+        {
+            string nextText = word.NextText;
+
+            if (word.Text != "(") return null;
+            switch (nextText)
+            {
+                case "small":
+                case "medium":
+                case "large":
+                    break;
+                default:
+                    return null;
+            }
+
+            word.MoveNext(); // (
+            ChargeStrength ret = new ChargeStrength();
+            Strengths? strength;
+
+            strength = getStrengths(word, nameSpace);
+            if (strength == null)
+            {
+                word.AddError("illegal strength");
+                return null;
+            }
+            if (
+                strength == Strengths.large ||
+                strength == Strengths.medium ||
+                strength == Strengths.small
+                )
+            {
+                ret.Strength = (Strengths)strength;
+                if (word.Text != ")")
+                {
+                    word.AddError(") required");
+                    return ret;
+                }
+                else
+                {
+                    word.MoveNext();
+                    return ret;
+                }
+            }
+            else
+            {
+                word.AddError("illegal strength");
+                return null;
+            }
+        }
+        private static Strengths? getStrengths(WordScanner word, NameSpace nameSpace)
+        {
+            switch (word.Text)
+            {
+                case "supply0":
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+                    return Strengths.supply0;
+                case "strong0":
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+                    return Strengths.strong0;
+                case "pull0":
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+                    return Strengths.pull0;
+                case "weak0":
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+                    return Strengths.weak0;
+                case "highz0":
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+                    return Strengths.highz0;
+
+                case "supply1":
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+                    return Strengths.supply1;
+                case "strong1":
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+                    return Strengths.strong1;
+                case "pull1":
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+                    return Strengths.pull1;
+                case "weak1":
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+                    return Strengths.weak1;
+                case "highz1":
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+                    return Strengths.highz1;
+
+                case "small":
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+                    return Strengths.small;
+                case "medium":
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+                    return Strengths.medium;
+                case "large":
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+                    return Strengths.large;
+                default:
+                    return null;
+            }
+
+        }
+    }
+
 
 
         public class DriveStrength
@@ -77,7 +199,7 @@ namespace pluginVerilog.Verilog
         public Strengths Strength1;
 
 
-        public static DriveStrength ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static DriveStrength? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             string nextText = word.NextText;
 

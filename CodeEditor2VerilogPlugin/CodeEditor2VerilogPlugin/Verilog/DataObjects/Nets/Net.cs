@@ -345,7 +345,11 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             }
 
             // [drive_strength | charge_strength]
-            DriveStrength driveStrength = DriveStrength.ParseCreate(word, nameSpace);
+            DriveStrength? driveStrength = DriveStrength.ParseCreate(word, nameSpace);
+            if(driveStrength == null)
+            {
+                ChargeStrength? chargeStrength = ChargeStrength.ParseCreate(word, nameSpace);
+            }
 
             // [vectored | scalared]
 
