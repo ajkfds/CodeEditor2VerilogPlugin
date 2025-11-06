@@ -100,7 +100,9 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
 
             return associativeArray;
         }
-
+        /*
+         * num()/size()、delete()、exists()、first()、last()、next()、prev()
+         */
 
 
         public DataTypes.IDataType? IndexDataType { get; set; } = null;

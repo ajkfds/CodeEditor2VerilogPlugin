@@ -103,7 +103,9 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             }
             return val;
         }
-
+        /*
+         * first()、last()、next()、prev()、num()、name()
+         */
 
 
     }

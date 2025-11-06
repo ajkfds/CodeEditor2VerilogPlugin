@@ -140,7 +140,6 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
 
             return queue;
         }
-
         public override DataObject Clone()
         {
             Queue queue = Queue.Create(DataObject.Clone(), MaxSizeExpression);

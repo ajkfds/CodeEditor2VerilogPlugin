@@ -36,5 +36,9 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
         {
             return new DynamicArray() { DataObject = DataObject.Clone(name), Name = name };
         }
+
+        /*
+         size()、delete()
+         */
     }
 }

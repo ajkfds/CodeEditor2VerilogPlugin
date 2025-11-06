@@ -262,6 +262,10 @@ number
 
                         // search downward
                         NameSpace? searchDownwardNameSpace = searchNameSpace(word, targetNameSpace, ref nameSpaceText);
+                        if(searchDownwardNameSpace is UnfoundNameSpace)
+                        {
+                            return new UnfoundObjectReference() { Reference = ((UnfoundNameSpace)searchDownwardNameSpace).Reference };
+                        }
                         if (searchDownwardNameSpace != null)
                         {
                             if (nameSpaceText != "") acceptImplicitNet = false;
@@ -429,6 +433,7 @@ number
         }
         public static NameSpace? searchUnfoundNameSpace(WordScanner word, ref string nameSpaceText)
         {
+            WordReference beginRef = word.GetReference();
             if (!General.IsIdentifier(word.Text) || General.ListOfKeywords.Contains(word.Text))
             {
                 return null;
@@ -443,17 +448,21 @@ number
             {
                 nameSpaceText += word.Text;
                 word.Color(CodeDrawStyle.ColorType.Identifier);
-                word.MoveNext();
-                if (word.Text == ".")
+                if(word.NextText == ".")
                 {
+                    word.MoveNext();
                     nameSpaceText += ".";
                     word.MoveNext();
                     continue;
                 }
+
+                if(!word.Prototype) WordReference.CreateReferenceRange(beginRef, word.GetReference()).AddError("unfound object");
+                word.MoveNext();
                 break;
             } while (!word.Eof);
 
-            return null;
+            WordReference wordReference = WordReference.CreateReferenceRange(beginRef, word.GetReference());
+            return new UnfoundNameSpace() { DefinitionReference = beginRef, Name = "?", Reference= wordReference};
         }
 
         public static Primary? parseDataObject(WordScanner word, NameSpace nameSpace, INamedElement owner, bool lValue,string nameSpaceText)
@@ -546,6 +555,8 @@ number
         //}
         private static Primary? parseUndefinedFunction(WordScanner word)
         {
+            WordReference beginRef = word.GetReference();
+
             word.AddError("undefined function");
             word.Color(CodeDrawStyle.ColorType.Identifier);
             word.MoveNext();
@@ -556,7 +567,8 @@ number
                 word.SkipToKeywords(new List<string> { ";", ")" });
                 if (word.Text == ")") word.MoveNext();
             }
-            return null;
+            WordReference wordReference = WordReference.CreateReferenceRange(beginRef, word.GetReference());
+            return new UnfoundObjectReference() { Reference = wordReference };
         }
 
 

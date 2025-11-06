@@ -23,7 +23,7 @@ namespace pluginVerilog.Verilog
         }
 
         [JsonConstructor]
-        private NameSpace()
+        protected NameSpace()
         {
         }
         public virtual CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable ; } }
