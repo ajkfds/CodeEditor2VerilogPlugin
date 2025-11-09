@@ -89,16 +89,17 @@ namespace pluginVerilog.NavigatePanel
             CodeEditor2.Controller.CodeEditor.SetTextFile(ModuleInstance, true);
             UpdateVisual();
 
-//            Update();
+            //            Update();
 
-//            foreach (NavigatePanelNode node in Nodes)
-//            {
-////                if (node is VerilogModuleInstanceNode)
-////                {
-////                    ((VerilogModuleInstanceNode)node).Update();
-////                }
-//                node.UpdateVisual();
-//            }
+            //            foreach (NavigatePanelNode node in Nodes)
+            //            {
+            ////                if (node is VerilogModuleInstanceNode)
+            ////                {
+            ////                    ((VerilogModuleInstanceNode)node).Update();
+            ////                }
+            //                node.UpdateVisual();
+            //            }
+            if (CodeEditor2.Global.StopParse) return;
 
             if (ModuleInstance.ParseValid & !ModuleInstance.ReparseRequested)
             {

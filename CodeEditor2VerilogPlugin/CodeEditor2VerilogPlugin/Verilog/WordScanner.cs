@@ -1,6 +1,7 @@
 ﻿using Avalonia.Remote.Protocol;
 using pluginVerilog.CodeEditor;
 using pluginVerilog.Data;
+using pluginVerilog.Parser;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -1052,7 +1053,12 @@ namespace pluginVerilog.Verilog
 
             stock.Add(wordPointer);
             CodeEditor.CodeDocument codeDocument = new CodeEditor.CodeDocument(macroText);
-            ParsedDocument newParsedDocument = new ParsedDocument((IVerilogRelatedFile)wordPointer.ParsedDocument.TextFile, null, wordPointer.ParsedDocument.ParseMode);
+            string key = VerilogParser.KeyGenerator(wordPointer.ParsedDocument, wordPointer.Index);
+            ParsedDocument newParsedDocument = new ParsedDocument(
+                (IVerilogRelatedFile)wordPointer.ParsedDocument.TextFile, 
+                key,
+                null, 
+                wordPointer.ParsedDocument.ParseMode);
             WordPointer newPointer = new WordPointer(codeDocument, newParsedDocument );// wordPointer.ParsedDocument);
 
             wordPointer = newPointer;
@@ -1299,7 +1305,8 @@ namespace pluginVerilog.Verilog
             if (parent == null) throw new Exception();
             vhInstance.Parent = parent;
 
-            newParsedDocument = new Verilog.ParsedDocument(vhInstance, indexReference, RootParsedDocument.ParseMode);
+            string key = VerilogParser.KeyGenerator(wordPointer.ParsedDocument, vhInstance);
+            newParsedDocument = new Verilog.ParsedDocument(vhInstance,key, indexReference, RootParsedDocument.ParseMode);
             CodeDocument? originalDocument = vhInstance.CodeDocument as CodeDocument;
             if (originalDocument == null) throw new Exception();
 

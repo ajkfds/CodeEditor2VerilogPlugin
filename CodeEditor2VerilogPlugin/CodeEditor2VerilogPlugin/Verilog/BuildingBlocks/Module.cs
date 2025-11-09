@@ -48,6 +48,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
             return ParseCreate(word, null, attribute,parent, file, protoType);
         }
+
         public static Module ParseCreate(
             WordScanner word,
             Dictionary<string, Expressions.Expression>? parameterOverrides,

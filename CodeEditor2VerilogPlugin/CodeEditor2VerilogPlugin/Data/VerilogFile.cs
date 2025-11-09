@@ -10,6 +10,7 @@ using CodeEditor2.Data;
 using CodeEditor2.Tools;
 using DynamicData;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using pluginVerilog.CodeEditor;
 using pluginVerilog.FileTypes;
 using pluginVerilog.Verilog.BuildingBlocks;
@@ -17,6 +18,8 @@ using Splat;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -523,24 +526,63 @@ namespace pluginVerilog.Data
             return VerilogCommon.AutoComplete.GetAutoCompleteItems(this, VerilogParsedDocument, index, out candidateWord);
         }
 
+        //public override string CasheId
+        //{
+        //    get
+        //    {
+        //        if (ParsedDocument == null) return "";
+
+        //        //byte[] data = Encoding.UTF8.GetBytes(AbsolutePath);
+        //        //byte[] hashBytes = XxHash64.Hash(data);
+        //        //string hex = BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
+        //        string hex = ParsedDocument.Key.Replace(@"\", "_").Replace("/", "_").Replace(":", "_").Replace(".", "_") + ".json";
+        //        return hex;
+        //    }
+        //}
+
+        public static bool waitLock = false;
         public override async Task<bool> CreateCashe()
         {
-            //if (VerilogParsedDocument == null) return false;
-            //Verilog.ParsedDocument casheObject = VerilogParsedDocument;
-            //string path = Project.RootPath + System.IO.Path.DirectorySeparatorChar + ".cashe";
-            //if (!System.IO.Path.Exists(path)) System.IO.Directory.CreateDirectory(path);
+            if (!CodeEditor2.Global.ActivateCashe) return true;
 
-            //path = path + System.IO.Path.DirectorySeparatorChar + CasheId;
-            //var settings = new Newtonsoft.Json.JsonSerializerSettings
-            //{
-            //    TypeNameHandling = TypeNameHandling.All,
-            //    Formatting = Formatting.Indented
-            //};
-            //string json = Newtonsoft.Json.JsonConvert.SerializeObject(casheObject, settings);
-            //using (System.IO.StreamWriter sw = new System.IO.StreamWriter(path))
-            //{
-            //    await sw.WriteAsync(json);
-            //}
+            if (VerilogParsedDocument == null) return false;
+
+            while (waitLock == true) await Task.Delay(1);
+            waitLock = true;
+
+            Verilog.ParsedDocument casheObject = VerilogParsedDocument;
+            string path = Project.RootPath + System.IO.Path.DirectorySeparatorChar + ".cashe";
+            if (!System.IO.Path.Exists(path)) System.IO.Directory.CreateDirectory(path);
+            System.Diagnostics.Debug.Print("entry json " + path);
+
+            path = path + System.IO.Path.DirectorySeparatorChar + CasheId;
+
+            if (path == "D:\\Repository\\scr1\\.cashe\\D__Repository_scr1_src_tb_scr1_top_tb_runtests_sv.json") System.Diagnostics.Debugger.Break();
+
+            var traceWriter = new MemoryTraceWriter { LevelFilter = TraceLevel.Verbose };
+
+            var settings = new Newtonsoft.Json.JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Auto,
+                Formatting = Formatting.Indented,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                ContractResolver = new DefaultContractResolver
+                {
+                    IgnoreSerializableInterface = true,
+                    IgnoreSerializableAttribute = true
+                },
+                TraceWriter = traceWriter
+            };
+            System.Diagnostics.Debug.Print("start json "+path);
+            string json = Newtonsoft.Json.JsonConvert.SerializeObject(casheObject, settings);
+            System.Diagnostics.Debug.Print("write json " + path);
+            using (System.IO.StreamWriter sw = new System.IO.StreamWriter(path))
+            {
+                await sw.WriteAsync(json);
+            }
+            System.Diagnostics.Debug.Print("complete json " + path);
+
+            waitLock = false;
             return true;
         }
 

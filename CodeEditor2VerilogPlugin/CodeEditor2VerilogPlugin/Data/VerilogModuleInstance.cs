@@ -6,6 +6,7 @@ using CodeEditor2.CodeEditor.PopupHint;
 using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
 using DynamicData;
+using Newtonsoft.Json;
 using pluginVerilog.CodeEditor;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.ModuleItems;
@@ -462,6 +463,41 @@ namespace pluginVerilog.Data
             return VerilogCommon.AutoComplete.GetAutoCompleteItems(this, VerilogParsedDocument, index, out candidateWord);
         }
 
+        public override string CasheId
+        {
+            get
+            {
+                if (ParsedDocument == null) return "";
+
+                //byte[] data = Encoding.UTF8.GetBytes(AbsolutePath);
+                //byte[] hashBytes = XxHash64.Hash(data);
+                //string hex = BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
+                string hex = ParsedDocument.Key.Replace(@"\", "_").Replace("/", "_").Replace(":", "_").Replace(".", "_") + ".json";
+                return hex;
+            }
+        }
+        public override async Task<bool> CreateCashe()
+        {
+            if (!CodeEditor2.Global.ActivateCashe) return true;
+
+            //if (VerilogParsedDocument == null) return false;
+            //Verilog.ParsedDocument casheObject = VerilogParsedDocument;
+            //string path = Project.RootPath + System.IO.Path.DirectorySeparatorChar + ".cashe";
+            //if (!System.IO.Path.Exists(path)) System.IO.Directory.CreateDirectory(path);
+
+            //path = path + System.IO.Path.DirectorySeparatorChar + CasheId;
+            //var settings = new Newtonsoft.Json.JsonSerializerSettings
+            //{
+            //    TypeNameHandling = TypeNameHandling.All,
+            //    Formatting = Formatting.Indented
+            //};
+            //string json = Newtonsoft.Json.JsonConvert.SerializeObject(casheObject, settings);
+            //using (System.IO.StreamWriter sw = new System.IO.StreamWriter(path))
+            //{
+            //    await sw.WriteAsync(json);
+            //}
+            return true;
+        }
 
     }
 }

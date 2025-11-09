@@ -25,7 +25,7 @@ namespace pluginVerilog.Verilog
 {
     public class ParsedDocument : CodeEditor2.CodeEditor.ParsedDocument
     {
-        public ParsedDocument(Data.IVerilogRelatedFile file, IndexReference? indexReference, DocumentParser.ParseModeEnum parseMode) : base((CodeEditor2.Data.TextFile)file, getCodeDocument(file).Version,parseMode)
+        public ParsedDocument(Data.IVerilogRelatedFile file,string key, IndexReference? indexReference, DocumentParser.ParseModeEnum parseMode) : base((CodeEditor2.Data.TextFile)file, key, getCodeDocument(file).Version,parseMode)
         {
             CodeDocument? document = file.CodeDocument as CodeDocument;
             if (document == null) throw new Exception();
@@ -40,17 +40,6 @@ namespace pluginVerilog.Verilog
             {
                 IndexReference = indexReference;
             }
-
-            tag = "verilogParsedDocument" + tagCount.ToString();
-            if (tagCount == int.MaxValue)
-            {
-                tagCount = 0;
-            }
-            else
-            {
-                tagCount++;
-            }
-            id = file.ID;
         }
 
         //private WeakReference<IVerilogNavigateNode>? refNavigateNode = null;
@@ -87,14 +76,10 @@ namespace pluginVerilog.Verilog
         }
 
 
-        string id;
         ~ParsedDocument()
         {
 //            System.Diagnostics.Debug.Print("### pasedDocument.Finalize " + id+"::"+ObjectID);
         }
-
-        public static int tagCount = 0;
-        public string tag;
 
         private System.WeakReference<Data.IVerilogRelatedFile> fileRef;
         [Newtonsoft.Json.JsonIgnore]

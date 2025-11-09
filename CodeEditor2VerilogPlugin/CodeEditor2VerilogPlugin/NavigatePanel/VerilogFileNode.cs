@@ -72,6 +72,7 @@ namespace pluginVerilog.NavigatePanel
             if (NodeSelected != null) NodeSelected();
 
             UpdateVisual();
+            if (CodeEditor2.Global.StopParse) return;
 
             if (TextFile.ParseValid && !TextFile.ReparseRequested)
             {
