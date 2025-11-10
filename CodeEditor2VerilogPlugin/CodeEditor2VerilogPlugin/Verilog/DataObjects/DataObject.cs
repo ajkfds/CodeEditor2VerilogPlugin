@@ -41,6 +41,7 @@ namespace pluginVerilog.Verilog.DataObjects
         //              + pos_covergroup
         //              + type_reference
         // 
+        [Newtonsoft.Json.JsonIgnore]
         public virtual CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Normal; } }
 
         public bool CommentAnnotation_Discarded = false;
@@ -122,7 +123,9 @@ namespace pluginVerilog.Verilog.DataObjects
             throw new NotImplementedException();
         }
 
+//        [Newtonsoft.Json.JsonIgnore]
         public required string Name { get; init; }
+        [Newtonsoft.Json.JsonIgnore]
         public string Comment { set; get; } = "";
         public WordReference? DefinedReference { set; get; } = null;
         public IDataType? DataType;
@@ -132,10 +135,13 @@ namespace pluginVerilog.Verilog.DataObjects
                 return DataType?.BitWidth;
             }
         }
+        [Newtonsoft.Json.JsonIgnore]
         public List<Arrays.UnPackedArray> UnpackedArrays { get; set; } = new List<Arrays.UnPackedArray>();
 
- 
+
+        [Newtonsoft.Json.JsonIgnore]
         public List<WordReference> UsedReferences { set; get; } = new List<WordReference>();
+        [Newtonsoft.Json.JsonIgnore]
         public List<WordReference> AssignedReferences { set; get; } = new List<WordReference>();
         public int DisposedIndex = -1;
 

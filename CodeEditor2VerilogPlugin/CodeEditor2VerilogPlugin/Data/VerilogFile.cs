@@ -1,4 +1,5 @@
-﻿using Avalonia.Media;
+﻿using Avalonia.Controls.Shapes;
+using Avalonia.Media;
 using Avalonia.Threading;
 using CodeEditor2;
 using CodeEditor2.CodeEditor;
@@ -24,6 +25,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using Tmds.DBus.Protocol;
 
@@ -139,7 +141,7 @@ namespace pluginVerilog.Data
             CodeDocument.CopyColorMarkFrom(VerilogParsedDocument.CodeDocument);
 
             // Register New Building Block
-            if(VerilogParsedDocument.Root != null)
+            if (VerilogParsedDocument.Root != null)
             {
                 foreach (BuildingBlock buildingBlock in VerilogParsedDocument.Root.BuildingBlocks.Values)
                 {
@@ -217,7 +219,7 @@ namespace pluginVerilog.Data
             {
                 if (!headerItems.ContainsKey(includeFile.ID)) continue;
                 Data.VerilogHeaderInstance item = headerItems[includeFile.ID];
-                if(item.CodeDocument == null) continue;
+                if (item.CodeDocument == null) continue;
 
                 item.CodeDocument.CopyColorMarkFrom(includeFile.VerilogParsedDocument.CodeDocument);
 
@@ -258,12 +260,12 @@ namespace pluginVerilog.Data
                     document.Clean();
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 document = null;
                 Console.Error.WriteLine("**error VerilogFile.loadDocumentFromFile");
                 Console.Error.WriteLine("* " + AbsolutePath);
-                Console.Error.WriteLine("* "+ e.Message);
+                Console.Error.WriteLine("* " + e.Message);
             }
         }
 
@@ -330,7 +332,7 @@ namespace pluginVerilog.Data
 
         public void RegisterInstanceParsedDocument(string id, ParsedDocument parsedDocument, InstanceTextFile moduleInstance)
         {
-//            System.Diagnostics.Debug.Print("#### RegisterInstanceParsedDocument " + id + "::" + parsedDocument.ObjectID);
+            //            System.Diagnostics.Debug.Print("#### RegisterInstanceParsedDocument " + id + "::" + parsedDocument.ObjectID);
             cleanWeakRef();
             if (id == "")
             {
@@ -343,13 +345,13 @@ namespace pluginVerilog.Data
                     if (instancedParsedDocumentRefs.ContainsKey(id))
                     {
                         instancedParsedDocumentRefs[id] = new WeakReference<ParsedDocument>(parsedDocument);
-//                        System.Diagnostics.Debug.Print("#### RegisterInstanceParsedDocument replace to " + id + "::" + parsedDocument.ObjectID);
+                        //                        System.Diagnostics.Debug.Print("#### RegisterInstanceParsedDocument replace to " + id + "::" + parsedDocument.ObjectID);
                     }
                     else
                     {
                         instancedParsedDocumentRefs.Add(id, new WeakReference<ParsedDocument>(parsedDocument));
                         //Project.AddReparseTarget(moduleInstance);
-//                        System.Diagnostics.Debug.Print("#### Try RegisterInstanceParsedDocument.Add " + id + "::" + parsedDocument.ObjectID);
+                        //                        System.Diagnostics.Debug.Print("#### Try RegisterInstanceParsedDocument.Add " + id + "::" + parsedDocument.ObjectID);
                     }
                 }
             }
@@ -438,7 +440,7 @@ namespace pluginVerilog.Data
 
         public override DocumentParser CreateDocumentParser(DocumentParser.ParseModeEnum parseMode, System.Threading.CancellationToken? token)
         {
-            return new Parser.VerilogParser(this, parseMode,token);
+            return new Parser.VerilogParser(this, parseMode, token);
         }
 
         // update sub-items from ParsedDocument
@@ -540,15 +542,38 @@ namespace pluginVerilog.Data
         //    }
         //}
 
-        public static bool waitLock = false;
+        public static VerilogFile? RestoreCashe(string path)
+        {
+            var settings = new Newtonsoft.Json.JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Auto,
+                Formatting = Formatting.Indented,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                ContractResolver = new DefaultContractResolver
+                {
+                    IgnoreSerializableInterface = true,
+                    IgnoreSerializableAttribute = true
+                }
+            };
+
+            var serializer = Newtonsoft.Json.JsonSerializer.Create(settings);
+
+            VerilogFile? typedObject;
+            using (var reader = new StreamReader(path))
+            using (var jsonReader = new JsonTextReader(reader))
+            {
+                typedObject = serializer.Deserialize<VerilogFile>(jsonReader);
+            }
+            return typedObject;
+        }
+
         public override async Task<bool> CreateCashe()
         {
             if (!CodeEditor2.Global.ActivateCashe) return true;
 
             if (VerilogParsedDocument == null) return false;
 
-            while (waitLock == true) await Task.Delay(1);
-            waitLock = true;
+            await TextFile.CasheSemaphore.WaitAsync();
 
             Verilog.ParsedDocument casheObject = VerilogParsedDocument;
             string path = Project.RootPath + System.IO.Path.DirectorySeparatorChar + ".cashe";
@@ -556,10 +581,6 @@ namespace pluginVerilog.Data
             System.Diagnostics.Debug.Print("entry json " + path);
 
             path = path + System.IO.Path.DirectorySeparatorChar + CasheId;
-
-            if (path == "D:\\Repository\\scr1\\.cashe\\D__Repository_scr1_src_tb_scr1_top_tb_runtests_sv.json") System.Diagnostics.Debugger.Break();
-
-            var traceWriter = new MemoryTraceWriter { LevelFilter = TraceLevel.Verbose };
 
             var settings = new Newtonsoft.Json.JsonSerializerSettings
             {
@@ -570,19 +591,29 @@ namespace pluginVerilog.Data
                 {
                     IgnoreSerializableInterface = true,
                     IgnoreSerializableAttribute = true
-                },
-                TraceWriter = traceWriter
+                }
             };
-            System.Diagnostics.Debug.Print("start json "+path);
-            string json = Newtonsoft.Json.JsonConvert.SerializeObject(casheObject, settings);
-            System.Diagnostics.Debug.Print("write json " + path);
-            using (System.IO.StreamWriter sw = new System.IO.StreamWriter(path))
-            {
-                await sw.WriteAsync(json);
-            }
-            System.Diagnostics.Debug.Print("complete json " + path);
 
-            waitLock = false;
+            try
+            {
+                System.Diagnostics.Debug.Print("start json "+path);
+                var serializer = Newtonsoft.Json.JsonSerializer.Create(settings);
+                using (var writer = new StreamWriter(path))
+                using (var jsonWriter = new JsonTextWriter(writer))
+                {
+                    serializer.Serialize(jsonWriter, casheObject);
+                }
+                System.Diagnostics.Debug.Print("complete json " + path);
+            }
+            catch(Exception exception)
+            {
+                CodeEditor2.Controller.AppendLog("exp " + exception.Message);
+            }
+            finally
+            {
+                TextFile.CasheSemaphore.Release();
+            }
+
             return true;
         }
 

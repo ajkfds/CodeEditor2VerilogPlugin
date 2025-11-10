@@ -93,21 +93,27 @@ namespace pluginVerilog.Verilog
             }
         }
 
+        [Newtonsoft.Json.JsonIgnore]
         public IndexReference IndexReference;
 
+        [Newtonsoft.Json.JsonIgnore]
         public List<int> Indexes = new List<int>();
 
         public bool SystemVerilog = false;
         public bool Instance = false;
 
-        [Newtonsoft.Json.JsonProperty]
-        public Root Root;
+//        [Newtonsoft.Json.JsonIgnore]
+//        [Newtonsoft.Json.JsonProperty]
+        public Root Root { set; get; }
 
         [Newtonsoft.Json.JsonIgnore]
         public Dictionary<string, Data.VerilogHeaderInstance> IncludeFiles = new Dictionary<string, Data.VerilogHeaderInstance>();
+        [Newtonsoft.Json.JsonIgnore]
         public Dictionary<string, Macro> Macros = new Dictionary<string, Macro>();
 
+        [Newtonsoft.Json.JsonIgnore]
         public Dictionary<string, Verilog.Expressions.Expression> ParameterOverrides = new Dictionary<string, Expressions.Expression>();
+        [Newtonsoft.Json.JsonIgnore]
         public string? TargetBuildingBlockName = null;
 
         // for IndexReference
@@ -181,9 +187,13 @@ namespace pluginVerilog.Verilog
             base.Dispose();
         }
 
+        [Newtonsoft.Json.JsonIgnore]
         public int ErrorCount = 0;
+        [Newtonsoft.Json.JsonIgnore]
         public int WarningCount = 0;
+        [Newtonsoft.Json.JsonIgnore]
         public int HintCount = 0;
+        [Newtonsoft.Json.JsonIgnore]
         public int NoticeCount = 0;
 
         public void AddError(int index,int length ,string message)
@@ -755,6 +765,7 @@ namespace pluginVerilog.Verilog
             }
         }
         public delegate void AppendSpecialAutoCompleteItemsDelegate(List<AutocompleteItem> items, string cantidate);
+        [Newtonsoft.Json.JsonIgnore]
         public static AppendSpecialAutoCompleteItemsDelegate AppendSpecialAutoCompleteItems = appendSpecialAutoCompleteItems;
         private static void appendSpecialAutoCompleteItems(List<AutocompleteItem> items, string cantidate)
         {

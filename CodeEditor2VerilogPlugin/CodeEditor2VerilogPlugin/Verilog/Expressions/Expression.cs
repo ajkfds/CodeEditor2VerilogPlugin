@@ -23,6 +23,8 @@ namespace pluginVerilog.Verilog.Expressions
         public virtual bool Constant { get; protected set; }
         public virtual double? Value { get; protected set; }
         public virtual int? BitWidth { get; protected set; }
+
+        [Newtonsoft.Json.JsonIgnore]
         public WordReference Reference { get; protected set; }
         public bool IncrementDecrement = false;
 

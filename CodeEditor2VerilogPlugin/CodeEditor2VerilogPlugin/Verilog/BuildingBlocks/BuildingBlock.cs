@@ -27,6 +27,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
         public virtual string FileId { get; protected set; }
 
+        [Newtonsoft.Json.JsonIgnore]
         public WordReference NameReference;
         public List<string> PortParameterNameList { get; } = new List<string>();
 

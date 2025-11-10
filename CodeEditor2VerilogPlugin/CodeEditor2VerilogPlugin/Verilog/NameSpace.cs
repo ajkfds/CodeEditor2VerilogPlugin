@@ -28,11 +28,13 @@ namespace pluginVerilog.Verilog
         }
         public virtual CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable ; } }
 
-        [JsonInclude]
         public NamedElements NamedElements { get; } = new NamedElements();
 
+        [Newtonsoft.Json.JsonIgnore]
         public IndexReference BeginIndexReference { get; init; }
+        [Newtonsoft.Json.JsonIgnore]
         public IndexReference? BlockBeginIndexReference = null;
+        [Newtonsoft.Json.JsonIgnore]
         public IndexReference? LastIndexReference = null;
 
         [Newtonsoft.Json.JsonIgnore]
