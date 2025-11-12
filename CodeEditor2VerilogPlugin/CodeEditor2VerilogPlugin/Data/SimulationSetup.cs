@@ -47,7 +47,7 @@ namespace pluginVerilog.Data
             if (buildingBlock == null) return null;
 
             setup.TopName = buildingBlock.Name;
-            searchHier(verilogFile,setup.TopName,ids,setup,"");
+            searchHier(verilogFile,setup.TopName,ids,setup,setup.TopName);
 
             return setup;
         }
@@ -60,6 +60,10 @@ namespace pluginVerilog.Data
 
             appendFile(file,setup);
 
+            foreach(var ifile in parsedDocument.IncludeFiles.Values)
+            {
+                appendVerilogHeaderInstance(ifile, setup);
+            }
             if (!parsedDocument.Root.BuildingBlocks.ContainsKey(buildingBlockName)) return;
             BuildingBlock buildingBlock = parsedDocument.Root.BuildingBlocks[buildingBlockName];
 
@@ -80,8 +84,7 @@ namespace pluginVerilog.Data
                 if(element is NameSpace)
                 {
                     NameSpace subNameSpace = (NameSpace)element;
-                    string newPath = subNameSpace.Name;
-                    if (path != "") newPath = path + "." + newPath;
+                    string newPath = path + "." + subNameSpace.Name;
                     searchNameSpace(file,ids,subNameSpace, setup, newPath);
                 }
                 else if(element is ModuleInstantiation)
@@ -89,8 +92,7 @@ namespace pluginVerilog.Data
                     ModuleInstantiation moduleInstantiation = (ModuleInstantiation)element;
                     if(nameSpace.BuildingBlock.Project.Name != moduleInstantiation.SourceProjectName)
                     {
-                        string newPath = moduleInstantiation.Name;
-                        if (path != "") newPath = path + "." + newPath;
+                        string newPath = path + "." + moduleInstantiation.Name;
                         setup.ExternalProjectEntryInstance.Add(
                             newPath,
                             CodeEditor2.Global.Projects[moduleInstantiation.SourceProjectName]
@@ -148,6 +150,8 @@ namespace pluginVerilog.Data
                     {
                         pSetup = new SimulationSetup() { Project = project };
                         setup.ExternalProjectReferences.Add(project, pSetup);
+                        pSetup.TopFile = instance.SourceVerilogFile;
+                        pSetup.TopName = instance.ModuleName;
                     }
                     else
                     {
@@ -158,38 +162,40 @@ namespace pluginVerilog.Data
                 }
                 return;
             }
-            if (file is VerilogHeaderInstance)
+        }
+
+        private static void appendVerilogHeaderInstance(VerilogHeaderInstance file,SimulationSetup setup)
+        {
+            if (file.Project == setup.Project)
             {
-                if (file.Project == setup.Project)
+                if (setup.IncludeFiles.Contains(file)) return;
+                setup.IncludeFiles.Add(file);
+                string? path = System.IO.Path.GetDirectoryName(file.Project.GetAbsolutePath(file.RelativePath));
+                if (path == null) return;
+                if (!setup.IncludePaths.Contains(path)) setup.IncludePaths.Add(path);
+                return;
+            }
+            else
+            {
+                CodeEditor2.Data.Project project = file.Project;
+                SimulationSetup pSetup;
+                if (!setup.ExternalProjectReferences.ContainsKey(project))
                 {
-                    if (setup.IncludeFiles.Contains(file)) return;
-                    setup.IncludeFiles.Add(file);
-                    string? path = System.IO.Path.GetDirectoryName(file.Project.GetAbsolutePath(file.RelativePath));
-                    if (path == null) return;
-                    if (!setup.IncludePaths.Contains(path)) setup.IncludePaths.Add(path);
-                    return;
+                    pSetup = new SimulationSetup() { Project = project };
+                    setup.ExternalProjectReferences.Add(project, pSetup);
                 }
                 else
                 {
-                    CodeEditor2.Data.Project project = file.Project;
-                    SimulationSetup pSetup;
-                    if (!setup.ExternalProjectReferences.ContainsKey(project))
-                    {
-                        pSetup = new SimulationSetup() { Project = project };
-                        setup.ExternalProjectReferences.Add(project, pSetup);
-                    }
-                    else
-                    {
-                        pSetup = setup.ExternalProjectReferences[project];
-                    }
-                    if (pSetup.IncludeFiles.Contains(file)) return;
-                    pSetup.IncludeFiles.Add(file);
-                    string? path = System.IO.Path.GetDirectoryName(file.Project.GetAbsolutePath(file.RelativePath));
-                    if (path == null) return;
-                    if (!pSetup.IncludePaths.Contains(path)) pSetup.IncludePaths.Add(path);
-                    return;
+                    pSetup = setup.ExternalProjectReferences[project];
                 }
+                if (pSetup.IncludeFiles.Contains(file)) return;
+                pSetup.IncludeFiles.Add(file);
+                string? path = System.IO.Path.GetDirectoryName(file.Project.GetAbsolutePath(file.RelativePath));
+                if (path == null) return;
+                if (!pSetup.IncludePaths.Contains(path)) pSetup.IncludePaths.Add(path);
+                return;
             }
+
         }
 
     }
