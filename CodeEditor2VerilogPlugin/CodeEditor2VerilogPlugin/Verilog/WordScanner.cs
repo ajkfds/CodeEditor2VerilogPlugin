@@ -1298,6 +1298,7 @@ namespace pluginVerilog.Verilog
             }
             else
             {
+//                wordPointer.ParsedDocument.IncludeFiles[vhInstance.ID] = vhInstance;
                 vhInstance = wordPointer.ParsedDocument.IncludeFiles[vhInstance.ID];
             }
 

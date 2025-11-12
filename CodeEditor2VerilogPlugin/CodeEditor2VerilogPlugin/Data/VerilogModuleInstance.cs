@@ -7,11 +7,13 @@ using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
 using DynamicData;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using pluginVerilog.CodeEditor;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.ModuleItems;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -138,7 +140,7 @@ namespace pluginVerilog.Data
             Data.IVerilogRelatedFile? ivFile = projectProperty.GetFileOfBuildingBlock(moduleInstantiation.SourceName);
             if (ivFile == null) return false;
 
-            File? file = ivFile as File;
+            CodeEditor2.Data.File? file = ivFile as CodeEditor2.Data.File;
             if (file == null) return false;
 
             if (!IsSameAs(file)) return false;
@@ -476,26 +478,94 @@ namespace pluginVerilog.Data
                 return hex;
             }
         }
+        public override CodeEditor2.CodeEditor.ParsedDocument? GetCashedParsedDocument()
+        {
+            if (!CodeEditor2.Global.ActivateCashe) return null;
+
+            string path = Project.RootPath + System.IO.Path.DirectorySeparatorChar + ".cashe";
+            if (!System.IO.Path.Exists(path)) System.IO.Directory.CreateDirectory(path);
+            System.Diagnostics.Debug.Print("entry json " + path);
+
+            path = path + System.IO.Path.DirectorySeparatorChar + CasheId;
+            if (!System.IO.File.Exists(path)) return null;
+
+            var settings = new Newtonsoft.Json.JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Auto,
+                Formatting = Formatting.Indented,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                ContractResolver = new DefaultContractResolver
+                {
+                    IgnoreSerializableInterface = true,
+                    IgnoreSerializableAttribute = true
+                }
+            };
+            var serializer = Newtonsoft.Json.JsonSerializer.Create(settings);
+
+            pluginVerilog.Verilog.ParsedDocument? parsedDocument;
+            try
+            {
+                using (var reader = new StreamReader(path))
+                using (var jsonReader = new JsonTextReader(reader))
+                {
+                    parsedDocument = serializer.Deserialize<pluginVerilog.Verilog.ParsedDocument>(jsonReader);
+                }
+            }
+            catch (Exception exception)
+            {
+                CodeEditor2.Controller.AppendLog("exp " + exception.Message);
+                return null;
+            }
+            return parsedDocument;
+        }
+
         public override async Task<bool> CreateCashe()
         {
             if (!CodeEditor2.Global.ActivateCashe) return true;
 
-            //if (VerilogParsedDocument == null) return false;
-            //Verilog.ParsedDocument casheObject = VerilogParsedDocument;
-            //string path = Project.RootPath + System.IO.Path.DirectorySeparatorChar + ".cashe";
-            //if (!System.IO.Path.Exists(path)) System.IO.Directory.CreateDirectory(path);
+            if (VerilogParsedDocument == null) return false;
 
-            //path = path + System.IO.Path.DirectorySeparatorChar + CasheId;
-            //var settings = new Newtonsoft.Json.JsonSerializerSettings
-            //{
-            //    TypeNameHandling = TypeNameHandling.All,
-            //    Formatting = Formatting.Indented
-            //};
-            //string json = Newtonsoft.Json.JsonConvert.SerializeObject(casheObject, settings);
-            //using (System.IO.StreamWriter sw = new System.IO.StreamWriter(path))
-            //{
-            //    await sw.WriteAsync(json);
-            //}
+            await TextFile.CasheSemaphore.WaitAsync();
+
+            Verilog.ParsedDocument casheObject = VerilogParsedDocument;
+            string path = Project.RootPath + System.IO.Path.DirectorySeparatorChar + ".cashe";
+            if (!System.IO.Path.Exists(path)) System.IO.Directory.CreateDirectory(path);
+            System.Diagnostics.Debug.Print("entry json " + path);
+
+            path = path + System.IO.Path.DirectorySeparatorChar + CasheId;
+
+            var settings = new Newtonsoft.Json.JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Auto,
+                Formatting = Formatting.Indented,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                ContractResolver = new DefaultContractResolver
+                {
+                    IgnoreSerializableInterface = true,
+                    IgnoreSerializableAttribute = true
+                }
+            };
+
+            try
+            {
+                System.Diagnostics.Debug.Print("start json " + path);
+                var serializer = Newtonsoft.Json.JsonSerializer.Create(settings);
+                using (var writer = new StreamWriter(path))
+                using (var jsonWriter = new JsonTextWriter(writer))
+                {
+                    serializer.Serialize(jsonWriter, casheObject);
+                }
+                System.Diagnostics.Debug.Print("complete json " + path);
+            }
+            catch (Exception exception)
+            {
+                CodeEditor2.Controller.AppendLog("exp " + exception.Message);
+            }
+            finally
+            {
+                TextFile.CasheSemaphore.Release();
+            }
+
             return true;
         }
 

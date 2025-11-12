@@ -29,6 +29,7 @@ namespace pluginVerilog.Verilog
             return wRef;
         }
 
+        [Newtonsoft.Json.JsonIgnore]
         public int Index
         {
             get

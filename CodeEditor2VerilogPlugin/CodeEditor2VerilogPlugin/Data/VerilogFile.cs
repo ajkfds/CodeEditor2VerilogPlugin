@@ -138,7 +138,7 @@ namespace pluginVerilog.Data
                 Update();
                 return;
             }
-            CodeDocument.CopyColorMarkFrom(VerilogParsedDocument.CodeDocument);
+            if(VerilogParsedDocument.CodeDocument != null) CodeDocument.CopyColorMarkFrom(VerilogParsedDocument.CodeDocument);
 
             // Register New Building Block
             if (VerilogParsedDocument.Root != null)
@@ -542,8 +542,17 @@ namespace pluginVerilog.Data
         //    }
         //}
 
-        public static VerilogFile? RestoreCashe(string path)
+        public override CodeEditor2.CodeEditor.ParsedDocument? GetCashedParsedDocument()
         {
+            if (!CodeEditor2.Global.ActivateCashe) return null;
+
+            string path = Project.RootPath + System.IO.Path.DirectorySeparatorChar + ".cashe";
+            if (!System.IO.Path.Exists(path)) System.IO.Directory.CreateDirectory(path);
+            System.Diagnostics.Debug.Print("entry json " + path);
+
+            path = path + System.IO.Path.DirectorySeparatorChar + CasheId;
+            if (!System.IO.File.Exists(path)) return null;
+
             var settings = new Newtonsoft.Json.JsonSerializerSettings
             {
                 TypeNameHandling = TypeNameHandling.Auto,
@@ -555,16 +564,23 @@ namespace pluginVerilog.Data
                     IgnoreSerializableAttribute = true
                 }
             };
-
             var serializer = Newtonsoft.Json.JsonSerializer.Create(settings);
 
-            VerilogFile? typedObject;
-            using (var reader = new StreamReader(path))
-            using (var jsonReader = new JsonTextReader(reader))
+            pluginVerilog.Verilog.ParsedDocument? parsedDocument;
+            try
             {
-                typedObject = serializer.Deserialize<VerilogFile>(jsonReader);
+                using (var reader = new StreamReader(path))
+                using (var jsonReader = new JsonTextReader(reader))
+                {
+                    parsedDocument = serializer.Deserialize<pluginVerilog.Verilog.ParsedDocument>(jsonReader);
+                }
             }
-            return typedObject;
+            catch (Exception exception)
+            {
+                CodeEditor2.Controller.AppendLog("exp " + exception.Message);
+                return null;
+            }
+            return parsedDocument;
         }
 
         public override async Task<bool> CreateCashe()

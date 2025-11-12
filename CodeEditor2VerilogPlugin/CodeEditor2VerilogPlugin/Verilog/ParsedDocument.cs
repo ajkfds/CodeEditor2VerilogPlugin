@@ -42,6 +42,16 @@ namespace pluginVerilog.Verilog
             }
         }
 
+        [Newtonsoft.Json.JsonConstructor]
+        private ParsedDocument(Data.IVerilogRelatedFile file, string key, IndexReference? indexReference) : base((CodeEditor2.Data.TextFile)file, key, long.MaxValue, DocumentParser.ParseModeEnum.LoadParse)
+        {
+            System.Diagnostics.Debug.Print("## parsed " + key);
+            if (file == null)
+            {
+                System.Diagnostics.Debug.Print("## parsed null " + key);
+            }
+        }
+
         //private WeakReference<IVerilogNavigateNode>? refNavigateNode = null;
         //public IVerilogNavigateNode? NavigateNodeWeakRef
         //{
@@ -66,6 +76,7 @@ namespace pluginVerilog.Verilog
 
         private static CodeDocument getCodeDocument(Data.IVerilogRelatedFile file)
         {
+            if (file == null) return null; // foe illeagal jon constructor 
             CodeDocument? codeDocument;
             codeDocument = file.CodeDocument as CodeDocument;
             if(codeDocument == null)
