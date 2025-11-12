@@ -157,6 +157,10 @@ namespace pluginVerilog.Verilog.ModuleItems
             BuildingBlock buildingBlock = nameSpace.BuildingBlock as BuildingBlock;
             if (buildingBlock == null) return false;
 
+            if (!General.IsSimpleIdentifier(word.Text)) return false;
+            if (General.ListOfKeywords.Contains(word.Text)) return false;
+
+
             Project sourceProject = word.Project;
 
             var moduleIdentifier = word.CrateWordReference();
@@ -185,16 +189,21 @@ namespace pluginVerilog.Verilog.ModuleItems
 
                         break;
                     }
-                    if(instancedModule == null)
-                    {
-                        return false;
-                    }
+                    //if(instancedModule == null)
+                    //{
+                    //    return false;
+                    //}
                 }
-                else
-                {
-                    return false;
-                }
+                //else
+                //{
+                //    return false;
+                //}
             }
+            if(instancedModule == null)
+            {
+                word.AddError("unfound module");
+            }
+
             word.MoveNext();
             IndexReference blockBeginIndexReference = word.CreateIndexReference();
             
@@ -410,7 +419,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                 }
                 else
                 {
-                    word.AddError("illegal port connection");
+                    if(instancedModule != null) word.AddError("illegal port connection");
                     Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
                 }
                 if (word.Text != ",")

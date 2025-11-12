@@ -22,10 +22,11 @@ namespace pluginVerilog.Verilog
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
-            if (word.Text != "(" || buildingBlock == null)
+            if (word.Text != "(")
             {
                 word.AddError("( expected");
                 word.SkipToKeyword(";");
+                if (word.Text == ";") word.MoveNext();
                 return true;
             }
             word.MoveNext();
