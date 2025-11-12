@@ -169,19 +169,36 @@ namespace pluginVerilog.Verilog.ModuleItems
 
         public static new PullUpPullDown? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
-            PullUpPullDown pull = new PullUpPullDown() { DefinitionReference = word.CrateWordReference(), Name = "", Project = word.Project };
-            if (word.Text == "pullup") pull.PullUp = true;
+            bool pullup = false;
+            if (word.Text == "pullup") pullup = true;
+            WordReference beginRef= word.CrateWordReference();
+
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
-            if (pull.PullUp)
+            DriveStrength driveStrength;
+            if (pullup)
             {
-                pull.DriveStrength = DriveStrength.ParseCreatePullUp(word, nameSpace as NameSpace);
+                driveStrength = DriveStrength.ParseCreatePullUp(word, nameSpace as NameSpace);
             }
             else
             {
-                pull.DriveStrength = DriveStrength.ParseCreatePullDown(word, nameSpace as NameSpace);
+                driveStrength = DriveStrength.ParseCreatePullDown(word, nameSpace as NameSpace);
             }
+
+
+            string name = "";
+            if (!General.IsSimpleIdentifier(word.Text))
+            {
+                word.AddError("need instance name");
+            }
+            else
+            {
+                word.Color(CodeDrawStyle.ColorType.Identifier);
+                name = word.Text;
+                word.MoveNext();
+            }
+            PullUpPullDown pull = new PullUpPullDown() { DefinitionReference = beginRef, Name = name, Project = word.Project, PullUp = pullup, DriveStrength = driveStrength };
 
             if (word.Text != "(")
             {
