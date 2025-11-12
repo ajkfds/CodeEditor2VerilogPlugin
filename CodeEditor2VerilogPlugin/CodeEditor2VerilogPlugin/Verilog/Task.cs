@@ -312,6 +312,8 @@ namespace pluginVerilog.Verilog
                 {
                     case "input": // tf_input_declaration
                     case "output": // tf_output_declaration
+                    case "inout":
+                    case "ref":
 
                         Verilog.DataObjects.Port.ParseTfPortDeclaration(word, function);
                         if (word.Text != ";")
