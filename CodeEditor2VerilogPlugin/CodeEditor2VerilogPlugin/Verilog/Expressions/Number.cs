@@ -125,11 +125,18 @@ namespace pluginVerilog.Verilog.Expressions
                 The third token, an unsigned number, shall consist of digits that are legal for the specified base format.The
                 unsigned number token shall immediately follow the base format, optionally preceded by white space.The
                 hexadecimal digits a to f shall be case insensitive.
-
-
-
                 size_constant base_format unsigned_number
         */
+
+        /*
+         
+        time_literal ::=
+              unsigned_number time_unit
+            | fixed_point_number time_unit
+        time_unit ::= s | ms | us | ns | ps | fs
+        The unsigned number or fixed-point number in time_literal shall not be followed by white_space. 
+        */
+
         public bool Signed = false;
         public NumberTypeEnum NumberType = NumberTypeEnum.Decimal;
         public string Text = "";
@@ -179,14 +186,14 @@ namespace pluginVerilog.Verilog.Expressions
                 {
                     apostropheIndex = index;
                     break;
-                } 
-                if(isDecimalDigit(word.GetCharAt(index)))
+                }
+                if (isDecimalDigit(word.GetCharAt(index)))
                 {
                     sb.Append(word.GetCharAt(index));
                 }
-                else if ( word.GetCharAt(index) == '_')
+                else if (word.GetCharAt(index) == '_')
                 {
-                    if(index == 0) return null;
+                    if (index == 0) return null;
                 }
                 else if (word.GetCharAt(index) == '.' || word.GetCharAt(index) == 'e' || word.GetCharAt(index) == 'E')
                 { // real
@@ -197,6 +204,42 @@ namespace pluginVerilog.Verilog.Expressions
                     }
                     word.MoveNext();
                     return number;
+                }
+                else if (index + 1 == word.Length && word.GetCharAt(index) == 's')
+                {
+                    number.NumberType = NumberTypeEnum.Decimal;
+                    number.Value = long.Parse(sb.ToString());
+                    number.Constant = true;
+                    word.MoveNext();
+                    return new Time() { Number = number, Unit = Time.UnitEnum.s };
+                    //        time_unit ::= s | ms | us | ns | ps | fs
+                }
+                else if (index+2 == word.Length && word.GetCharAt(index + 1)=='s')
+                {
+                    number.NumberType = NumberTypeEnum.Decimal;
+                    number.Value = long.Parse(sb.ToString());
+                    number.Constant = true;
+                    switch (word.GetCharAt(index))
+                    {
+                        case 'm':
+                            word.MoveNext();
+                            return new Time() { Number = number, Unit = Time.UnitEnum.ms };
+                        case 'u':
+                            word.MoveNext();
+                            return new Time() { Number = number, Unit = Time.UnitEnum.us };
+                        case 'n':
+                            word.MoveNext();
+                            return new Time() { Number = number, Unit = Time.UnitEnum.ns };
+                        case 'p':
+                            word.MoveNext();
+                            return new Time() { Number = number, Unit = Time.UnitEnum.ps };
+                        case 'f':
+                            word.MoveNext();
+                            return new Time() { Number = number, Unit = Time.UnitEnum.fs };
+                    }
+                    word.AddError("illegal number value");
+                    word.MoveNext();
+                    return null;
                 }
                 else
                 {
