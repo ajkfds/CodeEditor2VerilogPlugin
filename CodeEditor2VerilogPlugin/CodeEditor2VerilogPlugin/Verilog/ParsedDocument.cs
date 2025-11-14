@@ -52,28 +52,6 @@ namespace pluginVerilog.Verilog
             }
         }
 
-        //private WeakReference<IVerilogNavigateNode>? refNavigateNode = null;
-        //public IVerilogNavigateNode? NavigateNodeWeakRef
-        //{
-        //    get
-        //    {
-        //        if (refNavigateNode == null) return null;
-        //        refNavigateNode.TryGetTarget(out IVerilogNavigateNode? target);
-        //        return target;
-        //    }
-        //    set
-        //    {
-        //        if(value == null)
-        //        {
-        //            refNavigateNode = null;
-        //        }
-        //        else
-        //        {
-        //            refNavigateNode = new WeakReference<IVerilogNavigateNode>(value);
-        //        }
-        //    }
-        //}
-
         private static CodeDocument getCodeDocument(Data.IVerilogRelatedFile file)
         {
             if (file == null) return null; // foe illeagal jon constructor 
@@ -86,6 +64,45 @@ namespace pluginVerilog.Verilog
             return codeDocument;
         }
 
+        public static string KeyGenerator(
+            Data.IVerilogRelatedFile verilogRelatedFile,
+            string? moduleName,
+            Dictionary<string, Verilog.Expressions.Expression>? parameterOverrides
+            )
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(verilogRelatedFile.RelativePath);
+            if (moduleName == null) return sb.ToString(); // base Parse
+
+            sb.Append(":");
+            sb.Append(moduleName);
+            if (parameterOverrides == null || parameterOverrides.Count == 0) return sb.ToString();
+
+            sb.Append(":");
+            bool firstItem = true;
+            foreach (var pair in parameterOverrides)
+            {
+                if (!firstItem) sb.Append(",");
+                firstItem = false;
+                sb.Append(pair.Key);
+                sb.Append("=");
+                sb.Append(pair.Value.ConstantValueString());
+            }
+            return sb.ToString();
+        }
+        public static string KeyGenerator(
+            string key,
+            Data.IVerilogRelatedFile verilogRelatedFile,
+            string? moduleName,
+            Dictionary<string, Verilog.Expressions.Expression>? parameterOverrides
+            )
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(key);
+            sb.Append(":");
+            sb.Append(KeyGenerator(verilogRelatedFile, moduleName, parameterOverrides));
+            return sb.ToString();
+        }
 
         ~ParsedDocument()
         {

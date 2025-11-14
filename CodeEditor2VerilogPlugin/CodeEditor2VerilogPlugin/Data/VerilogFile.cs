@@ -138,7 +138,7 @@ namespace pluginVerilog.Data
                 Update();
                 return;
             }
-            if(VerilogParsedDocument.CodeDocument != null) CodeDocument.CopyColorMarkFrom(VerilogParsedDocument.CodeDocument);
+            if(VerilogParsedDocument.CodeDocument != null && CodeDocument != null) CodeDocument.CopyColorMarkFrom(VerilogParsedDocument.CodeDocument);
 
             // Register New Building Block
             if (VerilogParsedDocument.Root != null)

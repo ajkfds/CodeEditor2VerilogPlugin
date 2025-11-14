@@ -42,7 +42,7 @@ namespace pluginVerilog.Parser
 
             fileRef = new WeakReference<Data.VerilogFile>(verilogFile);
 
-            string key = KeyGenerator(verilogRelatedFile, null, null);
+            string key = Verilog.ParsedDocument.KeyGenerator(verilogRelatedFile, null, null);
             parsedDocument = new Verilog.ParsedDocument(verilogRelatedFile,key, null, parseMode);
             parsedDocument.Version = verilogRelatedFile.CodeDocument.Version;
 
@@ -103,7 +103,7 @@ namespace pluginVerilog.Parser
             if (verilogFile == null) throw new Exception();
 
             fileRef = new WeakReference<Data.VerilogFile>(verilogFile);
-            string key = KeyGenerator(verilogFile, moduleName, parameterOverrides);
+            string key = Verilog.ParsedDocument.KeyGenerator(verilogFile, moduleName, parameterOverrides);
             
             parsedDocument = new Verilog.ParsedDocument(verilogRelatedFile,key,null, parseMode);
 
@@ -127,49 +127,6 @@ namespace pluginVerilog.Parser
             word = new Verilog.WordScanner(VerilogDocument, parsedDocument, parsedDocument.SystemVerilog);
 
 //            System.Diagnostics.Debug.Print("Parser Construct " + sw.ElapsedMilliseconds.ToString());
-        }
-
-        public static string KeyGenerator(
-            Data.IVerilogRelatedFile verilogRelatedFile,
-            string? moduleName,
-            Dictionary<string, Verilog.Expressions.Expression>? parameterOverrides
-            )
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append(verilogRelatedFile.RelativePath);
-            if (moduleName == null) return sb.ToString(); // base Parse
-
-            sb.Append(":");
-            sb.Append(moduleName);
-            if (parameterOverrides == null || parameterOverrides.Count == 0) return sb.ToString();
-
-            sb.Append(":");
-            bool firstItem = true;
-            foreach (var pair in parameterOverrides)
-            {
-                if (!firstItem) sb.Append(",");
-                firstItem = false;
-                sb.Append(pair.Key);
-                sb.Append("=");
-                sb.Append(pair.Value.ConstantValueString());
-            }
-            return sb.ToString();
-        }
-        public static string KeyGenerator(ParsedDocument parsedDocument,Data.VerilogHeaderInstance vhInstance)
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append(parsedDocument.Key);
-            sb.Append(":");
-            sb.Append(vhInstance.ID);
-            return sb.ToString();
-        }
-        public static string KeyGenerator(ParsedDocument parsedDocument, int index)
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append(parsedDocument.Key);
-            sb.Append(":");
-            sb.Append(index.ToString());
-            return sb.ToString();
         }
 
         public Verilog.WordScanner word;

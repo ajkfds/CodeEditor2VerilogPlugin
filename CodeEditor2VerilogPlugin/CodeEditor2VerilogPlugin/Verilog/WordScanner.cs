@@ -1053,7 +1053,7 @@ namespace pluginVerilog.Verilog
 
             stock.Add(wordPointer);
             CodeEditor.CodeDocument codeDocument = new CodeEditor.CodeDocument(macroText);
-            string key = VerilogParser.KeyGenerator(wordPointer.ParsedDocument, wordPointer.Index);
+            string key = "";// Verilog.ParsedDocument.KeyGenerator(wordPointer.VerilogFile,) .KeyGenerator(wordPointer.ParsedDocument, wordPointer.Index);
             ParsedDocument newParsedDocument = new ParsedDocument(
                 (IVerilogRelatedFile)wordPointer.ParsedDocument.TextFile, 
                 key,
@@ -1306,7 +1306,7 @@ namespace pluginVerilog.Verilog
             if (parent == null) throw new Exception();
             vhInstance.Parent = parent;
 
-            string key = VerilogParser.KeyGenerator(wordPointer.ParsedDocument, vhInstance);
+            string key = Verilog.ParsedDocument.KeyGenerator(vhInstance.Parent.ID,vhInstance, null, null);
             newParsedDocument = new Verilog.ParsedDocument(vhInstance,key, indexReference, RootParsedDocument.ParseMode);
             CodeDocument? originalDocument = vhInstance.CodeDocument as CodeDocument;
             if (originalDocument == null) throw new Exception();

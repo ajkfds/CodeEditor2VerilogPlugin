@@ -86,17 +86,7 @@ namespace pluginVerilog.Data
         {
             get
             {
-                StringBuilder sb = new StringBuilder();
-                sb.Append(ModuleName);
-                sb.Append(":");
-                foreach (var kvp in ParameterOverrides)
-                {
-                    sb.Append(kvp.Key);
-                    sb.Append("=");
-                    sb.Append(kvp.Value.Value.ToString());
-                    sb.Append(",");
-                }
-                return sb.ToString();
+                return Verilog.ParsedDocument.KeyGenerator(this, ModuleName, ParameterOverrides);
             }
         }
 
@@ -117,14 +107,15 @@ namespace pluginVerilog.Data
         {
             get
             {
-                if (InstanceId == "")
-                {
-                    return RelativePath + ":" + ModuleName;
-                }
-                else
-                {
-                    return RelativePath + ":" + ModuleName + ":" + InstanceId;
-                }
+                return InstanceId;
+                //if (InstanceId == "")
+                //{
+                //    return RelativePath + ":" + ModuleName;
+                //}
+                //else
+                //{
+                //    return RelativePath + ":" + ModuleName + ":" + InstanceId;
+                //}
             }
         }
 
