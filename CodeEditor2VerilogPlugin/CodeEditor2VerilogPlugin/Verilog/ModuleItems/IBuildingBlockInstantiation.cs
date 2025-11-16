@@ -13,7 +13,7 @@ namespace pluginVerilog.Verilog.ModuleItems
 
         Dictionary<string, Expressions.Expression> ParameterOverrides { get; init; }
         Dictionary<string, Expressions.Expression> PortConnection { get; set; }
-        string OverrideParameterID { get; }
+        //string OverrideParameterID { get; }
         bool Prototype { get; set; }
         BuildingBlock? GetInstancedBuildingBlock();
         void AppendLabel(IndexReference iref, AjkAvaloniaLibs.Controls.ColorLabel label);

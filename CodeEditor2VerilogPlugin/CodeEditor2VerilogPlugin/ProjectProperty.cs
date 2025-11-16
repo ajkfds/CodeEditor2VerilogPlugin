@@ -104,7 +104,9 @@ namespace pluginVerilog
             {
                 Data.VerilogFile? file = GetFileOfBuildingBlock(instantiation.SourceName) as Data.VerilogFile;
                 if (file == null) return null;
-                Verilog.ParsedDocument? parsedDocument = file.GetInstancedParsedDocument(instantiation.OverrideParameterID) as Verilog.ParsedDocument;
+                string InstanceKey = Verilog.ParsedDocument.KeyGenerator(file,instantiation.SourceName,instantiation.ParameterOverrides);
+
+                Verilog.ParsedDocument? parsedDocument = file.GetInstancedParsedDocument(InstanceKey) as Verilog.ParsedDocument;
                 if (parsedDocument == null) return null;
                 if (parsedDocument.Root == null) return null;
                 if (!parsedDocument.Root.BuildingBlocks.ContainsKey(instantiation.SourceName)) return null;
@@ -239,6 +241,9 @@ namespace pluginVerilog
         {
             Data.IVerilogRelatedFile? file = GetFileOfBuildingBlock(buildingBlockName);
             if (file == null) return null;
+
+
+
             if (file.VerilogParsedDocument == null) return null;
             if (file.VerilogParsedDocument.Root == null) return null;
             if (!file.VerilogParsedDocument.Root.BuildingBlocks.ContainsKey(buildingBlockName)) return null;
@@ -398,6 +403,11 @@ namespace pluginVerilog
             //{"$sync$or$plane",null },
             //{"$sync$nor$array",null },
             //{"$sync$nor$plane",null },
+
+            // Command line input
+            {"$test$plusargs",null },
+            {"$value$plusargs",null },
+
             //Miscellaneous tasks and functions (20.18)
             {"$system",null },
 
@@ -445,10 +455,6 @@ namespace pluginVerilog
             {"$dist_t",null },
             {"$dist_uniform",null },
             {"$random",null },
-
-            // Command line input
-            {"$test$plusargs",null },
-            {"$value$plusargs",null },
 
 
             //SystemVerilog

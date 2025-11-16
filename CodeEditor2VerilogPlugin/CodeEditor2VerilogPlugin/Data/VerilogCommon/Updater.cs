@@ -189,26 +189,35 @@ namespace pluginVerilog.Data.VerilogCommon
                         {
                             ModuleInstantiation moduleInstantiation = (ModuleInstantiation)instantiation;
                             VerilogModuleInstance? moduleInstance = subItem as VerilogModuleInstance;
+                            ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+                            if (projectProperty == null) throw new Exception();
 
-                            if (
-                                moduleInstantiation != null &&
-                                moduleInstance != null &&
-                                moduleInstantiation.SourceName == moduleInstance.ModuleName &&
-                                moduleInstantiation.ParameterId == moduleInstance.InstanceId
-                                )
+                            Data.IVerilogRelatedFile? ivFile = projectProperty.GetFileOfBuildingBlock(moduleInstantiation.SourceName);
+                            if(ivFile != null)
                             {
-                                alreadyExist = true;
+                                string instanceKey = Verilog.ParsedDocument.KeyGenerator(ivFile, moduleInstantiation.SourceName, moduleInstantiation.ParameterOverrides);
 
-                                if (!newSubItems.ContainsKey(subItem.Name))
+                                if (
+                                    moduleInstantiation != null &&
+                                    moduleInstance != null &&
+                                    moduleInstantiation.SourceName == moduleInstance.ModuleName &&
+                                    instanceKey == moduleInstance.Key
+                                    )
                                 {
-                                    newSubItems.Add(subItem.Name, subItem);
+                                    alreadyExist = true;
+
+                                    if (!newSubItems.ContainsKey(subItem.Name))
+                                    {
+                                        newSubItems.Add(subItem.Name, subItem);
+                                    }
+                                    else
+                                    {
+                                        //System.Diagnostics.Debugger.Break();
+                                    }
+                                    continue;
                                 }
-                                else
-                                {
-                                    //System.Diagnostics.Debugger.Break();
-                                }
-                                continue;
                             }
+
                         }
                         else if (instantiation is IBuildingBlockInstantiation)
                         {

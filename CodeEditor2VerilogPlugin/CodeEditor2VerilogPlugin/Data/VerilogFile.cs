@@ -15,6 +15,7 @@ using Newtonsoft.Json.Serialization;
 using pluginVerilog.CodeEditor;
 using pluginVerilog.FileTypes;
 using pluginVerilog.Verilog.BuildingBlocks;
+using pluginVerilog.Verilog.ModuleItems;
 using Splat;
 using System;
 using System.Collections.Generic;
@@ -51,6 +52,13 @@ namespace pluginVerilog.Data
             return fileItem;
         }
 
+        public override string Key
+        {
+            get
+            {
+                return Verilog.ParsedDocument.KeyGenerator(this, null, null);
+            }
+        }
         static VerilogFile()
         {
             CustomizeItemEditorContextMenu += (x => EditorContextMenu.CustomizeEditorContextMenu(x));
@@ -299,11 +307,11 @@ namespace pluginVerilog.Data
             return sb.ToString();
         }
 
-        public ParsedDocument? GetInstancedParsedDocument(string parameterId)
+        public ParsedDocument? GetInstancedParsedDocument(string key)
         {
             cleanWeakRef();
             ParsedDocument ret;
-            if (parameterId == "")
+            if (key == "")
             {
                 return ParsedDocument;
             }
@@ -311,9 +319,9 @@ namespace pluginVerilog.Data
             {
                 lock (instancedParsedDocumentRefs)
                 {
-                    if (instancedParsedDocumentRefs.ContainsKey(parameterId))
+                    if (instancedParsedDocumentRefs.ContainsKey(key))
                     {
-                        if (instancedParsedDocumentRefs[parameterId].TryGetTarget(out ret))
+                        if (instancedParsedDocumentRefs[key].TryGetTarget(out ret))
                         {
                             return ret;
                         }

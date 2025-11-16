@@ -91,23 +91,23 @@ namespace pluginVerilog.Verilog.ModuleItems
             label.AppendLabel(port.GetLabel());
         }
 
-        public string OverrideParameterID
-        {
-            get
-            {
-                StringBuilder sb = new StringBuilder();
-                sb.Append(SourceName);
-                sb.Append(":");
-                foreach (var kvp in ParameterOverrides)
-                {
-                    sb.Append(kvp.Key);
-                    sb.Append("=");
-                    sb.Append(kvp.Value.Value.ToString());
-                    sb.Append(",");
-                }
-                return sb.ToString();
-            }
-        }
+        //public string OverrideParameterID
+        //{
+        //    get
+        //    {
+        //        StringBuilder sb = new StringBuilder();
+        //        sb.Append(SourceName);
+        //        sb.Append(":");
+        //        foreach (var kvp in ParameterOverrides)
+        //        {
+        //            sb.Append(kvp.Key);
+        //            sb.Append("=");
+        //            sb.Append(kvp.Value.Value.ToString());
+        //            sb.Append(",");
+        //        }
+        //        return sb.ToString();
+        //    }
+        //}
 
         public Project GetInstancedBuildingBlockProject()
         {
@@ -135,7 +135,9 @@ namespace pluginVerilog.Verilog.ModuleItems
             Data.VerilogFile source = (Data.VerilogFile)file;
             if (source == null) return null;
 
-            CodeEditor2.CodeEditor.ParsedDocument? codeEditorParsedDocument = source.GetInstancedParsedDocument(OverrideParameterID);
+            string instanceKey = Verilog.ParsedDocument.KeyGenerator(file, SourceName, ParameterOverrides);
+
+            CodeEditor2.CodeEditor.ParsedDocument? codeEditorParsedDocument = source.GetInstancedParsedDocument(instanceKey);
             if (codeEditorParsedDocument is not ParsedDocument) return null;
             ParsedDocument? parsedDocument = (ParsedDocument)codeEditorParsedDocument;
             if (parsedDocument == null) return null;
@@ -166,6 +168,8 @@ namespace pluginVerilog.Verilog.ModuleItems
             var moduleIdentifier = word.CrateWordReference();
             string moduleName = word.Text;
             IndexReference beginIndexReference = word.CreateIndexReference();
+
+
             Module? instancedModule = word.ProjectProperty.GetBuildingBlock(moduleName) as Module;
             if (instancedModule == null)
             {

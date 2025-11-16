@@ -82,7 +82,7 @@ namespace pluginVerilog.Data
             weakInstantiating.TryGetTarget(out var moduleInstantiation);
             return moduleInstantiation;
         }
-        public string InstanceId
+        public override string Key
         {
             get
             {
@@ -107,7 +107,7 @@ namespace pluginVerilog.Data
         {
             get
             {
-                return InstanceId;
+                return Key;
                 //if (InstanceId == "")
                 //{
                 //    return RelativePath + ":" + ModuleName;
@@ -138,7 +138,8 @@ namespace pluginVerilog.Data
             if (Project != project) return false;
             if (ModuleName != moduleInstantiation.SourceName) return false;
 
-            if (InstanceId != moduleInstantiation.OverrideParameterID) return false;
+            string instanceKey = Verilog.ParsedDocument.KeyGenerator(ivFile, moduleInstantiation.SourceName, moduleInstantiation.ParameterOverrides);
+            if (Key != instanceKey) return false;
 
             // re-register
             //disposeItems();
@@ -211,7 +212,7 @@ namespace pluginVerilog.Data
             {
                 {
                     Data.VerilogFile source = SourceVerilogFile;
-                    parsedDocument = source.GetInstancedParsedDocument(InstanceId);
+                    parsedDocument = source.GetInstancedParsedDocument(Key);
                 }
                 return parsedDocument;
             }
@@ -254,7 +255,7 @@ namespace pluginVerilog.Data
                 ParsedDocument? oldParsedDocument = ParsedDocument;
                 {
                     ParsedDocument = newParsedDocument; // should keep parseddocument 1st
-                    source.RegisterInstanceParsedDocument(InstanceId, newParsedDocument, this);
+                    source.RegisterInstanceParsedDocument(Key, newParsedDocument, this);
                     acceptParameterizedParsedDocument(newParsedDocument);
                 }
                 if (oldParsedDocument != null) oldParsedDocument.Dispose();
