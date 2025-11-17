@@ -58,12 +58,8 @@ namespace pluginVerilog.Data
             instance.id = id;
             instance.RootFile = parentFile;
             instance.InstancedReference = instancedReference;
-            instance.checkerId = checkerCount;
-            checkerCount++;
             return instance;
         }
-        private static int checkerCount = 0;
-        public int checkerId = -1;
         static VerilogHeaderInstance()
         {
             CustomizeItemEditorContextMenu += (x => EditorContextMenu.CustomizeEditorContextMenu(x));

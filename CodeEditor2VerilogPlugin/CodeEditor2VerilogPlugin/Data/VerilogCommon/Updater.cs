@@ -83,7 +83,7 @@ namespace pluginVerilog.Data.VerilogCommon
                     }
                     else
                     {
-                        addSubItemsMultiBuildingBlock(item, newSubItems, parent, project);
+                        addSubItemsMultiBuildingBlock((VerilogFile)item, newSubItems, parent, project);
                     }
                 }
 
@@ -96,18 +96,18 @@ namespace pluginVerilog.Data.VerilogCommon
         }
 
 
-        private static void addSubItemsMultiBuildingBlock(IVerilogRelatedFile item, Dictionary<string, CodeEditor2.Data.Item> newSubItems, CodeEditor2.Data.Item? parent, Project project)
+        private static void addSubItemsMultiBuildingBlock(VerilogFile verilogFile, Dictionary<string, CodeEditor2.Data.Item> newSubItems, CodeEditor2.Data.Item? parent, Project project)
         {
-            if (item.VerilogParsedDocument?.Root == null) throw new Exception();
+            if (verilogFile.VerilogParsedDocument?.Root == null) throw new Exception();
 
             // add building block instance
-            foreach (BuildingBlock buldingBlock in item.VerilogParsedDocument.Root.BuildingBlocks.Values)
+            foreach (BuildingBlock buldingBlock in verilogFile.VerilogParsedDocument.Root.BuildingBlocks.Values)
             {
                 bool alreadyExist = false;
 
-                if (item.Items.ContainsKey(buldingBlock.Name))
+                if (verilogFile.Items.ContainsKey(buldingBlock.Name))
                 {   // has same name item
-                    CodeEditor2.Data.Item subItem = item.Items[buldingBlock.Name];
+                    CodeEditor2.Data.Item subItem = verilogFile.Items[buldingBlock.Name];
 
                     if (buldingBlock is Module)
                     {
@@ -129,7 +129,7 @@ namespace pluginVerilog.Data.VerilogCommon
                     {
                         Module module = (Module)buldingBlock;
 
-                        if (item.Items.ContainsKey(module.Name))
+                        if (verilogFile.Items.ContainsKey(module.Name))
                         {
 
                         }

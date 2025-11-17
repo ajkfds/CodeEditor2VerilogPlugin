@@ -84,7 +84,6 @@ namespace pluginVerilog.NavigatePanel
             VerilogHeaderInstance? header = VerilogHeaderInstance;
             if (header == null) return;
 
-            Text = Text + ":"+header.checkerId.ToString();
             foreach (CodeEditor2.Data.Item item in header.Items.Values)
             {
                 targetDataItems.Add(item);

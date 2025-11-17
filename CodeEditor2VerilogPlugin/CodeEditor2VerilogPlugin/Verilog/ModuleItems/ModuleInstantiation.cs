@@ -91,24 +91,6 @@ namespace pluginVerilog.Verilog.ModuleItems
             label.AppendLabel(port.GetLabel());
         }
 
-        //public string OverrideParameterID
-        //{
-        //    get
-        //    {
-        //        StringBuilder sb = new StringBuilder();
-        //        sb.Append(SourceName);
-        //        sb.Append(":");
-        //        foreach (var kvp in ParameterOverrides)
-        //        {
-        //            sb.Append(kvp.Key);
-        //            sb.Append("=");
-        //            sb.Append(kvp.Value.Value.ToString());
-        //            sb.Append(",");
-        //        }
-        //        return sb.ToString();
-        //    }
-        //}
-
         public Project GetInstancedBuildingBlockProject()
         {
             Project sourceProject = Project;

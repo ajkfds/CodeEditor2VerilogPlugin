@@ -339,7 +339,7 @@ namespace pluginVerilog.Data
         public override DocumentParser CreateDocumentParser(DocumentParser.ParseModeEnum parseMode, System.Threading.CancellationToken? token)
         {
             //            return new Parser.VerilogParser(this, ModuleName, ParameterOverrides, parseMode);
-            return new Parser.VerilogParser(this.SourceVerilogFile, ModuleName, ParameterOverrides, parseMode, token);
+            return new Parser.VerilogInstanceParser(this.SourceVerilogFile, ModuleName, ParameterOverrides, parseMode, token);
         }
 
 

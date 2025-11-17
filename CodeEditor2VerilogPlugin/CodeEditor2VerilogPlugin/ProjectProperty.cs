@@ -11,6 +11,7 @@ using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.ModuleItems;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection.Metadata;
@@ -411,6 +412,8 @@ namespace pluginVerilog
             //Miscellaneous tasks and functions (20.18)
             {"$system",null },
 
+            //Formatting data to a string (21.3.3)
+            {"$sformat",null },
 
             // undefined in systemverilog standard
         };
@@ -556,6 +559,10 @@ namespace pluginVerilog
             //{"$dist_uniform",null },
             //Stochastic analysis functions (20.16)
             //{"$q_full",null },
+            //Formatting data to a string (21.3.3)
+            {"$sformatf",null },
+            // I/O error status(21.3.7)
+            {"$feof",null },
 
         };
 

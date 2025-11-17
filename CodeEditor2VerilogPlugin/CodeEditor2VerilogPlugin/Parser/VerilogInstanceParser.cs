@@ -13,11 +13,17 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Parser
 {
-    public class VerilogParser : DocumentParser
+    public class VerilogInstanceParser : DocumentParser
     {
-        // create parser
+        /// <summary>
+        /// Original Verilog File Parser Generator
+        /// </summary>
+        /// <param name="verilogRelatedFile"></param>
+        /// <param name="parseMode"></param>
+        /// <param name="token"></param>
+        /// <exception cref="Exception"></exception>
         [SetsRequiredMembers]
-        public VerilogParser(
+        public VerilogInstanceParser(
             Data.IVerilogRelatedFile verilogRelatedFile,
             DocumentParser.ParseModeEnum parseMode,
             System.Threading.CancellationToken? token
@@ -73,9 +79,18 @@ namespace pluginVerilog.Parser
 //            System.Diagnostics.Debug.Print("Parser Construct " + sw.ElapsedMilliseconds.ToString());
         }
 
+        /// <summary>
+        /// Create Instance Buliding Block Parser
+        /// </summary>
+        /// <param name="verilogRelatedFile"></param>
+        /// <param name="moduleName"></param>
+        /// <param name="parameterOverrides"></param>
+        /// <param name="parseMode"></param>
+        /// <param name="token"></param>
+        /// <exception cref="Exception"></exception>
         // create parser with parameter override
         [SetsRequiredMembers]
-        public VerilogParser(
+        public VerilogInstanceParser(
             Data.IVerilogRelatedFile verilogRelatedFile,
             string moduleName,
             Dictionary<string, Verilog.Expressions.Expression> parameterOverrides,

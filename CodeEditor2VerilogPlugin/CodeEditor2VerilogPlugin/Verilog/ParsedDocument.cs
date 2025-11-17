@@ -130,8 +130,6 @@ namespace pluginVerilog.Verilog
         public bool SystemVerilog = false;
         public bool Instance = false;
 
-//        [Newtonsoft.Json.JsonIgnore]
-//        [Newtonsoft.Json.JsonProperty]
         public Root Root { set; get; }
 
         [Newtonsoft.Json.JsonIgnore]
@@ -144,8 +142,9 @@ namespace pluginVerilog.Verilog
         [Newtonsoft.Json.JsonIgnore]
         public string? TargetBuildingBlockName = null;
 
-        // for IndexReference
 
+
+        // for IndexReference
         private bool reparseRequested = false;
         public bool ReparseRequested
         {

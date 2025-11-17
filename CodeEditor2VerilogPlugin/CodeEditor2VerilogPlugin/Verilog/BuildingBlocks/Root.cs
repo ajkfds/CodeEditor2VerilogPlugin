@@ -165,7 +165,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
             Module module;
 
-            if (parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse)
+            if (parsedDocument.ParseMode == Parser.VerilogInstanceParser.ParseModeEnum.LoadParse)
             {
                 if (parsedDocument.ParameterOverrides == null)
                 {
@@ -212,7 +212,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             Package package;
             //IndexReference iref = IndexReference.Create(parsedDocument);
 
-            if (parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse)
+            if (parsedDocument.ParseMode == Parser.VerilogInstanceParser.ParseModeEnum.LoadParse)
             {
                 if (parsedDocument.ParameterOverrides == null)
                 {
@@ -259,7 +259,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             Program program;
             //IndexReference iref = IndexReference.Create(parsedDocument);
 
-            if (parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse)
+            if (parsedDocument.ParseMode == Parser.VerilogInstanceParser.ParseModeEnum.LoadParse)
             {
                 if (parsedDocument.ParameterOverrides == null)
                 {
@@ -315,7 +315,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             Interface module;
             //IndexReference iref = IndexReference.Create(parsedDocument);
 
-            if (parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse)
+            if (parsedDocument.ParseMode == Parser.VerilogInstanceParser.ParseModeEnum.LoadParse)
             {
                 if (parsedDocument.ParameterOverrides == null)
                 {
