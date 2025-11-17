@@ -131,7 +131,15 @@ namespace pluginVerilog.Tool
             {
                 var parser = verilogFile.CreateDocumentParser(CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.BackgroundParse, token);
                 if (parser == null) return;
-                CodeEditor2.Controller.AppendLog("parseHier : " + verilogFile.ID);
+
+                if(parseMode == ParseMode.ForceAllFiles)
+                {
+                    CodeEditor2.Controller.AppendLog("parseHier : " + verilogFile.ID,Avalonia.Media.Colors.Cyan);
+                }
+                else
+                {
+                    CodeEditor2.Controller.AppendLog("parseHier : " + verilogFile.ID);
+                }
                 parser.Parse();
                 if(parser.ParsedDocument != null)
                 {
@@ -195,7 +203,14 @@ namespace pluginVerilog.Tool
             var parser = verilogFile.CreateDocumentParser(CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.BackgroundParse, token);
             if (parser == null) return;
 
-            CodeEditor2.Controller.AppendLog("reparseHier : " + verilogFile.ID);
+            if (parseMode == ParseMode.ForceAllFiles)
+            {
+                CodeEditor2.Controller.AppendLog("reparseHier : " + verilogFile.ID, Avalonia.Media.Colors.Cyan);
+            }
+            else
+            {
+                CodeEditor2.Controller.AppendLog("reparseHier : " + verilogFile.ID);
+            }
             parser.Parse();
             if (parser.ParsedDocument != null)
             {

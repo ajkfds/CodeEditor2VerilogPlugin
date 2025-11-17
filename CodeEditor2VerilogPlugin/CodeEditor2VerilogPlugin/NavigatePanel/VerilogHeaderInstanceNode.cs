@@ -37,7 +37,7 @@ namespace pluginVerilog.NavigatePanel
 
         public override void OnSelected()
         {
-            if(TextFile == null) return;
+            if (TextFile == null) return;
 
             CodeEditor2.Controller.CodeEditor.SetTextFile(TextFile);
             if (NodeSelected != null) NodeSelected();

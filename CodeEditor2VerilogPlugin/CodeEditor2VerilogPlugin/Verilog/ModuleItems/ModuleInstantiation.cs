@@ -248,7 +248,8 @@ namespace pluginVerilog.Verilog.ModuleItems
                     if (instancedModule == null)
                     {
                         nameSpace.BuildingBlock.ReparseRequested = true;
-                        word.AddWarning("not parsed yet.");
+                        word.RootParsedDocument.ReparseRequested = true;
+                        word.AddError("not parsed yet.");
                     }
                 }
 

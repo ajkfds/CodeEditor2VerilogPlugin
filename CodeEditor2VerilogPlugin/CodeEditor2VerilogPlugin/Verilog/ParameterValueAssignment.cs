@@ -71,10 +71,11 @@ namespace pluginVerilog.Verilog
                         {
                             word.AddPrototypeError("duplicated");
                         }
-                        else
-                        {
-                            if (expression != null) parameterOverrides.Add(paramName, expression);
-                        }
+                    }
+
+                    if(General.IsSimpleIdentifier(paramName) && expression != null)
+                    {
+                        if (expression != null) parameterOverrides.Add(paramName, expression);
                     }
 
                     if (word.Text != ")")

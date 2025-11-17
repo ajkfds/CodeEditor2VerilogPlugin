@@ -74,15 +74,15 @@ namespace pluginVerilog.NavigatePanel
             UpdateVisual();
             if (CodeEditor2.Global.StopParse) return;
 
-            if (TextFile.ParseValid && !TextFile.ReparseRequested)
-            {
-                // skip parse
-            }
-            else
-            {
+            //if (TextFile.ParseValid && !TextFile.ReparseRequested)
+            //{
+            //    // skip parse
+            //}
+            //else
+            //{
                 if (TextFile == null) return;
                 await Tool.ParseHierarchy.ParseAsync(TextFile, Tool.ParseHierarchy.ParseMode.SearchReparseReqestedTree);
-            }
+            //}
         }
 
 

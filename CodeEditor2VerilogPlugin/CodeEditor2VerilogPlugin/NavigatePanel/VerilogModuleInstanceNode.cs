@@ -101,15 +101,14 @@ namespace pluginVerilog.NavigatePanel
             //            }
             if (CodeEditor2.Global.StopParse) return;
 
-            if (ModuleInstance.ParseValid & !ModuleInstance.ReparseRequested)
-            {
-                // skip parse
-            }
-            else
-            {
+            //if (ModuleInstance.ParseValid & !ModuleInstance.ReparseRequested)
+            //{
+            //    // skip parse
+            //}
+            //else
+            //{
                 await Tool.ParseHierarchy.ParseAsync(ModuleInstance, Tool.ParseHierarchy.ParseMode.SearchReparseReqestedTree);
-            }
-
+            //}
         }
 
         public override void Update()
