@@ -81,7 +81,8 @@ namespace pluginVerilog
         }
 
         public AnnotationCommandsClass AnnotationCommands { get; set; } = new AnnotationCommandsClass();
-
+        public string AnnotationKeyValueDelimiter = ":";
+        public string AnnotationSeparator = ",";
         public class AnnotationCommandsClass
         {
             public string Synchronized = "@sync";

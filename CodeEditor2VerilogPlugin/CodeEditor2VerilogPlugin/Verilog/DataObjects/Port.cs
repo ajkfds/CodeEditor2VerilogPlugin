@@ -181,28 +181,29 @@ namespace pluginVerilog.Verilog.DataObjects
             string? portGroup = null;
             Port? definedPort;
 
-            PortAnnotation.ParseComment(word, nameSpace, null, ref portGroup);
+            PortAnnotation.ParsePreComment(word, nameSpace, null, ref portGroup);
             if (ParsePortDeclaration(word, nameSpace, true, ref prevDataType, ref prevNetType, ref prevDirection,out definedPort))
             {
                 if (definedPort != null)
                 {
                     definedPort.PortGroupName = portGroup;
-                    PortAnnotation.ParseComment(word, nameSpace, definedPort, ref portGroup);
+                    PortAnnotation.ParsePostComment(word, nameSpace, definedPort, ref portGroup);
                 }
+                if (definedPort != null) PortAnnotation.ParsePostComment(word, nameSpace, definedPort, ref portGroup);
                 if (word.Text != ",") return;
                 word.MoveNext();
-                if (definedPort != null) PortAnnotation.ParseComment(word, nameSpace, definedPort, ref portGroup);
+                if (definedPort != null) PortAnnotation.ParsePostComment(word, nameSpace, definedPort, ref portGroup);
                 while (!word.Eof)
                 {
                     if (!ParsePortDeclaration(word, nameSpace, false, ref prevDataType, ref prevNetType, ref prevDirection, out definedPort)) return;
                     if (definedPort != null)
                     {
                         definedPort.PortGroupName = portGroup;
-                        PortAnnotation.ParseComment(word, nameSpace, definedPort, ref portGroup);
+                        PortAnnotation.ParsePostComment(word, nameSpace, definedPort, ref portGroup);
                     }
                     if (word.Text != ",") return;
                     word.MoveNext();
-                    if (definedPort != null) PortAnnotation.ParseComment(word, nameSpace, definedPort, ref portGroup);
+                    if (definedPort != null) PortAnnotation.ParsePostComment(word, nameSpace, definedPort, ref portGroup);
                 }
             }
             else if(!nameSpace.BuildingBlock.AnsiStylePortDefinition)

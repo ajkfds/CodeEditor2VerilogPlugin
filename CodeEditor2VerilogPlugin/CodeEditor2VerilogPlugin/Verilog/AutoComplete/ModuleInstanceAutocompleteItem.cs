@@ -1,12 +1,14 @@
-﻿using System;
+﻿using Avalonia.Media;
+using CodeEditor2.CodeEditor.CodeComplete;
+using CodeEditor2.CodeEditor.PopupMenu;
+using pluginVerilog.Verilog.BuildingBlocks;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
-using Avalonia.Media;
-using CodeEditor2.CodeEditor.CodeComplete;
-using pluginVerilog.Verilog.BuildingBlocks;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace pluginVerilog.Verilog.AutoComplete
 {
@@ -111,6 +113,12 @@ namespace pluginVerilog.Verilog.AutoComplete
             CodeEditor2.Controller.CodeEditor.RequestReparse();
         }
 
+        public override PopupMenuItem CreatePopupMenuItem()
+        {
+            PopupMenuItem popupMenuItem = new PopupMenuItem(Text);
+            popupMenuItem.Selected += new Action(() => { Apply(); });
+            return popupMenuItem;
+        }
 
     }
 }
