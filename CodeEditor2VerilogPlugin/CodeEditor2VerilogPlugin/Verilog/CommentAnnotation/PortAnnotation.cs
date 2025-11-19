@@ -31,12 +31,12 @@ namespace pluginVerilog.Verilog.CommentAnnotation
         /// <summary>
         /// Check for comment annotations
         /// </summary>
-        public static void ParsePostComment(WordScanner word, NameSpace nameSpace, Verilog.DataObjects.Port? port, ref string? portGroup)
+        public static void ParsePostComment(WordScanner word, NameSpace nameSpace, Verilog.DataObjects.Port? port)
         {
-            string commentText = word.GetNextComment();
+            string commentText = word.GetPreviousComment();
             if (!commentText.Contains("@")) return;
 
-            var comment = word.GetNextCommentScanner();
+            var comment = word.GetPreviousCommentScanner();
             while (!comment.EOC)
             {
                 if (!comment.Text.StartsWith("@"))
@@ -110,11 +110,15 @@ namespace pluginVerilog.Verilog.CommentAnnotation
                 if(syncTarget == "clock")
                 {
                     port.AppendAnnotation("clock", "");
+                    comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                    comment.MoveNext();
                     return;
                 }
                 if (syncTarget == "reset")
                 {
                     port.AppendAnnotation("reset", "");
+                    comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                    comment.MoveNext();
                     return;
                 }
 

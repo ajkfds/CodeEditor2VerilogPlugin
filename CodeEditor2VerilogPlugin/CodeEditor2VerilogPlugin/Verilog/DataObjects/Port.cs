@@ -187,23 +187,23 @@ namespace pluginVerilog.Verilog.DataObjects
                 if (definedPort != null)
                 {
                     definedPort.PortGroupName = portGroup;
-                    PortAnnotation.ParsePostComment(word, nameSpace, definedPort, ref portGroup);
                 }
-                if (definedPort != null) PortAnnotation.ParsePostComment(word, nameSpace, definedPort, ref portGroup);
+                PortAnnotation.ParsePostComment(word, nameSpace, definedPort);
                 if (word.Text != ",") return;
                 word.MoveNext();
-                if (definedPort != null) PortAnnotation.ParsePostComment(word, nameSpace, definedPort, ref portGroup);
+                PortAnnotation.ParsePostComment(word, nameSpace, definedPort);
                 while (!word.Eof)
                 {
+                    PortAnnotation.ParsePreComment(word, nameSpace, null, ref portGroup);
                     if (!ParsePortDeclaration(word, nameSpace, false, ref prevDataType, ref prevNetType, ref prevDirection, out definedPort)) return;
                     if (definedPort != null)
                     {
                         definedPort.PortGroupName = portGroup;
-                        PortAnnotation.ParsePostComment(word, nameSpace, definedPort, ref portGroup);
                     }
+                    PortAnnotation.ParsePostComment(word, nameSpace, definedPort);
                     if (word.Text != ",") return;
                     word.MoveNext();
-                    if (definedPort != null) PortAnnotation.ParsePostComment(word, nameSpace, definedPort, ref portGroup);
+                    PortAnnotation.ParsePostComment(word, nameSpace, definedPort);
                 }
             }
             else if(!nameSpace.BuildingBlock.AnsiStylePortDefinition)

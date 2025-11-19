@@ -214,6 +214,10 @@ namespace pluginVerilog.Verilog
                     }
                 }
             }
+            else
+            {
+                commentSkippedPrev = false;
+            }
 
             if (Eof)
             {
