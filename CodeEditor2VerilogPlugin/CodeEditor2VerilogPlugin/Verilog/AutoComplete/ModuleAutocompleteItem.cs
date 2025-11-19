@@ -9,7 +9,7 @@ namespace pluginVerilog.Verilog.AutoComplete
 {
     public class ModuleAutocompleteItem : AutocompleteItem
     {
-        public ModuleAutocompleteItem(string text, byte colorIndex, Avalonia.Media.Color color) : base(text, colorIndex, color)
+        public ModuleAutocompleteItem(string text, byte colorIndex, Avalonia.Media.Color color) : base(text, colorIndex, color, "CodeEditor2/Assets/Icons/gear.svg")
         {
         }
         public override void Apply()

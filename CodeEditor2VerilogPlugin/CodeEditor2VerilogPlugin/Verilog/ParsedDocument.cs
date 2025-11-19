@@ -8,6 +8,7 @@ using pluginVerilog.NavigatePanel;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.ModuleItems;
+using Svg;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
@@ -557,7 +558,13 @@ namespace pluginVerilog.Verilog
 
             List<AutocompleteItem> items = new List<AutocompleteItem>();
 
-            if (hierWords.Count == 0) AppendKeywordAutoCompleteItems(items, candidateWord);
+            if (hierWords.Count == 0)
+            {
+                // special autocomplete tool
+                AppendSpecialAutoCompleteItems(items, candidateWord);
+                // keywords
+                AppendKeywordAutoCompleteItems(items, candidateWord);
+            }
 
             // on Root and sont have ant Building Blocks
             if (Root == null || Root.BuildingBlocks == null)
@@ -625,8 +632,6 @@ namespace pluginVerilog.Verilog
                 // append INamedElements
                 if (space != null) appendAutoCompleteINamedElements(items, space, candidateWord);
 
-                // special autocomplete tool
-                AppendSpecialAutoCompleteItems(items, candidateWord);
             }
             else
             {
@@ -647,7 +652,8 @@ namespace pluginVerilog.Verilog
                         new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
                             subElement.Name,
                             CodeDrawStyle.ColorIndex(subElement.ColorType),
-                            Global.CodeDrawStyle.Color(subElement.ColorType)
+                            Global.CodeDrawStyle.Color(subElement.ColorType),
+                            "CodeEditor2/Assets/Icons/tag.svg"
                             )
                     );
                 }
@@ -702,7 +708,8 @@ namespace pluginVerilog.Verilog
                     new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
                         element.Name,
                         CodeDrawStyle.ColorIndex(element.ColorType),
-                        Global.CodeDrawStyle.Color(element.ColorType)
+                        Global.CodeDrawStyle.Color(element.ColorType),
+                        "CodeEditor2/Assets/Icons/tag.svg"
                         )
                 );
                 add = true;
@@ -782,13 +789,13 @@ namespace pluginVerilog.Verilog
             foreach (string keyword in keywords)
             {
                 if (!keyword.StartsWith(cantidate)) continue;
-                items.Add(
-                    new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
+                AutocompleteItem item = new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
                     keyword,
                     CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
-                    Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
-                    )
-                );
+                    Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword),
+                    "CodeEditor2/Assets/Icons/bookmark.svg"
+                    );
+                items.Add(item);
             }
         }
         public delegate void AppendSpecialAutoCompleteItemsDelegate(List<AutocompleteItem> items, string cantidate);
