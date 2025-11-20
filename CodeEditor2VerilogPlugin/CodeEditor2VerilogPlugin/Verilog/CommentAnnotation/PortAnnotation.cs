@@ -10,6 +10,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
     {
         public static void ParsePreComment(WordScanner word, NameSpace nameSpace, Verilog.DataObjects.Port? port, ref string? portGroup)
         {
+            if (word.Prototype) return;
             string commentText = word.GetPreviousComment();
             if (!commentText.Contains("@")) return;
             var comment = word.GetPreviousCommentScanner();
@@ -33,6 +34,8 @@ namespace pluginVerilog.Verilog.CommentAnnotation
         /// </summary>
         public static void ParsePostComment(WordScanner word, NameSpace nameSpace, Verilog.DataObjects.Port? port)
         {
+            if (word.Prototype) return;
+
             string commentText = word.GetPreviousComment();
             if (!commentText.Contains("@")) return;
 
@@ -110,6 +113,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
                 if(syncTarget == "clock")
                 {
                     port.AppendAnnotation("clock", "");
+                    if (port.DataObject != null && !port.DataObject.SyncInfos.Contains("clock")) port.DataObject.SyncInfos.Add("clock");
                     comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
                     comment.MoveNext();
                     return;
@@ -117,6 +121,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
                 if (syncTarget == "reset")
                 {
                     port.AppendAnnotation("reset", "");
+                    if (port.DataObject != null && !port.DataObject.SyncInfos.Contains("clock")) port.DataObject.SyncInfos.Add("reset");
                     comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
                     comment.MoveNext();
                     return;
@@ -127,6 +132,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
                     break;
                 }
                 port.AppendAnnotation("sync", syncTarget);
+                if (port.DataObject != null && !port.DataObject.SyncInfos.Contains(syncTarget)) port.DataObject.SyncInfos.Add(syncTarget);
                 comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
                 comment.MoveNext();
 

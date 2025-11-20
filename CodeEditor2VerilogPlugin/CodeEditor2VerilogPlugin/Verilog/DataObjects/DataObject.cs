@@ -145,6 +145,8 @@ namespace pluginVerilog.Verilog.DataObjects
         public List<WordReference> AssignedReferences { set; get; } = new List<WordReference>();
         public int DisposedIndex = -1;
 
+        public List<string> SyncInfos { get; } = new List<string>();
+
         public virtual string CreateTypeString()
         {
             if (DataType != null) return DataType.CreateString();

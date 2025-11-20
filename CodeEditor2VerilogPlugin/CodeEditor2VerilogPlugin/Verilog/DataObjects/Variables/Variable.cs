@@ -395,6 +395,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         // comment annotation
 
+
         private Dictionary<string, string> commentAnnotations = new Dictionary<string, string>();
         public Dictionary<string, string> CommentAnnotations { get { return commentAnnotations; } }
         public void AppendAnnotation(string key, string value)
