@@ -86,6 +86,13 @@ namespace pluginVerilog.Data
             if (!IsSameAs(file as File)) return false;
 
             ParsedDocument = file.ParsedDocument;
+            if(CodeDocument != null && file.CodeDocument != null)
+            {
+                if(CodeDocument.Version == file.CodeDocument.Version)
+                {
+                    CodeDocument.CopyColorMarkFrom(file.CodeDocument);
+                }
+            }
 
             return true;
         }

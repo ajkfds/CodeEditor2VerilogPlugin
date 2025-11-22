@@ -1165,7 +1165,7 @@ namespace pluginVerilog.Verilog
         private void diveIntoIncludeFile(string relativeFilePath)
         {
             if (wordPointer.ParsedDocument.File == null) return;
-            string id = wordPointer.ParsedDocument.File.ID + ","+ relativeFilePath +"_"+ wordPointer.ParsedDocument.IncludeFiles.Count.ToString();
+            string id = wordPointer.ParsedDocument.File.ID + "," + relativeFilePath + "(" + wordPointer.Index+")";
 
             Data.IVerilogRelatedFile rootFile;
             if (stock.Count == 0)
@@ -1182,7 +1182,7 @@ namespace pluginVerilog.Verilog
 
             if (prototype)
             {
-                addIncludeFile(relativeFilePath, rootFile, id, indexReference, out newParsedDocument);
+                addIncludeFile(relativeFilePath, rootFile, id, indexReference, out newParsedDocument, wordPointer.Index);
             }
             else
             {
@@ -1204,7 +1204,7 @@ namespace pluginVerilog.Verilog
                 }
                 else
                 {
-                    addIncludeFile(relativeFilePath, rootFile, id, indexReference, out newParsedDocument);
+                    addIncludeFile(relativeFilePath, rootFile, id, indexReference, out newParsedDocument,wordPointer.Index);
                 }
             }
             if (newParsedDocument == null) return;
@@ -1240,7 +1240,7 @@ namespace pluginVerilog.Verilog
             }
         }
 
-        private void addIncludeFile(string relativeFilePath, IVerilogRelatedFile rootFile,string id, IndexReference indexReference, out ParsedDocument? newParsedDocument)
+        private void addIncludeFile(string relativeFilePath, IVerilogRelatedFile rootFile,string id, IndexReference indexReference, out ParsedDocument? newParsedDocument,int callIndex)
         {
             string name;
             if (relativeFilePath.Contains(System.IO.Path.DirectorySeparatorChar))
@@ -1252,25 +1252,27 @@ namespace pluginVerilog.Verilog
                 name = relativeFilePath;
             }
 
-            if (wordPointer.ParsedDocument.IncludeFiles.ContainsKey(name))
-            { // avoid duplicate name
-                int count = 1;
-                while (wordPointer.ParsedDocument.IncludeFiles.ContainsKey(name + ":" + count.ToString()))
-                {
-                    count++;
-                }
-                name = name + ":" + count.ToString();
-            }
+            name = name + "(" + callIndex.ToString() + ")";
 
-            if (wordPointer.ParsedDocument.IncludeFiles.ContainsKey(name))
-            { // avoid duplicate name
-                int count = 1;
-                while (wordPointer.ParsedDocument.IncludeFiles.ContainsKey(name + ":" + count.ToString()))
-                {
-                    count++;
-                }
-                name = name + ":" + count.ToString();
-            }
+            //if (wordPointer.ParsedDocument.IncludeFiles.ContainsKey(name))
+            //{ // avoid duplicate name
+            //    int count = 1;
+            //    while (wordPointer.ParsedDocument.IncludeFiles.ContainsKey(name + ":" + count.ToString()))
+            //    {
+            //        count++;
+            //    }
+            //    name = name + ":" + count.ToString();
+            //}
+
+            //if (wordPointer.ParsedDocument.IncludeFiles.ContainsKey(name))
+            //{ // avoid duplicate name
+            //    int count = 1;
+            //    while (wordPointer.ParsedDocument.IncludeFiles.ContainsKey(name + ":" + count.ToString()))
+            //    {
+            //        count++;
+            //    }
+            //    name = name + ":" + count.ToString();
+            //}
 
 
             Data.VerilogHeaderInstance vhInstance = Data.VerilogHeaderInstance.Create(

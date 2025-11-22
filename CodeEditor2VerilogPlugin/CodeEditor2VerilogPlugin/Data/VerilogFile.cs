@@ -18,6 +18,7 @@ using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.ModuleItems;
 using Splat;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -277,7 +278,7 @@ namespace pluginVerilog.Data
             }
         }
 
-        private Dictionary<string, System.WeakReference<ParsedDocument>> instancedParsedDocumentRefs = new Dictionary<string, WeakReference<ParsedDocument>>();
+        private ConcurrentDictionary<string, System.WeakReference<ParsedDocument>> instancedParsedDocumentRefs = new ConcurrentDictionary<string, WeakReference<ParsedDocument>>();
 
         internal string DebugInfo()
         {
@@ -309,95 +310,52 @@ namespace pluginVerilog.Data
 
         public ParsedDocument? GetInstancedParsedDocument(string key)
         {
-            cleanWeakRef();
-            ParsedDocument ret;
+            ParsedDocument? ret;
             if (key == "")
             {
                 return ParsedDocument;
             }
             else
             {
-                lock (instancedParsedDocumentRefs)
+                if(instancedParsedDocumentRefs.TryGetValue(key,out WeakReference < ParsedDocument >? weakRef))
                 {
-                    if (instancedParsedDocumentRefs.ContainsKey(key))
+                    if(weakRef == null)
                     {
-                        if (instancedParsedDocumentRefs[key].TryGetTarget(out ret))
-                        {
-                            return ret;
-                        }
-                        else
-                        {
-                            return null;
-                        }
+                        instancedParsedDocumentRefs.Remove(key,out _);
+                        return null;
                     }
                     else
                     {
-                        return null;
+                        weakRef.TryGetTarget(out ret);
+                        return ret;
                     }
+                }
+                else
+                {
+                    instancedParsedDocumentRefs.Remove(key, out _);
+                    return null;
                 }
             }
         }
 
         public void RegisterInstanceParsedDocument(string id, ParsedDocument parsedDocument, InstanceTextFile moduleInstance)
         {
-            //            System.Diagnostics.Debug.Print("#### RegisterInstanceParsedDocument " + id + "::" + parsedDocument.ObjectID);
-            cleanWeakRef();
             if (id == "")
             {
                 ParsedDocument = parsedDocument;
             }
             else
             {
-                lock (instancedParsedDocumentRefs)
-                {
-                    if (instancedParsedDocumentRefs.ContainsKey(id))
-                    {
-                        instancedParsedDocumentRefs[id] = new WeakReference<ParsedDocument>(parsedDocument);
-                        //                        System.Diagnostics.Debug.Print("#### RegisterInstanceParsedDocument replace to " + id + "::" + parsedDocument.ObjectID);
-                    }
-                    else
-                    {
-                        instancedParsedDocumentRefs.Add(id, new WeakReference<ParsedDocument>(parsedDocument));
-                        //Project.AddReparseTarget(moduleInstance);
-                        //                        System.Diagnostics.Debug.Print("#### Try RegisterInstanceParsedDocument.Add " + id + "::" + parsedDocument.ObjectID);
-                    }
-                }
+                instancedParsedDocumentRefs.AddOrUpdate(id,new WeakReference<ParsedDocument>(parsedDocument),(key,oldValue) => new WeakReference<ParsedDocument>(parsedDocument));
             }
         }
 
-        private void cleanWeakRef()
+        public void CleanWeakRef()
         {
-            List<string> removeKeys = new List<string>();
             ParsedDocument? ret;
-            lock (instancedParsedDocumentRefs)
+            foreach (var r in instancedParsedDocumentRefs)
             {
-                foreach (var r in instancedParsedDocumentRefs)
-                {
-                    if (!r.Value.TryGetTarget(out ret)) removeKeys.Add(r.Key);
-                }
-                foreach (string key in removeKeys)
-                {
-                    instancedParsedDocumentRefs.Remove(key);
-                    System.Diagnostics.Debug.Print("### remove key: " + key);
-                }
-            }
-        }
-
-        private List<System.WeakReference<Data.InstanceTextFile>> moduleInstanceRefs
-            = new List<WeakReference<InstanceTextFile>>();
-
-        public void RegisterModuleInstance(InstanceTextFile verilogModuleInstance)
-        {
-            moduleInstanceRefs.Add(new WeakReference<InstanceTextFile>(verilogModuleInstance));
-        }
-
-        public void RemoveModuleInstance(InstanceTextFile verilogModuleInstance)
-        {
-            for (int i = 0; i < moduleInstanceRefs.Count; i++)
-            {
-                InstanceTextFile? ret;
-                if (!moduleInstanceRefs[i].TryGetTarget(out ret)) continue;
-                if (ret == verilogModuleInstance) moduleInstanceRefs.Remove(moduleInstanceRefs[i]);
+                if (!r.Value.TryGetTarget(out ret)) instancedParsedDocumentRefs.Remove(r.Key, out _);
             }
         }
 
@@ -410,7 +368,6 @@ namespace pluginVerilog.Data
                     incFile.Dispose();
                 }
             }
-            moduleInstanceRefs.Clear();
             base.Dispose();
         }
 
@@ -431,7 +388,6 @@ namespace pluginVerilog.Data
                 return projectProperty;
             }
         }
-
         public override CodeEditor2.CodeEditor.CodeDrawStyle DrawStyle
         {
             get

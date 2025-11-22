@@ -4,7 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using static pluginVerilog.Tool.ParseHierarchy;
 
 namespace pluginVerilog.Verilog.Snippets
 {
@@ -26,6 +28,7 @@ namespace pluginVerilog.Verilog.Snippets
             CodeEditor2.Data.TextFile? file = CodeEditor2.Controller.CodeEditor.GetTextFile();
             if (file == null) return;
             document = file.CodeDocument;
+            if(document == null) return;
 
             string indent = "";
             if (document.GetCharAt(document.GetLineStartIndex(document.GetLineAt(document.CaretIndex))) == '\t')
@@ -67,14 +70,50 @@ namespace pluginVerilog.Verilog.Snippets
             }
 
             base.Apply();
+            System.Threading.Tasks.Task.Run(RunAsync);
+        }
+
+        private static System.Threading.Tasks.Task? _currentTask;
+        private static CancellationTokenSource? _cts;
+        private async System.Threading.Tasks.Task RunAsync()
+        {
+            if (_cts != null)
+            {
+                _cts.Cancel();
+            }
+
+            _cts = new CancellationTokenSource();
+            CancellationToken token = _cts.Token;
+
+            _currentTask = System.Threading.Tasks.Task.Run(async () =>
+            {
+                await runBackGround(token);
+            }, token);
+
+            try
+            {
+                await _currentTask;
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            finally
+            {
+                _currentTask = null;
+                CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
+            }
+            return;
+        }
+
+        private async System.Threading.Tasks.Task runBackGround(CancellationToken token)
+        {
+            if (document == null) return;
 
         }
 
 
         public override void Aborted()
         {
-            System.Diagnostics.Debug.Print("## AlwaysFFSnippet.Aborted");
-
             CodeEditor2.Controller.CodeEditor.ClearHighlight();
             document = null;
             base.Aborted();
@@ -90,7 +129,12 @@ namespace pluginVerilog.Verilog.Snippets
             // overrider return & escape
             if (!CodeEditor2.Controller.CodeEditor.IsPopupMenuOpened)
             {
-                if (e.Key == Key.Return || e.Key == Key.Escape)
+                if (e.Key == Key.Escape)
+                {
+                    CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
+                    e.Handled = true;
+                } 
+                else if (e.Key == Key.Return)
                 {
                     bool moved;
                     moveToNextHighlight(out moved);
@@ -111,7 +155,7 @@ namespace pluginVerilog.Verilog.Snippets
         {
             if (document == null) return;
             System.Diagnostics.Debug.Print("## AlwaysFFSnippet.AfterAutoCompleteHandled");
-
+            /*
             int i = CodeEditor2.Controller.CodeEditor.GetHighlightIndex(document.CaretIndex);
             switch (i)
             {
@@ -141,6 +185,7 @@ namespace pluginVerilog.Verilog.Snippets
                     CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
                     break;
             }
+            */
         }
 
         private void moveToNextHighlight(out bool moved)

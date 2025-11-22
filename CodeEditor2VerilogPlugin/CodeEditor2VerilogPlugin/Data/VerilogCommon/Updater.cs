@@ -49,33 +49,17 @@ namespace pluginVerilog.Data.VerilogCommon
                 // add vh instance
                 foreach (VerilogHeaderInstance newVhInstance in item.VerilogParsedDocument.IncludeFiles.Values)
                 {
-                    {  // add new include item
-                        string keyName = newVhInstance.Name;
-                        { // If the names are duplicated, append a number to the end
-                            int i = 0;
-                            while (newSubItems.ContainsKey(keyName + "_" + i.ToString()))
-                            {
-                                i++;
-                            }
-                            keyName = keyName + "_" + i.ToString();
-                        }
-                        if(item is InstanceTextFile && ((InstanceTextFile)item).ExternalProject)
-                        {
-                            newVhInstance.ExternalProject = true;
-                        }
-                        newSubItems.Add(keyName, newVhInstance);
-                        newVhInstance.Parent = parent;
-                    }
+                    addVhInstance(newSubItems, item, newVhInstance);
                 }
 
-                if(item is VerilogModuleInstance)
+                if (item is VerilogModuleInstance)
                 {
                     string? moduleName = null;
                     VerilogModuleInstance? verilogModuleInstance = item as VerilogModuleInstance;
                     moduleName = verilogModuleInstance?.ModuleName;
                     addSubItemsSingleBuldingBlock(item, moduleName, newSubItems, parent, project);
                 }
-                else if( item is VerilogFile )
+                else if (item is VerilogFile)
                 {
                     if (item.VerilogParsedDocument.Root.BuildingBlocks.Count == 1)
                     {
@@ -90,11 +74,41 @@ namespace pluginVerilog.Data.VerilogCommon
                 item.Items.Clear();
                 foreach (CodeEditor2.Data.Item i in newSubItems.Values)
                 {
-                    item.Items.Add(i.Name,i);
+                    item.Items.Add(i.Name, i);
                 }
             }
         }
 
+        private static void addVhInstance(Dictionary<string, CodeEditor2.Data.Item> newSubItems, IVerilogRelatedFile item, VerilogHeaderInstance newVhInstance)
+        {
+            string keyName = newVhInstance.Name;
+
+            // update external project
+            if (item is VerilogHeaderInstance && ((VerilogHeaderInstance)item).ExternalProject)
+            {
+                newVhInstance.ExternalProject = true;
+            }
+            VerilogHeaderInstance? oldInstanceTextFile = null;
+            if (item.Items.ContainsKey(keyName))
+            {
+                oldInstanceTextFile = item.Items[keyName] as VerilogHeaderInstance;
+            }
+
+            if (
+                oldInstanceTextFile != null &&
+                oldInstanceTextFile.ExternalProject == newVhInstance.ExternalProject &&
+                oldInstanceTextFile.ID == newVhInstance.ID
+                )
+            {
+                oldInstanceTextFile.ReplaceBy(newVhInstance);
+                newSubItems.Add(keyName, oldInstanceTextFile);
+                return;
+            }
+
+            // add new one
+            newSubItems.Add(keyName, newVhInstance);
+            newVhInstance.Parent = item as CodeEditor2.Data.Item;
+        }
 
         private static void addSubItemsMultiBuildingBlock(VerilogFile verilogFile, Dictionary<string, CodeEditor2.Data.Item> newSubItems, CodeEditor2.Data.Item? parent, Project project)
         {

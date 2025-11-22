@@ -67,6 +67,7 @@ namespace pluginVerilog.NavigatePanel
                 }
             });
         }
+
         public void _updateVisual()
         {
             if (FileItem == null)

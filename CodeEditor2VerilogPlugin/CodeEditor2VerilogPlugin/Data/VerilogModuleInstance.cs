@@ -61,7 +61,7 @@ namespace pluginVerilog.Data
                 Data.VerilogFile? vFile = file as Data.VerilogFile;
                 if (vFile == null) throw new Exception();
 
-                vFile.RegisterModuleInstance(fileItem);
+                //vFile.RegisterModuleInstance(fileItem);
 
                 if (vFile.SystemVerilog) fileItem.SystemVerilog = true;
             }
@@ -150,7 +150,7 @@ namespace pluginVerilog.Data
             {
                 Data.VerilogFile? vFile = file as Data.VerilogFile;
                 if (vFile == null) return false;
-                vFile.RegisterModuleInstance(this);
+                //vFile.RegisterModuleInstance(this);
             }
 
             weakInstantiating = new WeakReference<ModuleInstantiation>(moduleInstantiation);
@@ -183,7 +183,7 @@ namespace pluginVerilog.Data
             }
 
             ParsedDocument = null;
-            SourceVerilogFile.RemoveModuleInstance(this);
+//            SourceVerilogFile.RemoveModuleInstance(this);
         }
 
         public Data.VerilogFile SourceVerilogFile
