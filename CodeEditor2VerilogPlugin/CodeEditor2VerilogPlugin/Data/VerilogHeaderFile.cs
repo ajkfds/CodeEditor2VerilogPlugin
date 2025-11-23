@@ -89,23 +89,6 @@ namespace pluginVerilog.Data
         {
             VerilogCommon.Updater.Update(this);
         }
-        public async System.Threading.Tasks.Task UpdateAsync()
-        {
-            if (Dispatcher.UIThread.CheckAccess())
-            {
-                Update();
-            }
-            else
-            {
-                await Dispatcher.UIThread.InvokeAsync(
-                    () =>
-                    {
-                        Update();
-                    }
-                );
-            }
-        }
-
         // read text document from file
         private bool readFromFile()
         {

@@ -327,7 +327,7 @@ namespace pluginVerilog.Data
             while (true)
             {
                 if (item == null) break;
-                if(item is VerilogHeaderFile)
+                if (item is VerilogHeaderFile)
                 {
                     item = item.Parent;
                 }
@@ -337,29 +337,13 @@ namespace pluginVerilog.Data
                 }
             }
 
-            if( item != null && item is VerilogFile)
+            if (item != null && item is VerilogFile)
             {
                 VerilogFile vFile = (VerilogFile)item;
                 VerilogCommon.Updater.Update(vFile);
             }
         }
 
-        public async System.Threading.Tasks.Task UpdateAsync()
-        {
-            if (Dispatcher.UIThread.CheckAccess())
-            {
-                Update();
-            }
-            else
-            {
-                await Dispatcher.UIThread.InvokeAsync(
-                    () =>
-                    {
-                        Update();
-                    }
-                );
-            }
-        }
         // Auto Complete Handler
 
         //public override void AfterKeyDown(System.Windows.Forms.KeyEventArgs e)

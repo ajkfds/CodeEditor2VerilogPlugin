@@ -264,7 +264,8 @@ namespace pluginVerilog.Data
             if(source.ParsedDocument != null)// && source.ParsedDocument.Version != newParsedDocument.Version)
             {
                 Verilog.ParsedDocument vParsedDocument = (Verilog.ParsedDocument)newParsedDocument;
-                if(vParsedDocument.Root != null && vParsedDocument.Root.BuildingBlocks.Count == 1)
+                Verilog.ParsedDocument sourceParsedDocument = (Verilog.ParsedDocument)source.ParsedDocument;
+                if (sourceParsedDocument.Root != null && sourceParsedDocument.Root.BuildingBlocks.Count == 1)
                 {
                     source.AcceptParsedDocument(newParsedDocument);
                 }

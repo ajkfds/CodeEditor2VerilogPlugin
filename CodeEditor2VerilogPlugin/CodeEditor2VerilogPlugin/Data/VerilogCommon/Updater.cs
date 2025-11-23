@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Avalonia.Threading;
 using CodeEditor2.CodeEditor;
 using CodeEditor2.Data;
 using pluginVerilog.Verilog;
@@ -14,12 +15,22 @@ namespace pluginVerilog.Data.VerilogCommon
 {
     public static class Updater
     {
+
+        public static async System.Threading.Tasks.Task UpdateAsync(IVerilogRelatedFile item)
+        {
+            await Dispatcher.UIThread.InvokeAsync(() => { Update(item); });
+        }
+
         /// <summary>
         /// Update the Items member of this object according to the rootItem.ParsedDocument.
         /// </summary>
         /// <param name="item"></param>
         public static void Update(IVerilogRelatedFile item)
         {
+            if (!Dispatcher.UIThread.CheckAccess())
+            {
+                System.Diagnostics.Debugger.Break();
+            }
 
             // Update the Items member of this object according to the rootItem.ParsedDocument.
             Project project = item.Project;
@@ -70,6 +81,8 @@ namespace pluginVerilog.Data.VerilogCommon
                         addSubItemsMultiBuildingBlock((VerilogFile)item, newSubItems, parent, project);
                     }
                 }
+
+                List<CodeEditor2.Data.Item> itemsCopy = new List<CodeEditor2.Data.Item>();
 
                 item.Items.Clear();
                 foreach (CodeEditor2.Data.Item i in newSubItems.Values)
