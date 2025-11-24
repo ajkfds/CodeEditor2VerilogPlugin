@@ -220,12 +220,24 @@ namespace pluginVerilog.Verilog.Statements
                 }
             }
 
+            if (!word.Prototype && lExpression != null && expression != null) {
+                foreach(var sync in expression.SyncInfos)
+                {
+                    lExpression.SyncInfos.Add(sync);
+                }
+            }
+
+            if(lExpression!= null)
             {
                 BlockingAssignment assignment = new BlockingAssignment();
                 assignment.LValue = lExpression;
                 assignment.Expression = expression;
                 if (Assigned != null) Assigned(word, nameSpace, assignment);
                 return assignment;
+            }
+            else
+            {
+                return null;
             }
         }
 

@@ -248,6 +248,7 @@ namespace pluginVerilog.Verilog
             */
             commentNextFetched = true;
             commentNextAfterIndex = nextIndex;
+            int temp = nextIndex;
             int index_temp = nextIndex;
             string section_temp = nextSection;
             int length_temp = 0;
@@ -261,11 +262,12 @@ namespace pluginVerilog.Verilog
             // get next Index
             fetchNext(Document, ref index_temp, out length_temp, out commentNextAfterIndex, out wordTypeEnum_temp, ref section_temp, !InhibitColor);
 
-            if (wordType == WordTypeEnum.Comment)
+            if (wordTypeEnum_temp == WordTypeEnum.Comment)
             { // fist word is comment
                 commentNextFetched = true;
-                while (wordType == WordTypeEnum.Comment)
+                while (wordTypeEnum_temp == WordTypeEnum.Comment)
                 {
+                    temp = commentNextAfterIndex;
                     if (Eof)
                     {
                         commentSkippedPrev = false;
@@ -277,8 +279,17 @@ namespace pluginVerilog.Verilog
                         // get next Index
                         index_temp = commentNextAfterIndex;
                         fetchNext(Document, ref index_temp, out length_temp, out commentNextAfterIndex, out wordTypeEnum_temp, ref section_temp, !InhibitColor);
+                        if(wordTypeEnum_temp != WordTypeEnum.Comment)
+                        {
+                            commentNextAfterIndex = temp;
+                            break;
+                        }
                     }
                 }
+            }
+            else
+            {
+                commentNextFetched = false;
             }
 
             if (Eof)
@@ -311,6 +322,7 @@ namespace pluginVerilog.Verilog
         public string GetNextComment()
         {
             if (!commentNextFetched) fetchNextComment();
+            if (!commentNextFetched) return "";
             return Document.CreateString(nextIndex, commentNextAfterIndex-nextIndex);
         }
 

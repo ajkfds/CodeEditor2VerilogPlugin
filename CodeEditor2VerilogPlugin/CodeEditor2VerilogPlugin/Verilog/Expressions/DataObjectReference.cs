@@ -219,6 +219,10 @@ namespace pluginVerilog.Verilog.Expressions
                 }
             }
 
+            foreach(var sync in dataObject.SyncInfos)
+            {
+                val.SyncInfos.Add(sync);
+            }
 
             return val;
         }

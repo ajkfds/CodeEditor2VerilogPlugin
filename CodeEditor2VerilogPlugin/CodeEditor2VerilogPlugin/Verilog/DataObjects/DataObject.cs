@@ -107,7 +107,10 @@ namespace pluginVerilog.Verilog.DataObjects
 //                case DataTypeEnum.Virtual:
 //                    return .Create(dataType);
                 case DataTypeEnum.Class:
-                    throw new Exception();
+                    if (System.Diagnostics.Debugger.IsAttached)
+                    {
+                        System.Diagnostics.Debugger.Break();
+                    }
                     return DataObject.Create(name,dataType);
 //                case DataTypeEnum.Interface:
 //                    return InterfaceInstance.Create(name,dataType);

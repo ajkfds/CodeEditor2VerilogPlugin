@@ -372,7 +372,7 @@ namespace pluginVerilog.Verilog.Statements
                             word.MoveNext();
                             return null;
                         default:
-                            expression.Reference.AddError("illegal statement");
+                            if(expression.Reference!= null && !word.Prototype) expression.Reference.AddError("illegal statement");
                             return null;
                     }
                     if(word.GetCharAt(0) != ';')

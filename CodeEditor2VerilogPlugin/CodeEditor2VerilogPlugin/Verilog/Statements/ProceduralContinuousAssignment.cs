@@ -31,20 +31,19 @@ namespace pluginVerilog.Verilog.Statements
             Value.DisposeSubReference(true);
         }
 
-        public static ProceduralContinuousAssignment ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
+        public static ProceduralContinuousAssignment? ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
-            ProceduralContinuousAssignment ret = new ProceduralContinuousAssignment();
 
             if (word.Text != "assign") System.Diagnostics.Debugger.Break();
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
-            ret.LValue = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace,false);
+            Expressions.Expression? lvalue = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace,false);
 
             if (word.Text != "=") return null;
             word.MoveNext();
 
-            ret.Value = Expressions.Expression.ParseCreate(word, nameSpace);
+            Expressions.Expression? value = Expressions.Expression.ParseCreate(word, nameSpace);
 
             if (word.Text != ";")
             {
@@ -55,6 +54,12 @@ namespace pluginVerilog.Verilog.Statements
                 word.MoveNext();
             }
 
+            if (lvalue == null || value == null) return null;
+            ProceduralContinuousAssignment ret = new ProceduralContinuousAssignment() { LValue = lvalue, Value = value };
+            foreach(var sync in value.SyncInfos)
+            {
+                lvalue.SyncInfos.Add(sync);
+            }
             return ret;
         }
     }

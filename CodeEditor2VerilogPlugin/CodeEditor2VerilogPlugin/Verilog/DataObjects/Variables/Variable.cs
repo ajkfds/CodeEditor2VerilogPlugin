@@ -115,6 +115,16 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
             label.AppendText(Name);
+
+            label.AppendText("@sync ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.HighLightedComment));
+            bool first = true;
+            foreach (var sync in SyncInfos)
+            {
+                if (!first) label.AppendText(",");
+                if (sync != null) label.AppendText(sync, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.HighLightedComment));
+                first = false;
+            }
+            label.AppendText("\r\n");
         }
 
         public override void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
@@ -301,7 +311,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                             else
                             {
                                 variable.AssignedReferences.Add(variable.DefinedReference);
-                                if(variable.BitWidth != exp.BitWidth && !word.Prototype)
+                                if(variable.BitWidth != exp.BitWidth && !word.Prototype && exp.Reference != null && !word.Prototype)
                                 {
                                     exp.Reference.AddWarning("Bitwidth mismatch "+variable.BitWidth.ToString()+" = "+exp.BitWidth.ToString());
                                 }

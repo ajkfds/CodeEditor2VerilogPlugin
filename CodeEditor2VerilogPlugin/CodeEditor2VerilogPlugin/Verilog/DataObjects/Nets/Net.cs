@@ -102,6 +102,8 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
 
         public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
+            label.AppendIconImage(AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap("CodeEditor2VerilogPlugin/Assets/Icons/wire.svg", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Net)));
+
             AppendTypeLabel(label);
             if (Name == null) return;
 
@@ -119,6 +121,17 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                 label.AppendText(Comment.Trim(new char[] { '\r', '\n', '\t', ' ' }), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Comment));
             }
 
+            label.AppendText("\r\n");
+            if (SyncInfos.Count == 0) return;
+
+            label.AppendText("@sync ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.HighLightedComment));
+            bool first = true;
+            foreach (var sync in SyncInfos)
+            {
+                if (!first) label.AppendText(",");
+                if (sync != null) label.AppendText(sync, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.HighLightedComment));
+                first = false;
+            }
             label.AppendText("\r\n");
         }
 
@@ -520,12 +533,12 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             }
             else
             {
-                word.MoveNext();
                 string comment = word.GetNextComment();
                 foreach (Net net in nets)
                 {
                     net.Comment = comment;
                 }
+                word.MoveNext();
             }
 
             return true;
