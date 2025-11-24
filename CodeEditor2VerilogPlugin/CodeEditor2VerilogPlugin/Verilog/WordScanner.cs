@@ -1286,7 +1286,7 @@ namespace pluginVerilog.Verilog
 
             if (vhInstance == null)
             {
-                wordPointer.AddError("illegal file");
+                if(!Prototype) wordPointer.AddError("illegal file");
                 if (wordPointer.Text.StartsWith("\"") || wordPointer.Text.StartsWith("'")) wordPointer.MoveNext();
                 newParsedDocument = null;
                 return;
