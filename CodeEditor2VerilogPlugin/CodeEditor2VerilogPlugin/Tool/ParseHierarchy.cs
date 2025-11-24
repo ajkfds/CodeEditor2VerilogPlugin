@@ -1,6 +1,7 @@
 ﻿using Avalonia.Threading;
 using CodeEditor2.CodeEditor;
 using CodeEditor2.Data;
+using CodeEditor2.FileTypes;
 using pluginVerilog.Verilog.Statements;
 using System;
 using System.Collections.Concurrent;
@@ -32,7 +33,7 @@ namespace pluginVerilog.Tool
             {
                 await Task.Run(async () =>
                 {
-                    await runParse(textFile,parseMode, null);
+                    await runParallel(textFile, parseMode, null);
                 });
                 return;
             }
@@ -56,7 +57,7 @@ namespace pluginVerilog.Tool
 
             _currentTask = Task.Run(async () =>
             {
-                await runParse(textFile,parseMode, token);
+                await runParallel(textFile, parseMode, token);
             }, token);
 
             try
@@ -74,26 +75,90 @@ namespace pluginVerilog.Tool
             return;
         }
 
-        private static async Task runParse(TextFile textFile, ParseMode parseMode, CancellationToken? token)
+        public record ParseTask(
+            string Id,
+            CodeEditor2.Data.TextFile tarfgetTextFile,
+            bool topLevel = false
+            );
+        private static async Task runParallel(CodeEditor2.Data.TextFile textFile, ParseMode parseMode, CancellationToken? token)
         {
-            ConcurrentStack<TextFile> reparseTargetFiles = new ConcurrentStack<TextFile>();
-            ConcurrentDictionary<string, byte> completeIDList = new ConcurrentDictionary<string, byte>();
+            var workQueue = new ConcurrentQueue<ParseTask>();
+            var reparseTargetFiles = new ConcurrentStack<CodeEditor2.Data.TextFile>();
+            var completeIds = new ConcurrentDictionary<string, bool>();
+            var signal = new SemaphoreSlim(0); // starter
+            int workerCount = Environment.ProcessorCount;
 
-            await parseTextFile(textFile,reparseTargetFiles,completeIDList, parseMode, token);
+            // entry first
+            ParseTask task = new ParseTask(Id:textFile.Key, tarfgetTextFile: textFile,topLevel:true );
+            EnqueueWork(task,workQueue, completeIds, signal);
 
+            // boot workers
+            var workers = new Task[workerCount];
+            for (int i = 0; i < workerCount; i++)
+            {
+                workers[i] = Task.Run(async () =>
+                {
+                    while (true)
+                    {
+                        token?.ThrowIfCancellationRequested();
+                        await signal.WaitAsync(); // wait fist task
+
+                        if (workQueue.TryDequeue(out var newTask))
+                        {
+                            await parseTextFile(newTask.tarfgetTextFile, reparseTargetFiles,workQueue, completeIds, signal, parseMode, token);
+                            if (newTask.topLevel)
+                            {
+                                ParseTask reEntryTask = new ParseTask(Id: textFile.Key, tarfgetTextFile: textFile, topLevel: false);
+                                ForceEnqueueWork(reEntryTask,workQueue, completeIds, signal);
+                            }
+                        }
+                        else
+                        {
+                            await Task.Delay(10);
+                        }
+                        if (completeIds.Count > 0 && workQueue.IsEmpty)
+                            break;
+                    }
+                });
+            }
+
+            await Task.WhenAll(workers);
+            token?.ThrowIfCancellationRequested();
+
+            // reparse
             while (reparseTargetFiles.Count > 0)
             {
-                reparseTargetFiles.TryPop(out TextFile? tfile);
+                reparseTargetFiles.TryPop(out CodeEditor2.Data.TextFile? tfile);
                 if (tfile == null) continue;
-                token?.ThrowIfCancellationRequested();
-                await reparseText(tfile,parseMode, token);
+                await reparseText(tfile, parseMode, token);
             }
         }
 
+        static void EnqueueWork(ParseTask parse,
+            ConcurrentQueue<ParseTask> workQueue,
+            ConcurrentDictionary<string, bool> completeIds,
+            SemaphoreSlim signal)
+        {
+            if (completeIds.TryAdd(parse.Id, true))
+            {
+                workQueue.Enqueue(parse);
+                signal.Release(); // start worker
+            }
+        }
+        static void ForceEnqueueWork(ParseTask parse,
+            ConcurrentQueue<ParseTask> workQueue,
+            ConcurrentDictionary<string, bool> completeIds,
+            SemaphoreSlim signal)
+        {
+            workQueue.Enqueue(parse);
+            signal.Release(); // start worker
+        }
         private static async Task parseTextFile(
-            TextFile textFile,
-            ConcurrentStack<TextFile> reparseTargetFiles,
-            ConcurrentDictionary<string, byte> completeIDList,
+            CodeEditor2.Data.TextFile textFile,
+            ConcurrentStack<CodeEditor2.Data.TextFile> reparseTargetFiles,
+            ConcurrentQueue<ParseTask> workQueue,
+            ConcurrentDictionary<string, bool> completeIds,
+            SemaphoreSlim signal,
             ParseMode parseMode,
             CancellationToken? token 
             )
@@ -113,13 +178,7 @@ namespace pluginVerilog.Tool
             }
             if (verilogFile == null) return;
 
-            if (completeIDList.ContainsKey(verilogFile.ID)) return;
-            completeIDList.TryAdd(verilogFile.ID,0);
-
             token?.ThrowIfCancellationRequested();
-
-            //if (parseMode == ParseMode.SearchReparseReqestedTree
-            //    && verilogFile.ParseValid && !verilogFile.ReparseRequested) return;
 
 
             bool doParse = false;
@@ -157,7 +216,7 @@ namespace pluginVerilog.Tool
             if (!verilogFile.ParseValid) needReparse = true;
             if (verilogFile.ReparseRequested) needReparse = true;
             if (verilogFile.VerilogParsedDocument != null && verilogFile.VerilogParsedDocument.ErrorCount > 0) needReparse = true;
-            if (needReparse) reparseTargetFiles.Push((TextFile)verilogFile);
+            if (needReparse) reparseTargetFiles.Push((CodeEditor2.Data.TextFile)verilogFile);
 
             List<Item> items = new List<Item>();
             await Dispatcher.UIThread.InvokeAsync(
@@ -177,12 +236,13 @@ namespace pluginVerilog.Tool
             {
                 if(item is CodeEditor2.Data.TextFile tfile)
                 {
-                    await parseTextFile(tfile, reparseTargetFiles, completeIDList, parseMode, token);
+                    ParseTask task = new ParseTask(Id: tfile.Key, tarfgetTextFile: tfile);
+                    EnqueueWork(task, workQueue, completeIds, signal);
                 }
             }
         }
 
-        private static async Task reparseText(TextFile textFile, ParseMode parseMode,CancellationToken? token)
+        private static async Task reparseText(CodeEditor2.Data.TextFile textFile, ParseMode parseMode,CancellationToken? token)
         {
             Data.IVerilogRelatedFile? verilogFile = null;
             if (textFile is Data.VerilogModuleInstance)
