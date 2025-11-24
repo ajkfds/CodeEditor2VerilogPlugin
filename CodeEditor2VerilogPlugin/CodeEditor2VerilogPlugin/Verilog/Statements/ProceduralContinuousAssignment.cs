@@ -56,10 +56,8 @@ namespace pluginVerilog.Verilog.Statements
 
             if (lvalue == null || value == null) return null;
             ProceduralContinuousAssignment ret = new ProceduralContinuousAssignment() { LValue = lvalue, Value = value };
-            foreach(var sync in value.SyncInfos)
-            {
-                lvalue.SyncInfos.Add(sync);
-            }
+
+            lvalue.ApplySyncInfos(value.SyncInfos);
             return ret;
         }
     }

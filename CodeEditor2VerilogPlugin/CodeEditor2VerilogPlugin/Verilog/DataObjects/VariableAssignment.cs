@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -49,6 +50,8 @@ namespace pluginVerilog.Verilog.DataObjects
             if (expression == null) return null;
             variableAssign.Expression = expression;
 
+            lExpression.ApplySyncInfos(expression.SyncInfos);
+
             if (!word.Prototype)
             {
                 if (
@@ -63,6 +66,7 @@ namespace pluginVerilog.Verilog.DataObjects
                     wRef.ApplyRule(word.ProjectProperty.RuleSet.AssignmentBitwidthMismatch, "bit width mismatch " + variableAssign.NetLValue.BitWidth + " <- " + variableAssign.Expression.BitWidth);
                 }
             }
+
 
             return variableAssign;
         }

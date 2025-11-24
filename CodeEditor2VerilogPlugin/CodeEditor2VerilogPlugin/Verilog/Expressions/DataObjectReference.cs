@@ -219,13 +219,38 @@ namespace pluginVerilog.Verilog.Expressions
                 }
             }
 
-            foreach(var sync in dataObject.SyncInfos)
-            {
-                val.SyncInfos.Add(sync);
-            }
-
             return val;
         }
+
+        public override List<string> SyncInfos
+        {
+            get
+            {
+                if (DataObject == null) return new List<string>();
+                return DataObject.SyncInfos;
+            }
+        }
+        public override void ApplySyncInfos(List<string> syncInfos)
+        {
+            if (SyncInfos.Count == 0)
+            { // copy
+                foreach (var sync in syncInfos)
+                {
+                    SyncInfos.Add(sync);
+                }
+            }
+            else
+            {
+                bool match = true;
+                if (SyncInfos.Count != syncInfos.Count) match = false;
+                foreach (var sync in syncInfos)
+                {
+                    if(!SyncInfos.Contains(sync)) match = false;
+                }
+                if (!match) Reference.AddWarning("sync mismatch");
+            }
+        }
+
         private static bool parseRange(WordScanner word, NameSpace nameSpace, DataObjectReference val)
         {
             if (word.Text != "[") throw new Exception();

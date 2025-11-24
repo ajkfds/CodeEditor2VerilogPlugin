@@ -24,7 +24,7 @@ namespace pluginVerilog.Verilog.Expressions
         public virtual double? Value { get; protected set; }
         public virtual int? BitWidth { get; protected set; }
 
-        public List<string> SyncInfos { get; } = new List<string>();
+        public virtual List<string> SyncInfos { get; } = new List<string>();
 
         [Newtonsoft.Json.JsonIgnore]
         public WordReference Reference { get; protected set; }
@@ -64,6 +64,11 @@ namespace pluginVerilog.Verilog.Expressions
             return sb.ToString();
         }
         public virtual void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        {
+
+        }
+
+        public virtual void ApplySyncInfos(List<string> syncInfos)
         {
 
         }

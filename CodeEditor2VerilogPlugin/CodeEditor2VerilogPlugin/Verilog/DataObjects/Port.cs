@@ -494,7 +494,14 @@ namespace pluginVerilog.Verilog.DataObjects
                 }
             }
 
-            word.Color(CodeDrawStyle.ColorType.Variable);
+            if (port.DataObject != null)
+            {
+                word.Color(port.DataObject.ColorType);
+            }
+            else
+            {
+                word.Color(CodeDrawStyle.ColorType.Variable);
+            }
             word.MoveNext();
 
             // ansi_port_declaration		::=   [ net_port_header | interface_port_header ] port_identifier { unpacked_dimension } [ = constant_expression ] 
