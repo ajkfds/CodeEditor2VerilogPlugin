@@ -41,6 +41,7 @@ namespace pluginVerilog.Verilog.Statements
             Expressions.Expression? lvalue = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace,false);
 
             if (word.Text != "=") return null;
+            WordReference equalPointer = word.CrateWordReference();
             word.MoveNext();
 
             Expressions.Expression? value = Expressions.Expression.ParseCreate(word, nameSpace);
@@ -57,7 +58,7 @@ namespace pluginVerilog.Verilog.Statements
             if (lvalue == null || value == null) return null;
             ProceduralContinuousAssignment ret = new ProceduralContinuousAssignment() { LValue = lvalue, Value = value };
 
-            lvalue.ApplySyncInfos(value.SyncInfos);
+            lvalue.SyncContext.PropageteClockDomainFrom(value.SyncContext,equalPointer);
             return ret;
         }
     }

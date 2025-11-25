@@ -122,17 +122,8 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             }
 
             label.AppendText("\r\n");
-            if (SyncInfos.Count == 0) return;
 
-            label.AppendText("@sync ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.HighLightedComment));
-            bool first = true;
-            foreach (var sync in SyncInfos)
-            {
-                if (!first) label.AppendText(",");
-                if (sync != null) label.AppendText(sync, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.HighLightedComment));
-                first = false;
-            }
-            label.AppendText("\r\n");
+            SyncContext.AppendLabel(label);
         }
 
         public static Net Create(string name, NetTypeEnum netType, DataObjects.DataTypes.IDataType? dataType)

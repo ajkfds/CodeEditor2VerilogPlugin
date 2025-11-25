@@ -148,7 +148,7 @@ namespace pluginVerilog.Verilog.DataObjects
         public List<WordReference> AssignedReferences { set; get; } = new List<WordReference>();
         public int DisposedIndex = -1;
 
-        public List<string> SyncInfos { get; } = new List<string>();
+        public SyncContext SyncContext { get; } = new SyncContext();
 
         public virtual string CreateTypeString()
         {
@@ -159,6 +159,7 @@ namespace pluginVerilog.Verilog.DataObjects
         public virtual void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
             label.AppendText(Name);
+            SyncContext.AppendLabel(label);
         }
 
         public virtual void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)

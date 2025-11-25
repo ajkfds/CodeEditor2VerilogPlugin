@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using CodeEditor2.CodeEditor;
+using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.Expressions.Operators;
 
 namespace pluginVerilog.Verilog.Expressions
@@ -24,7 +25,7 @@ namespace pluginVerilog.Verilog.Expressions
         public virtual double? Value { get; protected set; }
         public virtual int? BitWidth { get; protected set; }
 
-        public virtual List<string> SyncInfos { get; } = new List<string>();
+        public virtual SyncContext SyncContext { get; } = new SyncContext();
 
         [Newtonsoft.Json.JsonIgnore]
         public WordReference Reference { get; protected set; }

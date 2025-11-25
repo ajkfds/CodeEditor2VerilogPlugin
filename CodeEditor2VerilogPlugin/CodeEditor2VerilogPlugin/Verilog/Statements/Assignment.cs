@@ -155,9 +155,10 @@ namespace pluginVerilog.Verilog.Statements
                 default:
                     throw new Exception();
             }
+            WordReference equalPointer = word.CrateWordReference();
 
 
-                word.MoveNext();    // <=
+            word.MoveNext();    // <=
 
             if (word.GetCharAt(0) == '#')
             {
@@ -221,10 +222,7 @@ namespace pluginVerilog.Verilog.Statements
             }
 
             if (!word.Prototype && lExpression != null && expression != null) {
-                foreach(var sync in expression.SyncInfos)
-                {
-                    lExpression.SyncInfos.Add(sync);
-                }
+                lExpression.SyncContext.PropageteClockDomainFrom(expression.SyncContext, equalPointer);
             }
 
             if(lExpression!= null)

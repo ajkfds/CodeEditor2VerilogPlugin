@@ -1,4 +1,5 @@
-﻿using pluginVerilog.Verilog.DataObjects.Nets;
+﻿using pluginVerilog.Verilog.DataObjects;
+using pluginVerilog.Verilog.DataObjects.Nets;
 using pluginVerilog.Verilog.DataObjects.Variables;
 using ReactiveUI;
 using System;
@@ -222,35 +223,14 @@ namespace pluginVerilog.Verilog.Expressions
             return val;
         }
 
-        public override List<string> SyncInfos
+        public override SyncContext SyncContext
         {
             get
             {
-                if (DataObject == null) return new List<string>();
-                return DataObject.SyncInfos;
+                if (DataObject == null) return new SyncContext();
+                return DataObject.SyncContext;
             }
         }
-        public override void ApplySyncInfos(List<string> syncInfos)
-        {
-            if (SyncInfos.Count == 0)
-            { // copy
-                foreach (var sync in syncInfos)
-                {
-                    SyncInfos.Add(sync);
-                }
-            }
-            else
-            {
-                bool match = true;
-                if (SyncInfos.Count != syncInfos.Count) match = false;
-                foreach (var sync in syncInfos)
-                {
-                    if(!SyncInfos.Contains(sync)) match = false;
-                }
-                if (!match) Reference.AddWarning("sync mismatch");
-            }
-        }
-
         private static bool parseRange(WordScanner word, NameSpace nameSpace, DataObjectReference val)
         {
             if (word.Text != "[") throw new Exception();
