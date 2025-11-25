@@ -113,7 +113,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
                 if(syncTarget == "clock")
                 {
                     port.AppendAnnotation("clock", "");
-                    if (port.DataObject != null && !port.DataObject.SyncInfos.Contains("clock")) port.DataObject.SyncInfos.Add("clock");
+                    if (port.DataObject != null) port.DataObject.SyncContext.AssignToClock();
                     comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
                     comment.MoveNext();
                     return;
@@ -121,7 +121,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
                 if (syncTarget == "reset")
                 {
                     port.AppendAnnotation("reset", "");
-                    if (port.DataObject != null && !port.DataObject.SyncInfos.Contains("reset")) port.DataObject.SyncInfos.Add("reset");
+                    if (port.DataObject != null) port.DataObject.SyncContext.AssignToReset();
                     comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
                     comment.MoveNext();
                     return;
@@ -132,7 +132,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
                     break;
                 }
                 port.AppendAnnotation("sync", syncTarget);
-                if (port.DataObject != null && !port.DataObject.SyncInfos.Contains(syncTarget)) port.DataObject.SyncInfos.Add(syncTarget);
+                if (port.DataObject != null) port.DataObject.SyncContext.AddClockDomain(syncTarget);
                 comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
                 comment.MoveNext();
 
@@ -153,7 +153,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
                 if (comment.Text == ":")
                 {
                     comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
-                    if (port.DataObject != null && !port.DataObject.SyncInfos.Contains("clock")) port.DataObject.SyncInfos.Add("clock");
+                    if (port.DataObject != null) port.DataObject.SyncContext.AssignToClock();
                     comment.MoveNext(); // :
                 }
                 else
@@ -186,7 +186,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
         private static void parseResetAnnotation(CommentScanner comment, NameSpace nameSpace, Verilog.DataObjects.Port port, ProjectProperty projectProperty)
         {
             comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
-            if (port.DataObject != null && !port.DataObject.SyncInfos.Contains("reset")) port.DataObject.SyncInfos.Add("reset");
+            if (port.DataObject != null) port.DataObject.SyncContext.AssignToReset();
             comment.MoveNext();
             port.AppendAnnotation("reset", "");
         }
