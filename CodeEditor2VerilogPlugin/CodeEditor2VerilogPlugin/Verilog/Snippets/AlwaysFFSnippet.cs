@@ -1,4 +1,5 @@
 ﻿using Avalonia.Input;
+using Avalonia.Threading;
 using CodeEditor2.Views;
 using System;
 using System.Collections.Generic;
@@ -20,7 +21,8 @@ namespace pluginVerilog.Verilog.Snippets
 
         // initial value for {n}
         private List<string> initials = new List<string> { "clock", "reset_x", "reset_x", "" };
-
+        private List<string> clocks = new List<string> { };
+        private List<string> resets = new List<string> { };
         public override void Apply()
         {
             System.Diagnostics.Debug.Print("## AlwaysFFSnippet.Apply");
@@ -29,6 +31,9 @@ namespace pluginVerilog.Verilog.Snippets
             if (file == null) return;
             document = file.CodeDocument;
             if(document == null) return;
+
+            ParsedDocument? parsedDocument = file.ParsedDocument as ParsedDocument;
+
 
             string indent = "";
             if (document.GetCharAt(document.GetLineStartIndex(document.GetLineAt(document.CaretIndex))) == '\t')
@@ -48,6 +53,33 @@ namespace pluginVerilog.Verilog.Snippets
 
 
             int index = document.CaretIndex;
+
+            if(parsedDocument != null)
+            {
+                BuildingBlocks.BuildingBlock? buildingBlock = parsedDocument.GetBuildingBlockAt(index);
+                IPortNameSpace? portNameSpace = buildingBlock as IPortNameSpace;
+                if (portNameSpace != null)
+                {
+                    foreach(DataObjects.Port port in portNameSpace.PortsList)
+                    {
+                        if (port.DataObject != null && port.DataObject.SyncContext.Data.Contains("clock"))
+                        {
+                            if(!clocks.Contains(port.Name)) clocks.Add(port.Name);
+                        }
+                        if (port.DataObject != null && port.DataObject.SyncContext.Data.Contains("reset"))
+                        {
+                            if (!clocks.Contains(port.Name)) resets.Add(port.Name);
+                        }
+                    }
+                }
+            }
+
+            if (clocks.Count == 1) initials[0] = clocks[0];
+            if(resets.Count==1)
+            {
+                initials[1] = resets[0];
+                initials[2] = resets[0];
+            }
 
             for (int i = 0; i < initials.Count; i++)
             {
@@ -105,10 +137,61 @@ namespace pluginVerilog.Verilog.Snippets
             return;
         }
 
+        private TaskCompletionSource<string> _eventTcs;
         private async System.Threading.Tasks.Task runBackGround(CancellationToken token)
         {
-            if (document == null) return;
+            try
+            {
+                if (document == null) return;
+                string result;
 
+                // clock
+                await Dispatcher.UIThread.InvokeAsync(() => {
+                    CodeEditor2.Controller.CodeEditor.SelectHighlight(0);    // move carlet to next highlight
+                });
+
+                if (clocks.Count != 1)
+                {
+                    // wait clock input
+                    _eventTcs = new TaskCompletionSource<string>();
+                    result = await _eventTcs.Task;
+                    if (result != "moveNext") return;
+                }
+
+                await Dispatcher.UIThread.InvokeAsync(() => {
+                    CodeEditor2.Controller.CodeEditor.SelectHighlight(1);    // move carlet to next highlight
+                });
+
+                if (resets.Count != 1)
+                {
+                    // wait reset input
+                    _eventTcs = new TaskCompletionSource<string>();
+                    result = await _eventTcs.Task;
+                    if (result != "moveNext") return;
+                }
+
+                // copy text from {1} to {2}
+                await Dispatcher.UIThread.InvokeAsync(() => {
+                    int start, last;
+                    CodeEditor2.Controller.CodeEditor.GetHighlightPosition(1, out start, out last);
+                    string text = document.CreateString(start, last - start + 1);
+                    CodeEditor2.Controller.CodeEditor.GetHighlightPosition(2, out start, out last);
+                    document.Replace(start, last - start + 1, 0, text);
+                });
+
+                // move next
+                await Dispatcher.UIThread.InvokeAsync(() => {
+                    CodeEditor2.Controller.CodeEditor.SelectHighlight(3);    // move carlet to next highlight
+                });
+            }
+            catch(Exception ex)
+            {
+                CodeEditor2.Controller.AppendLog("##Exception " + ex.Message, Avalonia.Media.Colors.Red);
+            }
+            finally
+            {
+                Aborted();
+            }
         }
 
 
@@ -118,6 +201,9 @@ namespace pluginVerilog.Verilog.Snippets
             document = null;
             base.Aborted();
         }
+
+
+
 
         private List<int> startIndexes = new List<int>();
         private List<int> lastIndexes = new List<int>();
@@ -129,16 +215,25 @@ namespace pluginVerilog.Verilog.Snippets
             // overrider return & escape
             if (!CodeEditor2.Controller.CodeEditor.IsPopupMenuOpened)
             {
-                if (e.Key == Key.Escape)
+                if (e.Key == Key.Escape || e.Key == Key.Up )
                 {
                     CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
                     e.Handled = true;
                 } 
                 else if (e.Key == Key.Return)
                 {
-                    bool moved;
-                    moveToNextHighlight(out moved);
-                    if (!moved) CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
+                    if (_eventTcs != null) _eventTcs.TrySetResult("moveNext");
+                    //bool moved;
+                    //moveToNextHighlight(out moved);
+                    //if (!moved) CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
+                    e.Handled = true;
+                }
+                else if (e.Key == Key.Down)
+                {
+                    if (_eventTcs != null) _eventTcs.TrySetResult("moveNext");
+                    //bool moved;
+                    //moveToNextHighlight(out moved);
+                    //if (!moved) CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
                     e.Handled = true;
                 }
             }
@@ -155,37 +250,7 @@ namespace pluginVerilog.Verilog.Snippets
         {
             if (document == null) return;
             System.Diagnostics.Debug.Print("## AlwaysFFSnippet.AfterAutoCompleteHandled");
-            /*
-            int i = CodeEditor2.Controller.CodeEditor.GetHighlightIndex(document.CaretIndex);
-            switch (i)
-            {
-                case 0: // clock
-                    CodeEditor2.Controller.CodeEditor.SelectHighlight(1);    // move carlet to next highlight
-                    break;
-                case 1: // reset
-                    // copy text from {1} to {2}
-                    int start, last;
-                    CodeEditor2.Controller.CodeEditor.GetHighlightPosition(1, out start, out last);
-                    string text = document.CreateString(start, last - start + 1);
-                    CodeEditor2.Controller.CodeEditor.GetHighlightPosition(2, out start, out last);
-                    document.Replace(start, last - start + 1, 0, text);
-                    CodeEditor2.Controller.CodeEditor.SelectHighlight(3);    // move carlet to next highlight
-                    CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
-                    CodeEditor2.Controller.CodeEditor.RequestReparse();
-                    break;
-                case 2: // reset (skip this input)
-                    CodeEditor2.Controller.CodeEditor.SelectHighlight(3);
-                    CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
-                    CodeEditor2.Controller.CodeEditor.RequestReparse();
-                    break;
-                case 3:
-                    CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
-                    break;
-                default:
-                    CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
-                    break;
-            }
-            */
+            if (_eventTcs != null) _eventTcs.TrySetResult("moveNext");
         }
 
         private void moveToNextHighlight(out bool moved)
