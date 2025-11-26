@@ -20,11 +20,11 @@ namespace pluginVerilog.Verilog.Items.Generate
          */
 
 
-        public static bool Parse(WordScanner word, NameSpace nameSpace)
+        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
         {
             if (nameSpace.BuildingBlock is BuildingBlocks.BuildingBlock)
             {
-                return ModuleOrGenerateItem.Parse(word, nameSpace);
+                return await ModuleOrGenerateItem.Parse(word, nameSpace);
             }
 
             return false;

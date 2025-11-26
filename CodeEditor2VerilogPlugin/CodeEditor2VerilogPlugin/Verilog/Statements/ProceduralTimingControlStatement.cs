@@ -22,7 +22,7 @@ namespace pluginVerilog.Verilog.Statements
         public EventControl? EventControl { get; protected set; }
         public IStatement? Statement { get; protected set; }
 
-        public static ProceduralTimingControlStatement? ParseCreate(WordScanner word, NameSpace nameSpace,string? statement_label)
+        public static async Task<ProceduralTimingControlStatement?> ParseCreate(WordScanner word, NameSpace nameSpace,string? statement_label)
         {
             switch (word.Text)
             {
@@ -32,7 +32,7 @@ namespace pluginVerilog.Verilog.Statements
                         if (statement_label != null) { statement.Name = statement_label; }
 
                         statement.DelayControl = DelayControl.ParseCreate(word, nameSpace);
-                        statement.Statement = Statements.ParseCreateStatementOrNull(word, nameSpace);
+                        statement.Statement = await Statements.ParseCreateStatementOrNull(word, nameSpace);
                         return statement;
                     }
                 case "@":
@@ -41,7 +41,7 @@ namespace pluginVerilog.Verilog.Statements
                         if (statement_label != null) { statement.Name = statement_label; }
 
                         statement.EventControl = EventControl.ParseCreate(word, nameSpace);
-                        statement.Statement = Statements.ParseCreateStatementOrNull(word, nameSpace);
+                        statement.Statement = await Statements.ParseCreateStatementOrNull(word, nameSpace);
                         return statement;
                     }
                 default:

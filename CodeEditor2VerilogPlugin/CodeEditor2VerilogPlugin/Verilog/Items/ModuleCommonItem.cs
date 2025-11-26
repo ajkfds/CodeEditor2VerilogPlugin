@@ -28,7 +28,7 @@ namespace pluginVerilog.Verilog.Items
             | elaboration_system_task
         */
 
-        public static bool Parse(WordScanner word,NameSpace nameSpace)
+        public static async Task<bool> Parse(WordScanner word,NameSpace nameSpace)
         {
 
 
@@ -46,23 +46,23 @@ namespace pluginVerilog.Verilog.Items
 
                 // continuous_assign
                 case "assign":
-                    return ModuleItems.ContinuousAssign.Parse(word, nameSpace);
+                    return await ModuleItems.ContinuousAssign.Parse(word, nameSpace);
                 // initial_construct
                 case "initial":
-                    return ModuleItems.InitialConstruct.Parse(word, nameSpace);
+                    return await ModuleItems.InitialConstruct.Parse(word, nameSpace);
                 // always_construct
                 case "always":
                 case "always_comb":
                 case "always_latch":
                 case "always_ff":
-                    return ModuleItems.AlwaysConstruct.Parse(word, nameSpace);
+                    return await ModuleItems.AlwaysConstruct.Parse(word, nameSpace);
                 // loop_generate_construct
                 case "for":
 //                    word.AddSystemVerilogError();
                     return Generate.LoopGenerateConstruct.Parse(word, nameSpace);
                 // conditional_generate_construct
                 case "if":
-                    return Generate.IfGenerateConstruct.Parse(word, nameSpace);
+                    return await Generate.IfGenerateConstruct.Parse(word, nameSpace);
             }
 
             // interface_instantiation

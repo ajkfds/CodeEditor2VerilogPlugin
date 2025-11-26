@@ -245,7 +245,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             | conditional_generate_construct 
             | generate_region
          */
-        protected static void parseProgramItems(
+        protected static async System.Threading.Tasks.Task parseProgramItems(
             WordScanner word,
             //            string parameterOverrideModuleName,
             Dictionary<string, Expressions.Expression>? parameterOverrides,
@@ -336,7 +336,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                 while (!word.Eof)
                 {
-                    if (!Items.ProgramItem.Parse(word, program))
+                    if (!await Items.ProgramItem.Parse(word, program))
                     {
                         if (word.Text == "endprogram") break;
                         word.AddError("illegal program item");

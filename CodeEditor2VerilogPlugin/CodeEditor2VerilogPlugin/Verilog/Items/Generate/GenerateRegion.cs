@@ -11,7 +11,7 @@ namespace pluginVerilog.Verilog.Items.Generate
         // generate_region ::=
         //      "generate" { generate_item } "endgenerate"
 
-        public static bool Parse(WordScanner word, NameSpace nameSpace)
+        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "generate") return false;
             word.Color(CodeDrawStyle.ColorType.Keyword);
@@ -19,7 +19,7 @@ namespace pluginVerilog.Verilog.Items.Generate
 
             while (!word.Eof)
             {
-                if (!GenerateItem.Parse(word, nameSpace)) break;
+                if (!await GenerateItem.Parse(word, nameSpace)) break;
             }
 
             if (word.Text == "endgenerate")

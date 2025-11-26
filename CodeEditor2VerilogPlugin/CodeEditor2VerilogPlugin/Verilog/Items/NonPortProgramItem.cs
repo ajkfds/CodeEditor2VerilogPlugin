@@ -24,7 +24,7 @@ namespace pluginVerilog.Verilog.Items
          
 
 
-        public static bool Parse(WordScanner word, NameSpace nameSpace)
+        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
         {
             // TODO
             //{ attribute_instance } final_construct 
@@ -32,7 +32,7 @@ namespace pluginVerilog.Verilog.Items
             //timeunits_declaration 
 
             //program_generate_item
-            if (ProgramGenerateItem.Parse(word, nameSpace))
+            if (await ProgramGenerateItem.Parse(word, nameSpace))
             {
                 return true;
             }
@@ -47,15 +47,15 @@ namespace pluginVerilog.Verilog.Items
             {
                 //{ attribute_instance } continuous_assign 
                 case "assign":
-                    return ModuleItems.ContinuousAssign.Parse(word, nameSpace);
+                    return await ModuleItems.ContinuousAssign.Parse(word, nameSpace);
                 //{ attribute_instance } initial_construct 
                 case "initial":
-                    return ModuleItems.InitialConstruct.Parse(word, nameSpace);
+                    return await ModuleItems.InitialConstruct.Parse(word, nameSpace);
                 default:
                     break;
 
             }
-            if (ModuleOrGenerateItem.Parse(word, nameSpace)) return true;
+            if (await ModuleOrGenerateItem.Parse(word, nameSpace)) return true;
             return false;
         }
     }

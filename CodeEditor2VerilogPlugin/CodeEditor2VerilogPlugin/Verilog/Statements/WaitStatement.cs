@@ -27,7 +27,7 @@ namespace pluginVerilog.Verilog.Statements
               statement_or_null
             | [ statement ] "else" statement_or_null         
          */
-        public static WaitStatement? ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
+        public static async Task<WaitStatement?> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             if(word.Text =="wait_order") return parseCreate_wait_fork(word, nameSpace);
 
@@ -72,7 +72,7 @@ namespace pluginVerilog.Verilog.Statements
                 return waitStatement;
             }
 
-            IStatement? statement = Statements.ParseCreateStatement(word, nameSpace);
+            IStatement? statement = await Statements.ParseCreateStatement(word, nameSpace);
             waitStatement.Statement = statement;
 
             if (word.Text != ";")

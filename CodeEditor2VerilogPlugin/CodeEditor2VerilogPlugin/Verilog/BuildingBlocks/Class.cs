@@ -290,7 +290,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 | # ( parameter_port_declaration { , parameter_port_declaration } )  
                 | #( )   
         */
-        protected static void parseClassItems(
+        protected static async System.Threading.Tasks.Task parseClassItems(
             WordScanner word,
             NameSpace nameSpace,
             //            string parameterOverrideModueName,
@@ -428,7 +428,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                 while (!word.Eof)
                 {
-                    if (!Items.ClassItem.Parse(word, class_))
+                    if (!await Items.ClassItem.Parse(word, class_))
                     {
                         if (word.Text == "endclass") break;
                         word.AddError("illegal class item");

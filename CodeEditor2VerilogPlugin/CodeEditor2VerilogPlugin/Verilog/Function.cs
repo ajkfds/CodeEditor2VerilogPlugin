@@ -63,7 +63,7 @@ namespace pluginVerilog.Verilog
             label.AppendText(Name);
         }
 
-        private static void Parse(WordScanner word, NameSpace nameSpace,bool acceptClassConstructor)
+        private static async System.Threading.Tasks.Task Parse(WordScanner word, NameSpace nameSpace,bool acceptClassConstructor)
         {
             if (word.Text != "function") throw new System.Exception();
 
@@ -305,7 +305,7 @@ namespace pluginVerilog.Verilog
                                 default:
                                     break;
                             }
-                            Statements.IStatement statement = Statements.Statements.ParseCreateFunctionStatement(word, function);
+                            Statements.IStatement statement = await Statements.Statements.ParseCreateFunctionStatement(word, function);
                             if(statement == null)
                             {
                                 word.MoveNext();
@@ -314,7 +314,7 @@ namespace pluginVerilog.Verilog
                     }
                     else
                     {
-                        Statements.IStatement statement = Statements.Statements.ParseCreateFunctionStatement(word, function);
+                        Statements.IStatement statement = await Statements.Statements.ParseCreateFunctionStatement(word, function);
                     }
                 }
             }
@@ -524,7 +524,7 @@ namespace pluginVerilog.Verilog
         // tf_port_list ::= tf_port_item { "," tf_port_item } 
         // tf_port_item ::= { attribute_instance } [ tf_port_direction ] [ var ] data_type_or_implicit [ port_identifier { variable_dimension } [ = expression ] ]
 
-        private static void parse_function_items_ansi(WordScanner word, NameSpace nameSpace, Function function)
+        private static async System.Threading.Tasks.Task parse_function_items_ansi(WordScanner word, NameSpace nameSpace, Function function)
         {
             if (word.Text != "(") throw new System.Exception();
             word.MoveNext();
@@ -550,7 +550,7 @@ namespace pluginVerilog.Verilog
 
             while (!word.Eof)
             {
-                if (!BlockItemDeclaration.Parse(word, function)) break;
+                if (!await BlockItemDeclaration.Parse(word, function)) break;
             }
 
         }

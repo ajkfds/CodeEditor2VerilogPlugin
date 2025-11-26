@@ -10,12 +10,12 @@ namespace pluginVerilog.Verilog.ModuleItems
     public class ContinuousAssign
     {
         protected ContinuousAssign() { }
-        public DriveStrength DriveStrength;
-        public Delay3 Delay3;
+        public DriveStrength? DriveStrength;
+        public Delay3? Delay3;
 
         public DataObjects.VariableAssignment VariableAssignment { get; protected set; }
 
-        public static bool Parse(WordScanner word, NameSpace nameSpace)
+        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
         {
             ModuleItems.ContinuousAssign continuousAssign = ModuleItems.ContinuousAssign.ParseCreate(word, nameSpace);
             return true;

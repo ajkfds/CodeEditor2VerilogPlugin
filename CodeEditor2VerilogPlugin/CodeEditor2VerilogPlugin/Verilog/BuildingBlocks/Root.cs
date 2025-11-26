@@ -80,7 +80,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
             return null;
         }
-        public static Root ParseCreate(WordScanner word, ParsedDocument parsedDocument,Data.VerilogFile file)
+        public static async System.Threading.Tasks.Task<Root> ParseCreate(WordScanner word, ParsedDocument parsedDocument,Data.VerilogFile file)
         {
             Root root = new Root()
             {
@@ -101,7 +101,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     // module_declaration
                     case "module":
                     case "macromodule":
-                        parseModule(word, parsedDocument, file);
+                        await parseModule(word, parsedDocument, file);
                         break;
                     // udp_declaration
                     // interface_declaration
@@ -133,7 +133,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         }
 
 
-        private static void parseModule(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
+        private static async System.Threading.Tasks.Task parseModule(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
         {
             if (word.Text != "module" && word.Text != "macromodule") throw new Exception();
 
@@ -169,11 +169,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
                 if (parsedDocument.ParameterOverrides == null)
                 {
-                    module = Module.ParseCreate(word, null, parsedDocument.Root, file, true);
+                    module = await Module.ParseCreate(word, null, parsedDocument.Root, file, true);
                 }
                 else
                 {
-                    module = Module.ParseCreate(word, parsedDocument.ParameterOverrides, null , parsedDocument.Root, file, true);
+                    module = await Module.ParseCreate(word, parsedDocument.ParameterOverrides, null , parsedDocument.Root, file, true);
                 }
                 {
                     module.ReparseRequested = true;
@@ -183,11 +183,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
                 if (parsedDocument.ParameterOverrides == null)
                 {
-                    module = Module.ParseCreate(word, null, parsedDocument.Root, file, false);
+                    module = await Module.ParseCreate(word, null, parsedDocument.Root, file, false);
                 }
                 else
                 {
-                    module = Module.ParseCreate(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, false);
+                    module = await Module.ParseCreate(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, false);
                 }
             }
 

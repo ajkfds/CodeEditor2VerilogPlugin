@@ -12,7 +12,7 @@ namespace pluginVerilog.Verilog.Items.Generate
      */
     public class IfGenerateConstruct
     {
-        public static bool Parse(WordScanner word, NameSpace nameSpace)
+        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "if") return false;
 
@@ -47,7 +47,7 @@ namespace pluginVerilog.Verilog.Items.Generate
                 word.StartNonGenerated();
                 while (!word.Eof)
                 {
-                    if (!GenerateBlock.Parse(word, nameSpace)) break;
+                    if (!await GenerateBlock.Parse(word, nameSpace)) break;
                 }
                 word.EndNonGenerated();
             }
@@ -55,7 +55,7 @@ namespace pluginVerilog.Verilog.Items.Generate
             {
                 while (!word.Eof)
                 {
-                    if (!GenerateBlock.Parse(word, nameSpace)) break;
+                    if (!await GenerateBlock.Parse(word, nameSpace)) break;
                 }
             }
 
@@ -70,12 +70,12 @@ namespace pluginVerilog.Verilog.Items.Generate
                 {
                     // false
                     word.StartNonGenerated();
-                    Parse(word, nameSpace);
+                    await Parse(word, nameSpace);
                     word.EndNonGenerated();
                 }
                 else
                 {
-                    Parse(word, nameSpace);
+                    await Parse(word, nameSpace);
                 }
                 return true;
             }
@@ -87,7 +87,7 @@ namespace pluginVerilog.Verilog.Items.Generate
                     word.StartNonGenerated();
                     while (!word.Eof)
                     {
-                        if (!GenerateBlock.Parse(word, nameSpace)) break;
+                        if (!await GenerateBlock.Parse(word, nameSpace)) break;
                     }
                     word.EndNonGenerated();
                 }
@@ -95,7 +95,7 @@ namespace pluginVerilog.Verilog.Items.Generate
                 {
                     while (!word.Eof)
                     {
-                        if (!GenerateBlock.Parse(word, nameSpace)) break;
+                        if (!await GenerateBlock.Parse(word, nameSpace)) break;
                     }
                 }
             }

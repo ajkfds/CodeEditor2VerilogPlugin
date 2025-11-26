@@ -10,7 +10,7 @@ namespace pluginVerilog.Verilog.ModuleItems
     public class AlwaysConstruct
     {
         protected AlwaysConstruct() { }
-        public Statements.IStatement Statement { get; protected set;}
+        public Statements.IStatement? Statement { get; protected set;}
 
         /* ## Verilog2001
             always_construct ::= always statement     */
@@ -20,12 +20,12 @@ namespace pluginVerilog.Verilog.ModuleItems
             always_keyword ::= always | always_comb | always_latch | always_ff     
          */
 
-        public static bool Parse(WordScanner word, NameSpace nameSpace)
+        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
         {
-            ModuleItems.AlwaysConstruct always = ModuleItems.AlwaysConstruct.ParseCreate(word, nameSpace);
+            ModuleItems.AlwaysConstruct? always = await ModuleItems.AlwaysConstruct.ParseCreate(word, nameSpace);
             return true;
         }
-        public static AlwaysConstruct ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static async Task<AlwaysConstruct?> ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             switch (word.Text)
             {
@@ -47,7 +47,7 @@ namespace pluginVerilog.Verilog.ModuleItems
             word.MoveNext();
 
             AlwaysConstruct always = new AlwaysConstruct();
-            always.Statement = Statements.Statements.ParseCreateStatement(word, nameSpace);
+            always.Statement = await Statements.Statements.ParseCreateStatement(word, nameSpace);
             if(always.Statement == null)
             {
                 word.AddError("illegal always construct");

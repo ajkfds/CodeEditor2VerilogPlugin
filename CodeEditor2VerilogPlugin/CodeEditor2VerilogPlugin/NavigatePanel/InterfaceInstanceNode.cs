@@ -120,6 +120,7 @@ namespace pluginVerilog.NavigatePanel
                 }
                 catch (Exception ex)
                 {
+                    if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
                     CodeEditor2.Controller.AppendLog("#Exception " + ex.Message, Avalonia.Media.Colors.Red);
                     throw;
                 }

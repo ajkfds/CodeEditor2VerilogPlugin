@@ -73,7 +73,7 @@ namespace pluginVerilog.Verilog
 
 
 
-        public static bool ParseGenerateBlockStatement(WordScanner word, NameSpace nameSpace)
+        public static async Task<bool> ParseGenerateBlockStatement(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "begin") return false;
 
@@ -128,7 +128,7 @@ namespace pluginVerilog.Verilog
                 {
                     while (!word.Eof)
                     {
-                        if (!GenerateItem.Parse(word, nameSpace)) break;
+                        if (!await GenerateItem.Parse(word, nameSpace)) break;
                     }
                 }
             }
@@ -181,7 +181,7 @@ namespace pluginVerilog.Verilog
             return true;
         }
 
-        public static bool ParseGenerateBlockStatementWithName(WordScanner word, NameSpace nameSpace)
+        public static async Task<bool> ParseGenerateBlockStatementWithName(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "begin") return false;
 
@@ -213,7 +213,7 @@ namespace pluginVerilog.Verilog
             {
                 while (!word.Eof)
                 {
-                    if (!GenerateItem.Parse(word, nameSpace)) break;
+                    if (!await GenerateItem.Parse(word, nameSpace)) break;
                 }
             }
             else

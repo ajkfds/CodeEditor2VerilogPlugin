@@ -51,7 +51,7 @@ namespace pluginVerilog.Verilog.ModuleItems
         //        private List<Verilog.DataObjects.Port> ports = new List<DataObjects.Port>();
         //        public IReadOnlyList<Verilog.DataObjects.Port> Ports { get { return ports; } }
 
-        public static bool Parse(WordScanner word, NameSpace nameSpace)
+        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
         {
             GateInstantiation? gate = ParseCreate(word, nameSpace);
             return true;

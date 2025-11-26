@@ -14,7 +14,7 @@ namespace pluginVerilog.Verilog.Items.Generate
         }
         public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Identifier; } }
 
-        public static bool Parse(WordScanner word, NameSpace nameSpace)
+        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "begin") return false;
 
@@ -107,11 +107,11 @@ namespace pluginVerilog.Verilog.Items.Generate
                 {
                     if(generateBlock != null)
                     {
-                        if (!GenerateItem.Parse(word, generateBlock)) break;
+                        if (!await GenerateItem.Parse(word, generateBlock)) break;
                     }
                     else
                     {
-                        if (!GenerateItem.Parse(word, nameSpace)) break;
+                        if (!await GenerateItem.Parse(word, nameSpace)) break;
                     }
                 }
             }

@@ -24,7 +24,7 @@ namespace pluginVerilog.Verilog.Statements
                 caseItem.DisposeSubRefrence();
             }
         }
-        public static CaseStatement ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
+        public static async Task<CaseStatement> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             /*
             case_statement ::=  case ( expression ) case_item { case_item } endcase          
@@ -99,7 +99,7 @@ namespace pluginVerilog.Verilog.Statements
 
             while (!word.Eof && word.Text != "endcase" && word.Text != "endmodule" && word.Text != "endfunction")
             {
-                CaseItem caseItem = CaseItem.ParseCreate(word, nameSpace);
+                CaseItem caseItem = await CaseItem.ParseCreate(word, nameSpace);
                 if (caseItem == null)
                 {
                     break;
@@ -132,7 +132,7 @@ namespace pluginVerilog.Verilog.Statements
                 }
                 Statement.DisposeSubReference();
             }
-            public static CaseItem ParseCreate(WordScanner word,NameSpace nameSpace)
+            public static async Task<CaseItem> ParseCreate(WordScanner word,NameSpace nameSpace)
             {
                 //            case_item ::=       expression { , expression } : statement_or_null 
                 //                                | default[ : ] statement_or_null
@@ -146,7 +146,7 @@ namespace pluginVerilog.Verilog.Statements
                     {
                         word.MoveNext();
                     }
-                    caseItem.Statement = Statements.ParseCreateStatementOrNull(word, nameSpace);
+                    caseItem.Statement = await Statements.ParseCreateStatementOrNull(word, nameSpace);
                     return caseItem;
                 }
 
@@ -178,7 +178,7 @@ namespace pluginVerilog.Verilog.Statements
                     return null;
                 }
 
-                caseItem.Statement = Statements.ParseCreateStatementOrNull(word, nameSpace);
+                caseItem.Statement = await Statements.ParseCreateStatementOrNull(word, nameSpace);
                 return caseItem;
             }
         }

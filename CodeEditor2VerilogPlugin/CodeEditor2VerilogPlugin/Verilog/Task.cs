@@ -75,7 +75,7 @@ namespace pluginVerilog.Verilog
             label.AppendText(Name);
         }
 
-        public static void Parse(WordScanner word, NameSpace nameSpace)
+        public static async System.Threading.Tasks.Task Parse(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "task")
             {
@@ -205,7 +205,7 @@ namespace pluginVerilog.Verilog
                                     break;
                             }
                             var index =  word.CreateIndexReference();
-                            Statements.IStatement statement = Statements.Statements.ParseCreateFunctionStatement(word, task);
+                            Statements.IStatement statement = await Statements.Statements.ParseCreateFunctionStatement(word, task);
                             if (word.CreateIndexReference().IsSameAs(index))
                             {
                                 word.MoveNext();
@@ -214,7 +214,7 @@ namespace pluginVerilog.Verilog
                     }
                     else
                     {
-                        Statements.IStatement statement = Statements.Statements.ParseCreateFunctionStatement(word, task);
+                        Statements.IStatement statement = await Statements.Statements.ParseCreateFunctionStatement(word, task);
                     }
                 }
             }
@@ -357,7 +357,7 @@ namespace pluginVerilog.Verilog
         }
 
         // ( [ tf_port_list ] ) ; { block_item_declaration }
-        private static void parse_task_items_ansi(WordScanner word, NameSpace nameSpace, Task task)
+        private static async System.Threading.Tasks.Task parse_task_items_ansi(WordScanner word, NameSpace nameSpace, Task task)
         {
             if (word.Text != "(") throw new Exception(); //System.Diagnostics.Debugger.Break();
             word.MoveNext();
@@ -383,7 +383,7 @@ namespace pluginVerilog.Verilog
 
             while (!word.Eof)
             {
-                if (!BlockItemDeclaration.Parse(word, task)) break;
+                if (!await BlockItemDeclaration.Parse(word, task)) break;
             }
 
         }

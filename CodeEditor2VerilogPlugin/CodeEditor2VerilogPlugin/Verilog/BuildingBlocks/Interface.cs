@@ -245,7 +245,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                                     | interface_declaration 
                                     | timeunits_declaration3
         */
-        protected static void parseInterfaceItems(
+        protected static async System.Threading.Tasks.Task parseInterfaceItems(
             WordScanner word,
             //            string parameterOverrideModueName,
             Dictionary<string, Expressions.Expression> parameterOverrides,
@@ -338,7 +338,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                 while (!word.Eof)
                 {
-                    if (!Items.InterfaceItem.Parse(word, interface_))
+                    if (!await Items.InterfaceItem.Parse(word, interface_))
                     {
                         if (word.Text == "endinterface") break;
                         word.AddError("illegal module item");

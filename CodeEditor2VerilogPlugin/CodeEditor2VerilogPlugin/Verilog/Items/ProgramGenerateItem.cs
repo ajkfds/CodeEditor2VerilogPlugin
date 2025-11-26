@@ -15,19 +15,19 @@ namespace pluginVerilog.Verilog.Items
                 | conditional_generate_construct 
                 | generate_region
          */
-        public static bool Parse(WordScanner word, NameSpace nameSpace)
+        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
         {
             switch (word.Text)
             {
                 // generate_region
                 case "generate":
-                    return GenerateRegion.Parse(word, nameSpace);
+                    return await GenerateRegion.Parse(word, nameSpace);
                 case "for":
                     // loop_generate_construct
                     return Generate.LoopGenerateConstruct.Parse(word, nameSpace);
                 case "if":
                     // conditional_generate_construct
-                    return Generate.IfGenerateConstruct.Parse(word, nameSpace);
+                    return await Generate.IfGenerateConstruct.Parse(word, nameSpace);
                 default:
                     break;
 

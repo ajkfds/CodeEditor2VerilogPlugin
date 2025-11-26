@@ -5,7 +5,10 @@
         xmlns:ajkctrl="clr-namespace:AjkAvaloniaLibs.Contorls;assembly=AjkAvaloniaLibs"
         mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="400"
         x:Class="pluginVerilog.Views.SetupWindow"
-        Title="SetupWindow">
+        Title="SetupWindow"
+		MinWidth="600"
+		MinHeight="400"
+		>
 	<TabControl Margin="1" Grid.Column="2" Name="TabControl0">
 		<TabItem Header="SimServer"  FontSize="12" Name="EditorTabItem">
 			<StackPanel Orientation="Vertical" Margin="0">

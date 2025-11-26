@@ -78,7 +78,7 @@ namespace pluginVerilog.Verilog.Items
         "const" { class_item_qualifier } data_type const_identifier [ = constant_expression ] ; 
          */
 
-        public static bool Parse(WordScanner word, NameSpace nameSpace)
+        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
         {
             // data_declaration
             if (DataObjects.Variables.Variable.ParseDeclaration(word, nameSpace)) return true;
@@ -87,7 +87,7 @@ namespace pluginVerilog.Verilog.Items
             {
                 // task_declaration
                 case "task":
-                    Task.Parse(word, nameSpace);
+                    await Task.Parse(word, nameSpace);
                     return true;
 
                 // function_declaration
@@ -110,11 +110,11 @@ namespace pluginVerilog.Verilog.Items
                 case "local":
                     word.Color(CodeDrawStyle.ColorType.Keyword);
                     word.MoveNext();
-                    Parse(word, nameSpace);
+                    await Parse(word, nameSpace);
                     return true;
 
                 default:
-                    return NonPortModuleItem.Parse(word, nameSpace);
+                    return await NonPortModuleItem.Parse(word, nameSpace);
             }
         }
 

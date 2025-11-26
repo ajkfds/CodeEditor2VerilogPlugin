@@ -67,7 +67,7 @@ namespace pluginVerilog.Verilog.Statements
                                 | { attribute_instance } disable_statement
                                 | { attribute_instance } system_task_enable  
         */
-        public static IStatement? ParseCreateStatement(WordScanner word, NameSpace nameSpace)
+        public static async Task<IStatement?> ParseCreateStatement(WordScanner word, NameSpace nameSpace)
         {
             /*
             A.6.4 Statements
@@ -141,56 +141,56 @@ namespace pluginVerilog.Verilog.Statements
             {
                 case "(*":
                     Attribute attribute = Attribute.ParseCreate(word, nameSpace);
-                    return Statements.ParseCreateStatement(word, nameSpace);
+                    return await Statements.ParseCreateStatement(word, nameSpace);
 
                 // unique_priority
                 case "unique":
                 case "unique0":
                 case "priority":
-                    return ParseUniquePriority(word, nameSpace, statement_label);
+                    return await ParseUniquePriority(word, nameSpace, statement_label);
 
                 // conditional_statement 
                 case "if":
-                    return ConditionalStatement.ParseCreate(word, nameSpace, statement_label);
+                    return await ConditionalStatement.ParseCreate(word, nameSpace, statement_label);
 
                 // procedural_timing_control_statement 
                 case "#":
                 case "@":
-                    return ProceduralTimingControlStatement.ParseCreate(word, nameSpace, statement_label);
+                    return await ProceduralTimingControlStatement.ParseCreate(word, nameSpace, statement_label);
 
                 // seq_block 
                 case "begin":
-                    return SequentialBlock.ParseCreate(word, nameSpace, statement_label);
+                    return await SequentialBlock.ParseCreate(word, nameSpace, statement_label);
 
                 // par_block 
                 case "fork":
-                    return ParallelBlock.ParseCreate(word, nameSpace, statement_label);
+                    return await ParallelBlock.ParseCreate(word, nameSpace, statement_label);
 
                 // ## loop_statement 
                 // forever statement_or_null
                 case "forever":
-                    return ForeverStatement.ParseCreate(word, nameSpace, statement_label);
+                    return await ForeverStatement.ParseCreate(word, nameSpace, statement_label);
                 // repeat(expression) statement_or_null
                 case "repeat":
-                    return RepeatStatement.ParseCreate(word, nameSpace, statement_label);
+                    return await RepeatStatement.ParseCreate(word, nameSpace, statement_label);
                 // while (expression) statement_or_null
                 case "while":
-                    return WhileStatememt.ParseCreate(word, nameSpace, statement_label);
+                    return await WhileStatememt.ParseCreate(word, nameSpace, statement_label);
                 // ([for_initialization]; [expression]; [for_step]) statement_or_null
                 case "for":
-                    return ForStatememt.ParseCreate(word, nameSpace, statement_label);
+                    return await ForStatememt.ParseCreate(word, nameSpace, statement_label);
                 // do statement_or_null while (expression);
                 case "do":
-                    return DoStatement.ParseCreate(word, nameSpace, statement_label);
+                    return await DoStatement.ParseCreate(word, nameSpace, statement_label);
                 // foreach (ps_or_hierarchical_array_identifier[loop_variables] ) statement
                 case "foreach":
-                    return ForeachStatement.ParseCreate(word, nameSpace, statement_label);
+                    return await ForeachStatement.ParseCreate(word, nameSpace, statement_label);
 
                 // case_statement 
                 case "case":
                 case "casex":
                 case "casez":
-                    return CaseStatement.ParseCreate(word, nameSpace, statement_label);
+                    return await CaseStatement.ParseCreate(word, nameSpace, statement_label);
 
                 // disable_statement 
                 case "disable":
@@ -225,7 +225,7 @@ namespace pluginVerilog.Verilog.Statements
                 // wait_statement 
                 case "wait":
                 case "wait_order":
-                    return WaitStatement.ParseCreate(word, nameSpace, statement_label);
+                    return await WaitStatement.ParseCreate(word, nameSpace, statement_label);
                 case "reg":
                 case "logic":
                 case "wire":
@@ -387,7 +387,7 @@ namespace pluginVerilog.Verilog.Statements
             }
         }
 
-        private static IStatement ParseUniquePriority(WordScanner word, NameSpace nameSpace,string? statement_label)
+        private static async Task<IStatement> ParseUniquePriority(WordScanner word, NameSpace nameSpace,string? statement_label)
         {
             switch (word.Text)
             {
@@ -411,13 +411,13 @@ namespace pluginVerilog.Verilog.Statements
             {
                 // conditional_statement 
                 case "if":
-                    return ConditionalStatement.ParseCreate(word, nameSpace,statement_label);
+                    return await ConditionalStatement.ParseCreate(word, nameSpace,statement_label);
 
                 // case_statement 
                 case "case":
                 case "casex":
                 case "casez":
-                    return CaseStatement.ParseCreate(word, nameSpace, statement_label);
+                    return await CaseStatement.ParseCreate(word, nameSpace, statement_label);
 
                 default:
                     word.AddError("if or case required");
@@ -435,20 +435,20 @@ namespace pluginVerilog.Verilog.Statements
             return getSpace(identifier, nameSpace.Parent);
         }
 
-        public static IStatement? ParseCreateStatementOrNull(WordScanner word, NameSpace nameSpace)
+        public static async Task<IStatement?> ParseCreateStatementOrNull(WordScanner word, NameSpace nameSpace)
         {
             if(word.GetCharAt(0) == ';')
             {
                 word.MoveNext();
                 return null;
             }
-            return ParseCreateStatement(word, nameSpace);
+            return await ParseCreateStatement(word, nameSpace);
         }
 
 
-        public static IStatement? ParseCreateFunctionStatement(WordScanner word, NameSpace nameSpace)
+        public static async Task<IStatement?> ParseCreateFunctionStatement(WordScanner word, NameSpace nameSpace)
         {
-            return ParseCreateStatement(word,nameSpace);
+            return await ParseCreateStatement(word,nameSpace);
         }
     }
 

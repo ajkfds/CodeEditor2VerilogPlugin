@@ -12,13 +12,13 @@ namespace pluginVerilog.Verilog.ModuleItems
         protected InitialConstruct() { }
         public Statements.IStatement? Statement { get; protected set; }
 
-        public static bool Parse(WordScanner word, NameSpace nameSpace)
+        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
         {
-            ModuleItems.InitialConstruct? initial = ModuleItems.InitialConstruct.ParseCreate(word, nameSpace);
+            ModuleItems.InitialConstruct? initial = await ModuleItems.InitialConstruct.ParseCreate(word, nameSpace);
             return true;
         }
 
-        public static InitialConstruct? ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static async Task<InitialConstruct?> ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             //    initial_construct   ::= initial statement
             System.Diagnostics.Debug.Assert(word.Text == "initial");
@@ -26,7 +26,7 @@ namespace pluginVerilog.Verilog.ModuleItems
             word.MoveNext();
 
             InitialConstruct initial = new InitialConstruct();
-            initial.Statement = Statements.Statements.ParseCreateStatement(word, nameSpace);
+            initial.Statement = await Statements.Statements.ParseCreateStatement(word, nameSpace);
             if (initial.Statement == null)
             {
                 word.AddError("illegal initial construct");

@@ -6,6 +6,7 @@ using Splat.ModeDetection;
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
@@ -44,12 +45,12 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
 
 
-        public static Module ParseCreate(WordScanner word, Attribute attribute, BuildingBlock parent, Data.IVerilogRelatedFile file, bool protoType)
+        public static async Task<Module> ParseCreate(WordScanner word, Attribute attribute, BuildingBlock parent, Data.IVerilogRelatedFile file, bool protoType)
         {
-            return ParseCreate(word, null, attribute,parent, file, protoType);
+            return await ParseCreate(word, null, attribute,parent, file, protoType);
         }
 
-        public static Module ParseCreate(
+        public static async Task<Module> ParseCreate(
             WordScanner word,
             Dictionary<string, Expressions.Expression>? parameterOverrides,
             Attribute attribute,
@@ -126,19 +127,19 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 // prototype parse
                 WordScanner prototypeWord = word.Clone();
                 prototypeWord.Prototype = true;
-                parseModule(prototypeWord, parameterOverrides, null, module);
+                await parseModule(prototypeWord, parameterOverrides, null, module);
                 prototypeWord.Dispose();
                 word.CheckCancelToken();
 
                 // parse
                 word.RootParsedDocument.Macros = macroKeep;
-                parseModule(word, parameterOverrides, null, module);
+                await parseModule(word, parameterOverrides, null, module);
             }
             else
             {
                 // parse prototype only
                 word.Prototype = true;
-                parseModule(word, parameterOverrides, null, module);
+                await parseModule(word, parameterOverrides, null, module);
                 word.Prototype = false;
             }
 
@@ -207,7 +208,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         module_parameter_port_list  ::= # ( parameter_declaration { , parameter_declaration } ) 
         list_of_ports ::= ( port { , port } )
         */
-        protected static void parseModule(
+        protected static async System.Threading.Tasks.Task parseModule(
             WordScanner word,
             //            string parameterOverrideModuleName,
             Dictionary<string, Expressions.Expression>? parameterOverrides,
@@ -303,7 +304,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 {
                     if (module.AnsiStylePortDefinition)
                     {
-                        if (!Items.NonPortModuleItem.Parse(word, module))
+                        if (!await Items.NonPortModuleItem.Parse(word, module))
                         {
                             word.CheckCancelToken();
                             if (word.Text == "endmodule") break;
@@ -316,7 +317,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     }
                     else
                     {
-                        if (!Items.ModuleItem.Parse(word, module))
+                        if (!await Items.ModuleItem.Parse(word, module))
                         {
                             word.CheckCancelToken();
                             if (word.Text == "endmodule") break;

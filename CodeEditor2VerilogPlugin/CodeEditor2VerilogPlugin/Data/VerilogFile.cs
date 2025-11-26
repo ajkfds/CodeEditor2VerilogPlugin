@@ -129,78 +129,84 @@ namespace pluginVerilog.Data
             }
         }
 
+//        private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+
         /// <summary>
         /// Accdept new Parsed Document for this Verilog File
         /// </summary>
         /// <param name="newParsedDocument"></param>
         public override void AcceptParsedDocument(ParsedDocument? newParsedDocument)
         {
-            ParsedDocument? oldParsedDocument = ParsedDocument;
-            if (oldParsedDocument == newParsedDocument) return;
+            lock (this) { 
+            
 
-            // swap ParsedDocument
-            ParsedDocument = newParsedDocument;
-            if (oldParsedDocument != null) oldParsedDocument.Dispose();
+                ParsedDocument? oldParsedDocument = ParsedDocument;
+                if (oldParsedDocument == newParsedDocument) return;
 
-            if (VerilogParsedDocument == null)
-            {
+                // swap ParsedDocument
+                ParsedDocument = newParsedDocument;
+                if (oldParsedDocument != null) oldParsedDocument.Dispose();
+
+                if (VerilogParsedDocument == null)
+                {
+                    Update();
+                    return;
+                }
+                if(VerilogParsedDocument.CodeDocument != null && CodeDocument != null) CodeDocument.CopyColorMarkFrom(VerilogParsedDocument.CodeDocument);
+
+                // Register New Building Block
+                if (VerilogParsedDocument.Root != null)
+                {
+                    foreach (BuildingBlock buildingBlock in VerilogParsedDocument.Root.BuildingBlocks.Values)
+                    {
+                        if (ProjectProperty.HasRegisteredBuildingBlock(buildingBlock.Name))
+                        {   // swap building block
+                            BuildingBlock? module = buildingBlock as Module;
+                            if (module == null) continue;
+
+                            BuildingBlock? registeredModule = ProjectProperty.GetBuildingBlock(module.Name) as Module;
+                            if (registeredModule == null) continue;
+                            if (registeredModule.File == null) continue;
+                            if (registeredModule.File.RelativePath == module.File.RelativePath) continue;
+
+                            continue;
+                        }
+
+                        // register new parsedDocument
+                        ProjectProperty.RegisterBuildingBlock(buildingBlock.Name, buildingBlock, this);
+                    }
+                }
+
+                Verilog.ParsedDocument? vParsedDocument = ParsedDocument as Verilog.ParsedDocument;
+                if (vParsedDocument != null)
+                {
+                    ReparseRequested = vParsedDocument.ReparseRequested;
+                }
+
+
+                updateIncludeFiles(VerilogParsedDocument, Items);
+
                 Update();
-                return;
-            }
-            if(VerilogParsedDocument.CodeDocument != null && CodeDocument != null) CodeDocument.CopyColorMarkFrom(VerilogParsedDocument.CodeDocument);
 
-            // Register New Building Block
-            if (VerilogParsedDocument.Root != null)
-            {
-                foreach (BuildingBlock buildingBlock in VerilogParsedDocument.Root.BuildingBlocks.Values)
-                {
-                    if (ProjectProperty.HasRegisteredBuildingBlock(buildingBlock.Name))
-                    {   // swap building block
-                        BuildingBlock? module = buildingBlock as Module;
-                        if (module == null) continue;
+                // update Navigate panel node visual for this item
+                NavigatePanelNode.UpdateVisual();
 
-                        BuildingBlock? registeredModule = ProjectProperty.GetBuildingBlock(module.Name) as Module;
-                        if (registeredModule == null) continue;
-                        if (registeredModule.File == null) continue;
-                        if (registeredModule.File.RelativePath == module.File.RelativePath) continue;
-
-                        continue;
-                    }
-
-                    // register new parsedDocument
-                    ProjectProperty.RegisterBuildingBlock(buildingBlock.Name, buildingBlock, this);
-                }
-            }
-
-            Verilog.ParsedDocument? vParsedDocument = ParsedDocument as Verilog.ParsedDocument;
-            if (vParsedDocument != null)
-            {
-                ReparseRequested = vParsedDocument.ReparseRequested;
-            }
-
-
-            updateIncludeFiles(VerilogParsedDocument, Items);
-
-            Update();
-
-            // update Navigate panel node visual for this item
-            NavigatePanelNode.UpdateVisual();
-
-            Task.Run(
-                async () =>
-                {
-                    try
+                Task.Run(
+                    async () =>
                     {
-                        await CreateCashe();
+                        try
+                        {
+                            await CreateCashe();
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debugger.Break();
+                            Controller.AppendLog(ex.Message, Avalonia.Media.Colors.Red);
+                        }
                     }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debugger.Break();
-                        Controller.AppendLog(ex.Message, Avalonia.Media.Colors.Red);
-                    }
-                }
-            );
+                );
 
+            }
 
         }
 
@@ -430,13 +436,14 @@ namespace pluginVerilog.Data
                     }
                     catch (Exception ex)
                     {
+                        if(System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
                         CodeEditor2.Controller.AppendLog("#Exception " + ex.Message, Colors.Red);
                     }
                 })
             );
 
         }
-        public async Task UpdateAsync()
+        public new async Task UpdateAsync()
         {
             if (Dispatcher.UIThread.CheckAccess())
             {

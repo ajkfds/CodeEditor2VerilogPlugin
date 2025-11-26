@@ -22,14 +22,14 @@ namespace pluginVerilog.Verilog.ModuleItems
             while (!word.Eof)
             {
                 ParameterOverride defparam = new ParameterOverride();
-                Expressions.Expression param = Expressions.Expression.ParseCreate(word, nameSpace);
+                Expressions.Expression? param = Expressions.Expression.ParseCreate(word, nameSpace);
                 if (word.Text != "=")
                 {
                     word.AddError("= required");
                     return true;
                 }
                 word.MoveNext();
-                Expressions.Expression expression = Expressions.Expression.ParseCreate(word, nameSpace);
+                Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
                 if(param != null && expression != null)
                 {
 

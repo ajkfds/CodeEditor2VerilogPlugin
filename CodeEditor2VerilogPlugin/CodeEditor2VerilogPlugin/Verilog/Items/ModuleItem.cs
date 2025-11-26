@@ -21,7 +21,7 @@ namespace pluginVerilog.Verilog.Items
             | { attribute_instance } interface_port_declaration
 
        */
-        public static bool Parse(WordScanner word, NameSpace nameSpace)
+        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
         {
             switch (word.Text)
             {
@@ -39,7 +39,7 @@ namespace pluginVerilog.Verilog.Items
                     }
                     break;
                 default:
-                    return NonPortModuleItem.Parse(word, nameSpace);
+                    return await NonPortModuleItem.Parse(word, nameSpace);
             }
             return true;
         }

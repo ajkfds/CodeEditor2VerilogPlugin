@@ -21,13 +21,13 @@ namespace pluginVerilog.Verilog.Items
             | interface_declaration 
             | timeunits_declaration
        */
-        public static bool Parse(WordScanner word, NameSpace nameSpace)
+        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
         {
             switch (word.Text)
             {
                 // generate_region
                 case "generate":
-                    return GenerateRegion.Parse(word, nameSpace);
+                    return await GenerateRegion.Parse(word, nameSpace);
                 // specify_block
                 case "specify":
                     return SpecifyBlock.Parse(word, nameSpace);
@@ -53,7 +53,7 @@ namespace pluginVerilog.Verilog.Items
                     break;
 
             }
-            if (ModuleOrGenerateItem.Parse(word, nameSpace)) return true;
+            if (await ModuleOrGenerateItem.Parse(word, nameSpace)) return true;
             return false;
         }
     }

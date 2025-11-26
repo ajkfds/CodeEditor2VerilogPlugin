@@ -237,7 +237,7 @@ namespace pluginVerilog.Parser
 
         */
 
-        public override void Parse(CancellationToken? cancellationToken)
+        public override async System.Threading.Tasks.Task Parse(CancellationToken? cancellationToken)
         {
             System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
             sw.Start();
@@ -247,7 +247,7 @@ namespace pluginVerilog.Parser
             word.RootParsedDocument.LockedDocument.Add(word.Document);
             if (File is not Data.VerilogFile) throw new Exception();
 
-            Root root = Root.ParseCreate(word,VerilogParsedDocument, File);
+            Root root = await Root.ParseCreate(word,VerilogParsedDocument, File);
 
             word.RootParsedDocument.UnlockDocument();
             word.Dispose();

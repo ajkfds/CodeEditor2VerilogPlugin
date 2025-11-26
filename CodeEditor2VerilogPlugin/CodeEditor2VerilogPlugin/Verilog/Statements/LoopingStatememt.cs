@@ -41,13 +41,13 @@ namespace pluginVerilog.Verilog.Statements
                             | "foreach" "(" ps_or_hierarchical_array_identifier "[" loop_variables "]" ")" statement
         */
 
-        public static ForeverStatement ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
+        public static async Task<ForeverStatement> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             ForeverStatement foreverStatement = new ForeverStatement();
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
-            foreverStatement.Statement = Statements.ParseCreateStatement(word, nameSpace);
+            foreverStatement.Statement = await Statements.ParseCreateStatement(word, nameSpace);
 
             return foreverStatement;
         }
@@ -72,7 +72,7 @@ namespace pluginVerilog.Verilog.Statements
                             | ...
         */
 
-        public static DoStatement ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
+        public static async Task<DoStatement> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             if (word.Text != "do") throw new Exception();
             if (!word.SystemVerilog) word.AddError("SystemVerilog expression");
@@ -81,7 +81,7 @@ namespace pluginVerilog.Verilog.Statements
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
-            doStatement.Statement = Statements.ParseCreateStatement(word, nameSpace);
+            doStatement.Statement = await Statements.ParseCreateStatement(word, nameSpace);
 
             if(word.Eof || word.Text != "while")
             {
@@ -146,7 +146,7 @@ namespace pluginVerilog.Verilog.Statements
         //                            | repeat (expression ) statement
         //                            | while (expression ) statement
         //                            | for (variable_assignment ; expression ; variable_assignment ) statement
-        public static RepeatStatement ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
+        public static async Task<RepeatStatement> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             RepeatStatement repeatStatement = new RepeatStatement();
             word.Color(CodeDrawStyle.ColorType.Keyword);
@@ -168,7 +168,7 @@ namespace pluginVerilog.Verilog.Statements
             }
             word.MoveNext();
 
-            repeatStatement.Statement = Statements.ParseCreateStatement(word, nameSpace);
+            repeatStatement.Statement = await Statements.ParseCreateStatement(word, nameSpace);
 
             return repeatStatement;
         }
@@ -198,7 +198,7 @@ namespace pluginVerilog.Verilog.Statements
         //                            | repeat (expression ) statement
         //                            | while (expression ) statement
         //                            | for (variable_assignment ; expression ; variable_assignment ) statement
-        public static WhileStatememt ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
+        public static async Task<WhileStatememt> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             WhileStatememt whileStatement = new WhileStatememt();
             word.Color(CodeDrawStyle.ColorType.Keyword);
@@ -220,7 +220,7 @@ namespace pluginVerilog.Verilog.Statements
             }
             word.MoveNext();
 
-            whileStatement.Statement = Statements.ParseCreateStatement(word, nameSpace);
+            whileStatement.Statement = await Statements.ParseCreateStatement(word, nameSpace);
 
             return whileStatement;
         }
@@ -272,7 +272,7 @@ namespace pluginVerilog.Verilog.Statements
         // operator_assignment          ::= variable_lvalue assignment_operator expression
         // assignment_operator          ::= = | += | -= | *= | /= | %= | &= | |= | ^= | <<= | >>= | <<<= | >>>=
 
-        public static ForStatememt? ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
+        public static async Task<ForStatememt?> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             ForStatememt forStatement = new ForStatememt(nameSpace.BuildingBlock, nameSpace) {
                 BeginIndexReference = word.CreateIndexReference(), 
@@ -381,7 +381,7 @@ namespace pluginVerilog.Verilog.Statements
             word.MoveNext();
 
 
-            forStatement.Statement = Statements.ParseCreateStatement(word, forStatement);
+            forStatement.Statement = await Statements.ParseCreateStatement(word, forStatement);
             return forStatement;
         }
 
@@ -407,7 +407,7 @@ namespace pluginVerilog.Verilog.Statements
 
         // "foreach" "(" ps_or_hierarchical_array_identifier [ loop_variables ] ")" statement
         // ps_or_hierarchical_array_identifier ::= [implicit_class_handle. | class_scope | package_scope] hierarchical_array_identifier
-        public static ForeachStatement ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
+        public static async Task<ForeachStatement> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             ForeachStatement foreachStatement = new ForeachStatement(nameSpace.BuildingBlock,nameSpace)
             {
@@ -473,7 +473,7 @@ namespace pluginVerilog.Verilog.Statements
             }
             word.MoveNext();
 
-            foreachStatement.Statement = Statements.ParseCreateStatement(word, nameSpace);
+            foreachStatement.Statement = await Statements.ParseCreateStatement(word, nameSpace);
 
             return foreachStatement;
         }

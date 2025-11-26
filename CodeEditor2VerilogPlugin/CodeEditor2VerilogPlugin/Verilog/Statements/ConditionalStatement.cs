@@ -44,7 +44,7 @@ namespace pluginVerilog.Verilog.Statements
                                             | function_if_else_if_statement
         function_if_else_if_statement   ::= if (expression ) function_statement_or_null { else if (expression) function_statement_or_null } [ else function_statement_or_null]
         */
-        public static ConditionalStatement ParseCreate(WordScanner word, NameSpace nameSpace,string? statement_label)
+        public static async Task<ConditionalStatement> ParseCreate(WordScanner word, NameSpace nameSpace,string? statement_label)
         {
             System.Diagnostics.Debug.Assert(word.Text == "if");
             word.Color(CodeDrawStyle.ColorType.Keyword);
@@ -74,7 +74,7 @@ namespace pluginVerilog.Verilog.Statements
             }
             word.MoveNext(); // )
 
-            IStatement statement = Statements.ParseCreateStatementOrNull(word, nameSpace);
+            IStatement statement = await Statements.ParseCreateStatementOrNull(word, nameSpace);
             conditionalStatement.ConditionStatementPairs.Add(new ConditionStatementPair(conditionExpression, statement));
 
             while (word.Text == "else")
@@ -107,12 +107,12 @@ namespace pluginVerilog.Verilog.Statements
                     }
                     word.MoveNext(); // )
 
-                    statement = Statements.ParseCreateStatementOrNull(word, nameSpace);
+                    statement = await Statements.ParseCreateStatementOrNull(word, nameSpace);
                     conditionalStatement.ConditionStatementPairs.Add(new ConditionStatementPair(conditionExpression, statement));
                 }
                 else
                 {
-                    statement = Statements.ParseCreateStatementOrNull(word, nameSpace);
+                    statement = await Statements.ParseCreateStatementOrNull(word, nameSpace);
                     conditionalStatement.ConditionStatementPairs.Add(new ConditionStatementPair(null, statement));
                     break;
                 }

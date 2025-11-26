@@ -1,4 +1,5 @@
 ﻿//using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Avalonia.Threading;
 using CodeEditor2.CodeEditor;
 using CodeEditor2.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
@@ -135,7 +136,7 @@ namespace pluginVerilog.Verilog.ModuleItems
         public IndexReference? LastIndexReference { get; set; }
 
 
-        public static bool Parse(WordScanner word, NameSpace nameSpace)
+        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
         {
             // interface instantiation can be placed only in module
             BuildingBlock buildingBlock = nameSpace.BuildingBlock as BuildingBlock;
@@ -189,6 +190,21 @@ namespace pluginVerilog.Verilog.ModuleItems
             {
                 word.AddError("unfound module");
             }
+
+            Data.VerilogFile? baseFile = instancedModule?.File as Data.VerilogFile;
+            if (baseFile != null && baseFile.ReparseRequested)
+            {
+                CodeEditor2.Controller.AppendLog("parsebase : " + baseFile.ID, Avalonia.Media.Colors.Orange);
+                var baseParser = baseFile.CreateDocumentParser(CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.BackgroundParse, null);
+                await baseParser.Parse();
+
+                await Dispatcher.UIThread.InvokeAsync(
+                    () => {baseFile.AcceptParsedDocument(baseParser.ParsedDocument); }
+                );
+                instancedModule = word.ProjectProperty.GetBuildingBlock(moduleName) as Module;
+            }
+
+
 
             word.MoveNext();
             IndexReference blockBeginIndexReference = word.CreateIndexReference();
@@ -245,6 +261,18 @@ namespace pluginVerilog.Verilog.ModuleItems
                     {
                         instancedModule = word.ProjectProperty.GetInstancedBuildingBlock(moduleInstantiation) as Module;
                     }
+                    //if (instancedModule == null && baseFile != null)
+                    //{
+                    //    CodeEditor2.Controller.AppendLog("parseparameter : " + baseFile.Name, Avalonia.Media.Colors.Orange);
+                    //    var baseParser = baseFile.CreateDocumentParser(CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.BackgroundParse, null);
+                    //    await baseParser.Parse();
+
+                    //    await Dispatcher.UIThread.InvokeAsync(
+                    //        () => { baseFile.AcceptParsedDocument(baseParser.ParsedDocument); }
+                    //    );
+                    //    instancedModule = word.ProjectProperty.GetInstancedBuildingBlock(moduleInstantiation) as Module;
+                    //}
+
                     if (instancedModule == null)
                     {
                         nameSpace.BuildingBlock.ReparseRequested = true;
