@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using static AjkAvaloniaLibs.Libs.Icons;
 using static pluginVerilog.Tool.ParseHierarchy;
 
 namespace pluginVerilog.Verilog.Snippets
@@ -15,6 +16,10 @@ namespace pluginVerilog.Verilog.Snippets
     {
         public AlwaysFFSnippet() : base("alwaysFF")
         {
+            IconImage = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
+                    "CodeEditor2VerilogPlugin/Assets/Icons/verilogDocument.svg",
+                    Avalonia.Media.Colors.Orange
+                    );
         }
 
         private CodeEditor2.CodeEditor.CodeDocument? document;
