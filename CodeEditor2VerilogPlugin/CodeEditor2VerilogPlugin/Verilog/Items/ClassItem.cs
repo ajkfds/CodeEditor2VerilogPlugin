@@ -92,7 +92,7 @@ namespace pluginVerilog.Verilog.Items
 
                 // function_declaration
                 case "function":
-                    Function.ParseFunctionOrConstructor(word, nameSpace);
+                    await Function.ParseFunctionOrConstructor(word, nameSpace);
                     return true;
 
                 case "const":

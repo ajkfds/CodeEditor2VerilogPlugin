@@ -154,7 +154,7 @@ namespace pluginVerilog.Verilog
             }
             else if(word.Text =="(")
             {
-                parse_task_items_ansi(word, nameSpace, task);
+                await parse_task_items_ansi(word, nameSpace, task);
             }
             else
             {
@@ -252,7 +252,7 @@ namespace pluginVerilog.Verilog
         }
 
         // task_prototype::= task task_identifier[([tf_port_list])]
-        public static void ParsePrototype(WordScanner word, NameSpace nameSpace)
+        public static async System.Threading.Tasks.Task ParsePrototype(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "task") throw new Exception();
 
@@ -294,7 +294,7 @@ namespace pluginVerilog.Verilog
             word.Color(CodeDrawStyle.ColorType.Identifier);
             word.MoveNext();
 
-            parse_task_items_ansi(word, nameSpace, task);
+            await parse_task_items_ansi(word, nameSpace, task);
         }
 
         // function_body_declaration    ::=   function_data_type_or_implicit [interface_identifier. | class_scope] function_identifier;

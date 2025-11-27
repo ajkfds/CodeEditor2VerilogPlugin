@@ -34,7 +34,7 @@ namespace pluginVerilog.Verilog.Items
 
 
             // module_or_generate_item_declaration
-            if (ModuleOrGenerateItemDeclaration.Parse(word, nameSpace.BuildingBlock )) return true;
+            if (await ModuleOrGenerateItemDeclaration.Parse(word, nameSpace.BuildingBlock )) return true;
 
             switch (word.Text)
             {
@@ -59,7 +59,7 @@ namespace pluginVerilog.Verilog.Items
                 // loop_generate_construct
                 case "for":
 //                    word.AddSystemVerilogError();
-                    return Generate.LoopGenerateConstruct.Parse(word, nameSpace);
+                    return await Generate.LoopGenerateConstruct.Parse(word, nameSpace);
                 // conditional_generate_construct
                 case "if":
                     return await Generate.IfGenerateConstruct.Parse(word, nameSpace);

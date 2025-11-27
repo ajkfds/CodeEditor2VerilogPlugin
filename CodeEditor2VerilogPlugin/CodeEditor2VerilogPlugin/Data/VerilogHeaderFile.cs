@@ -113,7 +113,7 @@ namespace pluginVerilog.Data
                 }
                 else
                 {
-                    throw ex;
+                    throw;
                 }
             }
         }

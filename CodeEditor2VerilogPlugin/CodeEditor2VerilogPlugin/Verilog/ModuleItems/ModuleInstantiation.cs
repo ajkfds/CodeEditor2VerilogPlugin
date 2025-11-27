@@ -192,7 +192,7 @@ namespace pluginVerilog.Verilog.ModuleItems
             }
 
             Data.VerilogFile? baseFile = instancedModule?.File as Data.VerilogFile;
-            if (baseFile != null && baseFile.ReparseRequested)
+            if (baseFile != null && baseFile.ReparseRequested && nameSpace.BuildingBlock.File.ID != baseFile.ID)
             {
                 CodeEditor2.Controller.AppendLog("parsebase : " + baseFile.ID, Avalonia.Media.Colors.Orange);
                 var baseParser = baseFile.CreateDocumentParser(CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.BackgroundParse, null);

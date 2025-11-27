@@ -27,7 +27,7 @@ namespace pluginVerilog.Verilog.Items
             | assertion_item_declaration 
             | ;
          */
-        public static bool Parse(WordScanner word, NameSpace nameSpace)
+        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
         {
             // data_declaration
             if (DataObjects.Variables.Variable.ParseDeclaration(word, nameSpace)) return true;
@@ -75,12 +75,12 @@ namespace pluginVerilog.Verilog.Items
 
                 // task_declaration
                 case "task":
-                    Task.Parse(word, nameSpace);
+                    await Task.Parse(word, nameSpace);
                     break;
 
                 // function_declaration
                 case "function":
-                    Function.Parse(word, nameSpace);
+                    await Function.Parse(word, nameSpace);
                     break;
 
                 // checker_declaration
@@ -89,7 +89,7 @@ namespace pluginVerilog.Verilog.Items
                 // dpi_import_export
                 case "import":
                 case "export":
-                    DpiImportExport.Parse(word, nameSpace);
+                    await DpiImportExport.Parse(word, nameSpace);
                     break;
                 // extern_constraint_declaration
                 // TODO
@@ -97,7 +97,7 @@ namespace pluginVerilog.Verilog.Items
                 // class_declaration
                 case "virtual":
                 case "class":
-                    BuildingBlocks.Class.ParseDeclaration(word, nameSpace);
+                    await BuildingBlocks.Class.ParseDeclaration(word, nameSpace);
                     break;
 
                 // class_constructor_declaration

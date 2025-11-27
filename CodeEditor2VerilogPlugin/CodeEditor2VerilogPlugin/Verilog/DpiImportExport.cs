@@ -25,7 +25,7 @@ namespace pluginVerilog.Verilog
         function_prototype              ::= function data_type_or_void function_identifier[([tf_port_list])]
         task_prototype                  ::= task task_identifier [ ([tf_port_list])]
         */
-        public static void Parse(WordScanner word, NameSpace nameSpace)
+        public static async System.Threading.Tasks.Task Parse(WordScanner word, NameSpace nameSpace)
         {
             bool import = false;
             if (word.Text == "import")
@@ -61,14 +61,14 @@ namespace pluginVerilog.Verilog
 
             if (import)
             {
-                parseImport(word, nameSpace);
+                await parseImport(word, nameSpace);
             }
             else
             {
                 parseExport(word, nameSpace);
             }
         }
-        public static void parseImport(WordScanner word, NameSpace nameSpace)
+        public static async System.Threading.Tasks.Task parseImport(WordScanner word, NameSpace nameSpace)
         {
             bool shouldBeFunction = false;
             if (word.Text == "context")
@@ -101,12 +101,12 @@ namespace pluginVerilog.Verilog
             if(word.Text == "task")
             {
                 if (shouldBeFunction) word.AddError("cannot use task with pure keyword");
-                Task.ParsePrototype(word, nameSpace);
+                await Task.ParsePrototype(word, nameSpace);
                 return;
             }
             if(word.Text == "function")
             {
-                Function.ParsePrototype(word, nameSpace);
+                await Function.ParsePrototype(word, nameSpace);
                 return;
             }
             word.AddError("illegal Dpi Import");

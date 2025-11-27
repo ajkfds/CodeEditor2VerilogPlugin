@@ -32,7 +32,7 @@ namespace pluginVerilog.Verilog.Items
                 // timeunits_declaration3
                 // interface_declaration 
                 case "interface":
-                    BuildingBlocks.Interface.Create(word, nameSpace, null, nameSpace.BuildingBlock, word.RootParsedDocument.File, word.Prototype);
+                    await BuildingBlocks.Interface.Create(word, nameSpace, null, nameSpace.BuildingBlock, word.RootParsedDocument.File, word.Prototype);
                     return true;
                 // program_declaration 
                 default:

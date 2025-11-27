@@ -46,13 +46,13 @@ namespace pluginVerilog.Verilog
             realtime,
             time
         }
-        public static void Parse(WordScanner word, NameSpace nameSpace)
+        public static async System.Threading.Tasks.Task Parse(WordScanner word, NameSpace nameSpace)
         {
-            Parse(word,nameSpace, false);
+            await Parse(word,nameSpace, false);
         }
-        public static void ParseFunctionOrConstructor(WordScanner word, NameSpace nameSpace)
+        public static async System.Threading.Tasks.Task ParseFunctionOrConstructor(WordScanner word, NameSpace nameSpace)
         {
-            Parse(word, nameSpace, true);
+            await Parse(word, nameSpace, true);
         }
         public virtual void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
@@ -259,7 +259,7 @@ namespace pluginVerilog.Verilog
             }
             else if (word.Text == "(")
             {
-                parse_function_items_ansi(word, nameSpace, function);
+                await parse_function_items_ansi(word, nameSpace, function);
             }
 
             if (!word.SystemVerilog && word.Text == "endfunction")
@@ -350,7 +350,7 @@ namespace pluginVerilog.Verilog
         }
 
         //function_prototype::= function data_type_or_void function_identifier[([tf_port_list])]
-        public static void ParsePrototype(WordScanner word, NameSpace nameSpace)
+        public static async System.Threading.Tasks.Task ParsePrototype(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "function") throw new System.Exception();
 
@@ -452,7 +452,7 @@ namespace pluginVerilog.Verilog
 
             if (word.Text == "(")
             {
-                parse_function_items_ansi(word, nameSpace, function);
+                await parse_function_items_ansi(word, nameSpace, function);
             }
             else
             {

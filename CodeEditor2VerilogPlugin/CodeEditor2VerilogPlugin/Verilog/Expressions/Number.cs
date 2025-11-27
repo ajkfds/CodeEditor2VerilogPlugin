@@ -594,14 +594,10 @@ namespace pluginVerilog.Verilog.Expressions
             }
             else
             {
-                try
+                if(int.TryParse(sb.ToString(),out int temp_int))
                 {
-                    number.Value = Convert.ToInt32(sb.ToString(), 2);
+                    number.Value = temp_int;
                     number.Constant = true;
-                }
-                catch
-                {
-
                 }
             }
 

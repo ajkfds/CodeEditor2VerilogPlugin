@@ -349,7 +349,7 @@ namespace pluginVerilog.Data
             VerilogCommon.Updater.Update(this);
         }
 
-        public async System.Threading.Tasks.Task UpdateAsync()
+        public override async System.Threading.Tasks.Task UpdateAsync()
         {
             if (Dispatcher.UIThread.CheckAccess())
             {

@@ -37,7 +37,7 @@ namespace pluginVerilog.Verilog.Items
                 return true;
             }
             //{ attribute_instance } module_or_generate_item_declaration 
-            if (ModuleOrGenerateItemDeclaration.Parse(word, nameSpace.BuildingBlock))
+            if (await ModuleOrGenerateItemDeclaration.Parse(word, nameSpace.BuildingBlock))
             {
                 return true;
             }

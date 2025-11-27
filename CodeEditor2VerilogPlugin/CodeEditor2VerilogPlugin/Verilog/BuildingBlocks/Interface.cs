@@ -64,11 +64,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
         //List<PackedArray> IDataType.PackedDimensions => new List<PackedArray>();
 
-        public static Interface Create(WordScanner word, NameSpace nameSpace, Attribute? attribute, BuildingBlock parent, Data.IVerilogRelatedFile file, bool protoType)
+        public static async System.Threading.Tasks.Task<Interface> Create(WordScanner word, NameSpace nameSpace, Attribute? attribute, BuildingBlock parent, Data.IVerilogRelatedFile file, bool protoType)
         {
-            return Create(word,nameSpace, null, attribute, parent, file, protoType);
+            return await Create(word,nameSpace, null, attribute, parent, file, protoType);
         }
-        public static Interface Create(
+        public static async System.Threading.Tasks.Task<Interface> Create(
             WordScanner word,
             NameSpace nameSpace,
             Dictionary<string, Expressions.Expression>? parameterOverrides,
@@ -132,18 +132,18 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 // protptype parse
                 WordScanner prototypeWord = word.Clone();
                 prototypeWord.Prototype = true;
-                parseInterfaceItems(prototypeWord, parameterOverrides, null, interface_);
+                await parseInterfaceItems(prototypeWord, parameterOverrides, null, interface_);
                 prototypeWord.Dispose();
 
                 // parse
                 word.RootParsedDocument.Macros = macroKeep;
-                parseInterfaceItems(word, parameterOverrides, null, interface_);
+                await parseInterfaceItems(word, parameterOverrides, null, interface_);
             }
             else
             {
                 // parse prototype only
                 word.Prototype = true;
-                parseInterfaceItems(word, parameterOverrides, null, interface_);
+                await parseInterfaceItems(word, parameterOverrides, null, interface_);
                 word.Prototype = false;
             }
 

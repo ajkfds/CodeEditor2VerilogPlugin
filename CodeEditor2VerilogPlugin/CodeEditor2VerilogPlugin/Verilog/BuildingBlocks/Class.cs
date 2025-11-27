@@ -67,9 +67,9 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             get { return DataTypeEnum.Class; }
             set { } 
         }
-        public static void ParseDeclaration(WordScanner word, NameSpace nameSpace)
+        public static async System.Threading.Tasks.Task ParseDeclaration(WordScanner word, NameSpace nameSpace)
         {
-            Class? class_ = Create(word, nameSpace);
+            Class? class_ = await Create(word, nameSpace);
             if (class_ == null) return;
 
             if (word.Prototype)
@@ -92,11 +92,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
         }
 
-        public static Class? Create(WordScanner word, NameSpace nameSpace)
+        public static async Task<Class?> Create(WordScanner word, NameSpace nameSpace)
         {
-            return Create(word, nameSpace, null);
+            return await Create(word, nameSpace, null);
         }
-        public static Class? Create(
+        public static async Task<Class?> Create(
             WordScanner word,
             NameSpace nameSpace,
             Dictionary<string, Expressions.Expression>? parameterOverrides
@@ -180,19 +180,19 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 WordScanner prototypeWord = word.Clone();
 //                WordScanner prototypeWord = word;
                 prototypeWord.Prototype = true;
-                parseClassItems(prototypeWord, nameSpace, parameterOverrides, null, class_);
+                await parseClassItems(prototypeWord, nameSpace, parameterOverrides, null, class_);
                 prototypeWord.Dispose();
 
                 // parse
                 word.RootParsedDocument.Macros = macroKeep;
-                parseClassItems(word, nameSpace, parameterOverrides, null, class_);
+                await parseClassItems(word, nameSpace, parameterOverrides, null, class_);
             }
             else
             {
-                parseClassItems(word, nameSpace, parameterOverrides, null, class_);
+                await parseClassItems(word, nameSpace, parameterOverrides, null, class_);
             }
 
-            parseClassItems(word, nameSpace, parameterOverrides, null, class_);
+            await parseClassItems(word, nameSpace, parameterOverrides, null, class_);
             /*
             if (!word.CellDefine && !word.Prototype)
             {

@@ -14,6 +14,5 @@ namespace pluginVerilog.Data
         ProjectProperty ProjectProperty { get; }
         bool SystemVerilog { get; }
 
-        Task UpdateAsync();
     }
 }

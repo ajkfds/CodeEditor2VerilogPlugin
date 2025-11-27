@@ -18,7 +18,9 @@ namespace pluginVerilog.Verilog.ModuleItems
         public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
         {
             ModuleItems.ContinuousAssign continuousAssign = ModuleItems.ContinuousAssign.ParseCreate(word, nameSpace);
-            return true;
+
+            
+            return await System.Threading.Tasks.Task.FromResult(true);
         }
 
         public static ContinuousAssign ParseCreate(WordScanner word, NameSpace nameSpace)

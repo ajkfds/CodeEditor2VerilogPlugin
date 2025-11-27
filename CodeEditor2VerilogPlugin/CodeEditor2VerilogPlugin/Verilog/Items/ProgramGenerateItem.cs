@@ -24,7 +24,7 @@ namespace pluginVerilog.Verilog.Items
                     return await GenerateRegion.Parse(word, nameSpace);
                 case "for":
                     // loop_generate_construct
-                    return Generate.LoopGenerateConstruct.Parse(word, nameSpace);
+                    return await Generate.LoopGenerateConstruct.Parse(word, nameSpace);
                 case "if":
                     // conditional_generate_construct
                     return await Generate.IfGenerateConstruct.Parse(word, nameSpace);

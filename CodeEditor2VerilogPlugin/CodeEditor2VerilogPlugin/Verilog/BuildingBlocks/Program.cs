@@ -29,11 +29,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         public bool AnsiPortStyle = false;
         public bool Static = true;
 
-        public static Program Parse(WordScanner word, Attribute attribute, BuildingBlock parent, Data.IVerilogRelatedFile file, bool protoType)
+        public static async System.Threading.Tasks.Task<Program> Parse(WordScanner word, Attribute attribute, BuildingBlock parent, Data.IVerilogRelatedFile file, bool protoType)
         {
-            return Parse(word, null, attribute, parent, file, protoType);
+            return await Parse(word, null, attribute, parent, file, protoType);
         }
-        public static Program Parse(
+        public static async Task<Program> Parse(
             WordScanner word,
             Dictionary<string, Expressions.Expression>? parameterOverrides,
             Attribute attribute,
@@ -140,18 +140,18 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 // prototype parse
                 WordScanner prototypeWord = word.Clone();
                 prototypeWord.Prototype = true;
-                parseProgramItems(prototypeWord, parameterOverrides, null, program);
+                await parseProgramItems(prototypeWord, parameterOverrides, null, program);
                 prototypeWord.Dispose();
 
                 // parse
                 word.RootParsedDocument.Macros = macroKeep;
-                parseProgramItems(word, parameterOverrides, null, program);
+                await parseProgramItems(word, parameterOverrides, null, program);
             }
             else
             {
                 // parse prototype only
                 word.Prototype = true;
-                parseProgramItems(word, parameterOverrides, null, program);
+                await parseProgramItems(word, parameterOverrides, null, program);
                 word.Prototype = false;
             }
 

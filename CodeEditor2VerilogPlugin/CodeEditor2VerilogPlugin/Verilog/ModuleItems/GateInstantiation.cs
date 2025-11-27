@@ -54,7 +54,7 @@ namespace pluginVerilog.Verilog.ModuleItems
         public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
         {
             GateInstantiation? gate = ParseCreate(word, nameSpace);
-            return true;
+            return await System.Threading.Tasks.Task.FromResult(true);
         }
         public static GateInstantiation? ParseCreate(WordScanner word, NameSpace nameSpace)
         {

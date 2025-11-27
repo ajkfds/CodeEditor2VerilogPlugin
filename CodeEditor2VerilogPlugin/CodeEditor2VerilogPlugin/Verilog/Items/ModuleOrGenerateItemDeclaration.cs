@@ -18,10 +18,10 @@ namespace pluginVerilog.Verilog.Items
             | default clocking clocking_identifier ;
         */
 
-        public static bool Parse(WordScanner word, BuildingBlocks.BuildingBlock buildingBlock)
+        public static async System.Threading.Tasks.Task<bool> Parse(WordScanner word, BuildingBlocks.BuildingBlock buildingBlock)
         {
             // package_or_generate_item_declaration
-            if (PackageOrGenerateItemDeclaration.Parse(word, buildingBlock)) return true;
+            if (await PackageOrGenerateItemDeclaration.Parse(word, buildingBlock)) return true;
 
             switch (word.Text)
             {

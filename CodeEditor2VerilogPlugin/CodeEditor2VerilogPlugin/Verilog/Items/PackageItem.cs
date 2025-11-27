@@ -21,7 +21,7 @@ namespace pluginVerilog.Verilog.Items
 
     public class PackageItem
     {
-        public static bool Parse(WordScanner word, NameSpace nameSpace)
+        public static async System.Threading.Tasks.Task<bool> Parse(WordScanner word, NameSpace nameSpace)
         {
             switch (word.Text)
             {
@@ -29,7 +29,7 @@ namespace pluginVerilog.Verilog.Items
                 // package_export_declaration
                 // timeunits_declaration
                 default:
-                    return PackageOrGenerateItemDeclaration.Parse(word, nameSpace);
+                    return await PackageOrGenerateItemDeclaration.Parse(word, nameSpace);
             }
         }
     }

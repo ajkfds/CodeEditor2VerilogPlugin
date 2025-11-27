@@ -106,21 +106,21 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     // udp_declaration
                     // interface_declaration
                     case "interface":
-                        parseInterface(word, parsedDocument, file);
+                        await parseInterface(word, parsedDocument, file);
                         break;
                     // program_declaration
                     case "program":
-                        parseProgram(word, parsedDocument, file);
+                        await parseProgram(word, parsedDocument, file);
                         break;
                     // bind_directive
                     // config_declaration
                     // package_declaration
                     case "package":
-                        parsePackage(word, parsedDocument, file);
+                        await parsePackage(word, parsedDocument, file);
                         break;
                     default:
                         // package_item
-                        if (!Items.PackageItem.Parse(word, root))
+                        if (!await Items.PackageItem.Parse(word, root))
                         {
                             word.MoveNext();
                         }
@@ -193,7 +193,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
         }
 
-        private static void parsePackage(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
+        private static async System.Threading.Tasks.Task parsePackage(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
         {
             if (word.Text != "package") System.Diagnostics.Debugger.Break();
 
@@ -216,11 +216,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
                 if (parsedDocument.ParameterOverrides == null)
                 {
-                    package = Package.Create(word, null, parsedDocument.Root, file, true);
+                    package = await Package.Create(word, null, parsedDocument.Root, file, true);
                 }
                 else
                 {
-                    package = Package.Create(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, true);
+                    package = await Package.Create(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, true);
                 }
                 //if (package.Instantiations.Count != 0) // prepare reparse (instanced module could have un-refferenced link)
                 {
@@ -231,16 +231,16 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
                 if (parsedDocument.ParameterOverrides == null)
                 {
-                    package = Package.Create(word, null, parsedDocument.Root, file, false);
+                    package = await Package.Create(word, null, parsedDocument.Root, file, false);
                 }
                 else
                 {
-                    package = Package.Create(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, false);
+                    package = await Package.Create(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, false);
                 }
             }
         }
 
-        private static void parseProgram(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
+        private static async System.Threading.Tasks.Task parseProgram(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
         {
             if (word.Text != "program") System.Diagnostics.Debugger.Break();
 
@@ -263,11 +263,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
                 if (parsedDocument.ParameterOverrides == null)
                 {
-                    program = Program.Parse(word, null, parsedDocument.Root, file, true);
+                    program = await Program.Parse(word, null, parsedDocument.Root, file, true);
                 }
                 else
                 {
-                    program = Program.Parse(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, true);
+                    program = await Program.Parse(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, true);
                 }
                 //if (program.Instantiations.Count != 0) // prepare reparse (instanced module could have un-referenced link)
                 {
@@ -278,11 +278,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
                 if (parsedDocument.ParameterOverrides == null)
                 {
-                    program = Program.Parse(word, null, parsedDocument.Root, file,  false);
+                    program = await Program.Parse(word, null, parsedDocument.Root, file,  false);
                 }
                 else
                 {
-                    program = Program.Parse(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, false);
+                    program = await Program.Parse(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, false);
                 }
             }
 
@@ -297,7 +297,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
         }
 
-        private static void parseInterface(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
+        private static async System.Threading.Tasks.Task parseInterface(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
         {
             if (word.Text != "interface") System.Diagnostics.Debugger.Break();
 
@@ -319,11 +319,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
                 if (parsedDocument.ParameterOverrides == null)
                 {
-                    module = Interface.Create(word, parsedDocument.Root, null, parsedDocument.Root, file, true);
+                    module = await Interface.Create(word, parsedDocument.Root, null, parsedDocument.Root, file, true);
                 }
                 else
                 {
-                    module = Interface.Create(word, parsedDocument.Root, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, true);
+                    module = await Interface.Create(word, parsedDocument.Root, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, true);
                 }
 //                if (module.Instantiations.Count != 0) // prepare reparse (instanced module could have un-refferenced link)
                 {
@@ -334,11 +334,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
                 if (parsedDocument.ParameterOverrides == null)
                 {
-                    module = Interface.Create(word, parsedDocument.Root, null, parsedDocument.Root, file, false);
+                    module = await Interface.Create(word, parsedDocument.Root, null, parsedDocument.Root, file, false);
                 }
                 else
                 {
-                    module = Interface.Create(word, parsedDocument.Root, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, false);
+                    module = await Interface.Create(word, parsedDocument.Root, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, false);
                 }
             }
 

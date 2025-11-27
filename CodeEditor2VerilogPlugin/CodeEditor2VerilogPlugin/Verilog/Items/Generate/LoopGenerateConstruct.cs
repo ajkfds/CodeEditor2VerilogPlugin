@@ -25,7 +25,7 @@ namespace pluginVerilog.Verilog.Items.Generate
         //      | inc_or_dec_operator genvar_identifier 
         //      | genvar_identifier inc_or_dec_operator
 
-        public static bool Parse(WordScanner word, NameSpace module)
+        public static async System.Threading.Tasks.Task<bool> Parse(WordScanner word, NameSpace module)
         {
             if (word.Text != "for") return false;
 
@@ -78,7 +78,7 @@ namespace pluginVerilog.Verilog.Items.Generate
             }
             word.MoveNext();
 
-            GenerateBlock.Parse(word, module);
+            await GenerateBlock.Parse(word, module);
             return true;
         }
     }
