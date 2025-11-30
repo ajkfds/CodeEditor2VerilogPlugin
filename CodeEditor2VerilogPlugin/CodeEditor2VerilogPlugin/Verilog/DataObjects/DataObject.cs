@@ -1,4 +1,5 @@
 ﻿using Avalonia;
+using CodeEditor2.CodeEditor.CodeComplete;
 using pluginVerilog.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
@@ -47,6 +48,15 @@ namespace pluginVerilog.Verilog.DataObjects
         public bool CommentAnnotation_Discarded = false;
         public virtual NamedElements NamedElements { get; } = new NamedElements();
 
+        public virtual AutocompleteItem CreateAutoCompleteItem()
+        {
+            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
+                Name,
+                CodeDrawStyle.ColorIndex(ColorType),
+                Global.CodeDrawStyle.Color(ColorType),
+                "CodeEditor2/Assets/Icons/tag.svg"
+                );
+        }
 
         private WeakReference<NameSpace>? wr_DefinedNameSpace = null;
         [Newtonsoft.Json.JsonIgnore]

@@ -1,6 +1,7 @@
 ﻿//using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Avalonia.Threading;
 using CodeEditor2.CodeEditor;
+using CodeEditor2.CodeEditor.CodeComplete;
 using CodeEditor2.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
@@ -20,6 +21,15 @@ namespace pluginVerilog.Verilog.ModuleItems
     {
         public NamedElements NamedElements { get; } = new NamedElements();
 
+        public AutocompleteItem CreateAutoCompleteItem()
+        {
+            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
+                Name,
+                CodeDrawStyle.ColorIndex(ColorType),
+                Global.CodeDrawStyle.Color(ColorType),
+                "CodeEditor2/Assets/Icons/tag.svg"
+                );
+        }
         public virtual CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Identifier; } }
         //protected ModuleInstantiation() { }
         /*
@@ -194,14 +204,28 @@ namespace pluginVerilog.Verilog.ModuleItems
             Data.VerilogFile? baseFile = instancedModule?.File as Data.VerilogFile;
             if (baseFile != null && baseFile.ReparseRequested && nameSpace.BuildingBlock.File.ID != baseFile.ID)
             {
-                CodeEditor2.Controller.AppendLog("parsebase : " + baseFile.ID, Avalonia.Media.Colors.Orange);
-                var baseParser = baseFile.CreateDocumentParser(CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.BackgroundParse, null);
-                await baseParser.Parse();
+                await baseFile.BaseParseSemapho.WaitAsync();
+                try
+                {
+                    if (baseFile.ReparseRequested)
+                    {
+                        CodeEditor2.Controller.AppendLog("parsebase : " + baseFile.ID, Avalonia.Media.Colors.Orange);
+                        var baseParser = baseFile.CreateDocumentParser(CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.BackgroundParse, null);
+                        await baseParser.Parse();
 
-                await Dispatcher.UIThread.InvokeAsync(
-                    () => {baseFile.AcceptParsedDocument(baseParser.ParsedDocument); }
-                );
-                instancedModule = word.ProjectProperty.GetBuildingBlock(moduleName) as Module;
+                        await Dispatcher.UIThread.InvokeAsync(
+                            () => {
+                                baseFile.AcceptParsedDocument(baseParser.ParsedDocument);
+                                baseFile.ReparseRequested = false;
+                            }
+                        );
+                        instancedModule = word.ProjectProperty.GetBuildingBlock(moduleName) as Module;
+                    }
+                }
+                finally
+                {
+                    baseFile.BaseParseSemapho.Release();
+                }
             }
 
 
@@ -275,8 +299,8 @@ namespace pluginVerilog.Verilog.ModuleItems
 
                     if (instancedModule == null)
                     {
-                        nameSpace.BuildingBlock.ReparseRequested = true;
-                        word.RootParsedDocument.ReparseRequested = true;
+//                        nameSpace.BuildingBlock.ReparseRequested = true;
+//                        word.RootParsedDocument.ReparseRequested = true;
                         word.AddError("not parsed yet.");
                     }
                 }

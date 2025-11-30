@@ -16,6 +16,10 @@ namespace pluginVerilog.Verilog.Snippets
     {
         public AutoFormatSnippet() : base("autoFormat")
         {
+            IconImage = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
+                    "CodeEditor2/Assets/Icons/wrench.svg",
+                    Plugin.ThemeColor
+                    );
         }
 
         public override void Apply()

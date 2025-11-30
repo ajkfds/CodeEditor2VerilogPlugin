@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CodeEditor2.CodeEditor.CodeComplete;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -29,6 +30,15 @@ namespace pluginVerilog.Verilog.Statements
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
         // task_enable ::= (From Annex A - A.6.9) hierarchical_task_identifier [ ( expression { , expression } ) ] ;
+        public AutocompleteItem CreateAutoCompleteItem()
+        {
+            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
+                Name,
+                CodeDrawStyle.ColorIndex(ColorType),
+                Global.CodeDrawStyle.Color(ColorType),
+                "CodeEditor2/Assets/Icons/tag.svg"
+                );
+        }
         public void DisposeSubReference()
         {
         }

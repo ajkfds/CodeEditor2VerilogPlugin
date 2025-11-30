@@ -1,4 +1,5 @@
-﻿using pluginVerilog.Verilog.BuildingBlocks;
+﻿using CodeEditor2.CodeEditor.CodeComplete;
+using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,15 @@ namespace pluginVerilog.Verilog.Statements
         public Expressions.Expression LValue { get; protected set; }
         public Expressions.Expression Expression { get; protected set; }
 
+        public AutocompleteItem CreateAutoCompleteItem()
+        {
+            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
+                Name,
+                CodeDrawStyle.ColorIndex(ColorType),
+                Global.CodeDrawStyle.Color(ColorType),
+                "CodeEditor2/Assets/Icons/tag.svg"
+                );
+        }
         /*
         A.6.2 Procedural blocks and assignments
         initial_construct   ::= initial statement
@@ -105,6 +115,15 @@ namespace pluginVerilog.Verilog.Statements
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
 
+        public AutocompleteItem CreateAutoCompleteItem()
+        {
+            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
+                Name,
+                CodeDrawStyle.ColorIndex(ColorType),
+                Global.CodeDrawStyle.Color(ColorType),
+                "CodeEditor2/Assets/Icons/tag.svg"
+                );
+        }
         public void DisposeSubReference()
         {
             LValue.DisposeSubReference(true);

@@ -1,4 +1,5 @@
-﻿using pluginVerilog.Verilog.DataObjects;
+﻿using CodeEditor2.CodeEditor.CodeComplete;
+using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.Expressions;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,15 @@ namespace pluginVerilog.Verilog.Statements
         public string Name { get; protected set; }
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
+        public AutocompleteItem CreateAutoCompleteItem()
+        {
+            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
+                Name,
+                CodeDrawStyle.ColorIndex(ColorType),
+                Global.CodeDrawStyle.Color(ColorType),
+                "CodeEditor2/Assets/Icons/tag.svg"
+                );
+        }
         public void DisposeSubReference()
         {
             if(Statement != null) Statement.DisposeSubReference();
@@ -60,6 +70,15 @@ namespace pluginVerilog.Verilog.Statements
         public string Name { get; protected set; }
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
+        public AutocompleteItem CreateAutoCompleteItem()
+        {
+            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
+                Name,
+                CodeDrawStyle.ColorIndex(ColorType),
+                Global.CodeDrawStyle.Color(ColorType),
+                "CodeEditor2/Assets/Icons/tag.svg"
+                );
+        }
         public void DisposeSubReference()
         {
             if (Statement != null) Statement.DisposeSubReference();
@@ -129,6 +148,15 @@ namespace pluginVerilog.Verilog.Statements
         public string Name { get; protected set; }
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
+        public AutocompleteItem CreateAutoCompleteItem()
+        {
+            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
+                Name,
+                CodeDrawStyle.ColorIndex(ColorType),
+                Global.CodeDrawStyle.Color(ColorType),
+                "CodeEditor2/Assets/Icons/tag.svg"
+                );
+        }
         public void DisposeSubReference()
         {
             Expression.DisposeSubReference(true);
@@ -181,6 +209,15 @@ namespace pluginVerilog.Verilog.Statements
         public string Name { get; protected set; }
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
+        public AutocompleteItem CreateAutoCompleteItem()
+        {
+            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
+                Name,
+                CodeDrawStyle.ColorIndex(ColorType),
+                Global.CodeDrawStyle.Color(ColorType),
+                "CodeEditor2/Assets/Icons/tag.svg"
+                );
+        }
         public void DisposeSubReference()
         {
             Expression.DisposeSubReference(true);

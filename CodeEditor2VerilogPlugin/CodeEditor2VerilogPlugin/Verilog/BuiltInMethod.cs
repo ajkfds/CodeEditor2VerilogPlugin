@@ -1,4 +1,5 @@
-﻿using pluginVerilog.Verilog.BuildingBlocks;
+﻿using CodeEditor2.CodeEditor.CodeComplete;
+using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.Variables;
 using System;
@@ -7,6 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace pluginVerilog.Verilog
 {
@@ -23,6 +25,16 @@ namespace pluginVerilog.Verilog
                 builtInMethod.PortsList.Add(port);
             }
             return builtInMethod;
+        }
+
+        public AutocompleteItem CreateAutoCompleteItem()
+        {
+            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
+                Name,
+                CodeDrawStyle.ColorIndex(ColorType),
+                Global.CodeDrawStyle.Color(ColorType),
+                "CodeEditor2/Assets/Icons/tag.svg"
+                );
         }
 
         private Dictionary<string, DataObjects.Port> ports = new Dictionary<string, DataObjects.Port>();
@@ -42,5 +54,6 @@ namespace pluginVerilog.Verilog
         public required DataObjects.Variables.Variable? ReturnVariable { init; get; }
 
         NamedElements INamedElement.NamedElements { get; } = new NamedElements();
+
     }
 }

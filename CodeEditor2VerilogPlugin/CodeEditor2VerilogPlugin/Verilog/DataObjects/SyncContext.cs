@@ -1,4 +1,5 @@
 ﻿using pluginVerilog.Verilog.DataObjects.Arrays;
+using Svg;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,8 @@ namespace pluginVerilog.Verilog.DataObjects
     public class SyncContext
     {
         public List<string> Data = new List<string>();
+        private bool isClock = false;
+        private bool isReset = false;
 
         public void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
@@ -30,17 +33,31 @@ namespace pluginVerilog.Verilog.DataObjects
 
         public void AssignToClock()
         {
-            if(!Data.Contains("clock")) Data.Add("clock");
+            isClock = true;
         }
         public void AssignToReset()
         {
-            if(!Data.Contains("reset")) Data.Add("reset");
+            isReset = true;
         }
         public void AddClockDomain(string domainName)
         {
 
         }
 
+        public bool IsClock 
+        { get
+            {
+                return isClock;
+            } 
+        }
+
+        public bool IsReset
+        {
+            get
+            {
+                return isReset;
+            }
+        }
         public void PropageteClockDomainFrom(SyncContext syncContext,WordReference alartWordRef)
         {
             if (Data.Count == 0)

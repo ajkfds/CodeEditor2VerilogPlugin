@@ -14,6 +14,7 @@ namespace pluginVerilog.Verilog
 
         public NamedElements NamedElements { get; }
 
+        public CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem CreateAutoCompleteItem();
 
     }
 }

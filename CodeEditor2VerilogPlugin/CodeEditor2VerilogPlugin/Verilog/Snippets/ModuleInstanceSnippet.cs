@@ -19,6 +19,10 @@ namespace pluginVerilog.Verilog.Snippets
         public ModuleInstanceSnippet(string moduleName) : base(moduleName)
         {
             this.moduleName = moduleName;
+            IconImage = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
+                    "CodeEditor2VerilogPlugin/Assets/Icons/module.svg",
+                    Plugin.ThemeColor
+                    );
         }
 
 
@@ -48,7 +52,8 @@ namespace pluginVerilog.Verilog.Snippets
                 Data.IVerilogRelatedFile? vFile = CodeEditor2.Controller.CodeEditor.GetTextFile() as Data.IVerilogRelatedFile;
                 if (vFile == null) return;
 
-                ParsedDocument parentParsedDocument = vFile.VerilogParsedDocument;
+                ParsedDocument? parentParsedDocument = vFile.VerilogParsedDocument;
+                if(parentParsedDocument == null) return;
                 BuildingBlock? module = parentParsedDocument.GetBuildingBlockAt(vFile.CodeDocument.CaretIndex);
                 if (module == null) return;
 

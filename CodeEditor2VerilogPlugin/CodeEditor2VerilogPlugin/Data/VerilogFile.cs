@@ -252,6 +252,8 @@ namespace pluginVerilog.Data
             }
         }
 
+        public SemaphoreSlim BaseParseSemapho = new SemaphoreSlim(1,1);
+
 
         public override void LoadFormFile()
         {

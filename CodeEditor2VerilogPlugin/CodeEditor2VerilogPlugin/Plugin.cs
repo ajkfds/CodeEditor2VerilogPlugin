@@ -19,7 +19,7 @@ namespace pluginVerilog
         public static string StaticID = "Verilog";
         public string Id { get { return StaticID; } }
 
-        public static Avalonia.Media.Color ThemeColor = Avalonia.Media.Color.FromArgb(255, 50, 150,150);
+        public static Avalonia.Media.Color ThemeColor = Avalonia.Media.Color.FromArgb(255, 255, 139,0);
 
         public bool Register()
         {

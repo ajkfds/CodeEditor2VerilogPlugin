@@ -705,12 +705,7 @@ namespace pluginVerilog.Verilog
             {
                 if (!element.Name.StartsWith(candidate)) continue;
                 items.Add(
-                    new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
-                        element.Name,
-                        CodeDrawStyle.ColorIndex(element.ColorType),
-                        Global.CodeDrawStyle.Color(element.ColorType),
-                        "CodeEditor2/Assets/Icons/tag.svg"
-                        )
+                    element.CreateAutoCompleteItem()
                 );
                 add = true;
             }

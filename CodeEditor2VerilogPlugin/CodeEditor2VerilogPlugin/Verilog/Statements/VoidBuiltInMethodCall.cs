@@ -1,4 +1,5 @@
-﻿using pluginVerilog.Verilog.Expressions;
+﻿using CodeEditor2.CodeEditor.CodeComplete;
+using pluginVerilog.Verilog.Expressions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,15 @@ namespace pluginVerilog.Verilog.Statements
         public NamedElements NamedElements => new NamedElements();
         public void DisposeSubReference()
         {
+        }
+        public AutocompleteItem CreateAutoCompleteItem()
+        {
+            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
+                Name,
+                CodeDrawStyle.ColorIndex(ColorType),
+                Global.CodeDrawStyle.Color(ColorType),
+                "CodeEditor2/Assets/Icons/tag.svg"
+                );
         }
 
         public BuiltinMethodCall? BuiltinMethodCall { get; private set; } = null!; // Initialized in Create method

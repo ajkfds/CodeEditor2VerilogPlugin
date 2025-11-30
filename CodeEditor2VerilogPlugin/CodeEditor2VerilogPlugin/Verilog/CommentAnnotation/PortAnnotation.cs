@@ -50,15 +50,15 @@ namespace pluginVerilog.Verilog.CommentAnnotation
 
                 if (port != null)
                 {
-                    if (commentText.Contains(word.ProjectProperty.AnnotationCommands.Synchronized))
+                    if (comment.Text.Contains(word.ProjectProperty.AnnotationCommands.Synchronized))
                     {
                         parseSyncAnnotation(comment, nameSpace, port,word.ProjectProperty);
                     }
-                    else if (commentText.Contains(word.ProjectProperty.AnnotationCommands.Clock))
+                    else if (comment.Text.Contains(word.ProjectProperty.AnnotationCommands.Clock))
                     {
                         parseClockAnnotation(comment, nameSpace, port, word.ProjectProperty);
                     }
-                    else if (commentText.Contains(word.ProjectProperty.AnnotationCommands.Reset))
+                    else if (comment.Text.Contains(word.ProjectProperty.AnnotationCommands.Reset))
                     {
                         parseResetAnnotation(comment, nameSpace, port, word.ProjectProperty);
                     }
@@ -147,13 +147,13 @@ namespace pluginVerilog.Verilog.CommentAnnotation
         {
             comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
             comment.MoveNext();
-            
+            if (port.DataObject != null) port.DataObject.SyncContext.AssignToClock();
+
             if (projectProperty.AnnotationKeyValueDelimiter != "")
             {
                 if (comment.Text == ":")
                 {
                     comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
-                    if (port.DataObject != null) port.DataObject.SyncContext.AssignToClock();
                     comment.MoveNext(); // :
                 }
                 else

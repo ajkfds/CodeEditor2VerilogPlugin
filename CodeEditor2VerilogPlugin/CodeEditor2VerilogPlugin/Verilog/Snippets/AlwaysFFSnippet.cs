@@ -1,9 +1,14 @@
-﻿using Avalonia.Input;
+﻿using Avalonia.Controls.Shapes;
+using Avalonia.Input;
 using Avalonia.Threading;
+using CodeEditor2.CodeEditor.CodeComplete;
+using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Views;
+using pluginVerilog.Verilog.DataObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Principal;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,8 +22,8 @@ namespace pluginVerilog.Verilog.Snippets
         public AlwaysFFSnippet() : base("alwaysFF")
         {
             IconImage = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
-                    "CodeEditor2VerilogPlugin/Assets/Icons/verilogDocument.svg",
-                    Avalonia.Media.Colors.Orange
+                    "CodeEditor2/Assets/Icons/wrench.svg",
+                    Plugin.ThemeColor
                     );
         }
 
@@ -28,14 +33,21 @@ namespace pluginVerilog.Verilog.Snippets
         private List<string> initials = new List<string> { "clock", "reset_x", "reset_x", "" };
         private List<string> clocks = new List<string> { };
         private List<string> resets = new List<string> { };
+        private Dictionary<string, Port> ports = new Dictionary<string, Port>();
+
+        private int? checkLine = null;
         public override void Apply()
         {
+            List<int> startIndexes = new List<int>();
+            List<int> lastIndexes = new List<int>();
+
+
             System.Diagnostics.Debug.Print("## AlwaysFFSnippet.Apply");
 
             CodeEditor2.Data.TextFile? file = CodeEditor2.Controller.CodeEditor.GetTextFile();
             if (file == null) return;
             document = file.CodeDocument;
-            if(document == null) return;
+            if (document == null) return;
 
             ParsedDocument? parsedDocument = file.ParsedDocument as ParsedDocument;
 
@@ -59,56 +71,66 @@ namespace pluginVerilog.Verilog.Snippets
 
             int index = document.CaretIndex;
 
-            if(parsedDocument != null)
+            if (parsedDocument != null)
             {
                 BuildingBlocks.BuildingBlock? buildingBlock = parsedDocument.GetBuildingBlockAt(index);
                 IPortNameSpace? portNameSpace = buildingBlock as IPortNameSpace;
                 if (portNameSpace != null)
                 {
-                    foreach(DataObjects.Port port in portNameSpace.PortsList)
+                    foreach (DataObjects.Port port in portNameSpace.PortsList)
                     {
-                        if (port.DataObject != null && port.DataObject.SyncContext.Data.Contains("clock"))
+                        if (port.DataObject != null && port.DataObject.SyncContext.IsClock)
                         {
-                            if(!clocks.Contains(port.Name)) clocks.Add(port.Name);
+                            if (!clocks.Contains(port.Name)) clocks.Add(port.Name);
                         }
-                        if (port.DataObject != null && port.DataObject.SyncContext.Data.Contains("reset"))
+                        if (port.DataObject != null && port.DataObject.SyncContext.IsReset)
                         {
                             if (!clocks.Contains(port.Name)) resets.Add(port.Name);
                         }
+                        if (!ports.ContainsKey(port.Name))
+                        {
+                            ports.Add(port.Name, port);
+                        }
                     }
                 }
+
+                if (clocks.Count > 0) initials[0] = clocks[0];
+                if (resets.Count > 0)
+                {
+                    initials[1] = resets[0];
+                    initials[2] = resets[0];
+                }
+
+                // replace {n} to initials[n]
+                for (int i = 0; i < initials.Count; i++)
+                {
+                    string target = "{" + i.ToString() + "}";
+                    if (!replaceText.Contains(target)) break;
+                    startIndexes.Add(index + replaceText.IndexOf(target));
+                    lastIndexes.Add(index + replaceText.IndexOf(target) + initials[i].Length - 1);
+                    replaceText = replaceText.Replace(target, initials[i]);
+                }
+
+                // update text
+                document.Replace(index, 0, 0, replaceText);
+                CodeEditor2.Controller.CodeEditor.SetCaretPosition(startIndexes[0]);
+                CodeEditor2.Controller.CodeEditor.SetSelection(startIndexes[0], lastIndexes[0]);
+
+                // set highlights for {n} texts
+                CodeEditor2.Controller.CodeEditor.ClearHighlight();
+                for (int i = 0; i < startIndexes.Count; i++)
+                {
+                    CodeEditor2.Controller.CodeEditor.AppendHighlight(startIndexes[i], lastIndexes[i]);
+                }
+
+                base.Apply();
+
+                // run async task
+                System.Threading.Tasks.Task.Run(RunAsync);
             }
-
-            if (clocks.Count == 1) initials[0] = clocks[0];
-            if(resets.Count==1)
-            {
-                initials[1] = resets[0];
-                initials[2] = resets[0];
-            }
-
-            for (int i = 0; i < initials.Count; i++)
-            {
-                string target = "{" + i.ToString() + "}";
-                if (!replaceText.Contains(target)) break;
-                startIndexes.Add(index + replaceText.IndexOf(target));
-                lastIndexes.Add(index + replaceText.IndexOf(target) + initials[i].Length - 1);
-                replaceText = replaceText.Replace(target, initials[i]);
-            }
-
-            document.Replace(index, 0, 0, replaceText);
-            CodeEditor2.Controller.CodeEditor.SetCaretPosition(startIndexes[0]);
-            CodeEditor2.Controller.CodeEditor.SetSelection(startIndexes[0], lastIndexes[0]);
-
-            // set highlights for {n} texts
-            CodeEditor2.Controller.CodeEditor.ClearHighlight();
-            for (int i = 0; i < startIndexes.Count; i++)
-            {
-                CodeEditor2.Controller.CodeEditor.AppendHighlight(startIndexes[i], lastIndexes[i]);
-            }
-
-            base.Apply();
-            System.Threading.Tasks.Task.Run(RunAsync);
         }
+
+        // backrtound thread ------------------------------------------------------
 
         private static System.Threading.Tasks.Task? _currentTask;
         private static CancellationTokenSource? _cts;
@@ -137,12 +159,12 @@ namespace pluginVerilog.Verilog.Snippets
             finally
             {
                 _currentTask = null;
-                CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
+                await CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippetAsync();
             }
             return;
         }
 
-        private TaskCompletionSource<string> _eventTcs;
+        private TaskCompletionSource<string> _eventTcs; // return from UI thread
         private async System.Threading.Tasks.Task runBackGround(CancellationToken token)
         {
             try
@@ -151,32 +173,81 @@ namespace pluginVerilog.Verilog.Snippets
                 string result;
 
                 // clock
-                await Dispatcher.UIThread.InvokeAsync(() => {
-                    CodeEditor2.Controller.CodeEditor.SelectHighlight(0);    // move carlet to next highlight
-                });
+                await CodeEditor2.Controller.CodeEditor.SelectHighlightAsync(0);    // move carlet to next highlight
 
-                if (clocks.Count != 1)
-                {
-                    // wait clock input
-                    _eventTcs = new TaskCompletionSource<string>();
+                if (clocks.Count == 0)
+                { // normal text input
+                    _eventTcs = new TaskCompletionSource<string>(); // wait clock input
+                    checkLine = document.GetLineAt(document.SelectionStart);
                     result = await _eventTcs.Task;
+                    checkLine = null;
+                    if (result != "moveNext") return;
+                } else if (clocks.Count == 1)
+                { // use default value
+
+                }
+                else
+                { // select from few list
+                    List<ToolItem> items = new List<ToolItem>();
+                    foreach (var clock in clocks)
+                    {
+                        if (!ports.ContainsKey(clock)) continue;
+                        AutocompleteItem? item = ports[clock].DataObject?.CreateAutoCompleteItem();
+                        if (item != null)
+                        {
+                            item.Assign(document);
+                            items.Add(item);
+                        }
+                    }
+
+                    await CodeEditor2.Controller.CodeEditor.ForceOpenCustomSelectionAsync(items);
+
+                    _eventTcs = new TaskCompletionSource<string>(); // wait clock input
+                    checkLine = document.GetLineAt(document.SelectionStart);
+                    result = await _eventTcs.Task;
+                    checkLine = null;
                     if (result != "moveNext") return;
                 }
 
-                await Dispatcher.UIThread.InvokeAsync(() => {
-                    CodeEditor2.Controller.CodeEditor.SelectHighlight(1);    // move carlet to next highlight
-                });
+                await CodeEditor2.Controller.CodeEditor.SelectHighlightAsync(1);    // move carlet to next highlight
 
-                if (resets.Count != 1)
-                {
-                    // wait reset input
+                if (resets.Count == 0)
+                { // normal text input
                     _eventTcs = new TaskCompletionSource<string>();
+                    checkLine = document.GetLineAt(document.SelectionStart);
                     result = await _eventTcs.Task;
+                    checkLine = null;
+                    if (result != "moveNext") return;
+                }else if (resets.Count == 1)
+                { // use default value
+
+                }
+                else
+                {
+                    List<ToolItem> items = new List<ToolItem>();
+                    foreach (var reset in resets)
+                    {
+                        if (!ports.ContainsKey(reset)) continue;
+                        AutocompleteItem? item = ports[reset].DataObject?.CreateAutoCompleteItem();
+                        if (item != null)
+                        {
+                            item.Assign(document);
+                            items.Add(item);
+                        }
+                    }
+
+                    await CodeEditor2.Controller.CodeEditor.ForceOpenCustomSelectionAsync(items);
+
+                    _eventTcs = new TaskCompletionSource<string>(); // wait clock input
+                    checkLine = document.GetLineAt(document.SelectionStart);
+                    result = await _eventTcs.Task;
+                    checkLine = null;
                     if (result != "moveNext") return;
                 }
 
                 // copy text from {1} to {2}
-                await Dispatcher.UIThread.InvokeAsync(() => {
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
                     int start, last;
                     CodeEditor2.Controller.CodeEditor.GetHighlightPosition(1, out start, out last);
                     string text = document.CreateString(start, last - start + 1);
@@ -185,9 +256,7 @@ namespace pluginVerilog.Verilog.Snippets
                 });
 
                 // move next
-                await Dispatcher.UIThread.InvokeAsync(() => {
-                    CodeEditor2.Controller.CodeEditor.SelectHighlight(3);    // move carlet to next highlight
-                });
+                await CodeEditor2.Controller.CodeEditor.SelectHighlightAsync(3);    // move carlet to next highlight
             }
             catch(Exception ex)
             {
@@ -195,23 +264,20 @@ namespace pluginVerilog.Verilog.Snippets
             }
             finally
             {
-                Aborted();
+                await CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippetAsync();
             }
         }
 
+        // UI thread handler ------------------------------------------------------
 
         public override void Aborted()
         {
+            if (_cts != null) _cts.Cancel();
             CodeEditor2.Controller.CodeEditor.ClearHighlight();
             document = null;
             base.Aborted();
         }
 
-
-
-
-        private List<int> startIndexes = new List<int>();
-        private List<int> lastIndexes = new List<int>();
 
         public override void KeyDown(object? sender, KeyEventArgs e, PopupMenuView popupMenuView)
         {
@@ -228,17 +294,11 @@ namespace pluginVerilog.Verilog.Snippets
                 else if (e.Key == Key.Return)
                 {
                     if (_eventTcs != null) _eventTcs.TrySetResult("moveNext");
-                    //bool moved;
-                    //moveToNextHighlight(out moved);
-                    //if (!moved) CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
                     e.Handled = true;
                 }
                 else if (e.Key == Key.Down)
                 {
                     if (_eventTcs != null) _eventTcs.TrySetResult("moveNext");
-                    //bool moved;
-                    //moveToNextHighlight(out moved);
-                    //if (!moved) CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
                     e.Handled = true;
                 }
             }
@@ -258,24 +318,20 @@ namespace pluginVerilog.Verilog.Snippets
             if (_eventTcs != null) _eventTcs.TrySetResult("moveNext");
         }
 
-        private void moveToNextHighlight(out bool moved)
+        // return @ carlet line changed
+        public override void Caret_PositionChanged(object? sender, EventArgs e)
         {
-            System.Diagnostics.Debug.Print("## AlwaysFFSnippet.moveToNextHighlight");
-            moved = false;
+            if (checkLine == null) return;
             if (document == null) return;
 
-            int i = CodeEditor2.Controller.CodeEditor.GetHighlightIndex(document.CaretIndex);
-            if (i == -1) return;
-            i++;
-            if (i >= initials.Count)
-            {
-                Aborted();
-                return;
-            }
+            int? carletPosition = CodeEditor2.Controller.CodeEditor.GetCaretPosition();
+            if(carletPosition == null) return;
+            int line = document.GetLineAt((int)carletPosition);
+            CodeEditor2.Controller.AppendLog("line "+line.ToString()+"=="+checkLine.ToString());
+            if (line != checkLine) CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
 
-            CodeEditor2.Controller.CodeEditor.SelectHighlight(i);
-            moved = true;
         }
+
     }
 }
 

@@ -116,12 +116,12 @@ namespace pluginVerilog.Verilog
             while (indexEnd < commentEnd)
             {
                 ch = document.GetCharAt(indexEnd);
-                if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r')
+                if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r') // word delimiters
                 {
                     break;
                 }
                 indexEnd++;
-                if (ch == ':')
+                if (ch == ':' || ch == ',') // single char separators
                 {
                     return;
                 }
@@ -131,7 +131,7 @@ namespace pluginVerilog.Verilog
             while (indexEnd < commentEnd)
             {
                 ch = document.GetCharAt(indexEnd);
-                if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' || ch == ':')
+                if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r'|| ch == ':' || ch==',')
                 {
                     break;
                 }

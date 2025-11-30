@@ -2,13 +2,14 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:ajkctrl="clr-namespace:AjkAvaloniaLibs.Contorls;assembly=AjkAvaloniaLibs"
+		xmlns:ajk="clr-namespace:AjkAvaloniaLibs.Controls;assembly=AjkAvaloniaLibs"
         mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="400"
         x:Class="pluginVerilog.Views.AutoConnectWindow"
         Title="AutoConnectWindow">
 	<StackPanel Orientation="Vertical" Margin="0">
 		<TextBlock Name="HeaderTextBlock">module </TextBlock>
 		<ListBox Name="ListBox0" FontSize="9" Margin="0" Padding="2"></ListBox>
+		<ajk:ListViewControl></ajk:ListViewControl>
 		<TextBlock Name="BottomTextBlock">module </TextBlock>
 	</StackPanel>
 </Window>

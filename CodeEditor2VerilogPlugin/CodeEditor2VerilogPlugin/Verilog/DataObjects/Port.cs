@@ -1,5 +1,6 @@
 ﻿using Avalonia.Controls;
 using CodeEditor2.Data;
+using DynamicData;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.CommentAnnotation;
 using pluginVerilog.Verilog.DataObjects.Arrays;
@@ -622,9 +623,10 @@ namespace pluginVerilog.Verilog.DataObjects
                     }
                     else
                     {
+                        Port oldPort = block.Ports[port.Name];
                         block.Ports.Remove(port.Name);
                         block.Ports.Add(port.Name, port);
-                        block.PortsList.Add(port);
+                        block.PortsList.ReplaceOrAdd(oldPort, port);
                     }
                 }
                 else

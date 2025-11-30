@@ -1,4 +1,5 @@
-﻿using pluginVerilog.Verilog.Statements;
+﻿using CodeEditor2.CodeEditor.CodeComplete;
+using pluginVerilog.Verilog.Statements;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,15 @@ namespace pluginVerilog.Verilog.Expressions
         public NamedElements NamedElements => new NamedElements();
         void IStatement.DisposeSubReference()
         {
+        }
+        public AutocompleteItem CreateAutoCompleteItem()
+        {
+            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
+                Name,
+                CodeDrawStyle.ColorIndex(ColorType),
+                Global.CodeDrawStyle.Color(ColorType),
+                "CodeEditor2/Assets/Icons/tag.svg"
+                );
         }
         public DataObjectReference? DataObjectReference { get; set; }
         public bool Increment = false;

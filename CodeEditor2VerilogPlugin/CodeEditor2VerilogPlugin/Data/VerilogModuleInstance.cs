@@ -355,7 +355,7 @@ namespace pluginVerilog.Data
                 })
             );
         }
-        public async Task UpdateAsync()
+        public override async Task UpdateAsync()
         {
             if (Dispatcher.UIThread.CheckAccess())
             {

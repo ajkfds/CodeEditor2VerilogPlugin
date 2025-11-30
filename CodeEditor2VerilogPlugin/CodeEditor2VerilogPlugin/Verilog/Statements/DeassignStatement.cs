@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CodeEditor2.CodeEditor.CodeComplete;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -29,6 +30,15 @@ namespace pluginVerilog.Verilog.Statements
             LValue.DisposeSubReference(true);
         }
 
+        public AutocompleteItem CreateAutoCompleteItem()
+        {
+            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
+                Name,
+                CodeDrawStyle.ColorIndex(ColorType),
+                Global.CodeDrawStyle.Color(ColorType),
+                "CodeEditor2/Assets/Icons/tag.svg"
+                );
+        }
         public static DeassignStatement ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             DeassignStatement ret = new DeassignStatement();
