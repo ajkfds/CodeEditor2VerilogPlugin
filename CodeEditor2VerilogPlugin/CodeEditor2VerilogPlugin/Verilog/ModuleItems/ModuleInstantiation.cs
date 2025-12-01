@@ -201,32 +201,33 @@ namespace pluginVerilog.Verilog.ModuleItems
                 word.AddError("unfound module");
             }
 
-            Data.VerilogFile? baseFile = instancedModule?.File as Data.VerilogFile;
-            if (baseFile != null && baseFile.ReparseRequested && nameSpace.BuildingBlock.File.ID != baseFile.ID)
-            {
-                await baseFile.BaseParseSemapho.WaitAsync();
-                try
-                {
-                    if (baseFile.ReparseRequested)
-                    {
-                        CodeEditor2.Controller.AppendLog("parsebase : " + baseFile.ID, Avalonia.Media.Colors.Orange);
-                        var baseParser = baseFile.CreateDocumentParser(CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.BackgroundParse, null);
-                        await baseParser.Parse();
+            //Data.VerilogFile? baseFile = instancedModule?.File as Data.VerilogFile;
+            //if (baseFile != null && baseFile.ReparseRequested && nameSpace.BuildingBlock.File.ID != baseFile.ID && !word.RootParsedDocument.RestrictBaseParse)
+            //{
+            //    await baseFile.BaseParseSemapho.WaitAsync();
+            //    try
+            //    {
+            //        if (baseFile.ReparseRequested)
+            //        {
+            //            CodeEditor2.Controller.AppendLog("parsebase : " + baseFile.ID, Avalonia.Media.Colors.Orange);
+            //            var baseParser = baseFile.CreateDocumentParser(CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.BackgroundParse, null);
+            //            ((ParsedDocument)baseParser.ParsedDocument).RestrictBaseParse = true;
+            //                await baseParser.Parse();
 
-                        await Dispatcher.UIThread.InvokeAsync(
-                            () => {
-                                baseFile.AcceptParsedDocument(baseParser.ParsedDocument);
-                                baseFile.ReparseRequested = false;
-                            }
-                        );
-                        instancedModule = word.ProjectProperty.GetBuildingBlock(moduleName) as Module;
-                    }
-                }
-                finally
-                {
-                    baseFile.BaseParseSemapho.Release();
-                }
-            }
+            //            await Dispatcher.UIThread.InvokeAsync(
+            //                () => {
+            //                    baseFile.AcceptParsedDocument(baseParser.ParsedDocument);
+            //                    baseFile.ReparseRequested = false;
+            //                }
+            //            );
+            //            instancedModule = word.ProjectProperty.GetBuildingBlock(moduleName) as Module;
+            //        }
+            //    }
+            //    finally
+            //    {
+            //        baseFile.BaseParseSemapho.Release();
+            //    }
+            //}
 
 
 

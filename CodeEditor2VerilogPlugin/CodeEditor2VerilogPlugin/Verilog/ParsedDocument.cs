@@ -131,6 +131,7 @@ namespace pluginVerilog.Verilog
         public bool SystemVerilog = false;
         public bool Instance = false;
 
+        public bool RestrictBaseParse { get; set; } = false;
         public Root Root { set; get; }
 
         [Newtonsoft.Json.JsonIgnore]

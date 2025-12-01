@@ -115,14 +115,15 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             word.MoveNext();
             module.BlockBeginIndexReference = word.CreateIndexReference();
 
-            if (word.RootParsedDocument.ParseMode == CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.LoadParse)
-            {
-                while (!word.Eof)
-                {
-                    if (word.Text == "endmodule") break;
-                    word.MoveNext();
-                }
-            } else if (!word.CellDefine && !protoType)
+            //if (word.RootParsedDocument.ParseMode == CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.LoadParse)
+            //{
+            //    while (!word.Eof)
+            //    {
+            //        if (word.Text == "endmodule") break;
+            //        word.MoveNext();
+            //    }
+            //} else
+            if (!word.CellDefine && !protoType)
             {
                 // prototype parse
                 WordScanner prototypeWord = word.Clone();
@@ -290,6 +291,16 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 } // list_of_ports or list_of_port_declarations
 
                 if (word.Eof || word.Text == "endmodule") break;
+
+                if (word.RootParsedDocument.ParseMode == CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.LoadParse)
+                {
+                    while (!word.Eof)
+                    {
+                        if (word.Text == "endmodule") break;
+                        word.MoveNext();
+                    }
+                    return;
+                }
 
                 if (word.GetCharAt(0) == ';')
                 {
