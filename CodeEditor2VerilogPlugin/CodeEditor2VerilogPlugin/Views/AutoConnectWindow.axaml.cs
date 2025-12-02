@@ -23,6 +23,8 @@ namespace pluginVerilog.Views
         {
             InitializeComponent();
 
+            HeaderTextBlock.Text = moduleInstantiation.SourceName + " " + moduleInstantiation.Name;
+
             BuildingBlock? buildingBlock = moduleInstantiation.GetInstancedBuildingBlock();
             IPortNameSpace? portNameSpace = buildingBlock as IPortNameSpace;
             if (portNameSpace == null)
@@ -69,7 +71,7 @@ namespace pluginVerilog.Views
         {
             public ConnectionItem((string,string?) connection) : base()
             {
-                Content = StackPanel;
+//                Content = StackPanel;
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch;
                 Background = new SolidColorBrush(Avalonia.Media.Colors.Transparent);
 
@@ -82,6 +84,7 @@ namespace pluginVerilog.Views
                 ColorLabel.AppendText("(");
                 if(connection.Item2 != null) ColorLabel.AppendText(connection.Item2);
                 ColorLabel.AppendText(")");
+                ColorLabel.AppendToTextBlock(TextBlock);
                 //Text = text;
                 //Height = 14;
                 //FontSize = 8;

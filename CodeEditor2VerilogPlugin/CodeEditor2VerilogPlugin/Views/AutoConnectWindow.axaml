@@ -10,6 +10,6 @@
 		<TextBlock Name="HeaderTextBlock">module </TextBlock>
 		<ListBox Name="ListBox0" FontSize="9" Margin="0" Padding="2"></ListBox>
 		<ajk:ListViewControl></ajk:ListViewControl>
-		<TextBlock Name="BottomTextBlock">module </TextBlock>
+		<TextBlock Name="BottomTextBlock">endmodule </TextBlock>
 	</StackPanel>
 </Window>
