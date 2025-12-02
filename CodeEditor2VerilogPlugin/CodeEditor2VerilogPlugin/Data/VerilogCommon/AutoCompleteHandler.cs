@@ -60,6 +60,7 @@ namespace pluginVerilog.Data.VerilogCommon
         {
             List<ToolItem> toolItems = new List<ToolItem>();
             toolItems.Add(new Verilog.Snippets.AlwaysFFSnippet());
+            toolItems.Add(new Verilog.Snippets.AutoConnectSnippet());
             toolItems.Add(new Verilog.Snippets.AutoFormatSnippet());
             toolItems.Add(new Verilog.Snippets.ModuleInstanceMenuSnippet());
             toolItems.Add(new Verilog.Snippets.PortConnectionCreateSnippet());
