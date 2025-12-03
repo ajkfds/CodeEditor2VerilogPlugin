@@ -251,14 +251,13 @@ namespace pluginVerilog.Data
             Data.VerilogFile source = SourceVerilogFile;
             if (source == null) return;
 
+            ParsedDocument? oldParsedDocument = ParsedDocument;
             {
-                ParsedDocument? oldParsedDocument = ParsedDocument;
                 {
                     ParsedDocument = newParsedDocument; // should keep parseddocument 1st
                     source.RegisterInstanceParsedDocument(Key, newParsedDocument, this);
                     acceptParameterizedParsedDocument(newParsedDocument);
                 }
-                if (oldParsedDocument != null) oldParsedDocument.Dispose();
             }
 
             if(source.ParsedDocument != null)// && source.ParsedDocument.Version != newParsedDocument.Version)
@@ -276,6 +275,8 @@ namespace pluginVerilog.Data
             }
 
             NavigatePanelNode.UpdateVisual();
+
+//            if (oldParsedDocument != null) oldParsedDocument.Dispose();
         }
 
         private void acceptParameterizedParsedDocument(ParsedDocument newParsedDocument)

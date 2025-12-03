@@ -21,17 +21,17 @@ namespace pluginVerilog.Tool
     {
         private static Task? _currentTask;
         private static CancellationTokenSource? _cts;
-        
+
         public enum ParseMode
         {
             SearchReparseReqestedTree,
             ForceAllFiles,
             ThisFileOnly
         }
-        
-        public static async Task ParseAsync(CodeEditor2.Data.TextFile textFile,ParseMode parseMode)
+
+        public static async Task ParseAsync(CodeEditor2.Data.TextFile textFile, ParseMode parseMode)
         {
-            if(parseMode == ParseMode.ForceAllFiles) // dont cancel
+            if (parseMode == ParseMode.ForceAllFiles) // dont cancel
             {
                 await Task.Run(async () =>
                 {
@@ -70,6 +70,11 @@ namespace pluginVerilog.Tool
             {
                 _currentTask = null;
             }
+            catch (Exception ex)
+            {
+                if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+                CodeEditor2.Controller.AppendLog("# Exception : " + ex.Message, Avalonia.Media.Colors.Red);
+            }
             finally
             {
                 _currentTask = null;
@@ -91,8 +96,8 @@ namespace pluginVerilog.Tool
             int workerCount = Environment.ProcessorCount;
 
             // entry first
-            ParseTask task = new ParseTask(Id:textFile.Key, tarfgetTextFile: textFile,topLevel:true );
-            EnqueueWork(task,workQueue, completeIds, signal);
+            ParseTask task = new ParseTask(Id: textFile.Key, tarfgetTextFile: textFile, topLevel: true);
+            EnqueueWork(task, workQueue, completeIds, signal);
 
             // boot workers
             var workers = new Task[workerCount];
@@ -100,6 +105,7 @@ namespace pluginVerilog.Tool
             {
                 workers[i] = Task.Run(async () =>
                 {
+                    int index = i;
                     while (true)
                     {
                         token?.ThrowIfCancellationRequested();
@@ -107,11 +113,11 @@ namespace pluginVerilog.Tool
 
                         if (workQueue.TryDequeue(out var newTask))
                         {
-                            await parseTextFile(newTask.tarfgetTextFile, reparseTargetFiles,workQueue, completeIds, signal, parseMode, token);
+                            await parseTextFile(index,newTask.tarfgetTextFile, reparseTargetFiles, workQueue, completeIds, signal, parseMode, token);
                             if (newTask.topLevel)
                             {
                                 ParseTask reEntryTask = new ParseTask(Id: textFile.Key, tarfgetTextFile: textFile, topLevel: false);
-                                ForceEnqueueWork(reEntryTask,workQueue, completeIds, signal);
+                                ForceEnqueueWork(reEntryTask, workQueue, completeIds, signal);
                             }
                         }
                         if (completeIds.Count > 0 && workQueue.IsEmpty)
@@ -164,13 +170,14 @@ namespace pluginVerilog.Tool
             signal.Release(); // start worker
         }
         private static async Task parseTextFile(
+            int index,
             CodeEditor2.Data.TextFile textFile,
             ConcurrentStack<CodeEditor2.Data.TextFile> reparseTargetFiles,
             ConcurrentQueue<ParseTask> workQueue,
             ConcurrentDictionary<string, bool> completeIds,
             SemaphoreSlim signal,
             ParseMode parseMode,
-            CancellationToken? token 
+            CancellationToken? token
             )
         {
             Data.IVerilogRelatedFile? verilogFile = null;
@@ -208,7 +215,7 @@ namespace pluginVerilog.Tool
 
             bool doParse = false;
             if (!verilogFile.ParseValid) doParse = true;
-            if(verilogFile.ReparseRequested) doParse = true;
+            if (verilogFile.ReparseRequested) doParse = true;
             if (verilogFile.VerilogParsedDocument != null && verilogFile.VerilogParsedDocument.ErrorCount > 0) doParse = true;
 
             if (doParse)
@@ -216,16 +223,16 @@ namespace pluginVerilog.Tool
                 var parser = verilogFile.CreateDocumentParser(CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.BackgroundParse, token);
                 if (parser == null) return;
 
-                if(parseMode == ParseMode.ForceAllFiles)
+                if (parseMode == ParseMode.ForceAllFiles)
                 {
-                    CodeEditor2.Controller.AppendLog("parseHier : " + verilogFile.ID,Avalonia.Media.Colors.Cyan);
+                    CodeEditor2.Controller.AppendLog("parseHier "+index.ToString()+" : " + verilogFile.ID, Avalonia.Media.Colors.Cyan);
                 }
                 else
                 {
-                    CodeEditor2.Controller.AppendLog("parseHier : " + verilogFile.ID);
+                    CodeEditor2.Controller.AppendLog("parseHier "+index.ToString()+" : " + verilogFile.ID);
                 }
                 await parser.Parse();
-                if(parser.ParsedDocument != null)
+                if (parser.ParsedDocument != null)
                 {
                     await Dispatcher.UIThread.InvokeAsync(
                         async () =>
@@ -259,7 +266,7 @@ namespace pluginVerilog.Tool
 
             foreach (var item in items)
             {
-                if(item is CodeEditor2.Data.TextFile tfile)
+                if (item is CodeEditor2.Data.TextFile tfile)
                 {
                     ParseTask task = new ParseTask(Id: tfile.Key, tarfgetTextFile: tfile);
                     EnqueueWork(task, workQueue, completeIds, signal);
@@ -267,7 +274,7 @@ namespace pluginVerilog.Tool
             }
         }
 
-        private static async Task reparseText(CodeEditor2.Data.TextFile textFile, ParseMode parseMode,CancellationToken? token)
+        private static async Task reparseText(CodeEditor2.Data.TextFile textFile, ParseMode parseMode, CancellationToken? token)
         {
             Data.IVerilogRelatedFile? verilogFile = null;
             if (textFile is Data.VerilogModuleInstance)

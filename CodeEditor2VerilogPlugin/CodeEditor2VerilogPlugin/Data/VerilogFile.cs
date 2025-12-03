@@ -53,6 +53,11 @@ namespace pluginVerilog.Data
             return fileItem;
         }
 
+        ~VerilogFile()
+        {
+            if(System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+
+        }
         public override string Key
         {
             get
@@ -145,7 +150,6 @@ namespace pluginVerilog.Data
 
                 // swap ParsedDocument
                 ParsedDocument = newParsedDocument;
-                if (oldParsedDocument != null) oldParsedDocument.Dispose();
 
                 if (VerilogParsedDocument == null)
                 {
@@ -206,6 +210,7 @@ namespace pluginVerilog.Data
                     }
                 );
 
+//                if (oldParsedDocument != null) oldParsedDocument.Dispose();
             }
 
         }

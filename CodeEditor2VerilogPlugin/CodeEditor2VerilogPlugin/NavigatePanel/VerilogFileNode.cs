@@ -81,7 +81,16 @@ namespace pluginVerilog.NavigatePanel
             //else
             //{
                 if (TextFile == null) return;
+
+            try
+            {
                 await Tool.ParseHierarchy.ParseAsync(TextFile, Tool.ParseHierarchy.ParseMode.SearchReparseReqestedTree);
+            }
+            catch (Exception ex)
+            {
+                if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+                CodeEditor2.Controller.AppendLog("# Exception : " + ex.Message, Avalonia.Media.Colors.Red);
+            }
             //}
         }
 

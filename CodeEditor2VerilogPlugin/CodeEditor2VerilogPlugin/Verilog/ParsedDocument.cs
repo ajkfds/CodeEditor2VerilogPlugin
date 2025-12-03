@@ -195,6 +195,7 @@ namespace pluginVerilog.Verilog
 
             Data.IVerilogRelatedFile? file = File;
 
+            /*
             if (!Instance)
             {
                 if (file is Data.VerilogFile)
@@ -213,6 +214,7 @@ namespace pluginVerilog.Verilog
                     includeFile.Close();
                 }
             }
+            */
             base.Dispose();
         }
 

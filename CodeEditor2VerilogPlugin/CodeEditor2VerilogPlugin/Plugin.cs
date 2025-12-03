@@ -88,7 +88,15 @@ namespace pluginVerilog
             Data.VerilogFile? vfile = (CodeEditor2.Controller.NavigatePanel.GetSelectedNode() as VerilogFileNode)?.VerilogFile;
             if (vfile == null) return;
 
-            await Tool.ParseHierarchy.ParseAsync(vfile, Tool.ParseHierarchy.ParseMode.ForceAllFiles);
+            try
+            {
+                await Tool.ParseHierarchy.ParseAsync(vfile, Tool.ParseHierarchy.ParseMode.ForceAllFiles);
+            }
+            catch (Exception ex)
+            {
+                if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+                CodeEditor2.Controller.AppendLog("# Exception : " + ex.Message, Avalonia.Media.Colors.Red);
+            }
         }
 
         private void projectCreated(CodeEditor2.Data.Project project, CodeEditor2.Data.Project.Setup? setup)

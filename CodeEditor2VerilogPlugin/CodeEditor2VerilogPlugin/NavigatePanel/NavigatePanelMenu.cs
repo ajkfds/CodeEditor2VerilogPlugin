@@ -121,38 +121,65 @@ namespace pluginVerilog.NavigatePanel
 
         private static async void menuItem_AddVerilogModule_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            await generateFile("verilog module", "v",
-                (sw,name) => {
-                    sw.Write("`timescale 1ns / 1ps\n");
-                    sw.Write("\n");
-                    sw.Write("module " + name + ";\n");
-                    sw.Write("\n");
-                    sw.Write("endmodule\n");
-                }
-            );
+            try
+            {
+                await generateFile("verilog module", "v",
+                    (sw, name) => {
+                        sw.Write("`timescale 1ns / 1ps\n");
+                        sw.Write("\n");
+                        sw.Write("module " + name + ";\n");
+                        sw.Write("\n");
+                        sw.Write("endmodule\n");
+                    }
+                );
+            }
+            catch (Exception ex)
+            {
+                if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+                CodeEditor2.Controller.AppendLog("#Exception " + ex.Message, Avalonia.Media.Colors.Red);
+                throw;
+            }
         }
         private static async void menuItem_AddSystemVerilogModule_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            await generateFile("system verilog module", "sv",
-                (sw, name) => {
-                    sw.Write("`timescale 1ns / 1ps\n");
-                    sw.Write("\n");
-                    sw.Write("module " + name + ";\n");
-                    sw.Write("\n");
-                    sw.Write("endmodule\n");
-                }
-            );
+            try
+            {
+                await generateFile("system verilog module", "sv",
+                    (sw, name) => {
+                        sw.Write("`timescale 1ns / 1ps\n");
+                        sw.Write("\n");
+                        sw.Write("module " + name + ";\n");
+                        sw.Write("\n");
+                        sw.Write("endmodule\n");
+                    }
+                );
+            }
+            catch (Exception ex)
+            {
+                if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+                CodeEditor2.Controller.AppendLog("#Exception " + ex.Message, Avalonia.Media.Colors.Red);
+                throw;
+            }
         }
 
         private static async void menuItem_AddSystemVerilogInterface_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            await generateFile("system verilog interface", "sv",
-                (sw, name) => {
-                    sw.Write("interface " + name + ";\n");
-                    sw.Write("\n");
-                    sw.Write("endinterface\n");
-                }
-            );
+            try
+            {
+                await generateFile("system verilog interface", "sv",
+                    (sw, name) => {
+                        sw.Write("interface " + name + ";\n");
+                        sw.Write("\n");
+                        sw.Write("endinterface\n");
+                    }
+                );
+            }
+            catch (Exception ex)
+            {
+                if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+                CodeEditor2.Controller.AppendLog("#Exception " + ex.Message, Avalonia.Media.Colors.Red);
+                throw;
+            }
         }
         private static string getRelativeFolderPath(NavigatePanelNode node)
         {
