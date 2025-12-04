@@ -134,7 +134,7 @@ namespace pluginVerilog.Verilog.Snippets
 
                 await Dispatcher.UIThread.InvokeAsync(async () => {
                     Views.AutoConnectWindow autoConnectWindow = new Views.AutoConnectWindow(moduleInstantiation);
-                    await autoConnectWindow.ShowDialog(CodeEditor2.Controller.GetMainWindow());
+                    if(autoConnectWindow.Ready) await autoConnectWindow.ShowDialog(CodeEditor2.Controller.GetMainWindow());
                 });
 
 

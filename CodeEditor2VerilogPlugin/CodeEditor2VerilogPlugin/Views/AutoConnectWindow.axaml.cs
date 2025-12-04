@@ -1,3 +1,4 @@
+using AjkAvaloniaLibs.Controls;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
@@ -14,6 +15,10 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
+using System.Linq.Expressions;
+using Tmds.DBus.Protocol;
+using static pluginVerilog.Verilog.ModPort;
 
 namespace pluginVerilog.Views
 {
@@ -27,77 +32,131 @@ namespace pluginVerilog.Views
 
             BuildingBlock? buildingBlock = moduleInstantiation.GetInstancedBuildingBlock();
             IPortNameSpace? portNameSpace = buildingBlock as IPortNameSpace;
-            if (portNameSpace == null)
+            if (portNameSpace == null || buildingBlock == null)
             {
-                Close();
                 return;
             }
 
-            foreach (Port port in portNameSpace.PortsList)
+            foreach (Verilog.DataObjects.Port port in portNameSpace.PortsList)
             {
-                (string, string?) connection;
+                ConnectionItem item;
                 if (!moduleInstantiation.PortConnection.ContainsKey(port.Name))
                 {
-                    connection = (port.Name, null);
+                    item = new ConnectionItem(port, null,buildingBlock);
                 }
                 else
                 {
-                    connection = (port.Name, moduleInstantiation.PortConnection[port.Name].CreateString());
+                    item = new ConnectionItem(port, moduleInstantiation.PortConnection[port.Name],buildingBlock);
                 }
-                connectionList.Add(connection);
-                ConnectionItem item = new ConnectionItem(connection);
                 ListBox0.Items.Add(item);
             }
+            Ready = true;
 
-
-            //Style style = new Style();
-            //style.Selector = ((Selector?)null).OfType(typeof(ListBoxItem));
-            //style.Add(new Setter(Layoutable.MinHeightProperty, 8.0));
-            //style.Add(new Setter(Layoutable.HeightProperty, 14.0));
-            //ListBox0.Styles.Add(style);
-
-            //            KeyDown += PopupMenuView_KeyDown;
-            //            LostFocus += PopupMenuView_LostFocus;
-            //            TextBox0.TextChanged += TextBox0_TextChanged;
-
-            //if (ListBox0.Items.Count > 0)
-            //{
-            //    ListBox0.SelectedIndex = 0;
-            //}
+            ListBox0.AddHandler(KeyDownEvent, ListBox0_KeyDown,
+               RoutingStrategies.Tunnel | RoutingStrategies.Bubble,
+               handledEventsToo: true);
+//            ListBox0.KeyDown += ListBox0_KeyDown;
         }
+
+        private void ListBox0_KeyDown(object? sender, Avalonia.Input.KeyEventArgs e)
+        {
+            object? item = ListBox0.SelectedItem;
+            ConnectionItem? connection = item as ConnectionItem;
+            if (connection == null) return;
+
+            if(e.Key == Avalonia.Input.Key.Left)
+            {
+                connection.Accept();
+            }
+            else if(e.Key == Avalonia.Input.Key.Right)
+            {
+                connection.Reject();
+            }
+        }
+
+        public bool Ready = false;
+        public bool Accept = false;
 
         List<(string, string?)> connectionList = new List<(string, string?)>();
         public class ConnectionItem : AjkAvaloniaLibs.Controls.ListViewItem
         {
-            public ConnectionItem((string,string?) connection) : base()
+            public ConnectionItem(Verilog.DataObjects.Port port, Verilog.Expressions.Expression? expression,BuildingBlock buildingBlock) : base()
             {
-//                Content = StackPanel;
+                this.Port = port;
+                this.Expression = expression;
+                this.BuildingBlock = buildingBlock;
+
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch;
                 Background = new SolidColorBrush(Avalonia.Media.Colors.Transparent);
+                if (Expression != null) target.AppendText(Expression.CreateString());
+                cantidates = GetCantidates();
 
-                RenderOptions.SetBitmapInterpolationMode(IconImage, Avalonia.Media.Imaging.BitmapInterpolationMode.HighQuality);
+                UpdateVisual();
+            }
+            pluginVerilog.Verilog.DataObjects.Port Port;
+            Verilog.Expressions.Expression? Expression;
+            BuildingBlock BuildingBlock;
+            List<ColorLabel> cantidates;
+            ColorLabel target = new ColorLabel();
 
-                //StackPanel.Children.Add(ColorLabel);
-
+            public AjkAvaloniaLibs.Controls.ColorLabel ColorLabel = new AjkAvaloniaLibs.Controls.ColorLabel();
+            public void UpdateVisual()
+            {
+                ColorLabel.Clear();
                 ColorLabel.AppendText(".");
-                ColorLabel.AppendText(connection.Item1);
+                ColorLabel.AppendText(Port.Name);
                 ColorLabel.AppendText("(");
-                if(connection.Item2 != null) ColorLabel.AppendText(connection.Item2);
+                ColorLabel.AppendLabel(target);
                 ColorLabel.AppendText(")");
                 ColorLabel.AppendToTextBlock(TextBlock);
-                //Text = text;
-                //Height = 14;
-                //FontSize = 8;
-                //Padding = new Avalonia.Thickness(0, 0, 2, 2);
-                //Margin = new Avalonia.Thickness(0, 0, 0, 0);
+                if (cantidates.Count != 0 && cantidates[0] != target)
+                {
+                    ColorLabel.AppendText(" -> ");
+                    ColorLabel.AppendLabel(cantidates[0]);
+                }
+                TextBlock.Inlines?.Clear();
+                ColorLabel.AppendToTextBlock(TextBlock);
             }
-            public AjkAvaloniaLibs.Controls.ColorLabel ColorLabel = new AjkAvaloniaLibs.Controls.ColorLabel();
 
-
-            public Action? Selected;
-            public virtual void OnSelected()
+            private List<ColorLabel> GetCantidates()
             {
-                if (Selected != null) Selected();
+                List<(int, ColorLabel)> cantidates = new List<(int, ColorLabel)>();
+                
+                foreach(var namedElement in BuildingBlock.NamedElements)
+                {
+                    if (namedElement.Name.ToLower() == Port.Name.ToLower()) {
+                        ColorLabel label = new ColorLabel();
+                        label.AppendText(namedElement.Name, Avalonia.Media.Colors.Red);
+                        cantidates.Add((0, label));
+                    }
+                }
+
+                List<ColorLabel> colorLabels = new List<ColorLabel>();
+                colorLabels = cantidates
+                    .OrderBy(c => c.Item1)
+                    .Select(c => c.Item2)
+                    .ToList();
+                return colorLabels;
+            }
+
+
+            public void Accept()
+            {
+                if (cantidates.Count != 0)
+                {
+                    target = cantidates[0];
+                }
+                UpdateVisual();
+            }
+
+            public void Reject()
+            {
+                target.Clear();
+                if (Expression != null)
+                {
+                    target.AppendText(Expression.CreateString()); 
+                }
+                UpdateVisual();
             }
         }
     }
