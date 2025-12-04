@@ -163,18 +163,18 @@ namespace pluginVerilog.Data
                 {
                     foreach (BuildingBlock buildingBlock in VerilogParsedDocument.Root.BuildingBlocks.Values)
                     {
-                        if (ProjectProperty.HasRegisteredBuildingBlock(buildingBlock.Name))
-                        {   // swap building block
-                            BuildingBlock? module = buildingBlock as Module;
-                            if (module == null) continue;
+                        //if (ProjectProperty.HasRegisteredBuildingBlock(buildingBlock.Name))
+                        //{   // swap building block
+                        //    BuildingBlock? module = buildingBlock as Module;
+                        //    if (module == null) continue;
 
-                            BuildingBlock? registeredModule = ProjectProperty.GetBuildingBlock(module.Name) as Module;
-                            if (registeredModule == null) continue;
-                            if (registeredModule.File == null) continue;
-                            if (registeredModule.File.RelativePath == module.File.RelativePath) continue;
+                        //    BuildingBlock? registeredModule = ProjectProperty.GetBuildingBlock(module.Name) as Module;
+                        //    if (registeredModule == null) continue;
+                        //    if (registeredModule.File == null) continue;
+                        //    if (registeredModule.File.RelativePath == module.File.RelativePath) continue;
 
-                            continue;
-                        }
+                        //    continue;
+                        //}
 
                         // register new parsedDocument
                         ProjectProperty.RegisterBuildingBlock(buildingBlock.Name, buildingBlock, this);

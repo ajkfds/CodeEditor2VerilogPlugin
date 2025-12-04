@@ -12,6 +12,7 @@ namespace pluginVerilog
     {
         private Dictionary<K, System.WeakReference<T>> itemRefs = new Dictionary<K, WeakReference<T>>();
 
+        public int Count { get { return itemRefs.Count; } }
         public void Register(K key, T item)
         {
             lock (itemRefs)

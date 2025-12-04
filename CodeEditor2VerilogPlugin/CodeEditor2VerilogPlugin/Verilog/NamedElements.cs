@@ -11,7 +11,8 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog
 {
-    public class NamedElements
+    public class NamedElements : IEnumerable<INamedElement>
+
     {
         [Newtonsoft.Json.JsonProperty]
         private List<INamedElement> itemList = new List<INamedElement>();
@@ -177,5 +178,16 @@ namespace pluginVerilog.Verilog
                 return itemList;
             }
         }
+        public IEnumerator<INamedElement> GetEnumerator()
+        {
+            return itemList.GetEnumerator();
+        }
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+
     }
 }
+

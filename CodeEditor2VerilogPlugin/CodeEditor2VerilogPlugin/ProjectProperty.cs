@@ -200,8 +200,20 @@ namespace pluginVerilog
 
         public void RegisterBuildingBlock(string buildingBlockName,BuildingBlock buildingBlock, VerilogFile file)
         {
+            if(file == null)
+            {
+                if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+            }
+            if (System.Diagnostics.Debugger.IsAttached && buildingBlockTable.Count != buildingBlockFileTable.Count)
+            {
+                System.Diagnostics.Debugger.Break();
+            }
             buildingBlockTable.Register(buildingBlockName, buildingBlock);
             buildingBlockFileTable.Register(buildingBlockName, file);
+            if (System.Diagnostics.Debugger.IsAttached && buildingBlockTable.Count != buildingBlockFileTable.Count)
+            {
+                System.Diagnostics.Debugger.Break();
+            }
         }
 
         //public bool RemoveBuildingBlock(string moduleName)
@@ -212,8 +224,23 @@ namespace pluginVerilog
 
         public bool HasRegisteredBuildingBlock(string moduleName)
         {
-            buildingBlockTable.HasItem(moduleName);
-            return buildingBlockFileTable.HasItem(moduleName);
+            if (System.Diagnostics.Debugger.IsAttached && buildingBlockTable.Count != buildingBlockFileTable.Count)
+            {
+                System.Diagnostics.Debugger.Break();
+            }
+            bool ret1 = false;
+            bool ret2 = false;
+            ret1 = buildingBlockTable.HasItem(moduleName);
+            ret2 = buildingBlockFileTable.HasItem(moduleName);
+            if (ret1!=ret2)
+            {
+                System.Diagnostics.Debugger.Break();
+            }
+            if (System.Diagnostics.Debugger.IsAttached && buildingBlockTable.Count != buildingBlockFileTable.Count)
+            {
+                System.Diagnostics.Debugger.Break();
+            }
+            return ret2;
         }
 
         public Data.IVerilogRelatedFile? GetFileOfBuildingBlock(string buildingBlockName)
@@ -223,8 +250,22 @@ namespace pluginVerilog
 
         public List<string> GetBuildingBlockNameList()
         {
+            if (System.Diagnostics.Debugger.IsAttached && buildingBlockTable.Count != buildingBlockFileTable.Count)
+            {
+                System.Diagnostics.Debugger.Break();
+            }
+
             buildingBlockTable.CleanDictionary();
-            return buildingBlockTable.KeyList();
+            if (System.Diagnostics.Debugger.IsAttached && buildingBlockTable.Count != buildingBlockFileTable.Count)
+            {
+                System.Diagnostics.Debugger.Break();
+            }
+            List<string> ret = buildingBlockTable.KeyList();
+            if (System.Diagnostics.Debugger.IsAttached && buildingBlockTable.Count != buildingBlockFileTable.Count)
+            {
+                System.Diagnostics.Debugger.Break();
+            }
+            return ret;
         }
 
         public List<string> GetModuleNameList()
