@@ -5,6 +5,7 @@
 		xmlns:ajk="clr-namespace:AjkAvaloniaLibs.Controls;assembly=AjkAvaloniaLibs"
         mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="400"
         x:Class="pluginVerilog.Views.AutoConnectWindow"
+		FontFamily="Cascadia Mono,Consolas,Menlo,Monospace,DejaVu Sans Mono,Liberation Mono,Noto Sans Mono,Source Code Pro"
         Title="AutoConnectWindow">
 	<StackPanel Orientation="Vertical" Margin="0">
 		<TextBlock Name="HeaderTextBlock">module </TextBlock>
