@@ -3,6 +3,7 @@ using Avalonia.Threading;
 using CodeEditor2.CodeEditor;
 using CodeEditor2.CodeEditor.CodeComplete;
 using CodeEditor2.Data;
+using DynamicData.Kernel;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.Nets;
@@ -64,7 +65,7 @@ namespace pluginVerilog.Verilog.ModuleItems
         */
         public required string SourceName{ get; init; }
         public required string SourceProjectName { get;init; }
-
+        public string ModuleNameComment { get; set; }
         public required Dictionary<string, Expressions.Expression> ParameterOverrides { get; init; }
             
         public Dictionary<string, Expressions.Expression> PortConnection { get; set; } = new Dictionary<string, Expressions.Expression>();
@@ -161,9 +162,10 @@ namespace pluginVerilog.Verilog.ModuleItems
             var moduleIdentifier = word.CrateWordReference();
             string moduleName = word.Text;
             IndexReference beginIndexReference = word.CreateIndexReference();
-
+            
 
             Module? instancedModule = word.ProjectProperty.GetBuildingBlock(moduleName) as Module;
+            string moduleComment = word.GetNextComment();
             if (instancedModule == null)
             {
                 if (word.GetNextComment().Contains("@project"))
@@ -275,7 +277,8 @@ namespace pluginVerilog.Verilog.ModuleItems
                     Project = word.RootParsedDocument.Project,
                     SourceName = moduleName,
                     ParameterOverrides = parameterOverrides,
-                    SourceProjectName = sourceProject.Name
+                    SourceProjectName = sourceProject.Name,
+                    ModuleNameComment = moduleComment
                 };
                 moduleInstantiation.BlockBeginIndexReference = blockBeginIndexReference;
 
@@ -1013,7 +1016,13 @@ namespace pluginVerilog.Verilog.ModuleItems
             bool first;
 
             sb.Append(SourceName);
-            sb.Append(" ");
+            if (ModuleNameComment != null && ModuleNameComment != "") {
+                sb.Append(ModuleNameComment);
+            }
+            else
+            {
+                sb.Append(" ");
+            }
 
             if(instancedModule.PortParameterNameList.Count != 0)
             {

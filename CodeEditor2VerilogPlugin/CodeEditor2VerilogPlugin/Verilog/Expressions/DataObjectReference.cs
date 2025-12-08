@@ -20,6 +20,7 @@ namespace pluginVerilog.Verilog.Expressions
         public List<Expression> Dimensions = new List<Expression>();
         public DataObjects.DataObject? DataObject = null;
         public string NameSpaceText = "";
+        public List<DataObjects.Arrays.UnPackedArray> UnpackedArrays { get; set; } = new List<DataObjects.Arrays.UnPackedArray>();
 
 
         public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
@@ -168,22 +169,29 @@ namespace pluginVerilog.Verilog.Expressions
             word.MoveNext();
 
             // parse dimensions
+            foreach (var unpackedArray in dataObject.UnpackedArrays)
+            {
+                val.UnpackedArrays.Add(unpackedArray.Clone());
+            }
+
             while (!word.Eof && val.Dimensions.Count < dataObject.UnpackedArrays.Count)
             {
                 if (word.GetCharAt(0) != '[')
                 {
-                    word.AddError("lacked dimension");
+//                    word.AddError("lacked dimension");
                     break;
                 }
-                word.MoveNext();
+                word.MoveNext();    // [
                 Expression? exp = Expression.ParseCreate(word, nameSpace);
                 if (exp != null) val.Dimensions.Add(exp);
+                val.UnpackedArrays.RemoveAt(0);
+
                 if (word.GetCharAt(0) != ']')
                 {
                     word.AddError("illegal dimension");
                     break;
                 }
-                word.MoveNext();
+                word.MoveNext();    // ]
             }
 
             // parse ranges

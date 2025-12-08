@@ -8,6 +8,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
 {
     public class UnPackedArray : VariableArray, IArray
     {
+        protected UnPackedArray() { }
         public static UnPackedArray? ParseCreate(WordScanner word, NameSpace nameSpace, Expressions.Expression expression)
         {
             // unpacked_dimension   ::= [constant_range] | [constant_expression]
@@ -140,6 +141,12 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
             }
             sb.Append("]");
             return sb.ToString();
+        }
+
+        public UnPackedArray Clone()
+        {
+            UnPackedArray unPackedArray = new UnPackedArray() { SizeExpression0 = SizeExpression0, SizeExpression1 = SizeExpression1, MinIndex = MinIndex, MaxIndex = MaxIndex };
+            return unPackedArray;
         }
 
         public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)

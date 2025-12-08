@@ -302,6 +302,13 @@ namespace pluginVerilog.Verilog.Statements
                     }
 
                     Expressions.Expression? expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace,false);
+                    if( expression is Expressions.UnfoundObjectReference)
+                    {
+                        word.SkipToKeyword(";");
+                        if (word.Text == ";") word.MoveNext();
+                        return null;
+                    }
+
                     if(expression != null && expression is Expressions.TaskReference)// Expressions.TaskReference)
                     {
                         Expressions.TaskReference taskReference = (Expressions.TaskReference)expression;

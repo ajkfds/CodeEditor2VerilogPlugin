@@ -18,6 +18,14 @@ namespace pluginVerilog.Verilog.DataObjects
 
         public void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
+            if (isClock)
+            {
+                label.AppendText("@clock\n\n", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.HighLightedComment));
+            }
+            if (isReset)
+            {
+                label.AppendText("@reset\n\n", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.HighLightedComment));
+            }
             if (Data.Count == 0) return;
 
             label.AppendText("@sync ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.HighLightedComment));

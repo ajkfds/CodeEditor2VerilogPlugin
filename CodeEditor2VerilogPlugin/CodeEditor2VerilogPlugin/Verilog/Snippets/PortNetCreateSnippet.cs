@@ -78,6 +78,8 @@ namespace pluginVerilog.Verilog.Snippets
             CodeEditor2.Controller.CodeEditor.RequestReparse();
         }
 
+        public List<string> RemoveSuffixList = new List<string> { "_I", "_O", "_IO" };
+
         private string CreateString(ModuleInstantiation moduleInstantiation,string indent, ProjectProperty projectProperty)
         {
             Module? instancedModule = projectProperty.GetBuildingBlock(moduleInstantiation.SourceName) as Module;
@@ -89,7 +91,15 @@ namespace pluginVerilog.Verilog.Snippets
             bool first;
 
             sb.Append(moduleInstantiation.SourceName);
-            sb.Append(" ");
+            if (moduleInstantiation.ModuleNameComment != null && moduleInstantiation.ModuleNameComment != "")
+            {
+                sb.Append(moduleInstantiation.ModuleNameComment);
+                sb.Append("\r\n");
+            }
+            else
+            {
+                sb.Append(" ");
+            }
 
             if (instancedModule.PortParameterNameList.Count != 0)
             {
@@ -151,7 +161,16 @@ namespace pluginVerilog.Verilog.Snippets
                 }
                 else
                 {
-                    string valueName = port.Name.ToLower();
+                    string portName = port.Name;
+                    foreach(string removeSuffix in RemoveSuffixList)
+                    {
+                        if(portName.EndsWith(removeSuffix, StringComparison.OrdinalIgnoreCase))
+                        {
+                            portName = portName.Substring(0, portName.Length - removeSuffix.Length);
+                        }
+                    }
+
+                    string valueName = portName.ToLower();
                     sb.Append(valueName);
 
                     BuildingBlock? buildingBlock = moduleInstantiation.GetInstancedBuildingBlock();

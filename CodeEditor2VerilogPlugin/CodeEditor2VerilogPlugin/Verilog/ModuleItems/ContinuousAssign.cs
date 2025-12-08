@@ -17,13 +17,13 @@ namespace pluginVerilog.Verilog.ModuleItems
 
         public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
         {
-            ModuleItems.ContinuousAssign continuousAssign = ModuleItems.ContinuousAssign.ParseCreate(word, nameSpace);
+            List<ModuleItems.ContinuousAssign> continuousAssigns = ModuleItems.ContinuousAssign.ParseCreate(word, nameSpace);
 
             
             return await System.Threading.Tasks.Task.FromResult(true);
         }
 
-        public static ContinuousAssign ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static List<ContinuousAssign> ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             // continuous_assign::= assign[drive_strength][delay3] list_of_net_assignments;
             // list_of_net_assignments::= net_assignment { , net_assignment }
@@ -35,24 +35,46 @@ namespace pluginVerilog.Verilog.ModuleItems
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
-            ContinuousAssign continuousAssign = new ContinuousAssign();
+            List<ContinuousAssign> continuousAssigns = new List<ContinuousAssign>();
 
-            continuousAssign.DriveStrength = DriveStrength.ParseCreate(word, nameSpace);
-            continuousAssign.Delay3 = Delay3.ParseCreate(word, nameSpace);
+            DriveStrength? driveStrength = DriveStrength.ParseCreate(word, nameSpace);
+            Delay3 delay3 = Delay3.ParseCreate(word, nameSpace);
 
-            DataObjects.VariableAssignment? assignment = DataObjects.VariableAssignment.ParseCreate(
-                word,
-                nameSpace,
-                true    // should accept implicit net declaration
-                );
 
-            if(assignment != null)
+            while (!word.Eof)
             {
-                continuousAssign.VariableAssignment = assignment;
-            }
-            else
-            {
-                word.AddError("illegal assignment");
+                ContinuousAssign continuousAssign = new ContinuousAssign();
+                continuousAssign.DriveStrength = driveStrength;
+                continuousAssign.Delay3 = delay3;
+
+                DataObjects.VariableAssignment? assignment = DataObjects.VariableAssignment.ParseCreate(
+                    word,
+                    nameSpace,
+                    true    // should accept implicit net declaration
+                    );
+                if (assignment != null)
+                {
+                    continuousAssign.VariableAssignment = assignment;
+                }
+                else
+                {
+                    word.AddError("illegal assignment");
+                }
+                continuousAssigns.Add(continuousAssign);
+
+                if(word.Text == ";")
+                {
+                    word.MoveNext();
+                    break;
+                }else if(word.Text == ",")
+                {
+                    word.MoveNext();
+                    continue;
+                }
+                word.AddError("; expected");
+                word.SkipToKeyword(";");
+                word.MoveNext();
+                break;
             }
 
 
@@ -62,11 +84,8 @@ namespace pluginVerilog.Verilog.ModuleItems
             }
             else
             {
-                word.AddError("; expected");
-                word.SkipToKeyword(";");
-                word.MoveNext();
             }
-            return continuousAssign;
+            return continuousAssigns;
         }
     }
 }

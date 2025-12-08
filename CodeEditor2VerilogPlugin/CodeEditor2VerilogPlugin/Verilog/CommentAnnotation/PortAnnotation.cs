@@ -14,11 +14,15 @@ namespace pluginVerilog.Verilog.CommentAnnotation
             string commentText = word.GetPreviousComment();
             if (!commentText.Contains("@")) return;
             var comment = word.GetPreviousCommentScanner();
+
+            if (!commentText.Contains(word.ProjectProperty.AnnotationCommands.PortGroup)) return;
+
             while (!comment.EOC)
             {
-                if (commentText.Contains(word.ProjectProperty.AnnotationCommands.PortGroup))
+                if ( comment.Text == word.ProjectProperty.AnnotationCommands.PortGroup )
                 {
                     pasePortGroup(comment, nameSpace, ref portGroup, word.ProjectProperty);
+                    return;
                 }
                 else
                 {
@@ -78,14 +82,16 @@ namespace pluginVerilog.Verilog.CommentAnnotation
         {
             comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
             comment.MoveNext();
-            if (comment.Text == ":")
+            if (projectProperty.AnnotationKeyValueDelimiter != "")
             {
-                comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
-                comment.MoveNextUntilEol(); // :
-
-                comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
-                portGroup = comment.Text;
+                if (comment.Text != ":") return;
             }
+            comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+
+            comment.MoveNextUntilEol(); // :
+            comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+
+            portGroup = comment.Text;
         }
 
         private static void parseSyncAnnotation(CommentScanner comment, NameSpace nameSpace, Verilog.DataObjects.Port port,ProjectProperty projectProperty)
