@@ -11,6 +11,10 @@ namespace pluginVerilog.Verilog.AutoComplete
     {
         public NonBlockingAssignmentAutoCompleteItem(string text, byte colorIndex, Avalonia.Media.Color color) : base(text, colorIndex, color, "CodeEditor2/Assets/Icons/gear.svg")
         {
+            IconImage = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
+                    "CodeEditor2/Assets/Icons/screwdriver.svg",
+                    Plugin.ThemeColor
+                    );
         }
 
         public override void Apply()
@@ -33,7 +37,7 @@ namespace pluginVerilog.Verilog.AutoComplete
 
             codeDocument.Replace(headIndex, length, ColorIndex, Text + appendText );
             CodeEditor2.Controller.CodeEditor.SetCaretPosition(headIndex + Text.Length + appendText.Length);
-            CodeEditor2.Controller.CodeEditor.SetSelection(headIndex + Text.Length,headIndex + Text.Length);
+            CodeEditor2.Controller.CodeEditor.SetSelection(headIndex + Text.Length + appendText.Length, headIndex + Text.Length + appendText.Length);
         }
 
     }

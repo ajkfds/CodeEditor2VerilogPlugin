@@ -18,6 +18,10 @@ namespace pluginVerilog.Verilog.Snippets
     {
         public PortConnectionCreateSnippet() : base("portConnectionCreate")
         {
+            IconImage = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
+                    "CodeEditor2/Assets/Icons/wrench.svg",
+                    Plugin.ThemeColor
+                    );
         }
 
         public override void Apply()
@@ -82,7 +86,8 @@ namespace pluginVerilog.Verilog.Snippets
 
         private string CreateString(ModuleInstantiation moduleInstantiation,string indent, ProjectProperty projectProperty)
         {
-            Module? instancedModule = projectProperty.GetBuildingBlock(moduleInstantiation.SourceName) as Module;
+            Module? instancedModule = moduleInstantiation.GetInstancedBuildingBlock() as Module;
+//            Module? instancedModule = projectProperty.GetBuildingBlock(moduleInstantiation.SourceName) as Module;
             if (instancedModule == null) return "";
             StringBuilder sbDefine = new StringBuilder();
 
@@ -94,7 +99,6 @@ namespace pluginVerilog.Verilog.Snippets
             if (moduleInstantiation.ModuleNameComment != null && moduleInstantiation.ModuleNameComment != "")
             {
                 sb.Append(moduleInstantiation.ModuleNameComment);
-                sb.Append("\r\n");
             }
             else
             {

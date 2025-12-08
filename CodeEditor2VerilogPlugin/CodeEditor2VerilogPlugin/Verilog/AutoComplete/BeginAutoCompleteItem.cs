@@ -11,8 +11,12 @@ namespace pluginVerilog.Verilog.AutoComplete
     {
         public BeginAutoCompleteItem(string text, byte colorIndex, Avalonia.Media.Color color) : base(text,colorIndex,color, "CodeEditor2/Assets/Icons/gear.svg")
         {
+            IconImage = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
+                    "CodeEditor2/Assets/Icons/screwdriver.svg",
+                    Plugin.ThemeColor
+                    );
         }
- 
+
         public override void Apply()
         {
             if (codeDocument == null) return;
@@ -23,6 +27,9 @@ namespace pluginVerilog.Verilog.AutoComplete
             }
             char currentChar = codeDocument.GetCharAt(codeDocument.CaretIndex);
             if (currentChar != '\r' && currentChar != '\n') return;
+
+
+            string replaceText = "begin\r\n{}end";
 
             int headIndex, length;
             codeDocument.GetWord(prevIndex, out headIndex, out length);

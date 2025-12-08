@@ -26,12 +26,13 @@ namespace pluginVerilog.Verilog.Snippets
         {
             CodeEditor2.Data.TextFile? file = CodeEditor2.Controller.CodeEditor.GetTextFile();
             if (file == null) return;
-            CodeDocument codeDocument = file.CodeDocument;
+            CodeDocument? codeDocument = file.CodeDocument;
+            if (codeDocument == null) return;
 
             Data.IVerilogRelatedFile? vFile = file as Data.IVerilogRelatedFile;
             if (vFile == null) return;
 
-            ParsedDocument parsedDocument = vFile.VerilogParsedDocument;
+            ParsedDocument? parsedDocument = vFile.VerilogParsedDocument;
             if (parsedDocument == null) return;
 
             int index = codeDocument.CaretIndex;

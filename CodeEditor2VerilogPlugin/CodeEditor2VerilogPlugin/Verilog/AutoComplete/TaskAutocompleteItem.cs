@@ -11,6 +11,10 @@ namespace pluginVerilog.Verilog.AutoComplete
     {
         public TaskAutocompleteItem(string text, byte colorIndex, Avalonia.Media.Color color) : base(text, colorIndex, color, "CodeEditor2/Assets/Icons/gear.svg")
         {
+            IconImage = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
+                    "CodeEditor2/Assets/Icons/screwdriver.svg",
+                    Plugin.ThemeColor
+                    );
         }
 
         public override void Apply()
