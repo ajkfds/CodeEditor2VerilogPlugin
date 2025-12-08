@@ -92,20 +92,22 @@ namespace pluginVerilog.Tool
             var workQueue = new ConcurrentQueue<ParseTask>();
             var reparseTargetFiles = new ConcurrentStack<CodeEditor2.Data.TextFile>();
             var completeIds = new ConcurrentDictionary<string, bool>();
+            var firstHierTaskCount = new ConcurrentStack<bool>();
             var signal = new SemaphoreSlim(0); // starter
             int workerCount = Environment.ProcessorCount;
 
             // entry first
             ParseTask task = new ParseTask(Id: textFile.Key, tarfgetTextFile: textFile, topLevel: true);
+            firstHierTaskCount.Append(true);
             EnqueueWork(task, workQueue, completeIds, signal);
 
             // boot workers
             var workers = new Task[workerCount];
             for (int i = 0; i < workerCount; i++)
             {
+                int index = i;
                 workers[i] = Task.Run(async () =>
                 {
-                    int index = i;
                     while (true)
                     {
                         token?.ThrowIfCancellationRequested();
@@ -113,11 +115,16 @@ namespace pluginVerilog.Tool
 
                         if (workQueue.TryDequeue(out var newTask))
                         {
-                            await parseTextFile(index,newTask.tarfgetTextFile, reparseTargetFiles, workQueue, completeIds, signal, parseMode, token);
-                            if (newTask.topLevel)
+                            await parseTextFile(index,newTask, reparseTargetFiles, workQueue, completeIds, firstHierTaskCount, signal, parseMode, token);
+
+                            // re-entry top level task after all 2nd level task complete
+                            if(firstHierTaskCount.TryPop(out bool first))
                             {
-                                ParseTask reEntryTask = new ParseTask(Id: textFile.Key, tarfgetTextFile: textFile, topLevel: false);
-                                ForceEnqueueWork(reEntryTask, workQueue, completeIds, signal);
+                                if (first)
+                                {
+                                    ParseTask reEntryTask = new ParseTask(Id: textFile.Key, tarfgetTextFile: textFile, topLevel: false);
+                                    ForceEnqueueWork(reEntryTask, workQueue, completeIds, signal);
+                                }
                             }
                         }
                         if (completeIds.Count > 0 && workQueue.IsEmpty)
@@ -170,35 +177,23 @@ namespace pluginVerilog.Tool
             signal.Release(); // start worker
         }
         private static async Task parseTextFile(
-            int index,
-            CodeEditor2.Data.TextFile textFile,
+            int index, 
+            ParseTask task,
             ConcurrentStack<CodeEditor2.Data.TextFile> reparseTargetFiles,
             ConcurrentQueue<ParseTask> workQueue,
             ConcurrentDictionary<string, bool> completeIds,
+            ConcurrentStack<bool> firstHierTaskCount,
             SemaphoreSlim signal,
             ParseMode parseMode,
             CancellationToken? token
             )
         {
+            CodeEditor2.Data.TextFile textFile = task.tarfgetTextFile;
             Data.IVerilogRelatedFile? verilogFile = null;
             if (textFile is Data.VerilogModuleInstance)
             {
                 VerilogModuleInstance mInstance = (Data.VerilogModuleInstance)textFile;
                 verilogFile = mInstance;
-                //Data.VerilogFile baseFile = mInstance.SourceVerilogFile;
-                //CodeEditor2.Controller.AppendLog("checkbase : " + baseFile.ID, Avalonia.Media.Colors.Orange);
-                //if (baseFile.ReparseRequested)
-                //{
-                //    CodeEditor2.Controller.AppendLog("parsebase : " + baseFile.ID, Avalonia.Media.Colors.Orange);
-                //    var baseParser = baseFile.CreateDocumentParser(CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.BackgroundParse, token);
-                //    baseParser.Parse();
-                //    await Dispatcher.UIThread.InvokeAsync(
-                //        () =>
-                //        {
-                //            baseFile.AcceptParsedDocument(baseParser.ParsedDocument);
-                //        }
-                //    );
-                //}
             }
             else if (textFile is Data.VerilogFile)
             {
@@ -229,7 +224,7 @@ namespace pluginVerilog.Tool
                 }
                 else
                 {
-                    CodeEditor2.Controller.AppendLog("parseHier "+index.ToString()+" : " + verilogFile.ID);
+                    CodeEditor2.Controller.AppendLog("parseHier "+index.ToString() + " : " + verilogFile.ID);
                 }
                 await parser.Parse();
                 if (parser.ParsedDocument != null)
@@ -263,13 +258,18 @@ namespace pluginVerilog.Tool
                     }
                 }
             );
-
+            
             foreach (var item in items)
             {
                 if (item is CodeEditor2.Data.TextFile tfile)
                 {
-                    ParseTask task = new ParseTask(Id: tfile.Key, tarfgetTextFile: tfile);
-                    EnqueueWork(task, workQueue, completeIds, signal);
+                    ParseTask newTask = new ParseTask(Id: tfile.Key, tarfgetTextFile: tfile);
+                    if (task.topLevel)
+                    {
+                        firstHierTaskCount.Append(false);
+                    }
+                    EnqueueWork(newTask, workQueue, completeIds, signal);
+                    
                 }
             }
         }
