@@ -10,40 +10,46 @@ namespace pluginVerilog.Verilog.AutoComplete
 {
     public class FunctionAutocompleteItem : AutocompleteItem
     {
-        public FunctionAutocompleteItem(string text, byte colorIndex, Avalonia.Media.Color color) : base(text, colorIndex, color, "CodeEditor2/Assets/Icons/gear.svg")
+        public FunctionAutocompleteItem() : base("function", CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Plugin.ThemeColor, "CodeEditor2/Assets/Icons/screwdriver.svg")
         {
-            IconImage = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
-                    "CodeEditor2/Assets/Icons/screwdriver.svg",
-                    Plugin.ThemeColor
-                    );
         }
 
         public override void Apply()
         {
             if (codeDocument == null) return;
+            CodeEditor.CodeDocument? document = (codeDocument as CodeEditor.CodeDocument);
+            if (document == null) return;
+
             int prevIndex = codeDocument.CaretIndex;
             if (codeDocument.GetLineStartIndex(codeDocument.GetLineAt(prevIndex)) != prevIndex && prevIndex != 0)
             {
                 prevIndex--;
             }
             int headIndex, length;
-            codeDocument.GetWord(prevIndex, out headIndex, out length);
-            string indent = (codeDocument as CodeEditor.CodeDocument).GetIndentString(prevIndex);
 
-            char currentChar = codeDocument.GetCharAt(codeDocument.CaretIndex);
-            string appendText = ";\r\n";
-            appendText += indent + "begin\r\n";
-            appendText += indent + "\t\r\n";
-            appendText += indent + "end\r\n";
+            document.GetWord(prevIndex, out headIndex, out length);
+            string indent = document.GetIndentString(prevIndex);
+            string cr = document.NewLine;
+
+            char currentChar = document.GetCharAt(document.CaretIndex);
+            
+            string appendText = "function [type_and_function_name];"+cr;
+            appendText += indent + "begin" + cr;
+            appendText += indent + "\t" + cr;
+            appendText += indent + "end" + cr;
             appendText += indent + "endfunction";
             if (currentChar != '\r' && currentChar != '\n')
             {
                 appendText = "";
             }
+            int selectStart = appendText.IndexOf("[");
+            int selectLast = appendText.IndexOf("]");
+            appendText = appendText.Replace("[", "");
+            appendText = appendText.Replace("]", "");
 
-            codeDocument.Replace(headIndex, length, ColorIndex, Text + appendText);
-            CodeEditor2.Controller.CodeEditor.SetCaretPosition(headIndex + Text.Length);
-            CodeEditor2.Controller.CodeEditor.SetSelection(headIndex + Text.Length,headIndex + Text.Length);
+            document.Replace(headIndex, length, ColorIndex, appendText);
+            CodeEditor2.Controller.CodeEditor.SetCaretPosition(headIndex + selectStart);
+            CodeEditor2.Controller.CodeEditor.SetSelection(headIndex + selectStart, headIndex + selectLast-2);
         }
     }
 }

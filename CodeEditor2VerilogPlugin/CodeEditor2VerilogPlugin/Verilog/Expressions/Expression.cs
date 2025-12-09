@@ -60,6 +60,8 @@ namespace pluginVerilog.Verilog.Expressions
         }
         public virtual string CreateString()
         {
+            if (Primary != null) return Primary.CreateString();
+
             StringBuilder sb = new StringBuilder();
             AppendString(sb);
             return sb.ToString();

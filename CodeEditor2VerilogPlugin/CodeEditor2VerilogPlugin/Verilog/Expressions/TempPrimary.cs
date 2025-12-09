@@ -23,8 +23,7 @@ namespace pluginVerilog.Verilog.Expressions
 
         public override string CreateString()
         {
-            return "";
-//            return GetLabel().CreateString();
+            return GetLabel().CreateString();
         }
 
         public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)

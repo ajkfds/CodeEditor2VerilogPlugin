@@ -877,43 +877,16 @@ namespace pluginVerilog.Verilog
         private static void appendSpecialAutoCompleteItems(List<AutocompleteItem> items, string cantidate)
         {
             List<AutocompleteItem> specialItems = new List<AutocompleteItem>()
-                    {
-                        new AutoComplete.BeginAutoCompleteItem(
-                            "begin",
-                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
-                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
-                            ),
-                        new AutoComplete.FunctionAutocompleteItem(
-                            "function",
-                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
-                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
-                            ),
-                        new AutoComplete.GenerateAutoCompleteItem(
-                            "generate",
-                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
-                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
-                            ),
-                        new AutoComplete.ModuleAutocompleteItem(
-                            "module",
-                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
-                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
-                            ),
-                        new AutoComplete.InterfaceAutocompleteItem(
-                            "interface",
-                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
-                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
-                            ),
-                        new AutoComplete.TaskAutocompleteItem(
-                            "task",
-                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
-                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
-                            ),
-                        new AutoComplete.NonBlockingAssignmentAutoCompleteItem(
-                            "<=",
-                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Normal),
-                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Normal)
-                            ),
-                    };
+                {
+                    new AutoComplete.BeginAutoCompleteItem(),
+                    new AutoComplete.CaseAutocompleteItem(),
+                    new AutoComplete.FunctionAutocompleteItem(),
+                    new AutoComplete.GenerateAutoCompleteItem(),
+                    new AutoComplete.ModuleAutocompleteItem(),
+                    new AutoComplete.InterfaceAutocompleteItem(),
+                    new AutoComplete.TaskAutocompleteItem(),
+                    new AutoComplete.NonBlockingAssignmentAutoCompleteItem()
+                };
 
             foreach (AutocompleteItem item in specialItems)
             {

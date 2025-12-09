@@ -1,15 +1,15 @@
-﻿using System;
+﻿using CodeEditor2.CodeEditor.CodeComplete;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using CodeEditor2.CodeEditor.CodeComplete;
 
 namespace pluginVerilog.Verilog.AutoComplete
 {
-    public class TaskAutocompleteItem : AutocompleteItem
+    public class CaseAutocompleteItem : AutocompleteItem
     {
-        public TaskAutocompleteItem() : base("task", CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Plugin.ThemeColor, "CodeEditor2/Assets/Icons/screwdriver.svg")
+        public CaseAutocompleteItem() : base("case", CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Plugin.ThemeColor, "CodeEditor2/Assets/Icons/screwdriver.svg")
         {
         }
 
@@ -32,9 +32,9 @@ namespace pluginVerilog.Verilog.AutoComplete
 
             char currentChar = document.GetCharAt(document.CaretIndex);
 
-            string appendText = "task [task_name];" + cr;
-            appendText += indent + "\t" + cr;
-            appendText += indent + "endtask" + cr;
+            string appendText = "begin" + cr;
+            appendText += indent + "\t[]" + cr;
+            appendText += indent + "end" + cr;
 
             //if (currentChar != '\r' && currentChar != '\n')
             //{
@@ -48,6 +48,7 @@ namespace pluginVerilog.Verilog.AutoComplete
             document.Replace(headIndex, length, ColorIndex, appendText);
             CodeEditor2.Controller.CodeEditor.SetCaretPosition(headIndex + selectStart);
             CodeEditor2.Controller.CodeEditor.SetSelection(headIndex + selectStart, headIndex + selectLast - 2);
+
         }
     }
 }

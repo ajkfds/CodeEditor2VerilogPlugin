@@ -27,7 +27,7 @@ namespace pluginVerilog.Views
         public AutoConnectWindow(ModuleInstantiation moduleInstantiation)
         {
             InitializeComponent();
-
+            this.moduleInstantiation = moduleInstantiation;
             HeaderTextBlock.Text = moduleInstantiation.SourceName + " " + moduleInstantiation.Name;
 
             BuildingBlock? buildingBlock = moduleInstantiation.GetInstancedBuildingBlock();
@@ -48,6 +48,7 @@ namespace pluginVerilog.Views
                 {
                     item = new ConnectionItem(port, moduleInstantiation.PortConnection[port.Name],buildingBlock);
                 }
+                item.FontSize = FontSize;
                 ListBox0.Items.Add(item);
             }
             Ready = true;
@@ -55,8 +56,39 @@ namespace pluginVerilog.Views
             ListBox0.AddHandler(KeyDownEvent, ListBox0_KeyDown,
                RoutingStrategies.Tunnel | RoutingStrategies.Bubble,
                handledEventsToo: true);
-//            ListBox0.KeyDown += ListBox0_KeyDown;
         }
+
+        ModuleInstantiation moduleInstantiation;
+        public bool Ready = false;
+        public bool Accept = false;
+
+        public void Complete()
+        {
+            Accept = true;
+
+
+            foreach(var item in ListBox0.Items)
+            {
+                ConnectionItem? citem = item as ConnectionItem;
+                if (citem == null) continue;
+
+                if (moduleInstantiation.PortConnection.ContainsKey(citem.Port.Name))
+                {
+                    moduleInstantiation.PortConnection[citem.Port.Name] = Verilog.Expressions.Expression.CreateTempExpression(citem.target.CreateString());
+                }
+                else
+                {
+                    moduleInstantiation.PortConnection.Add(citem.Port.Name,Verilog.Expressions.Expression.CreateTempExpression(citem.target.CreateString()));
+                }
+            }
+            Close();
+        }
+
+        public void Cancel()
+        {
+            Close();
+        }
+
 
         private void ListBox0_KeyDown(object? sender, Avalonia.Input.KeyEventArgs e)
         {
@@ -68,16 +100,22 @@ namespace pluginVerilog.Views
             {
                 connection.Accept();
             }
-            else if(e.Key == Avalonia.Input.Key.Right)
+            else if (e.Key == Avalonia.Input.Key.Right)
             {
                 connection.Reject();
             }
+            else if (e.Key == Avalonia.Input.Key.Enter)
+            {
+                Complete();
+            }
+            else if (e.Key == Avalonia.Input.Key.Escape)
+            {
+                Cancel();
+            }
         }
 
-        public bool Ready = false;
-        public bool Accept = false;
 
-        List<(string, string?)> connectionList = new List<(string, string?)>();
+        List<(string, string?)> ConnectionList = new List<(string, string?)>();
         public class ConnectionItem : AjkAvaloniaLibs.Controls.ListViewItem
         {
             public ConnectionItem(Verilog.DataObjects.Port port, Verilog.Expressions.Expression? expression,BuildingBlock buildingBlock) : base()
@@ -85,6 +123,11 @@ namespace pluginVerilog.Views
                 this.Port = port;
                 this.Expression = expression;
                 this.BuildingBlock = buildingBlock;
+                if (expression != null)
+                {
+                    this.original = expression.GetLabel();
+                    this.target = original;
+                }
 
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch;
                 Background = new SolidColorBrush(Avalonia.Media.Colors.Transparent);
@@ -93,11 +136,13 @@ namespace pluginVerilog.Views
 
                 UpdateVisual();
             }
-            pluginVerilog.Verilog.DataObjects.Port Port;
+
+            public pluginVerilog.Verilog.DataObjects.Port Port;
             Verilog.Expressions.Expression? Expression;
             BuildingBlock BuildingBlock;
             List<ColorLabel> cantidates;
-            ColorLabel target = new ColorLabel();
+            public ColorLabel target = new ColorLabel();
+            ColorLabel original = new ColorLabel();
 
             public AjkAvaloniaLibs.Controls.ColorLabel ColorLabel = new AjkAvaloniaLibs.Controls.ColorLabel();
             public void UpdateVisual()
@@ -118,16 +163,37 @@ namespace pluginVerilog.Views
                 ColorLabel.AppendToTextBlock(TextBlock);
             }
 
+            private List<string> removePortSuffixs = new List<string>() { "_I", "_O", "_IO" };
+
             private List<ColorLabel> GetCantidates()
             {
                 List<(int, ColorLabel)> cantidates = new List<(int, ColorLabel)>();
                 
                 foreach(var namedElement in BuildingBlock.NamedElements)
                 {
-                    if (namedElement.Name.ToLower() == Port.Name.ToLower()) {
+                    string portName = Port.Name;
+
+                    if (namedElement.Name.ToLower() == portName.ToLower()) {
                         ColorLabel label = new ColorLabel();
                         label.AppendText(namedElement.Name, Avalonia.Media.Colors.Red);
                         cantidates.Add((0, label));
+                        continue;
+                    }
+
+                    foreach(string removePortSuffix in removePortSuffixs)
+                    {
+                        if (Port.Name.EndsWith(removePortSuffix))
+                        {
+                            portName = Port.Name.Substring(0,Port.Name.Length - removePortSuffix.Length);
+
+                            if (namedElement.Name.ToLower() == portName.ToLower())
+                            {
+                                ColorLabel label = new ColorLabel();
+                                label.AppendText(namedElement.Name, Avalonia.Media.Colors.Red);
+                                cantidates.Add((0, label));
+                                continue;
+                            }
+                        }
                     }
                 }
 
@@ -151,11 +217,7 @@ namespace pluginVerilog.Views
 
             public void Reject()
             {
-                target.Clear();
-                if (Expression != null)
-                {
-                    target.AppendText(Expression.CreateString()); 
-                }
+                target = new ColorLabel();
                 UpdateVisual();
             }
         }

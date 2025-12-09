@@ -5,12 +5,14 @@ using CodeEditor2.CodeEditor;
 using CodeEditor2.CodeEditor.CodeComplete;
 using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Views;
+using pluginVerilog.CodeEditor;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.ModuleItems;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Security.Principal;
 using System.Text;
 using System.Threading;
@@ -36,9 +38,6 @@ namespace pluginVerilog.Verilog.Snippets
         {
             List<int> startIndexes = new List<int>();
             List<int> lastIndexes = new List<int>();
-
-
-            System.Diagnostics.Debug.Print("## AlwaysFFSnippet.Apply");
 
             CodeEditor2.Data.TextFile? file = CodeEditor2.Controller.CodeEditor.GetTextFile();
             if (file == null) return;
@@ -102,7 +101,6 @@ namespace pluginVerilog.Verilog.Snippets
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
                     if (document == null) return;
-
                     CodeEditor2.Data.TextFile? file = CodeEditor2.Controller.CodeEditor.GetTextFile();
                     if (file == null) return;
                     document = file.CodeDocument;
@@ -135,8 +133,39 @@ namespace pluginVerilog.Verilog.Snippets
                 await Dispatcher.UIThread.InvokeAsync(async () => {
                     Views.AutoConnectWindow autoConnectWindow = new Views.AutoConnectWindow(moduleInstantiation);
                     if(autoConnectWindow.Ready) await autoConnectWindow.ShowDialog(CodeEditor2.Controller.GetMainWindow());
+                    if (!autoConnectWindow.Accept) return;
                 });
 
+               
+
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (document == null) return;
+                    CodeEditor2.Data.TextFile? file = CodeEditor2.Controller.CodeEditor.GetTextFile();
+                    if (file == null) return;
+                    document = file.CodeDocument;
+                    if (document == null) return;
+                    pluginVerilog.CodeEditor.CodeDocument? vDocument = document as pluginVerilog.CodeEditor.CodeDocument;
+                    if (vDocument == null) return;
+
+                    string indent = vDocument.GetIndentString(vDocument.CaretIndex);
+
+                    string? moduleString = moduleInstantiation.CreateString("\t");
+                    if (moduleString == null)
+                    {
+                        CodeEditor2.Controller.AppendLog("illegal module instance", Avalonia.Media.Colors.Red);
+                        return;
+                    }
+
+                    CodeEditor2.Controller.CodeEditor.SetCaretPosition(moduleInstantiation.BeginIndexReference.Indexes.Last());
+                    document.Replace(
+                        moduleInstantiation.BeginIndexReference.Indexes.Last(),
+                        moduleInstantiation.LastIndexReference.Indexes.Last() - moduleInstantiation.BeginIndexReference.Indexes.Last() + 1,
+                        0,
+                        moduleString
+                        );
+                    CodeEditor2.Controller.CodeEditor.SetSelection(document.CaretIndex, document.CaretIndex);
+                });
 
             }
             catch (OperationCanceledException)
