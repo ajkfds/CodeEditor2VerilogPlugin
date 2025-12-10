@@ -24,6 +24,12 @@ namespace pluginVerilog.Views
 {
     public partial class AutoConnectWindow : Window
     {
+        public AutoConnectWindow()
+        {
+            InitializeComponent();
+            if (Design.IsDesignMode) return;
+            throw new NotImplementedException();
+        }
         public AutoConnectWindow(ModuleInstantiation moduleInstantiation)
         {
             InitializeComponent();
