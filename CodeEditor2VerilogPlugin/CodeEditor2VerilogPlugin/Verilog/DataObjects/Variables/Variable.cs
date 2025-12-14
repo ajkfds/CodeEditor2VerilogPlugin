@@ -211,8 +211,8 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 if (variable == null) return true;
                 variable.DefinedReference = word.GetReference();
 
-
                 word.Color(variable.ColorType);
+                CommentAnnotation.DataObjectAnnotaion.ParsePostComment(word, nameSpace, variable);
                 word.MoveNext();
 
                 // { variable_dimension }
@@ -234,6 +234,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                     }
                 }
 
+                CommentAnnotation.DataObjectAnnotaion.ParsePostComment(word, nameSpace, variable);
 
                 if (word.Text == "=") 
                 {
@@ -329,14 +330,14 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
                         }else if (nameSpace.BuildingBlock.AnsiStylePortDefinition)
                         {   
-                            variable.DefinedReference.AddError("duplicate");
+                            variable.DefinedReference?.AddError("duplicate");
                         }
                         else
                         {
                             BuildingBlocks.IModuleOrInterfaceOrProgram? buildingBlockWithPorts = nameSpace.BuildingBlock as BuildingBlocks.IModuleOrInterfaceOrProgram;
                             if(buildingBlockWithPorts == null)
                             {
-                                variable.DefinedReference.AddError("duplicate");
+                                variable.DefinedReference?.AddError("duplicate");
                             }
                             else
                             {
@@ -347,7 +348,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                                 }
                                 else
                                 {
-                                    variable.DefinedReference.AddError("duplicate");
+                                    variable.DefinedReference?.AddError("duplicate");
                                 }
                             }
 
@@ -360,6 +361,12 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                     if (!nameSpace.NamedElements.ContainsKey(variable.Name))
                     {
                         nameSpace.NamedElements.Add(variable.Name, variable);
+                        variable.Defined = true;
+                    }
+                    else
+                    {
+                        Variable? preDefined = nameSpace.NamedElements[variable.Name] as Variable;
+                        if(preDefined != null) preDefined.Defined = true;
                     }
                 }
                 vars.Add(variable);

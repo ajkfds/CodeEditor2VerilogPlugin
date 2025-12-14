@@ -31,6 +31,16 @@ namespace pluginVerilog.Verilog
             }
         }
 
+        public void RemoveAll(Func<INamedElement,bool> match)
+        {
+            foreach(string key in itemDict.Where( (kvp)=> { return match(kvp.Value); }).Select( kvp => kvp.Key ).ToList())
+            {
+                INamedElement namedElement = itemDict[key];
+                itemList.Remove(namedElement);
+                itemDict.Remove(key);
+            }
+        }
+
         public bool TryGetValue(string key, out INamedElement? namedElement)
         {
             if (!itemDict.TryGetValue(key, out namedElement))

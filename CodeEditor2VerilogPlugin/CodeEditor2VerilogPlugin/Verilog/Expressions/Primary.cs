@@ -179,15 +179,11 @@ number
                     {
                         return DollarMark.ParseCreate(word, nameSpace);
                     }
+
                     // system function call
-                    if (word.Text.StartsWith("$"))// && word.ProjectProperty.SystemFunctions.Keys.Contains(word.Text))
+                    if ( word.Text.StartsWith("$") )// && word.ProjectProperty.SystemFunctions.Keys.Contains(word.Text))
                     {
                         return FunctionCall.ParseCreate(word, nameSpace,nameSpace);
-                    }
-
-                    if(word.Text == "MyObject")
-                    {
-                        string a = "";
                     }
 
                     // assignment pattern
@@ -203,20 +199,19 @@ number
                     }
 
                     // keyword
-                    if (General.ListOfKeywords.Contains(word.Text))
+                    if ( General.ListOfKeywords.Contains(word.Text) )
                     {
                         return null;
                     }
 
                     // abosrt if not ideftifier
-                    if (!General.IsIdentifier(word.Text))
+                    if ( !General.IsIdentifier(word.Text) )
                     {
                         return null;
                     }
 
-
                     // function call (function recarsive call)
-                    if (word.NextText=="(" && word.Text == nameSpace.Name)
+                    if ( word.NextText=="(" && word.Text == nameSpace.Name )
                     {
                         // It shall be illegal to omit the parentheses in a tf_call unless the subroutine is a task, void function,
                         // or class method. If the subroutine is a nonvoid class function method, it shall be illegal to omit the parentheses if the call is directly recursive.
@@ -234,10 +229,7 @@ number
 
                     if (word.Text == "this" && word.NextText == ".")
                     {
-
-                        // The this keyword shall only be used within
-                        // non -static class methods,
-                        // constraints,
+                        // The this keyword shall only be used within non -static class methods, constraints,
                         // inlined constraint methods, or covergroups embedded within classes(see 19.4);
                         // otherwise, an error shall be issued.
 
@@ -334,12 +326,6 @@ number
                     {
                         return parseUndefinedFunction(word);
                     }
-                    //else if (word.NextText == ";")
-                    //{
-                    //    return parseUndefinedFunction(word);
-                    //}
-
-
 
                     // implicit net declaration
                     if (acceptImplicitNet)

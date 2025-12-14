@@ -161,9 +161,14 @@ namespace pluginVerilog.Verilog.Expressions
             {
                 val.DataObject.UsedReferences.Add(word.GetReference());
             }
+
             if (val.DataObject.CommentAnnotation_Discarded)
             {
                 word.AddError("Disarded.");
+            }
+            else
+            {
+                if ( !word.Prototype && !val.DataObject.Defined ) word.AddError("not defined here");
             }
 
             word.MoveNext();

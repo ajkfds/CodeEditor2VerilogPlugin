@@ -132,6 +132,14 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 prototypeWord.Dispose();
                 word.CheckCancelToken();
 
+                // remove all dataobjects to check definition order
+                //module.NamedElements.RemoveAll(
+                //    element =>
+                //    {
+                //        return (element is DataObjects.DataObject);
+                //    }
+                //);
+
                 // parse
                 word.RootParsedDocument.Macros = macroKeep;
                 await parseModule(word, parameterOverrides, null, module);

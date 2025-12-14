@@ -202,7 +202,6 @@ namespace pluginVerilog.Verilog.Statements
                 AssignmentPattern assignmentPattern = AssignmentPattern.ParseCreate(word, nameSpace,false);
                 BlockingAssignment assignment = new BlockingAssignment();
                 assignment.LValue = lExpression;
-//                assignment.Expression = expression;
                 if (Assigned != null) Assigned(word, nameSpace, assignment);
                 return assignment;
             }

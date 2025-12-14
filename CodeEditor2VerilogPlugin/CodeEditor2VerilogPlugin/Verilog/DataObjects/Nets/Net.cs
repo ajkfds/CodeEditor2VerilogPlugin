@@ -455,6 +455,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                         {
                             Net? newNet = nameSpace.NamedElements[net.Name] as Net;
                             if (newNet == null) throw new Exception();
+                            newNet.Defined = true;
                             net = newNet;
                         }
                         word.Color(CodeDrawStyle.ColorType.Net);

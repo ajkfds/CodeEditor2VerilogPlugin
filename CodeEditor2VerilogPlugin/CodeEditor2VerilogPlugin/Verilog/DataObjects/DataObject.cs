@@ -46,6 +46,11 @@ namespace pluginVerilog.Verilog.DataObjects
         public virtual CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Normal; } }
 
         public bool CommentAnnotation_Discarded = false;
+
+        // flag to check defined position
+        // defined = false @ prototypr parse
+        // defined changes to true @ definition on actual parse
+        public bool Defined = false;
         public virtual NamedElements NamedElements { get; } = new NamedElements();
 
         public virtual AutocompleteItem CreateAutoCompleteItem()
