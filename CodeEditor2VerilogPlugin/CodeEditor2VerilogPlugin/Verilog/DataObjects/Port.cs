@@ -1075,7 +1075,8 @@ namespace pluginVerilog.Verilog.DataObjects
                 else
                 {
                     if (portNameSpace.NamedElements.ContainsKey(port.DataObject.Name)) portNameSpace.NamedElements.Remove(port.DataObject.Name);
-                }
+                    port.DataObject.Defined = true;
+               }
                 portNameSpace.NamedElements.Add(port.DataObject.Name, port.DataObject);
             }
             else

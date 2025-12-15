@@ -395,6 +395,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                         { // for root nameSpace parameter
                             nameSpace.NamedElements.Add(constants.Name, constants);
                         }
+                        constants.Defined = true;
                     }
                 }
 

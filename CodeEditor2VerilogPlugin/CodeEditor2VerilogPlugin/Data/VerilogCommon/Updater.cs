@@ -27,10 +27,7 @@ namespace pluginVerilog.Data.VerilogCommon
         /// <param name="item"></param>
         public static void Update(IVerilogRelatedFile item)
         {
-            if (!Dispatcher.UIThread.CheckAccess())
-            {
-                System.Diagnostics.Debugger.Break();
-            }
+            if (!Dispatcher.UIThread.CheckAccess()) System.Diagnostics.Debugger.Break();
 
             // Update the Items member of this object according to the rootItem.ParsedDocument.
             Project project = item.Project;

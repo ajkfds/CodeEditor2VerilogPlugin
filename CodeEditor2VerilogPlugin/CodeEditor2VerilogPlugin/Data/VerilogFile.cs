@@ -142,6 +142,8 @@ namespace pluginVerilog.Data
         /// <param name="newParsedDocument"></param>
         public override void AcceptParsedDocument(ParsedDocument? newParsedDocument)
         {
+            if (!Dispatcher.UIThread.CheckAccess()) System.Diagnostics.Debugger.Break();
+
             lock (this) { 
             
 
@@ -195,22 +197,20 @@ namespace pluginVerilog.Data
                 // update Navigate panel node visual for this item
                 NavigatePanelNode.UpdateVisual();
 
-                Task.Run(
-                    async () =>
-                    {
-                        try
-                        {
-                            await CreateCashe();
-                        }
-                        catch (Exception ex)
-                        {
-                            System.Diagnostics.Debugger.Break();
-                            Controller.AppendLog(ex.Message, Avalonia.Media.Colors.Red);
-                        }
-                    }
-                );
-
-//                if (oldParsedDocument != null) oldParsedDocument.Dispose();
+                //Task.Run(
+                //    async () =>
+                //    {
+                //        try
+                //        {
+                //            await CreateCashe();
+                //        }
+                //        catch (Exception ex)
+                //        {
+                //            System.Diagnostics.Debugger.Break();
+                //            Controller.AppendLog(ex.Message, Avalonia.Media.Colors.Red);
+                //        }
+                //    }
+                //);
             }
 
         }

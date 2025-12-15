@@ -247,6 +247,8 @@ namespace pluginVerilog.Data
 
         public override void AcceptParsedDocument(ParsedDocument newParsedDocument)
         {
+            if (!Dispatcher.UIThread.CheckAccess()) System.Diagnostics.Debugger.Break();
+
             if (newParsedDocument == null) throw new Exception();
             Data.VerilogFile source = SourceVerilogFile;
             if (source == null) return;

@@ -4,6 +4,7 @@ using CodeEditor2.CodeEditor;
 using CodeEditor2.CodeEditor.CodeComplete;
 using CodeEditor2.Data;
 using DynamicData.Kernel;
+using pluginVerilog.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.Nets;
@@ -289,22 +290,38 @@ namespace pluginVerilog.Verilog.ModuleItems
                     {
                         instancedModule = word.ProjectProperty.GetInstancedBuildingBlock(moduleInstantiation) as Module;
                     }
-                    //if (instancedModule == null && baseFile != null)
-                    //{
-                    //    CodeEditor2.Controller.AppendLog("parseparameter : " + baseFile.Name, Avalonia.Media.Colors.Orange);
-                    //    var baseParser = baseFile.CreateDocumentParser(CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.BackgroundParse, null);
-                    //    await baseParser.Parse();
 
-                    //    await Dispatcher.UIThread.InvokeAsync(
-                    //        () => { baseFile.AcceptParsedDocument(baseParser.ParsedDocument); }
-                    //    );
-                    //    instancedModule = word.ProjectProperty.GetInstancedBuildingBlock(moduleInstantiation) as Module;
-                    //}
+                    VerilogFile? baseFile = word.ProjectProperty.GetFileOfBuildingBlock(moduleName) as VerilogFile;
+
+                    if (word.RootParsedDocument.ParseMode == CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.EditParse)
+                    {
+                        if (instancedModule == null && baseFile != null)
+                        {
+                            CodeEditor2.Controller.AppendLog("parseparameter : " + baseFile.Name, Avalonia.Media.Colors.Orange);
+                            var baseParser = baseFile.CreateDocumentParser(CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.LoadParse, null);
+                            await baseParser.Parse();
+
+                            string key = Verilog.ParsedDocument.KeyGenerator(baseFile, moduleName, parameterOverrides);
+
+                            if(baseParser.ParsedDocument != null)
+                            {
+                                await Dispatcher.UIThread.InvokeAsync(
+                                    () => {
+                                        baseFile.RegisterInstanceParsedDocument(key, baseParser.ParsedDocument, null);
+                                        //                                    baseFile.AcceptParsedDocument(baseParser.ParsedDocument);
+                                    }
+                                );
+                            }
+                            instancedModule = word.ProjectProperty.GetInstancedBuildingBlock(moduleInstantiation) as Module;
+                        }
+
+                    }
 
                     if (instancedModule == null)
                     {
-//                        nameSpace.BuildingBlock.ReparseRequested = true;
-//                        word.RootParsedDocument.ReparseRequested = true;
+                        //                        nameSpace.BuildingBlock.ReparseRequested = true;
+                        //                        word.RootParsedDocument.ReparseRequested = true;
+
                         word.AddError("not parsed yet.");
                     }
                 }
@@ -842,9 +859,9 @@ namespace pluginVerilog.Verilog.ModuleItems
                     checkModPortConnection(projectProperty, expression, modportInstantiation, interface_, pinName, output);
                 }
             }
-            else if (portDataObject is InterfaceInstance)
+            else if (portDataObject is DataObjects.InterfaceInstance)
             {
-                InterfaceInstance? portInterfaceInstantiation = instancedModule.Ports[pinName].DataObject as InterfaceInstance;
+                DataObjects.InterfaceInstance? portInterfaceInstantiation = instancedModule.Ports[pinName].DataObject as DataObjects.InterfaceInstance;
                 if (portInterfaceInstantiation == null) throw new Exception();
                 Interface? interface_ = instancedModule.Project.GetPluginProperty().GetBuildingBlock(portInterfaceInstantiation.SourceName) as Interface;
                 if(interface_ == null)
@@ -918,7 +935,7 @@ namespace pluginVerilog.Verilog.ModuleItems
         private static void checkInterfacePortConnection(
             ProjectProperty projectProperty,
             Expressions.Expression expression,
-            InterfaceInstance portInterfaceInstantiation,
+            DataObjects.InterfaceInstance portInterfaceInstantiation,
             Interface interface_,
             string pinName,
             bool output
@@ -931,7 +948,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                 return;
             }
 
-            InterfaceInstance? interfaceInstance = variableReference.DataObject as InterfaceInstance;
+            DataObjects.InterfaceInstance? interfaceInstance = variableReference.DataObject as DataObjects.InterfaceInstance;
             if(interfaceInstance == null)
             {
                 expression.Reference.AddError("should be " + portInterfaceInstantiation.SourceName);
