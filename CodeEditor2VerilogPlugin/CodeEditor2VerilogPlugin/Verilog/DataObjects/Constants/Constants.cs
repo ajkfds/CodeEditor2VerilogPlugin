@@ -244,7 +244,8 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                         }
                         else
                         {
-
+                            Constants? constant = module.NamedElements[identifier] as Constants;
+                            if (constant != null) constant.Defined = true;
                         }
                     }
                 }

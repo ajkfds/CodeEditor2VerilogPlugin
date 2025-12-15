@@ -17,6 +17,7 @@ using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static pluginVerilog.Verilog.ModPort;
 
 namespace pluginVerilog.Verilog.DataObjects
 {
@@ -656,6 +657,7 @@ namespace pluginVerilog.Verilog.DataObjects
                         }
                     }
 
+                    if (!word.Prototype) port.DataObject.Defined = true;
                 }
             }
 
@@ -733,6 +735,8 @@ namespace pluginVerilog.Verilog.DataObjects
             Port port = new Port() { DefinitionReference = word.CrateWordReference(), Name = iInst.Name, Project = word.Project };
             port.DataObject = iInst;
 
+            if (!word.Prototype) port.DataObject.Defined = true;
+
             addPort(word, nameSpace, port);
             addInstantiation(word, nameSpace, iInst);
 
@@ -751,6 +755,8 @@ namespace pluginVerilog.Verilog.DataObjects
 
             Port port = new Port() { DefinitionReference = word.CrateWordReference(), Name = iModport.Name, Project = word.Project };
             port.DataObject = iModport;
+
+            if (!word.Prototype) port.DataObject.Defined = true;
 
             addPort(word, nameSpace, port);
             addInstantiation(word, nameSpace, iModport);
@@ -916,6 +922,8 @@ namespace pluginVerilog.Verilog.DataObjects
                     nameSpace.NamedElements.Add(port.DataObject.Name, port.DataObject);
                 }
 
+                if (!word.Prototype) port.DataObject.Defined = true;
+
                 word.Color(CodeDrawStyle.ColorType.Variable);
                 word.MoveNext();
 
@@ -1075,14 +1083,14 @@ namespace pluginVerilog.Verilog.DataObjects
                 else
                 {
                     if (portNameSpace.NamedElements.ContainsKey(port.DataObject.Name)) portNameSpace.NamedElements.Remove(port.DataObject.Name);
-                    port.DataObject.Defined = true;
-               }
+                }
                 portNameSpace.NamedElements.Add(port.DataObject.Name, port.DataObject);
             }
             else
             {
                 portNameSpace.NamedElements.Add(port.DataObject.Name, port.DataObject);
             }
+            if(!word.Prototype) port.DataObject.Defined = true;
 
             word.MoveNext();
 
