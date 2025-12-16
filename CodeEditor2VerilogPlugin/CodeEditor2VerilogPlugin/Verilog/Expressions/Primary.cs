@@ -256,6 +256,7 @@ number
                         NameSpace? searchDownwardNameSpace = searchNameSpace(word, targetNameSpace, ref nameSpaceText);
                         if(searchDownwardNameSpace is UnfoundNameSpace)
                         {
+                            word.RootParsedDocument.ReparseRequested = true;
                             return new UnfoundObjectReference() { Reference = ((UnfoundNameSpace)searchDownwardNameSpace).Reference };
                         }
                         if (searchDownwardNameSpace != null)
@@ -332,11 +333,25 @@ number
                     {
                         Net net = DataObjects.Nets.Net.Create(word.Text, DataObjects.Nets.Net.NetTypeEnum.Wire, null);
                         net.DefinedReference = word.GetReference();
+                        net.Defined = true;
 
-                        if (!word.Prototype)
+                        if (word.Prototype)
                         {
                             nameSpace.NamedElements.Add(net.Name, net);
-                            word.ApplyRule(word.ProjectProperty.RuleSet.ImplicitNetDeclaretion);
+                        }
+                        else
+                        {
+                            if (nameSpace.NamedElements.ContainsKey(net.Name))
+                            {
+                                nameSpace.NamedElements.RemoveKey(net.Name);
+                                nameSpace.NamedElements.Add(net.Name, net);
+                            }
+                        }
+
+                        // define @ protptype
+                        if (word.Prototype)
+                        {
+                            word.ApplyPrototypeRule(word.ProjectProperty.RuleSet.ImplicitNetDeclaretion);
                         }
 
                         return parseDataObject(word, nameSpace, targetNameSpace, lValue, nameSpaceText);
@@ -448,6 +463,8 @@ number
             } while (!word.Eof);
 
             WordReference wordReference = WordReference.CreateReferenceRange(beginRef, word.GetReference());
+
+            word.RootParsedDocument.ReparseRequested = true;
             return new UnfoundNameSpace() { DefinitionReference = beginRef, Name = "?", Reference= wordReference};
         }
 
@@ -553,6 +570,7 @@ number
                 word.SkipToKeywords(new List<string> { ";", ")" });
                 if (word.Text == ")") word.MoveNext();
             }
+            word.RootParsedDocument.ReparseRequested = true;
             WordReference wordReference = WordReference.CreateReferenceRange(beginRef, word.GetReference());
             return new UnfoundObjectReference() { Reference = wordReference };
         }

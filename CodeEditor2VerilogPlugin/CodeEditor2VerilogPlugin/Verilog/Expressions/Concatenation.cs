@@ -21,14 +21,21 @@ namespace pluginVerilog.Verilog.Expressions
             WordReference reference = word.GetReference();
             word.MoveNext(); // {
 
-            Expression exp1;
+            Expression? exp1;
             if (lValue)
             {
                 exp1 = Expression.ParseCreateVariableLValue(word, nameSpace, acceptImplicitNet);
             }
             else
             {
-                exp1 = Expression.ParseCreate(word, nameSpace);
+                if (acceptImplicitNet)
+                {
+                    exp1 = Expression.ParseCreateAcceptImplicitNet(word, nameSpace,false);
+                }
+                else
+                {
+                    exp1 = Expression.ParseCreate(word, nameSpace);
+                }
             }
             if (exp1 == null)
             {
@@ -64,7 +71,14 @@ namespace pluginVerilog.Verilog.Expressions
                 }
                 else
                 {
-                    exp1 = Expression.ParseCreate(word, nameSpace);
+                    if (acceptImplicitNet)
+                    {
+                        exp1 = Expression.ParseCreateAcceptImplicitNet(word, nameSpace, false);
+                    }
+                    else
+                    {
+                        exp1 = Expression.ParseCreate(word, nameSpace);
+                    }
                 }
                 if (exp1 != null)
                 {
