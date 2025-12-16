@@ -237,7 +237,7 @@ namespace pluginVerilog.Parser
 
         */
 
-        public override async System.Threading.Tasks.Task Parse(CancellationToken? cancellationToken)
+        public override async System.Threading.Tasks.Task ParseAsync(CancellationToken? cancellationToken)
         {
             System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
             sw.Start();

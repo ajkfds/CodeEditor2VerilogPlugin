@@ -175,9 +175,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 {
                     module = await Module.ParseCreate(word, parsedDocument.ParameterOverrides, null , parsedDocument.Root, file, true);
                 }
-                {
-                    module.ReparseRequested = true;
-                }
+                parsedDocument.ReparseRequested = true;
             }
             else
             {
@@ -222,10 +220,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 {
                     package = await Package.Create(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, true);
                 }
-                //if (package.Instantiations.Count != 0) // prepare reparse (instanced module could have un-refferenced link)
-                {
-                    package.ReparseRequested = true;
-                }
+                parsedDocument.ReparseRequested = true;
             }
             else
             {
@@ -269,10 +264,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 {
                     program = await Program.Parse(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, true);
                 }
-                //if (program.Instantiations.Count != 0) // prepare reparse (instanced module could have un-referenced link)
-                {
-                    program.ReparseRequested = true;
-                }
+                parsedDocument.ReparseRequested = true;
             }
             else
             {
@@ -289,7 +281,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             if (!parsedDocument.Root.BuildingBlocks.ContainsKey(program.Name))
             {
                 parsedDocument.Root.BuildingBlocks.Add(program.Name, program);
-                if (program.ReparseRequested) parsedDocument.ReparseRequested = true;
+                parsedDocument.ReparseRequested = true;
             }
             else
             {
@@ -325,10 +317,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 {
                     module = await Interface.Create(word, parsedDocument.Root, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, true);
                 }
-//                if (module.Instantiations.Count != 0) // prepare reparse (instanced module could have un-refferenced link)
-                {
-                    module.ReparseRequested = true;
-                }
+                parsedDocument.ReparseRequested = true;
             }
             else
             {
@@ -345,7 +334,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             if (!parsedDocument.Root.BuildingBlocks.ContainsKey(module.Name))
             {
                 parsedDocument.Root.BuildingBlocks.Add(module.Name, module);
-                if (module.ReparseRequested) parsedDocument.ReparseRequested = true;
+                parsedDocument.ReparseRequested = true;
             }
             else
             {

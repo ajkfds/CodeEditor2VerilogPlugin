@@ -89,6 +89,8 @@ namespace pluginVerilog.Tool
             );
         private static async Task runParallel(CodeEditor2.Data.TextFile textFile, ParseMode parseMode, CancellationToken? token)
         {
+            textFile.ReparseRequested = true;
+
             var workQueue = new ConcurrentQueue<ParseTask>();
             var reparseTargetFiles = new ConcurrentStack<CodeEditor2.Data.TextFile>();
             var completeIds = new ConcurrentDictionary<string, bool>();
@@ -136,7 +138,15 @@ namespace pluginVerilog.Tool
                 });
             }
 
-            await Task.WhenAll(workers);
+            try
+            {
+                await Task.WhenAll(workers);
+            }
+            catch
+            {
+                if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+            }
+
             token?.ThrowIfCancellationRequested();
 
             // reparse
@@ -209,9 +219,8 @@ namespace pluginVerilog.Tool
 
 
             bool doParse = false;
-            if (!verilogFile.ParseValid) doParse = true;
             if (verilogFile.ReparseRequested) doParse = true;
-            if (verilogFile.VerilogParsedDocument != null && verilogFile.VerilogParsedDocument.ErrorCount > 0) doParse = true;
+//            if (verilogFile.VerilogParsedDocument != null && verilogFile.VerilogParsedDocument.ErrorCount > 0) doParse = true;
 
             if (doParse)
             {
@@ -226,7 +235,7 @@ namespace pluginVerilog.Tool
                 {
                     CodeEditor2.Controller.AppendLog("parseHier "+index.ToString() + " : " + verilogFile.ID);
                 }
-                await parser.Parse();
+                await parser.ParseAsync();
                 if (parser.ParsedDocument != null)
                 {
                     await Dispatcher.UIThread.InvokeAsync(
@@ -240,9 +249,8 @@ namespace pluginVerilog.Tool
             }
 
             bool needReparse = false;
-            if (!verilogFile.ParseValid) needReparse = true;
             if (verilogFile.ReparseRequested) needReparse = true;
-            if (verilogFile.VerilogParsedDocument != null && verilogFile.VerilogParsedDocument.ErrorCount > 0) needReparse = true;
+//            if (verilogFile.VerilogParsedDocument != null && verilogFile.VerilogParsedDocument.ErrorCount > 0) needReparse = true;
             if (needReparse) reparseTargetFiles.Push((CodeEditor2.Data.TextFile)verilogFile);
 
             List<Item> items = new List<Item>();
@@ -303,7 +311,7 @@ namespace pluginVerilog.Tool
             {
                 CodeEditor2.Controller.AppendLog("reparseHier : " + verilogFile.ID);
             }
-            await parser.Parse();
+            await parser.ParseAsync();
             if (parser.ParsedDocument != null)
             {
                 await Dispatcher.UIThread.InvokeAsync(

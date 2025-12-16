@@ -78,36 +78,45 @@ namespace pluginVerilog.NavigatePanel
 
         public override async void OnSelected()
         {
-            base.OnSelected(); // update context menu
-            if (ModuleInstance == null)
+            try
             {
-                Update();
-                return;
-            }
-
-
-            CodeEditor2.Controller.CodeEditor.SetTextFile(ModuleInstance, true);
-
-            UpdateVisual();
-
-            if (ModuleInstance.ParseValid && !ModuleInstance.ReparseRequested)
-            {
-                // skip parse
-            }
-            else
-            {
-                if (ModuleInstance == null) return;
-
-                try
+                base.OnSelected(); // update context menu
+                if (ModuleInstance == null)
                 {
-                    await Tool.ParseHierarchy.ParseAsync(ModuleInstance, Tool.ParseHierarchy.ParseMode.SearchReparseReqestedTree);
+                    Update();
+                    return;
                 }
-                catch (Exception ex)
+
+
+                CodeEditor2.Controller.CodeEditor.SetTextFile(ModuleInstance, true);
+
+                UpdateVisual();
+
+                if (!ModuleInstance.ReparseRequested)
                 {
-                    if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
-                    CodeEditor2.Controller.AppendLog("#Exception " + ex.Message, Avalonia.Media.Colors.Red);
-                    throw;
+                    // skip parse
                 }
+                else
+                {
+                    if (ModuleInstance == null) return;
+
+                    try
+                    {
+                        await Tool.ParseHierarchy.ParseAsync(ModuleInstance, Tool.ParseHierarchy.ParseMode.SearchReparseReqestedTree);
+                    }
+                    catch (Exception ex)
+                    {
+                        if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+                        CodeEditor2.Controller.AppendLog("#Exception " + ex.Message, Avalonia.Media.Colors.Red);
+                        throw;
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+                CodeEditor2.Controller.AppendLog("# Exception : " + ex.Message, Avalonia.Media.Colors.Red);
             }
         }
 

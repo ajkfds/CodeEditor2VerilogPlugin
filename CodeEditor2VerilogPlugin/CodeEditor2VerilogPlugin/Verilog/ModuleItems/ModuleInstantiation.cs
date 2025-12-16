@@ -202,6 +202,7 @@ namespace pluginVerilog.Verilog.ModuleItems
             if(instancedModule == null)
             {
                 word.AddError("unfound module");
+                word.RootParsedDocument.ReparseRequested = true;
             }
 
             //Data.VerilogFile? baseFile = instancedModule?.File as Data.VerilogFile;
@@ -297,21 +298,45 @@ namespace pluginVerilog.Verilog.ModuleItems
                     {
                         if (instancedModule == null && baseFile != null)
                         {
-                            CodeEditor2.Controller.AppendLog("parseparameter : " + baseFile.Name, Avalonia.Media.Colors.Orange);
-                            var baseParser = baseFile.CreateDocumentParser(CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.LoadParse, null);
-                            await baseParser.Parse();
 
-                            string key = Verilog.ParsedDocument.KeyGenerator(baseFile, moduleName, parameterOverrides);
-
-                            if(baseParser.ParsedDocument != null)
+                            VerilogModuleInstance? instance = VerilogModuleInstance.Create(moduleInstantiation);
+                            var baseParser = instance?.CreateDocumentParser(CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.LoadParse,word.CancellationToken);
+                            if(instance != null && baseParser != null)
                             {
-                                await Dispatcher.UIThread.InvokeAsync(
-                                    () => {
-                                        baseFile.RegisterInstanceParsedDocument(key, baseParser.ParsedDocument, null);
-                                        //                                    baseFile.AcceptParsedDocument(baseParser.ParsedDocument);
-                                    }
-                                );
+                                await baseParser.ParseAsync();
+                                if (baseParser.ParsedDocument != null)
+                                {
+                                    await Dispatcher.UIThread.InvokeAsync(
+                                        () =>
+                                        {
+                                            if (word.RootParsedDocument.File != null) word.RootParsedDocument.File.Items.Add(instance.Name, instance);
+                                            Verilog.ParsedDocument vParsedDocument = (Verilog.ParsedDocument)baseParser.ParsedDocument;
+                                            vParsedDocument.ReparseRequested = true;
+                                            instance.AcceptParsedDocument(baseParser.ParsedDocument);
+                                        }
+                                    );
+                                }
+                                word.RootParsedDocument.KeepObject.Add(instance);
                             }
+
+                            //CodeEditor2.Controller.AppendLog("parseparameter : " + baseFile.Name, Avalonia.Media.Colors.Orange);
+                            //var baseParser = baseFile.CreateDocumentParser(CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.LoadParse, null);
+                            //await baseParser.Parse();
+
+                            //string key = Verilog.ParsedDocument.KeyGenerator(baseFile, moduleName, parameterOverrides);
+
+                            //if(baseParser.ParsedDocument != null)
+                            //{
+                            //    Verilog.ParsedDocument? vParsedDocument = baseParser.ParsedDocument as Verilog.ParsedDocument;
+                            //    if (vParsedDocument != null) vParsedDocument.ReparseRequested = true;
+
+                            //    await Dispatcher.UIThread.InvokeAsync(
+                            //        () => {
+                            //            baseFile.RegisterInstanceParsedDocument(key, baseParser.ParsedDocument, null);
+                            //            //                                    baseFile.AcceptParsedDocument(baseParser.ParsedDocument);
+                            //        }
+                            //    );
+                            //}
                             instancedModule = word.ProjectProperty.GetInstancedBuildingBlock(moduleInstantiation) as Module;
                         }
 

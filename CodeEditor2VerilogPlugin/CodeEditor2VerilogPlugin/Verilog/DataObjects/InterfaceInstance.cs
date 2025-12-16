@@ -331,7 +331,7 @@ namespace pluginVerilog.Verilog.DataObjects
                     {
                         instancedInterface = word.ProjectProperty.GetInstancedBuildingBlock(interfaceInstance) as Interface;
                     }
-                    if (instancedInterface == null) nameSpace.BuildingBlock.ReparseRequested = true;
+                    if (instancedInterface == null) word.RootParsedDocument.ReparseRequested = true;
                 }
 
                 // register to upper bulding block

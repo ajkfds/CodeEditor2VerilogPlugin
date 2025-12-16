@@ -168,7 +168,10 @@ namespace pluginVerilog.Verilog.Expressions
             }
             else
             {
-                if ( !word.Prototype && !val.DataObject.Defined ) word.AddError("not defined here");
+                if (!word.Prototype && !val.DataObject.Defined)
+                {
+                    word.AddError("not defined here");
+                }
             }
 
             word.MoveNext();

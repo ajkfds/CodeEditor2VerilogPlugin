@@ -41,6 +41,13 @@ namespace pluginVerilog.Verilog
             }
         }
 
+        public void RemoveKey(string key)
+        {
+            INamedElement namedElement = itemDict[key];
+            itemList.Remove(namedElement);
+            itemDict.Remove(key);
+        }
+
         public bool TryGetValue(string key, out INamedElement? namedElement)
         {
             if (!itemDict.TryGetValue(key, out namedElement))

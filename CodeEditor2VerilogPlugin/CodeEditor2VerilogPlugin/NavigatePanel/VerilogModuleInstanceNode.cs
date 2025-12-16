@@ -74,41 +74,50 @@ namespace pluginVerilog.NavigatePanel
 
         public override async void OnSelected()
         {
-            base.OnSelected(); // update context enu
-
-            if (ModuleInstance == null)
+            try
             {
-                Update();
-                return;
+                base.OnSelected(); // update context enu
+
+                if (ModuleInstance == null)
+                {
+                    Update();
+                    return;
+                }
+
+                //System.Diagnostics.Debug.Print("## VerilogModuleInstanceNode.OnSelected");
+
+
+
+                CodeEditor2.Controller.CodeEditor.SetTextFile(ModuleInstance, true);
+                UpdateVisual();
+
+                //            Update();
+
+                //            foreach (NavigatePanelNode node in Nodes)
+                //            {
+                ////                if (node is VerilogModuleInstanceNode)
+                ////                {
+                ////                    ((VerilogModuleInstanceNode)node).Update();
+                ////                }
+                //                node.UpdateVisual();
+                //            }
+                if (CodeEditor2.Global.StopParse) return;
+
+                //if (ModuleInstance.ParseValid & !ModuleInstance.ReparseRequested)
+                //{
+                //    // skip parse
+                //}
+                //else
+                //{
+                await Tool.ParseHierarchy.ParseAsync(ModuleInstance, Tool.ParseHierarchy.ParseMode.SearchReparseReqestedTree);
+                //}
+            }
+            catch (Exception ex)
+            {
+                if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+                CodeEditor2.Controller.AppendLog("# Exception : " + ex.Message, Avalonia.Media.Colors.Red);
             }
 
-            //System.Diagnostics.Debug.Print("## VerilogModuleInstanceNode.OnSelected");
-
-
-
-            CodeEditor2.Controller.CodeEditor.SetTextFile(ModuleInstance, true);
-            UpdateVisual();
-
-            //            Update();
-
-            //            foreach (NavigatePanelNode node in Nodes)
-            //            {
-            ////                if (node is VerilogModuleInstanceNode)
-            ////                {
-            ////                    ((VerilogModuleInstanceNode)node).Update();
-            ////                }
-            //                node.UpdateVisual();
-            //            }
-            if (CodeEditor2.Global.StopParse) return;
-
-            //if (ModuleInstance.ParseValid & !ModuleInstance.ReparseRequested)
-            //{
-            //    // skip parse
-            //}
-            //else
-            //{
-                await Tool.ParseHierarchy.ParseAsync(ModuleInstance, Tool.ParseHierarchy.ParseMode.SearchReparseReqestedTree);
-            //}
         }
 
         public override void Update()

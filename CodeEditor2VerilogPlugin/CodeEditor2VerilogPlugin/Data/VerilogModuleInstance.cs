@@ -275,10 +275,30 @@ namespace pluginVerilog.Data
                     source.ReparseRequested = true;
                 }
             }
+            {
+                Verilog.ParsedDocument? vParsedDocument = ParsedDocument as Verilog.ParsedDocument;
+                if (vParsedDocument != null)
+                {
+                    ReparseRequested = vParsedDocument.ReparseRequested;
+                }
+            }
 
             NavigatePanelNode.UpdateVisual();
 
 //            if (oldParsedDocument != null) oldParsedDocument.Dispose();
+        }
+
+        public override bool ReparseRequested { 
+            get 
+            {
+                if (VerilogParsedDocument == null) return true;
+                if (VerilogParsedDocument.ReparseRequested) return true;
+                return false;
+            }
+            set
+            {
+                if (VerilogParsedDocument != null) VerilogParsedDocument.ReparseRequested = value;
+            }
         }
 
         private void acceptParameterizedParsedDocument(ParsedDocument newParsedDocument)

@@ -51,19 +51,6 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         public virtual Data.IVerilogRelatedFile File { get; init; }
 
 
-        private bool reparseRequested = false;
-        [Newtonsoft.Json.JsonIgnore]
-        public bool ReparseRequested
-        {
-            get
-            {
-                return reparseRequested;
-            }
-            set
-            {
-                reparseRequested = value;
-            }
-        }
 
         #endregion
 

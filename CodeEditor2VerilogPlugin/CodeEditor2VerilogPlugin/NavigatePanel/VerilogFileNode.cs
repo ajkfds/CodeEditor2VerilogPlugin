@@ -58,32 +58,26 @@ namespace pluginVerilog.NavigatePanel
 
         public override async void OnSelected()
         {
-            base.OnSelected(); // update context menu
-
-            if(TextFile == null)
-            {
-                if (NodeSelected != null) NodeSelected();
-                Update();
-                return;
-            }
-
-
-            CodeEditor2.Controller.CodeEditor.SetTextFile(TextFile, true);
-            if (NodeSelected != null) NodeSelected();
-
-            UpdateVisual();
-            if (CodeEditor2.Global.StopParse) return;
-
-            //if (TextFile.ParseValid && !TextFile.ReparseRequested)
-            //{
-            //    // skip parse
-            //}
-            //else
-            //{
-                if (TextFile == null) return;
-
             try
             {
+                base.OnSelected(); // update context menu
+
+                if(TextFile == null)
+                {
+                    if (NodeSelected != null) NodeSelected();
+                    Update();
+                    return;
+                }
+
+
+                CodeEditor2.Controller.CodeEditor.SetTextFile(TextFile, true);
+                if (NodeSelected != null) NodeSelected();
+
+                UpdateVisual();
+                if (CodeEditor2.Global.StopParse) return;
+
+                if (TextFile == null) return;
+
                 await Tool.ParseHierarchy.ParseAsync(TextFile, Tool.ParseHierarchy.ParseMode.SearchReparseReqestedTree);
             }
             catch (Exception ex)
@@ -91,7 +85,6 @@ namespace pluginVerilog.NavigatePanel
                 if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
                 CodeEditor2.Controller.AppendLog("# Exception : " + ex.Message, Avalonia.Media.Colors.Red);
             }
-            //}
         }
 
 

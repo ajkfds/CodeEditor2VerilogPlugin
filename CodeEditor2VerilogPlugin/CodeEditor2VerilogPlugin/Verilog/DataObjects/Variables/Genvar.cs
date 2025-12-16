@@ -63,7 +63,8 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                     {
                         if (nameSpace.NamedElements.ContainsKey(val.Name) && nameSpace.NamedElements[val.Name] is Genvar)
                         {
-                            val = nameSpace.NamedElements[val.Name] as Genvar;
+                            val = (Genvar)nameSpace.NamedElements[val.Name];
+                            val.Defined = true;
                         }
                     }
                 }

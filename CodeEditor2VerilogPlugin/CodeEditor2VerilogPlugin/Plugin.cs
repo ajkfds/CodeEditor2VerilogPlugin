@@ -85,11 +85,11 @@ namespace pluginVerilog
 
         private static async void MenuItem_ParseHier_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            Data.VerilogFile? vfile = (CodeEditor2.Controller.NavigatePanel.GetSelectedNode() as VerilogFileNode)?.VerilogFile;
-            if (vfile == null) return;
-
             try
             {
+                Data.VerilogFile? vfile = (CodeEditor2.Controller.NavigatePanel.GetSelectedNode() as VerilogFileNode)?.VerilogFile;
+                if (vfile == null) return;
+
                 await Tool.ParseHierarchy.ParseAsync(vfile, Tool.ParseHierarchy.ParseMode.ForceAllFiles);
             }
             catch (Exception ex)

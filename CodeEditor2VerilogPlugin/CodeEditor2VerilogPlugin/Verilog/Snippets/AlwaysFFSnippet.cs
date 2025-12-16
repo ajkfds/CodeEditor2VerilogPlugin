@@ -156,6 +156,10 @@ namespace pluginVerilog.Verilog.Snippets
             catch (OperationCanceledException)
             {
             }
+            catch
+            {
+                if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+            }
             finally
             {
                 _currentTask = null;
