@@ -138,14 +138,7 @@ namespace pluginVerilog.Tool
                 });
             }
 
-            try
-            {
-                await Task.WhenAll(workers);
-            }
-            catch
-            {
-                if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
-            }
+            await Task.WhenAll(workers);
 
             token?.ThrowIfCancellationRequested();
 

@@ -86,6 +86,8 @@ namespace pluginVerilog
                 if (identifierTable[value[index]] == 0) return false;
                 index++;
             }
+
+            if(General.ListOfKeywords.Contains(value)) return false;
             return true;
         }
 

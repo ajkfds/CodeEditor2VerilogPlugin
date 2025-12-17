@@ -628,7 +628,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                 }
                 else
                 {
-                    moduleIdentifier.AddWarning("missing port " + notWrittenPortName[0]);
+                    if(!word.Prototype) moduleIdentifier.AddWarning("missing port " + notWrittenPortName[0]);
                 }
             }
 
@@ -689,6 +689,7 @@ namespace pluginVerilog.Verilog.ModuleItems
         WordReference moduleIdentifier)
         {
             if (word.Text != "(") throw new Exception();
+            var startRef = word.GetReference();
             word.MoveNext();
 
             bool outPort = false;
@@ -706,7 +707,8 @@ namespace pluginVerilog.Verilog.ModuleItems
             {
                 if (!outPort)
                 {
-                    word.AddWarning("floating input");
+                    WordReference.CreateReferenceRange(startRef, word.GetReference()).AddWarning("floating input");
+                    //word.AddWarning("floating input");
                 }
                 word.MoveNext();
                 return;

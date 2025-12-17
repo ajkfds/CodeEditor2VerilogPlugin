@@ -35,16 +35,23 @@ namespace pluginVerilog.Verilog.Items
 
             // module_or_generate_item_declaration
             if (await ModuleOrGenerateItemDeclaration.Parse(word, nameSpace.BuildingBlock )) return true;
+            //assertion_item::= concurrent_assertion_item | deferred_immediate_assertion_item
 
             switch (word.Text)
             {
                 // assertion_item
+//                case "assert":
+                    //assertion_item ::=
+                    //        [block_identifier: ] concurrent_assertion_statement
+                    //      | checker_instantiation
+                    //      | deferred_immediate_assertion_item
+//                    return await ConcurrentAssertionItemExceptCheckerInstantiation.Parse(word, nameSpace);
                 // bind_directive
                 // net_alias
                 // final_construct
                 // elaboration_system_task
 
-                // continuous_assign
+                        // continuous_assign
                 case "assign":
                     return await ModuleItems.ContinuousAssign.Parse(word, nameSpace);
                 // initial_construct
@@ -58,17 +65,27 @@ namespace pluginVerilog.Verilog.Items
                     return await ModuleItems.AlwaysConstruct.Parse(word, nameSpace);
                 // loop_generate_construct
                 case "for":
-//                    word.AddSystemVerilogError();
+                    //                    word.AddSystemVerilogError();
                     return await Generate.LoopGenerateConstruct.Parse(word, nameSpace);
                 // conditional_generate_construct
                 case "if":
                     return await Generate.IfGenerateConstruct.Parse(word, nameSpace);
             }
 
+
             // interface_instantiation
             if (InterfaceInstance.Parse(word, nameSpace)) return true;
 
             // program_instantiation
+
+            //assertion_item ::=
+            //        [block_identifier: ] concurrent_assertion_statement
+            //      | checker_instantiation
+            //      | deferred_immediate_assertion_item
+            if (General.IsSimpleIdentifier(word.Text) && word.NextText == ":")
+            {
+                return await ConcurrentAssertionItemExceptCheckerInstantiation.Parse(word, nameSpace);
+            }
 
             return false;
         }

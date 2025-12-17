@@ -300,6 +300,8 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                             if (exp == null)
                             {
                                 word.AddError("expression required.");
+                                word.SkipToKeyword(";");
+                                if (word.Text == ";") word.MoveNext();
                                 return true;
                             }
                             else

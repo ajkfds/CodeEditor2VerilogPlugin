@@ -9,6 +9,37 @@ namespace pluginVerilog.Verilog.Items
     public class AssertionItem
     {
         /*
+        assertion_item ::=
+              concurrent_assertion_item
+            | deferred_immediate_assertion_item
+
+            concurrent_assertion_item ::=
+                  [ block_identifier : ] concurrent_assertion_statement
+                | checker_instantiation
+        
+                concurrent_assertion_statement ::=
+                      assert_property_statement
+                    | assume_property_statement
+                    | cover_property_statement
+                    | cover_sequence_statement
+                    | restrict_property_statement
+                checker_instantiation ::=
+                      ps_checker_identifier name_of_instance ( [list_of_checker_port_connections] ) ;
+
+            deferred_immediate_assertion_item ::=
+                [ block_identifier : ] deferred_immediate_assertion_statement
+
+                deferred_immediate_assertion_statement ::=
+                      deferred_immediate_assert_statement
+                    | deferred_immediate_assume_statement
+                    | deferred_immediate_cover_statement
+        */
+        /*
+            
+         
+        */
+        /*
+
 concurrent_assertion_item ::=
       [ block_identifier ":" ] concurrent_assertion_statement
     | checker_instantiation

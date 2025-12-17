@@ -1,12 +1,14 @@
-﻿using System;
+﻿using pluginVerilog.Verilog.Statements;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 
 namespace pluginVerilog.Verilog.Assertion
 {
-    public class AssertionItem
+    public class AssertionItemXX
     {
         /*
         assertion_item ::=
@@ -53,5 +55,8 @@ deferred_immediate_cover_statement ::=
 cover #0 ( expression ) statement_or_null
 | cover final ( expression ) statement_or_null         
          */
+
+
+
     }
 }
