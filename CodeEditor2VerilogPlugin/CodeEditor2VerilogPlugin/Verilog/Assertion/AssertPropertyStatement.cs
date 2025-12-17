@@ -32,6 +32,7 @@ namespace pluginVerilog.Verilog.Assertion
             if (word.Eof || word.Text != "(") return await exitTask(word, nameSpace, assertPropertyStatement);
             word.MoveNext();
 
+            PropertySpec propertySpec = await PropertySpec.ParseCreate(word, nameSpace);
             word.SkipToKeyword(")");
 
             if (word.Eof || word.Text != ")") return await exitTask(word, nameSpace, assertPropertyStatement);
