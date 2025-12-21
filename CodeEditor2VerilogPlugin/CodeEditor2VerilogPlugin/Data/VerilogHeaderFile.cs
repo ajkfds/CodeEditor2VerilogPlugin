@@ -87,6 +87,7 @@ namespace pluginVerilog.Data
         // update sub-items from ParsedDocument
         public override async System.Threading.Tasks.Task UpdateAsync()
         {
+            await base.UpdateAsync();
             await VerilogCommon.Updater.UpdateAsync(this);
         }
         // read text document from file

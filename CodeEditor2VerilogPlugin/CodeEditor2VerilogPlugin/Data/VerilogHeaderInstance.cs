@@ -319,7 +319,9 @@ namespace pluginVerilog.Data
         // update sub-items from ParsedDocument
         public override async System.Threading.Tasks.Task UpdateAsync()
         {
-            if(Parent == null)
+            await base.UpdateAsync();
+
+            if (Parent == null)
             {
                 await VerilogCommon.Updater.UpdateAsync(this);
             }

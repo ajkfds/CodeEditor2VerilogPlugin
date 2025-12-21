@@ -423,6 +423,7 @@ namespace pluginVerilog.Data
         // update sub-items from ParsedDocument
         public override async Task UpdateAsync()
         {
+            await base.UpdateAsync();
             //if (!Dispatcher.UIThread.CheckAccess())
             //{
             //    throw new Exception();
