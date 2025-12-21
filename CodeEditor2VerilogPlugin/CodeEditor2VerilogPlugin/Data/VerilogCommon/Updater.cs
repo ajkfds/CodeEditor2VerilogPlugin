@@ -16,16 +16,12 @@ namespace pluginVerilog.Data.VerilogCommon
     public static class Updater
     {
 
-        public static async System.Threading.Tasks.Task UpdateAsync(IVerilogRelatedFile item)
-        {
-            await Dispatcher.UIThread.InvokeAsync(() => { Update(item); });
-        }
 
         /// <summary>
         /// Update the Items member of this object according to the rootItem.ParsedDocument.
         /// </summary>
         /// <param name="item"></param>
-        public static void Update(IVerilogRelatedFile item)
+        public static async System.Threading.Tasks.Task UpdateAsync(IVerilogRelatedFile item)
         {
             if (!Dispatcher.UIThread.CheckAccess()) System.Diagnostics.Debugger.Break();
 

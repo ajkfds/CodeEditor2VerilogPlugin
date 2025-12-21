@@ -35,16 +35,23 @@ namespace pluginVerilog.NavigatePanel
             }
         }
 
-        public override void OnSelected()
+        public override async void OnSelected()
         {
-            if (TextFile == null) return;
+            try
+            {
+                if (TextFile == null) return;
 
-            CodeEditor2.Controller.CodeEditor.SetTextFile(TextFile);
-            if (NodeSelected != null) NodeSelected();
+                await CodeEditor2.Controller.CodeEditor.SetTextFileAsync(TextFile);
+                if (NodeSelected != null) NodeSelected();
+            }
+            catch
+            {
+                if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+            }
         }
 
 
-        public override void Update()
+        public override async Task UpdateAsync()
         {
             if (VerilogHeaderInstance == null) return;
             //VerilogHeaderInstance.Update();

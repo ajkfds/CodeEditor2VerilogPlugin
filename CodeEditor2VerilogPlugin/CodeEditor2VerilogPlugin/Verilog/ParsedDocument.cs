@@ -63,7 +63,12 @@ namespace pluginVerilog.Verilog
         {
             if (file == null) return null; // foe illeagal jon constructor 
             CodeDocument? codeDocument;
-            codeDocument = file.CodeDocument as CodeDocument;
+            if(file.CodeDocument == null)
+            {
+                file.LoadFormFile();
+            }
+
+            codeDocument = file.CodeDocument as pluginVerilog.CodeEditor.CodeDocument;
             if(codeDocument == null)
             {
                 System.Diagnostics.Debugger.Break();

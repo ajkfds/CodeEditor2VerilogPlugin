@@ -25,9 +25,10 @@ namespace pluginVerilog.NavigatePanel
             get { return Item as CodeEditor2.Data.TextFile; }
         }
 
-        public override void Update()
+        public override Task UpdateAsync()
         {
             UpdateVisual();
+            return Task.CompletedTask;
         }
         public override void UpdateVisual()
         {
@@ -60,10 +61,17 @@ namespace pluginVerilog.NavigatePanel
             if (verilogRelatedFile == null) return;
             Image = GetIcon(verilogRelatedFile);
         }
-        public override void OnSelected()
+        public override async void OnSelected()
         {
-            if(TextFile == null) return;
-            CodeEditor2.Controller.CodeEditor.SetTextFile(TextFile);
+            try
+            {
+                if (TextFile == null) return;
+                await CodeEditor2.Controller.CodeEditor.SetTextFileAsync(TextFile);
+            }
+            catch
+            {
+                if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+            }
         }
 
         public static IImage? GetIcon(IVerilogRelatedFile verilogRelatedFile)

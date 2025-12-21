@@ -15,6 +15,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reactive.Threading.Tasks;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -245,7 +246,7 @@ namespace pluginVerilog.Data
             }
         }
 
-        public override void AcceptParsedDocument(ParsedDocument newParsedDocument)
+        public override async Task AcceptParsedDocumentAsync(ParsedDocument newParsedDocument)
         {
             if (!Dispatcher.UIThread.CheckAccess()) System.Diagnostics.Debugger.Break();
 
@@ -258,7 +259,7 @@ namespace pluginVerilog.Data
                 {
                     ParsedDocument = newParsedDocument; // should keep parseddocument 1st
                     source.RegisterInstanceParsedDocument(Key, newParsedDocument, this);
-                    acceptParameterizedParsedDocument(newParsedDocument);
+                    await acceptParameterizedParsedDocumentAsync(newParsedDocument);
                 }
             }
 
@@ -268,7 +269,7 @@ namespace pluginVerilog.Data
                 Verilog.ParsedDocument sourceParsedDocument = (Verilog.ParsedDocument)source.ParsedDocument;
                 if (sourceParsedDocument.Root != null && sourceParsedDocument.Root.BuildingBlocks.Count == 1)
                 {
-                    source.AcceptParsedDocument(newParsedDocument);
+                    await source.AcceptParsedDocumentAsync(newParsedDocument);
                 }
                 else
                 {
@@ -301,7 +302,7 @@ namespace pluginVerilog.Data
             }
         }
 
-        private void acceptParameterizedParsedDocument(ParsedDocument newParsedDocument)
+        private async Task acceptParameterizedParsedDocumentAsync(ParsedDocument newParsedDocument)
         {
 
             // copy include files
@@ -310,7 +311,7 @@ namespace pluginVerilog.Data
 
             if (VerilogParsedDocument == null)
             {
-                Update();
+                await UpdateAsync();
                 return;
             }
 
@@ -322,7 +323,7 @@ namespace pluginVerilog.Data
 
             VerilogFile.updateIncludeFiles(VerilogParsedDocument, Items);
 
-            Update(); // eliminated here
+            await UpdateAsync(); // eliminated here
             //System.Diagnostics.Debug.Print("### Verilog File Parsed " + ID);
         }
 
@@ -362,9 +363,12 @@ namespace pluginVerilog.Data
 
 
         // update sub-items from ParsedDocument
-        public override void Update()
+        public override async Task UpdateAsync()
         {
-            VerilogCommon.Updater.Update(this);
+            await Dispatcher.UIThread.InvokeAsync(
+                async () => { await VerilogCommon.Updater.UpdateAsync(this);  }
+                );
+            
             NavigatePanelNode.UpdateVisual();
 
             Dispatcher.UIThread.Post(
@@ -378,23 +382,6 @@ namespace pluginVerilog.Data
                 })
             );
         }
-        public override async Task UpdateAsync()
-        {
-            if (Dispatcher.UIThread.CheckAccess())
-            {
-                Update();
-            }
-            else
-            {
-                await Dispatcher.UIThread.InvokeAsync(
-                    () =>
-                    {
-                        Update();
-                    }
-                );
-            }
-        }
-
 
         protected Dictionary<WeakReference<CodeEditor2.Data.Item?>, WeakReference<CodeEditor2.NavigatePanel.NavigatePanelNode>> nodeRefDictionary
             = new Dictionary<WeakReference<Item?>, WeakReference<CodeEditor2.NavigatePanel.NavigatePanelNode>>();

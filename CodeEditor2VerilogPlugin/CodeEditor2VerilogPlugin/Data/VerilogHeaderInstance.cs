@@ -253,7 +253,7 @@ namespace pluginVerilog.Data
             }
         }
 
-        public override void AcceptParsedDocument(CodeEditor2.CodeEditor.ParsedDocument newParsedDocument)
+        public override async System.Threading.Tasks.Task AcceptParsedDocumentAsync(CodeEditor2.CodeEditor.ParsedDocument newParsedDocument)
         {
             //{
             //    Data.VerilogFile source = SourceVerilogFile;
@@ -270,7 +270,7 @@ namespace pluginVerilog.Data
 
 
 //            ReparseRequested = VerilogParsedDocument.ReparseRequested;
-            Update();
+            await UpdateAsync();
         }
 
 
@@ -317,11 +317,11 @@ namespace pluginVerilog.Data
         }
 
         // update sub-items from ParsedDocument
-        public override void Update()
+        public override async System.Threading.Tasks.Task UpdateAsync()
         {
             if(Parent == null)
             {
-                VerilogCommon.Updater.Update(this);
+                await VerilogCommon.Updater.UpdateAsync(this);
             }
             CodeEditor2.Data.Item? item = Parent;
             while (true)
@@ -340,7 +340,7 @@ namespace pluginVerilog.Data
             if (item != null && item is VerilogFile)
             {
                 VerilogFile vFile = (VerilogFile)item;
-                VerilogCommon.Updater.Update(vFile);
+                await VerilogCommon.Updater.UpdateAsync(vFile);
             }
         }
 

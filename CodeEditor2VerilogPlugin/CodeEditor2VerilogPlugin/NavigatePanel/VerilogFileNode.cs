@@ -65,12 +65,12 @@ namespace pluginVerilog.NavigatePanel
                 if(TextFile == null)
                 {
                     if (NodeSelected != null) NodeSelected();
-                    Update();
+                    await UpdateAsync();
                     return;
                 }
 
 
-                CodeEditor2.Controller.CodeEditor.SetTextFile(TextFile, true);
+                await CodeEditor2.Controller.CodeEditor.SetTextFileAsync(TextFile, true);
                 if (NodeSelected != null) NodeSelected();
 
                 UpdateVisual();
@@ -89,13 +89,13 @@ namespace pluginVerilog.NavigatePanel
 
 
 
-        public override void Update()
+        public override async Task UpdateAsync()
         {
             if(VerilogFile == null)
             {
                 return;
             }
-            VerilogFile.Update(); // UpdateVisual called in this method on the  UI thread
+            await VerilogFile.UpdateAsync(); // UpdateVisual called in this method on the  UI thread
         }
 
 

@@ -222,7 +222,7 @@ namespace pluginVerilog.Data
             }
         }
 
-        public override void AcceptParsedDocument(ParsedDocument newParsedDocument)
+        public override async Task AcceptParsedDocumentAsync(ParsedDocument newParsedDocument)
         {
             //            Verilog.ParsedDocument? vParsedDocument = newParsedDocument as Verilog.ParsedDocument;
             //            if (vParsedDocument == null) return;
@@ -233,19 +233,19 @@ namespace pluginVerilog.Data
 
             if (ParameterOverrides.Count == 0)
             {
-                source.AcceptParsedDocument(newParsedDocument);
+                await source.AcceptParsedDocumentAsync(newParsedDocument);
             }
             else
             {
                 source.RegisterInstanceParsedDocument(ModuleName + ":" + ParameterId, newParsedDocument, this);
-                acceptParameterizedParsedDocument(newParsedDocument);
+                await acceptParameterizedParsedDocument(newParsedDocument);
             }
             //            ReparseRequested = vParsedDocument.ReparseRequested;
             //            Update();
             System.Diagnostics.Debug.Print("### Verilog Module Instance Parsed " + ID);
         }
 
-        private void acceptParameterizedParsedDocument(ParsedDocument newParsedDocument)
+        private async System.Threading.Tasks.Task acceptParameterizedParsedDocument(ParsedDocument newParsedDocument)
         {
             ParsedDocument oldParsedDocument = ParsedDocument;
             if (oldParsedDocument != null) oldParsedDocument.Dispose();
@@ -256,7 +256,7 @@ namespace pluginVerilog.Data
 
             if (VerilogParsedDocument == null)
             {
-                Update();
+                await UpdateAsync();
                 return;
             }
 
@@ -303,7 +303,7 @@ namespace pluginVerilog.Data
             //    item.CodeDocument.CopyColorMarkFrom(includeFile.VerilogParsedDocument.CodeDocument);
             //}
 
-            Update(); // eliminated here
+            await UpdateAsync(); // eliminated here
             System.Diagnostics.Debug.Print("### Verilog File Parsed " + ID);
         }
 
@@ -343,27 +343,9 @@ namespace pluginVerilog.Data
         }
 
 
-        // update sub-items from ParsedDocument
-        public override void Update()
+        public override async Task UpdateAsync()
         {
-            VerilogCommon.Updater.Update(this);
-        }
-
-        public override async System.Threading.Tasks.Task UpdateAsync()
-        {
-            if (Dispatcher.UIThread.CheckAccess())
-            {
-                Update();
-            }
-            else
-            {
-                await Dispatcher.UIThread.InvokeAsync(
-                    () =>
-                    {
-                        Update();
-                    }
-                );
-            }
+            await VerilogCommon.Updater.UpdateAsync(this);
         }
         // Auto Complete Handler
 

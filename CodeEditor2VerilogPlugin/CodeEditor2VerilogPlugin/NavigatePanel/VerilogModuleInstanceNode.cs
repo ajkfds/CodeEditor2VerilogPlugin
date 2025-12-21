@@ -80,7 +80,7 @@ namespace pluginVerilog.NavigatePanel
 
                 if (ModuleInstance == null)
                 {
-                    Update();
+                    await UpdateAsync();
                     return;
                 }
 
@@ -88,7 +88,7 @@ namespace pluginVerilog.NavigatePanel
 
 
 
-                CodeEditor2.Controller.CodeEditor.SetTextFile(ModuleInstance, true);
+                await CodeEditor2.Controller.CodeEditor.SetTextFileAsync(ModuleInstance, true);
                 UpdateVisual();
 
                 //            Update();
@@ -120,13 +120,10 @@ namespace pluginVerilog.NavigatePanel
 
         }
 
-        public override void Update()
+        public override async Task UpdateAsync()
         {
             if (VerilogModuleInstance == null) return;
-            VerilogModuleInstance.Update(); // UpdateVisual called in this method on the  UI thread
-
-
-//            UpdateVisual();
+            await VerilogModuleInstance.UpdateAsync(); // UpdateVisual called in this method on the  UI thread
         }
 
         public override void UpdateVisual()

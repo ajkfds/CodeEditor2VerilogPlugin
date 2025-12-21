@@ -116,7 +116,7 @@ namespace pluginVerilog.NavigatePanel
                 }
             }
 
-            CodeEditor2.Controller.NavigatePanel.UpdateFolder(node);
+            await CodeEditor2.Controller.NavigatePanel.UpdateFolder(node);
         }
 
         private static async void menuItem_AddVerilogModule_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)

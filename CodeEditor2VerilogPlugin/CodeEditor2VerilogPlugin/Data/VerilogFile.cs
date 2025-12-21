@@ -29,6 +29,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Markup;
 using Tmds.DBus.Protocol;
 
 namespace pluginVerilog.Data
@@ -117,7 +118,7 @@ namespace pluginVerilog.Data
                 {
                     try
                     {
-                        loadDocumentFromFile();
+                        this.LoadDocumentFromFile();
                     }
                     catch
                     {
@@ -133,85 +134,114 @@ namespace pluginVerilog.Data
                 document = value as CodeEditor2.CodeEditor.CodeDocument;
             }
         }
+        protected override void LoadDocumentFromFile()
+        {
+            try
+            {
+                if (document == null)
+                {
+                    document = new pluginVerilog.CodeEditor.CodeDocument(this);
+                }
 
-//        private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+                var info = new FileInfo(AbsolutePath);
+                CashedStatus = new FileStatus(info.Length, info.LastWriteTimeUtc);
+
+                string text = ReadStableText(AbsolutePath);
+                lock (document)
+                {
+                    document.TextDocument.Replace(0, document.TextDocument.TextLength, text);
+                }
+                document.ClearHistory();
+                document.Clean();
+            }
+            catch
+            {
+                document = null;
+            }
+//            await AcceptParsedDocumentAsync(null);
+            //if (NavigatePanelNode != null) NavigatePanelNode.UpdatAsync();
+        }
+        //public override void LoadFormFile()
+        //{
+        //    LoadDocumentFromFile();
+        //    AcceptParsedDocument(null);
+        //    if (NavigatePanelNode != null) NavigatePanelNode.Update();
+        //}
 
         /// <summary>
         /// Accdept new Parsed Document for this Verilog File
         /// </summary>
         /// <param name="newParsedDocument"></param>
-        public override void AcceptParsedDocument(ParsedDocument? newParsedDocument)
+        public override async Task AcceptParsedDocumentAsync(ParsedDocument? newParsedDocument)
         {
             if (!Dispatcher.UIThread.CheckAccess()) System.Diagnostics.Debugger.Break();
 
-            lock (this) { 
             
 
-                ParsedDocument? oldParsedDocument = ParsedDocument;
-                if (oldParsedDocument == newParsedDocument) return;
+            ParsedDocument? oldParsedDocument = ParsedDocument;
+            if (oldParsedDocument == newParsedDocument) return;
 
-                // swap ParsedDocument
-                ParsedDocument = newParsedDocument;
+            // swap ParsedDocument
+            ParsedDocument = newParsedDocument;
 
-                if (VerilogParsedDocument == null)
-                {
-                    Update();
-                    return;
-                }
-                if(VerilogParsedDocument.CodeDocument != null && CodeDocument != null) CodeDocument.CopyColorMarkFrom(VerilogParsedDocument.CodeDocument);
-
-                // Register New Building Block
-                if (VerilogParsedDocument.Root != null)
-                {
-                    foreach (BuildingBlock buildingBlock in VerilogParsedDocument.Root.BuildingBlocks.Values)
-                    {
-                        //if (ProjectProperty.HasRegisteredBuildingBlock(buildingBlock.Name))
-                        //{   // swap building block
-                        //    BuildingBlock? module = buildingBlock as Module;
-                        //    if (module == null) continue;
-
-                        //    BuildingBlock? registeredModule = ProjectProperty.GetBuildingBlock(module.Name) as Module;
-                        //    if (registeredModule == null) continue;
-                        //    if (registeredModule.File == null) continue;
-                        //    if (registeredModule.File.RelativePath == module.File.RelativePath) continue;
-
-                        //    continue;
-                        //}
-
-                        // register new parsedDocument
-                        ProjectProperty.RegisterBuildingBlock(buildingBlock.Name, buildingBlock, this);
-                    }
-                }
-
-                Verilog.ParsedDocument? vParsedDocument = ParsedDocument as Verilog.ParsedDocument;
-                if (vParsedDocument != null)
-                {
-                    ReparseRequested = vParsedDocument.ReparseRequested;
-                }
-
-
-                updateIncludeFiles(VerilogParsedDocument, Items);
-
-                Update();
-
-                // update Navigate panel node visual for this item
-                NavigatePanelNode.UpdateVisual();
-
-                //Task.Run(
-                //    async () =>
-                //    {
-                //        try
-                //        {
-                //            await CreateCashe();
-                //        }
-                //        catch (Exception ex)
-                //        {
-                //            System.Diagnostics.Debugger.Break();
-                //            Controller.AppendLog(ex.Message, Avalonia.Media.Colors.Red);
-                //        }
-                //    }
-                //);
+            if (VerilogParsedDocument == null)
+            {
+                await UpdateAsync();
+                return;
             }
+            if(VerilogParsedDocument.CodeDocument != null && CodeDocument != null) CodeDocument.CopyColorMarkFrom(VerilogParsedDocument.CodeDocument);
+
+            // Register New Building Block
+            if (VerilogParsedDocument.Root != null)
+            {
+                foreach (BuildingBlock buildingBlock in VerilogParsedDocument.Root.BuildingBlocks.Values)
+                {
+                    //if (ProjectProperty.HasRegisteredBuildingBlock(buildingBlock.Name))
+                    //{   // swap building block
+                    //    BuildingBlock? module = buildingBlock as Module;
+                    //    if (module == null) continue;
+
+                    //    BuildingBlock? registeredModule = ProjectProperty.GetBuildingBlock(module.Name) as Module;
+                    //    if (registeredModule == null) continue;
+                    //    if (registeredModule.File == null) continue;
+                    //    if (registeredModule.File.RelativePath == module.File.RelativePath) continue;
+
+                    //    continue;
+                    //}
+
+                    // register new parsedDocument
+                    ProjectProperty.RegisterBuildingBlock(buildingBlock.Name, buildingBlock, this);
+                }
+            }
+
+            Verilog.ParsedDocument? vParsedDocument = ParsedDocument as Verilog.ParsedDocument;
+            if (vParsedDocument != null)
+            {
+                ReparseRequested = vParsedDocument.ReparseRequested;
+            }
+
+
+            updateIncludeFiles(VerilogParsedDocument, Items);
+
+            await UpdateAsync();
+
+            // update Navigate panel node visual for this item
+            NavigatePanelNode.UpdateVisual();
+
+            //Task.Run(
+            //    async () =>
+            //    {
+            //        try
+            //        {
+            //            await CreateCashe();
+            //        }
+            //        catch (Exception ex)
+            //        {
+            //            System.Diagnostics.Debugger.Break();
+            //            Controller.AppendLog(ex.Message, Avalonia.Media.Colors.Red);
+            //        }
+            //    }
+            //);
 
         }
 
@@ -260,36 +290,6 @@ namespace pluginVerilog.Data
         public SemaphoreSlim BaseParseSemapho = new SemaphoreSlim(1,1);
 
 
-        public override void LoadFormFile()
-        {
-            loadDocumentFromFile();
-            AcceptParsedDocument(null);
-            if (NavigatePanelNode != null) NavigatePanelNode.Update();
-        }
-
-        private void loadDocumentFromFile()
-        {
-            try
-            {
-                if (document == null) document = new CodeEditor.CodeDocument(this);
-                using (System.IO.StreamReader sr = new System.IO.StreamReader(Project.GetAbsolutePath(RelativePath)))
-                {
-                    loadedFileLastWriteTime = System.IO.File.GetLastWriteTime(AbsolutePath);
-
-                    string text = sr.ReadToEnd();
-                    document.Replace(0, document.Length, 0, text);
-                    document.ClearHistory();
-                    document.Clean();
-                }
-            }
-            catch (Exception e)
-            {
-                document = null;
-                Console.Error.WriteLine("**error VerilogFile.loadDocumentFromFile");
-                Console.Error.WriteLine("* " + AbsolutePath);
-                Console.Error.WriteLine("* " + e.Message);
-            }
-        }
 
         private ConcurrentDictionary<string, System.WeakReference<ParsedDocument>> instancedParsedDocumentRefs = new ConcurrentDictionary<string, WeakReference<ParsedDocument>>();
 
@@ -421,13 +421,16 @@ namespace pluginVerilog.Data
         }
 
         // update sub-items from ParsedDocument
-        public override void Update()
+        public override async Task UpdateAsync()
         {
             //if (!Dispatcher.UIThread.CheckAccess())
             //{
             //    throw new Exception();
             //}
-            VerilogCommon.Updater.Update(this);
+            await Dispatcher.UIThread.InvokeAsync(
+                async () => { await VerilogCommon.Updater.UpdateAsync(this); }
+            );
+            
             NavigatePanelNode.UpdateVisual();
 
             Dispatcher.UIThread.Post(
@@ -448,24 +451,10 @@ namespace pluginVerilog.Data
                     }
                 })
             );
+        }
 
-        }
-        public new async Task UpdateAsync()
-        {
-            if (Dispatcher.UIThread.CheckAccess())
-            {
-                Update();
-            }
-            else
-            {
-                await Dispatcher.UIThread.InvokeAsync(
-                    () =>
-                    {
-                        Update();
-                    }
-                );
-            }
-        }
+
+
 
         // Auto Complete Handler
 

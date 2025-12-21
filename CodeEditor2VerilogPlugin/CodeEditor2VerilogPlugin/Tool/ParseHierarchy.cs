@@ -232,12 +232,11 @@ namespace pluginVerilog.Tool
                 if (parser.ParsedDocument != null)
                 {
                     await Dispatcher.UIThread.InvokeAsync(
-                        async () =>
-                        {
-                            verilogFile.AcceptParsedDocument(parser.ParsedDocument);
-                            await verilogFile.UpdateAsync();
-                        }
-                    );
+                        async () => { await verilogFile.AcceptParsedDocumentAsync(parser.ParsedDocument); }
+                        );
+
+                    
+                    await verilogFile.UpdateAsync();
                 }
             }
 
@@ -307,13 +306,8 @@ namespace pluginVerilog.Tool
             await parser.ParseAsync();
             if (parser.ParsedDocument != null)
             {
-                await Dispatcher.UIThread.InvokeAsync(
-                    async () =>
-                    {
-                        verilogFile.AcceptParsedDocument(parser.ParsedDocument);
-                        await verilogFile.UpdateAsync();
-                    }
-                );
+                await verilogFile.AcceptParsedDocumentAsync(parser.ParsedDocument);
+                await verilogFile.UpdateAsync();
             }
         }
 

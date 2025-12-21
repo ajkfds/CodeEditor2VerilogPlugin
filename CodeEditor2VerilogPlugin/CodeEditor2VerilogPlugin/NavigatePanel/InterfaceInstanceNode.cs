@@ -83,12 +83,12 @@ namespace pluginVerilog.NavigatePanel
                 base.OnSelected(); // update context menu
                 if (ModuleInstance == null)
                 {
-                    Update();
+                    await UpdateAsync();
                     return;
                 }
 
 
-                CodeEditor2.Controller.CodeEditor.SetTextFile(ModuleInstance, true);
+                await CodeEditor2.Controller.CodeEditor.SetTextFileAsync(ModuleInstance, true);
 
                 UpdateVisual();
 
@@ -121,10 +121,10 @@ namespace pluginVerilog.NavigatePanel
         }
 
 
-        public override void Update()
+        public override async Task UpdateAsync()
         {
             if (VerilogModuleInstance == null) return;
-            VerilogModuleInstance.Update();
+            await VerilogModuleInstance.UpdateAsync();
 
 
             UpdateVisual();

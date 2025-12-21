@@ -307,12 +307,12 @@ namespace pluginVerilog.Verilog.ModuleItems
                                 if (baseParser.ParsedDocument != null)
                                 {
                                     await Dispatcher.UIThread.InvokeAsync(
-                                        () =>
+                                        async () =>
                                         {
                                             if (word.RootParsedDocument.File != null) word.RootParsedDocument.File.Items.Add(instance.Name, instance);
                                             Verilog.ParsedDocument vParsedDocument = (Verilog.ParsedDocument)baseParser.ParsedDocument;
                                             vParsedDocument.ReparseRequested = true;
-                                            instance.AcceptParsedDocument(baseParser.ParsedDocument);
+                                            await instance.AcceptParsedDocumentAsync(baseParser.ParsedDocument);
                                         }
                                     );
                                 }

@@ -85,9 +85,9 @@ namespace pluginVerilog.Data
         }
 
         // update sub-items from ParsedDocument
-        public override void Update()
+        public override async System.Threading.Tasks.Task UpdateAsync()
         {
-            VerilogCommon.Updater.Update(this);
+            await VerilogCommon.Updater.UpdateAsync(this);
         }
         // read text document from file
         private bool readFromFile()
@@ -151,14 +151,14 @@ namespace pluginVerilog.Data
             }
         }
 
-        public override void AcceptParsedDocument(CodeEditor2.CodeEditor.ParsedDocument newParsedDocument)
+        public override async System.Threading.Tasks.Task AcceptParsedDocumentAsync(CodeEditor2.CodeEditor.ParsedDocument newParsedDocument)
         {
             Data.IVerilogRelatedFile? parentFile = Parent as Data.IVerilogRelatedFile;
             if (parentFile == null) return;
 
-            parentFile.AcceptParsedDocument(newParsedDocument);
+            await parentFile.AcceptParsedDocumentAsync(newParsedDocument);
 
-            Update();
+            await UpdateAsync();
         }
 
         protected override CodeEditor2.NavigatePanel.NavigatePanelNode CreateNode()
