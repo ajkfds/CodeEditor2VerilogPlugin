@@ -368,21 +368,15 @@ namespace pluginVerilog.Data
             await base.UpdateAsync();
 
             await Dispatcher.UIThread.InvokeAsync(
-                async () => { await VerilogCommon.Updater.UpdateAsync(this);  }
-                );
-            
-            NavigatePanelNode.UpdateVisual();
-
-            Dispatcher.UIThread.Post(
-                new Action(() =>
-                {
+                async () => { 
+                    await VerilogCommon.Updater.UpdateAsync(this);
+                    NavigatePanelNode.UpdateVisual();
                     if (CodeEditor2.Controller.NavigatePanel.GetSelectedFile() == this)
                     {
                         CodeEditor2.Controller.CodeEditor.Refresh();
-                        if(ParsedDocument!=null) CodeEditor2.Controller.MessageView.Update(ParsedDocument);
+                        if (ParsedDocument != null) CodeEditor2.Controller.MessageView.Update(ParsedDocument);
                     }
-                })
-            );
+                });
         }
 
         protected Dictionary<WeakReference<CodeEditor2.Data.Item?>, WeakReference<CodeEditor2.NavigatePanel.NavigatePanelNode>> nodeRefDictionary

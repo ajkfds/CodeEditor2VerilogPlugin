@@ -131,23 +131,11 @@ namespace pluginVerilog.NavigatePanel
         }
         public override void UpdateVisual()
         {
-            Dispatcher.UIThread.Post(() =>
+            if (!Dispatcher.UIThread.CheckAccess())
             {
-                try
-                {
-                    _updateVisual();
-                }
-                catch (Exception ex)
-                {
-                    if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
-                    CodeEditor2.Controller.AppendLog("#Exception " + ex.Message, Avalonia.Media.Colors.Red);
-                    throw;
-                }
-            });
-        }
+                if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+            }
 
-        public void _updateVisual()
-        {
             Data.VerilogModuleInstance instance = Item as Data.VerilogModuleInstance;
             Text = instance.Name + " - " + instance.ModuleName;
 

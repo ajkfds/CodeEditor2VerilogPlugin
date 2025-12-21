@@ -207,6 +207,7 @@ namespace pluginVerilog.Verilog
             if (retVal != null) retVal = retVal.Clone(function.Name);
 
             function.ReturnVariable = retVal;
+            if (function.ReturnVariable != null && !word.Prototype) function.ReturnVariable.Defined = true;
 
             if (!word.Active)
             {

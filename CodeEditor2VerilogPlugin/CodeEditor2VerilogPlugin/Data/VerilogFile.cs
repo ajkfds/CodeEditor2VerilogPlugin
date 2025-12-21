@@ -429,28 +429,15 @@ namespace pluginVerilog.Data
             //    throw new Exception();
             //}
             await Dispatcher.UIThread.InvokeAsync(
-                async () => { await VerilogCommon.Updater.UpdateAsync(this); }
-            );
-            
-            NavigatePanelNode.UpdateVisual();
-
-            Dispatcher.UIThread.Post(
-                new Action(() =>
-                {
-                    try
+                async () => { 
+                    await VerilogCommon.Updater.UpdateAsync(this);
+                    NavigatePanelNode.UpdateVisual();
+                    if (CodeEditor2.Controller.NavigatePanel.GetSelectedFile() == this)
                     {
-                        if (CodeEditor2.Controller.NavigatePanel.GetSelectedFile() == this)
-                        {
-                            CodeEditor2.Controller.CodeEditor.Refresh();
-                            if (ParsedDocument != null) CodeEditor2.Controller.MessageView.Update(ParsedDocument);
-                        }
+                        CodeEditor2.Controller.CodeEditor.Refresh();
+                        if (ParsedDocument != null) CodeEditor2.Controller.MessageView.Update(ParsedDocument);
                     }
-                    catch (Exception ex)
-                    {
-                        if(System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
-                        CodeEditor2.Controller.AppendLog("#Exception " + ex.Message, Colors.Red);
-                    }
-                })
+                }
             );
         }
 
