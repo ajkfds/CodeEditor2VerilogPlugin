@@ -213,7 +213,8 @@ namespace pluginVerilog.Tool
 
             bool doParse = false;
             if (verilogFile.ReparseRequested) doParse = true;
-//            if (verilogFile.VerilogParsedDocument != null && verilogFile.VerilogParsedDocument.ErrorCount > 0) doParse = true;
+            //            if (verilogFile.VerilogParsedDocument != null && verilogFile.VerilogParsedDocument.ErrorCount > 0) doParse = true;
+            if (parseMode == ParseMode.ForceAllFiles) doParse = true;
 
             if (doParse)
             {
@@ -306,8 +307,13 @@ namespace pluginVerilog.Tool
             await parser.ParseAsync();
             if (parser.ParsedDocument != null)
             {
-                await verilogFile.AcceptParsedDocumentAsync(parser.ParsedDocument);
-                await verilogFile.UpdateAsync();
+                await Dispatcher.UIThread.InvokeAsync(
+                    async () =>
+                    {
+                        await verilogFile.AcceptParsedDocumentAsync(parser.ParsedDocument);
+                        await verilogFile.UpdateAsync();
+
+                    });
             }
         }
 

@@ -98,17 +98,12 @@ namespace pluginVerilog.NavigatePanel
             await VerilogFile.UpdateAsync(); // UpdateVisual called in this method on the  UI thread
         }
 
-
-        public override void UpdateVisual()
+        public void UpdateSubNodes()
         {
             if (!Dispatcher.UIThread.CheckAccess())
             {
                 if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
             }
-
-            string text = "-";
-            if (FileItem != null) text=FileItem.Name;
-            Text = text;
 
             List<CodeEditor2.NavigatePanel.NavigatePanelNode> newNodes = new List<CodeEditor2.NavigatePanel.NavigatePanelNode>();
 
@@ -149,13 +144,27 @@ namespace pluginVerilog.NavigatePanel
 
                     int index = newNodes.IndexOf(node);
                     Nodes.Insert(index, node);
+                    node.UpdateVisual();
                 }
             }
+        }
+
+        public override void UpdateVisual()
+        {
+            if (!Dispatcher.UIThread.CheckAccess())
+            {
+                if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+            }
+
+            string text = "-";
+            if (FileItem != null) text=FileItem.Name;
+            Text = text;
 
             if (VerilogFile == null) return;
 
             Image = GetIcon(VerilogFile);
 
+            UpdateSubNodes();
         }
 
         public static IImage? GetIcon(IVerilogRelatedFile verilogRelatedFile)

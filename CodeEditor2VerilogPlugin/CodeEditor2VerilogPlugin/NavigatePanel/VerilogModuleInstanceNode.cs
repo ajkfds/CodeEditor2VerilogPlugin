@@ -91,26 +91,9 @@ namespace pluginVerilog.NavigatePanel
                 await CodeEditor2.Controller.CodeEditor.SetTextFileAsync(ModuleInstance, true);
                 UpdateVisual();
 
-                //            Update();
-
-                //            foreach (NavigatePanelNode node in Nodes)
-                //            {
-                ////                if (node is VerilogModuleInstanceNode)
-                ////                {
-                ////                    ((VerilogModuleInstanceNode)node).Update();
-                ////                }
-                //                node.UpdateVisual();
-                //            }
                 if (CodeEditor2.Global.StopParse) return;
 
-                //if (ModuleInstance.ParseValid & !ModuleInstance.ReparseRequested)
-                //{
-                //    // skip parse
-                //}
-                //else
-                //{
                 await Tool.ParseHierarchy.ParseAsync(ModuleInstance, Tool.ParseHierarchy.ParseMode.SearchReparseReqestedTree);
-                //}
             }
             catch (Exception ex)
             {
@@ -126,21 +109,12 @@ namespace pluginVerilog.NavigatePanel
             await VerilogModuleInstance.UpdateAsync(); // UpdateVisual called in this method on the  UI thread
         }
 
-        public override void UpdateVisual()
+
+        public void UpdateSubNodes()
         {
             if (!Dispatcher.UIThread.CheckAccess())
             {
                 if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
-            }
-
-            if (Item == null)
-            {
-                Text = "null";
-            }
-            else
-            {
-                Data.VerilogModuleInstance instance = (Data.VerilogModuleInstance)Item;
-                Text = instance.Name + " - " + instance.ModuleName;
             }
 
             List<CodeEditor2.Data.Item> targetDataItems = new List<CodeEditor2.Data.Item>();
@@ -189,15 +163,34 @@ namespace pluginVerilog.NavigatePanel
                     if (addDataItems.Contains(item))
                     {
                         Nodes.Insert(treeIndex, item.NavigatePanelNode);
+                        item.NavigatePanelNode.UpdateVisual();
                     }
                     treeIndex++;
                 }
+            }
+        }
+        public override void UpdateVisual()
+        {
+            if (!Dispatcher.UIThread.CheckAccess())
+            {
+                if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+            }
+
+            if (Item == null)
+            {
+                Text = "null";
+            }
+            else
+            {
+                Data.VerilogModuleInstance instance = (Data.VerilogModuleInstance)Item;
+                Text = instance.Name + " - " + instance.ModuleName;
             }
 
             if (VerilogFile == null) return;
 
             if(VerilogModuleInstance != null) Image = VerilogFileNode.GetIcon(VerilogModuleInstance);
 
+            UpdateSubNodes();
         }
 
     }
