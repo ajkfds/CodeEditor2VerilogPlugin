@@ -24,7 +24,7 @@ namespace pluginVerilog.Verilog.ModuleItems
         // Item
         string Name { get; init; }
         Attribute? Attribute { get; set; }
-        WordReference DefinitionReference { get; init; }
+        WordReference? DefinitionReference { get; init; }
 
         CodeEditor2.Data.Project Project { get; }
 

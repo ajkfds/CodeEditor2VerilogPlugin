@@ -66,7 +66,7 @@ namespace pluginVerilog.Verilog.ModuleItems
         */
         public required string SourceName{ get; init; }
         public required string SourceProjectName { get;init; }
-        public string ModuleNameComment { get; set; }
+        public string? ModuleNameComment { get; set; }
         public required Dictionary<string, Expressions.Expression> ParameterOverrides { get; init; }
             
         public Dictionary<string, Expressions.Expression> PortConnection { get; set; } = new Dictionary<string, Expressions.Expression>();
