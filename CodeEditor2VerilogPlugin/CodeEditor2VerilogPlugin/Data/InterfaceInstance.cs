@@ -332,7 +332,6 @@ namespace pluginVerilog.Data
         protected override CodeEditor2.NavigatePanel.NavigatePanelNode CreateNode()
         {
             NavigatePanel.InterfaceInstanceNode node = new NavigatePanel.InterfaceInstanceNode(this);
-            nodeRef = new WeakReference<CodeEditor2.NavigatePanel.NavigatePanelNode>(node);
             return node;
         }
 

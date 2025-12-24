@@ -76,6 +76,8 @@ namespace pluginVerilog.NavigatePanel
         {
             try
             {
+                System.Diagnostics.Debug.Print("##MI " + Text + " " + Indent.ToString());
+
                 base.OnSelected(); // update context enu
 
                 if (ModuleInstance == null)

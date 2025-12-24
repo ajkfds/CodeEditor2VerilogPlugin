@@ -348,12 +348,6 @@ namespace pluginVerilog.Data
             }
         }
 
-        protected override CodeEditor2.NavigatePanel.NavigatePanelNode CreateNode()
-        {
-            NavigatePanel.VerilogModuleInstanceNode node = new NavigatePanel.VerilogModuleInstanceNode(this);
-            nodeRef = new WeakReference<CodeEditor2.NavigatePanel.NavigatePanelNode>(node);
-            return node;
-        }
 
         public override DocumentParser CreateDocumentParser(DocumentParser.ParseModeEnum parseMode, System.Threading.CancellationToken? token)
         {
@@ -379,69 +373,25 @@ namespace pluginVerilog.Data
                 });
         }
 
-        protected Dictionary<WeakReference<CodeEditor2.Data.Item?>, WeakReference<CodeEditor2.NavigatePanel.NavigatePanelNode>> nodeRefDictionary
-            = new Dictionary<WeakReference<Item?>, WeakReference<CodeEditor2.NavigatePanel.NavigatePanelNode>>();
+
+        protected override CodeEditor2.NavigatePanel.NavigatePanelNode CreateNode()
+        {
+            NavigatePanel.VerilogModuleInstanceNode node = new NavigatePanel.VerilogModuleInstanceNode(this);
+            return node;
+        }
+
+
+        CodeEditor2.NavigatePanel.NavigatePanelNode? node = null;
         public override CodeEditor2.NavigatePanel.NavigatePanelNode NavigatePanelNode
         {
             get
             {
-                CodeEditor2.NavigatePanel.NavigatePanelNode? node = null;
-                List<WeakReference<CodeEditor2.Data.Item?>> disposeRefs = new List<WeakReference<Item?>>();
-
-                // search parent based table
-                foreach (var pair in nodeRefDictionary)
-                {
-                    var parentRef = pair.Key;
-                    if (!parentRef.TryGetTarget(out var parent))
-                    {
-                        disposeRefs.Add(parentRef);
-                        continue;
-                    }
-                    if (parent != Parent) continue;
-
-                    var nodeRef = pair.Value;
-                    if (nodeRef.TryGetTarget(out node)) break;
-                }
-
-                // remove unconnected weakRefs
-                foreach(var disposeRef in disposeRefs)
-                {
-                    nodeRefDictionary.Remove(disposeRef);
-                }
-
-                if(node == null)
-                {
-                    node = CreateNode();
-                    if (node == null) throw new Exception();
-
-                    WeakReference<CodeEditor2.Data.Item?> parent = new WeakReference<Item?>(Parent);
-                    nodeRefDictionary.Add(parent, new WeakReference<CodeEditor2.NavigatePanel.NavigatePanelNode>(node));
-                }
-
+                if (node == null) node = CreateNode();
                 return node;
             }
             protected set
             {
-                WeakReference<CodeEditor2.Data.Item?>? indexRef = null;
-
-                // search parent based table
-                foreach (var pair in nodeRefDictionary)
-                {
-                    var parentRef = pair.Key;
-                    if (!parentRef.TryGetTarget(out var parent))
-                    {
-                        continue;
-                    }
-                    if (parent != Parent) continue;
-                    indexRef = parentRef;
-                }
-
-                if(indexRef != null)
-                {
-                    nodeRefDictionary.Remove(indexRef);
-                }
-                WeakReference<CodeEditor2.Data.Item?> parentNewRef = new WeakReference<Item?>(Parent);
-                nodeRefDictionary.Add(parentNewRef, new WeakReference<CodeEditor2.NavigatePanel.NavigatePanelNode>(value));
+                node = value;
             }
         }
 
