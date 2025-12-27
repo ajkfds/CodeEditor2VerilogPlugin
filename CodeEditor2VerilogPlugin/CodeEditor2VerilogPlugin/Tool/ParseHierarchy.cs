@@ -95,6 +95,7 @@ namespace pluginVerilog.Tool
             var reparseTargetFiles = new ConcurrentStack<CodeEditor2.Data.TextFile>();
             var completeIds = new ConcurrentDictionary<string, bool>();
             var firstHierTaskCount = new ConcurrentStack<bool>();
+            var waitTaskCount = new ConcurrentStack<bool>();
             var signal = new SemaphoreSlim(0); // starter
             int workerCount = Environment.ProcessorCount;
 
@@ -113,7 +114,9 @@ namespace pluginVerilog.Tool
                     while (true)
                     {
                         token?.ThrowIfCancellationRequested();
+                        waitTaskCount.Push(true);
                         await signal.WaitAsync(); // wait fist task
+                        waitTaskCount.TryPop(out _);
 
                         if (workQueue.TryDequeue(out var newTask))
                         {
@@ -129,7 +132,7 @@ namespace pluginVerilog.Tool
                                 }
                             }
                         }
-                        if (completeIds.Count > 0 && workQueue.IsEmpty)
+                        if (completeIds.Count > 0 && workQueue.IsEmpty && waitTaskCount.Count == workerCount-1)
                         {
                             signal.Release(workerCount);
                             break;
@@ -213,7 +216,7 @@ namespace pluginVerilog.Tool
 
             bool doParse = false;
             if (verilogFile.ReparseRequested) doParse = true;
-            //            if (verilogFile.VerilogParsedDocument != null && verilogFile.VerilogParsedDocument.ErrorCount > 0) doParse = true;
+            if (verilogFile.VerilogParsedDocument != null && verilogFile.VerilogParsedDocument.ErrorCount > 0) doParse = true;
             if (parseMode == ParseMode.ForceAllFiles) doParse = true;
 
             if (doParse)
@@ -243,7 +246,7 @@ namespace pluginVerilog.Tool
 
             bool needReparse = false;
             if (verilogFile.ReparseRequested) needReparse = true;
-//            if (verilogFile.VerilogParsedDocument != null && verilogFile.VerilogParsedDocument.ErrorCount > 0) needReparse = true;
+            if (verilogFile.VerilogParsedDocument != null && verilogFile.VerilogParsedDocument.ErrorCount > 0) needReparse = true;
             if (needReparse) reparseTargetFiles.Push((CodeEditor2.Data.TextFile)verilogFile);
 
             List<Item> items = new List<Item>();
