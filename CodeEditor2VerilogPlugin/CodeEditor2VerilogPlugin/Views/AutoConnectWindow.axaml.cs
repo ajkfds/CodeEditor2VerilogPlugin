@@ -64,12 +64,13 @@ namespace pluginVerilog.Views
                handledEventsToo: true);
         }
 
-        ModuleInstantiation moduleInstantiation;
+        ModuleInstantiation? moduleInstantiation;
         public bool Ready = false;
         public bool Accept = false;
 
         public void Complete()
         {
+            if (moduleInstantiation == null) return;
             Accept = true;
 
 
