@@ -10,7 +10,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
     {
         public static void ParsePreComment(WordScanner word, NameSpace nameSpace, Verilog.DataObjects.Port? port, ref string? portGroup)
         {
-            if (word.Prototype) return;
+            //if (word.Prototype) return;
             string commentText = word.GetPreviousComment();
             if (!commentText.Contains("@")) return;
             var comment = word.GetPreviousCommentScanner();
@@ -38,7 +38,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
         /// </summary>
         public static void ParsePostComment(WordScanner word, NameSpace nameSpace, Verilog.DataObjects.Port? port)
         {
-            if (word.Prototype) return;
+            //if (word.Prototype) return;
 
             string commentText = word.GetPreviousComment();
             if (!commentText.Contains("@")) return;
