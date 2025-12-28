@@ -136,11 +136,6 @@ namespace pluginVerilog.Verilog.Snippets
                     Avalonia.Controls.Window window = CodeEditor2.Controller.GetMainWindow();
                     if (autoConnectWindow.Ready)
                     {
-                        if(autoConnectWindow.Owner != null)
-                        {
-                            autoConnectWindow.Width = window.Width * 0.8;
-                            autoConnectWindow.Height = window.Height * 0.8;
-                        }
                         await autoConnectWindow.ShowDialog(window);
                     }
                     if (!autoConnectWindow.Accept) return;

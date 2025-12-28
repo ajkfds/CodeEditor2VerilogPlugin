@@ -25,7 +25,7 @@ namespace pluginVerilog.Verilog.Expressions
 
         public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
-            label.AppendText(NameSpaceText, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Variable));
+            //label.AppendText(NameSpaceText, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Variable));
 
             if(DataObject is Reg || DataObject is Bit || DataObject is Logic)
             {

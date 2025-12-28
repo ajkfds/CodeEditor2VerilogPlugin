@@ -1,4 +1,5 @@
 using AjkAvaloniaLibs.Controls;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
@@ -85,6 +86,15 @@ namespace pluginVerilog.Views
             {
                 ListBox0.SelectedIndex = 0;
             }
+
+            Loaded += AutoConnectWindow_Loaded;
+        }
+
+        private void AutoConnectWindow_Loaded(object? sender, RoutedEventArgs e)
+        {
+            Position = new PixelPoint((int)(Position.X + Width * 0.1), (int)(Position.Y + Height * 0.1));
+            Width = Width * 0.8;
+            Height = Height * 0.8;
         }
 
         ModuleInstantiation? moduleInstantiation;
@@ -178,7 +188,6 @@ namespace pluginVerilog.Views
 
                 HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Stretch;
                 Background = new SolidColorBrush(Avalonia.Media.Colors.Transparent);
-                if (Expression != null) target.AppendText(Expression.CreateString());
                 cantidates = GetCantidates();
 
                 UpdateVisual();
