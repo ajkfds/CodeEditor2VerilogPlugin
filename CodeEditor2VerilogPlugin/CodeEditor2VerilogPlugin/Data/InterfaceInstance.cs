@@ -309,7 +309,6 @@ namespace pluginVerilog.Data
 
 
 
-        [Newtonsoft.Json.JsonIgnore]
         public ProjectProperty ProjectProperty
         {
             get

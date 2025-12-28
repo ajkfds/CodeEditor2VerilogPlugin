@@ -15,7 +15,7 @@ namespace pluginVerilog.Verilog.Expressions
     public class DataObjectReference : Primary
     {
         protected DataObjectReference() { }
-        public string VariableName { get; init; }
+        public required string VariableName { get; init; }
         public RangeExpression? RangeExpression { get; protected set; }
         public List<Expression> Dimensions = new List<Expression>();
         public DataObjects.DataObject? DataObject = null;

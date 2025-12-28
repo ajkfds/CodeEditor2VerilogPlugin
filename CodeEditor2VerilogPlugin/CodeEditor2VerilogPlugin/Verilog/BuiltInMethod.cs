@@ -38,19 +38,14 @@ namespace pluginVerilog.Verilog
         }
 
         private Dictionary<string, DataObjects.Port> ports = new Dictionary<string, DataObjects.Port>();
-        [Newtonsoft.Json.JsonIgnore]
         public Dictionary<string, DataObjects.Port> Ports { get { return ports; } }
         private List<DataObjects.Port> portsList = new List<DataObjects.Port>();
-        [Newtonsoft.Json.JsonIgnore]
         public List<DataObjects.Port> PortsList { get { return portsList; } }
 
-        [Newtonsoft.Json.JsonIgnore]
         public required string Name { init; get; }
 
-        [Newtonsoft.Json.JsonIgnore]
         public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Identifier; } }
 
-        [Newtonsoft.Json.JsonIgnore]
         public required DataObjects.Variables.Variable? ReturnVariable { init; get; }
 
         NamedElements INamedElement.NamedElements { get; } = new NamedElements();

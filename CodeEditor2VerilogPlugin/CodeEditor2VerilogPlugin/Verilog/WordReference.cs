@@ -29,7 +29,7 @@ namespace pluginVerilog.Verilog
             return wRef;
         }
 
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public int Index
         {
             get
@@ -77,14 +77,14 @@ namespace pluginVerilog.Verilog
             return ret;
         }
 
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public CodeEditor2.CodeEditor.ParsedDocument? ParsedDocument {
             get
             {
                 return indexReference.ParsedDocument;
             }
         }
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public pluginVerilog.CodeEditor.CodeDocument? Document
         {
             get

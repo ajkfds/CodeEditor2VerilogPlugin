@@ -15,8 +15,23 @@ namespace pluginVerilog.Verilog.Expressions
         //{
         //    return ParseCreateConcatenationOrMultipleConcatenation(word, nameSpace, false);
         //}
+        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        {
+            label.AppendText("{ ");
+            bool first = true;
+            foreach (Expression expression in Expressions)
+            {
+                if (!first)
+                {
+                    label.AppendText(", ");
+                }
+                label.AppendLabel(expression.GetLabel());
+                first = false;
+            }
+            label.AppendText(" }");
+        }
 
-        public static Primary ParseCreateConcatenationOrMultipleConcatenation(WordScanner word, NameSpace nameSpace, bool lValue,bool acceptImplicitNet)
+        public static Primary? ParseCreateConcatenationOrMultipleConcatenation(WordScanner word, NameSpace nameSpace, bool lValue,bool acceptImplicitNet)
         {
             WordReference reference = word.GetReference();
             word.MoveNext(); // {
@@ -127,13 +142,22 @@ namespace pluginVerilog.Verilog.Expressions
     {
         protected MultipleConcatenation() { }
 
-        public Expression MultipleExpression { get; protected set; }
+        public Expression? MultipleExpression { get; protected set; }
         public Expression? Expression { get; protected set; }
 
-        public static MultipleConcatenation ParseCreate(WordScanner word, NameSpace nameSpace, Expression multipleExpression,WordReference reference)
+        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
-            //word.MoveNext(); // {
-
+            label.AppendText("{ ");
+            if(MultipleExpression!=null) label.AppendLabel(MultipleExpression.GetLabel());
+            if (Expression != null)
+            {
+                label.AppendText(" ");
+                label.AppendLabel(Expression.GetLabel());
+            }
+            label.AppendText(" }");
+        }
+        public static MultipleConcatenation? ParseCreate(WordScanner word, NameSpace nameSpace, Expression multipleExpression,WordReference reference)
+        {
             Expression? exp = Concatenation.ParseCreate(word, nameSpace);
 
             if (word.Eof || word.GetCharAt(0) != '}')
@@ -157,7 +181,6 @@ namespace pluginVerilog.Verilog.Expressions
                 {
                     multipleConcatenation.Constant = true;
                 }
-
             }
 
             word.MoveNext(); // }

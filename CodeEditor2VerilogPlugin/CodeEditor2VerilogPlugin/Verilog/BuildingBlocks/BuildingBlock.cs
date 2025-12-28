@@ -27,7 +27,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
         public virtual string FileId { get; protected set; }
 
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public WordReference NameReference;
         public List<string> PortParameterNameList { get; } = new List<string>();
 
@@ -47,7 +47,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         public bool AnsiStylePortDefinition { get; set; } = false;
         public Net.NetTypeEnum DefaultNetType = Net.NetTypeEnum.Wire;
 
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public virtual Data.IVerilogRelatedFile File { get; init; }
 
 

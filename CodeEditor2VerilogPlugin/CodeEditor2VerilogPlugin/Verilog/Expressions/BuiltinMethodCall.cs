@@ -8,6 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using System.Text.Json.Serialization;
+
 
 namespace pluginVerilog.Verilog.Expressions
 {
@@ -21,7 +23,7 @@ namespace pluginVerilog.Verilog.Expressions
 //        public required NameSpace DefinedNameSpace { init; get; }
 
         public required BuiltInMethod BuiltInMethod { init; get; }
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public required ProjectProperty ProjectProperty { init; get; }
         //public Function? Function
         //{

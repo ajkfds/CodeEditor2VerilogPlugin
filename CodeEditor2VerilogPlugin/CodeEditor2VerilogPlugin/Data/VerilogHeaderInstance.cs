@@ -14,6 +14,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static CodeEditor2.Controller;
+using System.Text.Json.Serialization;
 
 namespace pluginVerilog.Data
 {
@@ -276,7 +277,7 @@ namespace pluginVerilog.Data
 
 
 
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public ProjectProperty ProjectProperty
         {
             get

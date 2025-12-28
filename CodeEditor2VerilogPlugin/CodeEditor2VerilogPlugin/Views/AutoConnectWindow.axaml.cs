@@ -7,6 +7,7 @@ using Avalonia.Styling;
 using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
 using DynamicData;
+using ExCSS;
 using pluginVerilog.Verilog;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
@@ -18,6 +19,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using Tmds.DBus.Protocol;
+using static pluginVerilog.CodeDrawStyle;
 using static pluginVerilog.Verilog.ModPort;
 
 namespace pluginVerilog.Views
@@ -33,8 +35,12 @@ namespace pluginVerilog.Views
         public AutoConnectWindow(ModuleInstantiation moduleInstantiation)
         {
             InitializeComponent();
+            FontSize = CodeEditor2.Controller.CodeEditor.FontSize + 2;
+
             this.moduleInstantiation = moduleInstantiation;
             HeaderTextBlock.Text = moduleInstantiation.SourceName + " " + moduleInstantiation.Name;
+            HeaderTextBlock.FontSize = FontSize;
+            BottomTextBlock.FontSize = FontSize;
 
             BuildingBlock? buildingBlock = moduleInstantiation.GetInstancedBuildingBlock();
             IPortNameSpace? portNameSpace = buildingBlock as IPortNameSpace;
@@ -43,8 +49,20 @@ namespace pluginVerilog.Views
                 return;
             }
 
+            string? portGroup = null;
+
             foreach (Verilog.DataObjects.Port port in portNameSpace.PortsList)
             {
+                if (port.PortGroupName != portGroup && portGroup != "")
+                {
+                    portGroup = port.PortGroupName;
+                    if (portGroup != null)
+                    {
+                        CommentItem commentItem = new CommentItem("// " + portGroup);
+                        commentItem.FontSize = FontSize;
+                        ListBox0.Items.Add(commentItem);
+                    }
+                }
                 ConnectionItem item;
                 if (!moduleInstantiation.PortConnection.ContainsKey(port.Name))
                 {
@@ -62,6 +80,11 @@ namespace pluginVerilog.Views
             ListBox0.AddHandler(KeyDownEvent, ListBox0_KeyDown,
                RoutingStrategies.Tunnel | RoutingStrategies.Bubble,
                handledEventsToo: true);
+
+            if(ListBox0.Items.Count > 0)
+            {
+                ListBox0.SelectedIndex = 0;
+            }
         }
 
         ModuleInstantiation? moduleInstantiation;
@@ -123,6 +146,23 @@ namespace pluginVerilog.Views
 
 
         List<(string, string?)> ConnectionList = new List<(string, string?)>();
+
+        public class CommentItem : AjkAvaloniaLibs.Controls.ListViewItem
+        {
+            public CommentItem(string comment) : base()
+            {
+                this.comment = comment;
+                UpdateVisual();
+            }
+            string comment;
+            public void UpdateVisual()
+            {
+                ColorLabel.AppendText(comment, Global.CodeDrawStyle.Color(ColorType.Comment));
+                TextBlock.Inlines?.Clear();
+                ColorLabel.AppendToTextBlock(TextBlock);
+            }
+            public AjkAvaloniaLibs.Controls.ColorLabel ColorLabel = new AjkAvaloniaLibs.Controls.ColorLabel();
+        }
         public class ConnectionItem : AjkAvaloniaLibs.Controls.ListViewItem
         {
             public ConnectionItem(Verilog.DataObjects.Port port, Verilog.Expressions.Expression? expression,BuildingBlock buildingBlock) : base()
@@ -156,7 +196,7 @@ namespace pluginVerilog.Views
             {
                 ColorLabel.Clear();
                 ColorLabel.AppendText(".");
-                ColorLabel.AppendText(Port.Name);
+                ColorLabel.AppendText(Port.Name, Global.CodeDrawStyle.Color(ColorType.Identifier));
                 ColorLabel.AppendText("(");
                 ColorLabel.AppendLabel(target);
                 ColorLabel.AppendText(")");

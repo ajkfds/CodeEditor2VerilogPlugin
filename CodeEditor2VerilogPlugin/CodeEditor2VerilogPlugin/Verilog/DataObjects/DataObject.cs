@@ -10,6 +10,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 
 namespace pluginVerilog.Verilog.DataObjects
 {
@@ -42,7 +43,7 @@ namespace pluginVerilog.Verilog.DataObjects
         //              + pos_covergroup
         //              + type_reference
         // 
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public virtual CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Normal; } }
 
         public bool CommentAnnotation_Discarded = false;
@@ -64,7 +65,7 @@ namespace pluginVerilog.Verilog.DataObjects
         }
 
         private WeakReference<NameSpace>? wr_DefinedNameSpace = null;
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public NameSpace? DefinedNameSpace
         {
             get
@@ -141,9 +142,9 @@ namespace pluginVerilog.Verilog.DataObjects
             throw new NotImplementedException();
         }
 
-//        [Newtonsoft.Json.JsonIgnore]
+//        [JsonIgnore]
         public required string Name { get; init; }
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public string Comment { set; get; } = "";
         public WordReference? DefinedReference { set; get; } = null;
         public IDataType? DataType;
@@ -153,13 +154,13 @@ namespace pluginVerilog.Verilog.DataObjects
                 return DataType?.BitWidth;
             }
         }
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public List<Arrays.UnPackedArray> UnpackedArrays { get; set; } = new List<Arrays.UnPackedArray>();
 
 
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public List<WordReference> UsedReferences { set; get; } = new List<WordReference>();
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public List<WordReference> AssignedReferences { set; get; } = new List<WordReference>();
         public int DisposedIndex = -1;
 

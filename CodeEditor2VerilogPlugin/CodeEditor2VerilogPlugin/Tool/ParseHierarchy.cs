@@ -104,6 +104,11 @@ namespace pluginVerilog.Tool
             firstHierTaskCount.Append(true);
             EnqueueWork(task, workQueue, completeIds, signal);
 
+            for(int i=0; i<workerCount; i++)
+            { // pend reparse first task
+                firstHierTaskCount.Append(false);
+            }
+
             // boot workers
             var workers = new Task[workerCount];
             for (int i = 0; i < workerCount; i++)
@@ -246,7 +251,7 @@ namespace pluginVerilog.Tool
 
             bool needReparse = false;
             if (verilogFile.ReparseRequested) needReparse = true;
-            if (verilogFile.VerilogParsedDocument != null && verilogFile.VerilogParsedDocument.ErrorCount > 0) needReparse = true;
+//            if (verilogFile.VerilogParsedDocument != null && verilogFile.VerilogParsedDocument.ErrorCount > 0) needReparse = true;
             if (needReparse) reparseTargetFiles.Push((CodeEditor2.Data.TextFile)verilogFile);
 
             List<Item> items = new List<Item>();

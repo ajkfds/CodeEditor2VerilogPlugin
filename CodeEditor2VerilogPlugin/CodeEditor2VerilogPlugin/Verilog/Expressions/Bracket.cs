@@ -10,12 +10,12 @@ namespace pluginVerilog.Verilog.Expressions
     {
         protected Bracket() { }
 
-        public Expression Expression { get; protected set; }
+        public Expression? Expression { get; protected set; }
 
         public override void DisposeSubReference(bool keepThisReference)
         {
             base.DisposeSubReference(keepThisReference);
-            Expression.DisposeSubReference(false);
+            if(Expression!=null) Expression.DisposeSubReference(false);
         }
 
         public override AjkAvaloniaLibs.Controls.ColorLabel GetLabel()

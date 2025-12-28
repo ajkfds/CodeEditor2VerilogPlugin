@@ -187,6 +187,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                         sourceProject = CodeEditor2.Global.Projects[comment.Text];
                         instancedModule = ((ProjectProperty)sourceProject.GetPluginProperty()).GetBuildingBlock(moduleName) as Module;
 
+                        word.RootParsedDocument.ReparseRequested = true;
                         break;
                     }
                     //if(instancedModule == null)
@@ -1070,12 +1071,12 @@ namespace pluginVerilog.Verilog.ModuleItems
 
             if(instancedModule.PortParameterNameList.Count != 0)
             {
-                sb.Append("#(\r\n");
+                sb.Append("#(\n");
 
                 first = true;
                 foreach(var paramName in instancedModule.PortParameterNameList)
                 {
-                    if (!first) sb.Append(",\r\n");
+                    if (!first) sb.Append(",\n");
                     sb.Append(indent);
                     sb.Append(".");
                     sb.Append(paramName);
@@ -1098,7 +1099,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                     sb.Append(" )");
                     first = false;
                 }
-                sb.Append("\r\n) ");
+                sb.Append("\n) ");
             }
 
             sb.Append(Name);
@@ -1108,14 +1109,14 @@ namespace pluginVerilog.Verilog.ModuleItems
             string? portGroup = null;
             foreach (var port in instancedModule.Ports.Values)
             {
-                if (!first) sb.Append(",\r\n");
+                if (!first) sb.Append(",\n");
 
                 if(port.PortGroupName != portGroup && portGroup != "")
                 {
                     portGroup = port.PortGroupName;
                     sb.Append("// ");
                     sb.Append(portGroup);
-                    sb.Append("\r\n");
+                    sb.Append("\n");
                 }
                 sb.Append(indent);
                 sb.Append(".");

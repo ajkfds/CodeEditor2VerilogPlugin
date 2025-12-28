@@ -39,17 +39,17 @@ namespace pluginVerilog.Verilog
 
         public NamedElements NamedElements { get; } = new NamedElements();
 
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public IndexReference BeginIndexReference { get; init; }
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public IndexReference? BlockBeginIndexReference = null;
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public IndexReference? LastIndexReference = null;
 
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public NameSpace Parent { get; init; } = null;
 
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public BuildingBlocks.BuildingBlock BuildingBlock { get; protected set; }
 
         public INamedElement? GetNamedElementUpward(string name)

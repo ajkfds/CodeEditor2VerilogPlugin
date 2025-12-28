@@ -85,7 +85,7 @@ namespace pluginVerilog.Verilog
         }
 
         protected WeakReference<ParsedDocument> parsedDocumentRef;
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public ParsedDocument? ParsedDocument
         {
             get
@@ -96,7 +96,7 @@ namespace pluginVerilog.Verilog
             }
         }
 
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public pluginVerilog.CodeEditor.CodeDocument? Document
         {
             get
@@ -109,7 +109,7 @@ namespace pluginVerilog.Verilog
 
 
         private System.WeakReference<ParsedDocument> rootParsedDocumentRef;
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public ParsedDocument RootParsedDocument
         {
             get

@@ -1,5 +1,4 @@
 ﻿
-using Newtonsoft.Json;
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using System;

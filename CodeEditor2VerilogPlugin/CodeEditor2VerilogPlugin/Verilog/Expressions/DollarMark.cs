@@ -51,6 +51,10 @@ namespace pluginVerilog.Verilog.Expressions
             return dollarMark;
         }
 
+        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        {
+            label.AppendText("$");
+        }
 
     }
 }

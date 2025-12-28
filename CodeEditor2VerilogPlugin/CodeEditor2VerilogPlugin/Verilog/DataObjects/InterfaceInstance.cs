@@ -10,6 +10,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 
 namespace pluginVerilog.Verilog.DataObjects
 {
@@ -21,14 +22,14 @@ namespace pluginVerilog.Verilog.DataObjects
         public Attribute? Attribute { get; set; }
         public required WordReference DefinitionReference { get; init; }
 
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public required NameSpace InstancedNameSpace { get; init; }
 
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public required Project Project { get; init; }
 
         public Dictionary<string, string> Properties = new Dictionary<string, string>();
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public ProjectProperty ProjectProperty
         {
             get

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 
 namespace pluginVerilog.Verilog.Statements
 {
@@ -15,7 +16,7 @@ namespace pluginVerilog.Verilog.Statements
     {
         public string Name { get; set; } = string.Empty;
         
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         private ProjectProperty projectProperty { init; get; }
         public Scope? ParseCreate(WordScanner word, NameSpace nameSpace)
         {

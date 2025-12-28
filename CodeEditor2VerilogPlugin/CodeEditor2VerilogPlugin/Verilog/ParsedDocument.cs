@@ -47,7 +47,6 @@ namespace pluginVerilog.Verilog
             }
         }
 
-        [Newtonsoft.Json.JsonConstructor]
         private ParsedDocument(Data.IVerilogRelatedFile file, string key, IndexReference? indexReference) : base((CodeEditor2.Data.TextFile)file, key, long.MaxValue, DocumentParser.ParseModeEnum.LoadParse)
         {
             if (file is SystemVerilogFile || file is SystemVerilogHeaderFile) SystemVerilog = true;
@@ -122,7 +121,7 @@ namespace pluginVerilog.Verilog
         }
 
         private System.WeakReference<Data.IVerilogRelatedFile> fileRef;
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public Data.IVerilogRelatedFile? File
         {
             get
@@ -134,10 +133,10 @@ namespace pluginVerilog.Verilog
         }
 
 
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public IndexReference IndexReference;
 
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public List<int> Indexes = new List<int>();
 
         public bool SystemVerilog = false;
@@ -146,14 +145,14 @@ namespace pluginVerilog.Verilog
         public bool RestrictBaseParse { get; set; } = false;
         public Root Root { set; get; }
 
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public Dictionary<string, Data.VerilogHeaderInstance> IncludeFiles = new Dictionary<string, Data.VerilogHeaderInstance>();
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public Dictionary<string, Macro> Macros = new Dictionary<string, Macro>();
 
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public Dictionary<string, Verilog.Expressions.Expression> ParameterOverrides = new Dictionary<string, Expressions.Expression>();
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public string? TargetBuildingBlockName = null;
 
 
@@ -177,7 +176,7 @@ namespace pluginVerilog.Verilog
         }
 
         CodeDocument codeDocument;
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public CodeDocument CodeDocument
         {
             get
@@ -190,7 +189,7 @@ namespace pluginVerilog.Verilog
             }
         }
 
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public ProjectProperty? ProjectProperty
         {
             get
@@ -230,13 +229,13 @@ namespace pluginVerilog.Verilog
             base.Dispose();
         }
 
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public int ErrorCount = 0;
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public int WarningCount = 0;
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public int HintCount = 0;
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public int NoticeCount = 0;
 
         public void AddError(int index,int length ,string message)
@@ -877,7 +876,7 @@ namespace pluginVerilog.Verilog
 
         }
         public delegate void AppendSpecialAutoCompleteItemsDelegate(List<AutocompleteItem> items, string cantidate);
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public static AppendSpecialAutoCompleteItemsDelegate AppendSpecialAutoCompleteItems = appendSpecialAutoCompleteItems;
         private static void appendSpecialAutoCompleteItems(List<AutocompleteItem> items, string cantidate)
         {
@@ -961,7 +960,7 @@ namespace pluginVerilog.Verilog
             }
 
             private System.WeakReference<Data.IVerilogRelatedFile> fileRef;
-            [Newtonsoft.Json.JsonIgnore]
+            [JsonIgnore]
             public Data.IVerilogRelatedFile? File
             {
                 get

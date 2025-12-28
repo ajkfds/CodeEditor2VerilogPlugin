@@ -114,7 +114,7 @@ namespace pluginVerilog.Verilog.Snippets
 
                     if (parsedDocument == null) return;
                     BuildingBlocks.BuildingBlock? buildingBlock = parsedDocument.GetBuildingBlockAt(index);
-
+                    if (buildingBlock == null) return;
                     IndexReference iref = IndexReference.Create(parsedDocument, vDocument, index);
 
                     List<IBuildingBlockInstantiation> instances = buildingBlock.GetBuildingBlockInstantiations();
@@ -133,7 +133,16 @@ namespace pluginVerilog.Verilog.Snippets
                 await Dispatcher.UIThread.InvokeAsync(async () => {
                     Views.AutoConnectWindow autoConnectWindow = new Views.AutoConnectWindow(moduleInstantiation);
                     autoConnectWindow.WindowStartupLocation = Avalonia.Controls.WindowStartupLocation.CenterOwner;
-                    if(autoConnectWindow.Ready) await autoConnectWindow.ShowDialog(CodeEditor2.Controller.GetMainWindow());
+                    Avalonia.Controls.Window window = CodeEditor2.Controller.GetMainWindow();
+                    if (autoConnectWindow.Ready)
+                    {
+                        if(autoConnectWindow.Owner != null)
+                        {
+                            autoConnectWindow.Width = window.Width * 0.8;
+                            autoConnectWindow.Height = window.Height * 0.8;
+                        }
+                        await autoConnectWindow.ShowDialog(window);
+                    }
                     if (!autoConnectWindow.Accept) return;
                 });
 
@@ -157,6 +166,7 @@ namespace pluginVerilog.Verilog.Snippets
                         CodeEditor2.Controller.AppendLog("illegal module instance", Avalonia.Media.Colors.Red);
                         return;
                     }
+                    if (moduleInstantiation.LastIndexReference == null) return;
 
                     CodeEditor2.Controller.CodeEditor.SetCaretPosition(moduleInstantiation.BeginIndexReference.Indexes.Last());
                     document.Replace(

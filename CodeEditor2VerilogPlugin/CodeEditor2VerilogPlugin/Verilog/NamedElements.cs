@@ -14,14 +14,12 @@ namespace pluginVerilog.Verilog
     public class NamedElements : IEnumerable<INamedElement>
 
     {
-        [Newtonsoft.Json.JsonProperty]
         private List<INamedElement> itemList = new List<INamedElement>();
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         private Dictionary<string, INamedElement> itemDict = new Dictionary<string, INamedElement>();
 
         public NamedElements() { }
 
-        [Newtonsoft.Json.JsonConstructor]
         public NamedElements(List<INamedElement> itemList)
         {
             this.itemList = itemList;
@@ -106,7 +104,7 @@ namespace pluginVerilog.Verilog
             return itemList.IndexOf(item);
         }
 
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public INamedElement this[string key]
         {
             get
@@ -115,7 +113,7 @@ namespace pluginVerilog.Verilog
             }
         }
 
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public INamedElement this[int index]
         {
             get
@@ -181,13 +179,13 @@ namespace pluginVerilog.Verilog
             itemDict.Clear();
         }
 
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public Dictionary<string, INamedElement>.KeyCollection Keys
         {
             get { return itemDict.Keys; }
         }
 
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public List<INamedElement> Values
         {
             get

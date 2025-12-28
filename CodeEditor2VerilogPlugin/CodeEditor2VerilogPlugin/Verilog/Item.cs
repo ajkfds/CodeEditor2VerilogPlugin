@@ -13,12 +13,12 @@ namespace pluginVerilog.Verilog
         public Attribute? Attribute { get; set; }
         public required WordReference? DefinitionReference { get; init; }
 
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public CodeEditor2.Data.Project Project { get; init; }
 
         public Dictionary<string, string> Properties = new Dictionary<string, string>();
 
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public ProjectProperty ProjectProperty
         {
             get

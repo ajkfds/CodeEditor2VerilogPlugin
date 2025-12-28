@@ -8,9 +8,9 @@ namespace pluginVerilog.Verilog.Expressions
 {
     public class ConditionalExpression : Expression
     {
-        public Expression ConditionExpression;
-        public Expression TrueExpression;
-        public Expression FalseExpression;
+        public Expression? ConditionExpression;
+        public Expression? TrueExpression;
+        public Expression? FalseExpression;
 
 
         protected ConditionalExpression() { }
@@ -20,11 +20,11 @@ namespace pluginVerilog.Verilog.Expressions
         {
             AjkAvaloniaLibs.Controls.ColorLabel label = new AjkAvaloniaLibs.Controls.ColorLabel();
 
-            label.AppendLabel(this.ConditionExpression.GetLabel());
+            if( this.ConditionExpression!=null ) label.AppendLabel(this.ConditionExpression.GetLabel());
             label.AppendText(" ? ");
-            label.AppendLabel(TrueExpression.GetLabel());
+            if( TrueExpression!=null ) label.AppendLabel(TrueExpression.GetLabel());
             label.AppendText(" : ");
-            label.AppendLabel(FalseExpression.GetLabel());
+            if( FalseExpression!=null ) label.AppendLabel(FalseExpression.GetLabel());
 
             return label;
         }

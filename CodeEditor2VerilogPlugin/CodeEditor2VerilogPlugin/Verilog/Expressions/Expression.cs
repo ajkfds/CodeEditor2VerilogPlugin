@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using CodeEditor2.CodeEditor;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.Expressions.Operators;
+using System.Text.Json.Serialization;
+
 
 namespace pluginVerilog.Verilog.Expressions
 {
@@ -27,7 +29,7 @@ namespace pluginVerilog.Verilog.Expressions
 
         public virtual SyncContext SyncContext { get; } = new SyncContext();
 
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public WordReference Reference { get; protected set; }
         public bool IncrementDecrement = false;
 

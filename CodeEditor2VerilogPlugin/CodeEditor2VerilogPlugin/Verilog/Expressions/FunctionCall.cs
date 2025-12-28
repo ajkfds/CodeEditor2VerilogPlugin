@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Text.Json.Serialization;
 
 namespace pluginVerilog.Verilog.Expressions
 {
@@ -25,9 +26,9 @@ namespace pluginVerilog.Verilog.Expressions
         }
         public Dictionary<string, Expressions.Expression> PortConnection { get; set; } = new Dictionary<string, Expressions.Expression>();
 
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public required NameSpace DefinedNameSpace { init; get; }
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public required ProjectProperty ProjectProperty { init; get; }
         public Function? Function
         {
