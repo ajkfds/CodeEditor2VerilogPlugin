@@ -231,10 +231,10 @@ namespace pluginVerilog.Data
             }
         }
 
-        public override void Save()
+        public override async System.Threading.Tasks.Task SaveAsync()
         {
             if(SourceTextFile == null) return;
-            SourceTextFile.Save();
+            await SourceTextFile.SaveAsync();
         }
 
         public override DateTime? LoadedFileLastWriteTime

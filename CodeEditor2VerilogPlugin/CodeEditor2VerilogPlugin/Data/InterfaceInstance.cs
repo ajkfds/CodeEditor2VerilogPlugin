@@ -199,11 +199,11 @@ namespace pluginVerilog.Data
                 parsedDocument = value;
             }
         }
-        public override void Save()
+        public override async Task SaveAsync()
         {
             if (CodeDocument == null) return;
             if (SourceTextFile == null) return;
-            SourceTextFile.Save();
+            await SourceTextFile.SaveAsync();
         }
 
         public override DateTime? LoadedFileLastWriteTime
