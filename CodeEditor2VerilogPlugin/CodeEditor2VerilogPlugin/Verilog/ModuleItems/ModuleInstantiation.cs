@@ -167,7 +167,6 @@ namespace pluginVerilog.Verilog.ModuleItems
 
             Module? instancedModule = word.ProjectProperty.GetBuildingBlock(moduleName) as Module;
             string moduleComment = word.GetNextComment();
-            if (instancedModule == null)
             {
                 if (word.GetNextComment().Contains("@project"))
                 {
@@ -190,15 +189,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                         word.RootParsedDocument.ReparseRequested = true;
                         break;
                     }
-                    //if(instancedModule == null)
-                    //{
-                    //    return false;
-                    //}
                 }
-                //else
-                //{
-                //    return false;
-                //}
             }
             if(instancedModule == null)
             {
