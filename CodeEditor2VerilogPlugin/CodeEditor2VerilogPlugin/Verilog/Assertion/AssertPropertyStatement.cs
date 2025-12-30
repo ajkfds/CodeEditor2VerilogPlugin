@@ -33,12 +33,14 @@ namespace pluginVerilog.Verilog.Assertion
             word.MoveNext();
 
             PropertySpec propertySpec = await PropertySpec.ParseCreate(word, nameSpace);
-            word.SkipToKeyword(")");
 
             if (word.Eof || word.Text != ")") return await exitTask(word, nameSpace, assertPropertyStatement);
             word.MoveNext();
 
-            assertPropertyStatement.PassStatement = await Statements.Statements.ParseCreateStatement(word, nameSpace);
+            if(word.Text != "else")
+            {
+                assertPropertyStatement.PassStatement = await Statements.Statements.ParseCreateStatement(word, nameSpace);
+            }
 
             if (word.Text != "else") return assertPropertyStatement;
             word.Color(CodeDrawStyle.ColorType.Keyword);

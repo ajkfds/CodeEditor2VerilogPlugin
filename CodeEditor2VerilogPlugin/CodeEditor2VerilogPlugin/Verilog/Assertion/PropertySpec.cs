@@ -55,6 +55,7 @@ namespace pluginVerilog.Verilog.Assertion
                         word.AddError("illegal property spec");
                         break;
                     }
+
                     disableIffExpression = Expressions.Expression.ParseCreate(word, nameSpace);
                     if (word.Text == ")")
                     {
@@ -65,6 +66,9 @@ namespace pluginVerilog.Verilog.Assertion
                         word.AddError("illegal property spec");
                         break;
                     }
+
+                    Property.PropertyExpr? propertyExpr = Property.PropertyExpr.ParseCreate(word, nameSpace);
+
                 } while (false);
             }
 
@@ -83,6 +87,7 @@ namespace pluginVerilog.Verilog.Assertion
             return propertySpec;
         }
 
+        Property.PropertyExpr? PropertyExpr { get; set; }
         public EventControl? EventControl { get; set; }
         public Expressions.Expression? DisableIffExpression { get; set; }
     }

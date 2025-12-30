@@ -809,7 +809,12 @@ namespace pluginVerilog.Verilog
                     op3 == ">>=" ||
                     op3 == "==?" ||
                     op3 == "!=?" ||
-                    op3 == "<->"
+                    op3 == "<->" ||
+                    // property operator
+                    op3 == "|->" ||
+                    op3 == "|=>" ||
+                    op3 == "#-#" ||
+                    op3 == "#=#"
             )
             {
                 nextIndex = nextIndex + 3;
@@ -846,7 +851,9 @@ namespace pluginVerilog.Verilog
                 op2 == "->" ||
                 op2 == "++" ||
                 op2 == "--" ||
-                op2 == "::"
+                op2 == "::" ||
+                // aequence operator
+                op2 == "##"
             )
             {
                 nextIndex = nextIndex + 2;
