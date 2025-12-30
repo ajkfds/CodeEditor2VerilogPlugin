@@ -212,7 +212,6 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 variable.DefinedReference = word.GetReference();
 
                 word.Color(variable.ColorType);
-                CommentAnnotation.DataObjectAnnotaion.ParsePostComment(word, nameSpace, variable);
                 word.MoveNext();
 
                 // { variable_dimension }
@@ -233,8 +232,6 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                         variable = associativeArray;
                     }
                 }
-
-                CommentAnnotation.DataObjectAnnotaion.ParsePostComment(word, nameSpace, variable);
 
                 if (word.Text == "=") 
                 {
@@ -376,19 +373,21 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 if (word.Text == ",")
                 {
                     word.MoveNext();
+                    CommentAnnotation.DataObjectAnnotaion.ParsePostComment(word, nameSpace, variable);
                 }
                 else
                 {
+                    if (word.Text == ";")
+                    {
+                        word.MoveNext();
+                        CommentAnnotation.DataObjectAnnotaion.ParsePostComment(word, nameSpace, variable);
+                    }
+                    else
+                    {
+                        word.AddError("; required");
+                    }
                     break;
                 }
-            }
-            if(word.Text == ";")
-            {
-                word.MoveNext();
-            }
-            else
-            {
-                word.AddError("; required");
             }
 
             string comment = word.GetNextComment();
