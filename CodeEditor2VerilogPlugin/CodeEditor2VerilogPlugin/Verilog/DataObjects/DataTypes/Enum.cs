@@ -148,7 +148,29 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             if(enum_.BaseType != null)
             {
                 EnumConstants constants = EnumConstants.Create(item.Identifier, enum_.BaseType, wordReference, Expressions.Expression.CreateTempExpression(index.ToString()));
-                if (!nameSpace.NamedElements.ContainsKey(constants.Name)) nameSpace.NamedElements.Add(constants.Name, constants);
+                if (word.Prototype)
+                {
+                    if (!nameSpace.NamedElements.ContainsKey(constants.Name))
+                    {
+                        nameSpace.NamedElements.Add(constants.Name, constants);
+                    }
+                    else
+                    {
+                        wordReference.AddError("duplicated");
+                    }
+                }
+                else
+                {
+                    constants.Defined = true;
+                    if (!nameSpace.NamedElements.ContainsKey(constants.Name))
+                    {
+                        nameSpace.NamedElements.Add(constants.Name, constants);
+                    }
+                    else
+                    {
+                        nameSpace.NamedElements.Replace(constants.Name, constants);
+                    }
+                }
             }
 
             enum_.Items.Add(item);
