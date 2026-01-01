@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Avalonia.Media;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -26,5 +27,12 @@ namespace pluginVerilog.FileTypes
             return Data.VerilogHeaderFile.Create(relativeFilePath, project);
         }
 
+        public override IImage GetIconImage()
+        {
+            return AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
+                "CodeEditor2VerilogPlugin/Assets/Icons/verilogHeaderDocument.svg",
+                    Avalonia.Media.Color.FromArgb(100, 200, 240, 240)
+                );
+        }
     }
 }

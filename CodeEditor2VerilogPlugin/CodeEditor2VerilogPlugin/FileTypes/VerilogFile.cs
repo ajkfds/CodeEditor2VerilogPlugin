@@ -1,4 +1,5 @@
-﻿using CodeEditor2.Data;
+﻿using Avalonia.Media;
+using CodeEditor2.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,5 +50,14 @@ namespace pluginVerilog.FileTypes
             }
 
         }
+
+        public override IImage GetIconImage()
+        {
+            return AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
+                    "CodeEditor2VerilogPlugin/Assets/Icons/verilogDocument.svg",
+                    Avalonia.Media.Color.FromArgb(100, 200, 240, 240)
+                );
+        }
+
     }
 }
