@@ -105,10 +105,19 @@ namespace pluginVerilog.NavigatePanel
                 }
             }
 
+            Avalonia.Media.Color color = Avalonia.Media.Color.FromArgb(100, 200, 240, 240);
+
+            if (verilogRelatedFile != null && verilogRelatedFile is InstanceTextFile)
+            {
+                if (((InstanceTextFile)verilogRelatedFile).ExternalProject)
+                {
+                    color = Avalonia.Media.Color.FromArgb(100, 250, 200, 200);
+                }
+            }
 
             return AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
                 "CodeEditor2VerilogPlugin/Assets/Icons/verilogHeaderDocument.svg",
-                Avalonia.Media.Color.FromArgb(100, 200, 240, 240),
+                color,
                 overrideIcons
                 );
         }
