@@ -108,10 +108,9 @@ namespace pluginVerilog.Verilog.Expressions
                     {
                         if (method.PortsList[i] != null 
                             && expression != null 
-                            && method.PortsList[i].Range != null
+                            && method.PortsList[i] != null
                         ){
-                            PackedArray? range = method.PortsList[i].Range;
-                            if(range != null && range.Size != expression.BitWidth)
+                            if(method.PortsList[i].BitWidth != expression.BitWidth)
                             {
                                 word.AddWarning("bitwidth mismatch");
                             }

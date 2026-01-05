@@ -119,7 +119,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
             }
             MaxIndex = (int)max;
             MinIndex = (int)min;
-            Size = (int)max - (int)min;
+            Size = (int)max - (int)min + 1;
         }
 
         public int? MaxIndex = null;
@@ -145,7 +145,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
 
         public UnPackedArray Clone()
         {
-            UnPackedArray unPackedArray = new UnPackedArray() { SizeExpression0 = SizeExpression0, SizeExpression1 = SizeExpression1, MinIndex = MinIndex, MaxIndex = MaxIndex };
+            UnPackedArray unPackedArray = new UnPackedArray() { SizeExpression0 = SizeExpression0, SizeExpression1 = SizeExpression1, MinIndex = MinIndex, MaxIndex = MaxIndex,Size = Size };
             return unPackedArray;
         }
 

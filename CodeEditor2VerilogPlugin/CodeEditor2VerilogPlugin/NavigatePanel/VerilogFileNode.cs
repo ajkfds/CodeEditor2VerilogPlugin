@@ -32,7 +32,8 @@ namespace pluginVerilog.NavigatePanel
         [SetsRequiredMembers]
         public VerilogFileNode(Data.VerilogFile verilogFile) : base(verilogFile)
         {
-            UpdateVisual();
+            Dispatcher.UIThread.Post(UpdateVisual);
+
             if (NodeCreated != null) NodeCreated(this);
         }
 

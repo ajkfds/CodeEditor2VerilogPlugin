@@ -1,4 +1,5 @@
 ﻿using pluginVerilog.Verilog.DataObjects;
+using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.DataObjects.Nets;
 using pluginVerilog.Verilog.DataObjects.Variables;
 using ReactiveUI;
@@ -27,7 +28,7 @@ namespace pluginVerilog.Verilog.Expressions
         {
             //label.AppendText(NameSpaceText, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Variable));
 
-            if(DataObject is Reg || DataObject is Bit || DataObject is Logic)
+            if (DataObject is Reg || DataObject is Bit || DataObject is Logic)
             {
                 label.AppendText(VariableName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Register));
             }
@@ -35,7 +36,7 @@ namespace pluginVerilog.Verilog.Expressions
             {
                 label.AppendText(VariableName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Net));
             }
-            else if(DataObject is DataObjects.Constants.Constants)
+            else if (DataObject is DataObjects.Constants.Constants)
             {
                 label.AppendText(VariableName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Parameter));
             }
@@ -93,11 +94,10 @@ namespace pluginVerilog.Verilog.Expressions
                 VariableName = dataObject.Name
             };
             val.DataObject = dataObject;
-            if(dataObject is DataObjects.Variables.IntegerVectorValueVariable)
+            if (dataObject is DataObjects.Variables.IntegerVectorValueVariable)
             {
                 IntegerVectorValueVariable integerVectorValueVariable = (IntegerVectorValueVariable)dataObject;
-                if(integerVectorValueVariable.Range != null)
-                    val.BitWidth = integerVectorValueVariable.Range.MaxIndex - integerVectorValueVariable.Range.MinIndex+1;
+                val.BitWidth = integerVectorValueVariable.BitWidth;
             }
             if (dataObject.DefinedReference != null) val.Reference = dataObject.DefinedReference;
             if (dataObject is DataObjects.Constants.Constants)
@@ -128,7 +128,7 @@ namespace pluginVerilog.Verilog.Expressions
         /// <param name="assigned"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        private static DataObjectReference? parseCreate(WordScanner word,NameSpace nameSpace, INamedElement owner, bool assigned,bool acceptRange)
+        private static DataObjectReference? parseCreate(WordScanner word, NameSpace nameSpace, INamedElement owner, bool assigned, bool acceptRange)
         {
             if (!owner.NamedElements.ContainsDataObject(word.Text)) return null;
             DataObjects.DataObject dataObject = (DataObjects.DataObject)owner.NamedElements[word.Text];
@@ -138,6 +138,11 @@ namespace pluginVerilog.Verilog.Expressions
                 VariableName = dataObject.Name
             };
             val.DataObject = dataObject;
+            //if(val.DataObject is IntegerVectorValueVariable && !word.Prototype)
+            //{
+            //    val.DataObject = val.DataObject.Clone();
+            //}
+
             val.Reference = word.GetReference();
 
             word.Color(dataObject.ColorType);
@@ -146,7 +151,7 @@ namespace pluginVerilog.Verilog.Expressions
             {
                 DataObjects.Constants.Constants constants = (DataObjects.Constants.Constants)dataObject;
                 val.Constant = true;
-                if(constants.Expression.Constant && constants.Expression.Value != null)
+                if (constants.Expression.Constant && constants.Expression.Value != null)
                 {
                     val.Value = constants.Expression.Value;
                 }
@@ -186,7 +191,6 @@ namespace pluginVerilog.Verilog.Expressions
             {
                 if (word.GetCharAt(0) != '[')
                 {
-//                    word.AddError("lacked dimension");
                     break;
                 }
                 word.MoveNext();    // [
@@ -213,8 +217,7 @@ namespace pluginVerilog.Verilog.Expressions
                 {
                     var original = dataObject as DataObjects.Variables.IntegerVectorValueVariable;
                     if (original == null) throw new Exception();
-                    if (original.Range != null) val.BitWidth = original.Range.Size;
-                    else val.BitWidth = 1;
+                    val.BitWidth = original.BitWidth;
                 }
                 else if (dataObject is DataObjects.Constants.Parameter)
                 {
@@ -227,13 +230,18 @@ namespace pluginVerilog.Verilog.Expressions
                 }
                 else if (dataObject is Net)
                 {
-                    if (((Net)dataObject).Range != null) val.BitWidth = ((Net)dataObject).Range.Size;
+                    if (((Net)dataObject).BitWidth != null) val.BitWidth = ((Net)dataObject).BitWidth;
                     else val.BitWidth = 1;
                 }
                 else if (dataObject is DataObjects.Variables.Genvar)
                 {
                     val.Constant = true;
                 }
+            }
+
+            foreach (UnPackedArray unPackedArray in val.UnpackedArrays)
+            {
+                val.BitWidth = val.BitWidth * unPackedArray.Size;
             }
 
             return val;

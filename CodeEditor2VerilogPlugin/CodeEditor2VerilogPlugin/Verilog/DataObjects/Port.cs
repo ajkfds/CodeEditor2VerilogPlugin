@@ -24,30 +24,54 @@ namespace pluginVerilog.Verilog.DataObjects
     public class Port : Item, ICommentAnnotated
     {
         public DirectionEnum Direction = DirectionEnum.Undefined;
-        public DataObjects.Arrays.PackedArray? Range
-        {
+
+        public List<DataObjects.Arrays.PackedArray>? PackedDimensions {
             get
             {
                 if (DataObject == null) return null;
                 Net? net = DataObject as Net;
-                if(net != null)
+                if (net != null)
                 {
-                    return net.Range;
+                    return net.PackedDimensions;
                 }
 
                 Variables.Variable? variable = DataObject as Variables.Variable;
-                if(variable != null)
+                if (variable != null)
                 {
                     Variables.IntegerVectorValueVariable? integerVectorValueVariable = DataObject as Variables.IntegerVectorValueVariable;
-                    if(integerVectorValueVariable != null)
+                    if (integerVectorValueVariable != null)
                     {
                         if (integerVectorValueVariable.PackedDimensions.Count < 1) return null;
-                        return integerVectorValueVariable.PackedDimensions[0];
+                        return integerVectorValueVariable.PackedDimensions;
                     }
 
                 }
 
                 return null;
+            }
+        }
+        public List<DataObjects.Arrays.UnPackedArray> UnPackedDimensions { get; set; } = new List<UnPackedArray>();
+
+        public int BitWidth
+        {
+            get
+            {
+                int bitWidth = 1;
+                if (PackedDimensions != null) 
+                {
+                    foreach(PackedArray packedArray in PackedDimensions)
+                    {
+                        if (packedArray.Size != null) bitWidth *= (int)packedArray.Size;
+                    }
+                }
+                if (UnPackedDimensions != null)
+                {
+                    foreach (UnPackedArray unpackedArray in UnPackedDimensions)
+                    {
+                        if (unpackedArray.Size != null) bitWidth *= (int)unpackedArray.Size;
+                    }
+                }
+                return bitWidth;
             }
         }
 
@@ -117,10 +141,13 @@ namespace pluginVerilog.Verilog.DataObjects
             }
 
 
-            if (Range != null)
+            if (PackedDimensions != null)
             {
-                label.AppendLabel(Range.GetLabel());
-                label.AppendText(" ");
+                foreach (PackedArray packedArray in PackedDimensions)
+                {
+                    label.AppendLabel(packedArray.GetLabel());
+                    label.AppendText(" ");
+                }
             }
 
             if (DataObject != null)
@@ -136,6 +163,15 @@ namespace pluginVerilog.Verilog.DataObjects
                 else
                 {
                     label.AppendText(Name);
+                }
+            }
+
+            if (UnPackedDimensions != null)
+            {
+                foreach (UnPackedArray unpackedArray in UnPackedDimensions)
+                {
+                    label.AppendLabel(unpackedArray.GetLabel());
+                    label.AppendText(" ");
                 }
             }
 

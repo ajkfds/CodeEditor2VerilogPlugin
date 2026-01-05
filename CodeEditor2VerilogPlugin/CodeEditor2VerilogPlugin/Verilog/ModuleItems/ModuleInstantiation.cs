@@ -917,16 +917,17 @@ namespace pluginVerilog.Verilog.ModuleItems
             bool output
             )
         {
-            if (port.Range == null)
+            //if (port.Range == null)
+            //{
+            //    if (expression.BitWidth != null && expression.Reference != null && expression.BitWidth != 1)
+            //    {
+            //        expression.Reference.AddWarning("bit width mismatch 1 <- " + expression.BitWidth);
+            //    }
+            //}
+            //else 
+            if (port.BitWidth != expression.BitWidth && expression.Reference != null)
             {
-                if (expression.BitWidth != null && expression.Reference != null && expression.BitWidth != 1)
-                {
-                    expression.Reference.AddWarning("bit width mismatch 1 <- " + expression.BitWidth);
-                }
-            }
-            else if (port.Range.Size != expression.BitWidth && expression.Reference != null)
-            {
-                expression.Reference.AddWarning("bit width mismatch " + port.Range.Size + " <- " + expression.BitWidth);
+                expression.Reference.AddWarning("bit width mismatch " + port.BitWidth + " <- " + expression.BitWidth);
             }
         }
         private static void checkVariablePortConnection(
@@ -938,17 +939,18 @@ namespace pluginVerilog.Verilog.ModuleItems
             bool output
             )
         {
-            if (port.Range == null)
-            {
-                if (expression.BitWidth != null && expression.Reference != null && expression.BitWidth != 1)
-                {
-                    expression.Reference.AddWarning("bit width mismatch 1 <- " + expression.BitWidth);
-                }
+            //if (port.Range == null)
+            //{
+            //    if (expression.BitWidth != null && expression.Reference != null && expression.BitWidth != 1)
+            //    {
+            //        expression.Reference.AddWarning("bit width mismatch 1 <- " + expression.BitWidth);
+            //    }
 
-            }
-            else if (port.Range.Size != expression.BitWidth && expression.Reference != null)
+            //}
+            //else 
+            if (port.BitWidth != expression.BitWidth && expression.Reference != null)
             {
-                expression.Reference.AddWarning("bit width mismatch " + port.Range.Size + " <- " + expression.BitWidth);
+                expression.Reference.AddWarning("bit width mismatch " + port.BitWidth + " <- " + expression.BitWidth);
             }
         }
         private static void checkInterfacePortConnection(

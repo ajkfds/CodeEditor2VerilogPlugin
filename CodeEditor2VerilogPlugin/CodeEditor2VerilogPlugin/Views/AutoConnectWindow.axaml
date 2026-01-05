@@ -7,13 +7,12 @@
         x:Class="pluginVerilog.Views.AutoConnectWindow"
 		FontFamily="Cascadia Mono,Consolas,Menlo,Monospace,DejaVu Sans Mono,Liberation Mono,Noto Sans Mono,Source Code Pro"
         Title="AutoConnectWindow">
-	<StackPanel Orientation="Vertical" Margin="0">
+	<StackPanel Orientation="Vertical" Margin="10">
 		<TextBlock Name="HeaderTextBlock">module </TextBlock>
 		<ListBox Name="ListBox0" 
 				 Margin="0" Padding="2"  
 				 ScrollViewer.HorizontalScrollBarVisibility="Auto">
 		</ListBox>
-		<ajk:ListViewControl></ajk:ListViewControl>
 		<TextBlock Name="BottomTextBlock">endmodule </TextBlock>
 	</StackPanel>
 </Window>

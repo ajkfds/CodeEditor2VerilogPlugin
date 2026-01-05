@@ -165,13 +165,9 @@ namespace pluginVerilog.Verilog.Expressions
                     functionCall.PortConnection.Add(port.Name, expression);
                 }
 
-                if (port.Range != null
-                ){
-                    PackedArray? range = port.Range;
-                    if(range != null && range.Size != expression.BitWidth)
-                    {
-                        word.AddWarning("bitwidth mismatch");
-                    }
+                if (port.BitWidth != expression.BitWidth)
+                {
+                    word.AddWarning("bitwidth mismatch");
                 }
                 i++;
 

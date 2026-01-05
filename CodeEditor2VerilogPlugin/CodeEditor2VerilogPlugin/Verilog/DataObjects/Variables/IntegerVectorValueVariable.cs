@@ -13,15 +13,6 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         //integer_vector_type::= bit | logic | reg
         public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Register; } }
-        public DataObjects.Arrays.PackedArray? Range
-        {
-            get
-            {
-                if (PackedDimensions == null) return null;
-                if (PackedDimensions.Count < 1) return null;
-                return PackedDimensions[0];
-            }
-        }
         public bool Signed { get; set; }
 
         public List<DataObjects.Arrays.PackedArray> PackedDimensions = new List<DataObjects.Arrays.PackedArray>();

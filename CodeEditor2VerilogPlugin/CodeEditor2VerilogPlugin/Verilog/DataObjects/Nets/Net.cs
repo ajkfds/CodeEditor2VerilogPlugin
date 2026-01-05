@@ -16,14 +16,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
         public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Net; } }
 
         public List<DataObjects.Arrays.PackedArray> PackedDimensions { get; set; } = new List<DataObjects.Arrays.PackedArray>();
-        public DataObjects.Arrays.PackedArray Range
-        {
-            get
-            {
-                if (PackedDimensions.Count < 1) return null;
-                return PackedDimensions[0];
-            }
-        }
+
 
         // net_type::= supply0 | supply1 | tri     | triand  | trior | tri0 | tri1 | wire  | wand   | wor
 
@@ -93,10 +86,13 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                 label.AppendText("signed ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
             }
 
-            if (Range != null)
+            if (PackedDimensions != null)
             {
-                label.AppendLabel(Range.GetLabel());
-                label.AppendText(" ");
+                foreach(PackedArray packedArray in PackedDimensions)
+                {
+                    label.AppendLabel(packedArray.GetLabel());
+                    label.AppendText(" ");
+                }
             }
         }
 
@@ -196,10 +192,13 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                 sb.Append("signed ");
             }
 
-            if (Range != null)
+            if (PackedDimensions != null)
             {
-                sb.Append(Range.CreateString());
-                sb.Append(" ");
+                foreach (PackedArray packedArray in PackedDimensions)
+                {
+                    sb.Append(packedArray.CreateString());
+                    sb.Append(" ");
+                }
             }
 
             if (DataType != null) sb.Append(DataType.CreateString());
@@ -471,16 +470,16 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                     if(net.DefinedReference != null) net.AssignedReferences.Add(net.DefinedReference);
                     if(!word.Prototype && assignValue != null)
                     {
-                        if(net.Range == null)
+                        if(net.BitWidth == null)
                         {
                             if (assignValue.BitWidth != 1 & !word.Prototype)
                             {
                                 assignValue.Reference.AddWarning("Size mismatch 1 <- " + assignValue.BitWidth.ToString());
                             }
                         }
-                        else if(assignValue.BitWidth != net.Range.Size & !word.Prototype)
+                        else if(assignValue.BitWidth != net.BitWidth & !word.Prototype)
                         {
-                            assignValue.Reference.AddWarning("Size mismatch "+ net.Range.Size.ToString() +" <- "+assignValue.BitWidth.ToString() );
+                            assignValue.Reference.AddWarning("Size mismatch "+ net.BitWidth.ToString() +" <- "+assignValue.BitWidth.ToString() );
                         }
                     }
                 }

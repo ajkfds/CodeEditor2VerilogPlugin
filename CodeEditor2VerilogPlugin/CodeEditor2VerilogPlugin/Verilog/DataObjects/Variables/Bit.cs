@@ -24,6 +24,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             val.Signed = Signed;
             return val;
         }
+
         public static new Bit Create(string name,DataTypes.IDataType dataType)
         {
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypes.DataTypeEnum.Bit);
