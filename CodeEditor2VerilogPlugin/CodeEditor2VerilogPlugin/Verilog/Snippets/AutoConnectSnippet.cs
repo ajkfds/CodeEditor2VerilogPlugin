@@ -97,6 +97,7 @@ namespace pluginVerilog.Verilog.Snippets
             try
             {
                 ModuleInstantiation? moduleInstantiation = null;
+                BuildingBlocks.BuildingBlock? buildingBlock = null;
 
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
@@ -113,7 +114,7 @@ namespace pluginVerilog.Verilog.Snippets
                     int index = document.CaretIndex;
 
                     if (parsedDocument == null) return;
-                    BuildingBlocks.BuildingBlock? buildingBlock = parsedDocument.GetBuildingBlockAt(index);
+                    buildingBlock = parsedDocument.GetBuildingBlockAt(index);
                     if (buildingBlock == null) return;
                     IndexReference iref = IndexReference.Create(parsedDocument, vDocument, index);
 
@@ -129,9 +130,10 @@ namespace pluginVerilog.Verilog.Snippets
                     }
                 });
                 if (moduleInstantiation == null) return;
+                if (buildingBlock == null) return;
 
                 await Dispatcher.UIThread.InvokeAsync(async () => {
-                    Views.AutoConnectWindow autoConnectWindow = new Views.AutoConnectWindow(moduleInstantiation);
+                    Views.AutoConnectWindow autoConnectWindow = new Views.AutoConnectWindow(moduleInstantiation, buildingBlock);
                     autoConnectWindow.WindowStartupLocation = Avalonia.Controls.WindowStartupLocation.CenterOwner;
                     Avalonia.Controls.Window window = CodeEditor2.Controller.GetMainWindow();
                     if (autoConnectWindow.Ready)
@@ -171,6 +173,7 @@ namespace pluginVerilog.Verilog.Snippets
                         moduleString
                         );
                     CodeEditor2.Controller.CodeEditor.SetSelection(document.CaretIndex, document.CaretIndex);
+                    CodeEditor2.Controller.CodeEditor.EntryParse();
                 });
 
             }

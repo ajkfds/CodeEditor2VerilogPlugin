@@ -9,6 +9,7 @@ using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
 using DynamicData;
 using ExCSS;
+using pluginVerilog.Data;
 using pluginVerilog.Verilog;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
@@ -33,19 +34,34 @@ namespace pluginVerilog.Views
             if (Design.IsDesignMode) return;
             throw new NotImplementedException();
         }
-        public AutoConnectWindow(ModuleInstantiation moduleInstantiation)
+
+        private TextBlock HeaderTextBlock = new TextBlock();
+        private TextBlock BottomTextBlock = new TextBlock();
+        private ListBox ListBox0 = new ListBox();
+        public AutoConnectWindow(ModuleInstantiation moduleInstantiation, BuildingBlock buildingBlock)
         {
             InitializeComponent();
-            FontSize = CodeEditor2.Controller.CodeEditor.FontSize + 2;
+
+            CodeEditor2.Tools.VerticalGridConstructor gridConstructor = new CodeEditor2.Tools.VerticalGridConstructor();
+            Content = gridConstructor.Grid;
+
+            gridConstructor.AppendContol(HeaderTextBlock,(int)FontSize);
+
+            gridConstructor.AppendContolFill(ListBox0);
+
+            gridConstructor.AppendContol(BottomTextBlock, (int)FontSize);
+
+            FontSize = CodeEditor2.Controller.CodeEditor.FontSize;
 
             this.moduleInstantiation = moduleInstantiation;
             HeaderTextBlock.Text = moduleInstantiation.SourceName + " " + moduleInstantiation.Name;
             HeaderTextBlock.FontSize = FontSize;
+            HeaderTextBlock.Text = "endmodule";
             BottomTextBlock.FontSize = FontSize;
 
-            BuildingBlock? buildingBlock = moduleInstantiation.GetInstancedBuildingBlock();
-            IPortNameSpace? portNameSpace = buildingBlock as IPortNameSpace;
-            if (portNameSpace == null || buildingBlock == null)
+            BuildingBlock? instanedBuildingBlock = moduleInstantiation.GetInstancedBuildingBlock();
+            IPortNameSpace? portNameSpace = instanedBuildingBlock as IPortNameSpace;
+            if (portNameSpace == null || instanedBuildingBlock == null)
             {
                 return;
             }
@@ -67,11 +83,11 @@ namespace pluginVerilog.Views
                 ConnectionItem item;
                 if (!moduleInstantiation.PortConnection.ContainsKey(port.Name))
                 {
-                    item = new ConnectionItem(port, null,buildingBlock);
+                    item = new ConnectionItem(port, null,instanedBuildingBlock,buildingBlock);
                 }
                 else
                 {
-                    item = new ConnectionItem(port, moduleInstantiation.PortConnection[port.Name],buildingBlock);
+                    item = new ConnectionItem(port, moduleInstantiation.PortConnection[port.Name],instanedBuildingBlock, buildingBlock);
                 }
                 item.FontSize = FontSize;
                 ListBox0.Items.Add(item);
@@ -175,10 +191,11 @@ namespace pluginVerilog.Views
         }
         public class ConnectionItem : AjkAvaloniaLibs.Controls.ListViewItem
         {
-            public ConnectionItem(Verilog.DataObjects.Port port, Verilog.Expressions.Expression? expression,BuildingBlock buildingBlock) : base()
+            public ConnectionItem(Verilog.DataObjects.Port port, Verilog.Expressions.Expression? expression,BuildingBlock instanceBuildingBlock,BuildingBlock buildingBlock) : base()
             {
                 this.Port = port;
                 this.Expression = expression;
+                this.InstanceBuildingBlock = instanceBuildingBlock;
                 this.BuildingBlock = buildingBlock;
                 if (expression != null)
                 {
@@ -195,6 +212,7 @@ namespace pluginVerilog.Views
 
             public pluginVerilog.Verilog.DataObjects.Port Port;
             Verilog.Expressions.Expression? Expression;
+            BuildingBlock InstanceBuildingBlock;
             BuildingBlock BuildingBlock;
             List<ColorLabel> cantidates;
             public ColorLabel target = new ColorLabel();
