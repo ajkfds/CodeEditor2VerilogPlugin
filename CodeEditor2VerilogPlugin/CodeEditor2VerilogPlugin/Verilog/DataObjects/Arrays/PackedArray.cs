@@ -103,6 +103,11 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
             return false;
         }
 
+        public PackedArray(int size)
+        {
+            Size = size;
+        }
+
         public static PackedArray? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             word.MoveNext(); // [

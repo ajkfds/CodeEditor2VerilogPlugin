@@ -99,6 +99,14 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
                 MaxIndex = Size - 1;
             }
         }
+
+        public UnPackedArray(int width)
+        {
+            Size = width;
+            MinIndex = 0;
+            MaxIndex = Size - 1;
+        }
+
         public UnPackedArray(Expressions.Expression expression0, Expressions.Expression expression1) 
         {
             if (expression0 == null || expression1 == null) return;

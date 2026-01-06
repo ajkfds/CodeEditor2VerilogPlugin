@@ -15,7 +15,14 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Register; } }
         public bool Signed { get; set; }
 
-        public List<DataObjects.Arrays.PackedArray> PackedDimensions = new List<DataObjects.Arrays.PackedArray>();
+        public List<DataObjects.Arrays.PackedArray> PackedDimensions
+        {
+            get
+            {
+                if(DataType == null) return new List<DataObjects.Arrays.PackedArray>();
+                return DataType.PackedDimensions;
+            }
+        }
 
         public new static IntegerVectorValueVariable Create(string name,IDataType dataType)
         {

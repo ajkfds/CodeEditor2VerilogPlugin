@@ -93,6 +93,15 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         }
 
 
+        public IDataType Clone()
+        {
+            List<PackedArray> array = new List<PackedArray>();
+            foreach(var packedDimension in PackedDimensions)
+            {
+                array.Add(packedDimension.Clone());
+            }
+            return IntegerVectorType.Create(Type, Signed, array);
+        }
         public static IntegerVectorType Create(DataTypeEnum dataType, bool signed,List<Arrays.PackedArray>? packedDimensions)
         {
             IntegerVectorType integerVectorType = new IntegerVectorType() { Type = dataType };

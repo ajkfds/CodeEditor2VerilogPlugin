@@ -92,6 +92,25 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
         }
 
+        public IDataType Clone()
+        {
+            Class class_ = new Class()
+            {
+                BeginIndexReference = BeginIndexReference,
+                DefinitionReference = DefinitionReference,
+                File = File,
+                Name = Name,
+                Parent = Parent,
+                Project = Project,
+                IsVirtual = IsVirtual
+            };
+            foreach(var namedElement in NamedElements)
+            {
+                class_.NamedElements.Add(namedElement.Name,namedElement);
+            }
+            return class_;
+        }
+
         public static async Task<Class?> Create(WordScanner word, NameSpace nameSpace)
         {
             return await Create(word, nameSpace, null);

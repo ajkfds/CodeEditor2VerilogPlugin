@@ -117,6 +117,11 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             return integerAtomType;
         }
 
+        public IDataType Clone()
+        {
+            return IntegerAtomType.Create(Type, Signed);
+        }
+
         protected static IntegerAtomType? parse(WordScanner word, NameSpace nameSpace, DataTypeEnum dataType)
         {
             word.Color(CodeDrawStyle.ColorType.Keyword);

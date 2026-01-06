@@ -29,6 +29,62 @@ namespace pluginVerilog.Verilog.Expressions
             return "";
         }
 
+        public static RangeExpression? ParseCreate(WordScanner word, NameSpace nameSpace)
+        {
+            if(word.Text != "[")
+            {
+                if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+                throw new Exception();
+            }
+            word.MoveNext();
+
+            Expression? exp1 = Expression.ParseCreate(word, nameSpace);
+            if (exp1 == null) return exitWithError(word, nameSpace);
+
+            if (word.Text == "]")
+            {
+                if (word.Text != "]") return exitWithError(word, nameSpace);
+                word.MoveNext();
+                return new SingleBitRangeExpression(exp1);
+            }
+
+            if(word.Text == ":")
+            {
+                word.MoveNext();
+                Expression? exp2 = Expression.ParseCreate(word, nameSpace);
+                if (exp2 == null) return exitWithError(word, nameSpace);
+                if (word.Text != "]") return exitWithError(word, nameSpace);
+                word.MoveNext();
+                return new AbsoluteRangeExpression(exp1, exp2);
+            }
+            if (word.Text == "-:")
+            {
+                word.MoveNext();
+                Expression? exp2 = Expression.ParseCreate(word, nameSpace);
+                if (exp2 == null) return exitWithError(word, nameSpace);
+                if (word.Text != "]") return exitWithError(word, nameSpace);
+                word.MoveNext();
+                return new RelativeMinusRangeExpression(exp1, exp2);
+            }
+            if (word.Text == "+:")
+            {
+                word.MoveNext();
+                Expression? exp2 = Expression.ParseCreate(word, nameSpace);
+                if (exp2 == null) return exitWithError(word, nameSpace);
+                if (word.Text != "]") return exitWithError(word, nameSpace);
+                word.MoveNext();
+                return new RelativePlusRangeExpression(exp1, exp2);
+            }
+            return exitWithError(word, nameSpace);
+        }
+
+        private static RangeExpression? exitWithError(WordScanner word, NameSpace nameSpace)
+        {
+            word.AddError("illegal range expression");
+            word.SkipToKeywords(new List<string>{ ";", "]"});
+            return null;
+        }
+
     }
     public class SingleBitRangeExpression : RangeExpression
     {

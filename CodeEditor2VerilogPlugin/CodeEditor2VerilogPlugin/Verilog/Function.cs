@@ -160,7 +160,6 @@ namespace pluginVerilog.Verilog
                         }
                         IDataType dataType = Verilog.DataObjects.DataTypes.IntegerVectorType.Create(DataTypeEnum.Logic, signed, packedDimensions);
                         Logic logic = Verilog.DataObjects.Variables.Logic.Create("",dataType);
-                        logic.PackedDimensions = packedDimensions;
                         retVal = logic;
                     }
                     break;
@@ -394,7 +393,6 @@ namespace pluginVerilog.Verilog
                         }
                         IDataType dataType = Verilog.DataObjects.DataTypes.IntegerVectorType.Create(DataTypeEnum.Logic, signed, packedDimensions);
                         Logic logic = Verilog.DataObjects.Variables.Logic.Create("",dataType);
-                        logic.PackedDimensions = packedDimensions;
                         retVal = logic;
                     }
                     break;

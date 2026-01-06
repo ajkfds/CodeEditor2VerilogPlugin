@@ -1,4 +1,6 @@
-﻿using System;
+﻿using DynamicData;
+using pluginVerilog.Verilog.DataObjects.Arrays;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -31,6 +33,28 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
 
         public virtual List<DataObjects.Arrays.PackedArray> PackedDimensions { get; protected set; } = new List<DataObjects.Arrays.PackedArray>();
+        public IDataType Clone()
+        {
+            List<PackedArray> array = new List<PackedArray>();
+            foreach (var packedDimension in PackedDimensions)
+            {
+                array.Add(packedDimension.Clone());
+            }
+            return RealTimeType.Create(array);
+        }
+        public static RealTimeType Create(List<Arrays.PackedArray>? packedDimensions)
+        {
+            RealTimeType realTimeType = new RealTimeType() {};
+            if (packedDimensions == null)
+            {
+                realTimeType.PackedDimensions.Clear();
+            }
+            else
+            {
+                realTimeType.PackedDimensions = packedDimensions;
+            }
+            return realTimeType;
+        }
         public static RealTimeType ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             RealTimeType dType = new RealTimeType();

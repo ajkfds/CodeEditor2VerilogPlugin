@@ -20,7 +20,6 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             if (dType == null) throw new Exception();
 
             Logic val = new Logic() { Name = name };
-            val.PackedDimensions = dType.PackedDimensions;
             val.DataType = dataType;
             return val;
         }
@@ -30,7 +29,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             Logic val = new Logic() {
                 Name = name,
                 DataType = DataType,
-                PackedDimensions = PackedDimensions
+                Defined = Defined
             };
             return val;
         }
@@ -38,7 +37,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         {
             Logic val = new Logic() { Name = Name };
             val.DataType = DataType;
-            val.PackedDimensions = PackedDimensions;
+            if (DataType != null) val.DataType = DataType.Clone();
             val.Signed = Signed;
             return val;
         }

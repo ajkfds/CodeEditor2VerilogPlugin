@@ -67,6 +67,20 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         }
         public bool IsVector { get { return false; } }
 
+        public IDataType Clone()
+        {
+            StructType structType = new StructType() { Signed = Signed, Tagged = Tagged };
+            foreach (Member member in Members.Values)
+            {
+                structType.Members.Add(member.Identifier, member.Clone());
+            }
+            foreach(var packedDimention in PackedDimensions)
+            {
+                structType.PackedDimensions.Add(packedDimention.Clone());
+            }
+            return structType;
+        }
+
         public static StructType? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "struct" ) System.Diagnostics.Debugger.Break();
@@ -211,6 +225,16 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             public PackedArray? PackedArray;
             public required IDataType DatType { get; init; }
             public Expressions.Expression? Value;
+
+            public Member Clone()
+            {
+                Member member = new Member() { Identifier = Identifier, DatType = DatType, Value = Value };
+                if (PackedArray != null)
+                {
+                    member.PackedArray = PackedArray.Clone();
+                }
+                return member;
+            }
         }
 
     }

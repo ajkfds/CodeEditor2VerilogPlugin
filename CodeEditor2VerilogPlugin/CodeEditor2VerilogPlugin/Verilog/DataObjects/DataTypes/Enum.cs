@@ -46,6 +46,22 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         }
 
         public bool IsVector { get { return false; } }
+
+        public IDataType Clone()
+        {
+            Enum enum_ = new Enum() { BaseType = BaseType.Clone() };
+            List<PackedArray> array = new List<PackedArray>();
+            foreach (var packedDimension in PackedDimensions)
+            {
+                enum_.PackedDimensions.Add(packedDimension.Clone());
+            }
+            foreach(var item in Items)
+            {
+                enum_.Items.Add(item.Clone());
+            }
+
+            return enum_;
+        }
         public static Enum ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "enum") System.Diagnostics.Debugger.Break();
@@ -183,6 +199,11 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         {
             public string Identifier;
             public int Index;
+
+            public Item Clone()
+            {
+                return new Item() { Identifier = Identifier, Index = Index };
+            }
         }
 
     }

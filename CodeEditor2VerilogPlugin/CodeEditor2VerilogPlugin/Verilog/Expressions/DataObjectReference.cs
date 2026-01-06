@@ -138,10 +138,10 @@ namespace pluginVerilog.Verilog.Expressions
                 VariableName = dataObject.Name
             };
             val.DataObject = dataObject;
-            //if(val.DataObject is IntegerVectorValueVariable && !word.Prototype)
-            //{
-            //    val.DataObject = val.DataObject.Clone();
-            //}
+            if(val.DataObject is IntegerVectorValueVariable)
+            {
+                val.DataObject = val.DataObject.Clone();
+            }
 
             val.Reference = word.GetReference();
 
@@ -181,43 +181,87 @@ namespace pluginVerilog.Verilog.Expressions
 
             word.MoveNext();
 
-            // parse dimensions
+            // parse unpacked dimensions
             foreach (var unpackedArray in dataObject.UnpackedArrays)
             {
                 val.UnpackedArrays.Add(unpackedArray.Clone());
             }
 
-            while (!word.Eof && val.Dimensions.Count < dataObject.UnpackedArrays.Count)
             {
-                if (word.GetCharAt(0) != '[')
+                int unpackedArrayIndex = 0;
+                while (!word.Eof)
                 {
-                    break;
-                }
-                word.MoveNext();    // [
-                Expression? exp = Expression.ParseCreate(word, nameSpace);
-                if (exp != null) val.Dimensions.Add(exp);
-                val.UnpackedArrays.RemoveAt(0);
+                    if (word.Text != "[")
+                    {
+                        break;
+                    }
+                    if (val.UnpackedArrays.Count <= unpackedArrayIndex) break;
 
-                if (word.GetCharAt(0) != ']')
-                {
-                    word.AddError("illegal dimension");
-                    break;
+                    RangeExpression? rangeExpression = RangeExpression.ParseCreate(word, nameSpace);
+                    if (rangeExpression == null) return null;
+
+                    if (rangeExpression is SingleBitRangeExpression)
+                    {
+                        val.UnpackedArrays.RemoveAt(unpackedArrayIndex);
+                    }
+                    else
+                    {
+                        val.UnpackedArrays[unpackedArrayIndex] = new UnPackedArray(rangeExpression.BitWidth);
+                        unpackedArrayIndex++;
+                    }
                 }
-                word.MoveNext();    // ]
             }
 
-            // parse ranges
-            if (word.GetCharAt(0) == '[' && acceptRange)
+            // parse packed dimensions
+            if (val.DataObject is IntegerVectorValueVariable)
             {
-                if (!parseRange(word, nameSpace, val)) return null;
+                int packedArrayIndex = 0;
+                IntegerVectorValueVariable ival = (IntegerVectorValueVariable)val.DataObject;
+
+                while (!word.Eof)
+                {
+                    if (word.Text != "[")
+                    {
+                        break;
+                    }
+                    if (ival.PackedDimensions.Count <= packedArrayIndex) break;
+
+                    RangeExpression? rangeExpression = RangeExpression.ParseCreate(word, nameSpace);
+                    if (rangeExpression == null) return null;
+
+                    if (rangeExpression is SingleBitRangeExpression)
+                    {
+                        ival.PackedDimensions.RemoveAt(packedArrayIndex);
+                    }
+                    else
+                    {
+                        ival.PackedDimensions[packedArrayIndex] = new PackedArray(rangeExpression.BitWidth);
+                        packedArrayIndex++;
+                    }
+                }
+
             }
-            else
+
+
+            while(word.Text =="[" && !word.Eof)
+            {
+                word.AddError("illegal range");
+                word.SkipToKeywords(new List<string> { "]", ";" });
+                if (word.Text == "]") word.MoveNext();
+            }
+
+            //// parse ranges
+            //if (word.GetCharAt(0) == '[' && acceptRange)
+            //{
+            //    if (!parseRange(word, nameSpace, val)) return null;
+            //}
+            //else
             {   // w/o range
                 if (dataObject is DataObjects.Variables.IntegerVectorValueVariable)
                 {
-                    var original = dataObject as DataObjects.Variables.IntegerVectorValueVariable;
-                    if (original == null) throw new Exception();
-                    val.BitWidth = original.BitWidth;
+                    //var original = dataObject as DataObjects.Variables.IntegerVectorValueVariable;
+                    //if (original == null) throw new Exception();
+                    val.BitWidth = val.DataObject.BitWidth;
                 }
                 else if (dataObject is DataObjects.Constants.Parameter)
                 {
@@ -255,59 +299,59 @@ namespace pluginVerilog.Verilog.Expressions
                 return DataObject.SyncContext;
             }
         }
-        private static bool parseRange(WordScanner word, NameSpace nameSpace, DataObjectReference val)
-        {
-            if (word.Text != "[") throw new Exception();
-            word.MoveNext();
+        //private static bool parseRange(WordScanner word, NameSpace nameSpace, DataObjectReference val)
+        //{
+        //    if (word.Text != "[") throw new Exception();
+        //    word.MoveNext();
 
-            Expression? exp1 = Expression.ParseCreate(word, nameSpace);
-            Expression? exp2;
-            switch (word.Text)
-            {
-                case ":":
-                    word.MoveNext();
-                    exp2 = Expression.ParseCreate(word, nameSpace);
-                    if (word.Text != "]")
-                    {
-                        word.AddError("illegal range");
-                        return false;
-                    }
-                    word.MoveNext();
-                    val.RangeExpression = new AbsoluteRangeExpression(exp1, exp2);
-                    break;
-                case "+:":
-                    word.MoveNext();
-                    exp2 = Expression.ParseCreate(word, nameSpace);
-                    if (word.Text != "]")
-                    {
-                        word.AddError("illegal range");
-                        return false;
-                    }
-                    word.MoveNext();
-                    val.RangeExpression = new RelativePlusRangeExpression(exp1, exp2);
-                    break;
-                case "-:":
-                    word.MoveNext();
-                    exp2 = Expression.ParseCreate(word, nameSpace);
-                    if (word.Text != "]")
-                    {
-                        word.AddError("illegal range");
-                        return false;
-                    }
-                    word.MoveNext();
-                    val.RangeExpression = new RelativeMinusRangeExpression(exp1, exp2);
-                    break;
-                case "]":
-                    word.MoveNext();
-                    val.RangeExpression = new SingleBitRangeExpression(exp1);
-                    break;
-                default:
-                    word.AddError("illegal range/dimension");
-                    return false;
-            }
-            val.BitWidth = val.RangeExpression.BitWidth;
-            return true;
-        }
+        //    Expression? exp1 = Expression.ParseCreate(word, nameSpace);
+        //    Expression? exp2;
+        //    switch (word.Text)
+        //    {
+        //        case ":":
+        //            word.MoveNext();
+        //            exp2 = Expression.ParseCreate(word, nameSpace);
+        //            if (word.Text != "]")
+        //            {
+        //                word.AddError("illegal range");
+        //                return false;
+        //            }
+        //            word.MoveNext();
+        //            val.RangeExpression = new AbsoluteRangeExpression(exp1, exp2);
+        //            break;
+        //        case "+:":
+        //            word.MoveNext();
+        //            exp2 = Expression.ParseCreate(word, nameSpace);
+        //            if (word.Text != "]")
+        //            {
+        //                word.AddError("illegal range");
+        //                return false;
+        //            }
+        //            word.MoveNext();
+        //            val.RangeExpression = new RelativePlusRangeExpression(exp1, exp2);
+        //            break;
+        //        case "-:":
+        //            word.MoveNext();
+        //            exp2 = Expression.ParseCreate(word, nameSpace);
+        //            if (word.Text != "]")
+        //            {
+        //                word.AddError("illegal range");
+        //                return false;
+        //            }
+        //            word.MoveNext();
+        //            val.RangeExpression = new RelativeMinusRangeExpression(exp1, exp2);
+        //            break;
+        //        case "]":
+        //            word.MoveNext();
+        //            val.RangeExpression = new SingleBitRangeExpression(exp1);
+        //            break;
+        //        default:
+        //            word.AddError("illegal range/dimension");
+        //            return false;
+        //    }
+        //    val.BitWidth = val.RangeExpression.BitWidth;
+        //    return true;
+        //}
 
     }
 }

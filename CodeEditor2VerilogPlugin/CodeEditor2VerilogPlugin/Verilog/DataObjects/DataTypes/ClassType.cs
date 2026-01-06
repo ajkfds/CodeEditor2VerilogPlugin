@@ -1,4 +1,6 @@
-﻿using pluginVerilog.Verilog.BuildingBlocks;
+﻿using DynamicData;
+using pluginVerilog.Verilog.BuildingBlocks;
+using pluginVerilog.Verilog.DataObjects.Arrays;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,7 +44,28 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
         parameter_value_assignment ::= # ( [ list_of_parameter_assignments ] ) 
         */
-
+        public IDataType Clone()
+        {
+            List<PackedArray> array = new List<PackedArray>();
+            foreach (var packedDimension in PackedDimensions)
+            {
+                array.Add(packedDimension.Clone());
+            }
+            return ClassType.Create(array);
+        }
+        public static ClassType Create(List<Arrays.PackedArray>? packedDimensions)
+        {
+            ClassType classType = new ClassType() { };
+            if (packedDimensions == null)
+            {
+                classType.PackedDimensions.Clear();
+            }
+            else
+            {
+                classType.PackedDimensions = packedDimensions;
+            }
+            return classType;
+        }
         public static ClassType? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             if (word.NextText != ":" && word.NextText != "#") throw new Exception();

@@ -17,7 +17,6 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             DataTypes.IntegerVectorType dType = (DataTypes.IntegerVectorType)dataType;
 
             Reg val = new Reg() { Name = name };
-            val.PackedDimensions = dType.PackedDimensions;
             val.DataType = dType;
             return val;
         }
@@ -25,9 +24,9 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         public override Variable Clone()
         {
             Reg val = new Reg() { Name = Name };
-            val.DataType = DataType;
-            val.PackedDimensions = PackedDimensions;
+            if(DataType != null) val.DataType = DataType.Clone();
             val.Signed = Signed;
+            val.Defined = Defined;
             return val;
         }
 
