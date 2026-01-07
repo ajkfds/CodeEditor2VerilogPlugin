@@ -147,14 +147,6 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                 if (word.Text == "[")
                 {
                     array = DataObjects.Arrays.PackedArray.ParseCreate(word, (NameSpace)module);
-                    if (array is UnPackedArray)
-                    {
-                        // TODO : implement
-                    }
-                    else if (array != null)
-                    {
-                        word.AddError("only unpacked array is acceptable");
-                    }
                 }
 
                 if(singed != null || array != null)
@@ -229,13 +221,8 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                                     List<PackedArray> packedArrays = new List<PackedArray>() { packedArray };
                                     dataType = DataTypes.IntegerVectorType.Create(DataTypeEnum.Logic, number.Signed, packedArrays);
                                 }
-
-                                constants.DataType = dataType;
                             }
-                            else
-                            {
-                                constants.DataType = dataType;
-                            }
+                            constants.DataType = dataType;
 
                             module.NamedElements.Add(constants.Name, constants);
 
@@ -318,19 +305,29 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
             word.MoveNext();
 
             IDataType? dataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, null);
-            PackedArray? range = null;
-            bool signed = false;
-
-            if (word.Text == "signed")
+            if (dataType == null)
             {
-                signed = true;
-                word.Color(CodeDrawStyle.ColorType.Keyword);
-                word.MoveNext();
-            }
+                bool? singed = null;
+                if (word.Text == "signed")
+                {
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+                }
 
-            if (word.GetCharAt(0) == '[')
-            {
-                range = PackedArray.ParseCreate(word, nameSpace);
+                IArray? array = null;
+                if (word.Text == "[")
+                {
+                    array = DataObjects.Arrays.PackedArray.ParseCreate(word, nameSpace);
+                }
+
+                if (singed != null || array != null)
+                {
+                    if (singed == null) singed = false;
+                    List<PackedArray> arrays = new List<PackedArray>();
+                    if (array != null) arrays.Add((PackedArray)array);
+
+                    dataType = DataTypes.IntegerVectorType.Create(DataTypeEnum.Logic, (bool)singed, arrays);
+                }
             }
 
             while (!word.Eof)
@@ -369,34 +366,54 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                         return;
                 }
 
+                if (!word.Active)
                 {
-                    if (!word.Active)
+                    // skip
+                }
+                else if (word.Prototype)
+                {
+                    if (nameSpace.NamedElements.ContainsKey(identifier))
                     {
-                        // skip
-                    }
-                    else if (word.Prototype)
-                    {
-                        if (nameSpace.NamedElements.ContainsKey(identifier))
-                        {
-                            word.AddError("name duplicated");
-                        }
-                        else
-                        {
-                            nameSpace.NamedElements.Add(constants.Name, constants);
-                        }
+                        word.AddError("name duplicated");
                     }
                     else
                     {
-                        if (nameSpace.NamedElements.ContainsKey(identifier) && nameSpace.NamedElements[identifier] is DataObjects.Constants.Constants)
-                        { // re-parse after prototype parse 
-                            constants = (DataObjects.Constants.Constants)nameSpace.NamedElements[identifier];
-                        }
-                        else
-                        { // for root nameSpace parameter
-                            nameSpace.NamedElements.Add(constants.Name, constants);
-                        }
-                        constants.Defined = true;
+                        nameSpace.NamedElements.Add(constants.Name, constants);
                     }
+                }
+                else
+                {
+                    if (nameSpace.NamedElements.ContainsKey(identifier) && nameSpace.NamedElements[identifier] is DataObjects.Constants.Constants)
+                    { // re-parse after prototype parse 
+                        constants = (DataObjects.Constants.Constants)nameSpace.NamedElements[identifier];
+                        constants.ConstantType = constantType;
+                        if (dataType == null && expression is Expressions.Number)
+                        {
+                            Expressions.Number number = (Expressions.Number)expression;
+                            if (number.NumberType == Expressions.Number.NumberTypeEnum.Real)
+                            {
+                                dataType = DataTypes.IntegerAtomType.Create(DataTypeEnum.Real, number.Signed);
+                            }
+                            else if (number.BitWidth != null)
+                            {
+                                PackedArray packedArray = new PackedArray((int)number.BitWidth);
+                                List<PackedArray> packedArrays = new List<PackedArray>() { packedArray };
+                                dataType = DataTypes.IntegerVectorType.Create(DataTypeEnum.Logic, number.Signed, packedArrays);
+                            }
+                            else
+                            {
+                                PackedArray packedArray = new PackedArray(32);
+                                List<PackedArray> packedArrays = new List<PackedArray>() { packedArray };
+                                dataType = DataTypes.IntegerVectorType.Create(DataTypeEnum.Logic, number.Signed, packedArrays);
+                            }
+                        }
+                        constants.DataType = dataType;
+                    }
+                    else
+                    { // for root nameSpace parameter
+                        nameSpace.NamedElements.Add(constants.Name, constants);
+                    }
+                    constants.Defined = true;
                 }
 
                 if (word.Text != ",") break;
