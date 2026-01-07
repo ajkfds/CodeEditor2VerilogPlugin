@@ -10,12 +10,47 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
 {
     public class Net : DataObject
     {
-        public bool Signed = false;
+        public bool Signed
+        {
+            get
+            {
+                if(DataType is DataTypes.IntegerAtomType)
+                {
+                    return ((DataTypes.IntegerAtomType)DataType).Signed;
+                }
+                if (DataType is DataTypes.IntegerVectorType)
+                {
+                    return ((DataTypes.IntegerVectorType)DataType).Signed;
+                }
+                return false;
+            }
+        }
+
+        public override int? BitWidth{
+            get
+            {
+                int bitWidth = 1;
+                if (DataType != null && DataType.BitWidth != null) bitWidth = (int)DataType.BitWidth;
+                foreach(UnPackedArray unPackedArray in UnpackedArrays)
+                {
+                    if (unPackedArray.Size == null) return null;
+                    bitWidth = bitWidth * (int)unPackedArray.Size;
+                }
+                return bitWidth;
+            }
+        }
 
         public NetTypeEnum NetType = NetTypeEnum.Wire;
         public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Net; } }
 
-        public List<DataObjects.Arrays.PackedArray> PackedDimensions { get; set; } = new List<DataObjects.Arrays.PackedArray>();
+        public List<DataObjects.Arrays.PackedArray> PackedDimensions
+        {
+            get
+            {
+                if (DataType == null) throw new Exception();
+                return DataType.PackedDimensions;
+            }
+        }
 
 
         // net_type::= supply0 | supply1 | tri     | triand  | trior | tri0 | tri1 | wire  | wand   | wor
@@ -127,20 +162,9 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             Net net = new Net() { Name = name };
             net.NetType = netType;
             net.DataType = dataType;
-
-            if (dataType is DataObjects.DataTypes.IntegerVectorType)
-            {
-                var integerVectorType = (DataObjects.DataTypes.IntegerVectorType)dataType;
-                net.PackedDimensions = integerVectorType.PackedDimensions;
-                net.Signed = integerVectorType.Signed;
-            }
-            else if (dataType is DataObjects.DataTypes.IntegerAtomType)
-            {
-                var integerAtomType = (DataObjects.DataTypes.IntegerAtomType)dataType;
-                net.Signed = integerAtomType.Signed;
-            }
             return net;
         }
+
 
         public override string CreateTypeString()
         {
@@ -291,14 +315,14 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
 
             // ### Verilog 2001
 
-            // net_declaration ::=    net_type                                          [signed]        [delay3] list_of_net_identifiers;
-            //                      | net_type[drive_strength]                          [signed]        [delay3] list_of_net_decl_assignments;
-            //                      | net_type                  [vectored | scalared]   [signed] range  [delay3] list_of_net_identifiers;
-            //                      | net_type[drive_strength]  [vectored | scalared]   [signed] range  [delay3] list_of_net_decl_assignments;
-            //                      | trireg[charge_strength][signed][delay3] list_of_net_identifiers;
-            //                      | trireg[drive_strength][signed][delay3] list_of_net_decl_assignments;
-            //                      | trireg[charge_strength][vectored | scalared][signed] range[delay3] list_of_net_identifiers;          
-            //                      | trireg[drive_strength][vectored | scalared][signed] range[delay3] list_of_net_decl_assignments; 
+            // net_declaration ::=    net_type                                              [signed]        [delay3] list_of_net_identifiers;
+            //                      | net_type  [drive_strength]                            [signed]        [delay3] list_of_net_decl_assignments;
+            //                      | net_type                      [vectored | scalared]   [signed] range  [delay3] list_of_net_identifiers;
+            //                      | net_type  [drive_strength]    [vectored | scalared]   [signed] range  [delay3] list_of_net_decl_assignments;
+            //                      | trireg    [charge_strength]                           [signed]        [delay3] list_of_net_identifiers;
+            //                      | trireg    [drive_strength]                            [signed]        [delay3] list_of_net_decl_assignments;
+            //                      | trireg    [charge_strength]   [vectored | scalared]   [signed] range  [delay3] list_of_net_identifiers;          
+            //                      | trireg    [drive_strength]    [vectored | scalared]   [signed] range  [delay3] list_of_net_decl_assignments; 
             //
             //
             // list_of_net_decl_assignments ::= net_decl_assignment { , net_decl_assignment }
@@ -334,6 +358,9 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             // The reg keyword can be used in a net or port declaration if there are lexical elements between the net type
             // keyword and the reg keyword. 
 
+
+
+            // net_type
             NetTypeEnum netType = NetTypeEnum.Wire;
             {
                 NetTypeEnum? netTypeTemp = parseNetType(word, nameSpace);
@@ -355,7 +382,6 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             }
 
             // [vectored | scalared]
-
             if (word.Text == "vectored")
             {
                 word.Color(CodeDrawStyle.ColorType.Keyword);
@@ -366,44 +392,11 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                 word.MoveNext();
             }
 
-            if (word.Eof)
-            {
-                word.AddError("illegal net declaration");
-                return true;
-            }
+            // data_type_or_implicit
+            DataTypes.IDataType? dataType = DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, DataTypes.DataTypeEnum.Logic);
+            if (dataType == null) return true;
 
-            // [signed]
-            bool signed = false;
-            if (word.Text == "signed")
-            {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
-                word.MoveNext();
-                signed = true;
-            }
-
-            if (word.Eof)
-            {
-                word.AddError("illegal net declaration");
-                return true;
-            }
-
-
-            // data type
-
-            // [range]
-            DataObjects.Arrays.PackedArray? range = null;
-            while(!word.Eof && word.GetCharAt(0) == '[')
-            {
-                range = DataObjects.Arrays.PackedArray.ParseCreate(word, nameSpace);
-                if (word.Eof || range == null)
-                {
-                    word.AddError("illegal net declaration");
-                    return true;
-                }
-            }
-
-
-            //[delay3]
+            // [delay3]
             if (word.Text == "#")
             {
                 Delay3.ParseCreate(word, nameSpace);
@@ -415,13 +408,12 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                 return true;
             }
 
+            // list_of_net_decl_assignments;
             List<Net> nets = new List<Net>();
             while (!word.Eof)
             {
-                Net net = new Net() { Name = word.Text };
+                Net net = new Net() { Name = word.Text,DataType = dataType };
                 nets.Add(net);
-                net.Signed = signed;
-                if(range != null)  net.PackedDimensions.Add(range);
                 net.NetType = netType;
 
                 net.DefinedReference = word.GetReference();
@@ -541,7 +533,9 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
         }
         public override DataObject Clone(string name)
         {
-            return new Net() { Name = name, DefinedReference = DefinedReference, PackedDimensions = PackedDimensions };
+            Net net = new Net() { Name = name, DefinedReference = DefinedReference, DataType = DataType,Defined = Defined };
+            if(DataType != null) net.DataType = DataType.Clone();
+            return net;
         }
     }
 }

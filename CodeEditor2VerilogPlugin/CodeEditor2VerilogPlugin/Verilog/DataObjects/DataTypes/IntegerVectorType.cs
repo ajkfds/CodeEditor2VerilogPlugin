@@ -16,7 +16,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Register; } }
 
         public virtual List<Arrays.PackedArray> PackedDimensions { get; protected set; } = new List<Arrays.PackedArray>();
-        public virtual bool Signed { get; protected set; }
+        public virtual bool Signed { get; init; }
 
         //      data_type::= integer_vector_type[signing] { packed_dimension }
         //                   ...
@@ -104,8 +104,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         }
         public static IntegerVectorType Create(DataTypeEnum dataType, bool signed,List<Arrays.PackedArray>? packedDimensions)
         {
-            IntegerVectorType integerVectorType = new IntegerVectorType() { Type = dataType };
-            integerVectorType.Signed = signed;
+            IntegerVectorType integerVectorType = new IntegerVectorType() { Type = dataType,Signed = signed };
             if(packedDimensions == null)
             {
                 integerVectorType.PackedDimensions.Clear();
@@ -119,7 +118,8 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
         public static IntegerVectorType? parse(WordScanner word,NameSpace nameSpace,DataTypeEnum dataType)
         {
-            var integerVectorType = new IntegerVectorType() { Type = dataType };
+
+            bool signed = false;
 
             word.Color(CodeDrawStyle.ColorType.Keyword);
             if(dataType == DataTypeEnum.Bit | dataType == DataTypeEnum.Logic)
@@ -128,7 +128,6 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             }
             word.MoveNext();
 
-            integerVectorType.Signed = false;
 
             if (word.Eof)
             {
@@ -139,13 +138,14 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             {
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 word.MoveNext();
-                integerVectorType.Signed = true;
+                signed = true;
             }
             if (word.Eof)
             {
                 word.AddError("illegal reg declaration");
                 return null;
             }
+            var integerVectorType = new IntegerVectorType() { Type = dataType,Signed = signed };
 
             while (word.GetCharAt(0) == '[')
             {

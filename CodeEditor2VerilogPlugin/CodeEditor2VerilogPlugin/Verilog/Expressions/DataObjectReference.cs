@@ -138,12 +138,12 @@ namespace pluginVerilog.Verilog.Expressions
                 VariableName = dataObject.Name
             };
             val.DataObject = dataObject;
-            if(val.DataObject is IntegerVectorValueVariable)
+            if(val.DataObject is IntegerVectorValueVariable || val.DataObject is Net)
             {
                 val.DataObject = val.DataObject.Clone();
             }
 
-            val.Reference = word.GetReference();
+                val.Reference = word.GetReference();
 
             word.Color(dataObject.ColorType);
 
@@ -186,6 +186,7 @@ namespace pluginVerilog.Verilog.Expressions
             {
                 val.UnpackedArrays.Add(unpackedArray.Clone());
             }
+            dataObject.UnpackedArrays.Clear();
 
             {
                 int unpackedArrayIndex = 0;
@@ -239,16 +240,41 @@ namespace pluginVerilog.Verilog.Expressions
                         packedArrayIndex++;
                     }
                 }
-
-            }
-
-
-            while(word.Text =="[" && !word.Eof)
+            }else if(val.DataObject is Net)
             {
-                word.AddError("illegal range");
-                word.SkipToKeywords(new List<string> { "]", ";" });
-                if (word.Text == "]") word.MoveNext();
+                int packedArrayIndex = 0;
+                Net ival = (Net)val.DataObject;
+
+                while (!word.Eof)
+                {
+                    if (word.Text != "[")
+                    {
+                        break;
+                    }
+                    if (ival.PackedDimensions.Count <= packedArrayIndex) break;
+
+                    RangeExpression? rangeExpression = RangeExpression.ParseCreate(word, nameSpace);
+                    if (rangeExpression == null) return null;
+
+                    if (rangeExpression is SingleBitRangeExpression)
+                    {
+                        ival.PackedDimensions.RemoveAt(packedArrayIndex);
+                    }
+                    else
+                    {
+                        ival.PackedDimensions[packedArrayIndex] = new PackedArray(rangeExpression.BitWidth);
+                        packedArrayIndex++;
+                    }
+                }
             }
+
+
+            while (word.Text == "[" && !word.Eof)
+                {
+                    word.AddError("illegal range");
+                    word.SkipToKeywords(new List<string> { "]", ";" });
+                    if (word.Text == "]") word.MoveNext();
+                }
 
             //// parse ranges
             //if (word.GetCharAt(0) == '[' && acceptRange)
@@ -257,7 +283,7 @@ namespace pluginVerilog.Verilog.Expressions
             //}
             //else
             {   // w/o range
-                if (dataObject is DataObjects.Variables.IntegerVectorValueVariable)
+                if (dataObject is DataObjects.Variables.IntegerVectorValueVariable || dataObject is Net)
                 {
                     //var original = dataObject as DataObjects.Variables.IntegerVectorValueVariable;
                     //if (original == null) throw new Exception();

@@ -151,7 +151,17 @@ namespace pluginVerilog.Verilog.DataObjects
         public virtual int? BitWidth
         {
             get {
-                return DataType?.BitWidth;
+                int? bitWith = null;
+                if(DataType != null && DataType.BitWidth != null)
+                {
+                    bitWith = (int)(DataType.BitWidth);
+                    foreach(Arrays.UnPackedArray unPackedArray in UnpackedArrays)
+                    {
+                        if (unPackedArray.Size == null) return null;
+                        bitWith = bitWith * (int)unPackedArray.Size;
+                    }
+                }
+                return bitWith;
             }
         }
         [JsonIgnore]

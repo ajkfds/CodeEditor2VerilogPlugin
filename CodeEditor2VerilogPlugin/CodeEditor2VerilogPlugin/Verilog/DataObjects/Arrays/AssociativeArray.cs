@@ -42,58 +42,58 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
 
             { // function int size();
                 List<Port> ports = new List<Port>();
-                Variable returnVal = DataObjects.Variables.Int.Create("size", DataTypes.IntegerAtomType.Create(DataTypes.DataTypeEnum.Int, false));
+                Variable returnVal = DataObjects.Variables.Int.Create("size", DataTypes.IntegerAtomType.Create(DataTypes.DataTypeEnum.Int, false,null));
                 BuiltInMethod builtInMethod = BuiltInMethod.Create("size", returnVal, ports);
                 associativeArray.NamedElements.Add(builtInMethod.Name, builtInMethod);
             }
             { // function int num();
                 List<Port> ports = new List<Port>();
-                Variable returnVal = DataObjects.Variables.Int.Create("num", DataTypes.IntegerAtomType.Create(DataTypes.DataTypeEnum.Int, false));
+                Variable returnVal = DataObjects.Variables.Int.Create("num", DataTypes.IntegerAtomType.Create(DataTypes.DataTypeEnum.Int, false, null));
                 BuiltInMethod builtInMethod = BuiltInMethod.Create("num", returnVal, ports);
                 associativeArray.NamedElements.Add(builtInMethod.Name, builtInMethod);
             }
 
             { // function int first( ref index );
                 List<Port> ports = new List<Port>();
-                Port? port = Port.Create("index", null, Port.DirectionEnum.Ref, DataObjects.Variables.Integer.Create("index", DataTypes.IntegerAtomType.Create(DataTypes.DataTypeEnum.Integer, false)));
+                Port? port = Port.Create("index", null, Port.DirectionEnum.Ref, DataObjects.Variables.Integer.Create("index", DataTypes.IntegerAtomType.Create(DataTypes.DataTypeEnum.Integer, false, null)));
                 if (port != null) ports.Add(port);
-                Variable returnVal = DataObjects.Variables.Int.Create("first", DataTypes.IntegerAtomType.Create(DataTypes.DataTypeEnum.Int, false));
+                Variable returnVal = DataObjects.Variables.Int.Create("first", DataTypes.IntegerAtomType.Create(DataTypes.DataTypeEnum.Int, false, null));
                 BuiltInMethod builtInMethod = BuiltInMethod.Create("first", returnVal, ports);
                 associativeArray.NamedElements.Add(builtInMethod.Name, builtInMethod);
             }
 
             { // function int next( ref index );
                 List<Port> ports = new List<Port>();
-                Port? port = Port.Create("index", null, Port.DirectionEnum.Ref, DataObjects.Variables.Integer.Create("index", DataTypes.IntegerAtomType.Create(DataTypes.DataTypeEnum.Integer, false)));
+                Port? port = Port.Create("index", null, Port.DirectionEnum.Ref, DataObjects.Variables.Integer.Create("index", DataTypes.IntegerAtomType.Create(DataTypes.DataTypeEnum.Integer, false, null)));
                 if (port != null) ports.Add(port);
-                Variable returnVal = DataObjects.Variables.Int.Create("next", DataTypes.IntegerAtomType.Create(DataTypes.DataTypeEnum.Int, false));
+                Variable returnVal = DataObjects.Variables.Int.Create("next", DataTypes.IntegerAtomType.Create(DataTypes.DataTypeEnum.Int, false, null));
                 BuiltInMethod builtInMethod = BuiltInMethod.Create("next", returnVal, ports);
                 associativeArray.NamedElements.Add(builtInMethod.Name, builtInMethod);
             }
 
             { // function int prev( ref index );
                 List<Port> ports = new List<Port>();
-                Port? port = Port.Create("index", null, Port.DirectionEnum.Ref, DataObjects.Variables.Integer.Create("index", DataTypes.IntegerAtomType.Create(DataTypes.DataTypeEnum.Integer, false)));
+                Port? port = Port.Create("index", null, Port.DirectionEnum.Ref, DataObjects.Variables.Integer.Create("index", DataTypes.IntegerAtomType.Create(DataTypes.DataTypeEnum.Integer, false, null)));
                 if (port != null) ports.Add(port);
-                Variable returnVal = DataObjects.Variables.Int.Create("prev", DataTypes.IntegerAtomType.Create(DataTypes.DataTypeEnum.Int, false));
+                Variable returnVal = DataObjects.Variables.Int.Create("prev", DataTypes.IntegerAtomType.Create(DataTypes.DataTypeEnum.Int, false, null));
                 BuiltInMethod builtInMethod = BuiltInMethod.Create("prev", returnVal, ports);
                 associativeArray.NamedElements.Add(builtInMethod.Name, builtInMethod);
             }
 
             { // function int last( ref index );
                 List<Port> ports = new List<Port>();
-                Port? port = Port.Create("index", null, Port.DirectionEnum.Ref, DataObjects.Variables.Integer.Create("index", DataTypes.IntegerAtomType.Create(DataTypes.DataTypeEnum.Integer, false)));
+                Port? port = Port.Create("index", null, Port.DirectionEnum.Ref, DataObjects.Variables.Integer.Create("index", DataTypes.IntegerAtomType.Create(DataTypes.DataTypeEnum.Integer, false, null)));
                 if (port != null) ports.Add(port);
-                Variable returnVal = DataObjects.Variables.Int.Create("last", DataTypes.IntegerAtomType.Create(DataTypes.DataTypeEnum.Int, false));
+                Variable returnVal = DataObjects.Variables.Int.Create("last", DataTypes.IntegerAtomType.Create(DataTypes.DataTypeEnum.Int, false, null));
                 BuiltInMethod builtInMethod = BuiltInMethod.Create("last", returnVal, ports);
                 associativeArray.NamedElements.Add(builtInMethod.Name, builtInMethod);
             }
 
             { // function int exists( input index );
                 List<Port> ports = new List<Port>();
-                Port? port = Port.Create("index", null, Port.DirectionEnum.Input, DataObjects.Variables.Integer.Create("index", DataTypes.IntegerAtomType.Create(DataTypes.DataTypeEnum.Integer, false)));
+                Port? port = Port.Create("index", null, Port.DirectionEnum.Input, DataObjects.Variables.Integer.Create("index", DataTypes.IntegerAtomType.Create(DataTypes.DataTypeEnum.Integer, false, null)));
                 if (port != null) ports.Add(port);
-                Variable returnVal = DataObjects.Variables.Int.Create("exists", DataTypes.IntegerAtomType.Create(DataTypes.DataTypeEnum.Int, false));
+                Variable returnVal = DataObjects.Variables.Int.Create("exists", DataTypes.IntegerAtomType.Create(DataTypes.DataTypeEnum.Int, false, null));
                 BuiltInMethod builtInMethod = BuiltInMethod.Create("exists", returnVal, ports);
                 associativeArray.NamedElements.Add(builtInMethod.Name, builtInMethod);
             }

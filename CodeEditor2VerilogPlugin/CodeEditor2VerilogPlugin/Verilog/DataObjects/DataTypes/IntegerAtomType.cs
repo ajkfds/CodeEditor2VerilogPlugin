@@ -110,16 +110,22 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             return sb.ToString();
         }
 
-        public static IntegerAtomType Create(DataTypeEnum dataType,bool signed)
+        public static IntegerAtomType Create(DataTypeEnum dataType,bool signed, List<DataObjects.Arrays.PackedArray>? packedDimensions)
         {
             IntegerAtomType integerAtomType = new IntegerAtomType() { Type = dataType };
             integerAtomType.Signed = signed;
+            if(packedDimensions != null) integerAtomType.PackedDimensions = packedDimensions;
             return integerAtomType;
         }
 
         public IDataType Clone()
         {
-            return IntegerAtomType.Create(Type, Signed);
+            IDataType dataType = IntegerAtomType.Create(Type, Signed,new List<Arrays.PackedArray>());
+            foreach(var packedArray in PackedDimensions)
+            {
+                dataType.PackedDimensions.Add(packedArray.Clone());
+            }
+            return dataType;
         }
 
         protected static IntegerAtomType? parse(WordScanner word, NameSpace nameSpace, DataTypeEnum dataType)

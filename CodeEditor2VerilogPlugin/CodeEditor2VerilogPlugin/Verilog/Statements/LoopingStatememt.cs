@@ -481,7 +481,7 @@ namespace pluginVerilog.Verilog.Statements
                     word.AddError("illegal loop variables");
                     break;
                 }
-                DataObjects.DataTypes.IDataType dataType = DataObjects.DataTypes.IntegerAtomType.Create(DataObjects.DataTypes.DataTypeEnum.Int, false);
+                DataObjects.DataTypes.IDataType dataType = DataObjects.DataTypes.IntegerAtomType.Create(DataObjects.DataTypes.DataTypeEnum.Int, false, null);
                 DataObjects.DataObject.Create(name, dataType);
                 word.Color(CodeDrawStyle.ColorType.Variable);
                 word.MoveNext();

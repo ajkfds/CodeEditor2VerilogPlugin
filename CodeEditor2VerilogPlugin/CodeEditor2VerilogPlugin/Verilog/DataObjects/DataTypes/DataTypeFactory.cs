@@ -189,131 +189,158 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 // type_reference
                 case "type":
                     return parseTypeReference(word, nameSpace);
+            }
 
-                default:
+            {
+                INamedElement? namedElement = nameSpace.GetNamedElementUpward(word.Text);
+                if(namedElement != null)
+                {
+                    // class
+                    if (namedElement is BuildingBlocks.Class)
                     {
-                        INamedElement? namedElement = nameSpace.GetNamedElementUpward(word.Text);
-                        if(namedElement != null)
-                        {
-                            // class
-                            if (namedElement is BuildingBlocks.Class)
-                            {
-                                IDataType dType = (BuildingBlocks.Class)namedElement;
-                                word.Color(CodeDrawStyle.ColorType.Keyword);
-                                word.MoveNext();
-                                return dType;
-                            }
-                            // [class_scope | package_scope] type_identifier { packed_dimension }
-
-
-                            // "virtual"["interface"] interface_identifier[parameter_value_assignment][ . modport_identifier]
-                            //if(namedElement is BuildingBlocks.Interface)
-                            //{
-                            //    IDataType dType = (BuildingBlocks.Interface)namedElement;
-                            //    word.Color(CodeDrawStyle.ColorType.Keyword);
-                            //    word.MoveNext();
-                            //    return dType;
-                            //}
-
-                            // typedef
-                            if (namedElement is Typedef)
-                            {
-                                IDataType dType = ((Typedef)namedElement).VariableType;
-                                if (dType != null)
-                                {
-                                    word.Color(CodeDrawStyle.ColorType.Identifier);
-                                    word.MoveNext();
-
-                                    // packed_dimension
-                                    while (word.GetCharAt(0) == '[')
-                                    {
-                                        PackedArray? range = PackedArray.ParseCreate(word, nameSpace);
-                                        if (word.Eof || range == null)
-                                        {
-                                            word.AddError("illegal reg declaration");
-                                            return null;
-                                        }
-
-                                        PackedArray? packedArray = range as Arrays.PackedArray;
-
-                                        if (packedArray != null)
-                                        {
-                                            dType.PackedDimensions.Add(packedArray);
-                                        }
-                                    }
-                                    return dType;
-                                }
-                            }
-                        }
-                    }
-
-                    // class_type
-                    BuildingBlock? buildingBlock = word.ProjectProperty.GetBuildingBlock(word.Text);
-                    if (buildingBlock is Class)
-                    {
-                        Class class_ =(Class) buildingBlock;
-                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        IDataType classType = (BuildingBlocks.Class)namedElement;
+                        word.Color(CodeDrawStyle.ColorType.Keyword);
                         word.MoveNext();
-                        return class_;
+                        return classType;
                     }
+                    // [class_scope | package_scope] type_identifier { packed_dimension }
 
-                    //if (nameSpace.NamedElements.ContainsKey(word.Text))
-                    //{
-                    //    INamedElement namedElement = nameSpace.NamedElements[word.Text];
 
-                    //}else if(word.RootParsedDocument.Root != null && word.RootParsedDocument.Root.NamedElements.ContainsKey(word.Text))
+                    // "virtual"["interface"] interface_identifier[parameter_value_assignment][ . modport_identifier]
+                    //if(namedElement is BuildingBlocks.Interface)
                     //{
-                    //    INamedElement namedElement = word.RootParsedDocument.Root.NamedElements[word.Text];
-                    //    if (namedElement is Typedef)
-                    //    {
-                    //        IDataType dType = ((Typedef)namedElement).VariableType;
-                    //        if (dType != null)
-                    //        {
-                    //            word.Color(CodeDrawStyle.ColorType.Keyword);
-                    //            word.MoveNext();
-                    //            return dType;
-                    //        }
-                    //    }
+                    //    IDataType dType = (BuildingBlocks.Interface)namedElement;
+                    //    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    //    word.MoveNext();
+                    //    return dType;
                     //}
 
-                    if (defaultDataType == null) break;
-                    DataTypeEnum dataTypeEnum = (DataTypeEnum)defaultDataType;
-                    // data_type_or_implicit::= data_type | implicit_data_type
-                    // signing ::= "signed" | "unsigned"
-                    // implicit_data_type::= [signing] { packed_dimension }
-                    if (word.Text == "signed" || word.Text == "unsigned" || word.Text == "[")
+                    // typedef
+                    if (namedElement is Typedef)
                     {
-                        IDataType? dType = null;
-                        switch (dataTypeEnum)
+                        IDataType defType = ((Typedef)namedElement).VariableType;
+                        if (defType != null)
                         {
-                            case DataTypeEnum.Bit:
-                            case DataTypeEnum.Logic:
-                            case DataTypeEnum.Reg:
-                                dType = new IntegerVectorType() { Type = dataTypeEnum };
-                                break;
-                            case DataTypeEnum.Byte:
-                            case DataTypeEnum.Shortint:
-                            case DataTypeEnum.Int:
-                            case DataTypeEnum.Longint:
-                            case DataTypeEnum.Integer:
-                            case DataTypeEnum.Time:
-                                dType = new IntegerAtomType() { Type = dataTypeEnum };
-                                break;
-                            case DataTypeEnum.Shortreal:
-                                dType = new ShortRealType();
-                                break;
-                            case DataTypeEnum.Real:
-                                dType = new ShortRealType();
-                                break;
-                            case DataTypeEnum.Realtime:
-                                dType = new RealTimeType();
-                                break;
+                            word.Color(CodeDrawStyle.ColorType.Identifier);
+                            word.MoveNext();
+
+                            // packed_dimension
+                            while (word.Text == "[")
+                            {
+                                PackedArray? range = PackedArray.ParseCreate(word, nameSpace);
+                                if (word.Eof || range == null)
+                                {
+                                    word.AddError("illegal reg declaration");
+                                    return null;
+                                }
+
+                                PackedArray? packedArray = range as Arrays.PackedArray;
+
+                                if (packedArray != null)
+                                {
+                                    defType.PackedDimensions.Add(packedArray);
+                                }
+                            }
+                            return defType;
                         }
-                        return dType;
                     }
+                }
+            }
+
+            // class_type
+            BuildingBlock? buildingBlock = word.ProjectProperty.GetBuildingBlock(word.Text);
+            if (buildingBlock is Class)
+            {
+                Class class_ =(Class) buildingBlock;
+                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.MoveNext();
+                return class_;
+            }
+
+            //if (nameSpace.NamedElements.ContainsKey(word.Text))
+            //{
+            //    INamedElement namedElement = nameSpace.NamedElements[word.Text];
+
+            //}else if(word.RootParsedDocument.Root != null && word.RootParsedDocument.Root.NamedElements.ContainsKey(word.Text))
+            //{
+            //    INamedElement namedElement = word.RootParsedDocument.Root.NamedElements[word.Text];
+            //    if (namedElement is Typedef)
+            //    {
+            //        IDataType dType = ((Typedef)namedElement).VariableType;
+            //        if (dType != null)
+            //        {
+            //            word.Color(CodeDrawStyle.ColorType.Keyword);
+            //            word.MoveNext();
+            //            return dType;
+            //        }
+            //    }
+            //}
+
+            if (defaultDataType == null) return null;
+
+            DataTypeEnum dataTypeEnum = (DataTypeEnum)defaultDataType;
+            // data_type_or_implicit::= data_type | implicit_data_type
+
+            // signing ::= "signed" | "unsigned"
+            // implicit_data_type::= [signing] { packed_dimension }
+            bool signed = false;
+            if (word.Text == "unsigned")
+            {
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext();
+            }
+            else if (word.Text == "signed")
+            {
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext();
+                signed = true;
+            }
+
+            IDataType? dType = null;
+            switch (dataTypeEnum)
+            {
+                case DataTypeEnum.Bit:
+                case DataTypeEnum.Logic:
+                case DataTypeEnum.Reg:
+                    dType = new IntegerVectorType() { Type = dataTypeEnum,Signed = signed };
+                    break;
+                case DataTypeEnum.Byte:
+                case DataTypeEnum.Shortint:
+                case DataTypeEnum.Int:
+                case DataTypeEnum.Longint:
+                case DataTypeEnum.Integer:
+                case DataTypeEnum.Time:
+                    dType = new IntegerAtomType() { Type = dataTypeEnum };
+                    break;
+                case DataTypeEnum.Shortreal:
+                    dType = new ShortRealType();
+                    break;
+                case DataTypeEnum.Real:
+                    dType = new ShortRealType();
+                    break;
+                case DataTypeEnum.Realtime:
+                    dType = new RealTimeType();
                     break;
             }
-            return null;
+
+
+            while (word.Text == "[")
+            {
+                PackedArray? range = PackedArray.ParseCreate(word, nameSpace);
+                if (word.Eof || range == null)
+                {
+                    word.AddError("illegal reg declaration");
+                    return null;
+                }
+
+                PackedArray? packedArray = range as Arrays.PackedArray;
+
+                if (packedArray != null)
+                {
+                    dType.PackedDimensions.Add(packedArray);
+                }
+            }
+            return dType;
         }
 
         private static IDataType? parseTypeReference(WordScanner word, NameSpace nameSpace)
