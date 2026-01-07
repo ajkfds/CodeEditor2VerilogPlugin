@@ -28,7 +28,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public override Variable Clone()
         {
-            Struct ret = new Struct() { StructType = StructType, Name = Name };
+            Struct ret = new Struct() { StructType = StructType, Name = Name, Defined = Defined };
             return ret;
         }
 

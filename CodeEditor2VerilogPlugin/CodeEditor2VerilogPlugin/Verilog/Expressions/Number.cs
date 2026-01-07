@@ -146,7 +146,8 @@ namespace pluginVerilog.Verilog.Expressions
             Decimal,
             Binary,
             Octal,
-            Hex
+            Hex,
+            Real
         }
 
         public override string CreateString()
@@ -205,16 +206,15 @@ namespace pluginVerilog.Verilog.Expressions
                     word.MoveNext();
                     return number;
                 }
-                else if (index + 1 == word.Length && word.GetCharAt(index) == 's')
+                else if (index + 1 == word.Length && word.GetCharAt(index) == 's') // time_unit : s
                 {
                     number.NumberType = NumberTypeEnum.Decimal;
                     number.Value = long.Parse(sb.ToString());
                     number.Constant = true;
                     word.MoveNext();
                     return new Time() { Number = number, Unit = Time.UnitEnum.s };
-                    //        time_unit ::= s | ms | us | ns | ps | fs
                 }
-                else if (index+2 == word.Length && word.GetCharAt(index + 1)=='s')
+                else if (index+2 == word.Length && word.GetCharAt(index + 1)=='s') // time_unit : ms | us | ns | ps | fs
                 {
                     number.NumberType = NumberTypeEnum.Decimal;
                     number.Value = long.Parse(sb.ToString());
@@ -265,11 +265,7 @@ namespace pluginVerilog.Verilog.Expressions
                 parseAfterApostrophe(word, nameSpace, index, apostropheIndex, number, sb);
                 return number;
             }
-            //else if (apostropheIndex == 0)
-            //{
-            //    return parseUnbasedUnsizedLiteral(word, nameSpace, lValue);
-            //}
-        else {
+            else {
                 if (apostropheIndex + 1 == word.Length)
                 {
                     // cast
@@ -284,6 +280,7 @@ namespace pluginVerilog.Verilog.Expressions
 
                     return Cast.ParseCreate(word, nameSpace, number);
                 }
+
                 parseAfterApostrophe(word, nameSpace,index, apostropheIndex, number, sb);
                 return number;
             }
@@ -482,6 +479,7 @@ namespace pluginVerilog.Verilog.Expressions
             if(double.TryParse(sb.ToString(),out value))
             {
                 number.Value = value;
+                number.NumberType = NumberTypeEnum.Real;
                 number.Constant = true;
             }
 //            word.MoveNext();

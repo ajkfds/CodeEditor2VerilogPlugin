@@ -1,7 +1,9 @@
-﻿using pluginVerilog.Verilog.BuildingBlocks;
+﻿using DynamicData.Kernel;
+using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
+using pluginVerilog.Verilog.Expressions;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -52,6 +54,12 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
         public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
             AppendTypeLabel(label);
+
+            if(DataType != null)
+            {
+                label.AppendText(" ");
+                label.AppendText(DataType.CreateString());
+            }
             label.AppendText(" ");
 
             label.AppendText(Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Parameter));
@@ -126,43 +134,37 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
             word.MoveNext();
 
             DataObjects.DataTypes.IDataType? dataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, (NameSpace)module, null);
-
-            switch (word.Text)
+            if(dataType == null)
             {
-                case "integer":
+                bool? singed = null;
+                if (word.Text == "signed")
+                {
                     word.Color(CodeDrawStyle.ColorType.Keyword);
                     word.MoveNext();
-                    break;
-                case "real":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
-                    word.MoveNext();
-                    break;
-                case "realtime":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
-                    word.MoveNext();
-                    break;
-                case "time":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
-                    word.MoveNext();
-                    break;
-                default:
-                    if (word.Text == "signed")
+                }
+
+                IArray? array = null;
+                if (word.Text == "[")
+                {
+                    array = DataObjects.Arrays.PackedArray.ParseCreate(word, (NameSpace)module);
+                    if (array is UnPackedArray)
                     {
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
-                        word.MoveNext();
+                        // TODO : implement
                     }
-                    if (word.GetCharAt(0) == '[')
+                    else if (array != null)
                     {
-                        IArray? array = DataObjects.Arrays.PackedArray.ParseCreate(word, (NameSpace)module);
-                        if(array is UnPackedArray)
-                        {
-                            // TODO : implement
-                        }else if(array != null)
-                        {
-                            word.AddError("only unpacked array is acceptable");
-                        }
+                        word.AddError("only unpacked array is acceptable");
                     }
-                    break;
+                }
+
+                if(singed != null || array != null)
+                {
+                    if (singed == null) singed = false;
+                    List<PackedArray> arrays = new List<PackedArray>();
+                    if(array != null) arrays.Add((PackedArray)array);
+
+                    dataType = DataTypes.IntegerVectorType.Create(DataTypeEnum.Logic, (bool)singed, arrays);
+                }
             }
 
             WordReference nameReference;
@@ -180,73 +182,70 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                 if (expression == null) break;
                 if (word.Active)
                 {
-                    //if (local)
-                    //{
-                    //    if (!word.Active)
-                    //    {
-
-                    //    }
-                    //    else if (word.Prototype)
-                    //    {
-                    //        if (module.LocalParameters.ContainsKey(identifier))
-                    //        {
-                    //            //                                nameReference.AddError("local parameter name duplicated");
-                    //        }
-                    //        else
-                    //        {
-                    //            Parameter param = new Parameter();
-                    //            param.Name = identifier;
-                    //            param.Expression = expression;
-                    //            param.DefinitionRefrecnce = nameReference;
-                    //            module.LocalParameters.Add(param.Name, param);
-                    //        }
-                    //    }
-                    //    else
-                    //    {
-
-                    //    }
-                    //}
-                    //else
+                    if (!word.Active)
                     {
-                        if (!word.Active)
+                        // skip
+                    }
+                    else if (word.Prototype)
+                    {
+                        if (module.NamedElements.ContainsKey(identifier))
                         {
-                            // skip
-                        }
-                        else if (word.Prototype)
-                        {
-                            if (module.NamedElements.ContainsKey(identifier))
-                            {
-                                //                                nameReference.AddError("parameter name duplicated");
-                            }
-                            else
-                            {
-                                Constants constants;
-                                switch (constantType)
-                                {
-                                    case ConstantTypeEnum.localparam:
-                                        constants = new Localparam() { Name = identifier, Expression = expression, DefinedReference = nameReference };
-                                        break;
-                                    case ConstantTypeEnum.parameter:
-                                        constants = new Parameter() { Name = identifier, Expression = expression, DefinedReference = nameReference };
-                                        break;
-                                    case ConstantTypeEnum.specparam:
-                                        constants = new Specparam() { Name = identifier, Expression = expression, DefinedReference = nameReference };
-                                        break;
-                                    default:
-                                        System.Diagnostics.Debugger.Break();
-                                        return;
-                                }
-                                constants.ConstantType = constantType;
-                                module.NamedElements.Add(constants.Name, constants);
-
-                                module.PortParameterNameList.Add(identifier);
-                            }
+                            //                                nameReference.AddError("parameter name duplicated");
                         }
                         else
                         {
-                            Constants? constant = module.NamedElements[identifier] as Constants;
-                            if (constant != null) constant.Defined = true;
+                            Constants constants;
+                            switch (constantType)
+                            {
+                                case ConstantTypeEnum.localparam:
+                                    constants = new Localparam() { Name = identifier, Expression = expression, DefinedReference = nameReference };
+                                    break;
+                                case ConstantTypeEnum.parameter:
+                                    constants = new Parameter() { Name = identifier, Expression = expression, DefinedReference = nameReference };
+                                    break;
+                                case ConstantTypeEnum.specparam:
+                                    constants = new Specparam() { Name = identifier, Expression = expression, DefinedReference = nameReference };
+                                    break;
+                                default:
+                                    System.Diagnostics.Debugger.Break();
+                                    return;
+                            }
+                            constants.ConstantType = constantType;
+                            if(dataType == null && expression is Expressions.Number)
+                            {
+                                Expressions.Number number = (Expressions.Number)expression;
+                                if(number.NumberType == Expressions.Number.NumberTypeEnum.Real)
+                                {
+                                    dataType = DataTypes.IntegerAtomType.Create(DataTypeEnum.Real, number.Signed);
+                                }
+                                else if(number.BitWidth != null)
+                                {
+                                    PackedArray packedArray = new PackedArray((int)number.BitWidth);
+                                    List<PackedArray> packedArrays = new List<PackedArray>() { packedArray };
+                                    dataType = DataTypes.IntegerVectorType.Create(DataTypeEnum.Logic, number.Signed, packedArrays);
+                                }else
+                                {
+                                    PackedArray packedArray = new PackedArray(32);
+                                    List<PackedArray> packedArrays = new List<PackedArray>() { packedArray };
+                                    dataType = DataTypes.IntegerVectorType.Create(DataTypeEnum.Logic, number.Signed, packedArrays);
+                                }
+
+                                constants.DataType = dataType;
+                            }
+                            else
+                            {
+                                constants.DataType = dataType;
+                            }
+
+                            module.NamedElements.Add(constants.Name, constants);
+
+                            module.PortParameterNameList.Add(identifier);
                         }
+                    }
+                    else
+                    {
+                        Constants? constant = module.NamedElements[identifier] as Constants;
+                        if (constant != null) constant.Defined = true;
                     }
                 }
                 if (word.Text != ",") break;
@@ -422,7 +421,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
         }
         public override DataObject Clone(string name)
         {
-            return new Constants { DefinedReference = DefinedReference, Expression = Expression, Name = name };
+            return new Constants { DefinedReference = DefinedReference, Expression = Expression, Name = name,Defined = Defined };
         }
     }
 }

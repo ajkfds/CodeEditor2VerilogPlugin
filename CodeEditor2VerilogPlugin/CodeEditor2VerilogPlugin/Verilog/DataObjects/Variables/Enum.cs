@@ -46,7 +46,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public override Enum Clone(string name)
         {
-            Enum val = new Enum() { Name = name };
+            Enum val = new Enum() { Name = name, Defined = Defined };
             val.PackedDimensions = PackedDimensions;
             val.BaseType = BaseType;
             val.Items = Items;

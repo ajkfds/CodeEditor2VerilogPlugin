@@ -23,7 +23,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public override Variable Clone()
         {
-            Shortreal val = new Shortreal() { Name = Name };
+            Shortreal val = new Shortreal() { Name = Name, Defined = Defined };
             val.DataType = DataType;
             return val;
         }

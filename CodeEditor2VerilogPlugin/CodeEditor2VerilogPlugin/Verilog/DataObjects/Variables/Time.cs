@@ -23,7 +23,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public override Variable Clone()
         {
-            Time val = new Time() { Name = Name };
+            Time val = new Time() { Name = Name, Defined = Defined };
             val.DataType = DataType;
             val.Signed = Signed;
             return val;

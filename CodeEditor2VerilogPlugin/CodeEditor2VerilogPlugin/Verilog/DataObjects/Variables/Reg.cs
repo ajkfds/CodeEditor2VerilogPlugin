@@ -23,7 +23,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public override Variable Clone()
         {
-            Reg val = new Reg() { Name = Name };
+            Reg val = new Reg() { Name = Name, Defined = Defined };
             if(DataType != null) val.DataType = DataType.Clone();
             val.Signed = Signed;
             val.Defined = Defined;

@@ -90,14 +90,14 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
 
             { // function int size();
                 List<Port> ports = new List<Port>();
-                Variable returnVal = DataObjects.Variables.Int.Create("size", DataTypes.IntegerAtomType.Create(DataTypes.DataTypeEnum.Int, false, null));
+                Variable returnVal = DataObjects.Variables.Int.Create("size", DataTypes.IntegerAtomType.Create(DataTypes.DataTypeEnum.Int, false));
                 BuiltInMethod builtInMethod = BuiltInMethod.Create("size", returnVal, ports);
                 queue.NamedElements.Add(builtInMethod.Name, builtInMethod);
             }
 
             { // function void insert(input integer index, input element_t item);
                 List<Port> ports = new List<Port>();
-                Port? port = Port.Create("index", null, Port.DirectionEnum.Input, DataObjects.Variables.Integer.Create("index", DataTypes.IntegerAtomType.Create(DataTypes.DataTypeEnum.Integer, false, null)));
+                Port? port = Port.Create("index", null, Port.DirectionEnum.Input, DataObjects.Variables.Integer.Create("index", DataTypes.IntegerAtomType.Create(DataTypes.DataTypeEnum.Integer, false)));
                 if (port != null) ports.Add(port);
                 port = Port.Create("item", null, Port.DirectionEnum.Input, dataObject);
                 if (port != null) ports.Add(port);

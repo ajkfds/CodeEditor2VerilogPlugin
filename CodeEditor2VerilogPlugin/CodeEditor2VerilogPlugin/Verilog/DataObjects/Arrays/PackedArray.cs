@@ -33,6 +33,25 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
             MinIndex = (int)min;
             Size = (int)max - (int)min + 1;
         }
+        public PackedArray(int value0, int value1)
+        {
+            SizeExpression0 = Expressions.Expression.CreateTempExpression(value0.ToString());
+            SizeExpression1 = Expressions.Expression.CreateTempExpression(value1.ToString());
+
+            double? max = value0;
+            double? min = value1;
+            if (max == null || min == null) return;
+
+            if (min > max)
+            {
+                double? temp = max;
+                max = min;
+                min = temp;
+            }
+            MaxIndex = (int)max;
+            MinIndex = (int)min;
+            Size = (int)max - (int)min + 1;
+        }
 
         public PackedArray Clone()
         {

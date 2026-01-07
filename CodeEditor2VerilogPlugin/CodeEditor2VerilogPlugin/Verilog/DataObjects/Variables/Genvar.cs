@@ -26,7 +26,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public override Genvar Clone(string name)
         {
-            Genvar val = new Genvar() { Name = name };
+            Genvar val = new Genvar() { Name = name, Defined = Defined };
             return val;
         }
         public static void ParseCreateFromDeclaration(WordScanner word, NameSpace nameSpace)

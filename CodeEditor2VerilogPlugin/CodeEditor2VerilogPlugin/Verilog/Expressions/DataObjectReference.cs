@@ -137,13 +137,11 @@ namespace pluginVerilog.Verilog.Expressions
             {
                 VariableName = dataObject.Name
             };
-            val.DataObject = dataObject;
-            if(val.DataObject is IntegerVectorValueVariable || val.DataObject is Net)
-            {
-                val.DataObject = val.DataObject.Clone();
-            }
+            DataObjects.DataObject originalObject = dataObject;
+            bool partial = false;
 
-                val.Reference = word.GetReference();
+            val.DataObject = dataObject.Clone();
+            val.Reference = word.GetReference();
 
             word.Color(dataObject.ColorType);
 
@@ -158,14 +156,6 @@ namespace pluginVerilog.Verilog.Expressions
                 if (constants.Expression.Constant) val.BitWidth = constants.Expression.BitWidth;
             }
 
-            if (assigned)
-            {
-                val.DataObject.AssignedReferences.Add(word.GetReference());
-            }
-            else
-            {
-                val.DataObject.UsedReferences.Add(word.GetReference());
-            }
 
             if (val.DataObject.CommentAnnotation_Discarded)
             {
@@ -201,6 +191,7 @@ namespace pluginVerilog.Verilog.Expressions
                     RangeExpression? rangeExpression = RangeExpression.ParseCreate(word, nameSpace);
                     if (rangeExpression == null) return null;
 
+                    partial = true;
                     if (rangeExpression is SingleBitRangeExpression)
                     {
                         val.UnpackedArrays.RemoveAt(unpackedArrayIndex);
@@ -229,6 +220,7 @@ namespace pluginVerilog.Verilog.Expressions
 
                     RangeExpression? rangeExpression = RangeExpression.ParseCreate(word, nameSpace);
                     if (rangeExpression == null) return null;
+                    partial = true;
 
                     if (rangeExpression is SingleBitRangeExpression)
                     {
@@ -240,7 +232,39 @@ namespace pluginVerilog.Verilog.Expressions
                         packedArrayIndex++;
                     }
                 }
-            }else if(val.DataObject is Net)
+            }
+            else if(val.DataObject is IntegerAtomVariable)
+            {
+                IntegerAtomVariable ival = (IntegerAtomVariable)val.DataObject;
+
+                while (!word.Eof)
+                {
+                    if (word.Text != "[")
+                    {
+                        break;
+                    }
+
+                    RangeExpression? rangeExpression = RangeExpression.ParseCreate(word, nameSpace);
+                    if (rangeExpression == null) return null;
+                    partial = true;
+
+                    if (rangeExpression is SingleBitRangeExpression)
+                    {
+                        List<PackedArray> packedDimensions = new List<PackedArray>();
+                        packedDimensions.Add(new PackedArray(1));
+                        val.DataObject = DataObjects.Variables.Logic.Create(ival.Name, DataObjects.DataTypes.IntegerVectorType.Create(DataObjects.DataTypes.DataTypeEnum.Logic, false, packedDimensions));
+                        break;
+                    }
+                    else
+                    {
+                        List<PackedArray> packedDimensions = new List<PackedArray>();
+                        packedDimensions.Add(new PackedArray(rangeExpression.BitWidth));
+                        val.DataObject = DataObjects.Variables.Logic.Create(ival.Name, DataObjects.DataTypes.IntegerVectorType.Create(DataObjects.DataTypes.DataTypeEnum.Logic, false, packedDimensions));
+                        break;
+                    }
+                }
+            }
+            else if (val.DataObject is Net)
             {
                 int packedArrayIndex = 0;
                 Net ival = (Net)val.DataObject;
@@ -255,6 +279,7 @@ namespace pluginVerilog.Verilog.Expressions
 
                     RangeExpression? rangeExpression = RangeExpression.ParseCreate(word, nameSpace);
                     if (rangeExpression == null) return null;
+                    partial = true;
 
                     if (rangeExpression is SingleBitRangeExpression)
                     {
@@ -268,6 +293,17 @@ namespace pluginVerilog.Verilog.Expressions
                 }
             }
 
+            while(word.Text == "[" && !word.Eof && originalObject is DataObjects.Variables.String)
+            {
+                RangeExpression? rangeExpression = RangeExpression.ParseCreate(word, nameSpace);
+                if (rangeExpression is not SingleBitRangeExpression)
+                {
+                    word.AddError("illegal range");
+                    break;
+                }
+                val.DataObject = DataObjects.Variables.Byte.Create(originalObject.Name, DataObjects.DataTypes.IntegerAtomType.Create(DataObjects.DataTypes.DataTypeEnum.Byte, false));
+                break;
+            }
 
             while (word.Text == "[" && !word.Eof)
                 {
@@ -312,6 +348,14 @@ namespace pluginVerilog.Verilog.Expressions
             foreach (UnPackedArray unPackedArray in val.UnpackedArrays)
             {
                 val.BitWidth = val.BitWidth * unPackedArray.Size;
+            }
+            if (assigned)
+            {
+                if(!partial) originalObject.AssignedReferences.Add(val.Reference);
+            }
+            else
+            {
+                originalObject.UsedReferences.Add(val.Reference);
             }
 
             return val;

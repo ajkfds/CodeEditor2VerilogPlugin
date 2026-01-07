@@ -32,7 +32,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public override Variable Clone()
         {
-            Longint val = new Longint() { Name = Name };
+            Longint val = new Longint() { Name = Name, Defined = Defined };
             val.DataType = DataType;
             val.Signed = Signed;
             return val;

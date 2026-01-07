@@ -46,7 +46,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public override Variable Clone(string name)
         {
-            Object val = new Object() { Class = Class, Name = name };
+            Object val = new Object() { Class = Class, Name = name, Defined = Defined };
             val.DataType = DataType;
             return val;
         }

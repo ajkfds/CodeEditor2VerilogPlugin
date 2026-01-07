@@ -104,6 +104,16 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         }
         public static IntegerVectorType Create(DataTypeEnum dataType, bool signed,List<Arrays.PackedArray>? packedDimensions)
         {
+            switch (dataType)
+            {
+                case DataTypeEnum.Bit:
+                case DataTypeEnum.Logic:
+                case DataTypeEnum.Reg:
+                    break;
+                default:
+                    if(System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+                    throw new Exception();
+            }
             IntegerVectorType integerVectorType = new IntegerVectorType() { Type = dataType,Signed = signed };
             if(packedDimensions == null)
             {

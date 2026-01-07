@@ -19,7 +19,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public override Chandle Clone(string name)
         {
-            Chandle val = new Chandle() { Name = name };
+            Chandle val = new Chandle() { Name = name,Defined = Defined };
             val.PackedDimensions = PackedDimensions;
             return val;
         }

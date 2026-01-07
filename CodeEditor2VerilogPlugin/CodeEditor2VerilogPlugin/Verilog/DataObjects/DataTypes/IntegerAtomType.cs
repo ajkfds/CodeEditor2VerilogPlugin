@@ -49,11 +49,11 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                         return null;
                 }
 
-                foreach (Arrays.PackedArray array in PackedDimensions)
-                {
-                    if (array.Size == null) return null;
-                    size = size * (int)array.Size;
-                }
+                //foreach (Arrays.PackedArray array in PackedDimensions)
+                //{
+                //    if (array.Size == null) return null;
+                //    size = size * (int)array.Size;
+                //}
                 return size;
             }
         }
@@ -110,17 +110,32 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             return sb.ToString();
         }
 
-        public static IntegerAtomType Create(DataTypeEnum dataType,bool signed, List<DataObjects.Arrays.PackedArray>? packedDimensions)
+        public static IntegerAtomType Create(DataTypeEnum dataType,bool signed)
         {
+            switch (dataType)
+            {
+                case DataTypeEnum.Byte:
+                case DataTypeEnum.Shortint:
+                case DataTypeEnum.Int:
+                case DataTypeEnum.Longint:
+                case DataTypeEnum.Integer:
+                case DataTypeEnum.Time:
+                    break;
+                default:
+                    if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+                    throw new Exception();
+            }
             IntegerAtomType integerAtomType = new IntegerAtomType() { Type = dataType };
             integerAtomType.Signed = signed;
-            if(packedDimensions != null) integerAtomType.PackedDimensions = packedDimensions;
+            int? bitWidth = integerAtomType.BitWidth;
+            if (bitWidth == null) bitWidth = 1;
+            integerAtomType.PackedDimensions.Add(new Arrays.PackedArray((int)bitWidth - 1,0));
             return integerAtomType;
         }
 
         public IDataType Clone()
         {
-            IDataType dataType = IntegerAtomType.Create(Type, Signed,new List<Arrays.PackedArray>());
+            IDataType dataType = IntegerAtomType.Create(Type, Signed);
             foreach(var packedArray in PackedDimensions)
             {
                 dataType.PackedDimensions.Add(packedArray.Clone());

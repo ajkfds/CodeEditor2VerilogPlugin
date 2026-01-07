@@ -22,7 +22,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public override Variable Clone()
         {
-            Realtime val = new Realtime() { Name = Name };
+            Realtime val = new Realtime() { Name = Name, Defined = Defined };
             val.DataType = DataType;
             return val;
         }

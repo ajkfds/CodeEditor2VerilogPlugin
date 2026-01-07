@@ -30,7 +30,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         }
         public override Variable Clone(string name)
         {
-            Integer val = new Integer() { Name = name };
+            Integer val = new Integer() { Name = name, Defined = Defined };
             val.DataType = DataType;
             val.Signed = Signed;
             return val;

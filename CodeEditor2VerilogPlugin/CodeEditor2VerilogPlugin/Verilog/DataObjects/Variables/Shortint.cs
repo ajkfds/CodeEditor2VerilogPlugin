@@ -22,7 +22,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public override Variable Clone()
         {
-            Shortint val = new Shortint() { Name = Name };
+            Shortint val = new Shortint() { Name = Name, Defined = Defined };
             val.DataType = DataType;
             val.Signed = Signed;
             return val;

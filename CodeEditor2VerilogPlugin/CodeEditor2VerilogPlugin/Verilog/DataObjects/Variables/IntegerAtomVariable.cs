@@ -13,6 +13,14 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         //integer_atom_type::= byte | shortint | int | longint | integer | time
         public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
         public bool Signed { get; set; }
+        public List<DataObjects.Arrays.PackedArray> PackedDimensions
+        {
+            get
+            {
+                if (DataType == null) return new List<DataObjects.Arrays.PackedArray>();
+                return DataType.PackedDimensions;
+            }
+        }
 
         public new static IntegerAtomVariable Create(string name, IDataType dataType)
         {

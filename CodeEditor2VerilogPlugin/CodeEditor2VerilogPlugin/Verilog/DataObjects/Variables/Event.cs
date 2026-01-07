@@ -23,7 +23,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public override Event Clone(string name)
         {
-            Event val = new Event() { Name = name };
+            Event val = new Event() { Name = name, Defined = Defined };
             return val;
         }
         public static void ParseCreateFromDeclaration(WordScanner word, NameSpace nameSpace)
