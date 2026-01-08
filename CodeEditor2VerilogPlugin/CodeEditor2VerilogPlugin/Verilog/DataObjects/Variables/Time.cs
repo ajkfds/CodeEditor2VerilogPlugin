@@ -26,6 +26,10 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             Time val = new Time() { Name = Name, Defined = Defined };
             val.DataType = DataType;
             val.Signed = Signed;
+            foreach (var unpackedArray in UnpackedArrays)
+            {
+                val.UnpackedArrays.Add(unpackedArray.Clone());
+            }
             return val;
         }
 

@@ -175,6 +175,10 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         public override Variable Clone()
         {
             String val = new String() { Name = Name,Defined=Defined };
+            foreach (var unpackedArray in UnpackedArrays)
+            {
+                val.UnpackedArrays.Add(unpackedArray.Clone());
+            }
             val.DataType = DataType;
             return val;
         }

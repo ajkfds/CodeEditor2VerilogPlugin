@@ -21,6 +21,10 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         {
             Chandle val = new Chandle() { Name = name,Defined = Defined };
             val.PackedDimensions = PackedDimensions;
+            foreach (var unpackedArray in UnpackedArrays)
+            {
+                val.UnpackedArrays.Add(unpackedArray.Clone());
+            }
             return val;
         }
 

@@ -27,6 +27,10 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             if(DataType != null) val.DataType = DataType.Clone();
             val.Signed = Signed;
             val.Defined = Defined;
+            foreach (var unpackedArray in UnpackedArrays)
+            {
+                val.UnpackedArrays.Add(unpackedArray.Clone());
+            }
             return val;
         }
 

@@ -25,6 +25,10 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             Shortint val = new Shortint() { Name = Name, Defined = Defined };
             val.DataType = DataType;
             val.Signed = Signed;
+            foreach (var unpackedArray in UnpackedArrays)
+            {
+                val.UnpackedArrays.Add(unpackedArray.Clone());
+            }
             return val;
         }
 

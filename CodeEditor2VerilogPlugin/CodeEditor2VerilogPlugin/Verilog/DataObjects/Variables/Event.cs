@@ -24,6 +24,10 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         public override Event Clone(string name)
         {
             Event val = new Event() { Name = name, Defined = Defined };
+            foreach (var unpackedArray in UnpackedArrays)
+            {
+                val.UnpackedArrays.Add(unpackedArray.Clone());
+            }
             return val;
         }
         public static void ParseCreateFromDeclaration(WordScanner word, NameSpace nameSpace)
@@ -42,31 +46,65 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 }
                 Event val = new Event() { Name = word.Text };
 
-                if (nameSpace.NamedElements.ContainsKey(val.Name))
+                if (word.Prototype)
                 {
-                    DataObject? dataObject = nameSpace.NamedElements.GetDataObject(val.Name);
-                    if(dataObject == null)
+                    if (nameSpace.NamedElements.ContainsKey(val.Name))
                     {
-                        word.AddError("duplicated event name");
-                    }
-                    else
-                    {
-                        Event? event_ = dataObject as Event;
-                        if (event_ == null)
+                        DataObject? dataObject = nameSpace.NamedElements.GetDataObject(val.Name);
+                        if (dataObject == null)
                         {
                             word.AddError("duplicated event name");
                         }
                         else
                         {
-                            nameSpace.NamedElements.Remove(val.Name);
-                            nameSpace.NamedElements.Add(val.Name, val);
+                            Event? event_ = dataObject as Event;
+                            if (event_ == null)
+                            {
+                                word.AddError("duplicated event name");
+                            }
+                            else
+                            {
+                                nameSpace.NamedElements.Remove(val.Name);
+                                nameSpace.NamedElements.Add(val.Name, val);
+                            }
                         }
-                    }
 
+                    }
+                    else
+                    {
+                        nameSpace.NamedElements.Add(val.Name, val);
+                    }
                 }
                 else
                 {
-                    nameSpace.NamedElements.Add(val.Name, val);
+                    if (nameSpace.NamedElements.ContainsKey(val.Name))
+                    {
+                        DataObject? dataObject = nameSpace.NamedElements.GetDataObject(val.Name);
+                        if (dataObject == null)
+                        {
+                            word.AddError("duplicated identifier");
+                        }
+                        else
+                        {
+                            Event? event_ = dataObject as Event;
+                            if (event_ == null)
+                            {
+                                word.AddError("duplicated identifier");
+                            }
+                            else
+                            {
+                                nameSpace.NamedElements.Remove(val.Name);
+                                nameSpace.NamedElements.Add(val.Name, val);
+                                val.Defined = true;
+                            }
+                        }
+
+                    }
+                    else
+                    {
+                        nameSpace.NamedElements.Add(val.Name, val);
+                        val.Defined = true;
+                    }
                 }
 
 

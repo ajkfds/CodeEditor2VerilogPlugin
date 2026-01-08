@@ -35,6 +35,10 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             Longint val = new Longint() { Name = Name, Defined = Defined };
             val.DataType = DataType;
             val.Signed = Signed;
+            foreach (var unpackedArray in UnpackedArrays)
+            {
+                val.UnpackedArrays.Add(unpackedArray.Clone());
+            }
             return val;
         }
 

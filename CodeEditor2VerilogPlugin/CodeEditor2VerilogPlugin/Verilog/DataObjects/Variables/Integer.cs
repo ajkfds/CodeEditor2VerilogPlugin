@@ -33,6 +33,10 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             Integer val = new Integer() { Name = name, Defined = Defined };
             val.DataType = DataType;
             val.Signed = Signed;
+            foreach (var unpackedArray in UnpackedArrays)
+            {
+                val.UnpackedArrays.Add(unpackedArray.Clone());
+            }
             return val;
         }
 

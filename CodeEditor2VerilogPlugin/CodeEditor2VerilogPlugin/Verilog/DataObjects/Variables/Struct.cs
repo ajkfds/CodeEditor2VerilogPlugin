@@ -29,6 +29,10 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         public override Variable Clone()
         {
             Struct ret = new Struct() { StructType = StructType, Name = Name, Defined = Defined };
+            foreach (var unpackedArray in UnpackedArrays)
+            {
+                ret.UnpackedArrays.Add(unpackedArray.Clone());
+            }
             return ret;
         }
 

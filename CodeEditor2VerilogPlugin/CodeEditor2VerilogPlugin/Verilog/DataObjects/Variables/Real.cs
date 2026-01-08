@@ -25,6 +25,10 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         {
             Real val = new Real() { Name = Name, Defined = Defined };
             val.DataType = DataType;
+            foreach (var unpackedArray in UnpackedArrays)
+            {
+                val.UnpackedArrays.Add(unpackedArray.Clone());
+            }
             return val;
         }
 

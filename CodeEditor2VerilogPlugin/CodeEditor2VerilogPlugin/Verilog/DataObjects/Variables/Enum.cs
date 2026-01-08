@@ -50,6 +50,10 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             val.PackedDimensions = PackedDimensions;
             val.BaseType = BaseType;
             val.Items = Items;
+            foreach (var unpackedArray in UnpackedArrays)
+            {
+                val.UnpackedArrays.Add(unpackedArray.Clone());
+            }
             return val;
         }
         public List<DataObjects.Arrays.PackedArray> PackedDimensions { get; set; } = new List<DataObjects.Arrays.PackedArray>();

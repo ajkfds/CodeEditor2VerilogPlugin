@@ -161,7 +161,14 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
         {
             Net net = new Net() { Name = name };
             net.NetType = netType;
-            net.DataType = dataType;
+            if(dataType == null)
+            {
+                net.DataType = DataTypes.IntegerVectorType.Create(DataTypes.DataTypeEnum.Logic, false, null);
+            }
+            else
+            {
+                net.DataType = dataType;
+            }
             return net;
         }
 
@@ -535,6 +542,10 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
         {
             Net net = new Net() { Name = name, DefinedReference = DefinedReference, DataType = DataType,Defined = Defined };
             if(DataType != null) net.DataType = DataType.Clone();
+            foreach(var unpackedArray in UnpackedArrays)
+            {
+                net.UnpackedArrays.Add(unpackedArray.Clone());
+            }
             return net;
         }
     }

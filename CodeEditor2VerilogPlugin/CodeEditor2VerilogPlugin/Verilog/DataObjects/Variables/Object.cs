@@ -41,6 +41,10 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         {
             Object val = new Object() { Class = Class, Name = Name };
             val.DataType = DataType;
+            foreach (var unpackedArray in UnpackedArrays)
+            {
+                val.UnpackedArrays.Add(unpackedArray.Clone());
+            }
             return val;
         }
 
@@ -48,6 +52,10 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         {
             Object val = new Object() { Class = Class, Name = name, Defined = Defined };
             val.DataType = DataType;
+            foreach (var unpackedArray in UnpackedArrays)
+            {
+                val.UnpackedArrays.Add(unpackedArray.Clone());
+            }
             return val;
         }
 

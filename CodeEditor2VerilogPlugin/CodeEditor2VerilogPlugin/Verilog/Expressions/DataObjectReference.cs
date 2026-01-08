@@ -131,23 +131,23 @@ namespace pluginVerilog.Verilog.Expressions
         private static DataObjectReference? parseCreate(WordScanner word, NameSpace nameSpace, INamedElement owner, bool assigned, bool acceptRange)
         {
             if (!owner.NamedElements.ContainsDataObject(word.Text)) return null;
-            DataObjects.DataObject dataObject = (DataObjects.DataObject)owner.NamedElements[word.Text];
+            DataObjects.DataObject originalDataObject = (DataObjects.DataObject)owner.NamedElements[word.Text];
 
             DataObjectReference val = new DataObjectReference()
             {
-                VariableName = dataObject.Name
+                VariableName = originalDataObject.Name
             };
-            DataObjects.DataObject originalObject = dataObject;
+            DataObjects.DataObject originalObject = originalDataObject;
             bool partial = false;
 
-            val.DataObject = dataObject.Clone();
+            val.DataObject = originalDataObject.Clone();
             val.Reference = word.GetReference();
 
-            word.Color(dataObject.ColorType);
+            word.Color(val.DataObject.ColorType);
 
-            if (dataObject is DataObjects.Constants.Constants)
+            if (val.DataObject is DataObjects.Constants.Constants)
             {
-                DataObjects.Constants.Constants constants = (DataObjects.Constants.Constants)dataObject;
+                DataObjects.Constants.Constants constants = (DataObjects.Constants.Constants)val.DataObject;
                 val.Constant = true;
                 if (constants.Expression.Constant && constants.Expression.Value != null)
                 {
@@ -172,11 +172,11 @@ namespace pluginVerilog.Verilog.Expressions
             word.MoveNext();
 
             // parse unpacked dimensions
-            foreach (var unpackedArray in dataObject.UnpackedArrays)
+            foreach (var unpackedArray in val.DataObject.UnpackedArrays)
             {
                 val.UnpackedArrays.Add(unpackedArray.Clone());
             }
-            dataObject.UnpackedArrays.Clear();
+            val.DataObject.UnpackedArrays.Clear();
 
             {
                 int unpackedArrayIndex = 0;
@@ -194,10 +194,43 @@ namespace pluginVerilog.Verilog.Expressions
                     partial = true;
                     if (rangeExpression is SingleBitRangeExpression)
                     {
+                        SingleBitRangeExpression singleBitRangeExpression = (SingleBitRangeExpression)rangeExpression;
+                        UnPackedArray oldArray = val.UnpackedArrays[unpackedArrayIndex];
+                        if (!word.Prototype && oldArray.MaxIndex != null && oldArray.MinIndex != null && singleBitRangeExpression.BitIndex != null)
+                        {
+                            if (oldArray.MaxIndex < singleBitRangeExpression.BitIndex || oldArray.MinIndex > singleBitRangeExpression.BitIndex)
+                            {
+                                singleBitRangeExpression.WordReference.AddError("index out of range");
+                            }
+                        }
                         val.UnpackedArrays.RemoveAt(unpackedArrayIndex);
                     }
                     else
                     {
+                        if(rangeExpression is AbsoluteRangeExpression)
+                        {
+                            AbsoluteRangeExpression absoluteRangeExpression = (AbsoluteRangeExpression)rangeExpression;
+                            UnPackedArray oldArray = val.UnpackedArrays[unpackedArrayIndex];
+                            if (!word.Prototype)
+                            {
+                                if(
+                                    absoluteRangeExpression.MaxBitIndex != null && absoluteRangeExpression.MinBitIndex != null &&
+                                    oldArray.MinIndex != null && oldArray.MaxIndex != null
+                                    )
+                                {
+                                    if(
+                                        absoluteRangeExpression.MaxBitIndex < oldArray.MinIndex ||
+                                        absoluteRangeExpression.MaxBitIndex > oldArray.MaxIndex ||
+                                        absoluteRangeExpression.MinBitIndex < oldArray.MinIndex ||
+                                        absoluteRangeExpression.MinBitIndex > oldArray.MaxIndex 
+                                        )
+                                    {
+                                        absoluteRangeExpression.WordReference.AddError("index out of range");
+                                    }
+                                }
+                            }
+                        }
+
                         val.UnpackedArrays[unpackedArrayIndex] = new UnPackedArray(rangeExpression.BitWidth);
                         unpackedArrayIndex++;
                     }
@@ -224,6 +257,15 @@ namespace pluginVerilog.Verilog.Expressions
 
                     if (rangeExpression is SingleBitRangeExpression)
                     {
+                        SingleBitRangeExpression singleBitRangeExpression = (SingleBitRangeExpression)rangeExpression;
+                        PackedArray oldArray = ival.PackedDimensions[packedArrayIndex];
+                        if(!word.Prototype && oldArray.MaxIndex != null && oldArray.MinIndex != null && singleBitRangeExpression.BitIndex != null)
+                        {
+                            if( oldArray.MaxIndex < singleBitRangeExpression.BitIndex || oldArray.MinIndex > singleBitRangeExpression.BitIndex)
+                            {
+                                singleBitRangeExpression.WordReference.AddError("index out of range");
+                            }
+                        }
                         ival.PackedDimensions.RemoveAt(packedArrayIndex);
                     }
                     else
@@ -250,6 +292,15 @@ namespace pluginVerilog.Verilog.Expressions
 
                     if (rangeExpression is SingleBitRangeExpression)
                     {
+                        SingleBitRangeExpression singleBitRangeExpression = (SingleBitRangeExpression)rangeExpression;
+                        if(!word.Prototype && singleBitRangeExpression.BitIndex != null)
+                        {
+                            if(singleBitRangeExpression.BitIndex<0 || singleBitRangeExpression.BitIndex>= val.DataObject.BitWidth)
+                            {
+                                singleBitRangeExpression.WordReference.AddError("index out of range");
+                            }
+                        }
+
                         List<PackedArray> packedDimensions = new List<PackedArray>();
                         packedDimensions.Add(new PackedArray(1));
                         val.DataObject = DataObjects.Variables.Logic.Create(ival.Name, DataObjects.DataTypes.IntegerVectorType.Create(DataObjects.DataTypes.DataTypeEnum.Logic, false, packedDimensions));
@@ -283,10 +334,39 @@ namespace pluginVerilog.Verilog.Expressions
 
                     if (rangeExpression is SingleBitRangeExpression)
                     {
+                        SingleBitRangeExpression singleBitRangeExpression = (SingleBitRangeExpression)rangeExpression;
+                        PackedArray oldArray = ival.PackedDimensions[packedArrayIndex];
+                        if (!word.Prototype && oldArray.MaxIndex != null && oldArray.MinIndex != null && singleBitRangeExpression.BitIndex != null)
+                        {
+                            if (oldArray.MaxIndex < singleBitRangeExpression.BitIndex || oldArray.MinIndex > singleBitRangeExpression.BitIndex)
+                            {
+                                singleBitRangeExpression.WordReference.AddError("index out of range");
+                            }
+                        }
                         ival.PackedDimensions.RemoveAt(packedArrayIndex);
                     }
                     else
                     {
+                        AbsoluteRangeExpression absoluteRangeExpression = (AbsoluteRangeExpression)rangeExpression;
+                        PackedArray oldArray = ival.PackedDimensions[packedArrayIndex];
+                        if (!word.Prototype)
+                        {
+                            if (
+                                absoluteRangeExpression.MaxBitIndex != null && absoluteRangeExpression.MinBitIndex != null &&
+                                oldArray.MinIndex != null && oldArray.MaxIndex != null
+                                )
+                            {
+                                if (
+                                    absoluteRangeExpression.MaxBitIndex < oldArray.MinIndex ||
+                                    absoluteRangeExpression.MaxBitIndex > oldArray.MaxIndex ||
+                                    absoluteRangeExpression.MinBitIndex < oldArray.MinIndex ||
+                                    absoluteRangeExpression.MinBitIndex > oldArray.MaxIndex
+                                    )
+                                {
+                                    absoluteRangeExpression.WordReference.AddError("index out of range");
+                                }
+                            }
+                        }
                         ival.PackedDimensions[packedArrayIndex] = new PackedArray(rangeExpression.BitWidth);
                         packedArrayIndex++;
                     }
@@ -319,27 +399,27 @@ namespace pluginVerilog.Verilog.Expressions
             //}
             //else
             {   // w/o range
-                if (dataObject is DataObjects.Variables.IntegerVectorValueVariable || dataObject is Net)
+                if (originalDataObject is DataObjects.Variables.IntegerVectorValueVariable || originalDataObject is Net)
                 {
                     //var original = dataObject as DataObjects.Variables.IntegerVectorValueVariable;
                     //if (original == null) throw new Exception();
                     val.BitWidth = val.DataObject.BitWidth;
                 }
-                else if (dataObject is DataObjects.Constants.Parameter)
+                else if (originalDataObject is DataObjects.Constants.Parameter)
                 {
-                    var constants = (DataObjects.Constants.Parameter)dataObject;
+                    var constants = (DataObjects.Constants.Parameter)originalDataObject;
                     if (constants.Expression != null)
                     {
                         val.Value = constants.Expression.Value;
                         val.BitWidth = constants.Expression.BitWidth;
                     }
                 }
-                else if (dataObject is Net)
+                else if (originalDataObject is Net)
                 {
-                    if (((Net)dataObject).BitWidth != null) val.BitWidth = ((Net)dataObject).BitWidth;
+                    if (((Net)originalDataObject).BitWidth != null) val.BitWidth = ((Net)originalDataObject).BitWidth;
                     else val.BitWidth = 1;
                 }
-                else if (dataObject is DataObjects.Variables.Genvar)
+                else if (originalDataObject is DataObjects.Variables.Genvar)
                 {
                     val.Constant = true;
                 }

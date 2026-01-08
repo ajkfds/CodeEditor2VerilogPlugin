@@ -21,6 +21,10 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             Byte val = new Byte() { Name = name };
             val.DataType = DataType;
             val.Signed = Signed;
+            foreach (var unpackedArray in UnpackedArrays)
+            {
+                val.UnpackedArrays.Add(unpackedArray.Clone());
+            }
             return val;
         }
         public static new Byte Create(string name,IDataType dataType)

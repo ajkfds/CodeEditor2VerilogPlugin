@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TextMateSharp.Model;
 
 namespace pluginVerilog.Verilog.Expressions
 {
@@ -29,9 +30,12 @@ namespace pluginVerilog.Verilog.Expressions
             return "";
         }
 
+        public WordReference WordReference;
         public static RangeExpression? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
-            if(word.Text != "[")
+            WordReference rangeWordRef = word.CrateWordReference();
+
+            if (word.Text != "[")
             {
                 if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
                 throw new Exception();
@@ -44,8 +48,10 @@ namespace pluginVerilog.Verilog.Expressions
             if (word.Text == "]")
             {
                 if (word.Text != "]") return exitWithError(word, nameSpace);
+                RangeExpression range = new SingleBitRangeExpression(exp1);
+                range.WordReference = WordReference.CreateReferenceRange(rangeWordRef, word.CrateWordReference());
                 word.MoveNext();
-                return new SingleBitRangeExpression(exp1);
+                return range;
             }
 
             if(word.Text == ":")
@@ -54,8 +60,10 @@ namespace pluginVerilog.Verilog.Expressions
                 Expression? exp2 = Expression.ParseCreate(word, nameSpace);
                 if (exp2 == null) return exitWithError(word, nameSpace);
                 if (word.Text != "]") return exitWithError(word, nameSpace);
+                RangeExpression range = new AbsoluteRangeExpression(exp1, exp2);
+                range.WordReference = WordReference.CreateReferenceRange(rangeWordRef, word.CrateWordReference());
                 word.MoveNext();
-                return new AbsoluteRangeExpression(exp1, exp2);
+                return range;
             }
             if (word.Text == "-:")
             {
@@ -63,8 +71,10 @@ namespace pluginVerilog.Verilog.Expressions
                 Expression? exp2 = Expression.ParseCreate(word, nameSpace);
                 if (exp2 == null) return exitWithError(word, nameSpace);
                 if (word.Text != "]") return exitWithError(word, nameSpace);
+                RangeExpression range = new RelativeMinusRangeExpression(exp1, exp2);
+                range.WordReference = WordReference.CreateReferenceRange(rangeWordRef, word.CrateWordReference());
                 word.MoveNext();
-                return new RelativeMinusRangeExpression(exp1, exp2);
+                return range;
             }
             if (word.Text == "+:")
             {
@@ -72,8 +82,10 @@ namespace pluginVerilog.Verilog.Expressions
                 Expression? exp2 = Expression.ParseCreate(word, nameSpace);
                 if (exp2 == null) return exitWithError(word, nameSpace);
                 if (word.Text != "]") return exitWithError(word, nameSpace);
+                RangeExpression range = new RelativePlusRangeExpression(exp1, exp2);
+                range.WordReference = WordReference.CreateReferenceRange(rangeWordRef, word.CrateWordReference());
                 word.MoveNext();
-                return new RelativePlusRangeExpression(exp1, exp2);
+                return range;
             }
             return exitWithError(word, nameSpace);
         }
@@ -81,7 +93,7 @@ namespace pluginVerilog.Verilog.Expressions
         private static RangeExpression? exitWithError(WordScanner word, NameSpace nameSpace)
         {
             word.AddError("illegal range expression");
-            word.SkipToKeywords(new List<string>{ ";", "]"});
+            //word.SkipToKeywords(new List<string>{ ";", "]"});
             return null;
         }
 
@@ -95,6 +107,17 @@ namespace pluginVerilog.Verilog.Expressions
             BitWidth = 1;
         }
         public Expression? Expression;
+        public int? BitIndex
+        {
+            get
+            {
+                if (Expression != null && Expression.Constant && Expression.Value != null)
+                {
+                    return (int)Expression.Value;
+                }
+                return null;
+            }
+        }
         public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
             if (Expression == null) return;
@@ -123,6 +146,53 @@ namespace pluginVerilog.Verilog.Expressions
         }
         public Expression? MsbExpression;
         public Expression? LsbExpression;
+
+        public int? MsbBitIndex
+        {
+            get
+            {
+                if (MsbExpression != null && MsbExpression.Constant && MsbExpression.Value != null)
+                {
+                    return (int)MsbExpression.Value;
+                }
+                return null;
+            }
+        }
+        public int? LsbBitIndex
+        {
+            get
+            {
+                if (LsbExpression != null && LsbExpression.Constant && LsbExpression.Value != null)
+                {
+                    return (int)LsbExpression.Value;
+                }
+                return null;
+            }
+        }
+
+        public int? MinBitIndex
+        {
+            get
+            {
+                if (LsbBitIndex != null && MsbBitIndex != null)
+                {
+                    return Math.Min((int)LsbBitIndex, (int)MsbBitIndex);
+                }
+                return null;
+            }
+        }
+        public int? MaxBitIndex
+        {
+            get
+            {
+                if (LsbBitIndex != null && MsbBitIndex != null)
+                {
+                    return Math.Max((int)LsbBitIndex, (int)MsbBitIndex);
+                }
+                return null;
+            }
+        }
+
 
         public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {

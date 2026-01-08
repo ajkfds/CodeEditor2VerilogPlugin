@@ -1,4 +1,6 @@
-﻿using pluginVerilog.Verilog.DataObjects.DataTypes;
+﻿using pluginVerilog.Verilog.DataObjects.Arrays;
+using pluginVerilog.Verilog.DataObjects.DataTypes;
+using pluginVerilog.Verilog.DataObjects.Nets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,6 +34,10 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             Int val = new Int() { Name = name,Defined= Defined };
             val.DataType = DataType;
             val.Signed = Signed;
+            foreach (var unpackedArray in UnpackedArrays)
+            {
+                val.UnpackedArrays.Add(unpackedArray.Clone());
+            }
             return val;
         }
 
