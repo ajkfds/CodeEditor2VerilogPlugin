@@ -53,17 +53,20 @@ namespace pluginVerilog
             // register project property creator
             CodeEditor2.Data.Project.Created += projectCreated;
 
-            RtlAgentControl = new pluginAi.Views.ChatControl();
-            RtlAgentControl.SetModelAsync(pluginAi.OpenRouterModels.openai_gpt_oss_120b ,false);
-
-            chatTab = new TabItem()
+            if(Global.GetLLM != null)
             {
-                Header = "RtlAgent",
-                Name = "RtlAgent",
-                FontSize = 12,
-                Content = RtlAgentControl
-            };
-            LLMChat = new pluginAi.LLMChat(RtlAgentControl);
+                RtlAgentControl = new pluginAi.Views.ChatControl();
+                RtlAgentControl.SetModelAsync(pluginAi.OpenRouterModels.openai_gpt_oss_120b, false);
+
+                chatTab = new TabItem()
+                {
+                    Header = "RtlAgent",
+                    Name = "RtlAgent",
+                    FontSize = 12,
+                    Content = RtlAgentControl
+                };
+                LLMChat = new pluginAi.LLMChat(RtlAgentControl);
+            }
 
             CodeEditor2.Controller.Tabs.AddItem(chatTab);
             return true;
