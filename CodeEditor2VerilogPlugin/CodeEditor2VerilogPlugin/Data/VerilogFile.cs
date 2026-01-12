@@ -465,7 +465,17 @@ namespace pluginVerilog.Data
 
         public override List<ToolItem> GetToolItems(int index)
         {
-            return VerilogCommon.AutoComplete.GetToolItems(this, index);
+            List<ToolItem> toolItems = new List<ToolItem>();
+            if (CustomizeTooltem != null)
+            {
+                CustomizeTooltem?.Invoke(toolItems);
+            }
+            List<ToolItem> toolItems2 = VerilogCommon.AutoComplete.GetToolItems(this, index);
+            foreach(ToolItem item in toolItems2)
+            {
+                toolItems.Add(item);
+            }
+            return toolItems;
         }
         public override List<AutocompleteItem>? GetAutoCompleteItems(int index, out string? candidateWord)
         {

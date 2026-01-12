@@ -347,23 +347,26 @@ namespace pluginVerilog.Verilog.Expressions
                     }
                     else
                     {
-                        AbsoluteRangeExpression absoluteRangeExpression = (AbsoluteRangeExpression)rangeExpression;
-                        PackedArray oldArray = ival.PackedDimensions[packedArrayIndex];
-                        if (!word.Prototype)
+                        if(rangeExpression is AbsoluteRangeExpression)
                         {
-                            if (
-                                absoluteRangeExpression.MaxBitIndex != null && absoluteRangeExpression.MinBitIndex != null &&
-                                oldArray.MinIndex != null && oldArray.MaxIndex != null
-                                )
+                            AbsoluteRangeExpression absoluteRangeExpression = (AbsoluteRangeExpression)rangeExpression;
+                            PackedArray oldArray = ival.PackedDimensions[packedArrayIndex];
+                            if (!word.Prototype)
                             {
                                 if (
-                                    absoluteRangeExpression.MaxBitIndex < oldArray.MinIndex ||
-                                    absoluteRangeExpression.MaxBitIndex > oldArray.MaxIndex ||
-                                    absoluteRangeExpression.MinBitIndex < oldArray.MinIndex ||
-                                    absoluteRangeExpression.MinBitIndex > oldArray.MaxIndex
+                                    absoluteRangeExpression.MaxBitIndex != null && absoluteRangeExpression.MinBitIndex != null &&
+                                    oldArray.MinIndex != null && oldArray.MaxIndex != null
                                     )
                                 {
-                                    absoluteRangeExpression.WordReference.AddError("index out of range");
+                                    if (
+                                        absoluteRangeExpression.MaxBitIndex < oldArray.MinIndex ||
+                                        absoluteRangeExpression.MaxBitIndex > oldArray.MaxIndex ||
+                                        absoluteRangeExpression.MinBitIndex < oldArray.MinIndex ||
+                                        absoluteRangeExpression.MinBitIndex > oldArray.MaxIndex
+                                        )
+                                    {
+                                        absoluteRangeExpression.WordReference.AddError("index out of range");
+                                    }
                                 }
                             }
                         }
@@ -449,59 +452,74 @@ namespace pluginVerilog.Verilog.Expressions
                 return DataObject.SyncContext;
             }
         }
-        //private static bool parseRange(WordScanner word, NameSpace nameSpace, DataObjectReference val)
-        //{
-        //    if (word.Text != "[") throw new Exception();
-        //    word.MoveNext();
 
-        //    Expression? exp1 = Expression.ParseCreate(word, nameSpace);
-        //    Expression? exp2;
-        //    switch (word.Text)
-        //    {
-        //        case ":":
-        //            word.MoveNext();
-        //            exp2 = Expression.ParseCreate(word, nameSpace);
-        //            if (word.Text != "]")
-        //            {
-        //                word.AddError("illegal range");
-        //                return false;
-        //            }
-        //            word.MoveNext();
-        //            val.RangeExpression = new AbsoluteRangeExpression(exp1, exp2);
-        //            break;
-        //        case "+:":
-        //            word.MoveNext();
-        //            exp2 = Expression.ParseCreate(word, nameSpace);
-        //            if (word.Text != "]")
-        //            {
-        //                word.AddError("illegal range");
-        //                return false;
-        //            }
-        //            word.MoveNext();
-        //            val.RangeExpression = new RelativePlusRangeExpression(exp1, exp2);
-        //            break;
-        //        case "-:":
-        //            word.MoveNext();
-        //            exp2 = Expression.ParseCreate(word, nameSpace);
-        //            if (word.Text != "]")
-        //            {
-        //                word.AddError("illegal range");
-        //                return false;
-        //            }
-        //            word.MoveNext();
-        //            val.RangeExpression = new RelativeMinusRangeExpression(exp1, exp2);
-        //            break;
-        //        case "]":
-        //            word.MoveNext();
-        //            val.RangeExpression = new SingleBitRangeExpression(exp1);
-        //            break;
-        //        default:
-        //            word.AddError("illegal range/dimension");
-        //            return false;
-        //    }
-        //    val.BitWidth = val.RangeExpression.BitWidth;
-        //    return true;
-        //}
+        private void parsePackedDimension(WordScanner word, NameSpace nameSpace, DataObjectReference val)
+        {
+            foreach (var unpackedArray in val.DataObject.UnpackedArrays)
+            {
+                val.UnpackedArrays.Add(unpackedArray.Clone());
+            }
+            val.DataObject.UnpackedArrays.Clear();
+
+            {
+                int unpackedArrayIndex = 0;
+                while (!word.Eof)
+                {
+                    if (word.Text != "[")
+                    {
+                        break;
+                    }
+                    if (val.UnpackedArrays.Count <= unpackedArrayIndex) break;
+
+                    RangeExpression? rangeExpression = RangeExpression.ParseCreate(word, nameSpace);
+                    if (rangeExpression == null) return;
+
+//                    partial = true;
+                    if (rangeExpression is SingleBitRangeExpression)
+                    {
+                        SingleBitRangeExpression singleBitRangeExpression = (SingleBitRangeExpression)rangeExpression;
+                        UnPackedArray oldArray = val.UnpackedArrays[unpackedArrayIndex];
+                        if (!word.Prototype && oldArray.MaxIndex != null && oldArray.MinIndex != null && singleBitRangeExpression.BitIndex != null)
+                        {
+                            if (oldArray.MaxIndex < singleBitRangeExpression.BitIndex || oldArray.MinIndex > singleBitRangeExpression.BitIndex)
+                            {
+                                singleBitRangeExpression.WordReference.AddError("index out of range");
+                            }
+                        }
+                        val.UnpackedArrays.RemoveAt(unpackedArrayIndex);
+                    }
+                    else
+                    {
+                        if (rangeExpression is AbsoluteRangeExpression)
+                        {
+                            AbsoluteRangeExpression absoluteRangeExpression = (AbsoluteRangeExpression)rangeExpression;
+                            UnPackedArray oldArray = val.UnpackedArrays[unpackedArrayIndex];
+                            if (!word.Prototype)
+                            {
+                                if (
+                                    absoluteRangeExpression.MaxBitIndex != null && absoluteRangeExpression.MinBitIndex != null &&
+                                    oldArray.MinIndex != null && oldArray.MaxIndex != null
+                                    )
+                                {
+                                    if (
+                                        absoluteRangeExpression.MaxBitIndex < oldArray.MinIndex ||
+                                        absoluteRangeExpression.MaxBitIndex > oldArray.MaxIndex ||
+                                        absoluteRangeExpression.MinBitIndex < oldArray.MinIndex ||
+                                        absoluteRangeExpression.MinBitIndex > oldArray.MaxIndex
+                                        )
+                                    {
+                                        absoluteRangeExpression.WordReference.AddError("index out of range");
+                                    }
+                                }
+                            }
+                        }
+
+                        val.UnpackedArrays[unpackedArrayIndex] = new UnPackedArray(rangeExpression.BitWidth);
+                        unpackedArrayIndex++;
+                    }
+                }
+            }
+        }
 
     }
 }
