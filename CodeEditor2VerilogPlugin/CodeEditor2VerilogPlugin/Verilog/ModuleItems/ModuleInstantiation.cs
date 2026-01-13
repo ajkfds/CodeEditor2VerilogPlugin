@@ -1123,12 +1123,13 @@ namespace pluginVerilog.Verilog.ModuleItems
                 sb.Append(" )");
                 first = false;
             }
-            sb.Append("\r\n);");
+            sb.Append("\n);");
 
 
             return sb.ToString();
         }
-
+        private void appendPortString(StringBuilder sb) { 
+        }
         /*
         module_instantiation            ::= module_identifier [ parameter_value_assignment ] module_instance { , module_instance } ;
         parameter_value_assignment      ::= # ( list_of_parameter_assignments )  

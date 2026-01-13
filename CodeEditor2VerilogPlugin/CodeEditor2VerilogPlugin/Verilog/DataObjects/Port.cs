@@ -113,6 +113,12 @@ namespace pluginVerilog.Verilog.DataObjects
             return port;
         }
 
+        public string CreateDefinitionString() 
+        {
+            AjkAvaloniaLibs.Controls.ColorLabel label = GetLabel();
+            return label.CreateString();
+        }
+
         public AjkAvaloniaLibs.Controls.ColorLabel GetLabel()
         {
             AjkAvaloniaLibs.Controls.ColorLabel label = new AjkAvaloniaLibs.Controls.ColorLabel();
@@ -173,6 +179,10 @@ namespace pluginVerilog.Verilog.DataObjects
                     label.AppendLabel(unpackedArray.GetLabel());
                     label.AppendText(" ");
                 }
+            }
+            if(Comment != "")
+            {
+                label.AppendText(" // " + Comment, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Comment));
             }
 
             return label;

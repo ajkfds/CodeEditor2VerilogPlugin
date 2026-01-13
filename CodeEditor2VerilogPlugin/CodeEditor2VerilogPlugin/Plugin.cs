@@ -4,6 +4,7 @@ using CodeEditor2.FileTypes;
 using CodeEditor2.Views;
 using CodeEditor2Plugin;
 using pluginAi;
+using pluginVerilog.LLM;
 using pluginVerilog.NavigatePanel;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using CodeEditor2.LLM;
 
 namespace pluginVerilog
 {
@@ -53,10 +55,12 @@ namespace pluginVerilog
             // register project property creator
             CodeEditor2.Data.Project.Created += projectCreated;
 
-            if(Global.GetLLM != null)
             {
-                RtlAgentControl = new pluginAi.Views.ChatControl();
-                RtlAgentControl.SetModelAsync(pluginAi.OpenRouterModels.openai_gpt_oss_120b, false);
+                pluginAi.OpenRouterChat chat = new OpenRouterChat(OpenRouterModels.openai_gpt_oss_120b, false);
+                LLMAgent agent = new LLMAgent();
+                InitializeLLMAgent.Run(agent);
+                RtlAgentControl = new ChatControl();
+                _=RtlAgentControl.SetModelAsync(chat,agent);
 
                 chatTab = new TabItem()
                 {
@@ -65,14 +69,13 @@ namespace pluginVerilog
                     FontSize = 12,
                     Content = RtlAgentControl
                 };
-                LLMChat = new pluginAi.LLMChat(RtlAgentControl);
             }
 
             CodeEditor2.Controller.Tabs.AddItem(chatTab);
             return true;
         }
         internal static Avalonia.Controls.TabItem? chatTab;
-        public static pluginAi.Views.ChatControl? RtlAgentControl;
+        public static ChatControl? RtlAgentControl;
         public static pluginAi.LLMChat? LLMChat;
 
         public bool Initialize()
@@ -88,11 +91,6 @@ namespace pluginVerilog
                     );
                 menuItem.Items.Add(newMenuItem);
                 newMenuItem.Click += MenuItem_CreateSnapShot_Click;
-            }
-            if (LLMChat != null) {
-                LLMChat.PersudoFunctionCallMode = true;
-                LLMChat.DebugMode = true;
-                LLM.InitializeLLMAgent.Run(LLMChat);
             }
 
             pluginVerilog.NavigatePanel.VerilogFileNode.CustomizeNavigateNodeContextMenu += CustomizeNavigateNodeContextMenuHandler;

@@ -31,7 +31,6 @@ namespace pluginVerilog
         //    public static IconImage MedalBadge = new IconImage(Properties.Resources.medalBadge);
         }
 
-        public static Func<LLMChat>? GetLLM = null;
         public static void CreateSnapShot()
         {
             using (StreamWriter sw = new StreamWriter("snapshot.log"))
