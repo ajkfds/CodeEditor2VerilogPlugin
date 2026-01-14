@@ -102,7 +102,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             }
             return IntegerVectorType.Create(Type, Signed, array);
         }
-        public static IntegerVectorType Create(DataTypeEnum dataType, bool signed,List<Arrays.PackedArray>? packedDimensions)
+        protected static IntegerVectorType Create(DataTypeEnum dataType, bool signed,List<Arrays.PackedArray>? packedDimensions)
         {
             switch (dataType)
             {

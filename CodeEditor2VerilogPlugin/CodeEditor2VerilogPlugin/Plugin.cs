@@ -26,8 +26,6 @@ namespace pluginVerilog
 
         public bool Register()
         {
-            if (!CodeEditor2.Global.Plugins.ContainsKey("AIPlugin")) return false;
-
             // register filetypes
             {
                 FileTypes.VerilogFile fileType = new FileTypes.VerilogFile();
@@ -54,13 +52,15 @@ namespace pluginVerilog
             }
             // register project property creator
             CodeEditor2.Data.Project.Created += projectCreated;
-
-            {
+            
+            { // chat agent tab
                 pluginAi.OpenRouterChat chat = new OpenRouterChat(OpenRouterModels.openai_gpt_oss_120b, false);
+
                 LLMAgent agent = new LLMAgent();
                 InitializeLLMAgent.Run(agent);
+
                 RtlAgentControl = new ChatControl();
-                _=RtlAgentControl.SetModelAsync(chat,agent);
+                RtlAgentControl.SetModel(chat,agent);
 
                 chatTab = new TabItem()
                 {
@@ -69,9 +69,10 @@ namespace pluginVerilog
                     FontSize = 12,
                     Content = RtlAgentControl
                 };
+                CodeEditor2.Controller.Tabs.AddItem(chatTab);
             }
 
-            CodeEditor2.Controller.Tabs.AddItem(chatTab);
+
             return true;
         }
         internal static Avalonia.Controls.TabItem? chatTab;

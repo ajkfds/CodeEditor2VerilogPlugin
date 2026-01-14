@@ -10,6 +10,8 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
 {
     public class Net : DataObject
     {
+        protected Net() { }
+
         public bool Signed
         {
             get
@@ -163,7 +165,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             net.NetType = netType;
             if(dataType == null)
             {
-                net.DataType = DataTypes.IntegerVectorType.Create(DataTypes.DataTypeEnum.Logic, false, null);
+                net.DataType = DataTypes.LogicType.Create(false, null);
             }
             else
             {

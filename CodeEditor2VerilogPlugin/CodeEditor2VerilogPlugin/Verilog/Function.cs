@@ -158,7 +158,7 @@ namespace pluginVerilog.Verilog
                             DataObjects.Arrays.PackedArray? range = Verilog.DataObjects.Arrays.PackedArray.ParseCreate(word, nameSpace);
                             if (range != null) packedDimensions.Add(range);
                         }
-                        IDataType dataType = Verilog.DataObjects.DataTypes.IntegerVectorType.Create(DataTypeEnum.Logic, signed, packedDimensions);
+                        IDataType dataType = Verilog.DataObjects.DataTypes.LogicType.Create(signed, packedDimensions);
                         Logic logic = Verilog.DataObjects.Variables.Logic.Create("",dataType);
                         retVal = logic;
                     }
@@ -198,7 +198,7 @@ namespace pluginVerilog.Verilog
             {
                 if (!returnVoid && retVal == null)
                 {
-                    IDataType dat_type = Verilog.DataObjects.DataTypes.IntegerVectorType.Create(DataTypeEnum.Logic, false, null);
+                    IDataType dat_type = Verilog.DataObjects.DataTypes.LogicType.Create(false, null);
                     retVal = Verilog.DataObjects.Variables.Logic.Create("",dat_type);
                 }
             }
@@ -391,7 +391,7 @@ namespace pluginVerilog.Verilog
                             DataObjects.Arrays.PackedArray? range = Verilog.DataObjects.Arrays.PackedArray.ParseCreate(word, nameSpace);
                             if (range != null) packedDimensions.Add(range);
                         }
-                        IDataType dataType = Verilog.DataObjects.DataTypes.IntegerVectorType.Create(DataTypeEnum.Logic, signed, packedDimensions);
+                        IDataType dataType = Verilog.DataObjects.DataTypes.LogicType.Create(signed, packedDimensions);
                         Logic logic = Verilog.DataObjects.Variables.Logic.Create("",dataType);
                         retVal = logic;
                     }
@@ -416,7 +416,7 @@ namespace pluginVerilog.Verilog
             Function function = new Function(nameSpace) { Name = word.Text, Project = word.Project, BeginIndexReference = beginReference };
             if (!returnVoid)
             {
-                IDataType dat_type = Verilog.DataObjects.DataTypes.IntegerVectorType.Create(DataTypeEnum.Logic, false, null);
+                IDataType dat_type = Verilog.DataObjects.DataTypes.LogicType.Create(false, null);
                 retVal = Verilog.DataObjects.Variables.Logic.Create("",dat_type);
             }
 

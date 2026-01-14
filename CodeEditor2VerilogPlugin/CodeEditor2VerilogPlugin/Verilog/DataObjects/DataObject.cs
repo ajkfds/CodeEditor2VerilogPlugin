@@ -82,6 +82,7 @@ namespace pluginVerilog.Verilog.DataObjects
                 wr_DefinedNameSpace = new WeakReference<NameSpace>(value);
             }
         }
+
         public static DataObject Create(string name,DataTypes.IDataType dataType)
         {
             switch (dataType.Type)

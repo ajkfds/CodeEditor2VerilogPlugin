@@ -155,7 +155,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                     List<PackedArray> arrays = new List<PackedArray>();
                     if(array != null) arrays.Add((PackedArray)array);
 
-                    dataType = DataTypes.IntegerVectorType.Create(DataTypeEnum.Logic, (bool)singed, arrays);
+                    dataType = DataTypes.LogicType.Create((bool)singed, arrays);
                 }
             }
 
@@ -208,18 +208,18 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                                 Expressions.Number number = (Expressions.Number)expression;
                                 if(number.NumberType == Expressions.Number.NumberTypeEnum.Real)
                                 {
-                                    dataType = DataTypes.IntegerAtomType.Create(DataTypeEnum.Real, number.Signed);
+                                    dataType = DataTypes.RealType.Create(null);
                                 }
                                 else if(number.BitWidth != null)
                                 {
                                     PackedArray packedArray = new PackedArray((int)number.BitWidth);
                                     List<PackedArray> packedArrays = new List<PackedArray>() { packedArray };
-                                    dataType = DataTypes.IntegerVectorType.Create(DataTypeEnum.Logic, number.Signed, packedArrays);
+                                    dataType = DataTypes.LogicType.Create(number.Signed, packedArrays);
                                 }else
                                 {
                                     PackedArray packedArray = new PackedArray(32);
                                     List<PackedArray> packedArrays = new List<PackedArray>() { packedArray };
-                                    dataType = DataTypes.IntegerVectorType.Create(DataTypeEnum.Logic, number.Signed, packedArrays);
+                                    dataType = DataTypes.LogicType.Create(number.Signed, packedArrays);
                                 }
                             }
                             constants.DataType = dataType;
@@ -326,7 +326,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                     List<PackedArray> arrays = new List<PackedArray>();
                     if (array != null) arrays.Add((PackedArray)array);
 
-                    dataType = DataTypes.IntegerVectorType.Create(DataTypeEnum.Logic, (bool)singed, arrays);
+                    dataType = DataTypes.LogicType.Create((bool)singed, arrays);
                 }
             }
 
@@ -392,19 +392,19 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                             Expressions.Number number = (Expressions.Number)expression;
                             if (number.NumberType == Expressions.Number.NumberTypeEnum.Real)
                             {
-                                dataType = DataTypes.IntegerAtomType.Create(DataTypeEnum.Real, number.Signed);
+                                dataType = DataTypes.RealType.Create(null);
                             }
                             else if (number.BitWidth != null)
                             {
                                 PackedArray packedArray = new PackedArray((int)number.BitWidth);
                                 List<PackedArray> packedArrays = new List<PackedArray>() { packedArray };
-                                dataType = DataTypes.IntegerVectorType.Create(DataTypeEnum.Logic, number.Signed, packedArrays);
+                                dataType = DataTypes.LogicType.Create(number.Signed, packedArrays);
                             }
                             else
                             {
                                 PackedArray packedArray = new PackedArray(32);
                                 List<PackedArray> packedArrays = new List<PackedArray>() { packedArray };
-                                dataType = DataTypes.IntegerVectorType.Create(DataTypeEnum.Logic, number.Signed, packedArrays);
+                                dataType = DataTypes.LogicType.Create(number.Signed, packedArrays);
                             }
                         }
                         constants.DataType = dataType;

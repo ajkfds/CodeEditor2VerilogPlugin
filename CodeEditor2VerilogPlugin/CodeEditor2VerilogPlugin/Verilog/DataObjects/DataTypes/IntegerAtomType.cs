@@ -110,7 +110,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             return sb.ToString();
         }
 
-        public static IntegerAtomType Create(DataTypeEnum dataType,bool signed)
+        protected static IntegerAtomType Create(DataTypeEnum dataType,bool signed)
         {
             switch (dataType)
             {

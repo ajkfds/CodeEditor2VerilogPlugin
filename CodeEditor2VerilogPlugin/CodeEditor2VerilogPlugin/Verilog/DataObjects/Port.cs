@@ -499,7 +499,7 @@ namespace pluginVerilog.Verilog.DataObjects
             port.Direction = (DirectionEnum)direction;
             if(netType != null)
             {
-                if (dataType == null) dataType = DataTypes.IntegerVectorType.Create(DataTypeEnum.Logic, false,packedDimensions);
+                if (dataType == null) dataType = DataTypes.LogicType.Create(false,packedDimensions);
                 Net net = Net.Create(port.Name,(Net.NetTypeEnum)netType, dataType);
                 net.DefinedReference = word.CrateWordReference();
                 port.DataObject = net;

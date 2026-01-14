@@ -243,7 +243,7 @@ namespace pluginVerilog.Verilog
             {
                 if (direction == Port.DirectionEnum.Input)
                 {
-                    Net net = Net.Create(identifier, Net.NetTypeEnum.Wire, DataObjects.DataTypes.IntegerAtomType.Create(DataObjects.DataTypes.DataTypeEnum.Byte, false));
+                    Net net = Net.Create(identifier, Net.NetTypeEnum.Wire, DataObjects.DataTypes.ByteType.Create( false));
 
                     if (intVectorVar != null)
                     {
@@ -256,7 +256,7 @@ namespace pluginVerilog.Verilog
                 }
                 else
                 {
-                    DataObjects.DataTypes.IntegerVectorType dType = Verilog.DataObjects.DataTypes.IntegerVectorType.Create(Verilog.DataObjects.DataTypes.DataTypeEnum.Logic, false, null);
+                    DataObjects.DataTypes.IntegerVectorType dType = DataObjects.DataTypes.LogicType.Create( false, null);
                     Logic logic = Logic.Create(identifier, dType);
 
                     if (intVectorVar != null)

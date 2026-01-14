@@ -9,6 +9,7 @@ using CodeEditor2.CodeEditor;
 using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
+using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.DataObjects.Nets;
 using pluginVerilog.Verilog.ModuleItems;
 
@@ -186,7 +187,7 @@ namespace pluginVerilog.Verilog.Snippets
                             if(port.DataObject is DataObjects.Nets.Net)
                             {
                                 DataObjects.Nets.Net net = (DataObjects.Nets.Net)port.DataObject;
-                                DataObjects.Nets.Net newNet = new DataObjects.Nets.Net() { Name = valueName };
+                                DataObjects.Nets.Net newNet = DataObjects.Nets.Net.Create(valueName,Net.NetTypeEnum.Wire,port.DataObject.DataType);
                                 foreach (var item in net.PackedDimensions)
                                 {
                                     newNet.PackedDimensions.Add(item);
@@ -197,7 +198,7 @@ namespace pluginVerilog.Verilog.Snippets
                             else if(port.DataObject is DataObjects.Variables.IntegerVectorValueVariable)
                             {
                                 DataObjects.Variables.IntegerVectorValueVariable vector = (DataObjects.Variables.IntegerVectorValueVariable)port.DataObject;
-                                DataObjects.Nets.Net newNet = new DataObjects.Nets.Net() { Name = valueName };
+                                DataObjects.Nets.Net newNet = DataObjects.Nets.Net.Create(valueName, Net.NetTypeEnum.Wire, port.DataObject.DataType);
                                 foreach (var item in vector.PackedDimensions)
                                 {
                                     newNet.PackedDimensions.Add(item);

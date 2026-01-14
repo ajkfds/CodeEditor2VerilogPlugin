@@ -303,14 +303,14 @@ namespace pluginVerilog.Verilog.Expressions
 
                         List<PackedArray> packedDimensions = new List<PackedArray>();
                         packedDimensions.Add(new PackedArray(1));
-                        val.DataObject = DataObjects.Variables.Logic.Create(ival.Name, DataObjects.DataTypes.IntegerVectorType.Create(DataObjects.DataTypes.DataTypeEnum.Logic, false, packedDimensions));
+                        val.DataObject = DataObjects.Variables.Logic.Create(ival.Name, DataObjects.DataTypes.LogicType.Create(false, packedDimensions));
                         break;
                     }
                     else
                     {
                         List<PackedArray> packedDimensions = new List<PackedArray>();
                         packedDimensions.Add(new PackedArray(rangeExpression.BitWidth));
-                        val.DataObject = DataObjects.Variables.Logic.Create(ival.Name, DataObjects.DataTypes.IntegerVectorType.Create(DataObjects.DataTypes.DataTypeEnum.Logic, false, packedDimensions));
+                        val.DataObject = DataObjects.Variables.Logic.Create(ival.Name, DataObjects.DataTypes.LogicType.Create(false, packedDimensions));
                         break;
                     }
                 }
@@ -384,7 +384,7 @@ namespace pluginVerilog.Verilog.Expressions
                     word.AddError("illegal range");
                     break;
                 }
-                val.DataObject = DataObjects.Variables.Byte.Create(originalObject.Name, DataObjects.DataTypes.IntegerAtomType.Create(DataObjects.DataTypes.DataTypeEnum.Byte, false));
+                val.DataObject = DataObjects.Variables.Byte.Create(originalObject.Name, DataObjects.DataTypes.ByteType.Create(false));
                 break;
             }
 
