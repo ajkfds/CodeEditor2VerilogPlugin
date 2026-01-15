@@ -22,6 +22,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         //                   ...
         //      integer_vector_type::= "bit" | "logic" | "reg"
 
+
         // reg          4state  >=1bit      
         // logic        4state  >=1bit      
         // bit          2state  >=1bit      

@@ -132,6 +132,7 @@ namespace pluginVerilog.Data
                 document = value as CodeEditor2.CodeEditor.CodeDocument;
             }
         }
+
         protected override void LoadDocumentFromFile()
         {
             try
@@ -141,14 +142,10 @@ namespace pluginVerilog.Data
                     document = new pluginVerilog.CodeEditor.CodeDocument(this);
                 }
 
-                var info = new FileInfo(AbsolutePath);
-                CashedStatus = new FileStatus(info.Length, info.LastWriteTimeUtc);
-
                 string text = ReadStableText(AbsolutePath);
-                lock (document)
-                {
-                    document.TextDocument.Replace(0, document.TextDocument.TextLength, text);
-                }
+                loadFileHash = GetHash(text);
+
+                document.TextDocument.Replace(0, document.TextDocument.TextLength, text);
                 document.ClearHistory();
                 document.Clean();
             }

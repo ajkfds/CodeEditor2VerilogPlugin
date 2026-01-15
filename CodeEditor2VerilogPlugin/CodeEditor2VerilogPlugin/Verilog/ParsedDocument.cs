@@ -452,6 +452,9 @@ namespace pluginVerilog.Verilog
                     } else if(namedElement is Task)
                     {
                         ((Task)namedElement).AppendLabel(ret);
+                    } else if(namedElement is DataObjects.Typedef)
+                    {
+                        ((DataObjects.Typedef)namedElement).AppendLabel(ret);
                     }
                 }
 

@@ -29,7 +29,8 @@ namespace pluginVerilog.Verilog.Snippets
         {
             CodeEditor2.Data.TextFile? file = CodeEditor2.Controller.CodeEditor.GetTextFile();
             if (file == null) return;
-            CodeEditor2.CodeEditor.CodeDocument codeDocument = file.CodeDocument;
+            CodeEditor2.CodeEditor.CodeDocument? codeDocument = file.CodeDocument;
+            if (codeDocument == null) return;
 
             CodeEditor2.Data.ITextFile? iText = CodeEditor2.Controller.CodeEditor.GetTextFile();
 
@@ -37,7 +38,7 @@ namespace pluginVerilog.Verilog.Snippets
             Data.IVerilogRelatedFile? vFile = iText as Data.IVerilogRelatedFile;
             if (vFile == null) return;
 
-            ParsedDocument parsedDocument = vFile.VerilogParsedDocument;
+            ParsedDocument? parsedDocument = vFile.VerilogParsedDocument;
             if (parsedDocument == null) return;
 
             int index = codeDocument.CaretIndex;
@@ -187,23 +188,17 @@ namespace pluginVerilog.Verilog.Snippets
                             if(port.DataObject is DataObjects.Nets.Net)
                             {
                                 DataObjects.Nets.Net net = (DataObjects.Nets.Net)port.DataObject;
-                                DataObjects.Nets.Net newNet = DataObjects.Nets.Net.Create(valueName,Net.NetTypeEnum.Wire,port.DataObject.DataType);
-                                foreach (var item in net.PackedDimensions)
-                                {
-                                    newNet.PackedDimensions.Add(item);
-                                }
-
+                                DataObjects.Nets.Net newNet = DataObjects.Nets.Net.Create(valueName,Net.NetTypeEnum.Wire,port.DataObject.DataType.Clone());
                                 sbDefine.Append(newNet.CreateTypeString());
                             }
                             else if(port.DataObject is DataObjects.Variables.IntegerVectorValueVariable)
                             {
                                 DataObjects.Variables.IntegerVectorValueVariable vector = (DataObjects.Variables.IntegerVectorValueVariable)port.DataObject;
-                                DataObjects.Nets.Net newNet = DataObjects.Nets.Net.Create(valueName, Net.NetTypeEnum.Wire, port.DataObject.DataType);
-                                foreach (var item in vector.PackedDimensions)
+                                DataObjects.Nets.Net newNet = DataObjects.Nets.Net.Create(valueName, Net.NetTypeEnum.Wire, DataObjects.DataTypes.LogicType.Create(false,null));
+                                foreach(var dimension in vector.PackedDimensions)
                                 {
-                                    newNet.PackedDimensions.Add(item);
+                                    newNet.PackedDimensions.Add(dimension.Clone());
                                 }
-
                                 sbDefine.Append(newNet.CreateTypeString());
                             }
                             else

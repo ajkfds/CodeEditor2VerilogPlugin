@@ -10,7 +10,9 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
     {
         public bool Constant { get; protected set; } = false;
 
-
+        protected  PackedArray()
+        {
+        }
         public PackedArray(Expressions.Expression? expression0, Expressions.Expression? expression1)
         {
             if (expression0 == null || expression1 == null) return;
@@ -55,7 +57,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
 
         public PackedArray Clone()
         {
-            PackedArray pArray = new(SizeExpression0, SizeExpression1);
+            PackedArray pArray = new PackedArray() { SizeExpression0 = SizeExpression0, SizeExpression1 = SizeExpression1, Size = Size, MinIndex = MinIndex, MaxIndex = MaxIndex };
             return pArray;
         }
 

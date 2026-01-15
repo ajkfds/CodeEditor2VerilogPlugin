@@ -228,14 +228,6 @@ namespace pluginVerilog.Data
             await SourceTextFile.SaveAsync();
         }
 
-        public override DateTime? LoadedFileLastWriteTime
-        {
-            get
-            {
-                if (SourceTextFile == null) return null;
-                return SourceTextFile.LoadedFileLastWriteTime;
-            }
-        }
 
         public Verilog.ParsedDocument? VerilogParsedDocument
         {

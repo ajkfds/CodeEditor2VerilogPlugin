@@ -149,11 +149,13 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                     array = DataObjects.Arrays.PackedArray.ParseCreate(word, (NameSpace)module);
                 }
 
-                if(singed != null || array != null)
+                // singed or array defined -> define data type
+                // otherwise, use assigned expression data type
+                if (singed != null || array != null)
                 {
                     if (singed == null) singed = false;
                     List<PackedArray> arrays = new List<PackedArray>();
-                    if(array != null) arrays.Add((PackedArray)array);
+                    if (array != null) arrays.Add((PackedArray)array);
 
                     dataType = DataTypes.LogicType.Create((bool)singed, arrays);
                 }
@@ -212,12 +214,12 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                                 }
                                 else if(number.BitWidth != null)
                                 {
-                                    PackedArray packedArray = new PackedArray((int)number.BitWidth);
+                                    PackedArray packedArray = new PackedArray((int)number.BitWidth-1,0);
                                     List<PackedArray> packedArrays = new List<PackedArray>() { packedArray };
                                     dataType = DataTypes.LogicType.Create(number.Signed, packedArrays);
                                 }else
                                 {
-                                    PackedArray packedArray = new PackedArray(32);
+                                    PackedArray packedArray = new PackedArray(31,0);
                                     List<PackedArray> packedArrays = new List<PackedArray>() { packedArray };
                                     dataType = DataTypes.LogicType.Create(number.Signed, packedArrays);
                                 }
@@ -320,6 +322,8 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                     array = DataObjects.Arrays.PackedArray.ParseCreate(word, nameSpace);
                 }
 
+                // singed or array defined -> define data type
+                // otherwise, use assigned expression data type
                 if (singed != null || array != null)
                 {
                     if (singed == null) singed = false;
@@ -366,6 +370,29 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                         return;
                 }
 
+                constants.ConstantType = constantType;
+                if (dataType == null && expression is Expressions.Number)
+                {
+                    Expressions.Number number = (Expressions.Number)expression;
+                    if (number.NumberType == Expressions.Number.NumberTypeEnum.Real)
+                    {
+                        dataType = DataTypes.RealType.Create(null);
+                    }
+                    else if (number.BitWidth != null)
+                    {
+                        PackedArray packedArray = new PackedArray((int)number.BitWidth-1,0);
+                        List<PackedArray> packedArrays = new List<PackedArray>() { packedArray };
+                        dataType = DataTypes.LogicType.Create(number.Signed, packedArrays);
+                    }
+                    else
+                    {
+                        PackedArray packedArray = new PackedArray(31,0);
+                        List<PackedArray> packedArrays = new List<PackedArray>() { packedArray };
+                        dataType = DataTypes.LogicType.Create(number.Signed, packedArrays);
+                    }
+                }
+                constants.DataType = dataType;
+
                 if (!word.Active)
                 {
                     // skip
@@ -386,28 +413,6 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                     if (nameSpace.NamedElements.ContainsKey(identifier) && nameSpace.NamedElements[identifier] is DataObjects.Constants.Constants)
                     { // re-parse after prototype parse 
                         constants = (DataObjects.Constants.Constants)nameSpace.NamedElements[identifier];
-                        constants.ConstantType = constantType;
-                        if (dataType == null && expression is Expressions.Number)
-                        {
-                            Expressions.Number number = (Expressions.Number)expression;
-                            if (number.NumberType == Expressions.Number.NumberTypeEnum.Real)
-                            {
-                                dataType = DataTypes.RealType.Create(null);
-                            }
-                            else if (number.BitWidth != null)
-                            {
-                                PackedArray packedArray = new PackedArray((int)number.BitWidth);
-                                List<PackedArray> packedArrays = new List<PackedArray>() { packedArray };
-                                dataType = DataTypes.LogicType.Create(number.Signed, packedArrays);
-                            }
-                            else
-                            {
-                                PackedArray packedArray = new PackedArray(32);
-                                List<PackedArray> packedArrays = new List<PackedArray>() { packedArray };
-                                dataType = DataTypes.LogicType.Create(number.Signed, packedArrays);
-                            }
-                        }
-                        constants.DataType = dataType;
                     }
                     else
                     { // for root nameSpace parameter
@@ -438,7 +443,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
         }
         public override DataObject Clone(string name)
         {
-            return new Constants { DefinedReference = DefinedReference, Expression = Expression, Name = name,Defined = Defined };
+            return new Constants { DefinedReference = DefinedReference, Expression = Expression, Name = name, Defined = Defined, DataType = DataType?.Clone() };
         }
     }
 }

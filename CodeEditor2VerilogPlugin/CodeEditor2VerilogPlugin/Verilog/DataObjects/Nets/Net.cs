@@ -174,67 +174,65 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             return net;
         }
 
+        public string CreateNetTypeString()
+        {
+            switch (NetType)
+            {
+                case NetTypeEnum.Supply0:
+                    return "supply0";
+                case NetTypeEnum.Supply1:
+                    return "supply1";
+                case NetTypeEnum.Tri:
+                    return "tri";
+                case NetTypeEnum.Triand:
+                    return "triand";
+                case NetTypeEnum.Trior:
+                    return "trior";
+                case NetTypeEnum.Trireg:
+                    return "trireg";
+                case NetTypeEnum.Tri0:
+                    return "tri0";
+                case NetTypeEnum.Tri1:
+                    return "tri1";
+                case NetTypeEnum.Uwire:
+                    return "uwire";
+                case NetTypeEnum.Wire:
+                    return "wire";
+                case NetTypeEnum.Wand:
+                    return "wand";
+                case NetTypeEnum.Wor:
+                    return "wor";
+            }
+            return "";
+        }
 
         public override string CreateTypeString()
         {
             StringBuilder sb = new StringBuilder();
-
-            switch (NetType)
-            {
-                case NetTypeEnum.Supply0:
-                    sb.Append("supply0");
-                    break;
-                case NetTypeEnum.Supply1:
-                    sb.Append("supply1");
-                    break;
-                case NetTypeEnum.Tri:
-                    sb.Append("tri");
-                    break;
-                case NetTypeEnum.Triand:
-                    sb.Append("triand");
-                    break;
-                case NetTypeEnum.Trior:
-                    sb.Append("trior");
-                    break;
-                case NetTypeEnum.Trireg:
-                    sb.Append("trireg");
-                    break;
-                case NetTypeEnum.Tri0:
-                    sb.Append("tri0");
-                    break;
-                case NetTypeEnum.Tri1:
-                    sb.Append("tri1");
-                    break;
-                case NetTypeEnum.Uwire:
-                    sb.Append("uwire");
-                    break;
-                case NetTypeEnum.Wire:
-                    sb.Append("wire");
-                    break;
-                case NetTypeEnum.Wand:
-                    sb.Append("wand");
-                    break;
-                case NetTypeEnum.Wor:
-                    sb.Append("wor");
-                    break;
-            }
-
+            sb.Append(CreateNetTypeString());
             sb.Append(" ");
             if (Signed)
             {
                 sb.Append("signed ");
             }
 
-            if (PackedDimensions != null)
+            if (DataType != null)
             {
-                foreach (PackedArray packedArray in PackedDimensions)
+                if(DataType.Type== DataTypes.DataTypeEnum.Logic)
                 {
-                    sb.Append(packedArray.CreateString());
-                    sb.Append(" ");
+                    bool first = true;
+                    foreach (Arrays.PackedArray range in PackedDimensions)
+                    {
+                        if (first) sb.Append(" ");
+                        sb.Append(range.CreateString());
+                        first = false;
+                    }
+                }
+                else
+                {
+                    sb.Append(DataType.CreateString());
                 }
             }
-
-            if (DataType != null) sb.Append(DataType.CreateString());
             return sb.ToString();
         }
 

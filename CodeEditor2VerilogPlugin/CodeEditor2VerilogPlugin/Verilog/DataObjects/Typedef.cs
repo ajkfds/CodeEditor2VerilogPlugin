@@ -1,5 +1,7 @@
 ﻿using CodeEditor2.CodeEditor.CodeComplete;
+using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
+using pluginVerilog.Verilog.DataObjects.Nets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,6 +27,18 @@ namespace pluginVerilog.Verilog.DataObjects
                 );
         }
 
+        public void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        {
+            label.AppendText("typedef ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+            label.AppendText(Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Identifier));
+            label.AppendText("\n");
+
+            if (VariableType != null)
+            {
+                label.AppendText(VariableType.CreateString(), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                label.AppendText("\n");
+            }
+        }
         public static bool ParseDeclaration(WordScanner word, NameSpace nameSpace)
         {
 

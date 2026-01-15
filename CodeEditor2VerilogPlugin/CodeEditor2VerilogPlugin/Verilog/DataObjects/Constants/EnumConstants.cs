@@ -15,5 +15,9 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
             constants.ConstantType = ConstantTypeEnum.enum_;
             return constants;
         }
+        public override DataObject Clone(string name)
+        {
+            return new EnumConstants { DefinedReference = DefinedReference, Expression = Expression, Name = name, Defined = Defined, DataType = DataType?.Clone() };
+        }
     }
 }
