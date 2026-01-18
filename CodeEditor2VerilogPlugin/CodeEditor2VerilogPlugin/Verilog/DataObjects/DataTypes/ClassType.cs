@@ -1,4 +1,5 @@
-﻿using DynamicData;
+﻿using AjkAvaloniaLibs.Controls;
+using DynamicData;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using System;
@@ -44,6 +45,17 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
         parameter_value_assignment ::= # ( [ list_of_parameter_assignments ] ) 
         */
+        public string CreateString()
+        {
+            ColorLabel label = new ColorLabel();
+            AppendTypeLabel(label);
+            return label.CreateString();
+        }
+
+        public void AppendTypeLabel(ColorLabel label)
+        {
+            label.AppendText("class", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+        }
         public IDataType Clone()
         {
             List<PackedArray> array = new List<PackedArray>();
@@ -83,10 +95,6 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         }
         public bool IsVector { get { return false; } }
 
-        public virtual string CreateString()
-        {
-            return "class";
-        }
 
     }
 }

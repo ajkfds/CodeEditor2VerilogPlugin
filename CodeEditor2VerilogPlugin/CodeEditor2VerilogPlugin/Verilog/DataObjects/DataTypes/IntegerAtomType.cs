@@ -81,6 +81,10 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
         public bool IsVector { get { return false; } }
 
+        public void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        {
+            label.AppendText(CreateString() + " ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+        }
         public virtual string CreateString()
         {
             StringBuilder sb = new StringBuilder();

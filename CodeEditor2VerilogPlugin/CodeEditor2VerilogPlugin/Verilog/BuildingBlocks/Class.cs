@@ -1,4 +1,5 @@
-﻿using Avalonia.Input;
+﻿using AjkAvaloniaLibs.Controls;
+using Avalonia.Input;
 using CodeEditor2.CodeEditor;
 using CodeEditor2.CodeEditor.CodeComplete;
 using pluginVerilog.Verilog.DataObjects;
@@ -92,6 +93,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
         }
 
+        
         public IDataType Clone()
         {
             Class class_ = new Class()
@@ -484,7 +486,15 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
         public string CreateString()
         {
-            throw new NotImplementedException();
+            ColorLabel label = new ColorLabel();
+            AppendTypeLabel(label);
+            return label.CreateString();
+        }
+
+        public void AppendTypeLabel(ColorLabel label)
+        {
+            label.AppendText("class ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+            label.AppendText(Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Identifier));
         }
 
         //protected static void checkVariablesUseAndDriven(WordScanner word, NameSpace nameSpace)

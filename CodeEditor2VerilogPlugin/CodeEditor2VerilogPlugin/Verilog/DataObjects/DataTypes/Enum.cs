@@ -30,6 +30,10 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 return BaseType?.BitWidth;
             }
         }
+        public void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        {
+            label.AppendText(CreateString() + " ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+        }
 
         public virtual string CreateString()
         {

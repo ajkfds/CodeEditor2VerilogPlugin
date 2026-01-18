@@ -1,4 +1,5 @@
-﻿using DynamicData;
+﻿using AjkAvaloniaLibs.Controls;
+using DynamicData;
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using System;
 using System.Collections.Generic;
@@ -23,6 +24,17 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             {
                 return null;
             }
+        }
+        public string CreateString()
+        {
+            ColorLabel label = new ColorLabel();
+            AppendTypeLabel(label);
+            return label.CreateString();
+        }
+
+        public void AppendTypeLabel(ColorLabel label)
+        {
+            label.AppendText("string", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
         }
         public virtual List<DataObjects.Arrays.PackedArray> PackedDimensions { get; protected set; } = new List<DataObjects.Arrays.PackedArray>();
         public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
@@ -55,10 +67,6 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
             return dType;
-        }
-        public virtual string CreateString()
-        {
-            return "string";
         }
         public bool IsVector { get { return false; } }
     }

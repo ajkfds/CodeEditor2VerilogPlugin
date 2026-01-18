@@ -1,4 +1,5 @@
-﻿using DynamicData;
+﻿using AjkAvaloniaLibs.Controls;
+using DynamicData;
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using System;
 using System.Collections.Generic;
@@ -20,6 +21,17 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         public int? BitWidth { get; } = 32;
         public virtual List<DataObjects.Arrays.PackedArray> PackedDimensions { get; protected set; } = new List<DataObjects.Arrays.PackedArray>();
         public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
+        public string CreateString()
+        {
+            ColorLabel label = new ColorLabel();
+            AppendTypeLabel(label);
+            return label.CreateString();
+        }
+
+        public void AppendTypeLabel(ColorLabel label)
+        {
+            label.AppendText("shortreal", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+        }
         public IDataType Clone()
         {
             List<PackedArray> array = new List<PackedArray>();
@@ -49,10 +61,6 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
             return dType;
-        }
-        public virtual string CreateString()
-        {
-            return "shortreal";
         }
         public bool IsVector { get { return false; } }
     }

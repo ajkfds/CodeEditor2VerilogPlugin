@@ -11,6 +11,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         public DataTypeEnum Type { get; }
         public string CreateString();
 
+        public void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label);
 
 
         public int? BitWidth { get; }

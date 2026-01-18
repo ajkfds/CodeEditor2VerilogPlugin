@@ -1,4 +1,5 @@
-﻿using pluginVerilog.Verilog.DataObjects.Arrays;
+﻿using AjkAvaloniaLibs.Controls;
+using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.DataObjects.Constants;
 using pluginVerilog.Verilog.DataObjects.Variables;
 using System;
@@ -55,15 +56,18 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         data_type_or_void ::= data_type | "void"
         struct_union ::= "struct" | "union" [ "tagged" ]          
          */
-        public virtual string CreateString()
+        public string CreateString()
         {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("struct ");
+            ColorLabel label = new ColorLabel();
+            AppendTypeLabel(label);
+            return label.CreateString();
+        }
 
-            if (Packed) sb.Append("packed ");
-            if (Signed) sb.Append("signed ");
-
-            return sb.ToString();
+        public void AppendTypeLabel(ColorLabel label)
+        {
+            label.AppendText("struct", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+            if(Packed) label.AppendText(" packed", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+            if(Signed) label.AppendText(" signed", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
         }
         public bool IsVector { get { return false; } }
 
