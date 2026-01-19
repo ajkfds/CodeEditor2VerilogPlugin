@@ -143,9 +143,10 @@ namespace pluginVerilog.Data
                 }
 
                 string text = ReadStableText(AbsolutePath);
-                loadFileHash = GetHash(text);
-
                 document.TextDocument.Replace(0, document.TextDocument.TextLength, text);
+                loadFileHash = GetHash(text);
+                Controller.AppendLog("LoadDocument From File (Verilog) " + RelativePath + " : " + loadFileHash, Avalonia.Media.Colors.Green);
+
                 document.ClearHistory();
                 document.Clean();
             }
@@ -162,9 +163,8 @@ namespace pluginVerilog.Data
         /// <param name="newParsedDocument"></param>
         public override async Task AcceptParsedDocumentAsync(ParsedDocument? newParsedDocument)
         {
-            if (!Dispatcher.UIThread.CheckAccess()) System.Diagnostics.Debugger.Break();
-
             
+            if (!Dispatcher.UIThread.CheckAccess()) System.Diagnostics.Debugger.Break();
 
             ParsedDocument? oldParsedDocument = ParsedDocument;
             if (oldParsedDocument == newParsedDocument) return;
@@ -177,7 +177,8 @@ namespace pluginVerilog.Data
                 await UpdateAsync();
                 return;
             }
-            if(VerilogParsedDocument.CodeDocument != null && CodeDocument != null) CodeDocument.CopyColorMarkFrom(VerilogParsedDocument.CodeDocument);
+            if (CodeDocument == null) return;
+            if (newParsedDocument == null) return;
 
             // Register New Building Block
             if (VerilogParsedDocument.Root != null)
