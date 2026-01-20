@@ -71,6 +71,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         CoverGroup,
         Struct,
         //        TypeReference
+        UserDefined
     }
 
     public static class DataTypeFactory
@@ -218,31 +219,24 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     // typedef
                     if (namedElement is Typedef)
                     {
-                        IDataType defType = ((Typedef)namedElement).VariableType;
-                        if (defType != null)
+                        Typedef defType = (Typedef)namedElement;
+                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.MoveNext();
+
+                        // packed_dimension
+                        List<PackedArray> packedArrays = new List<PackedArray>();
+                        while (word.Text == "[")
                         {
-                            word.Color(CodeDrawStyle.ColorType.Identifier);
-                            word.MoveNext();
-
-                            // packed_dimension
-                            while (word.Text == "[")
+                            PackedArray? range = PackedArray.ParseCreate(word, nameSpace);
+                            if (word.Eof || range == null)
                             {
-                                PackedArray? range = PackedArray.ParseCreate(word, nameSpace);
-                                if (word.Eof || range == null)
-                                {
-                                    word.AddError("illegal reg declaration");
-                                    return null;
-                                }
-
-                                PackedArray? packedArray = range as Arrays.PackedArray;
-
-                                if (packedArray != null)
-                                {
-                                    defType.PackedDimensions.Add(packedArray);
-                                }
+                                word.AddError("illegal reg declaration");
+                                return null;
                             }
-                            return defType;
+                            if (range != null) packedArrays.Add(range);
                         }
+                        UserDefinedType userDefinedType = UserDefinedType.Create(defType, packedArrays);
+                        return userDefinedType;
                     }
                 }
             }

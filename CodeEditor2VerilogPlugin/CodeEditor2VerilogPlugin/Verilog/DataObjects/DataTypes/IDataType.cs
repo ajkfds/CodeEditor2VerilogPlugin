@@ -11,6 +11,8 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         public DataTypeEnum Type { get; }
         public string CreateString();
 
+        public bool Packable { get; }
+
         public void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label);
 
 

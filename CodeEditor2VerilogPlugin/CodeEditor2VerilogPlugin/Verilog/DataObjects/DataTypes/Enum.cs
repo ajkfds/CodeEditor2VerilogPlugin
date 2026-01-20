@@ -19,6 +19,10 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 return DataTypeEnum.Enum;
             }
         }
+        public bool Packable
+        {
+            get { return true; }
+        }
         public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
         public IDataType? BaseType { get; protected set; } = null;
         public List<Item> Items = new List<Item>();

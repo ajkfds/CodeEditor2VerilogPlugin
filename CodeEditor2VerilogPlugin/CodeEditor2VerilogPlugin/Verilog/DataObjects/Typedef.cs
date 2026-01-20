@@ -35,7 +35,7 @@ namespace pluginVerilog.Verilog.DataObjects
 
             if (VariableType != null)
             {
-                label.AppendText(VariableType.CreateString(), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                VariableType.AppendTypeLabel(label);
                 label.AppendText("\n");
             }
         }

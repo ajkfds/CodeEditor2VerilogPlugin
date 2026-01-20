@@ -15,6 +15,13 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
         public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Register; } }
 
+        public bool Packable
+        {
+            get
+            {
+                return true;
+            }
+        }
         public virtual List<Arrays.PackedArray> PackedDimensions { get; protected set; } = new List<Arrays.PackedArray>();
         public virtual bool Signed { get; init; }
 

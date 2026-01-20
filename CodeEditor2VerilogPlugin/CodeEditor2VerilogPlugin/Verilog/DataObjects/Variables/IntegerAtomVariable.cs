@@ -8,7 +8,7 @@ using pluginVerilog.Verilog.DataObjects.DataTypes;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
-    public class IntegerAtomVariable : ValueVariable
+    public class IntegerAtomVariable : ValueVariable, IPackedDataObject
     {
         //integer_atom_type::= byte | shortint | int | longint | integer | time
         public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }

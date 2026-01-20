@@ -20,6 +20,10 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 return DataTypeEnum.Chandle;
             }
         }
+        public bool Packable
+        {
+            get { return false; }
+        }
         public int? BitWidth { get; } = null;
         public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
         public virtual List<DataObjects.Arrays.PackedArray> PackedDimensions { get; protected set; } = new List<Arrays.PackedArray>();

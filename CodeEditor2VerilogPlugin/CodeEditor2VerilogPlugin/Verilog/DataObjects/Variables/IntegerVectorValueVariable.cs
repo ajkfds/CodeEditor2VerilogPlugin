@@ -9,7 +9,7 @@ using pluginVerilog.Verilog.DataObjects.Variables;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
-    public class IntegerVectorValueVariable : ValueVariable
+    public class IntegerVectorValueVariable : ValueVariable, IPackedDataObject
     {
         //integer_vector_type::= bit | logic | reg
         public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Register; } }

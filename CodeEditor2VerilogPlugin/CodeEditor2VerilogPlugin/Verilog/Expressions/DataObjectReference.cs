@@ -241,87 +241,7 @@ namespace pluginVerilog.Verilog.Expressions
             // parse packed dimensions
             if(val.DataObject is DataObjects.Constants.Constants)
             {
-                Constants ival = (Constants)val.DataObject;
-
-                while (!word.Eof)
-                {
-                    if (word.Text != "[")
-                    {
-                        break;
-                    }
-
-                    RangeExpression? rangeExpression = RangeExpression.ParseCreate(word, nameSpace);
-                    if (rangeExpression == null) return null;
-                    partial = true;
-
-                    if (rangeExpression is SingleBitRangeExpression)
-                    {
-                        SingleBitRangeExpression singleBitRangeExpression = (SingleBitRangeExpression)rangeExpression;
-                        if (!word.Prototype && singleBitRangeExpression.BitIndex != null)
-                        {
-                            if (singleBitRangeExpression.BitIndex < 0 || singleBitRangeExpression.BitIndex >= val.DataObject.BitWidth)
-                            {
-                                singleBitRangeExpression.WordReference.AddError("index out of range");
-                            }
-                        }
-
-                        List<PackedArray> packedDimensions = new List<PackedArray>();
-                        packedDimensions.Add(new PackedArray(1));
-                        val.DataObject = DataObjects.Variables.Logic.Create(ival.Name, DataObjects.DataTypes.LogicType.Create(false, packedDimensions));
-                        val.BitWidth = 1;
-                        break;
-                    }
-                    else
-                    {
-                        List<PackedArray> packedDimensions = new List<PackedArray>();
-                        packedDimensions.Add(new PackedArray(rangeExpression.BitWidth));
-                        val.DataObject = DataObjects.Variables.Logic.Create(ival.Name, DataObjects.DataTypes.LogicType.Create(false, packedDimensions));
-                        val.BitWidth = rangeExpression.BitWidth;
-                        break;
-                    }
-                }
-
-            }
-            else if (val.DataObject is IntegerVectorValueVariable)
-            {
-                int packedArrayIndex = 0;
-                IntegerVectorValueVariable ival = (IntegerVectorValueVariable)val.DataObject;
-
-                while (!word.Eof)
-                {
-                    if (word.Text != "[")
-                    {
-                        break;
-                    }
-                    if (ival.PackedDimensions.Count <= packedArrayIndex) break;
-
-                    RangeExpression? rangeExpression = RangeExpression.ParseCreate(word, nameSpace);
-                    if (rangeExpression == null) return null;
-                    partial = true;
-
-                    if (rangeExpression is SingleBitRangeExpression)
-                    {
-                        SingleBitRangeExpression singleBitRangeExpression = (SingleBitRangeExpression)rangeExpression;
-                        PackedArray oldArray = ival.PackedDimensions[packedArrayIndex];
-                        if (!word.Prototype && oldArray.MaxIndex != null && oldArray.MinIndex != null && singleBitRangeExpression.BitIndex != null)
-                        {
-                            if (oldArray.MaxIndex < singleBitRangeExpression.BitIndex || oldArray.MinIndex > singleBitRangeExpression.BitIndex)
-                            {
-                                singleBitRangeExpression.WordReference.AddError("index out of range");
-                            }
-                        }
-                        ival.PackedDimensions.RemoveAt(packedArrayIndex);
-                    }
-                    else
-                    {
-                        ival.PackedDimensions[packedArrayIndex] = new PackedArray(rangeExpression.BitWidth);
-                        packedArrayIndex++;
-                    }
-                }
-            }
-            else if (val.DataObject is IntegerAtomVariable)
-            {
-                IntegerAtomVariable ival = (IntegerAtomVariable)val.DataObject;
+                var ival = val.DataObject;
 
                 while (!word.Eof)
                 {
@@ -361,10 +281,10 @@ namespace pluginVerilog.Verilog.Expressions
                     }
                 }
             }
-            else if (val.DataObject is Net)
+            else if(val.DataObject.Packable)
             {
                 int packedArrayIndex = 0;
-                Net ival = (Net)val.DataObject;
+                IPackedDataObject ival = (IPackedDataObject)val.DataObject;
 
                 while (!word.Eof)
                 {
@@ -393,29 +313,6 @@ namespace pluginVerilog.Verilog.Expressions
                     }
                     else
                     {
-                        if (rangeExpression is AbsoluteRangeExpression)
-                        {
-                            AbsoluteRangeExpression absoluteRangeExpression = (AbsoluteRangeExpression)rangeExpression;
-                            PackedArray oldArray = ival.PackedDimensions[packedArrayIndex];
-                            if (!word.Prototype)
-                            {
-                                if (
-                                    absoluteRangeExpression.MaxBitIndex != null && absoluteRangeExpression.MinBitIndex != null &&
-                                    oldArray.MinIndex != null && oldArray.MaxIndex != null
-                                    )
-                                {
-                                    if (
-                                        absoluteRangeExpression.MaxBitIndex < oldArray.MinIndex ||
-                                        absoluteRangeExpression.MaxBitIndex > oldArray.MaxIndex ||
-                                        absoluteRangeExpression.MinBitIndex < oldArray.MinIndex ||
-                                        absoluteRangeExpression.MinBitIndex > oldArray.MaxIndex
-                                        )
-                                    {
-                                        absoluteRangeExpression.WordReference.AddError("index out of range");
-                                    }
-                                }
-                            }
-                        }
                         ival.PackedDimensions[packedArrayIndex] = new PackedArray(rangeExpression.BitWidth);
                         packedArrayIndex++;
                     }

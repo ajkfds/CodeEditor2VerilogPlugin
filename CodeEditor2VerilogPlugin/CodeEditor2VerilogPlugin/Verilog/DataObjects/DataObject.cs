@@ -149,6 +149,16 @@ namespace pluginVerilog.Verilog.DataObjects
         public string Comment { set; get; } = "";
         public WordReference? DefinedReference { set; get; } = null;
         public IDataType? DataType;
+
+        public bool Packable
+        {
+            get
+            {
+                if (UnpackedArrays.Count != 0) return false;
+                if (DataType == null) return false;
+                return DataType.Packable;
+            }
+        }
         public virtual int? BitWidth
         {
             get {

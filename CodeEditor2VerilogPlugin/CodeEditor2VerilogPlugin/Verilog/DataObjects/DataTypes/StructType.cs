@@ -21,6 +21,10 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 return DataTypeEnum.Struct;
             }
         }
+        public bool Packable
+        {
+            get { return Packed; }
+        }
 
         public int? BitWidth
         {
@@ -68,6 +72,17 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             label.AppendText("struct", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
             if(Packed) label.AppendText(" packed", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
             if(Signed) label.AppendText(" signed", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+            if(Members.Count != 0)
+            {
+                label.AppendText("{\n");
+                foreach(Member member in Members.Values)
+                {
+                    label.AppendText("\t");
+                    member.AppendTypeLabel(label);
+                    label.AppendText("\n");
+                }
+                label.AppendText("}");
+            }
         }
         public bool IsVector { get { return false; } }
 
@@ -153,6 +168,14 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             /*
             struct_union_member ::=   { attribute_instance } [random_qualifier] data_type_or_void list_of_variable_decl_assignments;
             random_qualifier ::= "rand" | "randc"
+
+            list_of_variable_decl_assignments ::= variable_decl_assignment { , variable_decl_assignment }
+
+            variable_decl_assignment ::=
+                variable_identifier { variable_dimension } [ = expression ]
+                | dynamic_array_variable_identifier unsized_dimension { variable_dimension }
+                [ = dynamic_array_new ]
+                | class_variable_identifier [ = class_new ]
             */
 
             if (word.Text == "rand")
@@ -184,10 +207,11 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 if (dataType != null) word.Color(dataType.ColorType);
                 word.MoveNext();
 
-                PackedArray? range = null;
+                List<PackedArray> dimensions = new List<PackedArray>();
                 if (word.Text == "[")
                 {
-                    range = PackedArray.ParseCreate(word, nameSpace);
+                    var packedArray = PackedArray.ParseCreate(word, nameSpace);
+                    if(packedArray != null) dimensions.Add(packedArray);
                 }
 
                 Expressions.Expression? exp = null;
@@ -203,7 +227,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 {
                     DatType = dataType,
                     Identifier = identifier,
-                    PackedArray = range,
+                    Dimentions = dimensions,
                     Value = exp
                 };
 
@@ -226,18 +250,28 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         {
             public Member() { }
             public required string Identifier { get; init; }
-            public PackedArray? PackedArray;
+            public List<PackedArray> Dimentions = new List<PackedArray>();
             public required IDataType DatType { get; init; }
             public Expressions.Expression? Value;
 
             public Member Clone()
             {
                 Member member = new Member() { Identifier = Identifier, DatType = DatType, Value = Value };
-                if (PackedArray != null)
+                foreach(var packedArray in Dimentions)
                 {
-                    member.PackedArray = PackedArray.Clone();
+                    member.Dimentions.Add(packedArray.Clone());
                 }
                 return member;
+            }
+            public void AppendTypeLabel(ColorLabel label)
+            {
+                DatType.AppendTypeLabel(label);
+                foreach(var packedArray in Dimentions)
+                {
+                    packedArray.AppendLabel(label);
+                    label.AppendText(" ");
+                }
+                label.AppendText(Identifier, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Identifier));
             }
         }
 

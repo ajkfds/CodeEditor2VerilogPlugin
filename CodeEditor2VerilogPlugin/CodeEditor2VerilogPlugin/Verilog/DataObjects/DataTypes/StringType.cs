@@ -25,6 +25,10 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 return null;
             }
         }
+        public bool Packable
+        {
+            get { return false; }
+        }
         public string CreateString()
         {
             ColorLabel label = new ColorLabel();

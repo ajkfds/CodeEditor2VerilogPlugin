@@ -104,6 +104,8 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
                 case DataTypeEnum.Chandle:
                     return Chandle.Create(name, dataType);
+                case DataTypeEnum.UserDefined:
+                    return UserDefinedVariable.Create(name, dataType);
                 default:
                     throw new Exception();
                     break;
@@ -114,9 +116,9 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
-            label.AppendText(Name);
-
-            label.AppendText("@sync ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.HighLightedComment));
+            AppendTypeLabel(label);
+            label.AppendText(" ");
+            label.AppendText(Name, Global.CodeDrawStyle.Color(ColorType));
             SyncContext.AppendLabel(label);
         }
 
@@ -368,6 +370,8 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                         if(preDefined != null) preDefined.Defined = true;
                     }
                 }
+
+
                 vars.Add(variable);
 
                 if (word.Text == ",")

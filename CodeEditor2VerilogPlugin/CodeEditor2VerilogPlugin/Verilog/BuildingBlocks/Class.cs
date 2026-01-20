@@ -21,6 +21,10 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
 
         }
+        public bool Packable
+        {
+            get { return false; }
+        }
 
         public int? BitWidth { get; } = null;
         public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }

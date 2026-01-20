@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.Nets
 {
-    public class Net : DataObject
+    public class Net : DataObject,IPackedDataObject
     {
         protected Net() { }
 

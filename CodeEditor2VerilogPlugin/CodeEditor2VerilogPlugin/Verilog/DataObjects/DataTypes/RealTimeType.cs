@@ -18,6 +18,10 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 return DataTypeEnum.Realtime;
             }
         }
+        public bool Packable
+        {
+            get { return false; }
+        }
         public int? BitWidth
         {
             get
