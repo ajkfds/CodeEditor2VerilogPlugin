@@ -61,11 +61,7 @@ namespace pluginVerilog.Verilog
         private static CodeDocument getCodeDocument(Data.IVerilogRelatedFile file)
         {
             if (file == null) return null; // foe illeagal jon constructor 
-            CodeDocument? codeDocument;
-            if(file.CodeDocument == null)
-            {
-                file.LoadFormFile();
-            }
+            CodeDocument? codeDocument = file.CodeDocument as CodeDocument;
 
             codeDocument = file.CodeDocument as pluginVerilog.CodeEditor.CodeDocument;
             if(codeDocument == null)

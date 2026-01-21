@@ -53,36 +53,40 @@ namespace pluginVerilog.Data
             CustomizeItemEditorContextMenu += (x => EditorContextMenu.CustomizeEditorContextMenu(x));
         }
 
-        public bool SystemVerilog { get { return false; } }
-        public override CodeEditor2.CodeEditor.CodeDocument? CodeDocument
+        protected override void CreateCodeDocument()
         {
-            get
-            {
-                if (document != null && document as CodeEditor.CodeDocument == null) System.Diagnostics.Debugger.Break();
-                if (document == null)
-                {
-                    try
-                    {
-                        while (!readFromFile())
-                        {
-                            System.Threading.Thread.Sleep(10);
-                        }
-                    }
-                    catch
-                    {
-                        document = null;
-                    }
-                }
-                return document;
-            }
-            protected set
-            {
-                if (value == null) throw new Exception();
-                CodeEditor.CodeDocument? codeDocument = value as CodeEditor.CodeDocument;
-                if (codeDocument == null) throw new Exception();
-                document = codeDocument;
-            }
+            document = new pluginVerilog.CodeEditor.CodeDocument(this);
         }
+        public bool SystemVerilog { get { return false; } }
+        //public override CodeEditor2.CodeEditor.CodeDocument? CodeDocument
+        //{
+        //    get
+        //    {
+        //        if (document != null && document as CodeEditor.CodeDocument == null) System.Diagnostics.Debugger.Break();
+        //        if (document == null)
+        //        {
+        //            try
+        //            {
+        //                while (!readFromFile())
+        //                {
+        //                    System.Threading.Thread.Sleep(10);
+        //                }
+        //            }
+        //            catch
+        //            {
+        //                document = null;
+        //            }
+        //        }
+        //        return document;
+        //    }
+        //    protected set
+        //    {
+        //        if (value == null) throw new Exception();
+        //        CodeEditor.CodeDocument? codeDocument = value as CodeEditor.CodeDocument;
+        //        if (codeDocument == null) throw new Exception();
+        //        document = codeDocument;
+        //    }
+        //}
 
         // update sub-items from ParsedDocument
         public override async System.Threading.Tasks.Task UpdateAsync()

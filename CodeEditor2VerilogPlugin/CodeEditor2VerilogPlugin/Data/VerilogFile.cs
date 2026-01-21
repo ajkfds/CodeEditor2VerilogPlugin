@@ -104,58 +104,10 @@ namespace pluginVerilog.Data
             }
         }
 
-        /// <summary>
-        /// CodeDocument Object to keep the text data of the file.
-        /// only single instance is created for a file, and the same instance is used for all IVerilogRelatedFile instances.
-        /// </summary>
-        public override CodeEditor2.CodeEditor.CodeDocument? CodeDocument
+        protected override void CreateCodeDocument()
         {
-            get
-            {
-                if (document == null)
-                {
-                    try
-                    {
-                        this.LoadDocumentFromFile();
-                    }
-                    catch
-                    {
-
-                        document = null;
-                    }
-                }
-                return document;
-            }
-            protected set
-            {
-                if (value is not pluginVerilog.CodeEditor.CodeDocument) throw new Exception();
-                document = value as CodeEditor2.CodeEditor.CodeDocument;
-            }
+            document = new pluginVerilog.CodeEditor.CodeDocument(this);
         }
-
-        protected override void LoadDocumentFromFile()
-        {
-            try
-            {
-                if (document == null)
-                {
-                    document = new pluginVerilog.CodeEditor.CodeDocument(this);
-                }
-
-                string text = ReadStableText(AbsolutePath);
-                document.TextDocument.Replace(0, document.TextDocument.TextLength, text);
-                loadFileHash = GetHash(text);
-                Controller.AppendLog("LoadDocument From File (Verilog) " + RelativePath + " : " + loadFileHash, Avalonia.Media.Colors.Green);
-
-                document.ClearHistory();
-                document.Clean();
-            }
-            catch
-            {
-                document = null;
-            }
-        }
-
 
         /// <summary>
         /// Accdept new Parsed Document for this Verilog File
