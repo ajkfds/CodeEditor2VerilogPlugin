@@ -148,6 +148,15 @@ namespace pluginVerilog.Views
 
         private void ListBox0_KeyDown(object? sender, Avalonia.Input.KeyEventArgs e)
         {
+            if (e.Key == Avalonia.Input.Key.Enter)
+            {
+                Complete();
+            }
+            else if (e.Key == Avalonia.Input.Key.Escape)
+            {
+                Cancel();
+            }
+
             object? item = ListBox0.SelectedItem;
             ConnectionItem? connection = item as ConnectionItem;
             if (connection == null) return;
@@ -159,14 +168,6 @@ namespace pluginVerilog.Views
             else if (e.Key == Avalonia.Input.Key.Right)
             {
                 connection.Reject();
-            }
-            else if (e.Key == Avalonia.Input.Key.Enter)
-            {
-                Complete();
-            }
-            else if (e.Key == Avalonia.Input.Key.Escape)
-            {
-                Cancel();
             }
         }
 
