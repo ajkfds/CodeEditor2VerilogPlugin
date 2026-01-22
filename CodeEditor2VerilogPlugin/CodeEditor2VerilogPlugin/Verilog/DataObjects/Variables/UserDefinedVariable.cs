@@ -14,7 +14,14 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         protected UserDefinedVariable() { }
 
         public required UserDefinedType UserDefinedType { get; init; }
-        public List<PackedArray> PackedDimensions { get; init; } = new List<PackedArray>();
+        public List<PackedArray> PackedDimensions
+        {
+            get
+            {
+                if (DataType == null) return new List<PackedArray>();
+                return DataType.PackedDimensions;
+            }
+        }
 
 
         public new static UserDefinedVariable Create(string name, IDataType dataType)

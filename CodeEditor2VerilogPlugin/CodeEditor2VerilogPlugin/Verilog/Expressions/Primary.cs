@@ -483,6 +483,10 @@ number
             }
 
             if (word.Text != ".") return dataObjectReference;
+            if (dataObjectReference.UnpackedArrays.Count != 0 & !word.Prototype)
+            {
+                dataObjectReference.Reference.AddError("unpacked array");
+            }
             word.MoveNext();
 
             if (!dataObjectReference.DataObject.NamedElements.ContainsKey(word.Text))

@@ -157,6 +157,11 @@ namespace pluginVerilog.Data
             return true;
         }
 
+        public override Task<CodeEditor2.CodeEditor.CodeDocument> GetCodeDocumentAsync()
+        {
+            return SourceVerilogFile.GetCodeDocumentAsync();
+        }
+
         public override CodeEditor2.CodeEditor.CodeDocument CodeDocument
         {
             get
