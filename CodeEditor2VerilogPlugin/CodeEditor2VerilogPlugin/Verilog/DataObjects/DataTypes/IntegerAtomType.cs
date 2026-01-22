@@ -11,13 +11,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
     public class IntegerAtomType : IDataType
     {
         public required virtual DataTypeEnum Type { get; init; }
-        public bool Packable
-        {
-            get
-            {
-                return true;
-            }
-        }
+        public bool Packable { get { return true; } }
         public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
         public virtual List<DataObjects.Arrays.PackedArray> PackedDimensions { get; protected set; } = new List<DataObjects.Arrays.PackedArray>();
         public virtual bool Signed { get; protected set; }
@@ -26,6 +20,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         //                          | ...
         // integer_atom_type    ::=   "byte" | "shortint" | "int" | "longint" | "integer" | "time"
         // signing              ::=   "signed" | "unsigned"
+        public virtual bool PartSelectable { get { return true; } }
 
         public int? BitWidth
         {

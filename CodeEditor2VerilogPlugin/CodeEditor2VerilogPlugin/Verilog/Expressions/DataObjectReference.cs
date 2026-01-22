@@ -239,49 +239,7 @@ namespace pluginVerilog.Verilog.Expressions
             }
 
             // parse packed dimensions
-            if(val.DataObject is DataObjects.Constants.Constants)
-            {
-                var ival = val.DataObject;
-
-                while (!word.Eof)
-                {
-                    if (word.Text != "[")
-                    {
-                        break;
-                    }
-
-                    RangeExpression? rangeExpression = RangeExpression.ParseCreate(word, nameSpace);
-                    if (rangeExpression == null) return null;
-                    partial = true;
-
-                    if (rangeExpression is SingleBitRangeExpression)
-                    {
-                        SingleBitRangeExpression singleBitRangeExpression = (SingleBitRangeExpression)rangeExpression;
-                        if (!word.Prototype && singleBitRangeExpression.BitIndex != null)
-                        {
-                            if (singleBitRangeExpression.BitIndex < 0 || singleBitRangeExpression.BitIndex >= val.DataObject.BitWidth)
-                            {
-                                singleBitRangeExpression.WordReference.AddError("index out of range");
-                            }
-                        }
-
-                        List<PackedArray> packedDimensions = new List<PackedArray>();
-                        packedDimensions.Add(new PackedArray(1));
-                        val.DataObject = DataObjects.Variables.Logic.Create(ival.Name, DataObjects.DataTypes.LogicType.Create(false, packedDimensions));
-                        val.BitWidth = 1;
-                        break;
-                    }
-                    else
-                    {
-                        List<PackedArray> packedDimensions = new List<PackedArray>();
-                        packedDimensions.Add(new PackedArray(rangeExpression.BitWidth));
-                        val.DataObject = DataObjects.Variables.Logic.Create(ival.Name, DataObjects.DataTypes.LogicType.Create(false, packedDimensions));
-                        val.BitWidth = rangeExpression.BitWidth;
-                        break;
-                    }
-                }
-            }
-            else if(val.DataObject.Packable)
+            if (val.DataObject.Packable)
             {
                 int packedArrayIndex = 0;
                 IPackedDataObject ival = (IPackedDataObject)val.DataObject;
@@ -319,7 +277,28 @@ namespace pluginVerilog.Verilog.Expressions
                 }
             }
 
-            while(word.Text == "[" && !word.Eof && originalObject is DataObjects.Variables.String)
+            // get partial bits
+            if (val.DataObject is IPartSelectableDataObject)
+            {
+                var ival = (IPartSelectableDataObject)val.DataObject;
+
+                while (!word.Eof)
+                {
+                    if (word.Text != "[")
+                    {
+                        break;
+                    }
+
+                    RangeExpression? rangeExpression = RangeExpression.ParseCreate(word, nameSpace);
+                    if (rangeExpression == null) return null;
+                    partial = true;
+
+                    val.BitWidth = ival.GetBitWidthPartSelectReference(val, rangeExpression, word.Prototype);
+                }
+            }
+
+
+            while (word.Text == "[" && !word.Eof && originalObject is DataObjects.Variables.String)
             {
                 RangeExpression? rangeExpression = RangeExpression.ParseCreate(word, nameSpace);
                 if (rangeExpression is not SingleBitRangeExpression)

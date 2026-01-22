@@ -25,6 +25,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         {
             get { return Packed; }
         }
+        public virtual bool PartSelectable { get { return Packable; } }
 
         public int? BitWidth
         {

@@ -29,6 +29,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         {
             get { return false; }
         }
+        public virtual bool PartSelectable { get { return false; } }
         public string CreateString()
         {
             ColorLabel label = new ColorLabel();

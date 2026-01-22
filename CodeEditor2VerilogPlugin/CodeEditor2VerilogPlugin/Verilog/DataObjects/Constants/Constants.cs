@@ -16,7 +16,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
 {
 
     // parameter, localparam, and specparam.
-    public class Constants : DataObject
+    public class Constants : DataObject, IPartSelectableDataObject
     {
         public required Expressions.Expression Expression { get; set; }
         public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Parameter; } }
@@ -29,7 +29,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
             enum_
         }
         public ConstantTypeEnum ConstantType = ConstantTypeEnum.parameter;
-
+        public override bool Packable { get { return false; } }
         public override void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
             switch (ConstantType)
@@ -67,6 +67,36 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
             label.AppendText(" = ");
 
             if (Expression != null) Expression.AppendLabel(label);
+        }
+
+        public override bool PartSelectable { get { return true; } }
+        public int GetBitWidthPartSelectReference(Expressions.DataObjectReference val, RangeExpression? rangeExpression, bool prototype)
+        {
+            if (val.DataObject is not IPartSelectableDataObject) throw new Exception();
+
+            if (rangeExpression is SingleBitRangeExpression)
+            {
+                SingleBitRangeExpression singleBitRangeExpression = (SingleBitRangeExpression)rangeExpression;
+                if (!prototype && singleBitRangeExpression.BitIndex != null)
+                {
+                    if (singleBitRangeExpression.BitIndex < 0 || singleBitRangeExpression.BitIndex >= val.DataObject.BitWidth)
+                    {
+                        singleBitRangeExpression.WordReference.AddError("index out of range");
+                    }
+                }
+
+                List<PackedArray> packedDimensions = new List<PackedArray>();
+                packedDimensions.Add(new PackedArray(1));
+                val.DataObject = DataObjects.Variables.Logic.Create(val.DataObject.Name, DataObjects.DataTypes.LogicType.Create(false, packedDimensions));
+                return 1;
+            }
+            else
+            {
+                List<PackedArray> packedDimensions = new List<PackedArray>();
+                packedDimensions.Add(new PackedArray(rangeExpression.BitWidth));
+                val.DataObject = DataObjects.Variables.Logic.Create(val.DataObject.Name, DataObjects.DataTypes.LogicType.Create(false, packedDimensions));
+                return rangeExpression.BitWidth;
+            }
         }
 
 

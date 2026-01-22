@@ -33,6 +33,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         // reg          4state  >=1bit      
         // logic        4state  >=1bit      
         // bit          2state  >=1bit      
+        public virtual bool PartSelectable { get { return false; } }
 
         public int? BitWidth {
             get 

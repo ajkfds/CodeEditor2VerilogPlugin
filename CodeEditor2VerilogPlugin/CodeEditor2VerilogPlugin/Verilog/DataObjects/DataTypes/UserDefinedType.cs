@@ -19,6 +19,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 return Typedef.VariableType;
             }
         }
+        public virtual bool PartSelectable { get { return OriginalDataType.PartSelectable; } }
 
         public bool Packable
         {
@@ -27,7 +28,6 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 return OriginalDataType.Packable;
             }
         }
-
 
         public int? BitWidth
         {

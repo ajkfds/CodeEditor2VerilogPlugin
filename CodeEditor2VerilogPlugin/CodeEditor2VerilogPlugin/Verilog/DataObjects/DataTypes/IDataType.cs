@@ -13,6 +13,8 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
         public bool Packable { get; }
 
+        public bool PartSelectable { get; }
+
         public void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label);
 
 

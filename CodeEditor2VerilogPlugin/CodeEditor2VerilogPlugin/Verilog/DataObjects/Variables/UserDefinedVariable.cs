@@ -23,7 +23,6 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             }
         }
 
-
         public new static UserDefinedVariable Create(string name, IDataType dataType)
         {
             if (dataType.Type != DataTypeEnum.UserDefined) throw new Exception();
@@ -88,6 +87,11 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         public override void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
             UserDefinedType.AppendTypeLabel(label);
+        }
+        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        {
+            base.AppendLabel(label);
+            UserDefinedType.Typedef.AppendLabel(label);
         }
 
     }

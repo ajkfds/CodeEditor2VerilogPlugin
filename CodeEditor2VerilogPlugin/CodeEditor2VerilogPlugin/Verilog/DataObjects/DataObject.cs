@@ -145,6 +145,7 @@ namespace pluginVerilog.Verilog.DataObjects
             throw new NotImplementedException();
         }
 
+        public virtual bool PartSelectable { get { return false; } }
 //        [JsonIgnore]
         public required string Name { get; init; }
         [JsonIgnore]
@@ -152,7 +153,7 @@ namespace pluginVerilog.Verilog.DataObjects
         public WordReference? DefinedReference { set; get; } = null;
         public IDataType? DataType;
 
-        public bool Packable
+        public virtual bool Packable
         {
             get
             {

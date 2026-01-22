@@ -23,6 +23,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             get { return false; }
         }
         public int? BitWidth { get; } = 32;
+        public virtual bool PartSelectable { get { return false; } }
         public virtual List<DataObjects.Arrays.PackedArray> PackedDimensions { get; protected set; } = new List<DataObjects.Arrays.PackedArray>();
         public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
         public string CreateString()
