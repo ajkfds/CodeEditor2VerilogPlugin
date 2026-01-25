@@ -69,6 +69,13 @@ namespace pluginVerilog.NavigatePanel
             }
         }
 
+        public override void OnDeSelected()
+        {
+            if (ModuleInstance?.SourceTextFile != null)
+            {
+                ModuleInstance.SourceTextFile.PostParse();
+            }
+        }
 
 
 
