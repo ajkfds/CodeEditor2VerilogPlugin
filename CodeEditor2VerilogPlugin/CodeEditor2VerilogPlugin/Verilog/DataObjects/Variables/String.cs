@@ -1,6 +1,7 @@
 ﻿
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
+using pluginVerilog.Verilog.Expressions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
-    public class String : ValueVariable
+    public class String : ValueVariable, IPartSelectableDataObject
     {
         protected String() { 
         }
@@ -187,6 +188,12 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         {
             label.AppendText("string ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
             label.AppendText(" ");
+        }
+        public IDataType? ParsePartSelect(WordScanner word, NameSpace nameSpace)
+        {
+            IPartSelectableDataType? type = DataType as IPartSelectableDataType;
+            if (type == null) return null;
+            return type.ParsePartSelect(word, nameSpace);
         }
 
     }

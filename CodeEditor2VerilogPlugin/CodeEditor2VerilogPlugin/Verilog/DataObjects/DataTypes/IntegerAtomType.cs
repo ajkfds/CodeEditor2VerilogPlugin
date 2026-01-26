@@ -1,4 +1,6 @@
-﻿using pluginVerilog.Verilog.DataObjects.DataTypes;
+﻿using pluginVerilog.Verilog.DataObjects.Arrays;
+using pluginVerilog.Verilog.DataObjects.DataTypes;
+using pluginVerilog.Verilog.Expressions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
-    public class IntegerAtomType : IDataType
+    public class IntegerAtomType : IDataType, IPartSelectableDataType
     {
         public required virtual DataTypeEnum Type { get; init; }
         public bool Packable { get { return true; } }
@@ -183,6 +185,36 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             }
 
             return integerAtomType;
+        }
+
+        public IDataType? ParsePartSelect(WordScanner word, NameSpace nameSpace)
+        {
+            if (word.Eof || word.Text != "[") return null;
+
+            RangeExpression? rangeExpression = RangeExpression.ParseCreate(word, nameSpace);
+            if (rangeExpression == null) return null;
+
+            if (rangeExpression is SingleBitRangeExpression)
+            {
+                SingleBitRangeExpression singleBitRangeExpression = (SingleBitRangeExpression)rangeExpression;
+                if (!word.Prototype && singleBitRangeExpression.BitIndex != null)
+                {
+                    if (singleBitRangeExpression.BitIndex < 0 || singleBitRangeExpression.BitIndex >= BitWidth)
+                    {
+                        singleBitRangeExpression.WordReference.AddError("index out of range");
+                    }
+                }
+
+                List<PackedArray> packedDimensions = new List<PackedArray>();
+                packedDimensions.Add(new PackedArray(1));
+                return DataObjects.DataTypes.LogicType.Create(false, packedDimensions);
+            }
+            else
+            {
+                List<PackedArray> packedDimensions = new List<PackedArray>();
+                packedDimensions.Add(new PackedArray(rangeExpression.BitWidth));
+                return DataObjects.DataTypes.LogicType.Create(false, packedDimensions);
+            }
         }
     }
 }

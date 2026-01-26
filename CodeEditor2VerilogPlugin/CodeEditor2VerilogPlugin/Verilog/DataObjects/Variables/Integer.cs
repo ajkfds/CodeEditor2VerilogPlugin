@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
-    public class Integer : IntegerAtomVariable
+    public class Integer : IntegerAtomVariable, IPartSelectableDataObject
     {
         protected Integer() { }
 
@@ -38,6 +38,12 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 val.UnpackedArrays.Add(unpackedArray.Clone());
             }
             return val;
+        }
+        public IDataType? ParsePartSelect(WordScanner word, NameSpace nameSpace)
+        {
+            IPartSelectableDataType? type = DataType as IPartSelectableDataType;
+            if (type == null) return null;
+            return type.ParsePartSelect(word, nameSpace);
         }
 
     }

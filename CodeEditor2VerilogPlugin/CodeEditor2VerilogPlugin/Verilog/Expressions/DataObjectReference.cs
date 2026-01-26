@@ -1,6 +1,7 @@
 ﻿using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.DataObjects.Constants;
+using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.DataObjects.Nets;
 using pluginVerilog.Verilog.DataObjects.Variables;
 using ReactiveUI;
@@ -277,23 +278,19 @@ namespace pluginVerilog.Verilog.Expressions
                 }
             }
 
-            // get partial bits
+            // partial select
             if (val.DataObject is IPartSelectableDataObject)
             {
                 var ival = (IPartSelectableDataObject)val.DataObject;
-
-                while (!word.Eof)
+                if (ival.PartSelectable)
                 {
-                    if (word.Text != "[")
+                    IDataType? partSel = ival.ParsePartSelect(word, nameSpace);
+
+                    if(partSel != null)
                     {
-                        break;
+                        val.DataObject = DataObjects.Variables.Variable.Create(originalObject.Name, partSel);
+                        val.BitWidth = val.DataObject.BitWidth;
                     }
-
-                    RangeExpression? rangeExpression = RangeExpression.ParseCreate(word, nameSpace);
-                    if (rangeExpression == null) return null;
-                    partial = true;
-
-                    val.BitWidth = ival.GetBitWidthPartSelectReference(val, rangeExpression, word.Prototype);
                 }
             }
 

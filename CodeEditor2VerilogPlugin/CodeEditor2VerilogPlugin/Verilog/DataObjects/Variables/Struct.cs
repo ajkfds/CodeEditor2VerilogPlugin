@@ -1,4 +1,6 @@
-﻿using pluginVerilog.Verilog.DataObjects.DataTypes;
+﻿using pluginVerilog.Verilog.DataObjects.Arrays;
+using pluginVerilog.Verilog.DataObjects.DataTypes;
+using pluginVerilog.Verilog.Expressions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
-    public class Struct : Variable,IPackedDataObject
+    public class Struct : Variable,IPackedDataObject, IPartSelectableDataType
     {
         protected Struct() { }
         public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
@@ -62,6 +64,17 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             //label.AppendText( StructType.na, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
         }
 
+        public override bool PartSelectable
+        {
+            get { return StructType.PartSelectable; }
+        }
+
+        public IDataType? ParsePartSelect(WordScanner word, NameSpace nameSpace)
+        {
+            IPartSelectableDataType? type = DataType as IPartSelectableDataType;
+            if (type == null) return null;
+            return type.ParsePartSelect(word, nameSpace);
+        }
 
 
     }

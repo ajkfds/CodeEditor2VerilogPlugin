@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
-    public class Time : IntegerAtomVariable
+    public class Time : IntegerAtomVariable, IPartSelectableDataObject
     {
         protected Time() { }
 
@@ -33,5 +33,11 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             return val;
         }
 
+        public IDataType? ParsePartSelect(WordScanner word, NameSpace nameSpace)
+        {
+            TimeType? type = DataType as TimeType;
+            if (type == null) return null;
+            return type.ParsePartSelect(word, nameSpace);
+        }
     }
 }

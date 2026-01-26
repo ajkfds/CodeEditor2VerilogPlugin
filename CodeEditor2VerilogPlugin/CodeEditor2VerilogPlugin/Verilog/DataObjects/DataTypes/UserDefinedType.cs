@@ -3,13 +3,14 @@ using OpenAI.Realtime;
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
-    public class UserDefinedType : IDataType
+    public class UserDefinedType : IDataType, IPartSelectableDataType
     {
         public DataTypeEnum Type { get{ return DataTypeEnum.UserDefined; }}
 
@@ -27,6 +28,12 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             {
                 return OriginalDataType.Packable;
             }
+        }
+        public IDataType? ParsePartSelect(WordScanner word, NameSpace nameSpace)
+        {
+            IPartSelectableDataType? type = OriginalDataType as IPartSelectableDataType;
+            if (type == null) return null;
+            return type.ParsePartSelect(word, nameSpace);
         }
 
         public int? BitWidth

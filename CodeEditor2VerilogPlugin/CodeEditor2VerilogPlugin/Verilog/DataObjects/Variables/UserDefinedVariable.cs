@@ -1,5 +1,6 @@
 ﻿using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
+using pluginVerilog.Verilog.Expressions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
-    public class UserDefinedVariable : ValueVariable, IPackedDataObject
+    public class UserDefinedVariable : ValueVariable, IPackedDataObject, IPartSelectableDataObject
     {
         protected UserDefinedVariable() { }
 
@@ -93,6 +94,18 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             base.AppendLabel(label);
             UserDefinedType.Typedef.AppendLabel(label);
         }
+
+        public override bool PartSelectable
+        {
+            get { return UserDefinedType.PartSelectable; }
+        }
+        public IDataType? ParsePartSelect(WordScanner word, NameSpace nameSpace)
+        {
+            IPartSelectableDataType? type = DataType as IPartSelectableDataType;
+            if (type == null) return null;
+            return type.ParsePartSelect(word, nameSpace);
+        }
+
 
     }
 }

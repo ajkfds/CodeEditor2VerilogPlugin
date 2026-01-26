@@ -12,5 +12,6 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         {
             return IntegerAtomType.Create(DataTypeEnum.Integer, signed);
         }
+
     }
 }
