@@ -159,9 +159,14 @@ namespace pluginVerilog.Views
 
             object? item = ListBox0.SelectedItem;
             ConnectionItem? connection = item as ConnectionItem;
-            if (connection == null) return;
+            if (connection == null)
+            {
+                if (e.Key == Avalonia.Input.Key.Space) ListBox0.SelectedIndex++;
 
-            if(e.Key == Avalonia.Input.Key.Left)
+                return;
+            }
+
+            if(e.Key == Avalonia.Input.Key.Left || e.Key == Avalonia.Input.Key.Space)
             {
                 connection.Accept();
             }
@@ -169,6 +174,11 @@ namespace pluginVerilog.Views
             {
                 connection.Reject();
             }
+            else
+            {
+                return;
+            }
+            ListBox0.SelectedIndex++;
         }
 
 
