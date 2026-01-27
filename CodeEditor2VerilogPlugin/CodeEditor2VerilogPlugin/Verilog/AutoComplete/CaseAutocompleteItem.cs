@@ -32,9 +32,9 @@ namespace pluginVerilog.Verilog.AutoComplete
 
             char currentChar = document.GetCharAt(document.CaretIndex);
 
-            string appendText = "begin" + cr;
-            appendText += indent + "\t[]" + cr;
-            appendText += indent + "end" + cr;
+            string appendText = "case([])" + cr;
+            appendText += indent + "\t" + cr;
+            appendText += indent + "endcase" + cr;
 
             //if (currentChar != '\r' && currentChar != '\n')
             //{
