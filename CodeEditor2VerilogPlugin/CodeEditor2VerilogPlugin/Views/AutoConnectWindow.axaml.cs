@@ -1,6 +1,7 @@
 using AjkAvaloniaLibs.Controls;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
@@ -47,6 +48,7 @@ namespace pluginVerilog.Views
 
             gridConstructor.AppendContol(HeaderTextBlock,(int)FontSize);
 
+            ListBox0.SetValue(ScrollViewer.VerticalScrollBarVisibilityProperty, ScrollBarVisibility.Auto);
             gridConstructor.AppendContolFill(ListBox0);
 
             gridConstructor.AppendContol(BottomTextBlock, (int)FontSize);
@@ -161,8 +163,7 @@ namespace pluginVerilog.Views
             ConnectionItem? connection = item as ConnectionItem;
             if (connection == null)
             {
-                if (e.Key == Avalonia.Input.Key.Space) ListBox0.SelectedIndex++;
-
+                if (e.Key == Avalonia.Input.Key.Space) moveDownWard();
                 return;
             }
 
@@ -178,7 +179,13 @@ namespace pluginVerilog.Views
             {
                 return;
             }
-            ListBox0.SelectedIndex++;
+            moveDownWard();
+        }
+
+        private void moveDownWard()
+        {
+            if(ListBox0.SelectedIndex < ListBox0.Items.Count - 1)
+                ListBox0.SelectedIndex++;
         }
 
 
