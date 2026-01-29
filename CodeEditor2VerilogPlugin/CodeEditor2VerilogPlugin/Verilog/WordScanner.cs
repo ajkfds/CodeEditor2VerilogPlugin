@@ -17,13 +17,20 @@ namespace pluginVerilog.Verilog
 {
     public class WordScanner : IDisposable
     {
-        public WordScanner( CodeEditor.CodeDocument document, Verilog.ParsedDocument parsedDocument,bool systemVerilog)
+        public WordScanner( CodeEditor.CodeDocument document, Verilog.ParsedDocument parsedDocument,bool systemVerilog) : this(document,parsedDocument,systemVerilog,false)
+        {
+        }
+
+        public WordScanner(CodeEditor.CodeDocument document, Verilog.ParsedDocument parsedDocument, bool systemVerilog,bool supressCompilerDirectiveError)
         {
             RootParsedDocument = parsedDocument;
             wordPointer = new WordPointer(document, parsedDocument);
+            SupressCompilerDerectiveError = supressCompilerDirectiveError;
             recheckWord();
             this.systemVerilog = systemVerilog;
         }
+
+        public bool SupressCompilerDerectiveError { get; set; } = false;
 
         public DefaultNetTypeEnum DefaultNetType = WordScanner.DefaultNetTypeEnum.none;
         public CancellationToken? CancellationToken { get; set; }
@@ -148,7 +155,7 @@ namespace pluginVerilog.Verilog
         static System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
         public WordScanner Clone()
         {
-            WordScanner ret = new WordScanner(wordPointer.Document, RootParsedDocument,systemVerilog);
+            WordScanner ret = new WordScanner(wordPointer.Document, RootParsedDocument,systemVerilog,true);
             ret.wordPointer = wordPointer.Clone();
             ret.nonGeneratedCount = nonGeneratedCount;
             ret.prototype = prototype;
@@ -460,11 +467,11 @@ namespace pluginVerilog.Verilog
             {
                 if (error)
                 {
-                    wordPointer.AddError("include errors");
+                    if (!SupressCompilerDerectiveError) wordPointer.AddError("include errors");
                 }
                 else if (warning)
                 {
-                    wordPointer.AddWarning("include warnings");
+                    if (!SupressCompilerDerectiveError) wordPointer.AddWarning("include warnings");
                 }
             }
             wordPointer.MoveNext();
@@ -608,41 +615,41 @@ namespace pluginVerilog.Verilog
                             break;
                         case "tri":
                             DefaultNetType = DefaultNetTypeEnum.tri;
-                            wordPointer.AddError("not supported");
+                            if (!SupressCompilerDerectiveError) wordPointer.AddError("not supported");
                             wordPointer.MoveNext();
                             break;
                         case "tri0":
                             DefaultNetType = DefaultNetTypeEnum.tri0;
-                            wordPointer.AddError("not supported");
+                            if (!SupressCompilerDerectiveError) wordPointer.AddError("not supported");
                             wordPointer.MoveNext();
                             break;
                         case "wand":
                             DefaultNetType = DefaultNetTypeEnum.wand;
-                            wordPointer.AddError("not supported");
+                            if (!SupressCompilerDerectiveError) wordPointer.AddError("not supported");
                             wordPointer.MoveNext();
                             break;
                         case "triand":
                             DefaultNetType = DefaultNetTypeEnum.triand;
-                            wordPointer.AddError("not supported");
+                            if (!SupressCompilerDerectiveError) wordPointer.AddError("not supported");
                             wordPointer.MoveNext();
                             break;
                         case "wor":
                             DefaultNetType = DefaultNetTypeEnum.wor;
-                            wordPointer.AddError("not supported");
+                            if (!SupressCompilerDerectiveError) wordPointer.AddError("not supported");
                             wordPointer.MoveNext();
                             break;
                         case "trior":
                             DefaultNetType = DefaultNetTypeEnum.trior;
-                            wordPointer.AddError("not supported");
+                            if (!SupressCompilerDerectiveError) wordPointer.AddError("not supported");
                             wordPointer.MoveNext();
                             break;
                         case "trireg":
                             DefaultNetType = DefaultNetTypeEnum.trireg;
-                            wordPointer.AddError("not supported");
+                            if (!SupressCompilerDerectiveError) wordPointer.AddError("not supported");
                             wordPointer.MoveNext();
                             break;
                         default:
-                            wordPointer.AddError("illegal netType");
+                            if (!SupressCompilerDerectiveError) wordPointer.AddError("illegal netType");
                             wordPointer.MoveNext();
                             break;
                     }
@@ -730,7 +737,7 @@ namespace pluginVerilog.Verilog
                 case "`nounconnected_drive":
                 case "`unconnected_drive":
                     wordPointer.Color(CodeDrawStyle.ColorType.Keyword);
-                    wordPointer.AddError("unsupported compiler directive");
+                    if(!SupressCompilerDerectiveError) wordPointer.AddError("unsupported compiler directive");
                     wordPointer.MoveNext();
                     break;
                 case "`timescale":
@@ -869,11 +876,11 @@ namespace pluginVerilog.Verilog
             Macro macro = Macro.Create(identifier, macroText);
             if (!General.IsIdentifier(macro.Name))
             {
-                wordRef.AddError("illegal macro identifier");
+                if (!SupressCompilerDerectiveError) wordRef.AddError("illegal macro identifier");
             }
             else if (RootParsedDocument.Macros.ContainsKey(macro.Name))
             {
-                wordRef.AddError("duplicate macro name");
+                if (!SupressCompilerDerectiveError) wordRef.AddError("duplicate macro name");
             }
             else
             {
@@ -891,7 +898,7 @@ namespace pluginVerilog.Verilog
             wordPointer.MoveNext();
             if(wordPointer.WordType != WordPointer.WordTypeEnum.String || wordPointer.Text.Length<=2)
             {
-                wordPointer.AddError("\" expected");
+                if (!SupressCompilerDerectiveError) wordPointer.AddError("\" expected");
                 wordPointer.MoveNextUntilEol();
                 return;
             }
@@ -998,7 +1005,7 @@ namespace pluginVerilog.Verilog
                     return;
                 }
             }
-            wordPointer.AddError("file not found");
+            if (!SupressCompilerDerectiveError) wordPointer.AddError("file not found");
             wordPointer.MoveNext();
             recheckWord();
             return;
@@ -1020,7 +1027,7 @@ namespace pluginVerilog.Verilog
             }
             else
             {
-                wordPointer.AddError("unsupported macro call");
+                if (!SupressCompilerDerectiveError) wordPointer.AddError("unsupported macro call");
                 wordPointer.MoveNext();
                 if(wordPointer.Text == "(")
                 {
@@ -1092,7 +1099,7 @@ namespace pluginVerilog.Verilog
             List<string> wordAssignment = new List<string>();
             if (wordPointer.Text != "(")
             {
-                wordPointer.AddError("missing macro arguments");
+                if (!SupressCompilerDerectiveError) wordPointer.AddError("missing macro arguments");
                 wordPointer.MoveNext();
                 return;
             }
@@ -1139,13 +1146,13 @@ namespace pluginVerilog.Verilog
                     wordPointer.MoveNext();
                     continue;
                 }
-                wordPointer.AddError("illegal macro call");
+                if (!SupressCompilerDerectiveError) wordPointer.AddError("illegal macro call");
                 break;
             }
 
             if (macro.Aurguments.Count != wordAssignment.Count)
             {
-                wordPointer.AddError("macro arguments mismatch");
+                if (!SupressCompilerDerectiveError) wordPointer.AddError("macro arguments mismatch");
                 return;
             }
             else
@@ -1287,7 +1294,7 @@ namespace pluginVerilog.Verilog
 
             if (vhInstance == null)
             {
-                if(!Prototype) wordPointer.AddError("illegal file");
+                if(!Prototype & !SupressCompilerDerectiveError) wordPointer.AddError("illegal file");
                 if (wordPointer.Text.StartsWith("\"") || wordPointer.Text.StartsWith("'")) wordPointer.MoveNext();
                 newParsedDocument = null;
                 return;

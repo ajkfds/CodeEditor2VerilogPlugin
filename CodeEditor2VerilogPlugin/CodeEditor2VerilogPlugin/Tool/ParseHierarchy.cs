@@ -133,8 +133,9 @@ namespace pluginVerilog.Tool
                                 {
                                     if (first)
                                     {
-                                        ParseTask reEntryTask = new ParseTask(Id: textFile.Key, tarfgetTextFile: textFile, topLevel: false);
-                                        ForceEnqueueWork(reEntryTask, workQueue, completeIds, signal);
+                                        textFile.PostParse();
+//                                        ParseTask reEntryTask = new ParseTask(Id: textFile.Key, tarfgetTextFile: textFile, topLevel: false);
+//                                        ForceEnqueueWork(reEntryTask, workQueue, completeIds, signal);
                                     }
                                 }
 
@@ -328,7 +329,8 @@ namespace pluginVerilog.Tool
                     async () =>
                     {
                         await verilogFile.AcceptParsedDocumentAsync(parser.ParsedDocument);
-                        await verilogFile.UpdateAsync();
+                        verilogFile.PostRefresh();
+//                        await verilogFile.UpdateAsync();
 
                     });
             }

@@ -49,7 +49,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
             Primary1.DisposeSubReference(false);
             Primary2.DisposeSubReference(false);
         }
-        public static BinaryOperator ParseCreate(WordScanner word)
+        public static BinaryOperator? ParseCreate(WordScanner word)
         {
 
             switch (word.Length)
