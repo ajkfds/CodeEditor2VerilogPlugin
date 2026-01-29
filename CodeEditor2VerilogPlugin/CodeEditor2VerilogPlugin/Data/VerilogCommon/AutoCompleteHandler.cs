@@ -1,14 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Avalonia.Input;
+﻿using Avalonia.Input;
 using CodeEditor2.CodeEditor;
 using CodeEditor2.CodeEditor.CodeComplete;
 using CodeEditor2.CodeEditor.PopupHint;
 using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
+using pluginVerilog.Verilog;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Text;
+using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace pluginVerilog.Data.VerilogCommon
 {
@@ -78,36 +81,191 @@ namespace pluginVerilog.Data.VerilogCommon
         {
             candidateWord = "";
 
-            if(item.VerilogParsedDocument == null) return null;
-            if(item.CodeDocument == null) return null;
+            if (item.VerilogParsedDocument == null) return null;
+            if (item.CodeDocument == null) return null;
 
             int line = item.CodeDocument.GetLineAt(index);
             int lineStartIndex = item.CodeDocument.GetLineStartIndex(line);
-            bool endWithDot;
-            List<string> words = ((pluginVerilog.CodeEditor.CodeDocument)item.CodeDocument).GetHierWords(index, out endWithDot);
-            if (endWithDot)
+
+            { // pre carlet char check
+                if(index != 0)
+                {
+                    char preChar = item.CodeDocument.GetCharAt(index - 1);
+                    if (preChar == ' ') return null;
+                    if (preChar == '\t') return null;
+                }
+            }
+
+            // get text chunk
+            string preText = "";
+            string postText = "";
             {
-                candidateWord = "";
+                string text = item.CodeDocument.CreateLineString(line).Substring(0, index - lineStartIndex);
+                string[] texts = text.Split(new char[] { '\n', '\r', ' ', '\t', '=','{','}','(',')' });//, StringSplitOptions.RemoveEmptyEntries);
+                if (texts.Length == 0) return null;
+                text = texts.Last();
+                int dotIndex = text.IndexOf('.');
+                if (dotIndex > 0)
+                {
+                    preText = text.Substring(0, dotIndex);
+                }
+                if (dotIndex > 0)
+                {
+                    postText = text.Substring(dotIndex + 1);
+                }
+                else
+                {
+                    postText = text;
+                }
+            }
+            candidateWord = postText;
+
+            List<AutocompleteItem> items = new List<AutocompleteItem>();
+
+            // system task & functions
+            // return system task and function if the word starts with "$"
+            if (candidateWord.StartsWith("$") && parsedDocument.ProjectProperty != null)
+            {
+                items = new List<AutocompleteItem>();
+                foreach (string key in parsedDocument.ProjectProperty.SystemFunctions.Keys)
+                {
+                    if (!key.StartsWith(candidateWord)) continue;
+                    items.Add(
+                        new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
+                            key,
+                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
+                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
+                            )
+                    );
+                }
+                foreach (string key in parsedDocument.ProjectProperty.SystemTaskParsers.Keys)
+                {
+                    if (!key.StartsWith(candidateWord)) continue;
+                    items.Add(
+                        new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
+                            key,
+                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
+                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
+                            )
+                    );
+                }
+                return items;
+            }
+
+            // get namespace
+            NameSpace? nameSpace = null;
+            {
+                // namespace must get from linestart index, because current index cann't match last parsed document
+                IndexReference iref = IndexReference.Create(parsedDocument.IndexReference, lineStartIndex);
+                nameSpace = parsedDocument.GetNameSpace(iref);
+            }
+            
+            if (nameSpace == null)
+            {
+                if (preText == "")
+                {
+                    // special autocomplete tools
+                    Verilog.ParsedDocument.AppendSpecialAutoCompleteItems(items, candidateWord);
+                    // keywords
+                    Verilog.ParsedDocument.AppendKeywordAutoCompleteItems(items, candidateWord, parsedDocument.SystemVerilog);
+                }
+                return items;
+            }
+
+            INamedElement? element = null;
+            {
+                // create short document to parse current pretext
+                pluginVerilog.CodeEditor.CodeDocument document = new pluginVerilog.CodeEditor.CodeDocument(preText);
+                WordScanner word = new WordScanner(document, parsedDocument, parsedDocument.SystemVerilog);
+
+                Verilog.Expressions.Expression? expression = null;
+                while (!word.Eof)
+                {
+                    expression = Verilog.Expressions.Expression.ParseCreate(word, nameSpace);
+                    if (expression == null) word.MoveNext();
+                }
+                if (expression is Verilog.Expressions.DataObjectReference)
+                {
+                    Verilog.Expressions.DataObjectReference dataObjectReference = (Verilog.Expressions.DataObjectReference)expression;
+                    element = dataObjectReference.DataObject;
+                }
+                else if (expression is Verilog.Expressions.NameSpaceReference)
+                {
+                    NameSpace targetNameSpace = ((Verilog.Expressions.NameSpaceReference)expression).NameSpace;
+                    element = targetNameSpace;
+                }
+            }
+
+            if (preText == "")
+            {
+                // append INamedElements
+                if (nameSpace != null)
+                {
+                    // search upward
+                    appendItemsUpward(items, nameSpace, candidateWord);
+                }
             }
             else
             {
-                candidateWord = words.LastOrDefault();
-                if (words.Count > 0)
+                // append sub-element items
+                if (element != null)
                 {
-                    words.RemoveAt(words.Count - 1);
+                    foreach (INamedElement subElement in element.NamedElements.Values)
+                    {
+                        if (!subElement.Name.StartsWith(candidateWord)) continue;
+                        if (subElement.Name.StartsWith("\0", StringComparison.Ordinal)) continue; // reject unnamed elements
+                        items.Add(
+                            new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
+                                subElement.Name,
+                                CodeDrawStyle.ColorIndex(subElement.ColorType),
+                                Global.CodeDrawStyle.Color(subElement.ColorType),
+                                "CodeEditor2/Assets/Icons/tag.svg"
+                                )
+                        );
+                    }
                 }
+
+
             }
-            if (candidateWord == null) candidateWord = "";
 
-            List<AutocompleteItem>? items = parsedDocument.GetAutoCompleteItems(words, lineStartIndex, line, (CodeEditor.CodeDocument)item.CodeDocument, candidateWord);
-
-            if (AppendAutocompleteItems != null) AppendAutocompleteItems(items, item, parsedDocument, index, ref candidateWord);
+            if (preText == "")
+            {
+                // special autocomplete tools
+                Verilog.ParsedDocument.AppendSpecialAutoCompleteItems(items, candidateWord);
+                // keywords
+                Verilog.ParsedDocument.AppendKeywordAutoCompleteItems(items, candidateWord, parsedDocument.SystemVerilog);
+            }
 
             return items;
         }
+
+        public static void appendItemsUpward(List<AutocompleteItem> items,NameSpace nameSpace,string candidateWord)
+        {
+            foreach (INamedElement subElement in nameSpace.NamedElements.Values)
+            {
+                if (!subElement.Name.StartsWith(candidateWord)) continue;
+                if (subElement.Name.StartsWith("\0", StringComparison.Ordinal)) continue; // reject unnamed elements
+                if (items.Find(x => x.Text == subElement.Name) != null) continue;   // reject duplicated elements
+                items.Add(
+                    new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
+                        subElement.Name,
+                        CodeDrawStyle.ColorIndex(subElement.ColorType),
+                        Global.CodeDrawStyle.Color(subElement.ColorType),
+                        "CodeEditor2/Assets/Icons/tag.svg"
+                        )
+                );
+            }
+            if(nameSpace.Parent != null)
+            {
+                appendItemsUpward(items, nameSpace.Parent, candidateWord);
+            }
+        }
+
+
+
         // Append Tools
-        public delegate void AppendAutocompleteItemDelegate(List<AutocompleteItem>? toolItems, IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, int index, ref string? candidateWord);
-        public static AppendAutocompleteItemDelegate? AppendAutocompleteItems;
+        //        public delegate void AppendAutocompleteItemDelegate(List<AutocompleteItem>? toolItems, IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, int index, ref string? candidateWord);
+        //        public static AppendAutocompleteItemDelegate? AppendAutocompleteItems;
 
 
 

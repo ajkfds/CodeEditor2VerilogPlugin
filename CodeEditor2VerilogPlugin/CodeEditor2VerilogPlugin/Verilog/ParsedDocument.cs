@@ -8,6 +8,7 @@ using pluginVerilog.FileTypes;
 using pluginVerilog.NavigatePanel;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
+using pluginVerilog.Verilog.DataObjects.Variables;
 using pluginVerilog.Verilog.ModuleItems;
 using Svg;
 using System;
@@ -201,27 +202,6 @@ namespace pluginVerilog.Verilog
             if (Root == null) return;
 
             Data.IVerilogRelatedFile? file = File;
-
-            /*
-            if (!Instance)
-            {
-                if (file is Data.VerilogFile)
-                {
-                    Data.VerilogFile? verilogFile = file as Data.VerilogFile;
-                    if (verilogFile != null)
-                    {
-                        foreach (BuildingBlock module in Root.BuildingBlocks.Values)
-                        {
-                            verilogFile.ProjectProperty.RemoveBuildingBlock(module.Name);
-                        }
-                    }
-                }
-                foreach (var includeFile in IncludeFiles.Values)
-                {
-                    includeFile.Close();
-                }
-            }
-            */
             base.Dispose();
         }
 
@@ -563,155 +543,69 @@ namespace pluginVerilog.Verilog
             return nameSpace;
         }
 
-        public List<AutocompleteItem>? GetAutoCompleteItems(List<string> hierWords,int index,int line,CodeEditor.CodeDocument document,string candidateWord)
-        {
-            if (ProjectProperty == null) return null;
-            if (hierWords.Count == 0 && candidateWord == "") return null;
-            if (hierWords.Count==0 && candidateWord.Length < 2) return null;
+        //public void appendHierElement(List<string> hierWords, List<AutocompleteItem> items, INamedElement element, string candidate, bool first)
+        //{
+        //    if (hierWords.Count == 0)
+        //    {
+        //        foreach (INamedElement subElement in element.NamedElements.Values)
+        //        {
+        //            if (!subElement.Name.StartsWith(candidate)) continue;
+        //            items.Add(
+        //                new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
+        //                    subElement.Name,
+        //                    CodeDrawStyle.ColorIndex(subElement.ColorType),
+        //                    Global.CodeDrawStyle.Color(subElement.ColorType),
+        //                    "CodeEditor2/Assets/Icons/tag.svg"
+        //                    )
+        //            );
+        //        }
+        //        return;
+        //    }
+        //    else
+        //    {
+        //        INamedElement? subElement = null;
+        //        if (element.NamedElements.ContainsKey(hierWords[0]))
+        //        {
+        //            subElement = element.NamedElements[hierWords[0]];
+        //        } else if(element is NameSpace && first)
+        //        {
+        //            subElement = ((NameSpace)element).GetNamedElementUpward(hierWords[0]);
+        //        }
 
-            List<AutocompleteItem> items = new List<AutocompleteItem>();
+        //        if (subElement != null)
+        //        {
+        //            hierWords.RemoveAt(0);
+        //            if (subElement is IBuildingBlockInstantiation)
+        //            {
+        //                IBuildingBlockInstantiation inst = (IBuildingBlockInstantiation)subElement;
+        //                BuildingBlock? buildingBlock = inst.GetInstancedBuildingBlock();
+        //                if (buildingBlock != null)
+        //                {
+        //                    appendHierElement(hierWords, items, buildingBlock, candidate, false);
+        //                    return;
+        //                }
+        //                else
+        //                {
+        //                    return;
+        //                }
+        //            } else if(subElement is Variable)
+        //            {
+        //                Variable variable = (Variable)subElement;
+        //                if (variable.UnpackedArrays.Count != 0) return; // unpackedarray is not target of autocomplete
+        //            }
 
-            if (hierWords.Count == 0)
-            {
-                // special autocomplete tool
-                AppendSpecialAutoCompleteItems(items, candidateWord);
-                // keywords
-                AppendKeywordAutoCompleteItems(items, candidateWord,SystemVerilog);
-            }
 
-            // on Root and sont have ant Building Blocks
-            if (Root == null || Root.BuildingBlocks == null)
-            {
-                return items;
-            }
+        //            appendHierElement(hierWords, items, subElement, candidate, false);
+        //            return;
+        //        }
+        //        else
+        //        {
+        //            return;
+        //        }
+        //    }
+        //}
 
-            // get reference of current position
-            IndexReference iref = IndexReference.Create(this.IndexReference, index);
-
-            // get current buldingBlock
-            NameSpace? space = GetNameSpace(iref);
-
-            // parse macro in hierarchy words
-            for (int i = 0; i < hierWords.Count; i++)
-            {
-                if (!hierWords[i].StartsWith("`")) continue;
-
-                string macroText = hierWords[i].Substring(1);
-                if (!Macros.ContainsKey(macroText)) continue;
-                Macro macro = Macros[macroText];
-                if (macro.MacroText.Contains(' ')) continue;
-                if (macro.MacroText.Contains('\t')) continue;
-
-                string[] swapTexts = macro.MacroText.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
-                hierWords.RemoveAt(i);
-                for (int j = swapTexts.Length - 1; j >= 0; j--)
-                {
-                    hierWords.Insert(i, swapTexts[j]);
-                }
-            }
-
-            // system task & functions
-            // return system task and function if the word starts with "$"
-            if (candidateWord.StartsWith("$"))
-            {
-                items = new List<AutocompleteItem>();
-                foreach (string key in ProjectProperty.SystemFunctions.Keys)
-                {
-                    if (!key.StartsWith(candidateWord)) continue;
-                    items.Add(
-                        new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
-                            key,
-                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
-                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
-                            )
-                    );
-                }
-                foreach (string key in ProjectProperty.SystemTaskParsers.Keys)
-                {
-                    if (!key.StartsWith(candidateWord)) continue;
-                    items.Add(
-                        new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
-                            key,
-                            CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
-                            Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
-                            )
-                    );
-                }
-                return items;
-            }
-
-            if(hierWords.Count ==0)
-            {
-                // append INamedElements
-                if (space != null) appendAutoCompleteINamedElements(items, space, candidateWord);
-
-            }
-            else
-            {
-                if(space!=null) appendHierElement(hierWords, items, space, candidateWord,true);
-            }
-
-            return items;
-        }
-
-        private void appendHierElement(List<string> hierWords, List<AutocompleteItem> items, INamedElement element, string candidate, bool first)
-        {
-            if (hierWords.Count == 0)
-            {
-                foreach (INamedElement subElement in element.NamedElements.Values)
-                {
-                    if (!subElement.Name.StartsWith(candidate)) continue;
-                    items.Add(
-                        new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
-                            subElement.Name,
-                            CodeDrawStyle.ColorIndex(subElement.ColorType),
-                            Global.CodeDrawStyle.Color(subElement.ColorType),
-                            "CodeEditor2/Assets/Icons/tag.svg"
-                            )
-                    );
-                }
-                return;
-            }
-            else
-            {
-                INamedElement? subElement = null;
-                if (element.NamedElements.ContainsKey(hierWords[0]))
-                {
-                    subElement = element.NamedElements[hierWords[0]];
-                } else if(element is NameSpace && first)
-                {
-                    subElement = ((NameSpace)element).GetNamedElementUpward(hierWords[0]);
-                }
-
-                if (subElement != null)
-                {
-                    hierWords.RemoveAt(0);
-                    if (subElement is IBuildingBlockInstantiation)
-                    {
-                        IBuildingBlockInstantiation inst = (IBuildingBlockInstantiation)subElement;
-                        BuildingBlock? buildingBlock = inst.GetInstancedBuildingBlock();
-                        if (buildingBlock != null)
-                        {
-                            appendHierElement(hierWords, items, buildingBlock, candidate, false);
-                            return;
-                        }
-                        else
-                        {
-                            return;
-                        }
-                    }
-
-                    appendHierElement(hierWords, items, subElement, candidate, false);
-                    return;
-                }
-                else
-                {
-                    return;
-                }
-            }
-        }
-
-        private void appendAutoCompleteINamedElements(List<AutocompleteItem> items, NameSpace nameSpace,string candidate)
+        public void appendAutoCompleteINamedElements(List<AutocompleteItem> items, NameSpace nameSpace,string candidate)
         {
             bool add = false;
             foreach (INamedElement element in nameSpace.NamedElements.Values)

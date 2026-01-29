@@ -191,7 +191,13 @@ namespace pluginVerilog.Verilog.Expressions
                     if (val.UnpackedArrays.Count <= unpackedArrayIndex) break;
 
                     RangeExpression? rangeExpression = RangeExpression.ParseCreate(word, nameSpace);
-                    if (rangeExpression == null) return null;
+                    if (rangeExpression == null)
+                    {
+                        //                        UnfoundObjectReference unfoundObjectReference = new UnfoundObjectReference();
+                        //                        unfoundObjectReference.PartialDataObject = val;
+                        //                        return unfoundObjectReference;
+                        return null;
+                    }
 
                     partial = true;
                     if (rangeExpression is SingleBitRangeExpression)

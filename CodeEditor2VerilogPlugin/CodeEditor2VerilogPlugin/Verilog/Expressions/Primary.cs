@@ -263,6 +263,10 @@ number
                         {
                             if (nameSpaceText != "") acceptImplicitNet = false;
                             targetNameSpace = searchDownwardNameSpace;
+                            if(word.Text == "")
+                            {
+                                return new NameSpaceReference(searchDownwardNameSpace);
+                            }
                         }
                         else
                         {
@@ -428,7 +432,7 @@ number
                     }
                     return searchNameSpace(word, buildingBlock, ref nameSpaceText);
                 }
-                return nameSpace;
+                return buildingBlock;
             }
             return nameSpace;
         }
