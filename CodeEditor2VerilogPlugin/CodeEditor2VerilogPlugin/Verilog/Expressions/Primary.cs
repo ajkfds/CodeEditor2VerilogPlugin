@@ -4,6 +4,7 @@ using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.OpenGL;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
+using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.DataObjects.Nets;
 using pluginVerilog.Verilog.DataObjects.Variables;
 using pluginVerilog.Verilog.ModuleItems;
@@ -361,6 +362,12 @@ number
                         return parseDataObject(word, nameSpace, targetNameSpace, lValue, nameSpaceText);
                     }
 
+                    IDataType? dataType =  DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, null);
+                    if(dataType != null)
+                    {
+                        DataTypeReference dataTypeReference = new DataTypeReference { IDataType = dataType };
+                        return dataTypeReference;
+                    }
                     return null;
             }
             return null;

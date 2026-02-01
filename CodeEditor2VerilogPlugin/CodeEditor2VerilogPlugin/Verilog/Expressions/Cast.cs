@@ -136,7 +136,7 @@ namespace pluginVerilog.Verilog.Expressions
 
             IDataType? dataType = null;
 
-            Verilog.INamedElement? namedElement = nameSpace.NamedElements.GetDataObject(word.Text);
+            Verilog.INamedElement? namedElement = nameSpace.GetNamedElementUpward(word.Text);
             if(namedElement != null)
             {
                 word.Color(namedElement.ColorType);

@@ -476,7 +476,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                                 assignValue.Reference.AddWarning("Size mismatch 1 <- " + assignValue.BitWidth.ToString());
                             }
                         }
-                        else if(assignValue.BitWidth != net.BitWidth & !word.Prototype)
+                        else if(assignValue.BitWidth != net.BitWidth & !word.Prototype && assignValue.Reference != null)
                         {
                             assignValue.Reference.AddWarning("Size mismatch "+ net.BitWidth.ToString() +" <- "+assignValue.BitWidth.ToString() );
                         }
