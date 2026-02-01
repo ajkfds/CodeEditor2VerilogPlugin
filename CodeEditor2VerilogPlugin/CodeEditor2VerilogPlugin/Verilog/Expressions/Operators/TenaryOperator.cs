@@ -26,18 +26,18 @@ namespace pluginVerilog.Verilog.Expressions.Operators
         public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
             Condition.AppendLabel(label);
-            label.AppendText("?");
+            label.AppendText(" ? ");
             Primary1.AppendLabel(label);
-            label.AppendText(":");
+            label.AppendText(" : ");
             Primary2.AppendLabel(label);
         }
 
         public override void AppendString(StringBuilder stringBuilder)
         {
             Condition.AppendString(stringBuilder);
-            stringBuilder.Append("?");
+            stringBuilder.Append(" ? ");
             Primary1.AppendString(stringBuilder);
-            stringBuilder.Append(":");
+            stringBuilder.Append(" : ");
             Primary2.AppendString(stringBuilder);
         }
 

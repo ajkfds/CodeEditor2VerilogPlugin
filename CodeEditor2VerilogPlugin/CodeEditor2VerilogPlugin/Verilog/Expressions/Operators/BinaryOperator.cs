@@ -128,14 +128,18 @@ namespace pluginVerilog.Verilog.Expressions.Operators
         public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
             Primary1.AppendLabel(label);
+            label.AppendText(" ");
             label.AppendText(Text);
+            label.AppendText(" ");
             Primary2.AppendLabel(label);
         }
 
         public override void AppendString(StringBuilder stringBuilder)
         {
             Primary1.AppendString(stringBuilder);
+            stringBuilder.Append(" ");
             stringBuilder.Append(Text);
+            stringBuilder.Append(" ");
             Primary2.AppendString(stringBuilder);
         }
 
