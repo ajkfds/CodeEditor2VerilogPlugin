@@ -146,7 +146,6 @@ namespace pluginVerilog.Data
                     //    if (registeredModule == null) continue;
                     //    if (registeredModule.File == null) continue;
                     //    if (registeredModule.File.RelativePath == module.File.RelativePath) continue;
-
                     //    continue;
                     //}
 

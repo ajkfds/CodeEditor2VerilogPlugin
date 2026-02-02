@@ -54,7 +54,6 @@
 
   <ItemGroup>
     <Folder Include="Assets\Icons\" />
-    <Folder Include="Assets\LLMPrompt\" />
     <Folder Include="Docs\" />
   </ItemGroup>
 </Project>

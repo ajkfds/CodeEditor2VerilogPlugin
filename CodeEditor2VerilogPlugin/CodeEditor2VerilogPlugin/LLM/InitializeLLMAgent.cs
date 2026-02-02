@@ -3,6 +3,7 @@ using Avalonia.Threading;
 using DynamicData;
 using FaissNet;
 using Microsoft.Extensions.AI;
+using pluginVerilog.LLM.Tools;
 using pluginVerilog.Verilog.BuildingBlocks;
 using Svg;
 using System;
@@ -17,7 +18,7 @@ namespace pluginVerilog.LLM
 {
     public static class InitializeLLMAgent
     {
-        public static void Run(CodeEditor2.LLM.LLMAgent agent) 
+        public static void Run(CodeEditor2.LLM.LLMAgent agent,bool useFunctioncallApi) 
         {
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
             CancellationToken cancellationToken = cancellationTokenSource.Token;
@@ -25,7 +26,18 @@ namespace pluginVerilog.LLM
             agent.PersudoFunctionCallMode = true;
 
             string prompt;
-            using (var stream = AssetLoader.Open(new Uri("avares://CodeEditor2VerilogPlugin/Assets/LLMPrompt/AgentBasePrompt.md")))
+
+            string promptPath = "";
+            if (useFunctioncallApi)
+            {
+                promptPath = "avares://CodeEditor2VerilogPlugin/Assets/LLMPrompt/AgentBasePromptWFunctionCall.md";
+            }
+            else
+            {
+                promptPath = "avares://CodeEditor2VerilogPlugin/Assets/LLMPrompt/AgentBasePrompt.md";
+            }
+
+            using (var stream = AssetLoader.Open(new Uri(promptPath)))
             {
                 byte[] buffer = new byte[stream.Length];
                 stream.Read(buffer, 0, (int)stream.Length);
@@ -37,74 +49,28 @@ namespace pluginVerilog.LLM
             agent.PromptParameters.Add("Role", "a highly skilled hardware engineer with extensive knowledge in many programming languages, frameworks, design patterns, and best practices");
             // agent functions
 
-            { // GetModuleDefinition
-                [Description("指定されたmoduleが定義されているrtlファイルの内容を取得します")]
-                string GetModuleDefinition(
-                [Description("module name")] string moduleName)
-                {
-                    var node = CodeEditor2.Controller.NavigatePanel.GetSelectedNode();
-                    if (node == null) return "illegal moduleName";
-                    var project = node.GetProject();
-                    ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
-                    if (projectProperty == null) throw new Exception();
-                    var file = projectProperty.GetBuildingBlock(moduleName)?.File;
-                    if (file == null || file.CodeDocument==null) return "not found";
+            CodeEditor2.LLM.Tools.ReadFile readFile = new CodeEditor2.LLM.Tools.ReadFile();
+            agent.Tools.Add(readFile.GetAIFunction());
 
-                    StringBuilder sb = new StringBuilder();
-                    sb.Append(file.RelativePath);
-                    sb.Append("```verilog");
-                    sb.Append(file.CodeDocument.CreateString());
-                    sb.Append("```");
+            CodeEditor2.LLM.Tools.ReplaceInFile replaceInFile = new CodeEditor2.LLM.Tools.ReplaceInFile();
+            agent.Tools.Add(replaceInFile.GetAIFunction());
 
-                    return sb.ToString();
-                }
-                AIFunction getModuleDefinition = AIFunctionFactory.Create(GetModuleDefinition, "GetModuleDefinition");
-                agent.Tools.Add(getModuleDefinition);
-            }
+            CodeEditor2.LLM.Tools.SearchFiles searchFiles = new CodeEditor2.LLM.Tools.SearchFiles();
+            agent.Tools.Add(searchFiles.GetAIFunction());
 
-            { // GetModulePorts
-                [Description("指定されたモジュールのポート定義を取得します")]
-                string GetModulePorts(
-                [Description("module name")] string moduleName)
-                {
-                    var node = CodeEditor2.Controller.NavigatePanel.GetSelectedNode();
-                    if (node == null) return "illegal moduleName";
-                    var project = node.GetProject();
-                    ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
-                    if (projectProperty == null) throw new Exception();
-                    var file = projectProperty.GetBuildingBlock(moduleName)?.File;
-                    if (file == null || file.CodeDocument == null) return "not found";
-                    Verilog.ParsedDocument? pdoc = file.VerilogParsedDocument;
-                    if(pdoc == null) return "not found";
-                    if (!pdoc.Root.BuildingBlocks.ContainsKey(moduleName)) return "not found";
-                    BuildingBlock buildingBlock = pdoc.Root.BuildingBlocks[moduleName];
-                    Verilog.IPortNameSpace? portNameSpace = buildingBlock as Verilog.IPortNameSpace;
-                    if (portNameSpace == null) return "not found";
+            CodeEditor2.LLM.Tools.WriteToFile writeToFile = new CodeEditor2.LLM.Tools.WriteToFile();
+            agent.Tools.Add(writeToFile.GetAIFunction());
 
-                    StringBuilder sb = new StringBuilder();
-                    sb.Append(file.RelativePath);
-                    sb.Append("```verilog");
-                    string? portGroup = null;
-                    foreach (var port in portNameSpace.PortsList)
-                    {
-                        if (port.PortGroupName != portGroup && portGroup != "")
-                        {
-                            portGroup = port.PortGroupName;
-                            sb.Append("// ");
-                            sb.Append(portGroup);
-                            sb.Append("\n");
-                        }
-                        sb.Append(port.CreateDefinitionString());
-                        sb.Append("\n");
-                    }
-                    sb.Append("```");
+            CodeEditor2.LLM.Tools.ListFiles listFiles = new CodeEditor2.LLM.Tools.ListFiles();
+            agent.Tools.Add(listFiles.GetAIFunction());
+            GetBuildingBlockDefinedFilePath getBuildingBlockDefinedFilePath = new GetBuildingBlockDefinedFilePath();
+            agent.Tools.Add(getBuildingBlockDefinedFilePath.GetAIFunction());
 
-                    return sb.ToString();
-                }
-                AIFunction getModulePorts = AIFunctionFactory.Create(GetModulePorts, "GetModulePorts");
-                agent.Tools.Add(getModulePorts);
-            }
+            //GetModuleDefinition getModuleDefinition = new GetModuleDefinition();
+            //agent.Tools.Add(getModuleDefinition.GetAIFunction());
 
+            //GetModulePort getModulePort = new GetModulePort();
+            //agent.Tools.Add(getModulePort.GetAIFunction());
         }
     }
 }

@@ -52,15 +52,15 @@ namespace pluginVerilog
             }
             // register project property creator
             CodeEditor2.Data.Project.Created += projectCreated;
-            
+
             { // chat agent tab
                 pluginAi.OpenRouterChat chat = new OpenRouterChat(OpenRouterModels.openai_gpt_oss_120b, false);
 
                 LLMAgent agent = new LLMAgent();
-                InitializeLLMAgent.Run(agent);
+                InitializeLLMAgent.Run(agent,false);
 
                 RtlAgentControl = new ChatControl();
-                RtlAgentControl.SetModel(chat,agent);
+                RtlAgentControl.SetModel(chat, agent);
 
                 chatTab = new TabItem()
                 {
