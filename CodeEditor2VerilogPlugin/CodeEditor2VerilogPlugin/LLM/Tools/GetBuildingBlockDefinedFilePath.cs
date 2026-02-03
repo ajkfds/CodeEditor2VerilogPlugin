@@ -11,6 +11,13 @@ namespace pluginVerilog.LLM.Tools
     public class GetBuildingBlockDefinedFilePath : CodeEditor2.LLM.Tools.LLMTool
     {
         public override AIFunction GetAIFunction() { return AIFunctionFactory.Create(Run, "get_buildingblock_defined_filepath"); }
+        public override string XmlExample { get; } = """
+            ```xml
+            <get_buildingblock_defined_filepath>
+            <buildingBlockName> verilog/systemverilog building block name </buildingBlockName>
+            </get_buildingblock_defined_filepath>         
+            ```
+            """;
 
         [Description("指定されたbuilding block(module,class,program)が定義されているrtlファイルのpathを取得します。pathはproject rootに対する相対パスです。")]
         public async Task<string> Run(
