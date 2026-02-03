@@ -109,7 +109,7 @@ namespace pluginVerilog.NavigatePanel
                 if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
                 CodeEditor2.Controller.AppendLog("# Exception : " + ex.Message, Avalonia.Media.Colors.Red);
             }
-
+            base.OnSelected();
         }
 
         public override async Task UpdateAsync()
@@ -201,6 +201,9 @@ namespace pluginVerilog.NavigatePanel
 
             UpdateSubNodes();
         }
+        public static new Action<ContextMenu>? CustomizeSpecificNodeContextMenu;
+        protected override Action<ContextMenu>? customizeSpecificNodeContextMenu => CustomizeSpecificNodeContextMenu;
+
 
     }
 

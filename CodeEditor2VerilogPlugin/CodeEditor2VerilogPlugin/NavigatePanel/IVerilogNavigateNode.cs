@@ -18,5 +18,6 @@ namespace pluginVerilog.NavigatePanel
         void OnSelected();
 
         Task UpdateAsync();
+
     }
 }

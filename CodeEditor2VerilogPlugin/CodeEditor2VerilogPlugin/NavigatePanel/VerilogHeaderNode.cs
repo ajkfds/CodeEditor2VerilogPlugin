@@ -1,12 +1,13 @@
-﻿using System;
+﻿using Avalonia.Controls;
+using Avalonia.Media;
+using Avalonia.Threading;
+using pluginVerilog.Data;
+using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Drawing;
-using Avalonia.Media;
-using pluginVerilog.Data;
-using Avalonia.Threading;
 
 namespace pluginVerilog.NavigatePanel
 {
@@ -121,6 +122,9 @@ namespace pluginVerilog.NavigatePanel
                 overrideIcons
                 );
         }
+        public static new Action<ContextMenu>? CustomizeSpecificNodeContextMenu;
+        protected override Action<ContextMenu>? customizeSpecificNodeContextMenu => CustomizeSpecificNodeContextMenu;
+
 
     }
 }
