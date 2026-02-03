@@ -62,13 +62,15 @@ namespace pluginVerilog.Verilog.Statements
         private static async Task<ParallelBlock> parseParallelBlock(WordScanner word, NameSpace nameSpace, IndexReference beginIndex)
         {
             ParallelBlock sequentialBlock = new ParallelBlock();
-            while (!word.Eof && word.Text != "join")
+            List<string> join_families = new List<string> { "join", "join_any", "join_none" };
+
+            while (!word.Eof && !join_families.Contains(word.Text) )
             {
                 IStatement? statement = await Verilog.Statements.Statements.ParseCreateStatement(word, nameSpace);
                 if (statement == null) break;
                 sequentialBlock.Statements.Add(statement);
             }
-            if (word.Text != "join")
+            if (!join_families.Contains(word.Text))
             {
                 word.AddError("illegal sequential block");
                 return null;
