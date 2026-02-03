@@ -13,14 +13,12 @@ namespace pluginVerilog.LLM.Tools
 {
     public class GetModulePort:LLMTool
     {
+        public GetModulePort(CodeEditor2.Data.Project project) : base(project) { }
         public override AIFunction GetAIFunction() { return AIFunctionFactory.Create(Run, "get_module_definition"); }
         [Description("指定されたモジュールのポート定義を取得します")]
         public async Task<string> Run(
         [Description("module name")] string moduleName)
         {
-            var node = CodeEditor2.Controller.NavigatePanel.GetSelectedNode();
-            if (node == null) return "illegal moduleName";
-            var project = node.GetProject();
             ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
             if (projectProperty == null) throw new Exception();
             var file = projectProperty.GetBuildingBlock(moduleName)?.File;

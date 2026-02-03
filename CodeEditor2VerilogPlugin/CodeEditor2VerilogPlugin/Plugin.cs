@@ -3,7 +3,6 @@ using CodeEditor2;
 using CodeEditor2.FileTypes;
 using CodeEditor2.Views;
 using CodeEditor2Plugin;
-using pluginAi;
 using pluginVerilog.LLM;
 using pluginVerilog.NavigatePanel;
 using System;
@@ -53,31 +52,30 @@ namespace pluginVerilog
             // register project property creator
             CodeEditor2.Data.Project.Created += projectCreated;
 
-            { // chat agent tab
-                pluginAi.OpenRouterChat chat = new OpenRouterChat(OpenRouterModels.openai_gpt_oss_120b, false);
+            //{ // chat agent tab
+            //    pluginAi.OpenRouterChat chat = new OpenRouterChat(OpenRouterModels.openai_gpt_oss_120b, false);
 
-                LLMAgent agent = new LLMAgent();
-                InitializeLLMAgent.Run(agent,false);
+            //    LLMAgent agent = new LLMAgent();
+            //    InitializeLLMAgent.Run(agent,false);
 
-                RtlAgentControl = new ChatControl();
-                RtlAgentControl.SetModel(chat, agent);
+            //    RtlAgentControl = new ChatControl();
+            //    RtlAgentControl.SetModel(chat, agent);
 
-                chatTab = new TabItem()
-                {
-                    Header = "RtlAgent",
-                    Name = "RtlAgent",
-                    FontSize = 12,
-                    Content = RtlAgentControl
-                };
-                CodeEditor2.Controller.Tabs.AddItem(chatTab);
-            }
+            //    chatTab = new TabItem()
+            //    {
+            //        Header = "RtlAgent",
+            //        Name = "RtlAgent",
+            //        FontSize = 12,
+            //        Content = RtlAgentControl
+            //    };
+            //    CodeEditor2.Controller.Tabs.AddItem(chatTab);
+            //}
 
 
             return true;
         }
         internal static Avalonia.Controls.TabItem? chatTab;
         public static ChatControl? RtlAgentControl;
-        public static pluginAi.LLMChat? LLMChat;
 
         public bool Initialize()
         {

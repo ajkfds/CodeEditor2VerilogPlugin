@@ -1,5 +1,4 @@
 ﻿using AjkAvaloniaLibs.Controls;
-using OpenAI.Realtime;
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using System;
 using System.Collections.Generic;

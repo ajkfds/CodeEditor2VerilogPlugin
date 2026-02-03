@@ -10,6 +10,7 @@ namespace pluginVerilog.LLM.Tools
 {
     public class GetBuildingBlockDefinedFilePath : CodeEditor2.LLM.Tools.LLMTool
     {
+        public GetBuildingBlockDefinedFilePath(CodeEditor2.Data.Project project) : base(project) { }
         public override AIFunction GetAIFunction() { return AIFunctionFactory.Create(Run, "get_buildingblock_defined_filepath"); }
         public override string XmlExample { get; } = """
             ```xml
@@ -19,14 +20,14 @@ namespace pluginVerilog.LLM.Tools
             ```
             """;
 
-        [Description("指定されたbuilding block(module,class,program)が定義されているrtlファイルのpathを取得します。pathはproject rootに対する相対パスです。")]
+        [Description("""
+            指定されたbuilding block(module,class,program)が定義されているrtlファイルのfile pathを取得します。
+            file pathはproject rootに対する相対パスです。
+            """)]
+            
         public async Task<string> Run(
         [Description("building block name")] string buildingBlockName)
         {
-            var node = CodeEditor2.Controller.NavigatePanel.GetSelectedNode();
-            if (node == null) return "illegal moduleName";
-
-            CodeEditor2.Data.Project? project = GetProject();
             if (project == null) return "Failed to execute tool. Cannot get current project.";
 
             ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;

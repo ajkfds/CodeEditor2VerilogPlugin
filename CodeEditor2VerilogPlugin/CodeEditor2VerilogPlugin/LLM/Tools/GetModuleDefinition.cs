@@ -10,16 +10,13 @@ namespace pluginVerilog.LLM.Tools
 {
     public class GetModuleDefinition : CodeEditor2.LLM.Tools.LLMTool
     {
+        public GetModuleDefinition(CodeEditor2.Data.Project project) : base(project) { }
         public override AIFunction GetAIFunction() { return AIFunctionFactory.Create(Run, "get_module_definition"); }
 
         [Description("指定されたmoduleが定義されているrtlファイルの内容を取得します")]
         public async Task<string> Run(
         [Description("module name")] string moduleName)
         {
-            var node = CodeEditor2.Controller.NavigatePanel.GetSelectedNode();
-            if (node == null) return "illegal moduleName";
-
-            CodeEditor2.Data.Project? project = GetProject();
             if (project == null) return "Failed to execute tool. Cannot get current project.";
 
             ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;

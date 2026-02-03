@@ -1,7 +1,6 @@
 ﻿using Avalonia.Platform;
 using Avalonia.Threading;
 using DynamicData;
-using FaissNet;
 using Microsoft.Extensions.AI;
 using pluginVerilog.LLM.Tools;
 using pluginVerilog.Verilog.BuildingBlocks;
@@ -18,52 +17,53 @@ namespace pluginVerilog.LLM
 {
     public static class InitializeLLMAgent
     {
-        public static void Run(CodeEditor2.LLM.LLMAgent agent,bool useFunctioncallApi) 
+        public static void Run(CodeEditor2.Data.Project project, CodeEditor2.LLM.LLMAgent agent,bool useFunctioncallApi) 
         {
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
             CancellationToken cancellationToken = cancellationTokenSource.Token;
 
             agent.PersudoFunctionCallMode = true;
 
-            string prompt;
 
-            string promptPath = "";
+            StringBuilder sb = new StringBuilder();
+
+            sb.Append(getAssetString("avares://CodeEditor2VerilogPlugin/Assets/LLMPrompt/AgentBasePrompt.md"));
             if (useFunctioncallApi)
             {
-                promptPath = "avares://CodeEditor2VerilogPlugin/Assets/LLMPrompt/AgentBasePromptWFunctionCall.md";
-            }
-            else
-            {
-                promptPath = "avares://CodeEditor2VerilogPlugin/Assets/LLMPrompt/AgentBasePrompt.md";
+                sb.Append("avares://CodeEditor2VerilogPlugin/Assets/LLMPrompt/ToolCall.md");
             }
 
-            using (var stream = AssetLoader.Open(new Uri(promptPath)))
-            {
-                byte[] buffer = new byte[stream.Length];
-                stream.Read(buffer, 0, (int)stream.Length);
-                var encoding = Encoding.GetEncoding("UTF-8");
-                prompt = encoding.GetString(buffer);
-            }
-            agent.BasePrompt = prompt;
+            sb.Append(getAssetString("avares://CodeEditor2VerilogPlugin/Assets/LLMPrompt/RtlEditSkill.md"));
+
+            sb.Append("""
+                
+                ===
+                まず上記の指示を理解し、ユーザのタスク指示に備えて待機してください。
+
+                """);
+
+
+            agent.BasePrompt = sb.ToString();
 
             agent.PromptParameters.Add("Role", "a highly skilled hardware engineer with extensive knowledge in many programming languages, frameworks, design patterns, and best practices");
             // agent functions
 
-            CodeEditor2.LLM.Tools.ReadFile readFile = new CodeEditor2.LLM.Tools.ReadFile();
+            CodeEditor2.LLM.Tools.ReadFile readFile = new CodeEditor2.LLM.Tools.ReadFile(project);
             agent.Tools.Add(readFile.GetAIFunction());
 
-            CodeEditor2.LLM.Tools.ReplaceInFile replaceInFile = new CodeEditor2.LLM.Tools.ReplaceInFile();
+            CodeEditor2.LLM.Tools.ReplaceInFile replaceInFile = new CodeEditor2.LLM.Tools.ReplaceInFile(project);
             agent.Tools.Add(replaceInFile.GetAIFunction());
 
-            CodeEditor2.LLM.Tools.SearchFiles searchFiles = new CodeEditor2.LLM.Tools.SearchFiles();
+            CodeEditor2.LLM.Tools.SearchFiles searchFiles = new CodeEditor2.LLM.Tools.SearchFiles(project);
             agent.Tools.Add(searchFiles.GetAIFunction());
 
-            CodeEditor2.LLM.Tools.WriteToFile writeToFile = new CodeEditor2.LLM.Tools.WriteToFile();
+            CodeEditor2.LLM.Tools.WriteToFile writeToFile = new CodeEditor2.LLM.Tools.WriteToFile(project);
             agent.Tools.Add(writeToFile.GetAIFunction());
 
-            CodeEditor2.LLM.Tools.ListFiles listFiles = new CodeEditor2.LLM.Tools.ListFiles();
+            CodeEditor2.LLM.Tools.ListFiles listFiles = new CodeEditor2.LLM.Tools.ListFiles(project);
             agent.Tools.Add(listFiles.GetAIFunction());
-            GetBuildingBlockDefinedFilePath getBuildingBlockDefinedFilePath = new GetBuildingBlockDefinedFilePath();
+
+            GetBuildingBlockDefinedFilePath getBuildingBlockDefinedFilePath = new GetBuildingBlockDefinedFilePath(project);
             agent.Tools.Add(getBuildingBlockDefinedFilePath.GetAIFunction());
 
             //GetModuleDefinition getModuleDefinition = new GetModuleDefinition();
@@ -71,6 +71,17 @@ namespace pluginVerilog.LLM
 
             //GetModulePort getModulePort = new GetModulePort();
             //agent.Tools.Add(getModulePort.GetAIFunction());
+        }
+
+        private static string getAssetString(string assetPath)
+        {
+            using (var stream = AssetLoader.Open(new Uri(assetPath)))
+            {
+                byte[] buffer = new byte[stream.Length];
+                stream.Read(buffer, 0, (int)stream.Length);
+                var encoding = Encoding.GetEncoding("UTF-8");
+                return encoding.GetString(buffer);
+            }
         }
     }
 }
