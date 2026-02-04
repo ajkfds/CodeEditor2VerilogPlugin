@@ -26,7 +26,7 @@ namespace pluginVerilog.Verilog
         private List<DataObjects.Port> portsList = new List<DataObjects.Port>();
         public List<DataObjects.Port> PortsList { get { return portsList; } }
 
-        public DataObjects.Variables.Variable? ReturnVariable = null;
+        public DataObjects.DataObject? ReturnVariable = null;
 
         public Statements.IStatement Statement;
 
@@ -126,7 +126,7 @@ namespace pluginVerilog.Verilog
 
 
             // function_data_type_or_implicit   ::= data_type_or_void | implicit_data_type;
-            Variable? retVal = null;
+            DataObject? retVal = null;
             bool returnVoid = false;
 
             switch (word.Text)
@@ -199,7 +199,7 @@ namespace pluginVerilog.Verilog
                 if (!returnVoid && retVal == null)
                 {
                     IDataType dat_type = Verilog.DataObjects.DataTypes.LogicType.Create(false, null);
-                    retVal = Verilog.DataObjects.Variables.Logic.Create("",dat_type);
+                    retVal = DataObjects.DataObject.Create("", dat_type);
                 }
             }
 

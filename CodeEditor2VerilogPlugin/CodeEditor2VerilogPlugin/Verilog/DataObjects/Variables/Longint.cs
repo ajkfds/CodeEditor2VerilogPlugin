@@ -22,16 +22,6 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         }
         public override Variable Clone(string name)
         {
-            Longint val = new Longint()
-            {
-                Name = name,
-                DataType = DataType
-            };
-            return val;
-        }
-
-        public override Variable Clone()
-        {
             Longint val = new Longint() { Name = Name, Defined = Defined };
             val.DataType = DataType;
             val.Signed = Signed;
@@ -40,6 +30,11 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 val.UnpackedArrays.Add(unpackedArray.Clone());
             }
             return val;
+        }
+
+        public override Variable Clone()
+        {
+            return Clone(Name);
         }
 
         public IDataType? ParsePartSelect(WordScanner word, NameSpace nameSpace)

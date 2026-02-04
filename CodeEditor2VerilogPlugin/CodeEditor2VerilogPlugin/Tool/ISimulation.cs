@@ -9,7 +9,7 @@ namespace pluginVerilog.Tool
 {
     public interface ISimulation
     {
-        public Data.VerilogFile TopFile { get; set; }
+        public Data.VerilogFile? TopFile { get; set; }
         public Task<string> RunSimulationAsync(CancellationToken cancellationToken);
 
         

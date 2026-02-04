@@ -53,9 +53,9 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             return val;
         }
 
-        public override Variable Clone()
+        public override Variable Clone(string name)
         {
-            UserDefinedVariable val = new UserDefinedVariable() { Name = Name, Defined = Defined, UserDefinedType = (UserDefinedType)UserDefinedType.Clone() };
+            UserDefinedVariable val = new UserDefinedVariable() { Name = name, Defined = Defined, UserDefinedType = (UserDefinedType)UserDefinedType.Clone() };
 
             if (DataType != null) val.DataType = DataType.Clone();
             if (DataType is not DataObjects.DataTypes.UserDefinedType) throw new Exception();
@@ -84,6 +84,11 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             }
 
             return val;
+        }
+
+        public override Variable Clone()
+        {
+            return Clone(Name);
         }
         public override void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {

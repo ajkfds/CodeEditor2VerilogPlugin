@@ -20,9 +20,9 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             return val;
         }
 
-        public override Variable Clone()
+        public override Variable Clone(string name)
         {
-            Shortint val = new Shortint() { Name = Name, Defined = Defined };
+            Shortint val = new Shortint() { Name = name, Defined = Defined };
             val.DataType = DataType;
             val.Signed = Signed;
             foreach (var unpackedArray in UnpackedArrays)
@@ -30,6 +30,10 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 val.UnpackedArrays.Add(unpackedArray.Clone());
             }
             return val;
+        }
+        public override Variable Clone()
+        {
+            return Clone(Name);
         }
 
         public IDataType? ParsePartSelect(WordScanner word, NameSpace nameSpace)

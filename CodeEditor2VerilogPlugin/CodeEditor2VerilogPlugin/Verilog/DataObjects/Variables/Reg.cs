@@ -21,9 +21,9 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             return val;
         }
 
-        public override Variable Clone()
+        public override Variable Clone(string name)
         {
-            Reg val = new Reg() { Name = Name, Defined = Defined };
+            Reg val = new Reg() { Name = name, Defined = Defined };
             if(DataType != null) val.DataType = DataType.Clone();
             val.Signed = Signed;
             val.Defined = Defined;
@@ -32,6 +32,10 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 val.UnpackedArrays.Add(unpackedArray.Clone());
             }
             return val;
+        }
+        public override Variable Clone()
+        {
+            return Clone(Name);
         }
 
 

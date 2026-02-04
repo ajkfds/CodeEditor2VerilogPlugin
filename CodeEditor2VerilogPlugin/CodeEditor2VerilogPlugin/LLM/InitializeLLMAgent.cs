@@ -66,11 +66,6 @@ namespace pluginVerilog.LLM
             GetBuildingBlockDefinedFilePath getBuildingBlockDefinedFilePath = new GetBuildingBlockDefinedFilePath(project);
             agent.Tools.Add(getBuildingBlockDefinedFilePath.GetAIFunction());
 
-            //GetModuleDefinition getModuleDefinition = new GetModuleDefinition();
-            //agent.Tools.Add(getModuleDefinition.GetAIFunction());
-
-            //GetModulePort getModulePort = new GetModulePort();
-            //agent.Tools.Add(getModulePort.GetAIFunction());
         }
 
         private static string getAssetString(string assetPath)

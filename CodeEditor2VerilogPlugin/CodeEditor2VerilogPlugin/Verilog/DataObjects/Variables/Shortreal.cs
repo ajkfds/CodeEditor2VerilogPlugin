@@ -21,15 +21,19 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             return val;
         }
 
-        public override Variable Clone()
+        public override Variable Clone(string name)
         {
-            Shortreal val = new Shortreal() { Name = Name, Defined = Defined };
+            Shortreal val = new Shortreal() { Name = name, Defined = Defined };
             val.DataType = DataType;
             foreach (var unpackedArray in UnpackedArrays)
             {
                 val.UnpackedArrays.Add(unpackedArray.Clone());
             }
             return val;
+        }
+        public override Variable Clone()
+        {
+            return Clone(Name);
         }
 
         public override void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)

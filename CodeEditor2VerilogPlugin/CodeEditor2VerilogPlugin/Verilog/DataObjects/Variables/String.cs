@@ -173,15 +173,19 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             }
         }
 
-        public override Variable Clone()
+        public override Variable Clone(string name)
         {
-            String val = new String() { Name = Name,Defined=Defined };
+            String val = new String() { Name = name,Defined=Defined };
             foreach (var unpackedArray in UnpackedArrays)
             {
                 val.UnpackedArrays.Add(unpackedArray.Clone());
             }
             val.DataType = DataType;
             return val;
+        }
+        public override Variable Clone()
+        {
+            return Clone(Name);
         }
 
         public override void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)

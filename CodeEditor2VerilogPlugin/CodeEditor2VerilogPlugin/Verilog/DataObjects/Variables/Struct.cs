@@ -37,9 +37,9 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             return ret;
         }
 
-        public override Variable Clone()
+        public override Variable Clone(string name)
         {
-            Struct ret = new Struct() { StructType = StructType, Name = Name, Defined = Defined };
+            Struct ret = new Struct() { StructType = StructType, Name = name, Defined = Defined };
             //foreach (var packedArray in PackedDimensions)
             //{
             //    ret.PackedDimensions.Add(packedArray.Clone());
@@ -55,6 +55,10 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 ret.NamedElements.Add(dataObject.Name, dataObject);
             }
             return ret;
+        }
+        public override Variable Clone()
+        {
+            return Clone(Name);
         }
         public override void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
