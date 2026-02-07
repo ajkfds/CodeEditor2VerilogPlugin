@@ -18,7 +18,7 @@ namespace pluginVerilog.Data
 
     public class VerilogHeaderFile : CodeEditor2.Data.TextFile, IVerilogRelatedFile
     {
-        public new static VerilogHeaderFile Create(string relativePath, CodeEditor2.Data.Project project)
+        public new static Task<VerilogHeaderFile> Create(string relativePath, CodeEditor2.Data.Project project)
         {
             string name;
             if (relativePath.Contains(System.IO.Path.DirectorySeparatorChar))
@@ -37,7 +37,7 @@ namespace pluginVerilog.Data
                 Name = name
             };
             fileItem.readFromFile();
-            return fileItem;
+            return System.Threading.Tasks.Task.FromResult(fileItem);
         }
 
         private string id = "";

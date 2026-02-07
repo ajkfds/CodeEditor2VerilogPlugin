@@ -34,7 +34,7 @@ namespace pluginVerilog.Data
 {
     public class VerilogFile : CodeEditor2.Data.TextFile, IVerilogRelatedFile
     {
-        public new static VerilogFile Create(string relativePath, CodeEditor2.Data.Project project)
+        public new static Task<VerilogFile> CreateAsync(string relativePath, CodeEditor2.Data.Project project)
         {
             string name;
             if (relativePath.Contains(System.IO.Path.DirectorySeparatorChar))
@@ -49,7 +49,7 @@ namespace pluginVerilog.Data
             CodeEditor2.FileTypes.FileType fileType = CodeEditor2.Global.FileTypes[FileTypes.VerilogFile.TypeID];
             VerilogFile fileItem = new VerilogFile() { Name = name, Project = project, RelativePath = relativePath };
 
-            return fileItem;
+            return Task.FromResult(fileItem);
         }
 
         ~VerilogFile()
@@ -69,7 +69,7 @@ namespace pluginVerilog.Data
             CustomizeItemEditorContextMenu += (x => EditorContextMenu.CustomizeEditorContextMenu(x));
         }
 
-        public static VerilogFile CreateSystemVerilog(string relativePath, CodeEditor2.Data.Project project)
+        public static Task<VerilogFile> CreateSystemVerilog(string relativePath, CodeEditor2.Data.Project project)
         {
             string name;
             if (relativePath.Contains(System.IO.Path.DirectorySeparatorChar))
@@ -84,7 +84,7 @@ namespace pluginVerilog.Data
             CodeEditor2.FileTypes.FileType fileType = CodeEditor2.Global.FileTypes[FileTypes.SystemVerilogFile.TypeID];
             VerilogFile fileItem = new VerilogFile() { Name = name, Project = project, RelativePath = relativePath };
             fileItem.SystemVerilog = true;
-            return fileItem;
+            return Task.FromResult(fileItem);
         }
 
 
