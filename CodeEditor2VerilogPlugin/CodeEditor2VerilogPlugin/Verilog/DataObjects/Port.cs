@@ -860,10 +860,25 @@ namespace pluginVerilog.Verilog.DataObjects
         signing                 ::= "signed" | "unsigned"
         */
 
+
+        /*
+         
+        tf_port_declaration ::=
+            { attribute_instance } tf_port_direction [ var ] data_type_or_implicit list_of_tf_variable_identifiers ; 
+
+         */
         public static bool ParseTfPortDeclaration(WordScanner word, NameSpace nameSpace)
         {
             // tf_port_direction[var] data_type_or_implicit list_of_tf_variable_identifiers;
+
+            // SystemVerilog
+            // tf_port_item         ::= { attribute_instance } [tf_port_direction] [var] data_type_or_implicit [port_identifier { variable_dimension } [ = expression] ] 
+
+
             BuildingBlock buildingBlock = nameSpace.BuildingBlock;
+
+            // [tf_port_direction]
+            //      tf_port_direction::= port_direction | "const" "ref"
             DirectionEnum? direction = null;
             switch (word.Text)
             {
@@ -882,7 +897,7 @@ namespace pluginVerilog.Verilog.DataObjects
                     word.Color(CodeDrawStyle.ColorType.Keyword);
                     word.MoveNext();
                     break;
-                case "ref":
+                case "const":
                     direction = DirectionEnum.Ref;
                     word.Color(CodeDrawStyle.ColorType.Keyword);
                     word.MoveNext();
@@ -900,12 +915,14 @@ namespace pluginVerilog.Verilog.DataObjects
                     return false;
             }
 
+            // ["var"]
             if (word.Text == "var")
             {
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 word.MoveNext();
             }
 
+            // data_type_or_implicit [port_identifier { variable_dimension } [ = expression] ] 
             IDataType dataType = DataTypeFactory.ParseCreate(word, nameSpace, null);
 
             // Each formal argument has a data type that can be explicitly declared or inherited from the previous argument.
@@ -935,6 +952,7 @@ namespace pluginVerilog.Verilog.DataObjects
 
             while (!word.Eof)
             {
+                // port_identifier
                 if (!General.IsIdentifier(word.Text)) break;
 
                 Port port = new Port() { DefinitionReference = word.CrateWordReference(), Name = word.Text, Project = word.Project };
@@ -961,8 +979,6 @@ namespace pluginVerilog.Verilog.DataObjects
                     }
                 }
 
-                
-
                 if (!nameSpace.NamedElements.ContainsKey(port.DataObject.Name))
                 {
                     nameSpace.NamedElements.Add(port.DataObject.Name, port.DataObject);
@@ -972,6 +988,42 @@ namespace pluginVerilog.Verilog.DataObjects
 
                 word.Color(CodeDrawStyle.ColorType.Variable);
                 word.MoveNext();
+
+                // { variable_dimension } [ = expression] ] 
+                // { variable_dimension }
+                while (!word.Eof && word.Text == "[")
+                {
+                    IArray? array = null;
+                    if (port.DataObject != null) array = VariableArray.ParseCreate(port.DataObject, word, nameSpace);
+
+                    if (array is UnPackedArray)
+                    {
+                        UnPackedArray unPackedArray = (UnPackedArray)array;
+                        if (port.DataObject != null)
+                        {
+                            port.DataObject.UnpackedArrays.Add(unPackedArray);
+                        }
+                    }
+                    else if (array is Queue)
+                    {
+                        port.DataObject = (Queue)array;
+                    }
+                    else if (array is AssociativeArray)
+                    {
+                        port.DataObject = (AssociativeArray)array;
+                    }
+                    else if (array is DynamicArray)
+                    {
+                        port.DataObject = (DynamicArray)array;
+                    }
+                }
+
+                if (word.Text == "=")
+                {
+                    word.AddSystemVerilogError();
+                    word.MoveNext();
+                    Expressions.Expression? exp = Expressions.Expression.ParseCreate(word, nameSpace);
+                }
 
                 if (word.Text != ",") return true;
                 word.MoveNext();    // skip ,
