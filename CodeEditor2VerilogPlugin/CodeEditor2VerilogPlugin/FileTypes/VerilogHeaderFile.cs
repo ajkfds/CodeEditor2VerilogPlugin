@@ -24,7 +24,7 @@ namespace pluginVerilog.FileTypes
 
         public override async Task<CodeEditor2.Data.File> CreateFile(string relativeFilePath, CodeEditor2.Data.Project project)
         {
-            return await Data.VerilogHeaderFile.Create(relativeFilePath, project);
+            return await Data.VerilogHeaderFile.CreateAsync(relativeFilePath, project);
         }
 
         public override IImage GetIconImage()

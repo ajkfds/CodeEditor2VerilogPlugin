@@ -91,11 +91,13 @@ namespace pluginVerilog.Verilog
             // ## SystemVerilog2017
             // function_declaration         ::= "function" [lifetime] function_body_declaration
 
-            // function_body_declaration    ::=   function_data_type_or_implicit [interface_identifier. | class_scope] function_identifier;
+            // function_body_declaration    ::= // non-ansi-style
+            //                                      function_data_type_or_implicit [interface_identifier. | class_scope] function_identifier;
             //                                      { tf_item_declaration }
             //                                      { function_statement_or_null }
             //                                      endfunction[ : function_identifier]
-
+            //
+            //                                  // ansi-style
             //                                  | function_data_type_or_implicit [interface_identifier. | class_scope] function_identifier([tf_port_list]);
             //                                      { block_item_declaration }
             //                                      { function_statement_or_null }

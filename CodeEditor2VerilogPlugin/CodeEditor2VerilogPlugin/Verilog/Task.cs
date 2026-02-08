@@ -15,11 +15,44 @@ namespace pluginVerilog.Verilog
     public class Task : NameSpace,IPortNameSpace
     {
         /*
+        // # SystemVerilog2017
+        task_declaration ::= "task" [ lifetime ] task_body_declaration // from A.2.7
+        task_body_declaration ::=   // non-ansi-style
+                                      [ interface_identifier . | class_scope ] task_identifier ;
+                                      { tf_item_declaration }
+                                      { statement_or_null }
+                                      "endtask" [ : task_identifier ]
+
+                                    // ansi style
+                                    | [ interface_identifier . | class_scope ] task_identifier ( [ tf_port_list ] ) ;
+                                      { block_item_declaration }
+                                      { statement_or_null }
+                                      "endtask" [ : task_identifier ]
+
+        tf_item_declaration ::=       block_item_declaration
+                                    | tf_port_declaration
+
+        tf_port_list ::=            tf_port_item { , tf_port_item }
+        tf_port_item ::=            { attribute_instance } [ tf_port_direction ] [ var ] data_type_or_implicit [ port_identifier { variable_dimension } [ = expression ] ]
+
+        tf_port_direction ::=       port_direction | const ref
+        tf_port_declaration ::=     { attribute_instance } tf_port_direction [ var ] data_type_or_implicit list_of_tf_variable_identifiers ;
+        lifetime ::=                "static" | "automatic" // from A.2.1
+        signing ::=                 "signed" | "unsigned" // from A.2.2.1
+
+        data_type_or_implicit ::=     data_type
+                                    | implicit_data_type
+        implicit_data_type ::=      [ signing ] { packed_dimension }
+         
+         */
+
+
+        /*
         task_declaration ::=    (From Annex A - A.2.7)  
                                 task    [ automatic ] task_identifier ;                     { task_item_declaration }   statement   endtask 
                                 | task  [ automatic ] task_identifier ( task_port_list ) ;  { block_item_declaration }  statement   endtask
         task_item_declaration ::=   block_item_declaration 
-                                    | { attribute_instance } tf_ input_declaration ; 
+                                    | { attribute_instance } tf_input_declaration ; 
                                     | { attribute_instance } tf_output_declaration ; 
                                     | { attribute_instance } tf_inout_declaration ; 
         task_port_list ::= task_port_item { , task_port_item }  
@@ -52,11 +85,9 @@ namespace pluginVerilog.Verilog
 
 
         /*
-        // # SystemVerilog2017
         // task_declaration         ::=   task [ lifetime ] task_body_declaration
         // task_body_declaration    ::=   [ interface_identifier . | class_scope ] task_identifier ; { tf_item_declaration } { statement_or_null } endtask [ : task_identifier ] 
         //                              | [ interface_identifier . | class_scope ] task_identifier ( [ tf_port_list ] ) ; { block_item_declaration } { statement_or_null } endtask [ : task_identifier ]
-         
          */
         protected Task(NameSpace parent) : base(parent.BuildingBlock , parent)
         {

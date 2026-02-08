@@ -34,7 +34,7 @@ namespace pluginVerilog.Data
 {
     public class VerilogFile : CodeEditor2.Data.TextFile, IVerilogRelatedFile
     {
-        public new static Task<VerilogFile> CreateAsync(string relativePath, CodeEditor2.Data.Project project)
+        public new static async Task<VerilogFile> CreateAsync(string relativePath, CodeEditor2.Data.Project project)
         {
             string name;
             if (relativePath.Contains(System.IO.Path.DirectorySeparatorChar))
@@ -48,13 +48,14 @@ namespace pluginVerilog.Data
 
             CodeEditor2.FileTypes.FileType fileType = CodeEditor2.Global.FileTypes[FileTypes.VerilogFile.TypeID];
             VerilogFile fileItem = new VerilogFile() { Name = name, Project = project, RelativePath = relativePath };
+            await fileItem.FileCheck();
 
-            return Task.FromResult(fileItem);
+            return fileItem;
         }
 
         ~VerilogFile()
         {
-            if(System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+            //if(System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
 
         }
         public override string Key
@@ -69,7 +70,7 @@ namespace pluginVerilog.Data
             CustomizeItemEditorContextMenu += (x => EditorContextMenu.CustomizeEditorContextMenu(x));
         }
 
-        public static Task<VerilogFile> CreateSystemVerilog(string relativePath, CodeEditor2.Data.Project project)
+        public static async Task<VerilogFile> CreateSystemVerilog(string relativePath, CodeEditor2.Data.Project project)
         {
             string name;
             if (relativePath.Contains(System.IO.Path.DirectorySeparatorChar))
@@ -84,7 +85,9 @@ namespace pluginVerilog.Data
             CodeEditor2.FileTypes.FileType fileType = CodeEditor2.Global.FileTypes[FileTypes.SystemVerilogFile.TypeID];
             VerilogFile fileItem = new VerilogFile() { Name = name, Project = project, RelativePath = relativePath };
             fileItem.SystemVerilog = true;
-            return Task.FromResult(fileItem);
+
+            await fileItem.FileCheck();
+            return fileItem;
         }
 
 

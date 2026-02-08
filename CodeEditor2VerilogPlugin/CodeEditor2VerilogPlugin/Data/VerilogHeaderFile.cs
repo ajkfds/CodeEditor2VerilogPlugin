@@ -18,7 +18,7 @@ namespace pluginVerilog.Data
 
     public class VerilogHeaderFile : CodeEditor2.Data.TextFile, IVerilogRelatedFile
     {
-        public new static Task<VerilogHeaderFile> Create(string relativePath, CodeEditor2.Data.Project project)
+        public static new async Task<VerilogHeaderFile> CreateAsync(string relativePath, CodeEditor2.Data.Project project)
         {
             string name;
             if (relativePath.Contains(System.IO.Path.DirectorySeparatorChar))
@@ -36,9 +36,13 @@ namespace pluginVerilog.Data
                 RelativePath = relativePath,
                 Name = name
             };
-            fileItem.readFromFile();
-            return System.Threading.Tasks.Task.FromResult(fileItem);
+//            fileItem.readFromFile();
+            await fileItem.FileCheck();
+
+//            return System.Threading.Tasks.Task.FromResult(fileItem);
+            return fileItem;
         }
+
 
         private string id = "";
         public override string ID
