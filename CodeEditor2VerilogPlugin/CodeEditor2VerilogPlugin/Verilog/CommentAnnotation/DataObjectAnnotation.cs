@@ -61,7 +61,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
 
             if (projectProperty.AnnotationKeyValueDelimiter != "")
             {
-                if (comment.Text == ":")
+                if (comment.Text == projectProperty.AnnotationKeyValueDelimiter)
                 {
                     comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
                     comment.MoveNext(); // :
@@ -114,7 +114,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
 
             if (projectProperty.AnnotationKeyValueDelimiter != "")
             {
-                if (comment.Text == ":")
+                if (comment.Text == projectProperty.AnnotationKeyValueDelimiter)
                 {
                     comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
                     comment.MoveNext(); // :
