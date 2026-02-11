@@ -666,7 +666,7 @@ namespace pluginVerilog.Verilog.DataObjects
                 {
                     if (word.Prototype)
                     {
-                        word.AddError("port name duplicate");
+                        word.AddPrototypeError("port name duplicate");
                     }
                     else
                     {
@@ -923,7 +923,7 @@ namespace pluginVerilog.Verilog.DataObjects
             }
 
             // data_type_or_implicit [port_identifier { variable_dimension } [ = expression] ] 
-            IDataType dataType = DataTypeFactory.ParseCreate(word, nameSpace, null);
+            IDataType? dataType = DataTypeFactory.ParseCreate(word, nameSpace, null);
 
             // Each formal argument has a data type that can be explicitly declared or inherited from the previous argument.
             // If the data type is not explicitly declared, then the default data type is logic
@@ -968,6 +968,10 @@ namespace pluginVerilog.Verilog.DataObjects
                         function.Ports.Add(port.Name, port);
                         function.PortsList.Add(port);
                     }
+                    else
+                    {
+                        if (word.Prototype) port.DefinitionReference.AddError("duplicated");
+                    }
                 }else if(nameSpace is Task)
                 {
                     Task? task = nameSpace as Task;
@@ -976,6 +980,10 @@ namespace pluginVerilog.Verilog.DataObjects
                     {
                         task.Ports.Add(port.Name, port);
                         task.PortsList.Add(port);
+                    }
+                    else
+                    {
+                        if (word.Prototype) port.DefinitionReference.AddError("duplicated");
                     }
                 }
 

@@ -314,11 +314,11 @@ namespace pluginVerilog.Verilog.Expressions
             }
 
             while (word.Text == "[" && !word.Eof)
-                {
-                    word.AddError("illegal range");
-                    word.SkipToKeywords(new List<string> { "]", ";" });
-                    if (word.Text == "]") word.MoveNext();
-                }
+            {
+                word.AddError("illegal range");
+                word.SkipToKeywords(new List<string> { "]", ";" });
+                if (word.Text == "]") word.MoveNext();
+            }
 
             //// parse ranges
             //if (word.GetCharAt(0) == '[' && acceptRange)
@@ -378,73 +378,6 @@ namespace pluginVerilog.Verilog.Expressions
             }
         }
 
-        private void parsePackedDimension(WordScanner word, NameSpace nameSpace, DataObjectReference val)
-        {
-            foreach (var unpackedArray in val.DataObject.UnpackedArrays)
-            {
-                val.UnpackedArrays.Add(unpackedArray.Clone());
-            }
-            val.DataObject.UnpackedArrays.Clear();
-
-            {
-                int unpackedArrayIndex = 0;
-                while (!word.Eof)
-                {
-                    if (word.Text != "[")
-                    {
-                        break;
-                    }
-                    if (val.UnpackedArrays.Count <= unpackedArrayIndex) break;
-
-                    RangeExpression? rangeExpression = RangeExpression.ParseCreate(word, nameSpace);
-                    if (rangeExpression == null) return;
-
-//                    partial = true;
-                    if (rangeExpression is SingleBitRangeExpression)
-                    {
-                        SingleBitRangeExpression singleBitRangeExpression = (SingleBitRangeExpression)rangeExpression;
-                        UnPackedArray oldArray = val.UnpackedArrays[unpackedArrayIndex];
-                        if (!word.Prototype && oldArray.MaxIndex != null && oldArray.MinIndex != null && singleBitRangeExpression.BitIndex != null)
-                        {
-                            if (oldArray.MaxIndex < singleBitRangeExpression.BitIndex || oldArray.MinIndex > singleBitRangeExpression.BitIndex)
-                            {
-                                singleBitRangeExpression.WordReference.AddError("index out of range");
-                            }
-                        }
-                        val.UnpackedArrays.RemoveAt(unpackedArrayIndex);
-                    }
-                    else
-                    {
-                        if (rangeExpression is AbsoluteRangeExpression)
-                        {
-                            AbsoluteRangeExpression absoluteRangeExpression = (AbsoluteRangeExpression)rangeExpression;
-                            UnPackedArray oldArray = val.UnpackedArrays[unpackedArrayIndex];
-                            if (!word.Prototype)
-                            {
-                                if (
-                                    absoluteRangeExpression.MaxBitIndex != null && absoluteRangeExpression.MinBitIndex != null &&
-                                    oldArray.MinIndex != null && oldArray.MaxIndex != null
-                                    )
-                                {
-                                    if (
-                                        absoluteRangeExpression.MaxBitIndex < oldArray.MinIndex ||
-                                        absoluteRangeExpression.MaxBitIndex > oldArray.MaxIndex ||
-                                        absoluteRangeExpression.MinBitIndex < oldArray.MinIndex ||
-                                        absoluteRangeExpression.MinBitIndex > oldArray.MaxIndex
-                                        )
-                                    {
-                                        absoluteRangeExpression.WordReference.AddError("index out of range");
-                                    }
-                                }
-                            }
-                        }
-
-                        val.UnpackedArrays[unpackedArrayIndex] = new UnPackedArray(rangeExpression.BitWidth);
-                        unpackedArrayIndex++;
-                    }
-                }
-            }
-        }
 
     }
 }

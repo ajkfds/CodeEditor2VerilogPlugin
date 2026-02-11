@@ -250,7 +250,7 @@ namespace pluginVerilog.Verilog.Expressions
 
             if (word.Text == ")")
             {
-                if (function != null && i < function.Ports.Count - 1)
+                if (function != null && i < function.Ports.Count)
                 {
                     word.AddError("too few arguments");
                 }

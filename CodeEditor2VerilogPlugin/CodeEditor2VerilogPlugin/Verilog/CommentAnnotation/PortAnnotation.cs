@@ -81,12 +81,13 @@ namespace pluginVerilog.Verilog.CommentAnnotation
         private static void pasePortGroup(CommentScanner comment, NameSpace nameSpace, ref string? portGroup, ProjectProperty projectProperty)
         {
             comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
-            comment.MoveNext();
+            
             if (projectProperty.AnnotationKeyValueDelimiter != "")
             {
+                comment.MoveNext();
                 if (comment.Text != ":") return;
+                comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
             }
-            comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
 
             comment.MoveNextUntilEol(); // :
             comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);

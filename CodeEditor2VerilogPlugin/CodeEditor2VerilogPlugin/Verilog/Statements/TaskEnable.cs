@@ -112,6 +112,7 @@ namespace pluginVerilog.Verilog.Statements
 
                     if (word.Text == ")")
                     {
+                        if (task != null && task.Ports.Count != portCount+1) word.AddError("missing ports.");
                         break;
                     }
                     else if (word.Text == ",")
