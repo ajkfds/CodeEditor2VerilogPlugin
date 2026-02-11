@@ -628,15 +628,27 @@ namespace pluginVerilog.Verilog
         }
 
         public delegate void AppendKeywordAutoCompleteItemsDelegate(List<AutocompleteItem> items, string cantidate,bool systemVerilog);
+
         public static AppendKeywordAutoCompleteItemsDelegate AppendKeywordAutoCompleteItems = appendKeywordAutoCompleteItems;
 
         private static void appendKeywordAutoCompleteItems(List<AutocompleteItem> items,string cantidate, bool systemVerilog)
         {
-            
+            appendItems(items, cantidate, new AutoComplete.BeginAutoCompleteItem());
+            appendItems(items, cantidate, new AutoComplete.CaseAutocompleteItem());
+            appendItems(items, cantidate, new AutoComplete.FunctionAutocompleteItem());
+            appendItems(items, cantidate, new AutoComplete.GenerateAutoCompleteItem());
+            appendItems(items, cantidate, new AutoComplete.ModuleAutocompleteItem());
+            appendItems(items, cantidate, new AutoComplete.InterfaceAutocompleteItem());
+            appendItems(items, cantidate, new AutoComplete.TaskAutocompleteItem());
+            if (cantidate == "<=") items.Add(new AutoComplete.NonBlockingAssignmentAutoCompleteItem());
+
+            appendKeywordItems(items, cantidate, "always"); // verilog
+            appendKeywordItems(items, cantidate, "integer"); // verilog
+
+
             List<(string, int)> keywords = new List<(string, int)>
                 {
                 // Verilog
-                ("always",1),
                 ("and",1),
                 ("assign",1),
                 ("automatic",2),
@@ -673,7 +685,6 @@ namespace pluginVerilog.Verilog
                 ("initial",1),
                 ("inout",1),
                 ("input",1),
-                ("integer",1),
                 /*"interface",1),*/
                 ("join",1),
                 ("localparam",1),
@@ -773,26 +784,24 @@ namespace pluginVerilog.Verilog
         public static AppendSpecialAutoCompleteItemsDelegate AppendSpecialAutoCompleteItems = appendSpecialAutoCompleteItems;
         private static void appendSpecialAutoCompleteItems(List<AutocompleteItem> items, string cantidate)
         {
-            List<AutocompleteItem> specialItems = new List<AutocompleteItem>()
-                {
-                    new AutoComplete.BeginAutoCompleteItem(),
-                    new AutoComplete.CaseAutocompleteItem(),
-                    new AutoComplete.FunctionAutocompleteItem(),
-                    new AutoComplete.GenerateAutoCompleteItem(),
-                    new AutoComplete.ModuleAutocompleteItem(),
-                    new AutoComplete.InterfaceAutocompleteItem(),
-                    new AutoComplete.TaskAutocompleteItem(),
-                    new AutoComplete.NonBlockingAssignmentAutoCompleteItem()
-                };
-
-            foreach (AutocompleteItem item in specialItems)
-            {
-                if (!item.Text.StartsWith(cantidate)) continue;
-                items.Add(item);
-            }
         }
 
-
+        private static void appendItems(List<AutocompleteItem> items, string cantidate, AutocompleteItem item)
+        {
+            if (!item.Text.StartsWith(cantidate)) return;
+            items.Add(item);
+        }
+        private static void appendKeywordItems(List<AutocompleteItem> items, string cantidate, string keyword)
+        {
+            if (!keyword.StartsWith(cantidate)) return;
+            AutocompleteItem item = new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
+                keyword,
+                CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
+                Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword),
+                "CodeEditor2/Assets/Icons/bookmark.svg"
+                );
+            items.Add(item);
+        }
 
         private INamedElement? getSearchElement(NameSpace nameSpace, List<string> hier)
         {

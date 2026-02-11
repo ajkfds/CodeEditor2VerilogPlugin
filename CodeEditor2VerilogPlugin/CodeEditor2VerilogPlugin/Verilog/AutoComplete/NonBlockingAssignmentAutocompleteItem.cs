@@ -9,7 +9,7 @@ namespace pluginVerilog.Verilog.AutoComplete
 {
     public class NonBlockingAssignmentAutoCompleteItem : AutocompleteItem
     {
-        public NonBlockingAssignmentAutoCompleteItem() : base("=>", CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Plugin.ThemeColor, "CodeEditor2/Assets/Icons/screwdriver.svg")
+        public NonBlockingAssignmentAutoCompleteItem() : base("<=", CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Plugin.ThemeColor, "CodeEditor2/Assets/Icons/screwdriver.svg")
         {
         }
 

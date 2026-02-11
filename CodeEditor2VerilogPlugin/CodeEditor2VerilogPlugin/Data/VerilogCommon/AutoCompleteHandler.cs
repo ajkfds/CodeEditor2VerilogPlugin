@@ -1,4 +1,5 @@
-﻿using Avalonia.Input;
+﻿using Avalonia.Controls.Shapes;
+using Avalonia.Input;
 using CodeEditor2.CodeEditor;
 using CodeEditor2.CodeEditor.CodeComplete;
 using CodeEditor2.CodeEditor.PopupHint;
@@ -12,6 +13,8 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using static pluginVerilog.Verilog.DataObjects.DataTypes.Enum;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace pluginVerilog.Data.VerilogCommon
 {
@@ -87,38 +90,10 @@ namespace pluginVerilog.Data.VerilogCommon
             int line = item.CodeDocument.GetLineAt(index);
             int lineStartIndex = item.CodeDocument.GetLineStartIndex(line);
 
-            { // pre carlet char check
-                if(index != 0)
-                {
-                    char preChar = item.CodeDocument.GetCharAt(index - 1);
-                    if (preChar == ' ') return null;
-                    if (preChar == '\t') return null;
-                }
-            }
-
-            // get text chunk
-            string preText = "";
-            string postText = "";
+            if(!GetAutoCompleteTarget(item, parsedDocument, index, out NameSpace? nameSpace,out INamedElement? element, out candidateWord, out int candidateStartIndex))
             {
-                string text = item.CodeDocument.CreateLineString(line).Substring(0, index - lineStartIndex);
-                string[] texts = text.Split(new char[] { '\n', '\r', ' ', '\t', '=','{','}','(',')' });//, StringSplitOptions.RemoveEmptyEntries);
-                if (texts.Length == 0) return null;
-                text = texts.Last();
-                int dotIndex = text.IndexOf('.');
-                if (dotIndex > 0)
-                {
-                    preText = text.Substring(0, dotIndex);
-                }
-                if (dotIndex > 0)
-                {
-                    postText = text.Substring(dotIndex + 1);
-                }
-                else
-                {
-                    postText = text;
-                }
+                return null;
             }
-            candidateWord = postText;
 
             List<AutocompleteItem> items = new List<AutocompleteItem>();
 
@@ -152,36 +127,192 @@ namespace pluginVerilog.Data.VerilogCommon
                 return items;
             }
 
+
+            if(element == null)
+            {
+                if (nameSpace != null)
+                {
+                    // search upward
+                    appendItemsUpward(items, nameSpace, candidateStartIndex,candidateWord);
+                }
+                // special autocomplete tools
+                Verilog.ParsedDocument.AppendSpecialAutoCompleteItems(items, candidateWord);
+                // keywords
+                Verilog.ParsedDocument.AppendKeywordAutoCompleteItems(items, candidateWord, parsedDocument.SystemVerilog);
+            }
+            else // sub element
+            {
+                // append sub-element items
+                foreach (INamedElement subElement in element.NamedElements.Values)
+                {
+                    if (candidateWord != "" && !subElement.Name.StartsWith(candidateWord)) continue;
+                    if (subElement.Name.StartsWith("\0", StringComparison.Ordinal)) continue; // reject unnamed elements
+                    items.Add(
+                        new pluginVerilog.Data.VerilogCommon.AutoCompleteItem
+                            (
+                                subElement.Name,
+                                CodeDrawStyle.ColorIndex(subElement.ColorType),
+                                candidateStartIndex,
+                                candidateWord.Length,
+                                Global.CodeDrawStyle.Color(subElement.ColorType),
+                                "CodeEditor2/Assets/Icons/tag.svg"
+                            )
+                    );
+                }
+            }
+
+            return items;
+        }
+
+
+        public static void appendItemsUpward(List<AutocompleteItem> items, NameSpace nameSpace,int candidateStartIndex, string candidateWord)
+        {
+            foreach (INamedElement subElement in nameSpace.NamedElements.Values)
+            {
+                if (!subElement.Name.StartsWith(candidateWord)) continue;
+                if (subElement.Name.StartsWith("\0", StringComparison.Ordinal)) continue; // reject unnamed elements
+                if (items.Find(x => x.Text == subElement.Name) != null) continue;   // reject duplicated elements
+                items.Add(
+                    new pluginVerilog.Data.VerilogCommon.AutoCompleteItem(
+                        subElement.Name,
+                        CodeDrawStyle.ColorIndex(subElement.ColorType),
+                        candidateStartIndex,
+                        candidateWord.Length,
+                        Global.CodeDrawStyle.Color(subElement.ColorType),
+                        "CodeEditor2/Assets/Icons/tag.svg"
+                        )
+                );
+            }
+            if (nameSpace.Parent != null)
+            {
+                appendItemsUpward(items, nameSpace.Parent,candidateStartIndex, candidateWord);
+            }
+        }
+        public static bool GetAutoCompleteTarget(IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, int index,out NameSpace? nameSpace, out INamedElement? element, out string candidate,out int candidateStartIndex)
+        {
+            candidate = "";
+            candidateStartIndex = 0;
+            nameSpace = null;
+            element = null;
+            if (item.VerilogParsedDocument == null) return false;
+            if (item.CodeDocument == null) return false;
+
+            int line = item.CodeDocument.GetLineAt(index);
+            int lineStartIndex = item.CodeDocument.GetLineStartIndex(line);
+
+            string lineText = item.CodeDocument.CreateLineString(line).Substring(0, index - lineStartIndex);
+            candidateStartIndex = lineStartIndex;
+
+            { // pre carlet char check
+                if (index != 0)
+                {
+                    char preChar = item.CodeDocument.GetCharAt(index - 1);
+                    if (preChar == ' ') return false;
+                    if (preChar == '\t') return false;
+                }
+            }
+
+            { // remove comment start to activate auto complete in comments
+                int commentIndex = lineText.LastIndexOf("/*");
+                if (commentIndex > 0)
+                {
+                    commentIndex = commentIndex + 2;
+                    lineText = lineText.Substring(commentIndex);
+                    candidateStartIndex += commentIndex;
+                }
+            }
+            { // remove comment start to activate auto complete in comments
+                int commentIndex = lineText.LastIndexOf("//");
+                if (commentIndex > 0)
+                {
+                    commentIndex = commentIndex + 2;
+                    lineText = lineText.Substring(commentIndex);
+                    candidateStartIndex += commentIndex;
+                }
+            }
+
+
+            int blockStartIndex = 0;
+            int blockEndIndex = 0;
+            {
+                // create short document to parse current pretext
+                pluginVerilog.CodeEditor.CodeDocument document = new pluginVerilog.CodeEditor.CodeDocument(lineText);
+                WordScanner word = new WordScanner(document, parsedDocument, parsedDocument.SystemVerilog);
+
+                List<(string, int)> words = new List<(string, int)>();
+                while (!word.Eof)
+                {
+                    if (General.IsIdentifier(word.Text))
+                    {
+                        words.Add((word.Text, word.RootIndex));
+                        word.MoveNext();
+                        if (word.Text == "::" || word.Text == "->" || word.Text == ".")
+                        {
+                            words.Add((word.Text, word.RootIndex));
+                            word.MoveNext();
+                        }
+                        else
+                        {
+                            if (word.Eof) break;
+                            words.Clear();
+                        }
+                    }
+                    else
+                    {   // illegal text
+                        words.Add((word.Text, word.RootIndex));
+                        word.MoveNext();
+                        if (word.Eof) break;
+                        words.Clear();
+                    }
+                }
+
+                (string,int) lastWord = ("",0);
+                if(words.Count == 0)
+                {
+                    lastWord = ("", 0);
+                }else if (words.Last().Item1 == "." || words.Last().Item1 == "::" || words.Last().Item1 == "->")
+                {
+                    lastWord = ("", words.Last().Item2 + words.Last().Item1.Length);
+                    blockEndIndex = words.Last().Item2;
+                    blockStartIndex = words[0].Item2;
+                }
+                else
+                {
+                    // word . lastword
+                    lastWord = words.Last();
+                    blockStartIndex = words[0].Item2;
+                    if (words.Count > 2)
+                    {
+                        (string, int) prevLast = words[words.Count - 2];
+                        blockEndIndex = prevLast.Item2;
+                    }
+                    else
+                    {
+                        blockEndIndex = blockStartIndex;
+                    }
+                }
+                candidate = lastWord.Item1;
+                candidateStartIndex += lastWord.Item2;
+            }
+
             // get namespace
-            NameSpace? nameSpace = null;
             {
                 // namespace must get from linestart index, because current index cann't match last parsed document
                 IndexReference iref = IndexReference.Create(parsedDocument.IndexReference, lineStartIndex);
                 nameSpace = parsedDocument.GetNameSpace(iref);
             }
-            
-            if (nameSpace == null)
-            {
-                if (preText == "")
-                {
-                    // special autocomplete tools
-                    Verilog.ParsedDocument.AppendSpecialAutoCompleteItems(items, candidateWord);
-                    // keywords
-                    Verilog.ParsedDocument.AppendKeywordAutoCompleteItems(items, candidateWord, parsedDocument.SystemVerilog);
-                }
-                return items;
-            }
 
-            INamedElement? element = null;
+            string elementText = lineText.Substring(blockStartIndex,blockEndIndex-blockStartIndex);
+            element = null;
             {
                 // create short document to parse current pretext
-                pluginVerilog.CodeEditor.CodeDocument document = new pluginVerilog.CodeEditor.CodeDocument(preText);
+                pluginVerilog.CodeEditor.CodeDocument document = new pluginVerilog.CodeEditor.CodeDocument(elementText);
                 WordScanner word = new WordScanner(document, parsedDocument, parsedDocument.SystemVerilog);
 
                 Verilog.Expressions.Expression? expression = null;
                 while (!word.Eof)
                 {
-                    expression = Verilog.Expressions.Expression.ParseCreate(word, nameSpace);
+                    if(nameSpace != null) expression = Verilog.Expressions.Expression.ParseCreate(word, nameSpace);
                     if (expression == null) word.MoveNext();
                 }
                 if (expression is Verilog.Expressions.DataObjectReference)
@@ -195,70 +326,7 @@ namespace pluginVerilog.Data.VerilogCommon
                     element = targetNameSpace;
                 }
             }
-
-            if (preText == "")
-            {
-                // append INamedElements
-                if (nameSpace != null)
-                {
-                    // search upward
-                    appendItemsUpward(items, nameSpace, candidateWord);
-                }
-            }
-            else
-            {
-                // append sub-element items
-                if (element != null)
-                {
-                    foreach (INamedElement subElement in element.NamedElements.Values)
-                    {
-                        if (!subElement.Name.StartsWith(candidateWord)) continue;
-                        if (subElement.Name.StartsWith("\0", StringComparison.Ordinal)) continue; // reject unnamed elements
-                        items.Add(
-                            new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
-                                subElement.Name,
-                                CodeDrawStyle.ColorIndex(subElement.ColorType),
-                                Global.CodeDrawStyle.Color(subElement.ColorType),
-                                "CodeEditor2/Assets/Icons/tag.svg"
-                                )
-                        );
-                    }
-                }
-
-
-            }
-
-            if (preText == "")
-            {
-                // special autocomplete tools
-                Verilog.ParsedDocument.AppendSpecialAutoCompleteItems(items, candidateWord);
-                // keywords
-                Verilog.ParsedDocument.AppendKeywordAutoCompleteItems(items, candidateWord, parsedDocument.SystemVerilog);
-            }
-
-            return items;
-        }
-
-        public static void appendItemsUpward(List<AutocompleteItem> items,NameSpace nameSpace,string candidateWord)
-        {
-            foreach (INamedElement subElement in nameSpace.NamedElements.Values)
-            {
-                if (!subElement.Name.StartsWith(candidateWord)) continue;
-                if (subElement.Name.StartsWith("\0", StringComparison.Ordinal)) continue; // reject unnamed elements
-                if (items.Find(x => x.Text == subElement.Name) != null) continue;   // reject duplicated elements
-                items.Add(
-                    new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
-                        subElement.Name,
-                        CodeDrawStyle.ColorIndex(subElement.ColorType),
-                        Global.CodeDrawStyle.Color(subElement.ColorType),
-                        "CodeEditor2/Assets/Icons/tag.svg"
-                        )
-                );
-            }
-            if(nameSpace.Parent != null)
-            {
-                appendItemsUpward(items, nameSpace.Parent, candidateWord);
-            }
+            return true;
         }
 
 
