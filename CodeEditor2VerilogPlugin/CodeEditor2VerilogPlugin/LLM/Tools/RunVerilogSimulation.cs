@@ -15,12 +15,12 @@ namespace pluginVerilog.LLM.Tools
 {
     public class RunVerilogSimulation : LLMTool
     {
-        public RunVerilogSimulation(CodeEditor2.Data.Project project,ISimulation simulation) : base(project) 
+        public RunVerilogSimulation(CodeEditor2.Data.Project project,CodeEditor2.Tests.ITest simulation) : base(project) 
         {
             this.simulation = simulation;
         }
 
-        private ISimulation simulation;
+        private CodeEditor2.Tests.ITest simulation;
         public override AIFunction GetAIFunction() { return AIFunctionFactory.Create(Run, "run_verilog_simulation"); }
         [Description("指定されたモジュールをtop moduleとしてsimulationを流し、結果を取得する")]
         public async Task<string> Run(
@@ -34,7 +34,7 @@ namespace pluginVerilog.LLM.Tools
             Data.VerilogFile? verilogFile = file as Data.VerilogFile;
             if (verilogFile == null) return "failed to run simulation";
 
-            simulation.TopFile = verilogFile;
+            simulation.File = verilogFile;
             string log;
             try
             {
