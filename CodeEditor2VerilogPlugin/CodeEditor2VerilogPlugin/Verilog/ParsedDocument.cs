@@ -627,23 +627,23 @@ namespace pluginVerilog.Verilog
             if (nameSpace.Parent is NameSpace) appendAutoCompleteINamedElements(items, nameSpace.Parent, candidate);
         }
 
-        public delegate void AppendKeywordAutoCompleteItemsDelegate(List<AutocompleteItem> items, string cantidate,bool systemVerilog);
+        public delegate void AppendKeywordAutoCompleteItemsDelegate(List<AutocompleteItem> items, string cantidate, int candidateStartIndex, bool systemVerilog);
 
         public static AppendKeywordAutoCompleteItemsDelegate AppendKeywordAutoCompleteItems = appendKeywordAutoCompleteItems;
 
-        private static void appendKeywordAutoCompleteItems(List<AutocompleteItem> items,string cantidate, bool systemVerilog)
+        private static void appendKeywordAutoCompleteItems(List<AutocompleteItem> items,string candidate,int candidateStartIndex, bool systemVerilog)
         {
-            appendItems(items, cantidate, new AutoComplete.BeginAutoCompleteItem());
-            appendItems(items, cantidate, new AutoComplete.CaseAutocompleteItem());
-            appendItems(items, cantidate, new AutoComplete.FunctionAutocompleteItem());
-            appendItems(items, cantidate, new AutoComplete.GenerateAutoCompleteItem());
-            appendItems(items, cantidate, new AutoComplete.ModuleAutocompleteItem());
-            appendItems(items, cantidate, new AutoComplete.InterfaceAutocompleteItem());
-            appendItems(items, cantidate, new AutoComplete.TaskAutocompleteItem());
-            if (cantidate == "<=") items.Add(new AutoComplete.NonBlockingAssignmentAutoCompleteItem());
+            appendItems(items, candidate, new AutoComplete.BeginAutoCompleteItem());
+            appendItems(items, candidate, new AutoComplete.CaseAutocompleteItem());
+            appendItems(items, candidate, new AutoComplete.FunctionAutocompleteItem());
+            appendItems(items, candidate, new AutoComplete.GenerateAutoCompleteItem());
+            appendItems(items, candidate, new AutoComplete.ModuleAutocompleteItem());
+            appendItems(items, candidate, new AutoComplete.InterfaceAutocompleteItem());
+            appendItems(items, candidate, new AutoComplete.TaskAutocompleteItem());
+            if (candidate == "<=") items.Add(new AutoComplete.NonBlockingAssignmentAutoCompleteItem());
 
-            appendKeywordItems(items, cantidate, "always"); // verilog
-            appendKeywordItems(items, cantidate, "integer"); // verilog
+            appendKeywordItems(items, candidate, "always"); // verilog
+            appendKeywordItems(items, candidate, "integer"); // verilog
 
 
             List<(string, int)> keywords = new List<(string, int)>
@@ -750,11 +750,13 @@ namespace pluginVerilog.Verilog
             
             foreach ((string,int) keyword in keywords)
             {
-                if (!keyword.Item1.StartsWith(cantidate)) continue;
-                if (cantidate.Length < keyword.Item2) continue;
-                AutocompleteItem item = new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
+                if (!keyword.Item1.StartsWith(candidate)) continue;
+                if (candidate.Length < keyword.Item2) continue;
+                AutocompleteItem item = new pluginVerilog.Data.VerilogCommon.AutoCompleteItem(
                     keyword.Item1,
                     CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
+                    candidateStartIndex,
+                    candidate.Length,
                     Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword),
                     "CodeEditor2/Assets/Icons/bookmark.svg"
                     );
@@ -765,11 +767,13 @@ namespace pluginVerilog.Verilog
             {
                 foreach ((string, int) keyword in systemVerilogKeywords)
                 {
-                    if (!keyword.Item1.StartsWith(cantidate)) continue;
-                    if (cantidate.Length < keyword.Item2) continue;
-                    AutocompleteItem item = new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
+                    if (!keyword.Item1.StartsWith(candidate)) continue;
+                    if (candidate.Length < keyword.Item2) continue;
+                    AutocompleteItem item = new pluginVerilog.Data.VerilogCommon.AutoCompleteItem(
                         keyword.Item1,
                         CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
+                        candidateStartIndex,
+                        candidate.Length,
                         Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword),
                         "CodeEditor2/Assets/Icons/bookmark.svg"
                         );
@@ -778,12 +782,6 @@ namespace pluginVerilog.Verilog
 
             }
 
-        }
-        public delegate void AppendSpecialAutoCompleteItemsDelegate(List<AutocompleteItem> items, string cantidate);
-        [JsonIgnore]
-        public static AppendSpecialAutoCompleteItemsDelegate AppendSpecialAutoCompleteItems = appendSpecialAutoCompleteItems;
-        private static void appendSpecialAutoCompleteItems(List<AutocompleteItem> items, string cantidate)
-        {
         }
 
         private static void appendItems(List<AutocompleteItem> items, string cantidate, AutocompleteItem item)

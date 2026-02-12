@@ -135,10 +135,8 @@ namespace pluginVerilog.Data.VerilogCommon
                     // search upward
                     appendItemsUpward(items, nameSpace, candidateStartIndex,candidateWord);
                 }
-                // special autocomplete tools
-                Verilog.ParsedDocument.AppendSpecialAutoCompleteItems(items, candidateWord);
                 // keywords
-                Verilog.ParsedDocument.AppendKeywordAutoCompleteItems(items, candidateWord, parsedDocument.SystemVerilog);
+                Verilog.ParsedDocument.AppendKeywordAutoCompleteItems(items, candidateWord,candidateStartIndex, parsedDocument.SystemVerilog);
             }
             else // sub element
             {
