@@ -11,6 +11,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Text.Json.Serialization;
+using pluginVerilog.Verilog.DataObjects.Arrays;
 
 namespace pluginVerilog.Verilog.DataObjects
 {
@@ -187,6 +188,8 @@ namespace pluginVerilog.Verilog.DataObjects
         [JsonIgnore]
         public List<WordReference> AssignedReferences { set; get; } = new List<WordReference>();
         public int DisposedIndex = -1;
+
+        public ArraysBoolMap? AssignedMap = null;
 
         public SyncContext SyncContext { get; } = new SyncContext();
 
