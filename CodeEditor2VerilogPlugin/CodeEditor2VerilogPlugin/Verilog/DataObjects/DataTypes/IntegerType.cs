@@ -12,6 +12,17 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         {
             return IntegerAtomType.Create(DataTypeEnum.Integer, signed);
         }
+        public override bool IsValidForNet
+        {
+            get
+            {
+                foreach (var array in PackedDimensions)
+                {
+                    if (!array.IsValidForNet) return false;
+                }
+                return true;
+            }
+        }
 
     }
 }

@@ -13,5 +13,16 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             IntegerVectorType logicType = IntegerVectorType.Create(DataTypeEnum.Reg, signed, packedDimensions);
             return logicType;
         }
+        public override bool IsValidForNet
+        {
+            get
+            {
+                foreach (var array in PackedDimensions)
+                {
+                    if (!array.IsValidForNet) return false;
+                }
+                return true;
+            }
+        }
     }
 }

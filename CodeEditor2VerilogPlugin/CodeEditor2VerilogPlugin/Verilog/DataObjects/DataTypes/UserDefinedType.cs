@@ -19,6 +19,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 return Typedef.VariableType;
             }
         }
+        public virtual bool IsValidForNet { get { return OriginalDataType.IsValidForNet; } }
         public virtual bool PartSelectable { get { return OriginalDataType.PartSelectable; } }
 
         public bool Packable

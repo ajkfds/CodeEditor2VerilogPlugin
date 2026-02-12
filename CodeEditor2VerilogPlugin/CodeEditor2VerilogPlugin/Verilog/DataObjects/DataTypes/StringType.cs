@@ -19,6 +19,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 return DataTypeEnum.String;
             }
         }
+        public bool IsValidForNet { get { return false; } }
         public int? BitWidth
         {
             get

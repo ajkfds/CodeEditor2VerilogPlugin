@@ -28,6 +28,15 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         }
         public virtual bool PartSelectable { get { return Packable; } }
 
+        public bool IsValidForNet { 
+            get {
+                foreach(var member in Members.Values)
+                {
+                    if (!member.DatType.IsValidForNet) return false;
+                }
+                return true;
+            } 
+        }
         public int? BitWidth
         {
             get

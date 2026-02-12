@@ -12,5 +12,6 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         {
             return IntegerAtomType.Create(DataTypeEnum.Longint, signed);
         }
+        public override bool IsValidForNet { get { return false; } }
     }
 }

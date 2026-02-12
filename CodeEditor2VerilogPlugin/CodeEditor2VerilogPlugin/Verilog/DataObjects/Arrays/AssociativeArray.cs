@@ -15,6 +15,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
         protected AssociativeArray() { }
         public int? Size { get; protected set; } = null;
         public bool Constant { get; protected set; } = false;
+        public bool IsValidForNet { get { return false; } }
 
         public override CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Variable;
 

@@ -81,5 +81,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             return dType;
         }
         public bool IsVector { get { return false; } }
+
+        public bool IsValidForNet { get { return false; } }
     }
 }

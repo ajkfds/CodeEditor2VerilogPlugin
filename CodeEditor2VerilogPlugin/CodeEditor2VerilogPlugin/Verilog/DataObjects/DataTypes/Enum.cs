@@ -25,6 +25,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             get { return true; }
         }
         public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
+        public bool IsValidForNet { get { return true; } }
         public IDataType? BaseType { get; protected set; } = null;
         public List<Item> Items = new List<Item>();
         public virtual List<DataObjects.Arrays.PackedArray> PackedDimensions { get; protected set; } = new List<DataObjects.Arrays.PackedArray>();

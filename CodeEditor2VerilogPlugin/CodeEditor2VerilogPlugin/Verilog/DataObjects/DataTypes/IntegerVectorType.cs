@@ -25,6 +25,8 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         public virtual List<Arrays.PackedArray> PackedDimensions { get; protected set; } = new List<Arrays.PackedArray>();
         public virtual bool Signed { get; init; }
 
+        public virtual bool IsValidForNet { get { return false; } }
+
         //      data_type::= integer_vector_type[signing] { packed_dimension }
         //                   ...
         //      integer_vector_type::= "bit" | "logic" | "reg"

@@ -487,6 +487,10 @@ namespace pluginVerilog.Verilog.DataObjects
                     if (vector == null) throw new Exception();
                     packedDimensions = vector.PackedDimensions;
                 }
+                //else
+                //{
+                //    word.AddError("dataType must be vector");
+                //}
             }
 
             if (!General.IsIdentifier(word.Text))

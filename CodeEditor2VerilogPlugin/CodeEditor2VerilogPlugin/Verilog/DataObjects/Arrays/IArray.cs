@@ -28,5 +28,11 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
         {
             throw new NotImplementedException();
         }
+
+
+        /*
+        **Dynamic Types**: **Class handles**, **dynamic arrays**, **associative arrays**, and **queues** cannot be used for built-in nets because they are dynamic objects that only exist as variables.
+        */
+        public bool IsValidForNet { get; }
     }
 }

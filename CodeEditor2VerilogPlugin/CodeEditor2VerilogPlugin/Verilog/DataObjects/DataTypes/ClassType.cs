@@ -23,6 +23,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         {
             get { return false; }
         }
+        public bool IsValidForNet { get { return false; } }
         public int? BitWidth
         {
             get

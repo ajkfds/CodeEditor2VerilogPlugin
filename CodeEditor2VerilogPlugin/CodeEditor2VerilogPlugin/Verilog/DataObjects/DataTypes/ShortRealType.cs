@@ -18,10 +18,10 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 return DataTypeEnum.Shortreal;
             }
         }
-        public bool Packable
-        {
-            get { return false; }
-        }
+        public bool Packable { get { return false; } }
+        public bool IsVector { get { return false; } }
+        public bool IsValidForNet { get { return false; } }
+
         public int? BitWidth { get; } = 32;
         public virtual bool PartSelectable { get { return false; } }
         public virtual List<DataObjects.Arrays.PackedArray> PackedDimensions { get; protected set; } = new List<DataObjects.Arrays.PackedArray>();
@@ -67,6 +67,6 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             word.MoveNext();
             return dType;
         }
-        public bool IsVector { get { return false; } }
+
     }
 }

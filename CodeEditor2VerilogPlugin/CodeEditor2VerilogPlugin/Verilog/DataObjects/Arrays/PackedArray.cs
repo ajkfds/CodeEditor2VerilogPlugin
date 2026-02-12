@@ -13,6 +13,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
         protected  PackedArray()
         {
         }
+        public bool IsValidForNet { get { return true; } }
         public PackedArray(Expressions.Expression? expression0, Expressions.Expression? expression1)
         {
             if (expression0 == null || expression1 == null) return;

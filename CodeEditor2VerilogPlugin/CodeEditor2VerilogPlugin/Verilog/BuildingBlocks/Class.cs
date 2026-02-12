@@ -25,6 +25,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
             get { return false; }
         }
+        public bool IsValidForNet { get { return false; } }
 
         public int? BitWidth { get; } = null;
         public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }

@@ -23,6 +23,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         // integer_atom_type    ::=   "byte" | "shortint" | "int" | "longint" | "integer" | "time"
         // signing              ::=   "signed" | "unsigned"
         public virtual bool PartSelectable { get { return true; } }
+        public virtual bool IsValidForNet { get { return false; } }
 
         public int? BitWidth
         {

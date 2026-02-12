@@ -10,6 +10,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
     {
         protected DynamicArray() { }
 
+        public bool IsValidForNet { get { return false; } }
         public required DataObject DataObject { init; get; }
         public override CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Variable;
 

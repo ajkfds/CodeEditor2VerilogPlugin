@@ -9,6 +9,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
     public class UnPackedArray : VariableArray, IArray
     {
         protected UnPackedArray() { }
+        public bool IsValidForNet { get { return true; } }
         public static UnPackedArray? ParseCreate(WordScanner word, NameSpace nameSpace, Expressions.Expression expression)
         {
             // unpacked_dimension   ::= [constant_range] | [constant_expression]

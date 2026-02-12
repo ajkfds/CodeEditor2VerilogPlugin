@@ -17,6 +17,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
         // defined in section 7.10
         protected Queue() { }
 
+        public bool IsValidForNet { get { return false; } }
         public override CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Variable;
         public int? Size { get; protected set; } = null;
         public bool Constant { get; protected set; } = false;
