@@ -1,4 +1,6 @@
-﻿using pluginVerilog.Verilog.DataObjects.Arrays;
+﻿using Avalonia;
+using pluginVerilog.Verilog.DataObjects.Arrays;
+using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.DataObjects.Variables;
 using System;
 using System.Collections.Generic;
@@ -123,6 +125,11 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                 label.AppendText("signed ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
             }
 
+            if(DataType != null)
+            {
+                DataType.AppendTypeLabel(label);
+            }
+
             if (PackedDimensions != null)
             {
                 foreach(PackedArray packedArray in PackedDimensions)
@@ -170,6 +177,22 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             else
             {
                 net.DataType = dataType;
+            }
+            DataTypes.IDataType? baseDataType = dataType;
+            while(baseDataType is UserDefinedType)
+            {
+                baseDataType = ((UserDefinedType)baseDataType).OriginalDataType;
+            }
+
+            if (baseDataType != null && baseDataType.Type == DataTypes.DataTypeEnum.Struct)
+            {
+                StructType structType = (DataTypes.StructType)baseDataType;
+                foreach (var member in structType.Members.Values)
+                {
+                    var dataObject = DataObject.Create(member.Identifier, member.DatType);
+                    dataObject.Defined = true;
+                    net.NamedElements.Add(dataObject.Name, dataObject);
+                }
             }
             return net;
         }
@@ -400,8 +423,14 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             }
 
             // data_type_or_implicit
+            WordReference dataTypeRef = word.GetReference();
             DataTypes.IDataType? dataType = DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, DataTypes.DataTypeEnum.Logic);
             if (dataType == null) return true;
+            if( !dataType.IsValidForNet)
+            {
+                dataTypeRef.AddError("illegal data type for net");
+                dataType = DataTypes.LogicType.Create(false, null);
+            }
 
             // [delay3]
             if (word.Text == "#")
@@ -419,9 +448,9 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             List<Net> nets = new List<Net>();
             while (!word.Eof)
             {
-                Net net = new Net() { Name = word.Text,DataType = dataType };
+                Net net = Net.Create(word.Text,netType, dataType);
                 nets.Add(net);
-                net.NetType = netType;
+//                net.NetType = netType;
 
                 net.DefinedReference = word.GetReference();
                 if (word.Active)
