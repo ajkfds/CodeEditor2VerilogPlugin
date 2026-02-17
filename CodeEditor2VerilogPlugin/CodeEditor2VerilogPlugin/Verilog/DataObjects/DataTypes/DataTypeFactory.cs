@@ -294,17 +294,31 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             switch (dataTypeEnum)
             {
                 case DataTypeEnum.Bit:
+                    dType = BitType.Create(signed, null);
+                    break;
                 case DataTypeEnum.Logic:
+                    dType = LogicType.Create(signed, null);
+                    break;
                 case DataTypeEnum.Reg:
-                    dType = new IntegerVectorType() { Type = dataTypeEnum,Signed = signed };
+                    dType = RegType.Create(signed, null);
                     break;
                 case DataTypeEnum.Byte:
+                    dType = ByteType.Create(signed);
+                    break;
                 case DataTypeEnum.Shortint:
+                    dType= ShortIntType.Create(signed);
+                    break;
                 case DataTypeEnum.Int:
+                    dType = IntType.Create(signed);
+                    break;
                 case DataTypeEnum.Longint:
+                    dType = LongIntType.Create(signed);
+                    break;
                 case DataTypeEnum.Integer:
+                    dType = IntegerType.Create(signed);
+                    break;
                 case DataTypeEnum.Time:
-                    dType = new IntegerAtomType() { Type = dataTypeEnum };
+                    dType = TimeType.Create(signed);
                     break;
                 case DataTypeEnum.Shortreal:
                     dType = new ShortRealType();

@@ -937,7 +937,7 @@ namespace pluginVerilog.Verilog.DataObjects
 
             if (dataType == null)
             {
-                DataTypes.IntegerVectorType vectorType = new DataTypes.IntegerVectorType() { Type = DataTypeEnum.Logic };
+                DataTypes.IntegerVectorType vectorType = LogicType.Create(false, null);
                     if(word.Text == "[")
                     {
                     DataObjects.Arrays.PackedArray? range = DataObjects.Arrays.PackedArray.ParseCreate(word, nameSpace);
@@ -1135,7 +1135,7 @@ namespace pluginVerilog.Verilog.DataObjects
             {
                 if(first || direction != null)
                 {
-                    DataTypes.IntegerVectorType vectorType = new DataTypes.IntegerVectorType() { Type = DataTypeEnum.Logic };
+                    DataTypes.IntegerVectorType vectorType = LogicType.Create(false, null);
                     if (word.Text == "[")
                     {
                         DataObjects.Arrays.PackedArray? range = DataObjects.Arrays.PackedArray.ParseCreate(word, nameSpace);

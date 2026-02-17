@@ -104,7 +104,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 default:
                     // In the absence of a data type declaration, the default data type shall be int.
                     // Any other data type used with enumerated types shall require an explicit data type declaration.
-                    type.BaseType = new DataTypes.IntegerAtomType() { Type = DataTypeEnum.Int };
+                    type.BaseType = IntType.Create(false);
                     break;
             }
 

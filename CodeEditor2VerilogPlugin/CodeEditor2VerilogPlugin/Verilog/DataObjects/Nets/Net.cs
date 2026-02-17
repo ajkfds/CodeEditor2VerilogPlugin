@@ -426,7 +426,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             WordReference dataTypeRef = word.GetReference();
             DataTypes.IDataType? dataType = DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, DataTypes.DataTypeEnum.Logic);
             if (dataType == null) return true;
-            if( !dataType.IsValidForNet)
+            if(!dataType.IsValidForNet)
             {
                 dataTypeRef.AddError("illegal data type for net");
                 dataType = DataTypes.LogicType.Create(false, null);

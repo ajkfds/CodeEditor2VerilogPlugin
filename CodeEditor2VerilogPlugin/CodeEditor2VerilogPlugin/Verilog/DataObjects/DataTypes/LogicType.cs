@@ -9,10 +9,19 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
     public class LogicType : IntegerVectorType
     {
-        public static IntegerVectorType Create(bool signed, List<Arrays.PackedArray>? packedDimensions)
+        protected LogicType() { }
+        public static LogicType Create(bool signed, List<Arrays.PackedArray>? packedDimensions)
         {
-            IntegerVectorType logicType = IntegerVectorType.Create(DataTypeEnum.Logic, signed, packedDimensions);
-            return logicType;
+            LogicType type = new LogicType() { Type = DataTypeEnum.Logic, Signed = signed };
+            if (packedDimensions == null)
+            {
+                type.PackedDimensions.Clear();
+            }
+            else
+            {
+                type.PackedDimensions = packedDimensions;
+            }
+            return type;
         }
         public override bool IsValidForNet { 
             get {

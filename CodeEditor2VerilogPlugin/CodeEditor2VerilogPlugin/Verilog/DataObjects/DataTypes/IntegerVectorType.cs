@@ -11,6 +11,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
     public class IntegerVectorType : IDataType
     {
+        protected IntegerVectorType() { }
         public required virtual DataTypeEnum Type { get; init; }
 
         public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Register; } }
@@ -117,7 +118,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             }
             return IntegerVectorType.Create(Type, Signed, array);
         }
-        protected static IntegerVectorType Create(DataTypeEnum dataType, bool signed,List<Arrays.PackedArray>? packedDimensions)
+        public static IntegerVectorType Create(DataTypeEnum dataType, bool signed,List<Arrays.PackedArray>? packedDimensions)
         {
             switch (dataType)
             {

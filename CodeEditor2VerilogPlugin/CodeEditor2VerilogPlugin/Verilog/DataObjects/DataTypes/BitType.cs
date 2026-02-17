@@ -8,10 +8,18 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
     public class BitType : IntegerVectorType
     {
-        public static IntegerVectorType Create(bool signed, List<Arrays.PackedArray>? packedDimensions)
+        public static BitType Create(bool signed, List<Arrays.PackedArray>? packedDimensions)
         {
-            IntegerVectorType logicType = IntegerVectorType.Create(DataTypeEnum.Bit, signed, packedDimensions);
-            return logicType;
+            BitType type = new BitType() { Type = DataTypeEnum.Bit, Signed = signed};
+            if (packedDimensions == null)
+            {
+                type.PackedDimensions.Clear();
+            }
+            else
+            {
+                type.PackedDimensions = packedDimensions;
+            }
+            return type;
         }
         public override bool IsValidForNet { get { return false; } }
     }

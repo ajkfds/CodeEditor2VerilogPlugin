@@ -8,10 +8,19 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
     public class RegType : IntegerVectorType
     {
-        public static IntegerVectorType Create(bool signed, List<Arrays.PackedArray>? packedDimensions)
+        protected RegType() { }
+        public static RegType Create(bool signed, List<Arrays.PackedArray>? packedDimensions)
         {
-            IntegerVectorType logicType = IntegerVectorType.Create(DataTypeEnum.Reg, signed, packedDimensions);
-            return logicType;
+            RegType type = new RegType() { Type = DataTypeEnum.Reg, Signed = signed };
+            if (packedDimensions == null)
+            {
+                type.PackedDimensions.Clear();
+            }
+            else
+            {
+                type.PackedDimensions = packedDimensions;
+            }
+            return type;
         }
         public override bool IsValidForNet
         {

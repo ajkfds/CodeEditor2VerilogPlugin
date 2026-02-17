@@ -8,18 +8,15 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
     public class TimeType : IntegerAtomType
     {
-        public static IntegerAtomType? ParseCreate(bool signed)
+        protected TimeType() { }
+        public static TimeType Create(bool signed)
         {
-            return IntegerAtomType.Create(DataTypeEnum.Time, signed);
+            return new TimeType() { Type = DataTypeEnum.Time, Signed = signed };
         }
-        public bool IsValidForNet
+        public override bool IsValidForNet
         {
             get
             {
-                foreach (var array in PackedDimensions)
-                {
-                    if (!array.IsValidForNet) return false;
-                }
                 return true;
             }
         }

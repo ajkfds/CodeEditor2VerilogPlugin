@@ -8,9 +8,10 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
     public class IntType : IntegerAtomType
     {
-        public static IntegerAtomType Create(bool signed)
+        protected IntType() { } 
+        public static IntType Create(bool signed)
         {
-            return IntegerAtomType.Create(DataTypeEnum.Int, signed);
+            return new IntType() { Type = DataTypeEnum.Int };
         }
         public override bool IsValidForNet { get { return false; } }
     }

@@ -6,11 +6,12 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
-    public class LongInt : IntegerAtomType
+    public class LongIntType : IntegerAtomType
     {
-        public static IntegerAtomType Create(bool signed)
+        protected LongIntType() { }
+        public static LongIntType Create(bool signed)
         {
-            return IntegerAtomType.Create(DataTypeEnum.Longint, signed);
+            return new LongIntType() { Type = DataTypeEnum.Longint, Signed= signed };
         }
         public override bool IsValidForNet { get { return false; } }
     }

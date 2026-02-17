@@ -12,6 +12,11 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
     public class IntegerAtomType : IDataType, IPartSelectableDataType
     {
+        protected IntegerAtomType() {
+            int? bitWidth = BitWidth;
+            if (bitWidth == null) bitWidth = 1;
+            PackedDimensions.Add(new Arrays.PackedArray((int)bitWidth - 1, 0));
+        }
         public required virtual DataTypeEnum Type { get; init; }
         public bool Packable { get { return true; } }
         public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
@@ -124,22 +129,27 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             switch (dataType)
             {
                 case DataTypeEnum.Byte:
+                    return ByteType.Create(signed);
                 case DataTypeEnum.Shortint:
+                    return ShortIntType.Create(signed);
                 case DataTypeEnum.Int:
+                    return IntType.Create(signed);
                 case DataTypeEnum.Longint:
+                    return LongIntType.Create(signed);
                 case DataTypeEnum.Integer:
+                    return IntegerType.Create(signed);
                 case DataTypeEnum.Time:
-                    break;
+                    return TimeType.Create(signed);
                 default:
                     if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
                     throw new Exception();
             }
-            IntegerAtomType integerAtomType = new IntegerAtomType() { Type = dataType };
-            integerAtomType.Signed = signed;
-            int? bitWidth = integerAtomType.BitWidth;
-            if (bitWidth == null) bitWidth = 1;
-            integerAtomType.PackedDimensions.Add(new Arrays.PackedArray((int)bitWidth - 1,0));
-            return integerAtomType;
+            //IntegerAtomType integerAtomType = new IntegerAtomType() { Type = dataType };
+            //integerAtomType.Signed = signed;
+            //int? bitWidth = integerAtomType.BitWidth;
+            //if (bitWidth == null) bitWidth = 1;
+            //integerAtomType.PackedDimensions.Add(new Arrays.PackedArray((int)bitWidth - 1,0));
+            //return integerAtomType;
         }
 
         public IDataType Clone()
