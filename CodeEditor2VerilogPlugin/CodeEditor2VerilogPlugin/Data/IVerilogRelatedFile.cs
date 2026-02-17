@@ -14,5 +14,6 @@ namespace pluginVerilog.Data
         ProjectProperty ProjectProperty { get; }
         bool SystemVerilog { get; }
 
+        string AbsolutePath {  get; }
     }
 }
