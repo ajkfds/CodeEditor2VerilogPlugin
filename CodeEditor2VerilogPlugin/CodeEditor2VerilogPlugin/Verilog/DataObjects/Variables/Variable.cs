@@ -217,6 +217,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 word.MoveNext();
 
                 // { variable_dimension }
+                List<UnPackedArray>? unpackedArrays = new List<UnPackedArray>();
                 while(word.Text == "[" && !word.Eof)
                 {
                     IArray? array = DataObjects.Arrays.VariableArray.ParseCreate(variable,word, nameSpace);
@@ -224,14 +225,33 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                     {
                         UnPackedArray unPackedArray = (UnPackedArray)array;
                         variable.UnpackedArrays.Add(unPackedArray);
+
+                        if (unpackedArrays != null) unpackedArrays.Add(unPackedArray);
                     }else if(array is Queue)
                     {
                         Queue queue = (Queue)array;
                         variable = queue;
+                        unpackedArrays = null;
                     }else if(array is AssociativeArray)
                     {
                         AssociativeArray associativeArray = (AssociativeArray)array;
                         variable = associativeArray;
+                        unpackedArrays = null;
+                    }
+                }
+
+
+                // create assigned map if variable_dimension is generated only from unpackedarrays
+                if (unpackedArrays != null)
+                {
+                    if( dataType is IntegerAtomType)
+                    {
+                        if (dataType.BitWidth == null) throw new Exception();
+                        int bitWidth = (int)dataType.BitWidth;
+                        variable.AssignedBoolMap = new ArraysBoolMap(bitWidth,dataType.PackedDimensions, unpackedArrays);
+                    }else if( dataType is IntegerVectorType)
+                    {
+                        variable.AssignedBoolMap = new ArraysBoolMap(dataType.PackedDimensions, unpackedArrays);
                     }
                 }
 

@@ -25,6 +25,8 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Markup;
@@ -68,6 +70,7 @@ namespace pluginVerilog.Data
         static VerilogFile()
         {
             CustomizeItemEditorContextMenu += (x => EditorContextMenu.CustomizeEditorContextMenu(x));
+            CodeEditor2.Data.Item.PolymorphicResolver.DerivedTypes.Add(new JsonDerivedType(typeof(VerilogFile)));
         }
 
         public static async Task<VerilogFile> CreateSystemVerilog(string relativePath, CodeEditor2.Data.Project project)
@@ -326,6 +329,9 @@ namespace pluginVerilog.Data
             }
             base.Dispose();
         }
+
+        [JsonInclude]
+        public override CodeEditor2.CodeEditor.ParsedDocument? ParsedDocument { get; set; }
 
         public Verilog.ParsedDocument? VerilogParsedDocument
         {

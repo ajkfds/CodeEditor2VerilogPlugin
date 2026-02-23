@@ -154,6 +154,7 @@ namespace pluginVerilog.Verilog.DataObjects
         public WordReference? DefinedReference { set; get; } = null;
         public IDataType? DataType;
 
+        public ArraysBoolMap? AssignedBoolMap { set; get; } = null;
         public virtual bool Packable
         {
             get

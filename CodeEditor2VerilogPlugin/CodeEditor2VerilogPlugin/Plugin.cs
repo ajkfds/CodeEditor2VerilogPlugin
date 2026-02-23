@@ -42,6 +42,10 @@ namespace pluginVerilog
                 FileTypes.SystemVerilogHeaderFile fileType = new FileTypes.SystemVerilogHeaderFile();
                 CodeEditor2.Global.FileTypes.Add(fileType.ID, fileType);
             }
+            {
+                FileTypes.TestResultFile fileType = new FileTypes.TestResultFile();
+                CodeEditor2.Global.FileTypes.Add(fileType.ID, fileType);
+            }
 
             if (!CodeEditor2.Global.ProjectPropertyDeserializers.ContainsKey(Id))
             {
