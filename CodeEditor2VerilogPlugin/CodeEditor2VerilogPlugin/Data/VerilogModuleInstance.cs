@@ -202,7 +202,6 @@ namespace pluginVerilog.Data
         }
 
 
-
         public override void Close()
         {
             if (VerilogParsedDocument != null) VerilogParsedDocument.ReloadIncludeFiles();

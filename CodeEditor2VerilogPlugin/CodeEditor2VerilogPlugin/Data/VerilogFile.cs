@@ -1,6 +1,4 @@
-﻿using Avalonia.Controls.Shapes;
-using Avalonia.Media;
-using Avalonia.Threading;
+﻿using Avalonia.Threading;
 using CodeEditor2;
 using CodeEditor2.CodeEditor;
 using CodeEditor2.CodeEditor.CodeComplete;
@@ -8,29 +6,17 @@ using CodeEditor2.CodeEditor.Parser;
 using CodeEditor2.CodeEditor.PopupHint;
 using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
-using CodeEditor2.Tools;
 using DynamicData;
 using pluginVerilog.CodeEditor;
-using pluginVerilog.FileTypes;
 using pluginVerilog.Verilog.BuildingBlocks;
-using pluginVerilog.Verilog.ModuleItems;
-using Splat;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Markup;
-using Tmds.DBus.Protocol;
 
 namespace pluginVerilog.Data
 {
@@ -390,8 +376,10 @@ namespace pluginVerilog.Data
             );
         }
 
-
-
+        public override async Task ParseHierarchyAsync(Action<ITextFile> action)
+        {
+            await Tool.ParseHierarchy.ParseAsync(this, Tool.ParseHierarchy.ParseMode.ForceAllFiles);
+        }
 
         // Auto Complete Handler
 
