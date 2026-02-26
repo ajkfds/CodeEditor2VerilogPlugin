@@ -47,6 +47,11 @@ namespace pluginVerilog
                 CodeEditor2.Global.FileTypes.Add(fileType.ID, fileType);
             }
 
+            {// external libraries yaml
+                CodeEditor2.Data.YamlFile.AcceptCustomYamlParsedDocument += Setups.ExternalLibrariesSetup.AcceptYamlParsedDocument;
+                CodeEditor2.Parser.YamlParser.ParseCustomYaml += Setups.ExternalLibrariesSetup.ParseYaml;
+            }
+
             if (!CodeEditor2.Global.ProjectPropertyDeserializers.ContainsKey(Id))
             {
                 CodeEditor2.Global.ProjectPropertyDeserializers.Add(Id,
