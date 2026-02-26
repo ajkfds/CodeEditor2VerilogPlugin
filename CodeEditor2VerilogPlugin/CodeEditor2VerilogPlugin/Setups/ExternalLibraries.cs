@@ -33,6 +33,20 @@ namespace pluginVerilog.Setups
                 ExternalLibrariesSetup externalLibrariesSetup = new ExternalLibrariesSetup() { ExternalLibraries = libs };
                 CodeEditor2.Parser.YamlParsedDocument? yamlParsedDocument = yamlParser.ParsedDocument as CodeEditor2.Parser.YamlParsedDocument;
                 if(yamlParsedDocument != null) yamlParsedDocument.ParsedObject = externalLibrariesSetup;
+
+                ProjectProperty? projectProperty = yamlParser.TextFile.Project.ProjectProperties[Plugin.StaticID]  as ProjectProperty;
+                if (projectProperty == null) return;
+
+                projectProperty.ExtenralLibraryPath.Clear();
+
+                foreach(ExternalLibarary externalLibarary in externalLibrariesSetup.ExternalLibraries)
+                {
+                    foreach(string module in externalLibarary.Modules)
+                    {
+                        if (projectProperty.ExtenralLibraryPath.ContainsKey(module)) continue;
+                        projectProperty.ExtenralLibraryPath.Add(module, externalLibarary.Path);
+                    }
+                }
             }
             catch(YamlException ex)
             {

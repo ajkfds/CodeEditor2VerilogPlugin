@@ -152,7 +152,8 @@ namespace pluginVerilog.Verilog
         [JsonIgnore]
         public string? TargetBuildingBlockName = null;
 
-
+        public List<string> ExternalRefrenceModules = new List<string>();
+        public List<string> UnfoundModules = new List<string>();
 
         // for IndexReference
         private bool reparseRequested = false;

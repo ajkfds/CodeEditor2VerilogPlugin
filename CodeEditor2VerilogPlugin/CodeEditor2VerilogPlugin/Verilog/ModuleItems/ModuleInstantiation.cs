@@ -191,10 +191,19 @@ namespace pluginVerilog.Verilog.ModuleItems
                     }
                 }
             }
-            if(instancedModule == null)
+            if (instancedModule == null)
             {
-                word.AddError("unfound module");
-                word.RootParsedDocument.ReparseRequested = true;
+                if(word.ProjectProperty.ExtenralLibraryPath.ContainsKey(moduleName))
+                {
+                    word.AddHint("external library");
+                    if (!word.RootParsedDocument.ExternalRefrenceModules.Contains(moduleName)) word.RootParsedDocument.ExternalRefrenceModules.Add(moduleName);
+                }
+                else
+                {
+                    word.AddError("unfound module");
+                    word.RootParsedDocument.ReparseRequested = true;
+                    if (!word.RootParsedDocument.UnfoundModules.Contains(moduleName)) word.RootParsedDocument.UnfoundModules.Add(moduleName);
+                }
             }
 
             //Data.VerilogFile? baseFile = instancedModule?.File as Data.VerilogFile;

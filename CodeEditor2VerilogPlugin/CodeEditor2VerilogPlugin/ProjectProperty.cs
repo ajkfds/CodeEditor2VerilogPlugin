@@ -15,6 +15,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection.Metadata;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -79,6 +80,8 @@ namespace pluginVerilog
 
 
         }
+
+        public Dictionary<string, string> ExtenralLibraryPath = new Dictionary<string, string>();
 
         public AnnotationCommandsClass AnnotationCommands { get; set; } = new AnnotationCommandsClass();
         public string AnnotationKeyValueDelimiter = ":";

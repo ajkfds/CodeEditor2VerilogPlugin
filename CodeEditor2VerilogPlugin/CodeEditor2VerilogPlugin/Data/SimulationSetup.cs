@@ -28,6 +28,9 @@ namespace pluginVerilog.Data
         public List<IVerilogRelatedFile> IncludeFiles = new List<IVerilogRelatedFile>();
         public List<string> IncludePaths = new List<string>();
 
+        public List<string> ExternalLibraryPathList = new List<string>();
+        public List<string> UnfoundModules = new List<string>();
+
         public CodeEditor2.Data.Project Project;
 
         public Dictionary<CodeEditor2.Data.Project, SimulationSetup> ExternalProjectReferences = new Dictionary<Project, SimulationSetup>();
@@ -49,6 +52,14 @@ namespace pluginVerilog.Data
             setup.TopName = buildingBlock.Name;
             searchHier(verilogFile,setup.TopName,ids,setup,setup.TopName);
 
+            if (setup.UnfoundModules.Count != 0)
+            {
+                foreach (var module in setup.UnfoundModules)
+                {
+                    CodeEditor2.Controller.AppendLog(module + " unfound", Avalonia.Media.Colors.Red);
+                }
+                return null;
+            }
             return setup;
         }
 
@@ -59,8 +70,21 @@ namespace pluginVerilog.Data
             if (parsedDocument == null) return;
 
             appendFile(file,setup);
+            foreach(string unfound in parsedDocument.UnfoundModules)
+            {
+                if (!setup.UnfoundModules.Contains(unfound)) setup.UnfoundModules.Add(unfound);
 
-            foreach(var ifile in parsedDocument.IncludeFiles.Values)
+            }
+            foreach (string external in parsedDocument.ExternalRefrenceModules)
+            {
+                if (file.ProjectProperty.ExtenralLibraryPath.ContainsKey(external))
+                {
+                    string libPath = file.ProjectProperty.ExtenralLibraryPath[external];
+                    if(!setup.ExternalLibraryPathList.Contains(libPath)) setup.ExternalLibraryPathList.Add(libPath);
+                }
+            }
+
+            foreach (var ifile in parsedDocument.IncludeFiles.Values)
             {
                 appendVerilogHeaderInstance(ifile, setup);
             }
