@@ -33,7 +33,7 @@ namespace pluginVerilog.Data
             {
                 name = relativePath;
             }
-
+            System.Diagnostics.Debug.Print(relativePath);
             CodeEditor2.FileTypes.FileType fileType = CodeEditor2.Global.FileTypes[FileTypes.VerilogFile.TypeID];
             VerilogFile fileItem = new VerilogFile() { Name = name, Project = project, RelativePath = relativePath };
             await fileItem.FileCheck();
@@ -446,7 +446,6 @@ namespace pluginVerilog.Data
 
         public override CodeEditor2.CodeEditor.ParsedDocument? GetCashedParsedDocument()
         {
-            if (!CodeEditor2.Global.ActivateCashe) return null;
 
             string path = Project.RootPath + System.IO.Path.DirectorySeparatorChar + ".cashe";
             if (!System.IO.Path.Exists(path)) System.IO.Directory.CreateDirectory(path);
@@ -488,7 +487,6 @@ namespace pluginVerilog.Data
 
         public override async Task<bool> CreateCashe()
         {
-            if (!CodeEditor2.Global.ActivateCashe) return true;
 
             if (VerilogParsedDocument == null) return false;
 
