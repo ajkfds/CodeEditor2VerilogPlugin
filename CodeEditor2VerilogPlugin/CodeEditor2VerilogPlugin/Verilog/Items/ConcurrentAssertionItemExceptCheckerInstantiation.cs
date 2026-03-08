@@ -1,4 +1,4 @@
-﻿using pluginVerilog.Verilog.DataObjects.Nets;
+using pluginVerilog.Verilog.DataObjects.Nets;
 using System;
 using System.Collections.Generic;
 using System.Linq;

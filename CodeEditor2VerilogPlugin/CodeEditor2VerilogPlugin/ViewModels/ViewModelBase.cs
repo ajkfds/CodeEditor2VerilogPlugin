@@ -1,4 +1,4 @@
-﻿using ReactiveUI;
+using ReactiveUI;
 
 namespace CodeEditor2VerilogPlugin.ViewModels;
 

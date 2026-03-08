@@ -1,4 +1,4 @@
-﻿using Avalonia.Platform;
+using Avalonia.Platform;
 using Avalonia.Threading;
 using DynamicData;
 using Microsoft.Extensions.AI;

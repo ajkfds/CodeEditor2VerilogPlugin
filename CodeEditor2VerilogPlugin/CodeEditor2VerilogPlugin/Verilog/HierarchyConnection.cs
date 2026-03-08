@@ -1,4 +1,4 @@
-﻿using pluginVerilog.Data;
+using pluginVerilog.Data;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.Expressions;
 using pluginVerilog.Verilog.ModuleItems;

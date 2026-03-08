@@ -1,4 +1,4 @@
-﻿using CodeEditor2.Parser;
+using CodeEditor2.Parser;
 using ExCSS;
 using System;
 using System.Collections.Generic;

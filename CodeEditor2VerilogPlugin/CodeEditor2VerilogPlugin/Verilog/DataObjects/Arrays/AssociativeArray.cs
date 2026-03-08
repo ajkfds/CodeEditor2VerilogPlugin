@@ -1,4 +1,4 @@
-﻿using pluginVerilog.Verilog.DataObjects.Variables;
+using pluginVerilog.Verilog.DataObjects.Variables;
 using ReactiveUI;
 using System;
 using System.Collections;

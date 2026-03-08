@@ -1,4 +1,4 @@
-﻿using CodeEditor2.CodeEditor;
+using CodeEditor2.CodeEditor;
 using CodeEditor2.CodeEditor.CodeComplete;
 using pluginVerilog.Verilog.Items;
 using pluginVerilog.Verilog.ModuleItems;

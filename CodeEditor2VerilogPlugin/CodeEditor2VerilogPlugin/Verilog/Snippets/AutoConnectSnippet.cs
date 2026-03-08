@@ -1,4 +1,4 @@
-﻿using Avalonia.Controls.Shapes;
+using Avalonia.Controls.Shapes;
 using Avalonia.Input;
 using Avalonia.Threading;
 using CodeEditor2.CodeEditor;

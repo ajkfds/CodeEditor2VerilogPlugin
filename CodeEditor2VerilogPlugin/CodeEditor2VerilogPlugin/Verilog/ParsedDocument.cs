@@ -1,4 +1,4 @@
-﻿using Avalonia.Media.TextFormatting;
+using Avalonia.Media.TextFormatting;
 using CodeEditor2.CodeEditor.CodeComplete;
 using CodeEditor2.CodeEditor.Parser;
 using CodeEditor2.CodeEditor.PopupHint;

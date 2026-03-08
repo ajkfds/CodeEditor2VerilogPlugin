@@ -1,4 +1,4 @@
-﻿using pluginVerilog.Verilog.DataObjects.DataTypes;
+using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.DataObjects.Nets;
 using pluginVerilog.Verilog.ModuleItems;
 using System;

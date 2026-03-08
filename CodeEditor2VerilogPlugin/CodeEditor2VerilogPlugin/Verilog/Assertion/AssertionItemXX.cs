@@ -1,4 +1,4 @@
-﻿using pluginVerilog.Verilog.Statements;
+using pluginVerilog.Verilog.Statements;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,4 +1,4 @@
-﻿using pluginVerilog.Verilog.Sequence;
+using pluginVerilog.Verilog.Sequence;
 using System;
 using System.Collections.Generic;
 using System.Linq;

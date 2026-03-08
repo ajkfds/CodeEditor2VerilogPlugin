@@ -1,4 +1,4 @@
-﻿using pluginVerilog.Verilog.DataObjects.Arrays;
+using pluginVerilog.Verilog.DataObjects.Arrays;
 using System;
 using System.Collections.Generic;
 using System.Linq;

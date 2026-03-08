@@ -1,4 +1,4 @@
-﻿using pluginVerilog.Verilog.Expressions;
+using pluginVerilog.Verilog.Expressions;
 using pluginVerilog.Verilog.Expressions.Operators;
 using System;
 using System.Collections.Generic;

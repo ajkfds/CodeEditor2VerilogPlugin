@@ -1,4 +1,4 @@
-﻿using Avalonia.Media;
+using Avalonia.Media;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;

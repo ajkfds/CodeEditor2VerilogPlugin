@@ -1,4 +1,4 @@
-﻿using CodeEditor2.CodeEditor.CodeComplete;
+using CodeEditor2.CodeEditor.CodeComplete;
 using pluginVerilog.Verilog.BuildingBlocks;
 using System;
 using System.Collections.Generic;

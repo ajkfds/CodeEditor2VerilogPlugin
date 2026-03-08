@@ -1,4 +1,4 @@
-﻿using CodeEditor2.Data;
+using CodeEditor2.Data;
 using CodeEditor2.LLM.Tools;
 using Microsoft.Extensions.AI;
 using pluginVerilog.Tool;

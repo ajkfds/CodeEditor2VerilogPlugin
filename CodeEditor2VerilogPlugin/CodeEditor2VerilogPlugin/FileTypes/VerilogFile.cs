@@ -1,4 +1,4 @@
-﻿using Avalonia.Media;
+using Avalonia.Media;
 using CodeEditor2.Data;
 using System;
 using System.Collections.Generic;

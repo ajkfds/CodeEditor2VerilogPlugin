@@ -1,4 +1,4 @@
-﻿using CodeEditor2.CodeEditor;
+using CodeEditor2.CodeEditor;
 using CodeEditor2.CodeEditor.Parser;
 using pluginVerilog.Data;
 using pluginVerilog.Verilog.BuildingBlocks;

@@ -1,4 +1,4 @@
-﻿using Avalonia.Remote.Protocol;
+using Avalonia.Remote.Protocol;
 using pluginVerilog.CodeEditor;
 using pluginVerilog.Data;
 using pluginVerilog.Parser;

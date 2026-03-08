@@ -1,4 +1,4 @@
-﻿using Avalonia.Controls;
+using Avalonia.Controls;
 using CodeEditor2.Data;
 using DynamicData;
 using pluginVerilog.Verilog.BuildingBlocks;

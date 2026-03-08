@@ -1,4 +1,4 @@
-﻿using Avalonia;
+using Avalonia;
 using CodeEditor2.CodeEditor.CodeComplete;
 using pluginVerilog.Data;
 using pluginVerilog.Verilog.BuildingBlocks;

@@ -1,4 +1,4 @@
-﻿using pluginVerilog.Verilog.BuildingBlocks;
+using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.Expressions;
 using pluginVerilog.Verilog.ModuleItems;
 using pluginVerilog.Verilog;

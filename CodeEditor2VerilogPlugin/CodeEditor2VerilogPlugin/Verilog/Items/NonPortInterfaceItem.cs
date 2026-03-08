@@ -1,4 +1,4 @@
-﻿using pluginVerilog.Verilog.Items.Generate;
+using pluginVerilog.Verilog.Items.Generate;
 using System;
 using System.Collections.Generic;
 using System.Linq;

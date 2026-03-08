@@ -1,4 +1,4 @@
-﻿using CodeEditor2.CodeEditor.Parser;
+using CodeEditor2.CodeEditor.Parser;
 using CodeEditor2.Tests;
 using System;
 using System.Collections.Generic;

@@ -1,4 +1,4 @@
-﻿using pluginVerilog.Verilog.DataObjects;
+using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.ModuleItems;
 using ReactiveUI;
 using System;

@@ -1,4 +1,4 @@
-﻿using CodeEditor2.CodeEditor.CodeComplete;
+using CodeEditor2.CodeEditor.CodeComplete;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.Variables;

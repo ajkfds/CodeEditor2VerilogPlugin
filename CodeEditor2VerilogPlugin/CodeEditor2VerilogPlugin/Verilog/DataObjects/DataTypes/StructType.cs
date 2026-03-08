@@ -1,4 +1,4 @@
-﻿using AjkAvaloniaLibs.Controls;
+using AjkAvaloniaLibs.Controls;
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.DataObjects.Constants;
 using pluginVerilog.Verilog.DataObjects.Variables;

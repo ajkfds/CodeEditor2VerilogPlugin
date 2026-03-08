@@ -1,4 +1,4 @@
-﻿using CodeEditor2.Shells;
+using CodeEditor2.Shells;
 using ExCSS;
 using System;
 using System.Collections.Generic;

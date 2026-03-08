@@ -1,4 +1,4 @@
-﻿using DynamicData.Kernel;
+using DynamicData.Kernel;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.Arrays;

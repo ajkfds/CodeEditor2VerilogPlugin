@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.AI;
+using Microsoft.Extensions.AI;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

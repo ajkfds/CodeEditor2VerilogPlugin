@@ -1,4 +1,4 @@
-﻿using Avalonia.Input;
+using Avalonia.Input;
 using CodeEditor2.Views;
 using pluginVerilog.Verilog.DataObjects;
 using System;

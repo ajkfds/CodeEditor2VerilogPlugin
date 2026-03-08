@@ -1,4 +1,4 @@
-﻿using Avalonia.Controls.Documents;
+using Avalonia.Controls.Documents;
 using CodeEditor2.LLM.Tools;
 using Microsoft.Extensions.AI;
 using pluginVerilog.Verilog.BuildingBlocks;

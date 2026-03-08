@@ -1,4 +1,4 @@
-﻿using pluginVerilog.Verilog.BuildingBlocks;
+using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects.Nets;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.Items;

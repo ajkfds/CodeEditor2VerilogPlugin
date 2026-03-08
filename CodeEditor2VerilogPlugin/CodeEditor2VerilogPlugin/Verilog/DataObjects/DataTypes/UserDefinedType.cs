@@ -1,4 +1,4 @@
-﻿using AjkAvaloniaLibs.Controls;
+using AjkAvaloniaLibs.Controls;
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using System;
 using System.Collections.Generic;

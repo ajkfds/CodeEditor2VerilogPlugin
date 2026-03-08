@@ -1,4 +1,4 @@
-﻿using AjkAvaloniaLibs.Controls;
+using AjkAvaloniaLibs.Controls;
 using CodeEditor2.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.Expressions;

@@ -1,4 +1,4 @@
-﻿using AjkAvaloniaLibs.Controls;
+using AjkAvaloniaLibs.Controls;
 using DynamicData;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects.Arrays;

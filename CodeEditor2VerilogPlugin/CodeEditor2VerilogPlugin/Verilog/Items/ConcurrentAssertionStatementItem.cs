@@ -1,4 +1,4 @@
-﻿using CodeEditor2.CodeEditor.CodeComplete;
+using CodeEditor2.CodeEditor.CodeComplete;
 using pluginVerilog.Verilog.Assertion;
 using System;
 using System.Collections.Generic;

@@ -1,4 +1,4 @@
-﻿using CodeEditor2;
+using CodeEditor2;
 using CodeEditor2.Data;
 using pluginVerilog.Data;
 using pluginVerilog.FileTypes;

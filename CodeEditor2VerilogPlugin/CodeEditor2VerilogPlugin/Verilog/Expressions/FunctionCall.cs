@@ -1,4 +1,4 @@
-﻿using CodeEditor2.Data;
+using CodeEditor2.Data;
 using ExCSS;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.Arrays;

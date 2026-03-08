@@ -1,4 +1,4 @@
-﻿using DynamicData;
+using DynamicData;
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using System;
