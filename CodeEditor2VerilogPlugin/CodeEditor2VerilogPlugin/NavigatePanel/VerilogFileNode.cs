@@ -112,12 +112,9 @@ namespace pluginVerilog.NavigatePanel
 
             if (VerilogFile != null)
             {
-                lock (VerilogFile.Items)
+                foreach (CodeEditor2.Data.Item item in VerilogFile.Items)
                 {
-                    foreach (CodeEditor2.Data.Item item in VerilogFile.Items.Values)
-                    {
-                        newNodes.Add(item.NavigatePanelNode);
-                    }
+                    newNodes.Add(item.NavigatePanelNode);
                 }
             }
 

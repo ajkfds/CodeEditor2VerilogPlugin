@@ -143,7 +143,7 @@ namespace pluginVerilog.NavigatePanel
 
             List<CodeEditor2.Data.Item> targetDataItems = new List<CodeEditor2.Data.Item>();
             List<CodeEditor2.Data.Item> addDataItems = new List<CodeEditor2.Data.Item>();
-            foreach (CodeEditor2.Data.Item item in VerilogModuleInstance.Items.Values)
+            foreach (CodeEditor2.Data.Item item in VerilogModuleInstance.Items)
             {
                 targetDataItems.Add(item);
                 addDataItems.Add(item);

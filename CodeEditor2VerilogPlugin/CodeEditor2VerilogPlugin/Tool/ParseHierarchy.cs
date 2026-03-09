@@ -268,12 +268,9 @@ namespace pluginVerilog.Tool
             await Dispatcher.UIThread.InvokeAsync(
                 () =>
                 {
-                    lock (verilogFile.Items)
+                    foreach (var item in verilogFile.Items)
                     {
-                        foreach (var item in verilogFile.Items.Values)
-                        {
-                            items.Add(item);
-                        }
+                        items.Add(item);
                     }
                 }
             );

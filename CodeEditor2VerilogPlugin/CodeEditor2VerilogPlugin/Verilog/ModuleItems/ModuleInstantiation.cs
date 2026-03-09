@@ -310,7 +310,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                                     await Dispatcher.UIThread.InvokeAsync(
                                         async () =>
                                         {
-                                            if (word.RootParsedDocument.File != null) word.RootParsedDocument.File.Items.Add(instance.Name, instance);
+                                            if (word.RootParsedDocument.File != null) word.RootParsedDocument.File.Items.AddOrUpdate(instance.Name, instance);
                                             Verilog.ParsedDocument vParsedDocument = (Verilog.ParsedDocument)baseParser.ParsedDocument;
                                             vParsedDocument.ReparseRequested = true;
                                             await instance.AcceptParsedDocumentAsync(baseParser.ParsedDocument);

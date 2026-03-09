@@ -1,3 +1,4 @@
+using Avalonia.Controls;
 using CodeEditor2;
 using CodeEditor2.Data;
 using pluginVerilog.Data;
@@ -56,7 +57,7 @@ namespace pluginVerilog.Data
             {
                 foreach (var module in setup.UnfoundModules)
                 {
-                    CodeEditor2.Controller.AppendLog(module + " unfound", Avalonia.Media.Colors.Red);
+                    CodeEditor2.Controller.AppendLog(verilogFile.Project.Name+":"+ module + " unfound", Avalonia.Media.Colors.Red);
                 }
                 return null;
             }
@@ -72,6 +73,7 @@ namespace pluginVerilog.Data
             appendFile(file,setup);
             foreach(string unfound in parsedDocument.UnfoundModules)
             {
+                CodeEditor2.Controller.AppendLog("unfound instance on "+file.RelativePath);
                 if (!setup.UnfoundModules.Contains(unfound)) setup.UnfoundModules.Add(unfound);
 
             }
@@ -122,30 +124,18 @@ namespace pluginVerilog.Data
                             CodeEditor2.Global.Projects[moduleInstantiation.SourceProjectName]
                             );
                     }
-                    if (file.Items.ContainsKey(moduleInstantiation.Name))
+                    if (file.Items.TryGetValue(moduleInstantiation.Name,out CodeEditor2.Data.Item? item))
                     {
                         string newPath = moduleInstantiation.Name;
                         if (path != "") newPath = path + "." + newPath;
 
-                        var subfile = file.Items[moduleInstantiation.Name] as IVerilogRelatedFile;
+                        var subfile = item as IVerilogRelatedFile;
                         if(subfile != null) searchHier(subfile,moduleInstantiation.SourceName, ids, setup, newPath);
                     }
                 }
             }
         }
 
-        //private static string getHierName(VerilogModuleInstance instance)
-        //{
-        //    List<string> hierNames = new List<string>();
-        //    searchHierUpward(hierNames,instance);
-        //    StringBuilder sb = new StringBuilder();
-
-        //}
-
-        //private static string searchHierUpward(List<string> hierNames, VerilogModuleInstance instance)
-        //{
-
-        //}
 
         private static void appendFile(IVerilogRelatedFile file, SimulationSetup setup)
         {

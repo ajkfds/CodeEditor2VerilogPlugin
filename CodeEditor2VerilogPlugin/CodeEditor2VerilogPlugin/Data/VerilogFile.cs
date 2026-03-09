@@ -181,14 +181,11 @@ namespace pluginVerilog.Data
         {
             // create id table
             Dictionary<string, Data.VerilogHeaderInstance> headerItems = new Dictionary<string, VerilogHeaderInstance>();
-            lock (items)
+            foreach (var item in items)
             {
-                foreach (var item in items.Values)
-                {
-                    Data.VerilogHeaderInstance? vh = item as Data.VerilogHeaderInstance;
-                    if (vh == null) continue;
-                    headerItems.Add(item.ID, vh);
-                }
+                Data.VerilogHeaderInstance? vh = item as Data.VerilogHeaderInstance;
+                if (vh == null) continue;
+                headerItems.Add(item.ID, vh);
             }
 
             // get file selected in text editor

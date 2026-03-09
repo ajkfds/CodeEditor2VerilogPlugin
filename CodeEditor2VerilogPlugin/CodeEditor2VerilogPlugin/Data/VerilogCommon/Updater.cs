@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Avalonia.Threading;
 using CodeEditor2.CodeEditor;
 using CodeEditor2.Data;
+using Microsoft.Playwright;
 using pluginVerilog.Verilog;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.ModuleItems;
@@ -39,7 +40,7 @@ namespace pluginVerilog.Data.VerilogCommon
                 // dispose all sub items
                 lock (item.Items)
                 {
-                    foreach (CodeEditor2.Data.Item subItem in item.Items.Values) subItem.Dispose();
+                    foreach (CodeEditor2.Data.Item subItem in item.Items) subItem.Dispose();
                     item.Items.Clear();
                 }
                 return;
@@ -80,7 +81,7 @@ namespace pluginVerilog.Data.VerilogCommon
                 item.Items.Clear();
                 foreach (CodeEditor2.Data.Item i in newSubItems.Values)
                 {
-                    item.Items.Add(i.Name, i);
+                    item.Items.AddOrUpdate(i.Name, i);
                 }
             }
         }
@@ -95,9 +96,10 @@ namespace pluginVerilog.Data.VerilogCommon
                 newVhInstance.ExternalProject = true;
             }
             VerilogHeaderInstance? oldInstanceTextFile = null;
-            if (item.Items.ContainsKey(keyName))
+            if (item.Items.TryGetValue(keyName,out CodeEditor2.Data.Item? gotItem))
             {
-                oldInstanceTextFile = item.Items[keyName] as VerilogHeaderInstance;
+                if(gotItem == null) throw new Exception();
+                oldInstanceTextFile = gotItem as VerilogHeaderInstance;
             }
 
             if (
@@ -125,9 +127,10 @@ namespace pluginVerilog.Data.VerilogCommon
             {
                 bool alreadyExist = false;
 
-                if (verilogFile.Items.ContainsKey(buldingBlock.Name))
+                if (verilogFile.Items.TryGetValue(buldingBlock.Name, out CodeEditor2.Data.Item? gotItem))
                 {   // has same name item
-                    CodeEditor2.Data.Item subItem = verilogFile.Items[buldingBlock.Name];
+                    if(gotItem == null) throw new Exception();
+                    CodeEditor2.Data.Item subItem = gotItem;
 
                     if (buldingBlock is Module)
                     {
@@ -149,10 +152,6 @@ namespace pluginVerilog.Data.VerilogCommon
                     {
                         Module module = (Module)buldingBlock;
 
-                        if (verilogFile.Items.ContainsKey(module.Name))
-                        {
-
-                        }
                         ModuleInstantiation moduleInstantiation = new ModuleInstantiation()
                         {
                             BeginIndexReference = module.BeginIndexReference,
@@ -201,9 +200,10 @@ namespace pluginVerilog.Data.VerilogCommon
                 {
                     bool alreadyExist = false;
 
-                    if (item.Items.ContainsKey(instantiation.Name))
+                    if (item.Items.TryGetValue(instantiation.Name,out CodeEditor2.Data.Item? gotItem))
                     {   // has same name item
-                        CodeEditor2.Data.Item subItem = item.Items[instantiation.Name];
+                        if (gotItem == null) throw new Exception();
+                        CodeEditor2.Data.Item subItem = gotItem;
 
                         if (instantiation is ModuleInstantiation)
                         {

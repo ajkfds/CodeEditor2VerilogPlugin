@@ -41,6 +41,9 @@ namespace pluginVerilog.Setups
 
                 foreach(ExternalLibarary externalLibarary in externalLibrariesSetup.ExternalLibraries)
                 {
+                    if (externalLibarary == null) continue;
+                    if (externalLibarary.Modules == null) continue;
+
                     foreach(string module in externalLibarary.Modules)
                     {
                         if (projectProperty.ExtenralLibraryPath.ContainsKey(module)) continue;
