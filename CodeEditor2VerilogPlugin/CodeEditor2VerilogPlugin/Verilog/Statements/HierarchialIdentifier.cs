@@ -65,7 +65,7 @@ namespace pluginVerilog.Verilog.Statements
             if (word.NextText != ".") return hierarchialIdentifier;
 
             INamedElement element = nameSpace.NamedElements[word.Text];
-            if (element is縲Verilog.DataObjects.DataObject)
+            if (element is　Verilog.DataObjects.DataObject)
             {
                 return hierarchialIdentifier;
             }

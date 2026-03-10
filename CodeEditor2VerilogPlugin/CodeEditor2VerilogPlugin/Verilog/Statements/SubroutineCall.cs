@@ -42,7 +42,7 @@ namespace pluginVerilog.Verilog.Statements
             class_type ::=  ps_class_identifier [ parameter_value_assignment ] { "::" class_identifier [ parameter_value_assignment ] }
             ps_class_identifier ::= [ package_scope ] class_identifier
 
-            array_manipulation_call ::= array_method_name { attribute_instance }    [ "(" list_of_arguments ")" ]縲[ "with" "(" expression ")" ]
+            array_manipulation_call ::= array_method_name { attribute_instance }    [ "(" list_of_arguments ")" ]　[ "with" "(" expression ")" ]
 
 
             randomize_call ::=  "randomize" { attribute_instance }

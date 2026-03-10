@@ -32,7 +32,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
         }
     }
     /*
-    Table 12窶捻recedence rules for operators
+    Table 12—Precedence rules for operators
     1   + - ! ~ (unary)             Highest precedence
     2   **
     3   *  /  %
@@ -66,7 +66,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
     13  &&                                                      Left
     14  ||                                                      Left
     15  ?: (conditional operator)                               Right
-    16  窶・ <窶・                                                  Right
+    16  –> <–>                                                  Right
     17  = += -= *= /= %= &= ^= |= <<= >>= <<<= >>>= := :/ <=    None
     18  {} {{}}                                                 Concatenation   Lowest
 
@@ -126,7 +126,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
     & | ^ ^~ ~^             Binary bitwise operators                        Integral
     >> <<                   Binary logical shift operators                  Integral
     >>> <<<                 Binary arithmetic shift operators               Integral
-    && || 窶・ <窶・            Binary logical operators                        Integral, real, shortreal
+    && || –> <–>            Binary logical operators                        Integral, real, shortreal
     < <= > >=               Binary relational operators                     Integral, real, shortreal
     === !==                 Binary case equality operators                  Any except real and shortreal
     == !=                   Binary logical equality operators               Any
@@ -153,7 +153,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
     &&                                          Left
     ||                                          Left
     ?: (conditional operator)                   Right
-    窶・ <窶・                                      Right
+    –> <–>                                      Right
     = += -= *= /= %= &= ^= |=
     <<= >>= <<<= >>>= := :/ <=
     None

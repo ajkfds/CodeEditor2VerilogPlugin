@@ -22,7 +22,7 @@ namespace pluginVerilog.LLM.Tools
 
         private CodeEditor2.Tests.ITest simulation;
         public override AIFunction GetAIFunction() { return AIFunctionFactory.Create(Run, "run_verilog_simulation"); }
-        [Description("謖・ｮ壹＆繧後◆繝｢繧ｸ繝･繝ｼ繝ｫ繧稚op module縺ｨ縺励※simulation繧呈ｵ√＠縲∫ｵ先棡繧貞叙蠕励☆繧・)]
+        [Description("指定されたモジュールをtop moduleとしてsimulationを流し、結果を取得する")]
         public async Task<string> Run(
         [Description("module name")]
         string moduleName,

@@ -21,8 +21,8 @@ namespace pluginVerilog.LLM.Tools
             """;
 
         [Description("""
-            謖・ｮ壹＆繧後◆building block(module,class,program)縺悟ｮ夂ｾｩ縺輔ｌ縺ｦ縺・ｋrtl繝輔ぃ繧､繝ｫ縺ｮfile path繧貞叙蠕励＠縺ｾ縺吶・
-            file path縺ｯproject root縺ｫ蟇ｾ縺吶ｋ逶ｸ蟇ｾ繝代せ縺ｧ縺吶・
+            指定されたbuilding block(module,class,program)が定義されているrtlファイルのfile pathを取得します。
+            file pathはproject rootに対する相対パスです。
             """)]
             
         public async Task<string> Run(

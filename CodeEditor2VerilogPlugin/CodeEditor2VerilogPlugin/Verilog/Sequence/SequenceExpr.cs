@@ -39,7 +39,7 @@ namespace pluginVerilog.Verilog.Sequence
             | non_consecutive_repetition
             | goto_repetition
         consecutive_repetition ::=
-            縲[* const_or_range_expression ]
+            　[* const_or_range_expression ]
             | [*]
             | [+]
         non_consecutive_repetition ::= 

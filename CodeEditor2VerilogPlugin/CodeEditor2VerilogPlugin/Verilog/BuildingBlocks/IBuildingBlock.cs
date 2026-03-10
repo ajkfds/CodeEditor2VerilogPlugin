@@ -8,7 +8,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 {
     public interface IBuildingBlock
     {
-        // IModuleOrInterfaceOrProgram 縺ｫbuilding block縺ｮinterface繧偵ｂ縺溘○繧九◆繧√↓菴ｿ逕ｨ
+        // IModuleOrInterfaceOrProgram にbuilding blockのinterfaceをもたせるために使用
 
         NamedElements NamedElements { get; }
 

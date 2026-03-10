@@ -42,7 +42,7 @@ namespace pluginVerilog.Verilog.Snippets
             if (buildingBlock == null) return;
 
             List<IBuildingBlockInstantiation> instantiations = buildingBlock.GetBuildingBlockInstantiations();
-            // NamedElements.Values.FindAll(x => x is IBuildingBlockInstantiation); 縺ｧ縺ｯ繝繝｡縲Ｈenereted block蜀・・繧ゅ・縺悟叙繧後↑縺・・
+            // NamedElements.Values.FindAll(x => x is IBuildingBlockInstantiation); ではダメ。genereted block内のものが取れない。
             foreach (var instance in instantiations)
             {
                 ModuleInstantiation? moduleInstantiation = instance as ModuleInstantiation;

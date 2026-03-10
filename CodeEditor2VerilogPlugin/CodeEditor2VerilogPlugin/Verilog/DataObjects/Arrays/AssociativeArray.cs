@@ -102,7 +102,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
             return associativeArray;
         }
         /*
-         * num()/size()縲‥elete()縲‘xists()縲’irst()縲〕ast()縲］ext()縲｝rev()
+         * num()/size()、delete()、exists()、first()、last()、next()、prev()
          */
 
 

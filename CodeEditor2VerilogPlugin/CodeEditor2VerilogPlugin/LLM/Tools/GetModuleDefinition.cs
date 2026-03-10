@@ -13,7 +13,7 @@ namespace pluginVerilog.LLM.Tools
         public GetModuleDefinition(CodeEditor2.Data.Project project) : base(project) { }
         public override AIFunction GetAIFunction() { return AIFunctionFactory.Create(Run, "get_module_definition"); }
 
-        [Description("謖・ｮ壹＆繧後◆module縺悟ｮ夂ｾｩ縺輔ｌ縺ｦ縺・ｋrtl繝輔ぃ繧､繝ｫ縺ｮ蜀・ｮｹ繧貞叙蠕励＠縺ｾ縺・)]
+        [Description("指定されたmoduleが定義されているrtlファイルの内容を取得します")]
         public async Task<string> Run(
         [Description("module name")] string moduleName)
         {

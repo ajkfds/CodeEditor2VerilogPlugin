@@ -9,7 +9,7 @@ namespace pluginVerilog.Verilog
 {
     public class Macro
     {
-        //        text_macro_definition::= 窶賄efine text_macro_name macro_text 
+        //        text_macro_definition::= ‘define text_macro_name macro_text 
         // text_macro_name ::= text_macro_identifier[(list_of_formal_arguments)] 
         // list_of_formal_arguments ::= formal_argument_identifier { ,  formal_argument_identifier }
         //        text_macro_identifier::= (From Annex A - A.9.3) simple_identifier
