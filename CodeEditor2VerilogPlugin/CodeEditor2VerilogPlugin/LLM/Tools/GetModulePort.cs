@@ -15,7 +15,7 @@ namespace pluginVerilog.LLM.Tools
     {
         public GetModulePort(CodeEditor2.Data.Project project) : base(project) { }
         public override AIFunction GetAIFunction() { return AIFunctionFactory.Create(Run, "get_module_definition"); }
-        [Description("指定されたモジュールのポート定義を取得します")]
+        [Description("謖・ｮ壹＆繧後◆繝｢繧ｸ繝･繝ｼ繝ｫ縺ｮ繝昴・繝亥ｮ夂ｾｩ繧貞叙蠕励＠縺ｾ縺・)]
         public async Task<string> Run(
         [Description("module name")] string moduleName)
         {

@@ -26,8 +26,7 @@ namespace pluginVerilog.Setups
             {
                 var deserializer = new DeserializerBuilder()
                     .WithNamingConvention(PascalCaseNamingConvention.Instance)
-                    //.WithNamingConvention(CamelCaseNamingConvention.Instance) // YAMLが小文字(server)ならCamelCaseを指定
-                    .Build();
+                    //.WithNamingConvention(CamelCaseNamingConvention.Instance) // YAML縺悟ｰ乗枚蟄・server)縺ｪ繧韻amelCase繧呈欠螳・                    .Build();
                 var libs = deserializer.Deserialize<List<ExternalLibarary>>(text);
 
                 ExternalLibrariesSetup externalLibrariesSetup = new ExternalLibrariesSetup() { ExternalLibraries = libs };

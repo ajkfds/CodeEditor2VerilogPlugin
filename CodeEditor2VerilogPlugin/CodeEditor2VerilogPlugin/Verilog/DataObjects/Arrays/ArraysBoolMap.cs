@@ -74,20 +74,20 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
         private void addRange(long start, long last)
         {
             if (mapRanges == null) throw new Exception();
-            // 1. 新しい範囲を追加
+            // 1. 譁ｰ縺励＞遽・峇繧定ｿｽ蜉
             mapRanges.Add(new mapRange(start, last));
 
-            // 2. 開始位置でソート
+            // 2. 髢句ｧ倶ｽ咲ｽｮ縺ｧ繧ｽ繝ｼ繝・
             mapRanges.Sort();
 
-            // 3. 重複・隣接する範囲をマージ
+            // 3. 驥崎､・・髫｣謗･縺吶ｋ遽・峇繧偵・繝ｼ繧ｸ
             var merged = new List<mapRange>();
             if (mapRanges.Count == 0) return;
 
             var current = mapRanges[0];
             for (int i = 1; i < mapRanges.Count; i++)
             {
-                // 隣接(current.End + 1)または重複している場合
+                // 髫｣謗･(current.End + 1)縺ｾ縺溘・驥崎､・＠縺ｦ縺・ｋ蝣ｴ蜷・
                 if (mapRanges[i].Start <= current.Last + 1)
                 {
                     current.Last = Math.Max(current.Last, mapRanges[i].Last);

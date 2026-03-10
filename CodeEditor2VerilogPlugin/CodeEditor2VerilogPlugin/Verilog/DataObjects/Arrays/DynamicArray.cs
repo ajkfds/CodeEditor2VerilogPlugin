@@ -39,7 +39,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
         }
 
         /*
-         size()、delete()
+         size()縲‥elete()
          */
     }
 }

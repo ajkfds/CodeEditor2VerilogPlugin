@@ -402,7 +402,7 @@ namespace pluginVerilog.Verilog.DataObjects
                     if((word.NextText == "," || word.NextText == ")")) // Without this, a port of an undefined type will be recognized as a non-ANSI format.
                     {
                         //For the first port in the port list:
-                        //  — If the direction, port kind, and data type are all omitted, then the port shall be assumed to be a
+                        //  窶・If the direction, port kind, and data type are all omitted, then the port shall be assumed to be a
                         //    member of a non - ANSI style list_of_ports, and port direction and type declarations shall be declared
                         //    after the port list. 
                         nameSpace.BuildingBlock.AnsiStylePortDefinition = false;
@@ -427,7 +427,7 @@ namespace pluginVerilog.Verilog.DataObjects
                 else
                 {
                     //For subsequent ports in the port list:
-                    //    — If the direction, port kind and data type are all omitted, then they shall be inherited from the previous port.
+                    //    窶・If the direction, port kind and data type are all omitted, then they shall be inherited from the previous port.
                     //      If the previous port was an interconnect port, this port shall also be an interconnect port.
                     direction = prevDirection;
                     dataType = prevDataType;
@@ -435,7 +435,7 @@ namespace pluginVerilog.Verilog.DataObjects
                 }
             }
 
-            //    — If the direction is omitted, it shall default to inout. 
+            //    窶・If the direction is omitted, it shall default to inout. 
             if (direction == null) direction = DirectionEnum.Inout;
 
             //If the port kind is omitted: (port kinds = net_type keywords or "var")
@@ -443,16 +443,16 @@ namespace pluginVerilog.Verilog.DataObjects
             {
                 switch (direction)
                 {
-                    // — For input and inout ports, the port shall default to a net of default net type. 
+                    // 窶・For input and inout ports, the port shall default to a net of default net type. 
                     case DirectionEnum.Inout:
                     case DirectionEnum.Input:
                         netType = buildingBlock.DefaultNetType;
                         break;
-                    // — For output ports, the default port kind depends on how the data type is specified:
-                    //      — If the data type is omitted or declared with the implicit_data_type syntax, the port kind shall
+                    // 窶・For output ports, the default port kind depends on how the data type is specified:
+                    //      窶・If the data type is omitted or declared with the implicit_data_type syntax, the port kind shall
                     //        default to a net of default net type.
-                    //      — If the data type is declared with the explicit data_type syntax, the port kind shall default to variable.
-                    //      — A ref port is always a variable.
+                    //      窶・If the data type is declared with the explicit data_type syntax, the port kind shall default to variable.
+                    //      窶・A ref port is always a variable.
                     case DirectionEnum.Output:
                         if(dataType == null)
                         {
@@ -467,7 +467,7 @@ namespace pluginVerilog.Verilog.DataObjects
             //    dataType = DataType.ParseCreate(word, nameSpace, null);
             //}
 
-            // — If the data type is omitted, it shall default to logic except for interconnect ports which have no data type.
+            // 窶・If the data type is omitted, it shall default to logic except for interconnect ports which have no data type.
             // parse packed dimensions for net without explicit datatype
             List<DataObjects.Arrays.PackedArray> packedDimensions = new List<DataObjects.Arrays.PackedArray>();
             if(dataType == null)

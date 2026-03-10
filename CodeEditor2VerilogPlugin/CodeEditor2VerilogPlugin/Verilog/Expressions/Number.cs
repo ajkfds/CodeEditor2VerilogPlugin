@@ -43,10 +43,10 @@ namespace pluginVerilog.Verilog.Expressions
         // hex_value ::= hex_digit { _ | hex_digit }  
 
 
-        // decimal_base ::= ’[s|S]d | ’[s|S]D
-        // binary_base ::= ’[s|S]b |  ’[s|S]B  
-        // octal_base ::= ’[s|S]o | ’[s|S]O
-        // hex_base1 ::= ’[s|S]h | ’[s|S]H  
+        // decimal_base ::= 窶兌s|S]d | 窶兌s|S]D
+        // binary_base ::= 窶兌s|S]b |  窶兌s|S]B  
+        // octal_base ::= 窶兌s|S]o | 窶兌s|S]O
+        // hex_base1 ::= 窶兌s|S]h | 窶兌s|S]H  
         // non_zero_decimal_digit ::= 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 
         // decimal_digit ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9  
         // binary_digit ::= x_digit | z_digit | 0 | 1  
@@ -108,7 +108,7 @@ namespace pluginVerilog.Verilog.Expressions
                 There are two forms to express integer literal constants.The first form is a simple decimal number, which
                 shall be specified as a sequence of digits 0 through 9, optionally starting with a plus or minus unary
                 operator. The second form specifies a based literal constant, which shall be composed of up to three
-                tokens—an optional size constant, an apostrophe character (', ASCII 0x27) followed by a base format
+                tokens窶蚤n optional size constant, an apostrophe character (', ASCII 0x27) followed by a base format
                 character, and the digits representing the value of the number.It shall be legal to macro-substitute these three
                 tokens.
 

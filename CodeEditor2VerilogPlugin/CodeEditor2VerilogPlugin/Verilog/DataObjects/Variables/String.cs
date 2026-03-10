@@ -34,7 +34,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             return val;
         }
 
-        // substrの戻り値がStringを持つため、遅延評価される必要がある。
+        // substr縺ｮ謌ｻ繧雁､縺郡tring繧呈戟縺､縺溘ａ縲・≦蟒ｶ隧穂ｾ｡縺輔ｌ繧句ｿ・ｦ√′縺ゅｋ縲・
         private NamedElements? namedElements = null;
         public override NamedElements NamedElements
         {
