@@ -75,9 +75,8 @@ namespace pluginVerilog.CodeEditor
         }
 
 
-        private static Verilog.DataObjects.DataObject? getDataObject()
+        private static Verilog.DataObjects.DataObject? getDataObject(TextFile textFile)
         {
-            TextFile? textFile = CodeEditor2.Controller.CodeEditor.GetTextFile();
             IVerilogRelatedFile? verilogRelatedFile = textFile as IVerilogRelatedFile;
             if (verilogRelatedFile == null) return null;
             int? index = CodeEditor2.Controller.CodeEditor.GetCaretPosition();
@@ -108,8 +107,7 @@ namespace pluginVerilog.CodeEditor
             start = 0;
             length = 0;
             file = null;
-            TextFile? textFile = CodeEditor2.Controller.CodeEditor.GetTextFile();
-            Verilog.DataObjects.DataObject? dataObject = getDataObject();
+            Verilog.DataObjects.DataObject? dataObject = getDataObject((TextFile)file);
             if (dataObject == null) return false;
 
             WordReference? wordRef = dataObject.DefinedReference;
@@ -132,8 +130,7 @@ namespace pluginVerilog.CodeEditor
             start = 0;
             length = 0;
             file = null;
-            TextFile? textFile = CodeEditor2.Controller.CodeEditor.GetTextFile();
-            Verilog.DataObjects.DataObject? dataObject = getDataObject();
+            Verilog.DataObjects.DataObject? dataObject = getDataObject((TextFile)file);
             if (dataObject == null) return false;
 
             WordReference? wordRef = dataObject.AssignedReferences.FirstOrDefault();
@@ -150,16 +147,24 @@ namespace pluginVerilog.CodeEditor
             return true;
         }
 
-        private static void MenuItem_CheckConnection_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        private static async void MenuItem_CheckConnection_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            TextFile? textFile = CodeEditor2.Controller.CodeEditor.GetTextFile();
-            IVerilogRelatedFile? file = textFile as IVerilogRelatedFile;
-            if (file == null) return;
-            Verilog.DataObjects.DataObject? dataObject = getDataObject();
-            if (dataObject == null) return;
+            try
+            {
+                TextFile? textFile = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync();
+                IVerilogRelatedFile? file = textFile as IVerilogRelatedFile;
+                if (file == null) return;
+                Verilog.DataObjects.DataObject? dataObject = getDataObject((TextFile)file);
+                if (dataObject == null) return;
 
-            HierarchyConnection hierarchyConnection = new HierarchyConnection(file, dataObject);
+                HierarchyConnection hierarchyConnection = new HierarchyConnection(file, dataObject);
 
+
+            }
+            catch (Exception ex)
+            {
+                CodeEditor2.Controller.AppendLog(ex.Message, Avalonia.Media.Colors.Red);
+            }
 
 
 
@@ -173,7 +178,7 @@ namespace pluginVerilog.CodeEditor
             CodeEditor2.Data.TextReference textRef = new TextReference(file, start, length);
             CodeEditor2.Controller.SelectText(textRef);
             CodeEditor2.Controller.CodeEditor.SetCaretPosition(start);
-            CodeEditor2.Controller.CodeEditor.ScrollToCaret();
+            CodeEditor2.Controller.CodeEditor.PostScrollToCaret();
             CodeEditor2.Controller.AddSelectHistory(textRef);
         }
         private static void MenuItem_GoToDriver_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
@@ -184,7 +189,7 @@ namespace pluginVerilog.CodeEditor
             CodeEditor2.Data.TextReference textRef = new TextReference(file, start, length);
             CodeEditor2.Controller.SelectText(textRef);
             CodeEditor2.Controller.CodeEditor.SetCaretPosition(start);
-            CodeEditor2.Controller.CodeEditor.ScrollToCaret();
+            CodeEditor2.Controller.CodeEditor.PostScrollToCaret();
             CodeEditor2.Controller.AddSelectHistory(textRef);
         }
     }

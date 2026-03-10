@@ -27,9 +27,9 @@ namespace pluginVerilog.Verilog.Snippets
         }
 
 
-        public override void Apply()
+        public override async System.Threading.Tasks.Task ApplyAsync()
         {
-            CodeEditor2.Data.TextFile? textFile = CodeEditor2.Controller.CodeEditor.GetTextFile();
+            CodeEditor2.Data.TextFile? textFile = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync();
             if (textFile == null) return;
 
             List<ToolItem> items = new List<ToolItem>();

@@ -52,19 +52,36 @@ namespace pluginVerilog.NavigatePanel
         }
 
 
-        public override async Task UpdateAsync()
+        public override Task UpdateAsync()
         {
-            if (VerilogHeaderInstance == null) return;
-            //VerilogHeaderInstance.Update();
-
+            if (VerilogHeaderInstance == null) return Task.CompletedTask;
+            if (!Dispatcher.UIThread.CheckAccess())
+            {
+                Dispatcher.UIThread.Post(
+                        new Action(() =>
+                        {
+                            try
+                            {
+                                UpdateVisual();
+                            }
+                            catch (Exception ex)
+                            {
+                                CodeEditor2.Controller.AppendLog("#Exception " + ex.Message, Avalonia.Media.Colors.Red);
+                            }
+                        })
+                    );
+                return Task.CompletedTask;
+            }
             UpdateVisual();
+            return Task.CompletedTask;
         }
 
         public override void UpdateVisual()
         {
             if (!Dispatcher.UIThread.CheckAccess())
             {
-                if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+                Dispatcher.UIThread.Invoke(() => { UpdateVisual(); });
+                return;
             }
 
             if (FileItem == null)

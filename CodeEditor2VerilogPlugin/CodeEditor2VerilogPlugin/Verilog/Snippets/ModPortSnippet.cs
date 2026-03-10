@@ -27,9 +27,9 @@ namespace pluginVerilog.Verilog.Snippets
         private List<string> initials = new List<string> { "modportname" };
 
 
-        public override void Apply()
+        public override async System.Threading.Tasks.Task ApplyAsync()
         {
-            CodeEditor2.Data.TextFile? file = CodeEditor2.Controller.CodeEditor.GetTextFile();
+            CodeEditor2.Data.TextFile? file = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync();
             if (file == null) return;
             document = file.CodeDocument;
 
@@ -129,7 +129,7 @@ namespace pluginVerilog.Verilog.Snippets
             CodeEditor2.Controller.CodeEditor.SetSelection(startIndexes[0], lastIndexes[0]);
 
             // set highlights for {n} texts
-            CodeEditor2.Controller.CodeEditor.ClearHighlight();
+            CodeEditor2.Controller.CodeEditor.PostClearHighlight();
             for (int i = 0; i < startIndexes.Count; i++)
             {
                 CodeEditor2.Controller.CodeEditor.AppendHighlight(startIndexes[i], lastIndexes[i]);
@@ -143,7 +143,7 @@ namespace pluginVerilog.Verilog.Snippets
 
         public override void Aborted()
         {
-            CodeEditor2.Controller.CodeEditor.ClearHighlight();
+            CodeEditor2.Controller.CodeEditor.PostClearHighlight();
             document = null;
             base.Aborted();
         }

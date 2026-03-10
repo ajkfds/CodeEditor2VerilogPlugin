@@ -115,7 +115,29 @@ namespace pluginVerilog.NavigatePanel
         public override async Task UpdateAsync()
         {
             if (VerilogModuleInstance == null) return;
+            if (VerilogFile == null)
+            {
+                return;
+            }
+            if (!Dispatcher.UIThread.CheckAccess())
+            {
+                Dispatcher.UIThread.Post(
+                        new Action(async () =>
+                        {
+                            try
+                            {
+                                await VerilogModuleInstance.UpdateAsync(); // UpdateVisual called in this method on the  UI thread
+                            }
+                            catch (Exception ex)
+                            {
+                                CodeEditor2.Controller.AppendLog("#Exception " + ex.Message, Avalonia.Media.Colors.Red);
+                            }
+                        })
+                    );
+                return;
+            }
             await VerilogModuleInstance.UpdateAsync(); // UpdateVisual called in this method on the  UI thread
+            return;
         }
 
 
@@ -179,7 +201,8 @@ namespace pluginVerilog.NavigatePanel
         {
             if (!Dispatcher.UIThread.CheckAccess())
             {
-                if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+                Dispatcher.UIThread.Invoke(() => { UpdateVisual(); });
+                return;
             }
 
             if (Item == null)

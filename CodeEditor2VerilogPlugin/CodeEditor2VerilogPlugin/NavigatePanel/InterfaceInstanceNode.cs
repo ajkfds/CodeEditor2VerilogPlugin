@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Threading;
+using pluginVerilog.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
 using System;
 using System.Collections.Generic;
@@ -125,16 +126,34 @@ namespace pluginVerilog.NavigatePanel
         public override async Task UpdateAsync()
         {
             if (VerilogModuleInstance == null) return;
+
+            if (!Dispatcher.UIThread.CheckAccess())
+            {
+                Dispatcher.UIThread.Post(
+                        new Action(async() =>
+                        {
+                            try
+                            {
+                                await VerilogModuleInstance.UpdateAsync();
+                                UpdateVisual();
+                            }
+                            catch (Exception ex)
+                            {
+                                CodeEditor2.Controller.AppendLog("#Exception " + ex.Message, Avalonia.Media.Colors.Red);
+                            }
+                        })
+                    );
+                return;
+            }
             await VerilogModuleInstance.UpdateAsync();
-
-
             UpdateVisual();
         }
         public override void UpdateVisual()
         {
             if (!Dispatcher.UIThread.CheckAccess())
             {
-                if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+                Dispatcher.UIThread.Invoke(() => { UpdateVisual(); });
+                return;
             }
 
             Data.VerilogModuleInstance instance = Item as Data.VerilogModuleInstance;

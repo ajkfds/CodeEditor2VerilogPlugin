@@ -33,9 +33,9 @@ namespace pluginVerilog.Verilog.Snippets
         private CodeEditor2.Data.TextFile textFile;
         private string moduleName;
 
-        public override void Apply()
+        public override async System.Threading.Tasks.Task ApplyAsync()
         {
-            CodeEditor2.Data.TextFile? textFile = CodeEditor2.Controller.CodeEditor.GetTextFile();
+            CodeEditor2.Data.TextFile? textFile = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync();
             if (textFile == null) return;
             codeDocument = textFile.CodeDocument;
 
@@ -49,7 +49,7 @@ namespace pluginVerilog.Verilog.Snippets
 
             string instanceName = moduleName + "_";
             {
-                Data.IVerilogRelatedFile? vFile = CodeEditor2.Controller.CodeEditor.GetTextFile() as Data.IVerilogRelatedFile;
+                Data.IVerilogRelatedFile? vFile = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync() as Data.IVerilogRelatedFile;
                 if (vFile == null) return;
 
                 ParsedDocument? parentParsedDocument = vFile.VerilogParsedDocument;
@@ -96,7 +96,7 @@ namespace pluginVerilog.Verilog.Snippets
                 CodeEditor2.Controller.CodeEditor.SetCaretPosition(startIndexes[0]);
                 CodeEditor2.Controller.CodeEditor.SetSelection(startIndexes[0], lastIndexes[0] + 1);
 
-                CodeEditor2.Controller.CodeEditor.ClearHighlight();
+                CodeEditor2.Controller.CodeEditor.PostClearHighlight();
                 for (int i = 0; i < startIndexes.Count; i++)
                 {
                     CodeEditor2.Controller.CodeEditor.AppendHighlight(startIndexes[i], lastIndexes[i]);
@@ -111,7 +111,7 @@ namespace pluginVerilog.Verilog.Snippets
 
         public override void Aborted()
         {
-            CodeEditor2.Controller.CodeEditor.ClearHighlight();
+            CodeEditor2.Controller.CodeEditor.PostClearHighlight();
             codeDocument = null;
             textFile = null;
             base.Aborted();

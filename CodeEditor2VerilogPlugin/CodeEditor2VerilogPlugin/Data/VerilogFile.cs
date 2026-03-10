@@ -107,9 +107,6 @@ namespace pluginVerilog.Data
         /// <param name="newParsedDocument"></param>
         public override async Task AcceptParsedDocumentAsync(ParsedDocument? newParsedDocument)
         {
-            
-            if (!Dispatcher.UIThread.CheckAccess()) System.Diagnostics.Debugger.Break();
-
             ParsedDocument? oldParsedDocument = ParsedDocument;
             if (oldParsedDocument == newParsedDocument) return;
 
@@ -129,18 +126,6 @@ namespace pluginVerilog.Data
             {
                 foreach (BuildingBlock buildingBlock in VerilogParsedDocument.Root.BuildingBlocks.Values)
                 {
-                    //if (ProjectProperty.HasRegisteredBuildingBlock(buildingBlock.Name))
-                    //{   // swap building block
-                    //    BuildingBlock? module = buildingBlock as Module;
-                    //    if (module == null) continue;
-
-                    //    BuildingBlock? registeredModule = ProjectProperty.GetBuildingBlock(module.Name) as Module;
-                    //    if (registeredModule == null) continue;
-                    //    if (registeredModule.File == null) continue;
-                    //    if (registeredModule.File.RelativePath == module.File.RelativePath) continue;
-                    //    continue;
-                    //}
-
                     // register new parsedDocument
                     ProjectProperty.RegisterBuildingBlock(buildingBlock.Name, buildingBlock, this);
                 }
@@ -152,32 +137,18 @@ namespace pluginVerilog.Data
                 ReparseRequested = vParsedDocument.ReparseRequested;
             }
 
-
-            updateIncludeFiles(VerilogParsedDocument, Items);
+            await updateIncludeFilesAsync(VerilogParsedDocument, Items);
 
             await UpdateAsync();
 
             // update Navigate panel node visual for this item
-            NavigatePanelNode.UpdateVisual();
-
-            //Task.Run(
-            //    async () =>
-            //    {
-            //        try
-            //        {
-            //            await CreateCashe();
-            //        }
-            //        catch (Exception ex)
-            //        {
-            //            System.Diagnostics.Debugger.Break();
-            //            Controller.AppendLog(ex.Message, Avalonia.Media.Colors.Red);
-            //        }
-            //    }
-            //);
-
+            _ = Task.Run(async() => {
+                await NavigatePanelNode.UpdateAsync();
+                });
         }
 
-        internal static void updateIncludeFiles(Verilog.ParsedDocument parsedDocument, ItemList items)
+
+        internal static async System.Threading.Tasks.Task updateIncludeFilesAsync(Verilog.ParsedDocument parsedDocument, ItemList items)
         {
             // create id table
             Dictionary<string, Data.VerilogHeaderInstance> headerItems = new Dictionary<string, VerilogHeaderInstance>();
@@ -191,7 +162,8 @@ namespace pluginVerilog.Data
             // get file selected in text editor
             CodeEditor2.NavigatePanel.NavigatePanelNode? node = CodeEditor2.Controller.NavigatePanel.GetSelectedNode();
             CodeEditor2.Data.Item? currentItem = node?.Item;
-            CodeEditor2.Data.ITextFile? currentTextFile = Controller.CodeEditor.GetTextFile();
+            CodeEditor2.Data.ITextFile? currentTextFile = await Controller.CodeEditor.GetTextFileAsync
+               ();
 
 
             foreach (var includeFile in parsedDocument.IncludeFiles.Values)
@@ -205,14 +177,14 @@ namespace pluginVerilog.Data
                 // If this include file is selected in the editor, update the editor display.
                 if (item == currentItem && currentTextFile != null)
                 {
-                    Controller.CodeEditor.Refresh();
+                    Controller.CodeEditor.PostRefresh();
                     Controller.MessageView.Update(includeFile.VerilogParsedDocument);
                 }
 
                 includeFile.NavigatePanelNode.UpdateVisual();
 
                 // update nested include file
-                updateIncludeFiles(includeFile.VerilogParsedDocument, item.Items);
+                await updateIncludeFilesAsync(includeFile.VerilogParsedDocument, item.Items);
             }
         }
 
@@ -366,7 +338,7 @@ namespace pluginVerilog.Data
                     NavigatePanelNode.UpdateVisual();
                     if (CodeEditor2.Controller.NavigatePanel.GetSelectedFile() == this)
                     {
-                        CodeEditor2.Controller.CodeEditor.Refresh();
+                        CodeEditor2.Controller.CodeEditor.PostRefresh();
                         if (ParsedDocument != null) CodeEditor2.Controller.MessageView.Update(ParsedDocument);
                     }
                 }

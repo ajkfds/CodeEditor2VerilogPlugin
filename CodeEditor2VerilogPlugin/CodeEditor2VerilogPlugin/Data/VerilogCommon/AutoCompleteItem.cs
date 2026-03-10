@@ -22,13 +22,12 @@ namespace pluginVerilog.Data.VerilogCommon
         private int headIndex = -1;
         private int length = -1;
 
-        public override void Apply()
+        public override System.Threading.Tasks.Task ApplyAsync()
         {
-            if (codeDocument == null) return;
+            if (codeDocument == null) return Task.CompletedTask;
             codeDocument.Replace(headIndex, length, ColorIndex, Text);
             Controller.CodeEditor.SetCaretPosition(headIndex + Text.Length);
+            return Task.CompletedTask;
         }
-
-
     }
 }

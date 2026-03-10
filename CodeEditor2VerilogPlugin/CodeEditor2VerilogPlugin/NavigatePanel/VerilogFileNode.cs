@@ -98,7 +98,25 @@ namespace pluginVerilog.NavigatePanel
             {
                 return;
             }
+            if (!Dispatcher.UIThread.CheckAccess())
+            {
+                Dispatcher.UIThread.Post(
+                        new Action(async () =>
+                        {
+                            try
+                            {
+                                await VerilogFile.UpdateAsync(); // UpdateVisual called in this method on the  UI thread
+                            }
+                            catch (Exception ex)
+                            {
+                                CodeEditor2.Controller.AppendLog("#Exception " + ex.Message, Avalonia.Media.Colors.Red);
+                            }
+                        })
+                    );
+                return;
+            }
             await VerilogFile.UpdateAsync(); // UpdateVisual called in this method on the  UI thread
+            return;
         }
 
         public void UpdateSubNodes()
@@ -153,7 +171,8 @@ namespace pluginVerilog.NavigatePanel
         {
             if (!Dispatcher.UIThread.CheckAccess())
             {
-                if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+                Dispatcher.UIThread.Invoke(()=> { UpdateVisual(); });
+                return;
             }
 
             string text = "-";

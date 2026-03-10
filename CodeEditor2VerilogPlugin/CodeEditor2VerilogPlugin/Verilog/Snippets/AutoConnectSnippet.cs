@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Security.Principal;
 using System.Text;
 using System.Threading;
@@ -34,12 +35,12 @@ namespace pluginVerilog.Verilog.Snippets
 
         private CodeEditor2.CodeEditor.CodeDocument? document;
 
-        public override void Apply()
+        public override async System.Threading.Tasks.Task ApplyAsync()
         {
             List<int> startIndexes = new List<int>();
             List<int> lastIndexes = new List<int>();
 
-            CodeEditor2.Data.TextFile? file = CodeEditor2.Controller.CodeEditor.GetTextFile();
+            CodeEditor2.Data.TextFile? file = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync();
             if (file == null) return;
             document = file.CodeDocument;
             if (document == null) return;
@@ -56,7 +57,7 @@ namespace pluginVerilog.Verilog.Snippets
             base.Apply();
 
             // run async task
-            System.Threading.Tasks.Task.Run(RunAsync);
+            await RunAsync();
         }
 
         // backrtound thread ------------------------------------------------------
@@ -99,10 +100,10 @@ namespace pluginVerilog.Verilog.Snippets
                 ModuleInstantiation? moduleInstantiation = null;
                 BuildingBlocks.BuildingBlock? buildingBlock = null;
 
-                await Dispatcher.UIThread.InvokeAsync(() =>
+                await Dispatcher.UIThread.InvokeAsync(async () =>
                 {
                     if (document == null) return;
-                    CodeEditor2.Data.TextFile? file = CodeEditor2.Controller.CodeEditor.GetTextFile();
+                    CodeEditor2.Data.TextFile? file = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync();
                     if (file == null) return;
                     document = file.CodeDocument;
                     if (document == null) return;
@@ -143,12 +144,11 @@ namespace pluginVerilog.Verilog.Snippets
                     if (!autoConnectWindow.Accept) return;
                 });
 
-               
-
-                await Dispatcher.UIThread.InvokeAsync(() =>
+                await Dispatcher.UIThread.InvokeAsync(async () =>
                 {
+
                     if (document == null) return;
-                    CodeEditor2.Data.TextFile? file = CodeEditor2.Controller.CodeEditor.GetTextFile();
+                    CodeEditor2.Data.TextFile? file = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync();
                     if (file == null) return;
                     document = file.CodeDocument;
                     if (document == null) return;
@@ -175,7 +175,6 @@ namespace pluginVerilog.Verilog.Snippets
                     CodeEditor2.Controller.CodeEditor.SetSelection(document.CaretIndex, document.CaretIndex);
                     CodeEditor2.Controller.CodeEditor.EntryParse();
                 });
-
             }
             catch (OperationCanceledException)
             {
@@ -193,7 +192,7 @@ namespace pluginVerilog.Verilog.Snippets
         public override void Aborted()
         {
             if (_cts != null) _cts.Cancel();
-            CodeEditor2.Controller.CodeEditor.ClearHighlight();
+            CodeEditor2.Controller.CodeEditor.PostClearHighlight();
             document = null;
             base.Aborted();
         }

@@ -57,7 +57,7 @@ namespace pluginVerilog.MessageView
                 CodeEditor2.Controller.CodeEditor.SetCaretPosition(index);
                 CodeEditor2.Controller.CodeEditor.SetSelection(index, index + length-1);
             }
-            CodeEditor2.Controller.CodeEditor.ScrollToCaret();
+            CodeEditor2.Controller.CodeEditor.PostScrollToCaret();
         }
 
         public override void Update()

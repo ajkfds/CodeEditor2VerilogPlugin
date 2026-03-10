@@ -28,6 +28,23 @@ namespace pluginVerilog.NavigatePanel
 
         public override Task UpdateAsync()
         {
+            if (!Dispatcher.UIThread.CheckAccess())
+            {
+                Dispatcher.UIThread.Post(
+                        new Action(() =>
+                        {
+                            try
+                            {
+                                UpdateVisual();
+                            }
+                            catch (Exception ex)
+                            {
+                                CodeEditor2.Controller.AppendLog("#Exception " + ex.Message, Avalonia.Media.Colors.Red);
+                            }
+                        })
+                    );
+                return Task.CompletedTask;
+            }
             UpdateVisual();
             return Task.CompletedTask;
         }
@@ -35,7 +52,8 @@ namespace pluginVerilog.NavigatePanel
         {
             if (!Dispatcher.UIThread.CheckAccess())
             {
-                if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+                Dispatcher.UIThread.Invoke(() => { UpdateVisual(); });
+                return;
             }
 
             if (FileItem == null)

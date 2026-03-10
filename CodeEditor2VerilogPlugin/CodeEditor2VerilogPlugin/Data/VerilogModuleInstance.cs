@@ -243,7 +243,6 @@ namespace pluginVerilog.Data
 
         public override async Task AcceptParsedDocumentAsync(ParsedDocument newParsedDocument)
         {
-            if (!Dispatcher.UIThread.CheckAccess()) System.Diagnostics.Debugger.Break();
 
             if (newParsedDocument == null) throw new Exception();
             Data.VerilogFile source = SourceVerilogFile;
@@ -316,7 +315,7 @@ namespace pluginVerilog.Data
                 ReparseRequested = vParsedDocument.ReparseRequested;
             }
 
-            VerilogFile.updateIncludeFiles(VerilogParsedDocument, Items);
+            await VerilogFile.updateIncludeFilesAsync(VerilogParsedDocument, Items);
 
             await UpdateAsync(); // eliminated here
             //System.Diagnostics.Debug.Print("### Verilog File Parsed " + ID);
@@ -362,7 +361,7 @@ namespace pluginVerilog.Data
                     NavigatePanelNode.UpdateVisual();
                     if (CodeEditor2.Controller.NavigatePanel.GetSelectedFile() == this)
                     {
-                        CodeEditor2.Controller.CodeEditor.Refresh();
+                        CodeEditor2.Controller.CodeEditor.PostRefresh();
                         if (ParsedDocument != null) CodeEditor2.Controller.MessageView.Update(ParsedDocument);
                     }
                 });

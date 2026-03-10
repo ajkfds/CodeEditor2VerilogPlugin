@@ -36,7 +36,7 @@ namespace pluginVerilog.Verilog.Snippets
         private Dictionary<string, Port> ports = new Dictionary<string, Port>();
 
         private int? checkLine = null;
-        public override void Apply()
+        public override async System.Threading.Tasks.Task ApplyAsync()
         {
             List<int> startIndexes = new List<int>();
             List<int> lastIndexes = new List<int>();
@@ -44,7 +44,7 @@ namespace pluginVerilog.Verilog.Snippets
 
             System.Diagnostics.Debug.Print("## AlwaysFFSnippet.Apply");
 
-            CodeEditor2.Data.TextFile? file = CodeEditor2.Controller.CodeEditor.GetTextFile();
+            CodeEditor2.Data.TextFile? file = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync();
             if (file == null) return;
             document = file.CodeDocument;
             if (document == null) return;
@@ -117,7 +117,7 @@ namespace pluginVerilog.Verilog.Snippets
                 CodeEditor2.Controller.CodeEditor.SetSelection(startIndexes[0], lastIndexes[0]);
 
                 // set highlights for {n} texts
-                CodeEditor2.Controller.CodeEditor.ClearHighlight();
+                CodeEditor2.Controller.CodeEditor.PostClearHighlight();
                 for (int i = 0; i < startIndexes.Count; i++)
                 {
                     CodeEditor2.Controller.CodeEditor.AppendHighlight(startIndexes[i], lastIndexes[i]);
@@ -126,7 +126,7 @@ namespace pluginVerilog.Verilog.Snippets
                 base.Apply();
 
                 // run async task
-                System.Threading.Tasks.Task.Run(RunAsync);
+                await RunAsync();
             }
         }
 
@@ -277,7 +277,7 @@ namespace pluginVerilog.Verilog.Snippets
         public override void Aborted()
         {
             if (_cts != null) _cts.Cancel();
-            CodeEditor2.Controller.CodeEditor.ClearHighlight();
+            CodeEditor2.Controller.CodeEditor.PostClearHighlight();
             document = null;
             base.Aborted();
         }

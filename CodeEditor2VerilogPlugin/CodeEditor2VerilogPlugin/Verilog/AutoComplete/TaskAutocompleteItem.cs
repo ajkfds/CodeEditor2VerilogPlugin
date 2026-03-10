@@ -13,11 +13,11 @@ namespace pluginVerilog.Verilog.AutoComplete
         {
         }
 
-        public override void Apply()
+        public override System.Threading.Tasks.Task ApplyAsync()
         {
-            if (codeDocument == null) return;
+            if (codeDocument == null) return System.Threading.Tasks.Task.CompletedTask;
             CodeEditor.CodeDocument? document = (codeDocument as CodeEditor.CodeDocument);
-            if (document == null) return;
+            if (document == null) return System.Threading.Tasks.Task.CompletedTask;
 
             int prevIndex = codeDocument.CaretIndex;
             if (codeDocument.GetLineStartIndex(codeDocument.GetLineAt(prevIndex)) != prevIndex && prevIndex != 0)
@@ -48,6 +48,8 @@ namespace pluginVerilog.Verilog.AutoComplete
             document.Replace(headIndex, length, ColorIndex, appendText);
             CodeEditor2.Controller.CodeEditor.SetCaretPosition(headIndex + selectStart);
             CodeEditor2.Controller.CodeEditor.SetSelection(headIndex + selectStart, headIndex + selectLast - 2);
+
+            return System.Threading.Tasks.Task.CompletedTask;
         }
     }
 }

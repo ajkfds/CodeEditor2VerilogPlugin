@@ -22,9 +22,9 @@ namespace pluginVerilog.Verilog.Snippets
                     );
         }
 
-        public override void Apply()
+        public override async System.Threading.Tasks.Task ApplyAsync()
         {
-            CodeEditor2.Data.TextFile? file = CodeEditor2.Controller.CodeEditor.GetTextFile();
+            CodeEditor2.Data.TextFile? file = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync();
             if (file == null) return;
             CodeDocument? codeDocument = file.CodeDocument;
             if (codeDocument == null) return;

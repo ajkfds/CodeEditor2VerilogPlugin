@@ -25,14 +25,14 @@ namespace pluginVerilog.Verilog.Snippets
                     );
         }
 
-        public override void Apply()
+        public override async System.Threading.Tasks.Task ApplyAsync()
         {
-            CodeEditor2.Data.TextFile? file = CodeEditor2.Controller.CodeEditor.GetTextFile();
+            CodeEditor2.Data.TextFile? file = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync();
             if (file == null) return;
             CodeEditor2.CodeEditor.CodeDocument? codeDocument = file.CodeDocument;
             if (codeDocument == null) return;
 
-            CodeEditor2.Data.ITextFile? iText = CodeEditor2.Controller.CodeEditor.GetTextFile();
+            CodeEditor2.Data.ITextFile? iText = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync();
 
             if (!(iText is Data.IVerilogRelatedFile)) return;
             Data.IVerilogRelatedFile? vFile = iText as Data.IVerilogRelatedFile;
@@ -56,17 +56,17 @@ namespace pluginVerilog.Verilog.Snippets
                 if (iref.IsSmallerThan(moduleInstantiation.BeginIndexReference)) continue;
                 if (moduleInstantiation.LastIndexReference==null || iref.IsGreaterThan(moduleInstantiation.LastIndexReference)) continue;
 
-                writeModuleInstance(codeDocument, index, moduleInstantiation);
+                await writeModuleInstanceAsync(codeDocument, index, moduleInstantiation);
                 return;
             }
         }
 
-        private void writeModuleInstance(CodeDocument codeDocument, int index, ModuleItems.ModuleInstantiation moduleInstantiation)
+        private async System.Threading.Tasks.Task writeModuleInstanceAsync(CodeDocument codeDocument, int index, ModuleItems.ModuleInstantiation moduleInstantiation)
         {
             CodeEditor.CodeDocument? vCodeDocument = codeDocument as CodeEditor.CodeDocument;
             if (vCodeDocument == null) return;
             if (moduleInstantiation.LastIndexReference == null) return;
-            CodeEditor2.Data.ITextFile? iText = CodeEditor2.Controller.CodeEditor.GetTextFile();
+            CodeEditor2.Data.ITextFile? iText = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync();
             if (iText == null) return;
             ProjectProperty? projectProperty = iText.Project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
             if (projectProperty == null) return;

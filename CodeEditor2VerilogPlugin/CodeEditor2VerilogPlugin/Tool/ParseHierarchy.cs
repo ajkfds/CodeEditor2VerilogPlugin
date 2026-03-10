@@ -261,19 +261,10 @@ namespace pluginVerilog.Tool
 
             bool needReparse = false;
             if (verilogFile.ReparseRequested) needReparse = true;
-//            if (verilogFile.VerilogParsedDocument != null && verilogFile.VerilogParsedDocument.ErrorCount > 0) needReparse = true;
             if (needReparse) reparseTargetFiles.Push((CodeEditor2.Data.TextFile)verilogFile);
 
             List<Item> items = new List<Item>();
-            await Dispatcher.UIThread.InvokeAsync(
-                () =>
-                {
-                    foreach (var item in verilogFile.Items)
-                    {
-                        items.Add(item);
-                    }
-                }
-            );
+            items = verilogFile.Items.ToList();
             
             foreach (var item in items)
             {
@@ -322,14 +313,8 @@ namespace pluginVerilog.Tool
             await parser.ParseAsync();
             if (parser.ParsedDocument != null)
             {
-                await Dispatcher.UIThread.InvokeAsync(
-                    async () =>
-                    {
-                        await verilogFile.AcceptParsedDocumentAsync(parser.ParsedDocument);
-                        verilogFile.PostRefresh();
-//                        await verilogFile.UpdateAsync();
-
-                    });
+                await verilogFile.AcceptParsedDocumentAsync(parser.ParsedDocument);
+                verilogFile.PostUIUpdate();
             }
         }
 

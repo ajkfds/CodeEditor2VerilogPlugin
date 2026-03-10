@@ -279,7 +279,7 @@ namespace pluginVerilog.Data
                 ReparseRequested = vParsedDocument.ReparseRequested;
             }
 
-            VerilogFile.updateIncludeFiles(VerilogParsedDocument, Items);
+            await VerilogFile.updateIncludeFilesAsync(VerilogParsedDocument, Items);
 
             //Dictionary<string, Data.VerilogHeaderInstance> headerItems = new Dictionary<string, VerilogHeaderInstance>();
             //foreach (var item in Items.Values)

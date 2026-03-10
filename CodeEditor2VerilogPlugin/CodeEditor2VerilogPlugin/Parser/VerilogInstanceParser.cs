@@ -249,7 +249,6 @@ namespace pluginVerilog.Parser
 
             Root root = await Root.ParseCreate(word,VerilogParsedDocument, File);
 
-            word.RootParsedDocument.UnlockDocument();
             word.Dispose();
         }
     }
