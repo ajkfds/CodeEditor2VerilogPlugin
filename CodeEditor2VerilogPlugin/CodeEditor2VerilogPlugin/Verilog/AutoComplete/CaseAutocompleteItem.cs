@@ -1,4 +1,7 @@
+using AvaloniaEdit.Rendering;
 using CodeEditor2.CodeEditor.CodeComplete;
+using Microsoft.Playwright;
+using pluginVerilog.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +15,8 @@ namespace pluginVerilog.Verilog.AutoComplete
         public CaseAutocompleteItem() : base("case", CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Plugin.ThemeColor, "CodeEditor2/Assets/Icons/screwdriver.svg")
         {
         }
+
+        private string CaseHeader = "P_";
 
         public override System.Threading.Tasks.Task ApplyAsync()
         {
@@ -35,6 +40,23 @@ namespace pluginVerilog.Verilog.AutoComplete
             string appendText = "case([])" + cr;
             appendText += indent + "\t" + cr;
             appendText += indent + "endcase" + cr;
+
+            IVerilogRelatedFile vfile = document.VerilogFile;
+
+            {
+                BuildingBlocks.BuildingBlock? buildingBlock = vfile.VerilogParsedDocument?.GetBuildingBlockAt(prevIndex);
+                if(buildingBlock != null)
+                {
+                    foreach(INamedElement namedElement in buildingBlock.NamedElements)
+                    {
+                        if (namedElement is not Verilog.DataObjects.Constants.Constants) continue;
+                        if (namedElement.Name.StartsWith(CaseHeader))
+                        {
+                            appendText += indent + "\t" + namedElement.Name + ":" + cr;
+                        }
+                    }
+                }
+            }
 
             //if (currentChar != '\r' && currentChar != '\n')
             //{

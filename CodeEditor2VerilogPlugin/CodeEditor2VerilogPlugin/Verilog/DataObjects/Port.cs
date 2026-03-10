@@ -668,7 +668,7 @@ namespace pluginVerilog.Verilog.DataObjects
             {
                 if (block.Ports.ContainsKey(port.Name))
                 {
-                    if (word.Prototype)
+                    if (word.Prototype & block.Ports[port.Name].Direction != DirectionEnum.Undefined)
                     {
                         word.AddPrototypeError("port name duplicate");
                     }

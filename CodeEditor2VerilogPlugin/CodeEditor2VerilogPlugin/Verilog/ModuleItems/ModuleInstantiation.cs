@@ -203,6 +203,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                     word.AddError("unfound module");
                     word.RootParsedDocument.ReparseRequested = true;
                     if (!word.RootParsedDocument.UnfoundModules.Contains(moduleName)) word.RootParsedDocument.UnfoundModules.Add(moduleName);
+                    CodeEditor2.Controller.AppendLog("## unfound " + moduleName + " at " + buildingBlock.Name, Avalonia.Media.Colors.Orange);
                 }
             }
 

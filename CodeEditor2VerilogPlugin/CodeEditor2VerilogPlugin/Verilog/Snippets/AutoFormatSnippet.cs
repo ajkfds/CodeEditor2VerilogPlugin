@@ -41,7 +41,8 @@ namespace pluginVerilog.Verilog.Snippets
             BuildingBlock? buildingBlock = parsedDocument.GetBuildingBlockAt(index);
             if (buildingBlock == null) return;
 
-            List<INamedElement> instantiations = buildingBlock.NamedElements.Values.FindAll(x => x is IBuildingBlockInstantiation);
+            List<IBuildingBlockInstantiation> instantiations = buildingBlock.GetBuildingBlockInstantiations();
+            // NamedElements.Values.FindAll(x => x is IBuildingBlockInstantiation); ではダメ。genereted block内のものが取れない。
             foreach (var instance in instantiations)
             {
                 ModuleInstantiation? moduleInstantiation = instance as ModuleInstantiation;
