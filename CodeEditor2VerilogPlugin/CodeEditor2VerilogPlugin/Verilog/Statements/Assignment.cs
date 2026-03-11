@@ -60,11 +60,11 @@ namespace pluginVerilog.Verilog.Statements
 
             if (word.GetCharAt(0) == '#')
             {
-                DelayControl delayControl = DelayControl.ParseCreate(word, nameSpace);
+                DelayControl? delayControl = DelayControl.ParseCreate(word, nameSpace);
             }
             else if (word.GetCharAt(0) == '@')
             {
-                EventControl eventControl = EventControl.ParseCreate(word, nameSpace);
+                EventControl? eventControl = EventControl.ParseCreate(word, nameSpace);
             }
 
             Expressions.Expression? expression;
