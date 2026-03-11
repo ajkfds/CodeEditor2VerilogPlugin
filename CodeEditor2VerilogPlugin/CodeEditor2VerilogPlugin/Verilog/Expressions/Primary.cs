@@ -142,6 +142,11 @@ number
 
 
         */
+
+        public static new Primary? ParseCreate(WordScanner word, NameSpace nameSpace)
+        {
+            return ParseCreate(word, nameSpace, false);
+        }
         public static new Primary? ParseCreate(WordScanner word, NameSpace nameSpace, bool acceptImplicitNet)
         {
             return parseCreate(word, nameSpace, false, acceptImplicitNet);

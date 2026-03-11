@@ -1,3 +1,4 @@
+using pluginVerilog.Verilog.Expressions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,19 +27,69 @@ namespace pluginVerilog.Verilog.Statements
                                 | specparam_identifier
                                 | mintypmax_expression 
             */
+            /*
+            delay3 ::= # delay_value | # ( mintypmax_expression [ , mintypmax_expression [ , mintypmax_expression ] ] )
+            delay2 ::= # delay_value | # ( mintypmax_expression [ , mintypmax_expression ] )
+            delay_value ::=
+                unsigned_number
+                | real_number
+                | ps_identifier
+                | time_literal
+                | 1step             
+             */
             System.Diagnostics.Debug.Assert(word.Text == "#");
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
-            Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
-            if(expression == null)
+            if(word.Text != "(")
             {
-                word.AddError("illegal delay control");
-                return null;
+                Expression? expression = Primary.ParseCreate(word, nameSpace);
+                if (expression == null)
+                {
+                    word.AddError("illegal delay control");
+                    return null;
+                }
+            }
+            else
+            {
+                word.MoveNext();
+                Expressions.Expression? expression1 = Expressions.Expression.ParseCreate(word, nameSpace);
+                if (expression1 == null)
+                {
+                    word.AddError("illegal delay control");
+                    return null;
+                }
+                if(word.Text == ",")
+                {
+                    word.MoveNext();
+                    Expressions.Expression? expression2 = Expressions.Expression.ParseCreate(word, nameSpace);
+                    if (expression2 == null)
+                    {
+                        word.AddError("illegal delay control");
+                        return null;
+                    }
+                    if (word.Text == ",")
+                    {
+                        word.MoveNext();
+                        Expressions.Expression? expression3 = Expressions.Expression.ParseCreate(word, nameSpace);
+                        if (expression3 == null)
+                        {
+                            word.AddError("illegal delay control");
+                            return null;
+                        }
+                    }
+
+                }
+                if(word.Text != ")")
+                {
+                    word.AddError("illegal delay control");
+                    return null;
+                }
+                word.MoveNext();
             }
 
             DelayControl delayControl = new DelayControl();
-            delayControl.DelayValue = expression;
+//            delayControl.DelayValue = expression;
             return delayControl;
         }
     }
