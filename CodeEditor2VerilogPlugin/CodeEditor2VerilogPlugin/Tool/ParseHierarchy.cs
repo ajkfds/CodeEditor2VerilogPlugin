@@ -98,6 +98,7 @@ namespace pluginVerilog.Tool
             var firstHierTaskCount = new ConcurrentStack<bool>();
             var signal = new SemaphoreSlim(0); // starter
             int workerCount = Environment.ProcessorCount;
+            if (workerCount > 2) workerCount--;
             int activeTaskCount = 0;
 
             // entry first
