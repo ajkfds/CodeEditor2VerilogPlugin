@@ -28,7 +28,10 @@ namespace pluginVerilog.Verilog.Expressions.Operators
 
         public override string CreateString()
         {
-            return Text;
+            StringBuilder stringBuilder = new StringBuilder();
+            AppendString(stringBuilder);
+
+            return stringBuilder.ToString();
         }
     }
     /*

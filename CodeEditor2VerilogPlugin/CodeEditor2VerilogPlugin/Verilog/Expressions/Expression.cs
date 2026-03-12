@@ -238,10 +238,6 @@ namespace pluginVerilog.Verilog.Expressions
             if (rpnPrimaries.Count == 1 && rpnPrimaries[0] is Primary)
             {
                 Primary primary = rpnPrimaries[0] as Primary;
-                //expression.Constant = primary.Constant;
-                //expression.Value = primary.Value;
-                //expression.BitWidth = primary.BitWidth;
-                //expression.Primary = primary;
                 return primary;
             }
 
@@ -286,39 +282,37 @@ namespace pluginVerilog.Verilog.Expressions
                         primary.Reference.AddError("assignment operator needs ()");
                     }
                 }
-                else if (item is UnaryOperator)
+                else if (item is UnaryOperator uop)
                 {
                     if (primaries.Count < 1) return null;
-                    UnaryOperator? op = item as UnaryOperator;
-                    if (op == null) throw new Exception();
-                    Primary primary = op.Operate(primaries[0], word.Prototype);
-                    primaries.RemoveAt(0);
+
+                    Primary operand = primaries[primaries.Count - 1];
+                    Primary primary = uop.Operate(operand, word.Prototype);
+                    primaries.RemoveAt(primaries.Count - 1);
                     primaries.Add(primary);
                 }
-                else if (item is InsideOperator)
+                else if (item is InsideOperator iop)
                 {
                     if (primaries.Count < 1) return null;
-                    InsideOperator? op = item as InsideOperator;
-                    if (op == null) throw new Exception();
-                    Primary primary = op.Operate(primaries[0], word.Prototype);
-                    primaries.RemoveAt(0);
+
+                    Primary operand = primaries[primaries.Count - 1];
+                    Primary primary = iop.Operate(operand, word.Prototype);
+                    primaries.RemoveAt(primaries.Count - 1);
                     primaries.Add(primary);
                 }
-                else if (item is IncDecOperator)
+                else if (item is IncDecOperator idop)
                 {
                     if (primaries.Count < 1) return null;
-                    IncDecOperator? op = item as IncDecOperator;
-                    if (op == null) throw new Exception();
-                    Primary primary = op.Operate(primaries[0], word.Prototype);
-                    primaries.RemoveAt(0);
+
+                    Primary operand = primaries[primaries.Count - 1];
+                    Primary primary = idop.Operate(operand, word.Prototype);
+                    primaries.RemoveAt(primaries.Count - 1);
                     primaries.Add(primary);
                 }
-                else if (item is TenaryOperator)
+                else if (item is TenaryOperator top)
                 {
                     if (primaries.Count < 3) return null;
-                    TenaryOperator? op = item as TenaryOperator;
-                    if (op == null) throw new Exception();
-                    Primary primary = op.Operate(primaries[primaries.Count - 3], primaries[primaries.Count - 2], primaries[primaries.Count - 1], word.Prototype);
+                    Primary primary = top.Operate(primaries[primaries.Count - 3], primaries[primaries.Count - 2], primaries[primaries.Count - 1], word.Prototype);
                     primaries.RemoveAt(primaries.Count - 1);
                     primaries.RemoveAt(primaries.Count - 1);
                     primaries.RemoveAt(primaries.Count - 1);
@@ -331,10 +325,6 @@ namespace pluginVerilog.Verilog.Expressions
             }
             if (primaries.Count == 1)
             {
-                //expression.Constant = Primaries[0].Constant;
-                //expression.BitWidth = Primaries[0].BitWidth;
-                //expression.Value = Primaries[0].Value;
-                //expression.Primary = Primaries[0];
             }
             else
             {
@@ -343,7 +333,6 @@ namespace pluginVerilog.Verilog.Expressions
 
             primaries[0].IncrementDecrement = incDec;
             return primaries[0];
-            //            return expression;
         }
 
 
