@@ -103,7 +103,7 @@ namespace pluginVerilog.Verilog.Snippets
                 }
             }
 
-            base.Apply();
+            await base.ApplyAsync();
         }
 
 

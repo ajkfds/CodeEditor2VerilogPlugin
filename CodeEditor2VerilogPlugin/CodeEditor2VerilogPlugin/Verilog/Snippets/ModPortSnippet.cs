@@ -135,7 +135,7 @@ namespace pluginVerilog.Verilog.Snippets
                 CodeEditor2.Controller.CodeEditor.AppendHighlight(startIndexes[i], lastIndexes[i]);
             }
 
-            base.Apply();
+            await base.ApplyAsync();
         }
 
 

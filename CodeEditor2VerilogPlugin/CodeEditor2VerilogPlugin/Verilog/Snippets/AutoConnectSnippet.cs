@@ -54,7 +54,7 @@ namespace pluginVerilog.Verilog.Snippets
                 indent = "\t";
             }
 
-            base.Apply();
+            await base.ApplyAsync();
 
             // run async task
             await RunAsync();
