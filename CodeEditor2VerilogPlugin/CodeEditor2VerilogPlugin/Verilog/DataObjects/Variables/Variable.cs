@@ -49,7 +49,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         /// </summary>
         /// <param name="dataType"></param>
         /// <returns></returns>
-        public static Variable Create(string name,IDataType dataType)
+        public static new Variable Create(string name,IDataType dataType)
         {
             /*
             6.8 Variable declarations 

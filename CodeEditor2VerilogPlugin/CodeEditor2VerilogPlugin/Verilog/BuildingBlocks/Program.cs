@@ -22,9 +22,9 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         public Dictionary<string, DataObjects.Port> Ports { get { return ports; } }
         private List<DataObjects.Port> portsList = new List<DataObjects.Port>();
         public List<DataObjects.Port> PortsList { get { return portsList; } }
-        public WordReference NameReference;
+        //public new WordReference NameReference;
         private List<string> portParameterNameList = new List<string>();
-        public List<string> PortParameterNameList { get { return portParameterNameList; } }
+        //public List<string> PortParameterNameList { get { return portParameterNameList; } }
 
         public bool AnsiPortStyle = false;
         public bool Static = true;

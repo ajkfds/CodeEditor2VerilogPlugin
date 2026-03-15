@@ -375,7 +375,7 @@ namespace pluginVerilog.Data
         }
 
 
-        CodeEditor2.NavigatePanel.NavigatePanelNode? node = null;
+//        CodeEditor2.NavigatePanel.NavigatePanelNode? node = null;
         public override CodeEditor2.NavigatePanel.NavigatePanelNode NavigatePanelNode
         {
             get

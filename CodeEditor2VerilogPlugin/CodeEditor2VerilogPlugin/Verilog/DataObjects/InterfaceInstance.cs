@@ -11,15 +11,16 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Text.Json.Serialization;
+using System.Diagnostics.CodeAnalysis;
 
 namespace pluginVerilog.Verilog.DataObjects
 {
     public class InterfaceInstance : DataObject,IBuildingBlockInstantiation,INamedElement
     {
-        
         protected InterfaceInstance() { }
         public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
         public Attribute? Attribute { get; set; }
+
         public required WordReference DefinitionReference { get; init; }
 
         [JsonIgnore]
@@ -128,7 +129,7 @@ namespace pluginVerilog.Verilog.DataObjects
             get
             {
                 Interface? instancedInterface;
-                BuildingBlock buildingBlock = InstancedNameSpace.BuildingBlock.SearchBuildingBlockUpward(SourceName);
+                BuildingBlock? buildingBlock = InstancedNameSpace.BuildingBlock.SearchBuildingBlockUpward(SourceName);
                 if(buildingBlock is Interface)
                 {
                     instancedInterface = (Interface)buildingBlock;
@@ -256,7 +257,7 @@ namespace pluginVerilog.Verilog.DataObjects
                     int i = 0;
                     while (!word.Eof && word.Text != ")")
                     {
-                        Expressions.Expression expression = Expressions.Expression.ParseCreate(word, nameSpace);
+                        Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
                         if (instancedInterface != null)
                         {
                             if (i >= instancedInterface.PortParameterNameList.Count)
@@ -449,7 +450,7 @@ namespace pluginVerilog.Verilog.DataObjects
                         }
                         else
                         {
-                            Expressions.Expression expression = Expressions.Expression.ParseCreate(word, nameSpace);
+                            Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
                             if (word.Prototype && expression != null && !interfaceInstance.PortConnection.ContainsKey(pinName)) interfaceInstance.PortConnection.Add(pinName, expression);
 
                             if (!word.Prototype)
@@ -498,13 +499,13 @@ namespace pluginVerilog.Verilog.DataObjects
                         if (instancedInterface != null && i < instancedInterface.PortsList.Count)
                         {
                             pinName = instancedInterface.PortsList[i].Name;
-                            Expressions.Expression expression = Expressions.Expression.ParseCreate(word, nameSpace);
+                            Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
                             if (word.Prototype && expression != null && !interfaceInstance.PortConnection.ContainsKey(pinName)) interfaceInstance.PortConnection.Add(pinName, expression);
                         }
                         else
                         {
                             word.AddError("illegal port connection");
-                            Expressions.Expression expression = Expressions.Expression.ParseCreate(word, nameSpace);
+                            Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
                         }
                         if (word.Text != ",")
                         {
@@ -591,8 +592,8 @@ namespace pluginVerilog.Verilog.DataObjects
         }
         public string CreateString(string indent)
         {
-            Interface instancedModule = ProjectProperty.GetBuildingBlock(SourceName) as Interface;
-            if (instancedModule == null) return null;
+            Interface? instancedModule = ProjectProperty.GetBuildingBlock(SourceName) as Interface;
+            if (instancedModule == null) return "";
 
             StringBuilder sb = new StringBuilder();
             bool first;

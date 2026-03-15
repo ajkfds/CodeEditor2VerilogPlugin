@@ -163,13 +163,16 @@ namespace pluginVerilog.Verilog.Snippets
                 }
             }
         }
-        public override void BeforeKeyDown(object sender, TextInputEventArgs e, CodeEditor2.Views.PopupMenuView popupMenuView)
+
+        public override void BeforeKeyDown(object? sender, TextInputEventArgs e, PopupMenuView popupMenuView)
         {
         }
-        public override void AfterKeyDown(object sender, TextInputEventArgs e, CodeEditor2.Views.PopupMenuView popupMenuView)
+
+        public override void AfterKeyDown(object? sender, TextInputEventArgs e, PopupMenuView popupMenuView)
         {
 
         }
+
         public override void AfterAutoCompleteHandled(CodeEditor2.Views.PopupMenuView popupMenuView)
         {
             CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();

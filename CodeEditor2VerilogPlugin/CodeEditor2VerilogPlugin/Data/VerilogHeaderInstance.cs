@@ -38,7 +38,7 @@ namespace pluginVerilog.Data
             CodeEditor2.Data.Item? fileItem = project.GetItem(relativePath);
             VerilogHeaderFile? vhFile = fileItem as VerilogHeaderFile;
 
-            if (vhFile == null) return null;
+            if (vhFile == null) throw new Exception();
 
 
             //string name;
@@ -99,8 +99,6 @@ namespace pluginVerilog.Data
         }
 
 
-        private ulong cashedVersion = ulong.MaxValue;
-        CodeDocument? cashedDocument = null;
         public override CodeEditor2.CodeEditor.CodeDocument? CodeDocument
         {
             get
@@ -110,17 +108,6 @@ namespace pluginVerilog.Data
             }
         }
 
-        private void disposeItems()
-        {
-            if (ParsedDocument != null)// && ParameterOverrides.Count != 0)
-            {
-                foreach (var incFile in VerilogParsedDocument.IncludeFiles.Values)
-                {
-                    incFile.Dispose();
-                }
-            }
-            parsedDocument = null;
-        }
 
         public string ModuleName { set; get; }
 

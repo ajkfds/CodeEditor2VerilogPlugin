@@ -54,7 +54,7 @@ namespace pluginVerilog.Verilog.Sequence
             | constant_expression : $
         */
 
-        public static SequenceExpr? ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static new SequenceExpr? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             List<SequenceExpr> exprs = new List<SequenceExpr>();
             while (!word.Eof)

@@ -95,7 +95,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
                 {
                     break;
                 }
-                dataObject.SyncContext.AddClockDomain(syncTarget);
+//                dataObject.SyncContext.AddClockDomain(syncTarget);
                 comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
                 comment.MoveNext();
 

@@ -10,7 +10,7 @@ namespace pluginVerilog.Data
 {
     public class TestResultFile : TextFile
     {
-        public static async Task<TestResultFile> CreateAsync(string relativePath, Project project)
+        public static async new Task<TestResultFile> CreateAsync(string relativePath, Project project)
         {
             string name;
             if (relativePath.Contains(System.IO.Path.DirectorySeparatorChar))

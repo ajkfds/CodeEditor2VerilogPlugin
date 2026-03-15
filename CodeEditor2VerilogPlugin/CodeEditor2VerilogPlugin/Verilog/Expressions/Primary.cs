@@ -45,7 +45,7 @@ namespace pluginVerilog.Verilog.Expressions
         //    return primary;
         //}
 
-        public virtual AjkAvaloniaLibs.Controls.ColorLabel GetLabel()
+        public new virtual AjkAvaloniaLibs.Controls.ColorLabel GetLabel()
         {
             AjkAvaloniaLibs.Controls.ColorLabel label = new AjkAvaloniaLibs.Controls.ColorLabel();
             AppendLabel(label);

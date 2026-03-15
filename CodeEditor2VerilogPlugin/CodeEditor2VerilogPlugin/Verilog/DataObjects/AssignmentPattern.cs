@@ -47,7 +47,7 @@ namespace pluginVerilog.Verilog.DataObjects
         {
             return ParseCreate(word, nameSpace, false);
         }
-        public static AssignmentPattern ParseCreate(WordScanner word,NameSpace nameSpace, bool lValue)
+        public static new AssignmentPattern ParseCreate(WordScanner word,NameSpace nameSpace, bool lValue)
         {
             AssignmentPattern assignmentPattern;
 

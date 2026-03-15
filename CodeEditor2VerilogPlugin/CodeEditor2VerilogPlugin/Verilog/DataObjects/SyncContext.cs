@@ -47,11 +47,10 @@ namespace pluginVerilog.Verilog.DataObjects
         {
             isReset = true;
         }
-        public void AddClockDomain(string domainName)
-        {
+        //public void AddClockDomain(string domainName)
+        //{
 
-        }
-
+        //}
         public bool IsClock 
         { get
             {

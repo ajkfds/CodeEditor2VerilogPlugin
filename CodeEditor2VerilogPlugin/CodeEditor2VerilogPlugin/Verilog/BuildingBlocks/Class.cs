@@ -2,6 +2,7 @@ using AjkAvaloniaLibs.Controls;
 using Avalonia.Input;
 using CodeEditor2.CodeEditor;
 using CodeEditor2.CodeEditor.CodeComplete;
+using CodeEditor2.Data;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.ModuleItems;
@@ -17,7 +18,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 {
     public class Class : BuildingBlock, IModuleOrInterface, IModuleOrInterfaceOrCheckerOrClass, DataObjects.DataTypes.IDataType
     {
-        protected Class() : base(null, null)
+        protected Class() : base(null,null)
         {
 
         }
@@ -28,7 +29,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         public bool IsValidForNet { get { return false; } }
 
         public int? BitWidth { get; } = null;
-        public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
+        public new CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
         public bool IsVector { get { return false; } }
         public bool IsVirtual { get; set; }
         public virtual bool PartSelectable { get { return false; } }
@@ -53,7 +54,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
             get
             {
-                Data.IVerilogRelatedFile ret;
+                Data.IVerilogRelatedFile? ret;
                 if (!fileRef.TryGetTarget(out ret)) return null;
                 return ret;
             }
