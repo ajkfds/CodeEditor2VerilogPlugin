@@ -84,16 +84,20 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
         {
             if (SizeExpression0 == null) return "";
 
-            StringBuilder sb = new StringBuilder();
-            sb.Append("[");
-            sb.Append(SizeExpression0.CreateString());
-            if (SizeExpression1 != null)
-            {
-                sb.Append(":");
-                sb.Append(SizeExpression1.CreateString());
-            }
-            sb.Append("]");
-            return sb.ToString();
+            AjkAvaloniaLibs.Controls.ColorLabel label = new AjkAvaloniaLibs.Controls.ColorLabel();
+            AppendLabel(label);
+            return label.CreateString();
+
+            //StringBuilder sb = new StringBuilder();
+            //sb.Append("[");
+            //sb.Append(SizeExpression0.CreateString());
+            //if (SizeExpression1 != null)
+            //{
+            //    sb.Append(":");
+            //    sb.Append(SizeExpression1.CreateString());
+            //}
+            //sb.Append("]");
+            //return sb.ToString();
         }
 
         public void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)

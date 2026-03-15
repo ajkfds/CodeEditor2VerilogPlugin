@@ -9,6 +9,7 @@ using CodeEditor2.CodeEditor;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.Expressions.Operators;
 using System.Text.Json.Serialization;
+using DynamicData;
 
 
 namespace pluginVerilog.Verilog.Expressions
@@ -20,7 +21,7 @@ namespace pluginVerilog.Verilog.Expressions
             Constant = false;
         }
 
-        //        public List<Primary> RpnPrimaries = new List<Primary>();
+        public List<Primary> RpnPrimaries = new List<Primary>();
 
         public Primary Primary;
         public virtual bool Constant { get; protected set; }
@@ -224,6 +225,7 @@ namespace pluginVerilog.Verilog.Expressions
             List<Primary> rpnPrimaries = new List<Primary>();
 
             parseExpressionPrimaries(word, nameSpace, rpnPrimaries, operatorsStock, ref reference,acceptAssignment, acceptmplicitNet);
+
             expression.Reference = reference;
             while (operatorsStock.Count != 0)
             {

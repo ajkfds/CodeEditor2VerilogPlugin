@@ -83,29 +83,50 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         }
         public void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
-            label.AppendText(CreateString() + " ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+            switch (Type)
+            {
+                case DataTypeEnum.Bit:
+                    label.AppendText("bit", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    break;
+                case DataTypeEnum.Logic:
+                    label.AppendText("logic", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    break;
+                case DataTypeEnum.Reg:
+                    label.AppendText("reg", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    break;
+            }
+
+            foreach (Arrays.PackedArray range in PackedDimensions)
+            {
+                label.AppendText(" ");
+                range.AppendLabel(label);
+            }
         }
 
         public virtual string CreateString()
         {
-            StringBuilder sb = new StringBuilder();
-            switch (Type)
-            {
-                case DataTypeEnum.Bit:
-                    sb.Append("bit");
-                    break;
-                case DataTypeEnum.Logic:
-                    sb.Append("logic");
-                    break;
-                case DataTypeEnum.Reg:
-                    sb.Append("reg");
-                    break;
-            }
-            foreach(Arrays.PackedArray range in PackedDimensions)
-            {
-                sb.Append(" " + range.CreateString());
-            }
-            return sb.ToString();
+            AjkAvaloniaLibs.Controls.ColorLabel label = new AjkAvaloniaLibs.Controls.ColorLabel();
+            AppendTypeLabel(label);
+            return label.CreateString();
+
+            //StringBuilder sb = new StringBuilder();
+            //switch (Type)
+            //{
+            //    case DataTypeEnum.Bit:
+            //        sb.Append("bit");
+            //        break;
+            //    case DataTypeEnum.Logic:
+            //        sb.Append("logic");
+            //        break;
+            //    case DataTypeEnum.Reg:
+            //        sb.Append("reg");
+            //        break;
+            //}
+            //foreach(Arrays.PackedArray range in PackedDimensions)
+            //{
+            //    sb.Append(" " + range.CreateString());
+            //}
+            //return sb.ToString();
         }
 
 

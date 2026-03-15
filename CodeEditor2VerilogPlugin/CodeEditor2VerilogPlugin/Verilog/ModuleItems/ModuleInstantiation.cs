@@ -9,6 +9,7 @@ using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.Nets;
 using pluginVerilog.Verilog.DataObjects.Variables;
+using pluginVerilog.Verilog.Expressions;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -318,27 +319,8 @@ namespace pluginVerilog.Verilog.ModuleItems
                                         }
                                     );
                                 }
-                                word.RootParsedDocument.KeepObject.Add(instance);
                             }
 
-                            //CodeEditor2.Controller.AppendLog("parseparameter : " + baseFile.Name, Avalonia.Media.Colors.Orange);
-                            //var baseParser = baseFile.CreateDocumentParser(CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.LoadParse, null);
-                            //await baseParser.Parse();
-
-                            //string key = Verilog.ParsedDocument.KeyGenerator(baseFile, moduleName, parameterOverrides);
-
-                            //if(baseParser.ParsedDocument != null)
-                            //{
-                            //    Verilog.ParsedDocument? vParsedDocument = baseParser.ParsedDocument as Verilog.ParsedDocument;
-                            //    if (vParsedDocument != null) vParsedDocument.ReparseRequested = true;
-
-                            //    await Dispatcher.UIThread.InvokeAsync(
-                            //        () => {
-                            //            baseFile.RegisterInstanceParsedDocument(key, baseParser.ParsedDocument, null);
-                            //            //                                    baseFile.AcceptParsedDocument(baseParser.ParsedDocument);
-                            //        }
-                            //    );
-                            //}
                             instancedModule = word.ProjectProperty.GetInstancedBuildingBlock(moduleInstantiation) as Module;
                         }
 
@@ -363,14 +345,6 @@ namespace pluginVerilog.Verilog.ModuleItems
                     {
                         // 
                     }
-                    //else if (buildingBlock.NamedElements.ContainsIBuldingBlockInstantiation(moduleInstantiation.Name))
-                    //{   // duplicated
-                    //    word.AddPrototypeError("instance name duplicated");
-                    //}
-                    //else
-                    //{
-                    //    buildingBlock.NamedElements.Add(moduleInstantiation.Name, moduleInstantiation);
-                    //}
                     else if (nameSpace.NamedElements.ContainsIBuldingBlockInstantiation(moduleInstantiation.Name))
                     {   // duplicated
                         word.AddPrototypeError("instance name duplicated");
@@ -386,21 +360,6 @@ namespace pluginVerilog.Verilog.ModuleItems
                     {
                         // 
                     }
-                    //else if (buildingBlock.NamedElements.ContainsIBuldingBlockInstantiation(moduleInstantiation.Name))
-                    //{   // duplicated
-                    //    if (((IBuildingBlockInstantiation)buildingBlock.NamedElements[moduleInstantiation.Name]).Prototype)
-                    //    {
-                    //        ModuleInstantiation? mod = buildingBlock.NamedElements[moduleInstantiation.Name] as ModuleInstantiation;
-                    //        if (mod != null)
-                    //        {
-                    //            moduleInstantiation = mod;
-                    //            moduleInstantiation.Prototype = false;
-                    //        }
-                    //    }
-                    //    else
-                    //    {
-                    //    }
-                    //}
                     else if (nameSpace.NamedElements.ContainsIBuldingBlockInstantiation(moduleInstantiation.Name))
                     {   // duplicated
                         if (((IBuildingBlockInstantiation)nameSpace.NamedElements[moduleInstantiation.Name]).Prototype)
@@ -447,8 +406,10 @@ namespace pluginVerilog.Verilog.ModuleItems
                 {
                     word.AppendBlock(moduleInstantiation.BlockBeginIndexReference, moduleInstantiation.LastIndexReference);
                 }
+                syncCheck(word, nameSpace, moduleInstantiation);
                 if (word.Text != ",") break;
                 word.MoveNext();
+
             }
 
 
@@ -459,6 +420,36 @@ namespace pluginVerilog.Verilog.ModuleItems
             }
             word.MoveNext();
             return true;
+        }
+
+        private static void syncCheck(WordScanner word, NameSpace nameSpace,ModuleInstantiation moduleInstantiation)
+        {
+            if (word.Prototype) return;
+
+            Module? instancedModule = word.ProjectProperty.GetInstancedBuildingBlock(moduleInstantiation) as Module;
+            if (instancedModule == null) return;
+
+            foreach (var kvp in moduleInstantiation.PortConnection)
+            {
+                Expressions.Expression expression = kvp.Value;
+                string portName = kvp.Key;
+
+                if (!instancedModule.Ports.TryGetValue(portName, out Port? targetPort)) continue;
+                if (targetPort.DataObject == null) continue;
+                foreach(string syncTargetPortName in targetPort.DataObject.SyncContext.Data)
+                {
+                    if (!moduleInstantiation.PortConnection.TryGetValue(syncTargetPortName, out Expressions.Expression? syncExpression)) continue;
+                    if (syncExpression is not DataObjectReference) continue;
+                    string clockDomain = syncExpression.CreateString().Trim();
+
+//                    if(targetPort.Direction == Port.DirectionEnum.Output || targetPort.Direction== Port.DirectionEnum.Inout)
+                    {
+                        kvp.Value.SyncContext.AddClockDomain(clockDomain, kvp.Value.Reference );
+                    }
+                }
+            }
+
+
         }
 
         private static void parseListOfPortConnections(
@@ -825,19 +816,41 @@ namespace pluginVerilog.Verilog.ModuleItems
 
             if (outPort)
             {
-                if (word.Prototype && expression != null && !moduleInstantiation.PortConnection.ContainsKey(pinName))
+                if (word.Prototype)
                 {
-                    moduleInstantiation.PortConnection.Add(pinName, expression);
+                    if (expression != null && !moduleInstantiation.PortConnection.ContainsKey(pinName))
+                    {
+                        moduleInstantiation.PortConnection.Add(pinName, expression);
+                    }
                 }
-                if (!word.Prototype) checkPortConnection(word.ProjectProperty, instancedModule, expression, pinName, true);
+                else
+                {
+                    if (expression != null && moduleInstantiation.PortConnection.ContainsKey(pinName))
+                    {
+                        moduleInstantiation.PortConnection[pinName] = expression;
+                    }
+                    checkPortConnection(word.ProjectProperty, instancedModule, expression, pinName, true);
+                }
+
             }
             else
             {
-                if (word.Prototype && expression != null && !moduleInstantiation.PortConnection.ContainsKey(pinName))
+                if (word.Prototype)
                 {
-                    moduleInstantiation.PortConnection.Add(pinName, expression);
+                    if (expression != null && !moduleInstantiation.PortConnection.ContainsKey(pinName))
+                    {
+                        moduleInstantiation.PortConnection.Add(pinName, expression);
+                    }
                 }
-                if (!word.Prototype) checkPortConnection(word.ProjectProperty, instancedModule, expression, pinName, false);
+                else
+                {
+                    if (expression != null && moduleInstantiation.PortConnection.ContainsKey(pinName))
+                    {
+                        moduleInstantiation.PortConnection[pinName] = expression;
+                    }
+                    checkPortConnection(word.ProjectProperty, instancedModule, expression, pinName, false);
+                }
+
             }
         }
 
@@ -871,9 +884,8 @@ namespace pluginVerilog.Verilog.ModuleItems
 
             DataObject? portDataObject = instancedModule.Ports[pinName].DataObject;
 
-            if(portDataObject is ModportInstance)
+            if (portDataObject is ModportInstance)
             {
-
                 // connect to modport
                 ModportInstance? modportInstantiation = instancedModule.Ports[pinName].DataObject as ModportInstance;
                 if (modportInstantiation == null) throw new Exception();

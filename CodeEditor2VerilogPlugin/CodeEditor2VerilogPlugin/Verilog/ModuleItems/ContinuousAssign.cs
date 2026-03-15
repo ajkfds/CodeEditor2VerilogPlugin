@@ -13,7 +13,7 @@ namespace pluginVerilog.Verilog.ModuleItems
         public DriveStrength? DriveStrength;
         public Delay3? Delay3;
 
-        public DataObjects.VariableAssignment VariableAssignment { get; protected set; }
+        public DataObjects.VariableAssignment? VariableAssignment { get; protected set; }
 
         public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
         {

@@ -16,8 +16,8 @@ namespace pluginVerilog.Verilog.Statements
         public string Name { get; protected set; }
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
-        public Expressions.Expression LValue { get; protected set; }
-        public Expressions.Expression Expression { get; protected set; }
+        public Expressions.Expression? LValue { get; protected set; }
+        public Expressions.Expression? Expression { get; protected set; }
 
         public AutocompleteItem CreateAutoCompleteItem()
         {
@@ -129,8 +129,8 @@ namespace pluginVerilog.Verilog.Statements
             LValue.DisposeSubReference(true);
             Expression.DisposeSubReference(true);
         }
-        public Expressions.Expression LValue { get; protected set; }
-        public Expressions.Expression Expression { get; protected set; }
+        public Expressions.Expression? LValue { get; protected set; }
+        public Expressions.Expression? Expression { get; protected set; }
         /* IEEE1800-2017
         blocking_assignment ::=   variable_lvalue = delay_or_event_control expression
                                 | nonrange_variable_lvalue = dynamic_array_new

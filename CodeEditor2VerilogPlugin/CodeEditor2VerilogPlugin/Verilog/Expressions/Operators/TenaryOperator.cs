@@ -68,6 +68,10 @@ namespace pluginVerilog.Verilog.Expressions.Operators
             {
                 Reference = WordReference.CreateReferenceRange(Condition.Reference, Primary2.Reference);
             }
+            SyncContext.PropageteClockDomainFrom(Primary1.SyncContext, Primary1.Reference);
+            SyncContext.PropageteClockDomainFrom(Primary2.SyncContext, Primary2.Reference);
+            SyncContext.PropageteClockDomainFrom(Condition.SyncContext, Condition.Reference);
+
             if (Operated != null) Operated(this);
             return this;
         }

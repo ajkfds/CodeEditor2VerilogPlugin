@@ -128,13 +128,14 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             if(DataType != null)
             {
                 DataType.AppendTypeLabel(label);
+                label.AppendText(" ");
             }
 
-            if (PackedDimensions != null)
+            if (UnpackedArrays != null)
             {
-                foreach(PackedArray packedArray in PackedDimensions)
+                foreach(UnPackedArray unpackedArray in UnpackedArrays)
                 {
-                    label.AppendLabel(packedArray.GetLabel());
+                    label.AppendLabel(unpackedArray.GetLabel());
                     label.AppendText(" ");
                 }
             }
@@ -449,7 +450,6 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             while (!word.Eof)
             {
                 Net net = Net.Create(word.Text,netType, dataType);
-                nets.Add(net);
 //                net.NetType = netType;
 
                 net.DefinedReference = word.GetReference();
@@ -459,7 +459,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                     {
                         if (nameSpace.NamedElements.ContainsKey(net.Name))
                         {
-                            BuildingBlocks.IModuleOrInterfaceOrProgram portBlock = nameSpace.BuildingBlock as BuildingBlocks.IModuleOrInterfaceOrProgram;
+                            BuildingBlocks.IModuleOrInterfaceOrProgram? portBlock = nameSpace.BuildingBlock as BuildingBlocks.IModuleOrInterfaceOrProgram;
                             if(portBlock != null && portBlock.Ports.ContainsKey(net.Name))
                             {   // for non-ansi style port definition
                                 nameSpace.NamedElements.Replace(net.Name,net);
@@ -541,6 +541,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                     //    }
                     //}
                 }
+                nets.Add(net);
 
                 if (word.GetCharAt(0) != ',') break;
                 word.MoveNext(); // ,
@@ -558,6 +559,10 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                     net.Comment = comment;
                 }
                 word.MoveNext();
+                foreach (Net net in nets)
+                {
+                    CommentAnnotation.DataObjectAnnotaion.ParsePostComment(word, nameSpace, net);
+                }
             }
 
             return true;

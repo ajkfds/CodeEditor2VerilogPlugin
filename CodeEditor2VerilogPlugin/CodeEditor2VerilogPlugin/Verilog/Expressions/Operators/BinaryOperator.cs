@@ -193,6 +193,8 @@ namespace pluginVerilog.Verilog.Expressions.Operators
                 }
             }
 
+            if (Primary1 !=null) SyncContext.PropageteClockDomainFrom(Primary1.SyncContext, Primary1.Reference);
+            if (Primary2 != null) SyncContext.PropageteClockDomainFrom(Primary2.SyncContext, Primary2.Reference);
             if (Operated != null) Operated(this);
             return this;
         }

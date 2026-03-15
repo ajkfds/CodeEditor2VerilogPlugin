@@ -47,10 +47,6 @@ namespace pluginVerilog.Verilog.DataObjects
         {
             isReset = true;
         }
-        //public void AddClockDomain(string domainName)
-        //{
-
-        //}
         public bool IsClock 
         { get
             {
@@ -65,7 +61,20 @@ namespace pluginVerilog.Verilog.DataObjects
                 return isReset;
             }
         }
-        public void PropageteClockDomainFrom(SyncContext syncContext,WordReference alartWordRef)
+        public void AddClockDomain(string domainName, WordReference? alartWordRef)
+        {
+            if (Data.Count == 0)
+            { // assign new context
+                Data.Add(domainName);
+            }
+            else
+            {
+                bool matched = true;
+                if (!Data.Contains(domainName)) matched = false;
+                if (!matched && alartWordRef != null) alartWordRef.AddWarning("sync mismatch");
+            }
+        }
+        public void PropageteClockDomainFrom(SyncContext syncContext,WordReference? alartWordRef)
         {
             if (Data.Count == 0)
             { // assign new context
@@ -77,12 +86,11 @@ namespace pluginVerilog.Verilog.DataObjects
             else
             {
                 bool matched = true;
-                if (Data.Count == syncContext.Data.Count) matched = false;
                 foreach(var sync in syncContext.Data)
                 {
                     if(!Data.Contains(sync)) matched = false;
                 }
-                if(!matched) alartWordRef.AddWarning("sync mismatch");
+                if(!matched && alartWordRef != null) alartWordRef.AddWarning("sync mismatch");
             }
         }
 

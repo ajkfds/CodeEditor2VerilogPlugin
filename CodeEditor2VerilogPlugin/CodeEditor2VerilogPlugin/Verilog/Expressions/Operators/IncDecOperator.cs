@@ -80,6 +80,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
             {
                 Reference = WordReference.CreateReferenceRange(Primary.Reference, Primary.Reference);
             }
+            SyncContext.PropageteClockDomainFrom(Primary.SyncContext, Reference);
             if (Operated != null) Operated(this);
             return this;
         }

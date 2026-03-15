@@ -101,6 +101,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
             {
                 Reference = Primary.Reference;
             }
+            SyncContext.PropageteClockDomainFrom(Primary.SyncContext,Reference);
             if (Operated != null) Operated(this);
             return this;
         }
