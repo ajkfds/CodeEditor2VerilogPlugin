@@ -15,14 +15,18 @@ using System.Text;
 using System.Threading.Tasks;
 using static CodeEditor2.Controller;
 using System.Text.Json.Serialization;
+using System.Threading;
 
 namespace pluginVerilog.Data
 {
     public class VerilogHeaderInstance : InstanceTextFile, IVerilogRelatedFile
     {
+
         protected VerilogHeaderInstance(CodeEditor2.Data.TextFile sourceTextFile) : base(sourceTextFile)
         {
-
+            idLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
+            moduleNameLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
+            nodeRefDictionaryLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
         }
 
         
@@ -56,7 +60,7 @@ namespace pluginVerilog.Data
                 RelativePath = relativePath 
             };
 
-            instance.id = id;
+            instance.ID = id;
             instance.RootFile = parentFile;
             instance.InstancedReference = instancedReference;
             return instance;
@@ -68,12 +72,33 @@ namespace pluginVerilog.Data
         public IVerilogRelatedFile RootFile { get; protected set; }
         public IndexReference InstancedReference { get; protected set; }
 
-        private string id;
+        private readonly ReaderWriterLockSlim idLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
+        private string id = string.Empty;
         public override string ID
         {
             get
             {
-                return id;
+                idLock.EnterReadLock();
+                try
+                {
+                    return id;
+                }
+                finally
+                {
+                    idLock.ExitReadLock();
+                }
+            }
+            set
+            {
+                idLock.EnterWriteLock();
+                try
+                {
+                    id = value;
+                }
+                finally
+                {
+                    idLock.ExitWriteLock();
+                }
             }
         }
 
@@ -86,12 +111,31 @@ namespace pluginVerilog.Data
             if (file == null) return false;
             if (!IsSameAs(file as File)) return false;
 
-            ParsedDocument = file.ParsedDocument;
-            if(CodeDocument != null && file.CodeDocument != null)
+            // Use write lock for updating state
+            textFileLock.EnterWriteLock();
+            try
             {
-                if(CodeDocument.Version == file.CodeDocument.Version)
+                parsedDocument = file.parsedDocument;
+            }
+            finally
+            {
+                textFileLock.ExitWriteLock();
+            }
+
+            // CodeDocument is from source file, so read lock is sufficient
+            textFileLock.EnterReadLock();
+            var codeDoc = CodeDocument;
+            textFileLock.ExitReadLock();
+
+            file.textFileLock.EnterReadLock();
+            var fileCodeDoc = file.CodeDocument;
+            file.textFileLock.ExitReadLock();
+
+            if (codeDoc != null && fileCodeDoc != null)
+            {
+                if (codeDoc.Version == fileCodeDoc.Version)
                 {
-                    CodeDocument.CopyColorMarkFrom(file.CodeDocument);
+                    codeDoc.CopyColorMarkFrom(fileCodeDoc);
                 }
             }
 
@@ -109,7 +153,35 @@ namespace pluginVerilog.Data
         }
 
 
-        public string ModuleName { set; get; }
+        private readonly ReaderWriterLockSlim moduleNameLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
+        private string moduleName = string.Empty;
+        public string ModuleName
+        {
+            get
+            {
+                moduleNameLock.EnterReadLock();
+                try
+                {
+                    return moduleName;
+                }
+                finally
+                {
+                    moduleNameLock.ExitReadLock();
+                }
+            }
+            set
+            {
+                moduleNameLock.EnterWriteLock();
+                try
+                {
+                    moduleName = value;
+                }
+                finally
+                {
+                    moduleNameLock.ExitWriteLock();
+                }
+            }
+        }
 
 
         public string ParameterId
@@ -132,89 +204,127 @@ namespace pluginVerilog.Data
 
         public override void Close()
         {
-            if (VerilogParsedDocument != null) VerilogParsedDocument.ReloadIncludeFiles();
+            textFileLock.EnterReadLock();
+            var parsed = VerilogParsedDocument;
+            textFileLock.ExitReadLock();
+
+            if (parsed != null) parsed.ReloadIncludeFiles();
             //SourceVerilogFile.Close();
         }
-
-        private Verilog.ParsedDocument parsedDocument = null;
 
         public override CodeEditor2.CodeEditor.ParsedDocument ParsedDocument
         {
             get
             {
-                return parsedDocument;
+                textFileLock.EnterReadLock();
+                try
+                {
+                    if(parsedDocument==null) throw new Exception();
+                    return parsedDocument;
+                }
+                finally
+                {
+                    textFileLock.ExitReadLock();
+                }
             }
             set
             {
                 Verilog.ParsedDocument? vParsedDocument = value as Verilog.ParsedDocument;
                 if (vParsedDocument == null) throw new Exception();
-                parsedDocument = vParsedDocument;
+
+                textFileLock.EnterWriteLock();
+                try
+                {
+                    parsedDocument = vParsedDocument;
+                }
+                finally
+                {
+                    textFileLock.ExitWriteLock();
+                }
             }
         }
 
         protected Dictionary<WeakReference<CodeEditor2.Data.Item?>, WeakReference<CodeEditor2.NavigatePanel.NavigatePanelNode>> nodeRefDictionary
             = new Dictionary<WeakReference<CodeEditor2.Data.Item?>, WeakReference<CodeEditor2.NavigatePanel.NavigatePanelNode>>();
+        private readonly ReaderWriterLockSlim nodeRefDictionaryLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
+
         public override CodeEditor2.NavigatePanel.NavigatePanelNode NavigatePanelNode
         {
             get
             {
-                CodeEditor2.NavigatePanel.NavigatePanelNode? node = null;
-                List<WeakReference<CodeEditor2.Data.Item?>> disposeRefs = new List<WeakReference<CodeEditor2.Data.Item?>>();
-
-                // search parent based table
-                foreach (var pair in nodeRefDictionary)
+                nodeRefDictionaryLock.EnterWriteLock();
+                try
                 {
-                    var parentRef = pair.Key;
-                    if (!parentRef.TryGetTarget(out var parent))
+                    CodeEditor2.NavigatePanel.NavigatePanelNode? node = null;
+                    List<WeakReference<CodeEditor2.Data.Item?>> disposeRefs = new List<WeakReference<CodeEditor2.Data.Item?>>();
+
+                    // search parent based table
+                    foreach (var pair in nodeRefDictionary)
                     {
-                        disposeRefs.Add(parentRef);
-                        continue;
+                        var parentRef = pair.Key;
+                        if (!parentRef.TryGetTarget(out var parent))
+                        {
+                            disposeRefs.Add(parentRef);
+                            continue;
+                        }
+                        if (parent != Parent) continue;
+
+                        var nodeRef = pair.Value;
+                        if (nodeRef.TryGetTarget(out node)) break;
                     }
-                    if (parent != Parent) continue;
 
-                    var nodeRef = pair.Value;
-                    if (nodeRef.TryGetTarget(out node)) break;
+                    // remove unconnected weakRefs
+                    foreach (var disposeRef in disposeRefs)
+                    {
+                        nodeRefDictionary.Remove(disposeRef);
+                    }
+
+                    if (node == null)
+                    {
+                        node = CreateNode();
+                        if (node == null) throw new Exception();
+
+                        WeakReference<CodeEditor2.Data.Item?> parent = new WeakReference<CodeEditor2.Data.Item?>(Parent);
+                        nodeRefDictionary.Add(parent, new WeakReference<CodeEditor2.NavigatePanel.NavigatePanelNode>(node));
+                    }
+
+                    return node;
                 }
-
-                // remove unconnected weakRefs
-                foreach (var disposeRef in disposeRefs)
+                finally
                 {
-                    nodeRefDictionary.Remove(disposeRef);
+                    nodeRefDictionaryLock.ExitWriteLock();
                 }
-
-                if (node == null)
-                {
-                    node = CreateNode();
-                    if (node == null) throw new Exception();
-
-                    WeakReference<CodeEditor2.Data.Item?> parent = new WeakReference<CodeEditor2.Data.Item?>(Parent);
-                    nodeRefDictionary.Add(parent, new WeakReference<CodeEditor2.NavigatePanel.NavigatePanelNode>(node));
-                }
-
-                return node;
             }
             protected set
             {
-                WeakReference<CodeEditor2.Data.Item?>? indexRef = null;
-
-                // search parent based table
-                foreach (var pair in nodeRefDictionary)
+                nodeRefDictionaryLock.EnterWriteLock();
+                try
                 {
-                    var parentRef = pair.Key;
-                    if (!parentRef.TryGetTarget(out var parent))
+                    WeakReference<CodeEditor2.Data.Item?>? indexRef = null;
+
+                    // search parent based table
+                    foreach (var pair in nodeRefDictionary)
                     {
-                        continue;
+                        var parentRef = pair.Key;
+                        if (!parentRef.TryGetTarget(out var parent))
+                        {
+                            continue;
+                        }
+                        if (parent != Parent) continue;
+                        indexRef = parentRef;
                     }
-                    if (parent != Parent) continue;
-                    indexRef = parentRef;
-                }
 
-                if (indexRef != null)
-                {
-                    nodeRefDictionary.Remove(indexRef);
+                    if (indexRef != null)
+                    {
+                        nodeRefDictionary.Remove(indexRef);
+                    }
+                    WeakReference<CodeEditor2.Data.Item?> parentNewRef = new WeakReference<CodeEditor2.Data.Item?>(Parent);
+                    nodeRefDictionary.Add(parentNewRef, new WeakReference<CodeEditor2.NavigatePanel.NavigatePanelNode>(value));
                 }
-                WeakReference<CodeEditor2.Data.Item?> parentNewRef = new WeakReference<CodeEditor2.Data.Item?>(Parent);
-                nodeRefDictionary.Add(parentNewRef, new WeakReference<CodeEditor2.NavigatePanel.NavigatePanelNode>(value));
+                finally
+                {
+                    nodeRefDictionaryLock.ExitWriteLock();
+                }
             }
         }
 
@@ -228,7 +338,15 @@ namespace pluginVerilog.Data
         {
             get
             {
-                return parsedDocument;
+                textFileLock.EnterReadLock();
+                try
+                {
+                    return parsedDocument as Verilog.ParsedDocument;
+                }
+                finally
+                {
+                    textFileLock.ExitReadLock();
+                }
             }
         }
 
@@ -352,7 +470,11 @@ namespace pluginVerilog.Data
         //}
         public override PopupItem? GetPopupItem(ulong version, int index)
         {
-            return VerilogCommon.AutoComplete.GetPopupItem(this, VerilogParsedDocument, version, index);
+            textFileLock.EnterReadLock();
+            var parsed = VerilogParsedDocument;
+            textFileLock.ExitReadLock();
+
+            return VerilogCommon.AutoComplete.GetPopupItem(this, parsed, version, index);
         }
 
         public override List<ToolItem> GetToolItems(int index)
@@ -362,7 +484,11 @@ namespace pluginVerilog.Data
 
         public override List<AutocompleteItem>? GetAutoCompleteItems(int index, out string cantidateWord)
         {
-            return VerilogCommon.AutoComplete.GetAutoCompleteItems(this, VerilogParsedDocument, index, out cantidateWord);
+            textFileLock.EnterReadLock();
+            var parsed = VerilogParsedDocument;
+            textFileLock.ExitReadLock();
+
+            return VerilogCommon.AutoComplete.GetAutoCompleteItems(this, parsed, index, out cantidateWord);
         }
 
 

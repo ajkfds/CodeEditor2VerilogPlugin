@@ -41,6 +41,13 @@ namespace pluginVerilog.Verilog.Expressions.Operators
             Primary2.AppendString(stringBuilder);
         }
 
+        public override void AppendRefrencedDataObjects(List<DataObjects.DataObject> referencedObjects)
+        {
+            Condition.AppendRefrencedDataObjects(referencedObjects);
+            Primary1.AppendRefrencedDataObjects(referencedObjects);
+            Primary2.AppendRefrencedDataObjects(referencedObjects);
+        }
+
         public delegate void OperatedAction(TenaryOperator tenaryOperator);
         public static OperatedAction Operated;
 

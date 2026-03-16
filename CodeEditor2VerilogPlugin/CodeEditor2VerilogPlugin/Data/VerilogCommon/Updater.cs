@@ -66,13 +66,14 @@ namespace pluginVerilog.Data.VerilogCommon
                 }
                 else if (item is VerilogFile)
                 {
+                    VerilogFile verilogFile = (VerilogFile)item;
                     if (item.VerilogParsedDocument.Root.BuildingBlocks.Count == 1)
                     {
                         addSubItemsSingleBuldingBlock(item, null, newSubItems, parent, project);
                     }
                     else
                     {
-                        addSubItemsMultiBuildingBlock((VerilogFile)item, newSubItems, parent, project);
+                        addSubItemsMultiBuildingBlock(verilogFile, newSubItems, parent, project);
                     }
                 }
 

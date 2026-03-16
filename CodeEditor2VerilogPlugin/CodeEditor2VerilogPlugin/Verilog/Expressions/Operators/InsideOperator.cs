@@ -1,3 +1,4 @@
+using pluginVerilog.Verilog.DataObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -80,6 +81,11 @@ namespace pluginVerilog.Verilog.Expressions.Operators
         {
             stringBuilder.Append(Text);
             Primary.AppendString(stringBuilder);
+        }
+
+        public override void AppendRefrencedDataObjects(List<DataObject> referencedObjects)
+        {
+            Primary.AppendRefrencedDataObjects(referencedObjects);
         }
 
         public static new InsideOperator? ParseCreate(WordScanner word,NameSpace nameSpace)

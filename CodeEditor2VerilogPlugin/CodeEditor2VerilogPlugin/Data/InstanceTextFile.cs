@@ -2,13 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Data
 {
     public class InstanceTextFile : CodeEditor2.Data.TextFile
     {
-        public InstanceTextFile(CodeEditor2.Data.TextFile sourceTextFile)
+
+        protected InstanceTextFile(CodeEditor2.Data.TextFile sourceTextFile)
         {
             sourceFileRef = new WeakReference<CodeEditor2.Data.TextFile>(sourceTextFile);
         }

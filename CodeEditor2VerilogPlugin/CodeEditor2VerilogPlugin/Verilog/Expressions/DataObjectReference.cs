@@ -84,6 +84,11 @@ namespace pluginVerilog.Verilog.Expressions
             return sb.ToString();
         }
 
+        public override void AppendRefrencedDataObjects(List<DataObjects.DataObject> referencedObjects)
+        {
+            if(DataObject!=null && !referencedObjects.Contains(DataObject)) referencedObjects.Add(DataObject);
+        }
+
         /// <summary>
         /// create DataObject Reference from DataObject
         /// </summary>

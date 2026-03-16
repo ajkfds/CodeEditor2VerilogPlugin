@@ -149,6 +149,11 @@ namespace pluginVerilog.Verilog.Expressions.Operators
             AppendString(sb);
             return sb.ToString();
         }
+        public override void AppendRefrencedDataObjects(List<DataObjects.DataObject> referencedObjects)
+        {
+            Primary1.AppendRefrencedDataObjects(referencedObjects);
+            Primary2.AppendRefrencedDataObjects(referencedObjects);
+        }
 
 
         Primary Primary1;

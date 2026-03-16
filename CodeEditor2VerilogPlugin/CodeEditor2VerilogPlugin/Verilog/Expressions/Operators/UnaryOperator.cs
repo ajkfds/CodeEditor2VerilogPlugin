@@ -1,3 +1,4 @@
+using pluginVerilog.Verilog.DataObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,6 +46,10 @@ namespace pluginVerilog.Verilog.Expressions.Operators
             Primary.AppendString(stringBuilder);
         }
 
+        public override void AppendRefrencedDataObjects(List<DataObject> referencedObjects)
+        {
+            Primary.AppendRefrencedDataObjects(referencedObjects);
+        }
         public static UnaryOperator? ParseCreate(WordScanner word)
         {
             switch (word.Length)

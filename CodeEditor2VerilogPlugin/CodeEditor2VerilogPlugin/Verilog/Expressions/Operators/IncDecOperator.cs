@@ -35,6 +35,10 @@ namespace pluginVerilog.Verilog.Expressions.Operators
             Primary.AppendString(stringBuilder);
         }
 
+        public override void AppendRefrencedDataObjects(List<DataObjects.DataObject> referencedObjects)
+        {
+            Primary.AppendRefrencedDataObjects(referencedObjects);
+        }
         public static IncDecOperator ParseCreate(WordScanner word)
         {
             switch (word.Length)

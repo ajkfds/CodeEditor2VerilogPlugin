@@ -5,6 +5,7 @@ using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
 using pluginVerilog.CodeEditor;
 using pluginVerilog.Verilog;
+using pluginVerilog.Verilog.BuildingBlocks;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

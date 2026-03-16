@@ -10,12 +10,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Data
 {
     public class InterfaceInstance : InstanceTextFile, IVerilogRelatedFile
     {
+
         public required string ModuleName { set; get; }
 
         public required Dictionary<string, Verilog.Expressions.Expression> ParameterOverrides;
