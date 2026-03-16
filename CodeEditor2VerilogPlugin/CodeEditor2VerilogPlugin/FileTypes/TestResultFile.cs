@@ -23,7 +23,7 @@ namespace pluginVerilog.FileTypes
             return false;
         }
 
-        public override async Task<CodeEditor2.Data.File?> CreateFile(string relativeFilePath, CodeEditor2.Data.Project project)
+        public override async Task<CodeEditor2.Data.File> CreateFile(string relativeFilePath, CodeEditor2.Data.Project project)
         {
             return await Data.TestResultFile.CreateAsync(relativeFilePath, project);
         }

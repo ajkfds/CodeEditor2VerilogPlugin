@@ -108,7 +108,6 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                     return UserDefinedVariable.Create(name, dataType);
                 default:
                     throw new Exception();
-                    break;
             }
         }
 

@@ -143,11 +143,11 @@ namespace pluginVerilog.Data
         }
 
 
-        public override CodeEditor2.CodeEditor.CodeDocument? CodeDocument
+        public override CodeEditor2.CodeEditor.CodeDocument CodeDocument
         {
             get
             {
-                if (SourceVerilogFile == null) return null;
+                if (SourceVerilogFile == null) throw new Exception();
                 return SourceVerilogFile.CodeDocument;
             }
         }
@@ -212,7 +212,7 @@ namespace pluginVerilog.Data
             //SourceVerilogFile.Close();
         }
 
-        public override CodeEditor2.CodeEditor.ParsedDocument ParsedDocument
+        public override CodeEditor2.CodeEditor.ParsedDocument? ParsedDocument
         {
             get
             {
@@ -341,7 +341,9 @@ namespace pluginVerilog.Data
                 textFileLock.EnterReadLock();
                 try
                 {
-                    return parsedDocument as Verilog.ParsedDocument;
+                    Verilog.ParsedDocument? vParsedDocument = parsedDocument as Verilog.ParsedDocument;
+                    if (vParsedDocument == null) throw new Exception();
+                    return vParsedDocument;
                 }
                 finally
                 {

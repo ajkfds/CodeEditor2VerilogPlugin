@@ -47,7 +47,7 @@ namespace pluginVerilog.Verilog.DataObjects
         public Dictionary<string, Expressions.Expression> PortConnection { get; set; } = new Dictionary<string, Expressions.Expression>();
 
         public required IndexReference BeginIndexReference { get; init; }
-        public IndexReference BlockBeginIndexReference { get; set; }
+        public required IndexReference BlockBeginIndexReference { get; set; }
         public IndexReference? LastIndexReference { get; set; }
         public void AppendLabel(IndexReference iref, AjkAvaloniaLibs.Controls.ColorLabel label)
         {
@@ -112,7 +112,8 @@ namespace pluginVerilog.Verilog.DataObjects
                 ParameterOverrides = new Dictionary<string, Expressions.Expression>(),
                 Project = word.Project,
                 SourceName = sourceInterfaceName,
-                InstancedNameSpace = nameSpace
+                InstancedNameSpace = nameSpace,
+                BlockBeginIndexReference = word.CreateIndexReference()
             };
             Interface? interface_ = interfaceInstantiation.Interface;
             if (interface_ == null) return interfaceInstantiation;
@@ -230,7 +231,7 @@ namespace pluginVerilog.Verilog.DataObjects
                             }
                             else
                             {
-                                parameterOverrides.Add(paramName, expression);
+                                if(expression != null) parameterOverrides.Add(paramName, expression);
                             }
                         }
 
@@ -322,9 +323,9 @@ namespace pluginVerilog.Verilog.DataObjects
                     ParameterOverrides = parameterOverrides,
                     Project = word.RootParsedDocument.Project,
                     SourceName = interfaceName,
-                    InstancedNameSpace = nameSpace
+                    InstancedNameSpace = nameSpace,
+                    BlockBeginIndexReference = blockBeginIndexReference
                 };
-                interfaceInstance.BlockBeginIndexReference = blockBeginIndexReference;
 
                 // swap to parameter overrided module
                 if (instancedInterface != null)
@@ -364,7 +365,8 @@ namespace pluginVerilog.Verilog.DataObjects
                     {   // duplicated
                         if (((IBuildingBlockInstantiation)moduleOrInterface.NamedElements[interfaceInstance.Name]).Prototype)
                         {
-                            interfaceInstance = moduleOrInterface.NamedElements[interfaceInstance.Name] as InterfaceInstance;
+                            InterfaceInstance? inst = moduleOrInterface.NamedElements[interfaceInstance.Name] as InterfaceInstance;
+                            interfaceInstance = inst ?? interfaceInstance;
                             interfaceInstance.Prototype = false;
                         }
                         else
@@ -682,7 +684,8 @@ namespace pluginVerilog.Verilog.DataObjects
                 ParameterOverrides = ParameterOverrides,
                 Project = Project,
                 SourceName = SourceName,
-                InstancedNameSpace = InstancedNameSpace
+                InstancedNameSpace = InstancedNameSpace,
+                BlockBeginIndexReference = BlockBeginIndexReference
             };
         }
 

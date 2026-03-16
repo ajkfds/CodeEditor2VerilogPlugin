@@ -29,8 +29,8 @@ namespace pluginVerilog.Verilog.Snippets
         // initial value for {n}
         private List<string> initials = new List<string> { };
 
-        private CodeDocument codeDocument;
-        private CodeEditor2.Data.TextFile textFile;
+        private CodeDocument? codeDocument;
+        private CodeEditor2.Data.TextFile? textFile;
         private string moduleName;
 
         public override async System.Threading.Tasks.Task ApplyAsync()

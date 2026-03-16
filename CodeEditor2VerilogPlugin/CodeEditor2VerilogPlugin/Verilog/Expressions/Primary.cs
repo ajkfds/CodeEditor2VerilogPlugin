@@ -230,7 +230,7 @@ number
                     // Class scope resolution operator
                     if (word.NextText == "::")
                     {
-                        string a = "";
+//                        string a = "";
                     }
 
                     if (word.Text == "this" && word.NextText == ".")

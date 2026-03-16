@@ -55,7 +55,7 @@ namespace pluginVerilog.Setups
             {
                 yamlParser.Document.Marks.SetMarkAt((int)ex.Start.Index, (int)ex.End.Index - (int)ex.Start.Index, 0);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return;
             }

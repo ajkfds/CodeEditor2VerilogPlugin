@@ -356,7 +356,6 @@ namespace pluginVerilog.Data
             SourceVerilogFile.Close();
         }
 
-        private CodeEditor2.CodeEditor.ParsedDocument? parsedDocument = null;
 
         public override CodeEditor2.CodeEditor.ParsedDocument? ParsedDocument
         {

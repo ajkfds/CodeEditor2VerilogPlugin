@@ -173,7 +173,6 @@ namespace pluginVerilog.Data
             SourceVerilogFile.Close();
         }
 
-        private CodeEditor2.CodeEditor.ParsedDocument? parsedDocument = null;
 
         public override CodeEditor2.CodeEditor.ParsedDocument? ParsedDocument
         {
@@ -242,7 +241,7 @@ namespace pluginVerilog.Data
 
         private async System.Threading.Tasks.Task acceptParameterizedParsedDocument(ParsedDocument newParsedDocument)
         {
-            ParsedDocument oldParsedDocument = ParsedDocument;
+            ParsedDocument? oldParsedDocument = ParsedDocument;
             if (oldParsedDocument != null) oldParsedDocument.Dispose();
 
             // copy include files
@@ -375,7 +374,9 @@ namespace pluginVerilog.Data
 
         public override List<AutocompleteItem> GetAutoCompleteItems(int index, out string candidateWord)
         {
-            return VerilogCommon.AutoComplete.GetAutoCompleteItems(this, VerilogParsedDocument, index, out candidateWord);
+            List<AutocompleteItem>? autocompleteItems = VerilogCommon.AutoComplete.GetAutoCompleteItems(this, VerilogParsedDocument, index, out candidateWord);
+            if (autocompleteItems == null) return new List<AutocompleteItem>();
+            return autocompleteItems;
         }
 
 
