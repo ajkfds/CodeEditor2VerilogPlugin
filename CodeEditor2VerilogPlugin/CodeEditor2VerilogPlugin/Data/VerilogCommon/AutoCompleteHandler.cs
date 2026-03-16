@@ -71,6 +71,7 @@ namespace pluginVerilog.Data.VerilogCommon
             toolItems.Add(new Verilog.Snippets.ModuleInstanceMenuSnippet());
             toolItems.Add(new Verilog.Snippets.PortConnectionCreateSnippet());
             toolItems.Add(new Verilog.Snippets.ModPortSnippet());
+            toolItems.Add(new Verilog.Snippets.ConnectionCheckSnippet());
 
             if(AppendToolItems != null) AppendToolItems(toolItems, item, index);
 
