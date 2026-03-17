@@ -53,7 +53,7 @@ namespace pluginVerilog.Verilog.Snippets
 
                 writeModuleInstance(codeDocument, index, moduleInstantiation);
 
-                CodeEditor2.Controller.CodeEditor.RequestReparse();
+                CodeEditor2.Controller.CodeEditor.RequestReparsePost();
                 return;
             }
         }

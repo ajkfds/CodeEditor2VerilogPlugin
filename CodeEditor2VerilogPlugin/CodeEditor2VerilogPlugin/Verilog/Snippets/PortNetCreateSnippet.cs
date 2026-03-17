@@ -81,7 +81,7 @@ namespace pluginVerilog.Verilog.Snippets
                 CreateString(moduleInstantiation,"\t",projectProperty)
                 );
             CodeEditor2.Controller.CodeEditor.SetSelection(codeDocument.CaretIndex, codeDocument.CaretIndex);
-            CodeEditor2.Controller.CodeEditor.RequestReparse();
+            CodeEditor2.Controller.CodeEditor.RequestReparsePost();
         }
 
         public List<string> RemoveSuffixList = new List<string> { "_I", "_O", "_IO" };
