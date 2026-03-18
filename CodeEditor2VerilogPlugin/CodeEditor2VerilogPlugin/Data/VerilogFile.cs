@@ -236,7 +236,7 @@ namespace pluginVerilog.Data
             }
 
             // get file selected in text editor
-            CodeEditor2.NavigatePanel.NavigatePanelNode? node = CodeEditor2.Controller.NavigatePanel.GetSelectedNode();
+            CodeEditor2.NavigatePanel.NavigatePanelNode? node = await CodeEditor2.Controller.NavigatePanel.GetSelectedNodeAsync();
             CodeEditor2.Data.Item? currentItem = node?.Item;
             CodeEditor2.Data.ITextFile? currentTextFile = await Controller.CodeEditor.GetTextFileAsync
                ();

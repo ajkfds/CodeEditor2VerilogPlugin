@@ -140,7 +140,7 @@ namespace pluginVerilog.Verilog
         public bool Instance = false;
 
         public bool RestrictBaseParse { get; set; } = false;
-        public Root Root { set; get; }
+        public Root Root { set; get; } = null!;
 
         [JsonIgnore]
         public Dictionary<string, Data.VerilogHeaderInstance> IncludeFiles = new Dictionary<string, Data.VerilogHeaderInstance>();
