@@ -55,7 +55,7 @@ namespace pluginVerilog.Verilog.Items.Generate
                     word.AddError("must be genvar");
                     return false;
                 }
-                if (genvar.DataObject is not Genvar)
+                if (genvar.TargetDataObject is not Genvar)
                 {
                     genvar.Reference.AddError("must be genvar");
                 }

@@ -67,7 +67,7 @@ namespace pluginVerilog.Verilog
                     if(connextionExpression is DataObjectReference)
                     {
                         DataObjectReference variableReference = (DataObjectReference)connextionExpression;
-                        DataObject? connectionDataObject = variableReference.DataObject;
+                        DataObject? connectionDataObject = variableReference.TargetDataObject;
                         if(connectionDataObject is null) return;
                         foreach( var assign in connectionDataObject.AssignedReferences)
                         {

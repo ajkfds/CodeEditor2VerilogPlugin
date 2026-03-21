@@ -2,6 +2,7 @@ using pluginVerilog.Verilog.Expressions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -43,7 +44,7 @@ namespace pluginVerilog.Verilog.Statements
 
             if(word.Text != "(")
             {
-                Expression? expression = Primary.ParseCreate(word, nameSpace);
+                Expressions.Expression? expression = Primary.ParseCreate(word, nameSpace);
                 if (expression == null)
                 {
                     word.AddError("illegal delay control");
@@ -59,7 +60,8 @@ namespace pluginVerilog.Verilog.Statements
                     word.AddError("illegal delay control");
                     return null;
                 }
-                if(word.Text == ",")
+
+                if (word.Text == ",")
                 {
                     word.MoveNext();
                     Expressions.Expression? expression2 = Expressions.Expression.ParseCreate(word, nameSpace);
@@ -68,6 +70,7 @@ namespace pluginVerilog.Verilog.Statements
                         word.AddError("illegal delay control");
                         return null;
                     }
+
                     if (word.Text == ",")
                     {
                         word.MoveNext();
@@ -78,7 +81,6 @@ namespace pluginVerilog.Verilog.Statements
                             return null;
                         }
                     }
-
                 }
                 if(word.Text != ")")
                 {
@@ -94,12 +96,13 @@ namespace pluginVerilog.Verilog.Statements
         }
     }
 
+
     public class EventControl
     {
         protected EventControl() { }
         public List<EventExpression> EventExpressions { get; protected set; }
 
-        public static EventControl? ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static EventControl? ParseCreate(WordScanner word, NameSpace nameSpace, List<string>? clockDomains = null)
         {
             /*
             event_control       ::= @ event_identifier
@@ -134,7 +137,7 @@ namespace pluginVerilog.Verilog.Statements
                 }
                 else
                 {
-                    eventExpressions = EventExpression.ParseCreate(word, nameSpace);
+                    eventExpressions = EventExpression.ParseCreate(word, nameSpace,clockDomains);
                     if (word.GetCharAt(0) != ')' || eventExpressions.Count == 0)
                     {
                         word.AddError("illegal event contol");
@@ -152,7 +155,7 @@ namespace pluginVerilog.Verilog.Statements
                 }
                 else
                 {
-                    eventExpressions = EventExpression.ParseCreate(word, nameSpace);
+                    eventExpressions = EventExpression.ParseCreate(word, nameSpace, clockDomains);
                     if (eventExpressions.Count == 0)
                     {
                         word.AddError("illegal event contol");
@@ -181,7 +184,7 @@ namespace pluginVerilog.Verilog.Statements
             Negedge
         }
 
-        public static List<EventExpression> ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static List<EventExpression> ParseCreate(WordScanner word, NameSpace nameSpace, List<string>? clockDomains = null)
         {
             /*
             event_expression    ::= expression
@@ -194,7 +197,7 @@ namespace pluginVerilog.Verilog.Statements
 
             List<EventExpression> eventExpressions = new List<EventExpression>();
 
-            EventExpression? eventExpression = EventExpression.ParseCreateSingle(word, nameSpace);
+            EventExpression? eventExpression = EventExpression.ParseCreateSingle(word, nameSpace, clockDomains);
             eventExpressions.Add(eventExpression);
 
             while (!word.Eof)
@@ -203,11 +206,11 @@ namespace pluginVerilog.Verilog.Statements
                 {
                     case ",":
                         word.MoveNext();
-                        eventExpression = EventExpression.ParseCreateSingle(word, nameSpace);
+                        eventExpression = EventExpression.ParseCreateSingle(word, nameSpace, clockDomains);
                         break;
                     case "or":
                         word.MoveNext();
-                        eventExpression = EventExpression.ParseCreateSingle(word, nameSpace);
+                        eventExpression = EventExpression.ParseCreateSingle(word, nameSpace, clockDomains);
                         break;
                     default:
                         eventExpression = null;
@@ -222,7 +225,7 @@ namespace pluginVerilog.Verilog.Statements
             return eventExpressions;
         }
 
-        public static EventExpression? ParseCreateSingle(WordScanner word, NameSpace nameSpace)
+        public static EventExpression? ParseCreateSingle(WordScanner word, NameSpace nameSpace, List<string>? clockDomains = null)
         {
             EventExpression? eventExpression = new EventExpression();
             switch (word.Text)
@@ -232,16 +235,19 @@ namespace pluginVerilog.Verilog.Statements
                     word.MoveNext();
                     eventExpression.EventType = EventTypeEnum.Posedge;
                     eventExpression.Expression = Expressions.Expression.ParseCreate(word, nameSpace);
+                    if(clockDomains != null && eventExpression.Expression != null) addClockDomain(eventExpression.Expression, clockDomains);
                     break;
                 case "negedge":
                     word.Color(CodeDrawStyle.ColorType.Keyword);
                     word.MoveNext();
                     eventExpression.EventType = EventTypeEnum.Negedge;
                     eventExpression.Expression = Expressions.Expression.ParseCreate(word, nameSpace);
+                    if (clockDomains != null && eventExpression.Expression != null) addClockDomain(eventExpression.Expression, clockDomains);
                     break;
                 default:
                     eventExpression.EventType = EventTypeEnum.Both;
                     eventExpression.Expression = Expressions.Expression.ParseCreate(word, nameSpace);
+                    if (clockDomains != null && eventExpression.Expression != null) addClockDomain(eventExpression.Expression, clockDomains);
                     break;
             }
             if (eventExpression.Expression == null)
@@ -249,6 +255,17 @@ namespace pluginVerilog.Verilog.Statements
                 return null;
             }
             return eventExpression;
+        }
+
+        private static void addClockDomain(Expressions.Expression expression, List<string> clockDomains)
+        {
+            List<Verilog.DataObjects.DataObject> refrencedObjects = new System.Collections.Generic.List<DataObjects.DataObject>();
+            expression.AppendRefrencedDataObjects(refrencedObjects);
+            foreach (var dataObject in refrencedObjects)
+            {
+                if (dataObject.SyncContext.IsReset) continue;
+                clockDomains.Add(dataObject.Name);
+            }
         }
     }
 

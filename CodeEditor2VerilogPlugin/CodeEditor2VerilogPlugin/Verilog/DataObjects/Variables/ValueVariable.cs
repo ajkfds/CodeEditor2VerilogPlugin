@@ -31,6 +31,8 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             }
 
             label.AppendText("\r\n");
+
+            SyncContext.AppendLabel(label);
         }
 
 

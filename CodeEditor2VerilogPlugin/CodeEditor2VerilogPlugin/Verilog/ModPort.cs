@@ -237,7 +237,7 @@ namespace pluginVerilog.Verilog
             Port port = new Port { Direction = direction, Name = identifier };
             port.Expression = expression;
             DataObjectReference? vRef = expression as DataObjectReference;
-            IntegerVectorValueVariable? intVectorVar = vRef?.DataObject as IntegerVectorValueVariable;
+            IntegerVectorValueVariable? intVectorVar = vRef?.TargetDataObject as IntegerVectorValueVariable;
 
             if (!NamedElements.ContainsKey(port.Name))
             {

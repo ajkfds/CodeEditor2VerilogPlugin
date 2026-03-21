@@ -1,6 +1,9 @@
+using Avalonia.Controls;
 using CodeEditor2.CodeEditor.CodeComplete;
+using Microsoft.Extensions.Logging.Abstractions;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
+using pluginVerilog.Verilog.Expressions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,7 +52,7 @@ namespace pluginVerilog.Verilog.Statements
             LValue.DisposeSubReference(true);
             Expression.DisposeSubReference(true);
         }
-        public static NonBlockingAssignment? ParseCreate(WordScanner word,NameSpace nameSpace,Expressions.Expression lExpression)
+        public static NonBlockingAssignment? ParseCreate(WordScanner word,NameSpace nameSpace,Expressions.Expression lExpression, List<string>? clockDomains = null)
         {
             if(word.Text != "<=")
             {
@@ -71,7 +74,7 @@ namespace pluginVerilog.Verilog.Statements
 
             if(word.Text == "'" && word.NextText == "{")
             {
-                expression = AssignmentPattern.ParseCreate(word, nameSpace,false);
+                expression = Expressions.AssignmentPattern.ParseCreate(word, nameSpace,false);
             }
             else
             {
@@ -104,6 +107,29 @@ namespace pluginVerilog.Verilog.Statements
             NonBlockingAssignment assignment = new NonBlockingAssignment();
             assignment.LValue = lExpression;
             assignment.Expression = expression;
+
+            if (clockDomains != null && lExpression != null)
+            {
+                List<DataObject> dataObjects = new List<DataObject>();
+                lExpression.AppendRefrencedDataObjects(dataObjects);
+
+                foreach(DataObject dataObject in dataObjects)
+                {
+                    DataObject? targetDataObject = nameSpace.GetNamedElementUpward(dataObject.Name) as DataObject;
+                    if (targetDataObject == null) continue;
+
+                    foreach (string clockDomain in clockDomains)
+                    {
+                        INamedElement? namedElemect = nameSpace.GetNamedElementUpward(clockDomain);
+                        if(namedElemect is DataObject clkObject)
+                        {
+                            if (clkObject.SyncContext.IsReset) continue;
+                        }
+
+                        targetDataObject.SyncContext.AddClockDomain(clockDomain, lExpression.Reference);
+                    }
+                }
+            }
             if (Assigned != null) Assigned(word, nameSpace, assignment);
             return assignment;
         }
@@ -199,7 +225,7 @@ namespace pluginVerilog.Verilog.Statements
 
             if (word.Text=="'" && word.NextText == "{")
             {
-                AssignmentPattern assignmentPattern = AssignmentPattern.ParseCreate(word, nameSpace,false);
+                Expressions.AssignmentPattern assignmentPattern = Expressions.AssignmentPattern.ParseCreate(word, nameSpace, false) as Expressions.AssignmentPattern;
                 BlockingAssignment assignment = new BlockingAssignment();
                 assignment.LValue = lExpression;
                 if (Assigned != null) Assigned(word, nameSpace, assignment);
@@ -279,9 +305,9 @@ namespace pluginVerilog.Verilog.Statements
                 if(lExpression is Expressions.DataObjectReference)
                 {
                     Expressions.DataObjectReference dref = (Expressions.DataObjectReference)lExpression;
-                    if(dref.DataObject is DataObjects.Variables.Object)
+                    if(dref.TargetDataObject is DataObjects.Variables.Object)
                     {
-                        DataObjects.Variables.Object? obj = (DataObjects.Variables.Object)dref.DataObject;
+                        DataObjects.Variables.Object? obj = (DataObjects.Variables.Object)dref.TargetDataObject;
                         class_ = obj.Class;
                     }
                 }

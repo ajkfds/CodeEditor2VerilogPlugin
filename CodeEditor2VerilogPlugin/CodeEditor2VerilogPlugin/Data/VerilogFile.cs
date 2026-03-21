@@ -279,7 +279,6 @@ namespace pluginVerilog.Data
             Verilog.ParsedDocument? parsedDocument = ParsedDocument as Verilog.ParsedDocument;
             textFileLock.ExitReadLock();
 
-            sb.Append(" path " + ",ID:" + ObjectID + ",ReparseRequested:" + ReparseRequested);
             if (parsedDocument != null)
             {
                 sb.Append(",pd.ReparseRequested:" + parsedDocument.ReparseRequested + ",pd.Version" + parsedDocument.Version);
@@ -291,7 +290,6 @@ namespace pluginVerilog.Data
                 if (!kvPair.Value.TryGetTarget(out pDoc)) continue;
                 Verilog.ParsedDocument? iParsedDocument = pDoc as Verilog.ParsedDocument;
 
-                sb.Append(" instance key:" + kvPair.Key + ",ID:" + pDoc.ObjectID);
                 if (iParsedDocument != null)
                 {
                     sb.Append(",pd.ReparseRequested:" + iParsedDocument.ReparseRequested + ",pd.Version" + iParsedDocument.Version);

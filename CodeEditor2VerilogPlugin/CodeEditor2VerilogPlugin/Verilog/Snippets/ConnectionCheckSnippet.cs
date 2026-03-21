@@ -182,7 +182,7 @@ namespace pluginVerilog.Verilog.Snippets
                 foreach (var portConnection in instantiation.PortConnection)
                 {
                     if (portConnection.Value is not DataObjectReference portRef) continue;
-                    if (portRef.DataObject != dataObject) continue;
+                    if (portRef.TargetDataObject != dataObject) continue;
 
                     // Found a receiver - check the module's output ports
                     if (instancedModule.Ports.TryGetValue(portConnection.Key, out Port? port))
@@ -227,7 +227,7 @@ namespace pluginVerilog.Verilog.Snippets
                 foreach (var portConnection in instantiation.PortConnection)
                 {
                     if (portConnection.Value is not DataObjectReference portRef) continue;
-                    if (portRef.DataObject != dataObject) continue;
+                    if (portRef.TargetDataObject != dataObject) continue;
 
                     // Found a driver - check the module's input ports
                     if (instancedModule.Ports.TryGetValue(portConnection.Key, out Port? port))

@@ -21,7 +21,7 @@ namespace pluginVerilog.Verilog.Items.Generate
             {
                 Expressions.DataObjectReference? genvar = Expressions.DataObjectReference.ParseCreate(word, nameSpace, nameSpace.BuildingBlock, true);
                 if (genvar == null) return false;
-                if (!(genvar.DataObject is DataObjects.Variables.Genvar))
+                if (!(genvar.TargetDataObject is DataObjects.Variables.Genvar))
                 {
                     word.AddError("should be genvar");
                 }
@@ -58,7 +58,7 @@ namespace pluginVerilog.Verilog.Items.Generate
                     return true;
                 }
                 Expressions.DataObjectReference dataObjectReference = (Expressions.DataObjectReference)op.Primary;
-                if(dataObjectReference.DataObject is not DataObjects.Variables.Genvar)
+                if(dataObjectReference.TargetDataObject is not DataObjects.Variables.Genvar)
                 {
                     op.Primary.Reference.AddError("must be genvar");
                     return true;

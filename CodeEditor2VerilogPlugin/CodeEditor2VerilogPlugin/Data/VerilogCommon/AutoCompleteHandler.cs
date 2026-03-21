@@ -317,7 +317,7 @@ namespace pluginVerilog.Data.VerilogCommon
                 if (expression is Verilog.Expressions.DataObjectReference)
                 {
                     Verilog.Expressions.DataObjectReference dataObjectReference = (Verilog.Expressions.DataObjectReference)expression;
-                    element = dataObjectReference.DataObject;
+                    element = dataObjectReference.TargetDataObject;
                 }
                 else if (expression is Verilog.Expressions.NameSpaceReference)
                 {

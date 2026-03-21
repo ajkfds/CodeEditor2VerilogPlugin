@@ -32,7 +32,7 @@ namespace pluginVerilog.Verilog.Statements
                 "CodeEditor2/Assets/Icons/tag.svg"
                 );
         }
-        public static async Task<ProceduralTimingControlStatement?> ParseCreate(WordScanner word, NameSpace nameSpace,string? statement_label)
+        public static async Task<ProceduralTimingControlStatement?> ParseCreate(WordScanner word, NameSpace nameSpace,string? statement_label, List<string>? clockDomains = null)
         {
             switch (word.Text)
             {
@@ -50,8 +50,9 @@ namespace pluginVerilog.Verilog.Statements
                         ProceduralTimingControlStatement statement = new ProceduralTimingControlStatement(){ Name = "" };
                         if (statement_label != null) { statement.Name = statement_label; }
 
-                        statement.EventControl = EventControl.ParseCreate(word, nameSpace);
-                        statement.Statement = await Statements.ParseCreateStatementOrNull(word, nameSpace);
+                        if (clockDomains == null) clockDomains = new List<string>();
+                        statement.EventControl = EventControl.ParseCreate(word, nameSpace, clockDomains);
+                        statement.Statement = await Statements.ParseCreateStatementOrNull(word, nameSpace,clockDomains);
                         return statement;
                     }
                 default:

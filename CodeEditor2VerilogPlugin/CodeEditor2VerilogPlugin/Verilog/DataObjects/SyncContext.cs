@@ -71,7 +71,7 @@ namespace pluginVerilog.Verilog.DataObjects
             {
                 bool matched = true;
                 if (!Data.Contains(domainName)) matched = false;
-                if (!matched && alartWordRef != null) alartWordRef.AddWarning("sync mismatch");
+                if (!matched && alartWordRef != null) alartWordRef.AddWarning("sync mismatch "+domainName+" assigned");
             }
         }
         public void PropageteClockDomainFrom(SyncContext syncContext,WordReference? alartWordRef)

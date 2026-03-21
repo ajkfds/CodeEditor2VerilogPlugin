@@ -991,7 +991,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                 return;
             }
 
-            DataObjects.InterfaceInstance? interfaceInstance = variableReference.DataObject as DataObjects.InterfaceInstance;
+            DataObjects.InterfaceInstance? interfaceInstance = variableReference.TargetDataObject as DataObjects.InterfaceInstance;
             if(interfaceInstance == null)
             {
                 expression.Reference.AddError("should be " + portInterfaceInstantiation.SourceName);
@@ -1021,7 +1021,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                 return;
             }
 
-            ModportInstance? modportInstance = variableReference.DataObject as ModportInstance;
+            ModportInstance? modportInstance = variableReference.TargetDataObject as ModportInstance;
             if (modportInstance == null)
             {
                 expression.Reference.ApplyRule(projectProperty.RuleSet.ImplicitModportInterfaceConnectionToInstance,

@@ -490,12 +490,12 @@ number
             if(dataObjectReference != null) dataObjectReference.NameSpaceText = nameSpaceText;
 
             if (dataObjectReference == null) return null;
-            if (dataObjectReference.DataObject == null) return null;
+            if (dataObjectReference.TargetDataObject == null) return null;
 
             DataObjects.Variables.Object? obj = null;
-            if (dataObjectReference.DataObject is DataObjects.Variables.Object)
+            if (dataObjectReference.TargetDataObject is DataObjects.Variables.Object)
             {
-                obj = (DataObjects.Variables.Object)dataObjectReference.DataObject;
+                obj = (DataObjects.Variables.Object)dataObjectReference.TargetDataObject;
             }
 
             if (word.Text != ".") return dataObjectReference;
@@ -505,7 +505,7 @@ number
             }
             word.MoveNext();
 
-            if (!dataObjectReference.DataObject.NamedElements.ContainsKey(word.Text))
+            if (!dataObjectReference.TargetDataObject.NamedElements.ContainsKey(word.Text))
             {
                 if(word.NextText=="(" || word.NextText == ";")
                 {
@@ -518,7 +518,7 @@ number
             //{ // undefined primitive
             //    return parseUndefinedDataObject(word, nameSpace, owner, lValue, nameSpaceText);
             //}
-            INamedElement? element = dataObjectReference.DataObject.NamedElements[word.Text];
+            INamedElement? element = dataObjectReference.TargetDataObject.NamedElements[word.Text];
 
 
             // Since ModPort are also namespaces, they need to be processed before namespaces.
@@ -526,14 +526,14 @@ number
             {
                 if (nameSpaceText != "") nameSpaceText = nameSpaceText + ".";
                 nameSpaceText = nameSpaceText + dataObjectReference.VariableName + ".";
-                return parseDataObject(word, nameSpace, dataObjectReference.DataObject, lValue,nameSpaceText);
+                return parseDataObject(word, nameSpace, dataObjectReference.TargetDataObject, lValue,nameSpaceText);
             }
 
             // Since Task and Function are also namespaces, they need to be processed before namespaces.
 
             if (element is BuiltInMethod)
             {
-                BuiltinMethodCall? builtinMethodCall = BuiltinMethodCall.ParseCreate(word, nameSpace,dataObjectReference.DataObject);
+                BuiltinMethodCall? builtinMethodCall = BuiltinMethodCall.ParseCreate(word, nameSpace,dataObjectReference.TargetDataObject);
                 return builtinMethodCall;
             }
 

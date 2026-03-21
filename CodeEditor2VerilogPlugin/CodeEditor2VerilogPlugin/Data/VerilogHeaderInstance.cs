@@ -30,7 +30,7 @@ namespace pluginVerilog.Data
         }
 
         
-        public static VerilogHeaderInstance Create(
+        public static VerilogHeaderInstance? Create(
             string relativePath,
             string name,
             IndexReference instancedReference,
@@ -42,8 +42,8 @@ namespace pluginVerilog.Data
             CodeEditor2.Data.Item? fileItem = project.GetItem(relativePath);
             VerilogHeaderFile? vhFile = fileItem as VerilogHeaderFile;
 
-            if (vhFile == null) throw new Exception();
-
+            if (vhFile == null) return null;
+            
 
             //string name;
             //if (relativePath.Contains(System.IO.Path.DirectorySeparatorChar))

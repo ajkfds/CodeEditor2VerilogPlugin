@@ -67,7 +67,7 @@ namespace pluginVerilog.Verilog.Statements
                                 | { attribute_instance } disable_statement
                                 | { attribute_instance } system_task_enable  
         */
-        public static async Task<IStatement?> ParseCreateStatement(WordScanner word, NameSpace nameSpace)
+        public static async Task<IStatement?> ParseCreateStatement(WordScanner word, NameSpace nameSpace,List<string>? clockDomains = null )
         {
             /*
             A.6.4 Statements
@@ -141,7 +141,7 @@ namespace pluginVerilog.Verilog.Statements
             {
                 case "(*":
                     Attribute attribute = Attribute.ParseCreate(word, nameSpace);
-                    return await Statements.ParseCreateStatement(word, nameSpace);
+                    return await Statements.ParseCreateStatement(word, nameSpace, clockDomains);
 
                 // unique_priority
                 case "unique":
@@ -151,16 +151,16 @@ namespace pluginVerilog.Verilog.Statements
 
                 // conditional_statement 
                 case "if":
-                    return await ConditionalStatement.ParseCreate(word, nameSpace, statement_label);
+                    return await ConditionalStatement.ParseCreate(word, nameSpace, statement_label, clockDomains);
 
                 // procedural_timing_control_statement 
                 case "#":
                 case "@":
-                    return await ProceduralTimingControlStatement.ParseCreate(word, nameSpace, statement_label);
+                    return await ProceduralTimingControlStatement.ParseCreate(word, nameSpace, statement_label, clockDomains);
 
                 // seq_block 
                 case "begin":
-                    return await SequentialBlock.ParseCreate(word, nameSpace, statement_label);
+                    return await SequentialBlock.ParseCreate(word, nameSpace, statement_label, clockDomains);
 
                 // par_block 
                 case "fork":
@@ -266,6 +266,8 @@ namespace pluginVerilog.Verilog.Statements
                     {
                         if (word.Text.StartsWith("$"))
                         {
+                            if (word.RootParsedDocument.ProjectProperty == null) throw new Exception();
+
                             if (!word.RootParsedDocument.ProjectProperty.SystemTaskParsers.ContainsKey(word.Text))
                             {
                                 word.AddError("unsupported system task");
@@ -357,7 +359,7 @@ namespace pluginVerilog.Verilog.Statements
                             break;
                         // nonblocking_assignment ;
                         case "<=":
-                            statement = NonBlockingAssignment.ParseCreate(word, nameSpace, expression);
+                            statement = NonBlockingAssignment.ParseCreate(word, nameSpace, expression,clockDomains);
                             break;
                         case "+=":
                         case "-=":
@@ -442,14 +444,14 @@ namespace pluginVerilog.Verilog.Statements
             return getSpace(identifier, nameSpace.Parent);
         }
 
-        public static async Task<IStatement?> ParseCreateStatementOrNull(WordScanner word, NameSpace nameSpace)
+        public static async Task<IStatement?> ParseCreateStatementOrNull(WordScanner word, NameSpace nameSpace, List<string>? clockDomains = null)
         {
             if(word.GetCharAt(0) == ';')
             {
                 word.MoveNext();
                 return null;
             }
-            return await ParseCreateStatement(word, nameSpace);
+            return await ParseCreateStatement(word, nameSpace, clockDomains);
         }
 
 

@@ -19,10 +19,17 @@ namespace pluginVerilog.Verilog.Expressions
     public class DataObjectReference : Primary
     {
         protected DataObjectReference() { }
+
+        // DataObject名称
         public required string VariableName { get; init; }
         public RangeExpression? RangeExpression { get; protected set; }
         public List<Expression> Dimensions = new List<Expression>();
-        public DataObjects.DataObject? DataObject = null;
+
+        // 参照先DataObject.DefinedDataObjectの部分Clone
+        public DataObjects.DataObject? TargetDataObject = null;
+
+        // DataObjectへの参照
+        public DataObjects.DataObject? DefinedDataObject = null;
         public string NameSpaceText = "";
         public List<DataObjects.Arrays.UnPackedArray> UnpackedArrays { get; set; } = new List<DataObjects.Arrays.UnPackedArray>();
 
@@ -31,15 +38,15 @@ namespace pluginVerilog.Verilog.Expressions
         {
             //label.AppendText(NameSpaceText, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Variable));
 
-            if (DataObject is Reg || DataObject is Bit || DataObject is Logic)
+            if (TargetDataObject is Reg || TargetDataObject is Bit || TargetDataObject is Logic)
             {
                 label.AppendText(VariableName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Register));
             }
-            else if (DataObject is Net)
+            else if (TargetDataObject is Net)
             {
                 label.AppendText(VariableName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Net));
             }
-            else if (DataObject is DataObjects.Constants.Constants)
+            else if (TargetDataObject is DataObjects.Constants.Constants)
             {
                 label.AppendText(VariableName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Parameter));
             }
@@ -86,7 +93,11 @@ namespace pluginVerilog.Verilog.Expressions
 
         public override void AppendRefrencedDataObjects(List<DataObjects.DataObject> referencedObjects)
         {
-            if(DataObject!=null && !referencedObjects.Contains(DataObject)) referencedObjects.Add(DataObject);
+            if (TargetDataObject == null) return;
+            if (!referencedObjects.Contains(TargetDataObject))
+            {
+                referencedObjects.Add(TargetDataObject);
+            }
         }
 
         /// <summary>
@@ -101,7 +112,7 @@ namespace pluginVerilog.Verilog.Expressions
             {
                 VariableName = dataObject.Name
             };
-            val.DataObject = dataObject;
+            val.TargetDataObject = dataObject;
             if (dataObject is DataObjects.Variables.IntegerVectorValueVariable)
             {
                 IntegerVectorValueVariable integerVectorValueVariable = (IntegerVectorValueVariable)dataObject;
@@ -148,14 +159,18 @@ namespace pluginVerilog.Verilog.Expressions
             DataObjects.DataObject originalObject = originalDataObject;
             bool partial = false;
 
-            val.DataObject = originalDataObject.Clone();
+            // もともとのdataobject定義を保持
+            val.DefinedDataObject = originalDataObject;
+
+            // TargetDataObjectは部分配列取得のためにCloneされる。
+            val.TargetDataObject = originalDataObject.Clone();
             val.Reference = word.GetReference();
 
-            word.Color(val.DataObject.ColorType);
+            word.Color(val.TargetDataObject.ColorType);
 
-            if (val.DataObject is DataObjects.Constants.Constants)
+            if (val.TargetDataObject is DataObjects.Constants.Constants)
             {
-                DataObjects.Constants.Constants constants = (DataObjects.Constants.Constants)val.DataObject;
+                DataObjects.Constants.Constants constants = (DataObjects.Constants.Constants)val.TargetDataObject;
                 val.Constant = true;
                 if (constants.Expression.Constant && constants.Expression.Value != null)
                 {
@@ -165,13 +180,13 @@ namespace pluginVerilog.Verilog.Expressions
             }
 
 
-            if (val.DataObject.CommentAnnotation_Discarded)
+            if (val.TargetDataObject.CommentAnnotation_Discarded)
             {
                 word.AddError("Disarded.");
             }
             else
             {
-                if (!word.Prototype && !val.DataObject.Defined)
+                if (!word.Prototype && !val.TargetDataObject.Defined)
                 {
                     word.AddError("not defined here");
                 }
@@ -180,11 +195,11 @@ namespace pluginVerilog.Verilog.Expressions
             word.MoveNext();
 
             // parse unpacked dimensions
-            foreach (var unpackedArray in val.DataObject.UnpackedArrays)
+            foreach (var unpackedArray in val.TargetDataObject.UnpackedArrays)
             {
                 val.UnpackedArrays.Add(unpackedArray.Clone());
             }
-            val.DataObject.UnpackedArrays.Clear();
+            val.TargetDataObject.UnpackedArrays.Clear();
 
             {
                 int unpackedArrayIndex = 0;
@@ -252,10 +267,10 @@ namespace pluginVerilog.Verilog.Expressions
             }
 
             // parse packed dimensions
-            if (val.DataObject.Packable)
+            if (val.TargetDataObject.Packable)
             {
                 int packedArrayIndex = 0;
-                IPackedDataObject ival = (IPackedDataObject)val.DataObject;
+                IPackedDataObject ival = (IPackedDataObject)val.TargetDataObject;
 
                 while (!word.Eof)
                 {
@@ -291,17 +306,17 @@ namespace pluginVerilog.Verilog.Expressions
             }
 
             // partial select
-            if (val.DataObject is IPartSelectableDataObject)
+            if (val.TargetDataObject is IPartSelectableDataObject)
             {
-                var ival = (IPartSelectableDataObject)val.DataObject;
+                var ival = (IPartSelectableDataObject)val.TargetDataObject;
                 if (ival.PartSelectable)
                 {
                     IDataType? partSel = ival.ParsePartSelect(word, nameSpace);
 
                     if(partSel != null)
                     {
-                        val.DataObject = DataObjects.Variables.Variable.Create(originalObject.Name, partSel);
-                        val.BitWidth = val.DataObject.BitWidth;
+                        val.TargetDataObject = DataObjects.Variables.Variable.Create(originalObject.Name, partSel);
+                        val.BitWidth = val.TargetDataObject.BitWidth;
                     }
                 }
             }
@@ -315,7 +330,7 @@ namespace pluginVerilog.Verilog.Expressions
                     word.AddError("illegal range");
                     break;
                 }
-                val.DataObject = DataObjects.Variables.Byte.Create(originalObject.Name, DataObjects.DataTypes.ByteType.Create(false));
+                val.TargetDataObject = DataObjects.Variables.Byte.Create(originalObject.Name, DataObjects.DataTypes.ByteType.Create(false));
                 break;
             }
 
@@ -337,7 +352,7 @@ namespace pluginVerilog.Verilog.Expressions
                 {
                     //var original = dataObject as DataObjects.Variables.IntegerVectorValueVariable;
                     //if (original == null) throw new Exception();
-                    val.BitWidth = val.DataObject.BitWidth;
+                    val.BitWidth = val.TargetDataObject.BitWidth;
                 }
                 else if (originalDataObject is DataObjects.Constants.Parameter)
                 {
@@ -380,8 +395,8 @@ namespace pluginVerilog.Verilog.Expressions
         {
             get
             {
-                if (DataObject == null) return new SyncContext();
-                return DataObject.SyncContext;
+                if (TargetDataObject == null) return new SyncContext();
+                return TargetDataObject.SyncContext;
             }
         }
 

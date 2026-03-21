@@ -52,7 +52,7 @@ namespace pluginVerilog.Verilog
             //    genvar_assignment::= genvar_identifier = constant_expression
             Expressions.DataObjectReference genvar = Expressions.DataObjectReference.ParseCreate(word, nameSpace, nameSpace, true);
             if (genvar == null) return false;
-            if (!(genvar.DataObject is DataObjects.Variables.Genvar))
+            if (!(genvar.TargetDataObject is DataObjects.Variables.Genvar))
             {
                 word.AddError("should be genvar");
             }
