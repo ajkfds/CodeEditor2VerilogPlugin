@@ -21,50 +21,34 @@ namespace pluginVerilog.Verilog.Expressions
         protected DataObjectReference() { }
 
         // DataObject名称
-        public required string VariableName { get; init; }
-        public RangeExpression? RangeExpression { get; protected set; }
-        public List<Expression> Dimensions = new List<Expression>();
+        public required string DatObjectName { get; init; }
+
+
+        // DataObject定義への参照
+        public DataObjects.DataObject? DefinedDataObject = null;
 
         // 参照先DataObject.DefinedDataObjectの部分Clone
         public DataObjects.DataObject? TargetDataObject = null;
-
-        // DataObjectへの参照
-        public DataObjects.DataObject? DefinedDataObject = null;
-        public string NameSpaceText = "";
         public List<DataObjects.Arrays.UnPackedArray> UnpackedArrays { get; set; } = new List<DataObjects.Arrays.UnPackedArray>();
 
 
         public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
-            //label.AppendText(NameSpaceText, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Variable));
-
             if (TargetDataObject is Reg || TargetDataObject is Bit || TargetDataObject is Logic)
             {
-                label.AppendText(VariableName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Register));
+                label.AppendText(DatObjectName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Register));
             }
             else if (TargetDataObject is Net)
             {
-                label.AppendText(VariableName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Net));
+                label.AppendText(DatObjectName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Net));
             }
             else if (TargetDataObject is DataObjects.Constants.Constants)
             {
-                label.AppendText(VariableName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Parameter));
+                label.AppendText(DatObjectName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Parameter));
             }
             else
             {
-                label.AppendText(VariableName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Variable));
-            }
-
-            if (RangeExpression != null)
-            {
-                label.AppendText(" ");
-                label.AppendLabel(RangeExpression.GetLabel());
-            }
-            foreach (Expression expression in Dimensions)
-            {
-                label.AppendText(" [");
-                label.AppendLabel(expression.GetLabel());
-                label.AppendText("]");
+                label.AppendText(DatObjectName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Variable));
             }
         }
 
@@ -75,20 +59,11 @@ namespace pluginVerilog.Verilog.Expressions
 
         public override string CreateString()
         {
+            AjkAvaloniaLibs.Controls.ColorLabel label = new AjkAvaloniaLibs.Controls.ColorLabel();
+            AppendLabel(label);
             StringBuilder sb = new StringBuilder();
-            sb.Append(NameSpaceText);
-            sb.Append(VariableName);
-            if (RangeExpression != null)
-            {
-                sb.Append(RangeExpression.CreateString());
-            }
-            foreach (Expression expression in Dimensions)
-            {
-                sb.Append(" [");
-                sb.Append(expression.CreateString());
-                sb.Append("]");
-            }
-            return sb.ToString();
+            sb.Append(DatObjectName);
+            return label.CreateString();
         }
 
         public override void AppendRefrencedDataObjects(List<DataObjects.DataObject> referencedObjects)
@@ -110,7 +85,7 @@ namespace pluginVerilog.Verilog.Expressions
         {
             DataObjectReference val = new DataObjectReference()
             {
-                VariableName = dataObject.Name
+                DatObjectName = dataObject.Name
             };
             val.TargetDataObject = dataObject;
             if (dataObject is DataObjects.Variables.IntegerVectorValueVariable)
@@ -154,7 +129,7 @@ namespace pluginVerilog.Verilog.Expressions
 
             DataObjectReference val = new DataObjectReference()
             {
-                VariableName = originalDataObject.Name
+                DatObjectName = originalDataObject.Name
             };
             DataObjects.DataObject originalObject = originalDataObject;
             bool partial = false;

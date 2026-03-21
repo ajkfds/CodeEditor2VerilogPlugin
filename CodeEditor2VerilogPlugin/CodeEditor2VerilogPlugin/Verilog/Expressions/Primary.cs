@@ -487,7 +487,6 @@ number
         public static Primary? parseDataObject(WordScanner word, NameSpace nameSpace, INamedElement owner, bool lValue,string nameSpaceText)
         {
             DataObjectReference? dataObjectReference = DataObjectReference.ParseCreate(word, nameSpace, owner, lValue);
-            if(dataObjectReference != null) dataObjectReference.NameSpaceText = nameSpaceText;
 
             if (dataObjectReference == null) return null;
             if (dataObjectReference.TargetDataObject == null) return null;
@@ -525,7 +524,7 @@ number
             if (element is DataObject)
             {
                 if (nameSpaceText != "") nameSpaceText = nameSpaceText + ".";
-                nameSpaceText = nameSpaceText + dataObjectReference.VariableName + ".";
+                nameSpaceText = nameSpaceText + dataObjectReference.DatObjectName + ".";
                 return parseDataObject(word, nameSpace, dataObjectReference.TargetDataObject, lValue,nameSpaceText);
             }
 
