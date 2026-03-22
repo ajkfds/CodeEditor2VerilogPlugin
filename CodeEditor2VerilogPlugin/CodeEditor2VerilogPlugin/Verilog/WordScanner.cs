@@ -944,7 +944,7 @@ namespace pluginVerilog.Verilog
 
             if (rootFile == null)
             {
-                throw new Exception();
+                return;
             }
 
             {
