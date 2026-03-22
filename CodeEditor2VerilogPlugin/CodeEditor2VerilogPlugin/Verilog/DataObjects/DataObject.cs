@@ -15,8 +15,14 @@ using pluginVerilog.Verilog.DataObjects.Arrays;
 
 namespace pluginVerilog.Verilog.DataObjects
 {
+    /// <summary>
+    /// Verilog/SystemVerilogのDataObjectを保持するクラス。
+    /// AssociativeArray, DynamicArray, Queue, Constants, InterfaceInstance, ModportInstance,Net, Veriableがこれを継承する。
+    /// </summary>
+
     public abstract class DataObject : INamedElement
     {
+
         // #SystemVerilog 2017
         //	net												user-defined-size	4state	v
         //
@@ -84,6 +90,14 @@ namespace pluginVerilog.Verilog.DataObjects
             }
         }
 
+        /// <summary>
+        /// DataTypeで指定したDataObjectを作成する。
+        /// ただし、DataTypeにclassは指定できない。
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="dataType"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
         public static DataObject Create(string name,DataTypes.IDataType dataType)
         {
             switch (dataType.Type)

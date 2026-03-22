@@ -16,9 +16,19 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Expressions
 {
+
+
+    /// <summary>
+    /// dataobjectへの参照を保持するクラス。
+    /// packed arrayはDataTypeに含まれ、Unpackerd ArrayはDataObjectに含まれるため、両方の情報を保持する必要がある。
+    /// bit-selectやpart-selectが行われた場合、
+    /// </summary>
     public class DataObjectReference : Primary
     {
+
+
         protected DataObjectReference() { }
+
 
         // DataObject名称
         public required string DatObjectName { get; init; }

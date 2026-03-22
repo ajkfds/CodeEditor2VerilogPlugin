@@ -6,24 +6,63 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
+    /// <summary>
+    /// DataObjectのDataTypeを保持するクラス。
+    /// PackedDimensionはここに内包される。
+    /// </summary>
     public interface IDataType
     {
         public DataTypeEnum Type { get; }
         public string CreateString();
 
+        /// <summary>
+        ///  packed arrayの一部となりえるDataTypeであることを示す。
+        /// </summary>
         public bool Packable { get; }
 
+        /// <summary>
+        /// vector中の一部のvectorをrangeで取り出すことが可能なデータタイプであることを示す。
+        /// </summary>
         public bool PartSelectable { get; }
 
+        /// <summary>
+        /// ColorLabelにDataType宣言を追加する。
+        /// </summary>
+        /// <param name="label"></param>
         public void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label);
 
-
-        public int? BitWidth { get; }
-        public CodeDrawStyle.ColorType ColorType { get; }
+        /// <summary>
+        /// Vectorであることを示す。
+        /// </summary>
         public bool IsVector { get; }
 
+
+        /// <summary>
+        /// DataType全体のbit幅を示す
+        /// </summary>
+        public int? BitWidth { get; }
+
+        /// <summary>
+        /// Editor中での表示色を示す
+        /// </summary>
+        public CodeDrawStyle.ColorType ColorType { get; }
+
+        /// <summary>
+        /// DataTypeをDeep Cloneする
+        /// </summary>
+        /// <returns></returns>
         public IDataType Clone();
+
+
+        /// <summary>
+        /// Packed Dimentionをｓっごっする
+        /// </summary>
         public List<Arrays.PackedArray> PackedDimensions { get; }
+
+        /// <summary>
+        /// NetのDataTypeとして有効であることを示す。
+        /// </summary>
+        public bool IsValidForNet { get; }
 
         /*
         In SystemVerilog, the types that can be specified as the data type for a built-in net (such as **`wire`**) are restricted to ensure the net can correctly model hardware behavior, including signal strengths and 4-state logic.
@@ -55,7 +94,6 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
         However, standard nets like `wire` are strictly limited to the 4-state bit models described in Section 1. 
          */
-        public bool IsValidForNet { get; }
 
     }
 }
