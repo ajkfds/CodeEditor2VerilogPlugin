@@ -62,24 +62,33 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 {
                     Net net = (Net)element;
                     if (net.DefinedReference == null) continue;
-                    if (net.AssignedReferences.Count == 0)
+                    if (net.AssignedBoolMap?.IsFullMapped() != true)
                     {
-                        if (net.UsedReferences.Count == 0)
-                        {
-                            net.DefinedReference.AddNotice("undriven & unused");
-                        }
-                        else
-                        {
-                            net.DefinedReference.AddNotice("undriven");
-                        }
+                        net.DefinedReference.AddNotice("undriven");
                     }
-                    else
+
+                    if (net.UsedReferences.Count == 0)
                     {
-                        if (net.UsedReferences.Count == 0)
-                        {
-                            net.DefinedReference.AddNotice("unused");
-                        }
+                        net.DefinedReference.AddNotice("unused");
                     }
+                    //if (net.AssignedReferences.Count == 0)
+                    //{
+                    //    if (net.UsedReferences.Count == 0)
+                    //    {
+                    //        net.DefinedReference.AddNotice("undriven & unused");
+                    //    }
+                    //    else
+                    //    {
+                    //        net.DefinedReference.AddNotice("undriven");
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    if (net.UsedReferences.Count == 0)
+                    //    {
+                    //        net.DefinedReference.AddNotice("unused");
+                    //    }
+                    //}
                     continue;
                 }
 
@@ -87,24 +96,34 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 if (valueVar == null) continue;
                 if (valueVar.DefinedReference == null) continue;
 
-                if (valueVar.AssignedReferences.Count == 0)
+                if (valueVar.AssignedBoolMap?.IsFullMapped() != true)
                 {
-                    if (valueVar.UsedReferences.Count == 0)
-                    {
-                        valueVar.DefinedReference.AddNotice("undriven & unused");
-                    }
-                    else
-                    {
-                        valueVar.DefinedReference.AddNotice("undriven");
-                    }
+                    valueVar.DefinedReference.AddNotice("undriven");
                 }
-                else
+
+                if (valueVar.UsedReferences.Count == 0)
                 {
-                    if (valueVar.UsedReferences.Count == 0)
-                    {
-                        valueVar.DefinedReference.AddNotice("unused");
-                    }
+                    valueVar.DefinedReference.AddNotice("unused");
                 }
+
+                //if (valueVar.AssignedReferences.Count == 0)
+                //{
+                //    if (valueVar.UsedReferences.Count == 0)
+                //    {
+                //        valueVar.DefinedReference.AddNotice("undriven & unused");
+                //    }
+                //    else
+                //    {
+                //        valueVar.DefinedReference.AddNotice("undriven");
+                //    }
+                //}
+                //else
+                //{
+                //    if (valueVar.UsedReferences.Count == 0)
+                //    {
+                //        valueVar.DefinedReference.AddNotice("unused");
+                //    }
+                //}
             }
         }
 
