@@ -88,6 +88,11 @@ namespace pluginVerilog.Verilog.Expressions
         {
 
         }
+
+        public virtual void AssertAssigned()
+        {
+
+        }
         public string ConstantValueString()
         {
             if (Constant)

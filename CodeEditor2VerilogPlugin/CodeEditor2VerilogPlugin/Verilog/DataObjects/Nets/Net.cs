@@ -195,6 +195,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                     net.NamedElements.Add(dataObject.Name, dataObject);
                 }
             }
+            net.AssignedBoolMap = new ArraysBoolMap(1, net.DataType.PackedDimensions,new List<UnPackedArray>());
             return net;
         }
 
@@ -542,6 +543,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                     //}
                 }
                 nets.Add(net);
+                net.AssignedBoolMap = new ArraysBoolMap(net.DataType, net.UnpackedArrays);
 
                 if (word.GetCharAt(0) != ',') break;
                 word.MoveNext(); // ,

@@ -112,6 +112,7 @@ namespace pluginVerilog.Verilog.Statements
             {
                 List<DataObject> dataObjects = new List<DataObject>();
                 lExpression.AppendRefrencedDataObjects(dataObjects);
+                lExpression.AssertAssigned();
 
                 foreach(DataObject dataObject in dataObjects)
                 {

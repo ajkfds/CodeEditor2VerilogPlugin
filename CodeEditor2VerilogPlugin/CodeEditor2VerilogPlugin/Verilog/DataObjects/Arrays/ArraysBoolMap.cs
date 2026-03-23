@@ -2,6 +2,7 @@ using pluginVerilog.Verilog.DataObjects.Variables;
 using pluginVerilog.Verilog.Expressions;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,13 +11,26 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
 {
     public class ArraysBoolMap
     {
-        public ArraysBoolMap(List<PackedArray> packedArrays,List<UnPackedArray> unpackedArrays):this(1,packedArrays,unpackedArrays)
+
+        public ArraysBoolMap(DataTypes.IDataType dataType, List<UnPackedArray>? unpackedArrays)
         {
+            int bits = 1;
+            if (dataType.IsVector && dataType.BitWidth != null) bits = (int)dataType.BitWidth;
+            initialize(bits, dataType.PackedDimensions, unpackedArrays);
         }
-        public ArraysBoolMap(int bits, List<PackedArray> packedArrays, List<UnPackedArray> unpackedArrays)
+
+        public ArraysBoolMap(List<PackedArray> packedArrays,List<UnPackedArray>? unpackedArrays)
+        {
+            initialize(1, packedArrays, unpackedArrays);
+        }
+        public ArraysBoolMap(int bits, List<PackedArray> packedArrays, List<UnPackedArray>? unpackedArrays)
+        {
+            initialize(bits, packedArrays, unpackedArrays);
+        }
+        private void initialize(int bits, List<PackedArray> packedArrays, List<UnPackedArray>? unpackedArrays)
         {
             mapRanges = null;
-            int size = bits;
+            size = bits;
             dimensions.Add(bits);
 
             foreach (PackedArray packedArray in packedArrays)
@@ -25,22 +39,28 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
                 dimensions.Add((int)packedArray.Size);
                 size = size * (int)packedArray.Size;
             }
-            foreach (UnPackedArray unpackedArray in unpackedArrays)
+
+            if(unpackedArrays != null)
             {
-                if (unpackedArray.Size == null) return;
-                dimensions.Add((int)unpackedArray.Size);
-                size = size + (int)unpackedArray.Size;
+                foreach (UnPackedArray unpackedArray in unpackedArrays)
+                {
+                    if (unpackedArray.Size == null) return;
+                    dimensions.Add((int)unpackedArray.Size);
+                    size = size + (int)unpackedArray.Size;
+                }
             }
             mapRanges = new List<mapRange>(size);
         }
+
         List<int> dimensions = new List<int>();
         private List<mapRange>? mapRanges = null;
+        int size = 1;
 
         public void Assert(List<RangeExpression> rangeExpressions)
         {
             if (mapRanges == null) return;
             long start = 0;
-            long last = mapRanges.Count-1;
+            long last = size-1;
             int dimension = 0;
 
             foreach(RangeExpression rangeExpression in rangeExpressions)
@@ -70,6 +90,10 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
             addRange(start, last);
         }
 
+        public void AssertAll()
+        {
+            addRange(0, size - 1);
+        }
 
         private void addRange(long start, long last)
         {
@@ -107,7 +131,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
             if (mapRanges == null) return null;
             return mapRanges.Count == 1 &&
                    mapRanges[0].Start == 0 &&
-                   mapRanges[0].Last == mapRanges.Count - 1;
+                   mapRanges[0].Last == size - 1;
         }
         public struct mapRange : IComparable<mapRange>
         {

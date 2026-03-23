@@ -389,7 +389,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                         if(preDefined != null) preDefined.Defined = true;
                     }
                 }
-
+                variable.AssignedMap = new ArraysBoolMap(dataType, unpackedArrays);
 
                 vars.Add(variable);
 
