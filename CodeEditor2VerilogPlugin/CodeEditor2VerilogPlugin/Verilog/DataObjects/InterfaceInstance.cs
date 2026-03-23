@@ -72,37 +72,6 @@ namespace pluginVerilog.Verilog.DataObjects
 
         public bool Prototype { get; set; } = false;
 
-        //public static InterfaceInstantiation Create(string name, string sourceName, Project project)
-        //{
-        //    InterfaceInstantiation instantiation = new InterfaceInstantiation() { }
-        //    instantiation.Name = name;
-        //    instantiation.SourceName = sourceName;
-        //    instantiation.Project = project;
-        //    return instantiation;
-        //}
-        //public static DataObject Create(string name, DataTypes.IDataType dataType)
-        //{
-        //    if (dataType is not BuildingBlocks.Interface) throw new Exception();
-        //    BuildingBlocks.Interface interface_ = (BuildingBlocks.Interface)dataType;
-
-        //    InterfaceInstance interfaceInstantiation = new InterfaceInstance()
-        //    {
-        //        BeginIndexReference = interface_.BeginIndexReference,
-        //        DefinitionReference = interface_.DefinitionReference,
-        //        Name = name,
-        //        ParameterOverrides = new Dictionary<string, Expressions.Expression>(),
-        //        Project = null,
-        //        SourceName = interface_.Name
-        //    };
-        //    if (interface_ == null) return interfaceInstantiation;
-        //    //foreach (var modPort in interface_.NamedElements.Values.OfType<ModPort>())
-        //    //{
-        //    //    interface_.ModPorts.cl
-        //    //}
-        //    copyItems(interfaceInstantiation, interface_);
-
-        //    return interfaceInstantiation;
-        //}
         public static InterfaceInstance CreatePortInstance(WordScanner word,string sourceInterfaceName,NameSpace nameSpace)
         {
             InterfaceInstance interfaceInstantiation = new InterfaceInstance() {
@@ -154,28 +123,30 @@ namespace pluginVerilog.Verilog.DataObjects
             IModuleOrInterface? moduleOrInterface = nameSpace.BuildingBlock as IModuleOrInterface;
             if (moduleOrInterface == null) return false;
 
-            WordReference moduleIdentifier = word.CrateWordReference();
+            // create word reference to add message onto this name
+            WordReference interfaceIdentifier = word.CrateWordReference();
+
+            // check interface name
             string interfaceName = word.Text;
-            IndexReference beginIndexReference = word.CreateIndexReference();
             Interface? instancedInterface = word.ProjectProperty.GetBuildingBlock(interfaceName) as Interface;
-            if (instancedInterface == null)
-            {
-                return false;
-            }
-            word.MoveNext();
+            if (instancedInterface == null) return false;   // this identifier is not interface name
+
+            IndexReference beginIndexReference = word.CreateIndexReference();
+            word.MoveNext(); // interface name
+
             IndexReference blockBeginIndexReference = word.CreateIndexReference();
 
             string next = word.NextText;
             if (word.Text != "#" && next != "(" && next != ";" && General.IsIdentifier(word.Text))
             {
-                moduleIdentifier.AddError("illegal module item");
+                interfaceIdentifier.AddError("illegal module item");
                 word.SkipToKeyword(";");
                 return true;
             }
-            moduleIdentifier.Color(CodeDrawStyle.ColorType.Keyword);
+            interfaceIdentifier.Color(CodeDrawStyle.ColorType.Keyword);
 
+            // get parameters to override interface port parameter
             Dictionary<string, Expressions.Expression> parameterOverrides = new Dictionary<string, Expressions.Expression>();
-
             if (word.Text == "#") // parse parameter override
             {
                 word.Color(CodeDrawStyle.ColorType.Keyword);
