@@ -35,7 +35,8 @@ namespace pluginVerilog.Verilog.Expressions
 
 
         // DataObject定義への参照
-        public DataObjects.DataObject? DefinedDataObject = null;
+        public DataObjects.DataObject? OrigainalDataObject = null;
+        public List<RangeExpression> RangesFromOriginal { get; set; } = new List<RangeExpression>();
 
         // 参照先DataObject.DefinedDataObjectの部分Clone
         public DataObjects.DataObject? TargetDataObject = null;
@@ -84,6 +85,14 @@ namespace pluginVerilog.Verilog.Expressions
                 referencedObjects.Add(TargetDataObject);
             }
         }
+
+        public override void AssertAssigned()
+        {
+            if (OrigainalDataObject == null) return;
+            if (OrigainalDataObject.AssignedMap == null) return;
+            OrigainalDataObject.AssignedMap.Assert(RangesFromOriginal);
+        }
+
 
         /// <summary>
         /// create DataObject Reference from DataObject
@@ -145,7 +154,7 @@ namespace pluginVerilog.Verilog.Expressions
             bool partial = false;
 
             // もともとのdataobject定義を保持
-            val.DefinedDataObject = originalDataObject;
+            val.OrigainalDataObject = originalDataObject;
 
             // TargetDataObjectは部分配列取得のためにCloneされる。
             val.TargetDataObject = originalDataObject.Clone();
@@ -164,47 +173,44 @@ namespace pluginVerilog.Verilog.Expressions
                 if (constants.Expression.Constant) val.BitWidth = constants.Expression.BitWidth;
             }
 
-
+            // 変数名箇所にエラーを追記
+            // comment annotationの@discardでdiscardされた後に使用されたエラー
             if (val.TargetDataObject.CommentAnnotation_Discarded)
             {
                 word.AddError("Disarded.");
             }
             else
             {
+                // 未宣言の変数が使用されたエラー
                 if (!word.Prototype && !val.TargetDataObject.Defined)
                 {
                     word.AddError("not defined here");
                 }
             }
-
             word.MoveNext();
 
             // parse unpacked dimensions
+            // TargetDataObjectのUnpacked ArrayをDataObjectReferenceに移動させる。
             foreach (var unpackedArray in val.TargetDataObject.UnpackedArrays)
             {
                 val.UnpackedArrays.Add(unpackedArray.Clone());
             }
             val.TargetDataObject.UnpackedArrays.Clear();
 
-            {
+            { // DataObjectReferenceのUnpackedArray数の上限まで、Range表記を処理する。
                 int unpackedArrayIndex = 0;
                 while (!word.Eof)
                 {
-                    if (word.Text != "[")
-                    {
-                        break;
-                    }
+                    if (word.Text != "[") break;
                     if (val.UnpackedArrays.Count <= unpackedArrayIndex) break;
 
                     RangeExpression? rangeExpression = RangeExpression.ParseCreate(word, nameSpace);
                     if (rangeExpression == null)
                     {
-                        //                        UnfoundObjectReference unfoundObjectReference = new UnfoundObjectReference();
-                        //                        unfoundObjectReference.PartialDataObject = val;
-                        //                        return unfoundObjectReference;
                         return null;
                     }
 
+                    // 部分UnpackedArrayを生成する。
                     partial = true;
                     if (rangeExpression is SingleBitRangeExpression)
                     {
@@ -217,6 +223,9 @@ namespace pluginVerilog.Verilog.Expressions
                                 singleBitRangeExpression.WordReference.AddError("index out of range");
                             }
                         }
+
+                        val.RangesFromOriginal.Add(rangeExpression);
+                        //単一のUnpacked Arrayが選択されたので、DataObjectReferenceのUnpackedArrayIndexの次元数を1次元落とす。
                         val.UnpackedArrays.RemoveAt(unpackedArrayIndex);
                     }
                     else
@@ -246,6 +255,7 @@ namespace pluginVerilog.Verilog.Expressions
                         }
 
                         val.UnpackedArrays[unpackedArrayIndex] = new UnPackedArray(rangeExpression.BitWidth);
+                        val.RangesFromOriginal.Add(rangeExpression);
                         unpackedArrayIndex++;
                     }
                 }
@@ -281,11 +291,13 @@ namespace pluginVerilog.Verilog.Expressions
                             }
                         }
                         ival.PackedDimensions.RemoveAt(packedArrayIndex);
+                        val.RangesFromOriginal.Add(rangeExpression);
                     }
                     else
                     {
                         ival.PackedDimensions[packedArrayIndex] = new PackedArray(rangeExpression.BitWidth);
                         packedArrayIndex++;
+                        val.RangesFromOriginal.Add(rangeExpression);
                     }
                 }
             }
@@ -297,8 +309,9 @@ namespace pluginVerilog.Verilog.Expressions
                 if (ival.PartSelectable)
                 {
                     IDataType? partSel = ival.ParsePartSelect(word, nameSpace);
+                    //                         val.RangesFromOriginal.Add(rangeExpression);
 
-                    if(partSel != null)
+                    if (partSel != null)
                     {
                         val.TargetDataObject = DataObjects.Variables.Variable.Create(originalObject.Name, partSel);
                         val.BitWidth = val.TargetDataObject.BitWidth;
@@ -316,6 +329,7 @@ namespace pluginVerilog.Verilog.Expressions
                     break;
                 }
                 val.TargetDataObject = DataObjects.Variables.Byte.Create(originalObject.Name, DataObjects.DataTypes.ByteType.Create(false));
+                val.RangesFromOriginal.Add(rangeExpression);
                 break;
             }
 
