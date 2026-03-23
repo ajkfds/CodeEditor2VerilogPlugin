@@ -121,7 +121,7 @@ namespace pluginVerilog.Verilog
                     break;
                 }
                 indexEnd++;
-                if (ch == ':' || ch == ',') // single char separators
+                if (ch == ':' || ch == ',' ) // single char separators
                 {
                     return;
                 }
@@ -131,7 +131,7 @@ namespace pluginVerilog.Verilog
             while (indexEnd < commentEnd)
             {
                 ch = document.GetCharAt(indexEnd);
-                if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r'|| ch == ':' || ch==',')
+                if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r'|| ch == ':' || ch==','|| ch=='@')
                 {
                     break;
                 }
