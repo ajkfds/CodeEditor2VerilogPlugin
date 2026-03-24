@@ -100,6 +100,8 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             UserDefinedType.Typedef.AppendLabel(label);
         }
 
+        public override int? BitWidth => UserDefinedType.BitWidth;
+
         public override bool PartSelectable
         {
             get { return UserDefinedType.PartSelectable; }

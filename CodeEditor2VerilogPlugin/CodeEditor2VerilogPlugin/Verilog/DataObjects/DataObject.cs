@@ -160,15 +160,33 @@ namespace pluginVerilog.Verilog.DataObjects
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// part selectが可能かどうかを表す。
+        /// IntegerVactorTypeはdalse,IntegerAtomTypeはtrueになるが、StructやUserDefinedTypeはその参照内容次第でpartSelect可能か同かが変わる。
+        /// </summary>
         public virtual bool PartSelectable { get { return false; } }
-//        [JsonIgnore]
+
+        /// <summary>
+        /// DataObjectの名称
+        /// </summary>
         public required string Name { get; init; }
-        [JsonIgnore]
+        
+        /// <summary>
+        /// 定義時に後ろにつけられた説明コメント
+        /// </summary>
         public string Comment { set; get; } = "";
+
+        /// <summary>
+        /// ドキュメント中の定義位置に対する参照
+        /// </summary>
         public WordReference? DefinedReference { set; get; } = null;
+
+        /// <summary>
+        /// DataTypeに対する参照。
+        /// unpacked arrayはDataObjectに含まれるが、packed arrayはdataTypeの一部であることに注意。
+        /// </summary>
         public IDataType? DataType;
 
-        public ArraysBoolMap? AssignedBoolMap { set; get; }
         public virtual bool Packable
         {
             get

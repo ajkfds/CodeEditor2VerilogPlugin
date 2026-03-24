@@ -62,7 +62,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 {
                     Net net = (Net)element;
                     if (net.DefinedReference == null) continue;
-                    if (net.AssignedBoolMap?.IsFullMapped() != true)
+                    if (net.AssignedMap?.IsFullMapped() != true)
                     {
                         net.DefinedReference.AddNotice("undriven");
                     }
@@ -96,7 +96,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 if (valueVar == null) continue;
                 if (valueVar.DefinedReference == null) continue;
 
-                if (valueVar.AssignedBoolMap?.IsFullMapped() != true)
+                if (valueVar.AssignedMap?.IsFullMapped() != true)
                 {
                     valueVar.DefinedReference.AddNotice("undriven");
                 }

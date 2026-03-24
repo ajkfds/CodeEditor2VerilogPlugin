@@ -247,16 +247,18 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                     {
                         if (dataType.BitWidth == null) throw new Exception();
                         int bitWidth = (int)dataType.BitWidth;
-                        variable.AssignedBoolMap = new ArraysBoolMap(bitWidth,dataType.PackedDimensions, unpackedArrays);
+                        variable.AssignedMap = new ArraysBoolMap(bitWidth,dataType.PackedDimensions, unpackedArrays);
                     }else if( dataType is IntegerVectorType)
                     {
-                        variable.AssignedBoolMap = new ArraysBoolMap(dataType.PackedDimensions, unpackedArrays);
+                        variable.AssignedMap = new ArraysBoolMap(dataType.PackedDimensions, unpackedArrays);
                     }
                 }
 
+                bool assigned = false;
                 if (word.Text == "=") 
                 {
                     word.MoveNext();    // =
+
                     if (word.Text == "new")
                     {
                         word.Color(CodeDrawStyle.ColorType.Keyword);
@@ -299,6 +301,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                             }
                             if(word.Text ==")") word.MoveNext();
                         }
+                        assigned = true;
                     }
                     else
                     {
@@ -310,6 +313,10 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                             {
                                 word.AddError("illegal assignment pattern.");
                                 return true;
+                            }
+                            else
+                            {
+                                assigned = true;
                             }
                         }
                         else
@@ -324,6 +331,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                             }
                             else
                             {
+                                assigned = true;
                                 variable.AssignedReferences.Add(variable.DefinedReference);
                                 if(variable.BitWidth != exp.BitWidth && !word.Prototype && exp.Reference != null && !word.Prototype)
                                 {
@@ -390,6 +398,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                     }
                 }
                 variable.AssignedMap = new ArraysBoolMap(dataType, unpackedArrays);
+                if (assigned) variable.AssignedMap.AssertAll();
 
                 vars.Add(variable);
 

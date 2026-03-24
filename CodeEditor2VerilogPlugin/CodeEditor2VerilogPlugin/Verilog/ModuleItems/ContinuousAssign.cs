@@ -55,6 +55,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                 if (assignment != null)
                 {
                     continuousAssign.VariableAssignment = assignment;
+                    assignment.NetLValue.AssertAssigned();
                 }
                 else
                 {

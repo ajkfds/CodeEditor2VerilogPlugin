@@ -530,11 +530,11 @@ namespace pluginVerilog.Verilog.DataObjects
                     case DirectionEnum.Inout:
                         port.DataObject.AssignedReferences.Add(word.GetReference());
                         port.DataObject.UsedReferences.Add(word.GetReference());
-                        if (port.DataObject.AssignedBoolMap != null) port.DataObject.AssignedBoolMap.AssertAll();
+                        if (port.DataObject.AssignedMap != null) port.DataObject.AssignedMap.AssertAll();
                         break;
                     case DirectionEnum.Input:
                         port.DataObject.AssignedReferences.Add(word.GetReference());
-                        if(port.DataObject.AssignedBoolMap != null) port.DataObject.AssignedBoolMap.AssertAll();
+                        if(port.DataObject.AssignedMap != null) port.DataObject.AssignedMap.AssertAll();
                         break;
                     case DirectionEnum.Undefined:
                         break;

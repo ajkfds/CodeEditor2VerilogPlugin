@@ -15,7 +15,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
         public ArraysBoolMap(DataTypes.IDataType dataType, List<UnPackedArray>? unpackedArrays)
         {
             int bits = 1;
-            if (dataType.IsVector && dataType.BitWidth != null) bits = (int)dataType.BitWidth;
+            if (dataType.PartSelectable && dataType.BitWidth != null) bits = (int)dataType.BitWidth;
             initialize(bits, dataType.PackedDimensions, unpackedArrays);
         }
 
@@ -46,7 +46,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
                 {
                     if (unpackedArray.Size == null) return;
                     dimensions.Add((int)unpackedArray.Size);
-                    size = size + (int)unpackedArray.Size;
+                    size = size * (int)unpackedArray.Size;
                 }
             }
             mapRanges = new List<mapRange>(size);
@@ -61,26 +61,29 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
             if (mapRanges == null) return;
             long start = 0;
             long last = size-1;
-            int dimension = 0;
+            int dimension = dimensions.Count-1;
+            int dsize = size;
 
             foreach(RangeExpression rangeExpression in rangeExpressions)
             {
+                dsize = dsize / dimensions[dimension];
+
                 if(rangeExpression is SingleBitRangeExpression)
                 {
                     SingleBitRangeExpression singleBitRangeExpression = (SingleBitRangeExpression)rangeExpression;
                     if (singleBitRangeExpression.BitIndex == null) return;
-                    start = start + (long)dimensions[dimension]*(long)singleBitRangeExpression.BitIndex;
-                    last = start + (long)dimensions[dimension] - 1;
-                    dimension++;
+                    start = start + dsize*(long)singleBitRangeExpression.BitIndex;
+                    last = start + dsize - 1;
+                    dimension--;
                 }
                 else if(rangeExpression is AbsoluteRangeExpression)
                 {
                     AbsoluteRangeExpression absoluteRangeExpression = (AbsoluteRangeExpression)rangeExpression;
                     if (absoluteRangeExpression.MaxBitIndex == null) return;
                     if (absoluteRangeExpression.MinBitIndex == null) return;
-                    start = start + (long)dimensions[dimension] * (long)absoluteRangeExpression.MinBitIndex;
-                    last = start + (long)dimensions[dimension]*((long)absoluteRangeExpression.MaxBitIndex- (long)absoluteRangeExpression.MinBitIndex) - 1;
-                    dimension++;
+                    start = start + dsize * (long)absoluteRangeExpression.MinBitIndex;
+                    last = start + dsize *((long)absoluteRangeExpression.MaxBitIndex- (long)absoluteRangeExpression.MinBitIndex) - 1;
+                    dimension--;
                 }
                 else
                 {
