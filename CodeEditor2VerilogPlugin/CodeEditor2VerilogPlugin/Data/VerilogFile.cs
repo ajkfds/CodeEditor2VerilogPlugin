@@ -257,7 +257,7 @@ namespace pluginVerilog.Data
                     Controller.MessageView.Update(includeFile.VerilogParsedDocument);
                 }
 
-                includeFile.NavigatePanelNode.UpdateVisual();
+//                includeFile.NavigatePanelNode.UpdateVisual();
 
                 // update nested include file
                 await updateIncludeFilesAsync(includeFile.VerilogParsedDocument, item.Items);
@@ -440,21 +440,19 @@ namespace pluginVerilog.Data
         public override async Task UpdateAsync()
         {
             await base.UpdateAsync();
-            //if (!Dispatcher.UIThread.CheckAccess())
-            //{
-            //    throw new Exception();
-            //}
-            await Dispatcher.UIThread.InvokeAsync(
-                async () => { 
-                    await VerilogCommon.Updater.UpdateAsync(this);
-                    NavigatePanelNode.UpdateVisual();
-                    if (CodeEditor2.Controller.NavigatePanel.GetSelectedFile() == this)
-                    {
-                        CodeEditor2.Controller.CodeEditor.PostRefresh();
-                        if (ParsedDocument != null) CodeEditor2.Controller.MessageView.Update(ParsedDocument);
-                    }
-                }
-            );
+            if (!Dispatcher.UIThread.CheckAccess())
+            {
+                await Dispatcher.UIThread.InvokeAsync(() => UpdateAsync());
+                return;
+            }
+
+            await VerilogCommon.Updater.UpdateAsync(this);
+            NavigatePanelNode.UpdateVisual();
+            if (CodeEditor2.Controller.NavigatePanel.GetSelectedFile() == this)
+            {
+                CodeEditor2.Controller.CodeEditor.PostRefresh();
+                if (ParsedDocument != null) CodeEditor2.Controller.MessageView.Update(ParsedDocument);
+            }
         }
 
         public override async Task ParseHierarchyAsync(Action<ITextFile> action)

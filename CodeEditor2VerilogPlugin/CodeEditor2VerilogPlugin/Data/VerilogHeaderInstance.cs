@@ -472,9 +472,7 @@ namespace pluginVerilog.Data
         //}
         public override PopupItem? GetPopupItem(ulong version, int index)
         {
-            textFileLock.EnterReadLock();
             var parsed = VerilogParsedDocument;
-            textFileLock.ExitReadLock();
 
             return VerilogCommon.AutoComplete.GetPopupItem(this, parsed, version, index);
         }
