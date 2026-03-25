@@ -87,7 +87,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
                 }
                 else
                 {
-                    throw new Exception();
+                    //throw new Exception();
                 }
             }
             addRange(start, last);
@@ -100,7 +100,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
 
         private void addRange(long start, long last)
         {
-            if (mapRanges == null) throw new Exception();
+            if (mapRanges == null) return; //throw new Exception();
             // 1. 新しい範囲を追加
             mapRanges.Add(new mapRange(start, last));
 

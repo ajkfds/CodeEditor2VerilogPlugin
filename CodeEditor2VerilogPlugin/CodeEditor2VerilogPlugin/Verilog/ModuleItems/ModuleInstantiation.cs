@@ -829,6 +829,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                     {
                         moduleInstantiation.PortConnection[pinName] = expression;
                     }
+                    if(expression != null) expression.AssertAssigned();
                     checkPortConnection(word.ProjectProperty, instancedModule, expression, pinName, true);
                 }
 
