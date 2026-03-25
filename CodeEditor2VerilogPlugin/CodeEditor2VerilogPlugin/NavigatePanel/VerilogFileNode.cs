@@ -57,8 +57,11 @@ namespace pluginVerilog.NavigatePanel
         }
 
 
+        private volatile bool onSelecting = false;
         public override async void OnSelected()
         {
+            if (onSelecting) return;
+            onSelecting = true;
             try
             {
                 base.OnSelected(); // update context menu
@@ -86,8 +89,10 @@ namespace pluginVerilog.NavigatePanel
                 if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
                 CodeEditor2.Controller.AppendLog("# Exception : " + ex.Message, Avalonia.Media.Colors.Red);
             }
-
-            base.OnSelected();
+            finally
+            {
+                onSelecting= false;
+            }
         }
 
 
@@ -201,7 +206,7 @@ namespace pluginVerilog.NavigatePanel
                 overrideIcons.Add(new AjkAvaloniaLibs.Libs.Icons.OverrideIcon()
                 {
                     SvgPath = "CodeEditor2/Assets/Icons/shine.svg",
-                    Color = Avalonia.Media.Color.FromArgb(255, 255, 255, 200),
+                    Color = CodeEditor2.Global.Color_Shine,
                     OverridePosition = AjkAvaloniaLibs.Libs.Icons.OverridePosition.UpRight
                 });
             }
@@ -213,28 +218,28 @@ namespace pluginVerilog.NavigatePanel
                     overrideIcons.Add(new AjkAvaloniaLibs.Libs.Icons.OverrideIcon()
                     {
                         SvgPath = "CodeEditor2VerilogPlugin/Assets/Icons/exclamation_triangle.svg",
-                        Color = Avalonia.Media.Color.FromArgb(255, 255, 20, 20),
+                        Color = CodeEditor2.Global.Color_Error,
                         OverridePosition = AjkAvaloniaLibs.Libs.Icons.OverridePosition.DownLeft
-                    });
+                    }); 
                 }
                 else if (verilogRelatedFile.VerilogParsedDocument.WarningCount > 0)
                 {
                     overrideIcons.Add(new AjkAvaloniaLibs.Libs.Icons.OverrideIcon()
                     {
                         SvgPath = "CodeEditor2VerilogPlugin/Assets/Icons/exclamation_triangle.svg",
-                        Color = Avalonia.Media.Color.FromArgb(255, 255, 255, 20),
+                        Color = CodeEditor2.Global.Color_Warning,
                         OverridePosition = AjkAvaloniaLibs.Libs.Icons.OverridePosition.DownLeft
                     });
                 }
             }
 
-            Avalonia.Media.Color color = Avalonia.Media.Color.FromArgb(100, 200, 240, 240);
+            Avalonia.Media.Color color = Global.Color_Verilog;
 
             if (verilogRelatedFile != null && verilogRelatedFile is InstanceTextFile)
             {
                 if (((InstanceTextFile)verilogRelatedFile).ExternalProject)
                 {
-                    color = Avalonia.Media.Color.FromArgb(100, 250, 200, 200);
+                    color = Global.Color_VerilogExternalProject;
                 }
             }
 

@@ -10,6 +10,7 @@ using System.Linq;
 using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
+using YamlDotNet.Serialization;
 
 namespace pluginVerilog.NavigatePanel
 {
@@ -78,9 +79,11 @@ namespace pluginVerilog.NavigatePanel
         }
 
 
-
+        private volatile bool onSelecting = false;
         public override async void OnSelected()
         {
+            if(onSelecting) return;
+            onSelecting = true;
             try
             {
                 System.Diagnostics.Debug.Print("##MI " + Text + " " + Indent.ToString());
@@ -109,7 +112,10 @@ namespace pluginVerilog.NavigatePanel
                 if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
                 CodeEditor2.Controller.AppendLog("# Exception : " + ex.Message, Avalonia.Media.Colors.Red);
             }
-            base.OnSelected();
+            finally
+            {
+                onSelecting = false;
+            }
         }
 
         public override async Task UpdateAsync()

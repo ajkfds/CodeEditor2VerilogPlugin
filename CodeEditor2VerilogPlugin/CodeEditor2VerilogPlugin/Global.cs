@@ -30,6 +30,8 @@ namespace pluginVerilog
         //    public static IconImage MedalBadge = new IconImage(Properties.Resources.medalBadge);
         }
 
+        public static Avalonia.Media.Color Color_Verilog = Avalonia.Media.Color.FromRgb(124,140,140);
+        public static Avalonia.Media.Color Color_VerilogExternalProject = Avalonia.Media.Color.FromRgb(146, 85, 85);
         public static void CreateSnapShot()
         {
             using (StreamWriter sw = new StreamWriter("snapshot.log"))
