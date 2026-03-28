@@ -287,6 +287,16 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             }
         }
 
+        public void AppendChiledNamedElements(NamedElements namedElements)
+        {
+            foreach (var member in Members.Values)
+            {
+                var dataObject = DataObject.Create(member.Identifier, member.DatType);
+                dataObject.Defined = true;
+                namedElements.Add(dataObject.Name, dataObject);
+            }
+        }
+
         public class Member
         {
             public Member() { }

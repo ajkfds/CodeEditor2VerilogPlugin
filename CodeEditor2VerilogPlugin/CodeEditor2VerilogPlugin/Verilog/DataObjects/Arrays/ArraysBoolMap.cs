@@ -9,8 +9,12 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.Arrays
 {
+    /// <summary>
+    /// boolの多次元array object, 多次元のbit配列を小さいメモリ領域で表現する。
+    /// </summary>
     public class ArraysBoolMap
     {
+
 
         public ArraysBoolMap(DataTypes.IDataType dataType, List<UnPackedArray>? unpackedArrays)
         {
@@ -23,6 +27,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
         {
             initialize(1, packedArrays, unpackedArrays);
         }
+
         public ArraysBoolMap(int bits, List<PackedArray> packedArrays, List<UnPackedArray>? unpackedArrays)
         {
             initialize(bits, packedArrays, unpackedArrays);
@@ -93,6 +98,9 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
             addRange(start, last);
         }
 
+        /// <summary>
+        /// 全bitをtrueにする。
+        /// </summary>
         public void AssertAll()
         {
             addRange(0, size - 1);
@@ -129,6 +137,10 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
             mapRanges = merged;
         }
 
+        /// <summary>
+        /// 全bitがtrueかどうかを確認する。
+        /// </summary>
+        /// <returns></returns>
         public bool? IsFullMapped()
         {
             if (mapRanges == null) return null;

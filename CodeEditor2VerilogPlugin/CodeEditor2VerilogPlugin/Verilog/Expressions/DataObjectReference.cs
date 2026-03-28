@@ -40,7 +40,6 @@ namespace pluginVerilog.Verilog.Expressions
 
         // 参照先DataObject.DefinedDataObjectの部分Clone
         public DataObjects.DataObject? TargetDataObject = null;
-        public List<DataObjects.Arrays.UnPackedArray> UnpackedArrays { get; set; } = new List<DataObjects.Arrays.UnPackedArray>();
 
 
         public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
@@ -156,12 +155,13 @@ namespace pluginVerilog.Verilog.Expressions
             // もともとのdataobject定義を保持
             val.OrigainalDataObject = originalDataObject;
 
-            // TargetDataObjectは部分配列取得のためにCloneされる。
+            // TargetDataObjectは部分配列取得のためにCloneされる。(DataTypeも含めDeep Cloneされる)
             val.TargetDataObject = originalDataObject.Clone();
             val.Reference = word.GetReference();
 
             word.Color(val.TargetDataObject.ColorType);
 
+            // constantの場合は値をコピー
             if (val.TargetDataObject is DataObjects.Constants.Constants)
             {
                 DataObjects.Constants.Constants constants = (DataObjects.Constants.Constants)val.TargetDataObject;
@@ -173,7 +173,7 @@ namespace pluginVerilog.Verilog.Expressions
                 if (constants.Expression.Constant) val.BitWidth = constants.Expression.BitWidth;
             }
 
-            // 変数名箇所にエラーを追記
+            // エラーチェック
             // comment annotationの@discardでdiscardされた後に使用されたエラー
             if (val.TargetDataObject.CommentAnnotation_Discarded)
             {

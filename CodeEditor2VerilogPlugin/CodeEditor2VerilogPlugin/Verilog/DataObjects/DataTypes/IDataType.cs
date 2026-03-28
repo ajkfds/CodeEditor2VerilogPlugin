@@ -64,6 +64,13 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         /// </summary>
         public bool IsValidForNet { get; }
 
+        // このdatatype でDataObjectを作ったとき、そのDataobjectが持つべき子NamedElemetsを追加する。
+        public void AppendChiledNamedElements(NamedElements namedElements)
+        {
+
+        }
+
+
         /*
         In SystemVerilog, the types that can be specified as the data type for a built-in net (such as **`wire`**) are restricted to ensure the net can correctly model hardware behavior, including signal strengths and 4-state logic.
 

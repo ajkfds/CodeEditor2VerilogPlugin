@@ -378,9 +378,17 @@ namespace pluginVerilog.Verilog.DataObjects
             Net.NetTypeEnum? netType = Net.parseNetType(word, nameSpace);
 
             IDataType? dataType = null;
-            if(netType == null)
+            if (netType == null)
             {
-                dataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, null);
+                if ( word.NextText =="," || word.NextText==")")
+                {
+                    // implicit net かつ identifierと同名のDataTypeが定義されていたときの処理
+                    // implicit net としての解釈を有線する必要がある。
+                }
+                else
+                {
+                    dataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, null);
+                }
             }
 
             Interface? interface_ = null;

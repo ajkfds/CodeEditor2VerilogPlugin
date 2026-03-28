@@ -29,6 +29,13 @@ namespace pluginVerilog.Tool
             ForceAllFiles,
             ThisFileOnly
         }
+        public static void PostParseAsync(CodeEditor2.Data.TextFile textFile, ParseMode parseMode)
+        {
+            Dispatcher.UIThread.Post(
+                async () => { 
+                    await ParseAsync(textFile, parseMode);  
+                });
+        }
 
         public static async Task ParseAsync(CodeEditor2.Data.TextFile textFile, ParseMode parseMode)
         {

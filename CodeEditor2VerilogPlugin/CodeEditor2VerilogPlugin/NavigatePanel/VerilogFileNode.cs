@@ -73,7 +73,6 @@ namespace pluginVerilog.NavigatePanel
                     return;
                 }
 
-
                 await CodeEditor2.Controller.CodeEditor.SetTextFileAsync(TextFile, true);
                 if (NodeSelected != null) NodeSelected();
 
@@ -82,7 +81,8 @@ namespace pluginVerilog.NavigatePanel
 
                 if (TextFile == null) return;
 
-                await Tool.ParseHierarchy.ParseAsync(TextFile, Tool.ParseHierarchy.ParseMode.SearchReparseReqestedTree);
+                Tool.ParseHierarchy.PostParseAsync(TextFile, Tool.ParseHierarchy.ParseMode.SearchReparseReqestedTree);
+                //await Tool.ParseHierarchy.ParseAsync(TextFile, Tool.ParseHierarchy.ParseMode.SearchReparseReqestedTree);
             }
             catch (Exception ex)
             {

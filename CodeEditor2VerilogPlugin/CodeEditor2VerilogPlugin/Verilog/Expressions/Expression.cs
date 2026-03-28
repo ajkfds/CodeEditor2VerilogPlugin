@@ -10,6 +10,7 @@ using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.Expressions.Operators;
 using System.Text.Json.Serialization;
 using DynamicData;
+using System.ComponentModel.DataAnnotations;
 
 
 namespace pluginVerilog.Verilog.Expressions
@@ -27,6 +28,9 @@ namespace pluginVerilog.Verilog.Expressions
         public virtual bool Constant { get; protected set; }
         public virtual double? Value { get; protected set; }
         public virtual int? BitWidth { get; protected set; }
+
+        public virtual DataType? DataType { get; protected set; }
+        public List<DataObjects.Arrays.UnPackedArray> UnpackedArrays { get; set; } = new List<DataObjects.Arrays.UnPackedArray>();
 
         public virtual SyncContext SyncContext { get; } = new SyncContext();
 
@@ -228,13 +232,14 @@ namespace pluginVerilog.Verilog.Expressions
         private static Expression? parseCreate(WordScanner word, NameSpace nameSpace,bool acceptAssignment, bool acceptmplicitNet)
         {
             Expression expression = new Expression();
-            List<Operator> operatorsStock = new List<Operator>();
             WordReference reference = word.GetReference();
 
+            // primaryをrpn形式で取得
             List<Primary> rpnPrimaries = new List<Primary>();
-
+            List<Operator> operatorsStock = new List<Operator>();
             parseExpressionPrimaries(word, nameSpace, rpnPrimaries, operatorsStock, ref reference,acceptAssignment, acceptmplicitNet);
 
+            // rpnを計算し、いつのprimaryにする
             expression.Reference = reference;
             while (operatorsStock.Count != 0)
             {

@@ -96,6 +96,10 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             return userDefinedType;
 
         }
+        public void AppendChiledNamedElements(NamedElements namedElements)
+        {
+            OriginalDataType.AppendChiledNamedElements(namedElements);
+        }
         public IDataType Clone()
         {
             UserDefinedType userDefinedType = new UserDefinedType { Typedef = Typedef };

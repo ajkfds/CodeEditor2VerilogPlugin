@@ -30,7 +30,8 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             }
         }
 
-        public override int? BitWidth{
+        public override int? BitWidth
+        {
             get
             {
                 int bitWidth = 1;
@@ -129,15 +130,6 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             {
                 DataType.AppendTypeLabel(label);
                 label.AppendText(" ");
-            }
-
-            if (UnpackedArrays != null)
-            {
-                foreach(UnPackedArray unpackedArray in UnpackedArrays)
-                {
-                    label.AppendLabel(unpackedArray.GetLabel());
-                    label.AppendText(" ");
-                }
             }
         }
 
@@ -310,6 +302,19 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             return ret;
         }
 
+        private NamedElements? namedElements = null;
+        public override NamedElements NamedElements
+        {
+            get
+            {
+                if (namedElements != null) return namedElements;
+                namedElements = new NamedElements();
+
+                if (DataType == null) return namedElements;
+                DataType.AppendChiledNamedElements(namedElements);
+                return namedElements;
+            }
+        }
         public static bool ParseDeclaration(WordScanner word, NameSpace nameSpace)
         {
             /* systemverilog 1800-2017

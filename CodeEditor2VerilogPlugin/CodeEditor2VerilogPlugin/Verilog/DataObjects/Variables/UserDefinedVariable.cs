@@ -32,23 +32,6 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             UserDefinedVariable val = new UserDefinedVariable() { Name = name,UserDefinedType = userDefinedType };
             IDataType originalType = userDefinedType.OriginalDataType;
 
-            switch (originalType.Type)
-            {
-                case DataTypeEnum.Struct:
-                    StructType structType = (StructType)originalType;
-                    foreach (var member in structType.Members.Values)
-                    {
-                        var dataObject = DataObject.Create(member.Identifier, member.DatType);
-                        dataObject.Defined = true;
-                        val.NamedElements.Add(dataObject.Name, dataObject);
-                    }
-                    break;
-                case DataTypeEnum.UserDefined:
-                case DataTypeEnum.Enum:
-                case DataTypeEnum.Class:
-                    break;
-            }
-
             val.DataType = dataType;
             return val;
         }
@@ -66,24 +49,22 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             {
                 val.UnpackedArrays.Add(unpackedArray.Clone());
             }
-            switch (originalType.Type)
-            {
-                case DataTypeEnum.Struct:
-                    StructType structType = (StructType)originalType;
-                    foreach (var member in structType.Members.Values)
-                    {
-                        var dataObject = DataObject.Create(member.Identifier, member.DatType);
-                        dataObject.Defined = true;
-                        val.NamedElements.Add(dataObject.Name, dataObject);
-                    }
-                    break;
-                case DataTypeEnum.UserDefined:
-                case DataTypeEnum.Enum:
-                case DataTypeEnum.Class:
-                    break;
-            }
 
             return val;
+        }
+
+        private NamedElements? namedElements = null;
+        public override NamedElements NamedElements
+        {
+            get
+            {
+                if (namedElements != null) return namedElements;
+                namedElements = new NamedElements();
+
+                if (DataType == null) return namedElements;
+                DataType.AppendChiledNamedElements(namedElements);
+                return namedElements;
+            }
         }
 
         public override Variable Clone()

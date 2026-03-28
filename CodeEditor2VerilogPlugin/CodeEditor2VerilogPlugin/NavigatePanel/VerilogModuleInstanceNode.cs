@@ -105,7 +105,8 @@ namespace pluginVerilog.NavigatePanel
 
                 if (CodeEditor2.Global.StopParse) return;
 
-                await Tool.ParseHierarchy.ParseAsync(ModuleInstance, Tool.ParseHierarchy.ParseMode.SearchReparseReqestedTree);
+                Tool.ParseHierarchy.PostParseAsync(ModuleInstance, Tool.ParseHierarchy.ParseMode.SearchReparseReqestedTree);
+                //await Tool.ParseHierarchy.ParseAsync(ModuleInstance, Tool.ParseHierarchy.ParseMode.SearchReparseReqestedTree);
             }
             catch (Exception ex)
             {

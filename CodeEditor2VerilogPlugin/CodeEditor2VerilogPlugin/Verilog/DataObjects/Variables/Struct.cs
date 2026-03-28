@@ -28,34 +28,39 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             StructType structType = (StructType)dataType;
 
             Struct ret = new Struct() { StructType = structType, Name = name };
-            foreach (var member in structType.Members.Values)
-            {
-                var dataObject = DataObject.Create(member.Identifier, member.DatType);
-                dataObject.Defined = true;
-                ret.NamedElements.Add(dataObject.Name, dataObject);
-            }
             return ret;
         }
 
         public override Variable Clone(string name)
         {
             Struct ret = new Struct() { StructType = StructType, Name = name, Defined = Defined };
-            //foreach (var packedArray in PackedDimensions)
-            //{
-            //    ret.PackedDimensions.Add(packedArray.Clone());
-            //}
             foreach (var unpackedArray in UnpackedArrays)
             {
                 ret.UnpackedArrays.Add(unpackedArray.Clone());
             }
-            foreach (var member in StructType.Members.Values)
-            {
-                var dataObject = DataObject.Create(member.Identifier, member.DatType);
-                dataObject.Defined = true;
-                ret.NamedElements.Add(dataObject.Name, dataObject);
-            }
             return ret;
         }
+
+        // アクセス時に遅延生成する
+        private NamedElements? namedElements = null;
+        public override NamedElements NamedElements
+        {
+            get
+            {
+                if (namedElements != null) return namedElements;
+                namedElements = new NamedElements();
+
+                foreach (var member in StructType.Members.Values)
+                {
+                    var dataObject = DataObject.Create(member.Identifier, member.DatType);
+                    dataObject.Defined = true;
+                    namedElements.Add(dataObject.Name, dataObject);
+                }
+                return namedElements;
+            }
+        }
+
+
         public override Variable Clone()
         {
             return Clone(Name);
