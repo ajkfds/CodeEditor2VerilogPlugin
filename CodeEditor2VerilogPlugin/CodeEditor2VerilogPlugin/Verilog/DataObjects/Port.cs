@@ -538,11 +538,9 @@ namespace pluginVerilog.Verilog.DataObjects
                     case DirectionEnum.Inout:
                         port.DataObject.AssignedReferences.Add(word.GetReference());
                         port.DataObject.UsedReferences.Add(word.GetReference());
-                        if (port.DataObject.AssignedMap != null) port.DataObject.AssignedMap.AssertAll();
                         break;
                     case DirectionEnum.Input:
                         port.DataObject.AssignedReferences.Add(word.GetReference());
-                        if(port.DataObject.AssignedMap != null) port.DataObject.AssignedMap.AssertAll();
                         break;
                     case DirectionEnum.Undefined:
                         break;
@@ -616,6 +614,20 @@ namespace pluginVerilog.Verilog.DataObjects
                 }
             }
 
+            if (port.DataObject != null && port.DataObject.DataType != null)
+            {
+                // Unpacked dimenstionが更新されているので Assigned Mapを再生成する。
+                port.DataObject.AssignedMap = new ArraysBoolMap(port.DataObject.DataType, port.UnPackedDimensions);
+                switch (direction)
+                {
+                    case DirectionEnum.Inout:
+                    case DirectionEnum.Input:
+                        port.DataObject.AssignedMap.AssertAll();
+                        break;
+                }
+            }
+
+
             // [ = constant_expression ] 
             if (word.Text == "=")
             {
@@ -630,6 +642,7 @@ namespace pluginVerilog.Verilog.DataObjects
                 {
                     port.DefaultArgument = ex;
                 }
+                if (port.DataObject?.AssignedMap != null) port.DataObject.AssignedMap.AssertAll();
             }
 
             prevDirection = direction;
