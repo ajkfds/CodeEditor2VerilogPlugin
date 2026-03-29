@@ -108,25 +108,6 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             AjkAvaloniaLibs.Controls.ColorLabel label = new AjkAvaloniaLibs.Controls.ColorLabel();
             AppendTypeLabel(label);
             return label.CreateString();
-
-            //StringBuilder sb = new StringBuilder();
-            //switch (Type)
-            //{
-            //    case DataTypeEnum.Bit:
-            //        sb.Append("bit");
-            //        break;
-            //    case DataTypeEnum.Logic:
-            //        sb.Append("logic");
-            //        break;
-            //    case DataTypeEnum.Reg:
-            //        sb.Append("reg");
-            //        break;
-            //}
-            //foreach(Arrays.PackedArray range in PackedDimensions)
-            //{
-            //    sb.Append(" " + range.CreateString());
-            //}
-            //return sb.ToString();
         }
 
 
