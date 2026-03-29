@@ -209,7 +209,7 @@ namespace pluginVerilog.Verilog.Statements
             { // implementation
                 if (nameSpace.NamedElements.ContainsKey(name) && nameSpace.NamedElements[name] is NamedSequentialBlock)
                 {
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+//                    word.Color(CodeDrawStyle.ColorType.Identifier);
                     namedBlock = (NamedSequentialBlock)nameSpace.NamedElements[name];
                 }
                 else
@@ -234,7 +234,7 @@ namespace pluginVerilog.Verilog.Statements
             word.Color(CodeDrawStyle.ColorType.Identifier);
             word.MoveNext();
 
-            // create namedBlock
+            //// create namedBlock
             NamedSequentialBlock namedBlock = createNamedSequentialBlock(word, nameSpace, beginIndex, name);
 
             // local item declaration
