@@ -23,6 +23,52 @@ namespace pluginVerilog.Verilog.DataObjects
     public abstract class DataObject : INamedElement
     {
 
+        /*
+        # DataObjectからの継承関係
+
+        DataObject  AssociativeArray
+                    DynamicArray
+                    Queue
+                    Constants   EnumConstants
+                                Localparam
+                                Parameter
+                                Specparam
+                    InterfaceInstance
+                    ModportInstance
+                    Net
+
+                    Variable    Chandle
+                                Enum
+                                Event
+                                Genvar
+                                Object
+                                Realtime
+                                Struct
+
+                                ValueVariable   IntegerAtomVariable         Byte
+                                                                            Int
+                                                                            Integer
+                                                                            Longint
+                                                                            Shortint
+                                                                            Time
+                                        
+                                                IntegerVectorValueVariable  Bit
+                                                                            Logic
+                                                                            Reg
+
+                                                Real
+                                                Shortreal
+                                                String
+                                                UserDefinedVariable
+         */
+
+
+
+
+
+
+
+
         // #SystemVerilog 2017
         //	net												user-defined-size	4state	v
         //
@@ -56,7 +102,7 @@ namespace pluginVerilog.Verilog.DataObjects
         public bool CommentAnnotation_Discarded = false;
 
         // flag to check defined position
-        // defined = false @ prototypr parse
+        // defined = false @ prototype parse
         // defined changes to true @ definition on actual parse
         public bool Defined = false;
         public virtual NamedElements NamedElements { get; } = new NamedElements();
@@ -92,7 +138,6 @@ namespace pluginVerilog.Verilog.DataObjects
 
         /// <summary>
         /// DataTypeで指定したDataObjectを作成する。
-        /// ただし、DataTypeにclassは指定できない。
         /// </summary>
         /// <param name="name"></param>
         /// <param name="dataType"></param>
@@ -134,8 +179,8 @@ namespace pluginVerilog.Verilog.DataObjects
                     return Variables.Enum.Create(name, dataType);
                 case DataTypeEnum.String:
                     return Variables.String.Create(name, dataType);
-//                case DataTypeEnum.Chandle:
-//                    return Chan.Create(dataType);
+                case DataTypeEnum.Chandle:
+                    return Variables.Chandle.Create(name, dataType);
 //                case DataTypeEnum.Virtual:
 //                    return .Create(dataType);
                 case DataTypeEnum.Class:
@@ -143,7 +188,7 @@ namespace pluginVerilog.Verilog.DataObjects
                     {
                         System.Diagnostics.Debugger.Break();
                     }
-                    return DataObject.Create(name,dataType);
+                    return Variables.Object.Create(name,dataType);
 //                case DataTypeEnum.Interface:
 //                    return InterfaceInstance.Create(name,dataType);
                 case DataTypeEnum.Event:
