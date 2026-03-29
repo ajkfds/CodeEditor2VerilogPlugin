@@ -193,6 +193,14 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 pointerMoved = true;
             }
 
+            if (!pointerMoved)
+            {   // shadowing check
+                // buidingblock内にclassと同名のidentifierが存在した場合はクラス名を参照しない。
+                INamedElement? namedElement = nameSpace.GetNamedElementUpward(word.Text);
+                if (namedElement != null) return false;
+            }
+
+
             IDataType? dataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, null);
             if (dataType == null) return pointerMoved;
 
