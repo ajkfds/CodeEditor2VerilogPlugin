@@ -21,29 +21,33 @@ namespace pluginVerilog.Verilog.Statements
         public static DelayControl? ParseCreate(WordScanner word,NameSpace nameSpace)
         {
             /*
-            delay_control   ::= # delay_value
-                                | # ( mintypmax_expression )  
-            delay_value     ::= unsigned_number
-                                | parameter_identifier
-                                | specparam_identifier
-                                | mintypmax_expression 
-            */
-            /*
-            delay3 ::= # delay_value | # ( mintypmax_expression [ , mintypmax_expression [ , mintypmax_expression ] ] )
-            delay2 ::= # delay_value | # ( mintypmax_expression [ , mintypmax_expression ] )
+            delay_control ::=
+                  # delay_value
+                | # ( mintypmax_expression )
+
             delay_value ::=
-                unsigned_number
+                  unsigned_number
                 | real_number
                 | ps_identifier
                 | time_literal
-                | 1step             
-             */
+                | "1step"
+            
+            mintypmax_expression ::=
+                  expression
+                | expression : expression : expression
+
+            constant_mintypmax_expression ::=
+                  constant_expression
+                | constant_expression : constant_expression : constant_expression
+            */
+
+
             System.Diagnostics.Debug.Assert(word.Text == "#");
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
             if(word.Text != "(")
-            {
+            {   // delay_value
                 Expressions.Expression? expression = Primary.ParseCreate(word, nameSpace);
                 if (expression == null)
                 {
@@ -52,7 +56,7 @@ namespace pluginVerilog.Verilog.Statements
                 }
             }
             else
-            {
+            {   // mintypmax
                 word.MoveNext();
                 Expressions.Expression? expression1 = Expressions.Expression.ParseCreate(word, nameSpace);
                 if (expression1 == null)
@@ -61,7 +65,7 @@ namespace pluginVerilog.Verilog.Statements
                     return null;
                 }
 
-                if (word.Text == ",")
+                if (word.Text == ":")
                 {
                     word.MoveNext();
                     Expressions.Expression? expression2 = Expressions.Expression.ParseCreate(word, nameSpace);
@@ -71,7 +75,7 @@ namespace pluginVerilog.Verilog.Statements
                         return null;
                     }
 
-                    if (word.Text == ",")
+                    if (word.Text == ":")
                     {
                         word.MoveNext();
                         Expressions.Expression? expression3 = Expressions.Expression.ParseCreate(word, nameSpace);
