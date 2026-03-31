@@ -594,6 +594,9 @@ namespace pluginVerilog.Verilog
                     wordPointer.Color(CodeDrawStyle.ColorType.Keyword);
                     wordPointer.MoveNext();
                     break;
+                case "`undefineall":
+                    parseUndefineAll();
+                    break;
                 case "`endcelldefine":
                     wordPointer.Color(CodeDrawStyle.ColorType.Keyword);
                     cellDefine = false;
@@ -890,6 +893,13 @@ namespace pluginVerilog.Verilog
 
             wordPointer.MoveNext();
             recheckWord();
+        }
+
+        private void parseUndefineAll()
+        {
+            wordPointer.Color(CodeDrawStyle.ColorType.Keyword);
+            wordPointer.MoveNext();
+            RootParsedDocument.Macros.Clear();
         }
 
         private void parseInclude()
