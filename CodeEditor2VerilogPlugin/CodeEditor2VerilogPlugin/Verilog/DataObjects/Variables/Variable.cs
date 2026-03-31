@@ -195,9 +195,12 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
             if (!pointerMoved)
             {   // shadowing check
-                // buidingblock内にclassと同名のidentifierが存在した場合はクラス名を参照しない。
+                // buidingblock内にclassと同名のclass 以外のidentifierが存在した場合はクラスの定義とはみなさない。
+                // int a;
+                // a = 1;
+                // のような場合にclass aが存在した場合に、a=1をclass aのinstance生成と誤認しないために必要。
                 INamedElement? namedElement = nameSpace.GetNamedElementUpward(word.Text);
-                if (namedElement != null) return false;
+                if (namedElement != null && namedElement is not pluginVerilog.Verilog.BuildingBlocks.Class) return false;
             }
 
 
@@ -341,7 +344,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                             {
                                 assigned = true;
                                 variable.AssignedReferences.Add(variable.DefinedReference);
-                                if(variable.BitWidth != exp.BitWidth && !word.Prototype && exp.Reference != null && !word.Prototype)
+                                if (variable.BitWidth != exp.BitWidth && !word.Prototype && exp.BitWidth != null && exp.Reference != null && !word.Prototype)
                                 {
                                     exp.Reference.AddWarning("Bitwidth mismatch "+variable.BitWidth.ToString()+" = "+exp.BitWidth.ToString());
                                 }
