@@ -237,6 +237,15 @@ namespace pluginVerilog.Verilog.Statements
                     word.AddError("variable definition must not place here");
                     word.SkipToKeyword(";");
                     return null;
+
+
+                // procedural_assertion_statement
+                case "assert":
+                case "assume":
+                case "cover":
+                    return await ImmidiateAssertionStatement.ParseCreate(word, nameSpace, statement_label);
+                    break;
+
                 default:
 
                     // subroutine_call_statement 

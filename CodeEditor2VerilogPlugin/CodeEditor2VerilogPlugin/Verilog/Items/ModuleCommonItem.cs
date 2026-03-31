@@ -40,18 +40,18 @@ namespace pluginVerilog.Verilog.Items
             switch (word.Text)
             {
                 // assertion_item
-//                case "assert":
-                    //assertion_item ::=
+                case "assert":
+                    //assertion_item::=
                     //        [block_identifier: ] concurrent_assertion_statement
                     //      | checker_instantiation
                     //      | deferred_immediate_assertion_item
-//                    return await ConcurrentAssertionItemExceptCheckerInstantiation.Parse(word, nameSpace);
+                    return await ConcurrentAssertionItemExceptCheckerInstantiation.Parse(word, nameSpace);
                 // bind_directive
                 // net_alias
                 // final_construct
                 // elaboration_system_task
 
-                        // continuous_assign
+                // continuous_assign
                 case "assign":
                     return await ModuleItems.ContinuousAssign.Parse(word, nameSpace);
                 // initial_construct

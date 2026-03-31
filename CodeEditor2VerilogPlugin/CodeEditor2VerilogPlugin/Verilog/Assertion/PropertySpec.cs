@@ -27,7 +27,8 @@ namespace pluginVerilog.Verilog.Assertion
          */
         public static async Task<PropertySpec> ParseCreate(WordScanner word, NameSpace nameSpace)
         {
-            EventControl? eventControl = EventControl.ParseCreate(word, nameSpace);
+            EventControl? eventControl = null;
+            if(word.Text=="@") eventControl = EventControl.ParseCreate(word, nameSpace);
             Expressions.Expression? disableIffExpression = null;
 
             if (word.Text == "disable")
