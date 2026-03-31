@@ -138,6 +138,22 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 word.AddError("endpackage expected");
             }
 
+            if (word.Text == ":")
+            {
+                word.MoveNext();
+                if (word.Text == package.Name)
+                {
+                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.MoveNext();
+                }
+                else
+                {
+                    word.AddError("module name mismatch");
+                    word.MoveNext();
+                }
+            }
+
+
             // register with the parent module
             if (!parent.BuildingBlocks.ContainsKey(package.Name))
             {
