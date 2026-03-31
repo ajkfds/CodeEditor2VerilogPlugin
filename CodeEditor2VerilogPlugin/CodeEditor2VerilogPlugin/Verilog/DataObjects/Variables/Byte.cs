@@ -18,9 +18,8 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public override Byte Clone(string name)
         {
-            Byte val = new Byte() { Name = name };
-            val.DataType = DataType;
-            val.Signed = Signed;
+            Byte val = new Byte() { Name = name, Defined = Defined, Signed = Signed };
+            if(DataType != null) val.DataType = DataType.Clone();
             foreach (var unpackedArray in UnpackedArrays)
             {
                 val.UnpackedArrays.Add(unpackedArray.Clone());

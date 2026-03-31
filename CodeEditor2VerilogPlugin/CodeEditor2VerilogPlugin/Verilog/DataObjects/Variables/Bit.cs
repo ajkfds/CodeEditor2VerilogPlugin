@@ -20,10 +20,8 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public override Bit Clone(string name)
         {
-            Bit val = new Bit() { Name = name };
+            Bit val = new Bit() { Name = name, Defined = Defined, Signed = Signed };
             if (DataType != null) val.DataType = DataType.Clone();
-            val.Signed = Signed;
-            val.Defined = Defined;
             foreach (var unpackedArray in UnpackedArrays)
             {
                 val.UnpackedArrays.Add(unpackedArray.Clone());
