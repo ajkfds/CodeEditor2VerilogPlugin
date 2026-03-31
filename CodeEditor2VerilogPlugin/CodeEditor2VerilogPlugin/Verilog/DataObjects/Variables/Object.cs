@@ -33,19 +33,28 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             if (class_ == null) throw new Exception();
 
             Object val = new Object() { Class = class_, Name = name };
+
+            defineElements(val);
+
             val.DataType = dataType;
             return val;
         }
 
+        private static void defineElements(INamedElement namedElement)
+        {
+            foreach(INamedElement subElement in namedElement.NamedElements)
+            {
+                Variable? variable = subElement as Variable;
+                if (variable != null) variable.Defined = true;
+
+                defineElements(subElement);
+            }
+        }
+
+
         public override Variable Clone()
         {
-            Object val = new Object() { Class = Class, Name = Name };
-            val.DataType = DataType;
-            foreach (var unpackedArray in UnpackedArrays)
-            {
-                val.UnpackedArrays.Add(unpackedArray.Clone());
-            }
-            return val;
+            return Clone(Name);
         }
 
         public override Variable Clone(string name)

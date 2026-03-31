@@ -30,11 +30,12 @@ namespace pluginVerilog.Verilog
 
         public Statements.IStatement Statement;
 
-        public Function Create(
-            NameSpace parent
+        public static Function Create(
+            NameSpace parent,
+            string name
             )
         {
-            Function function = new Function(parent);
+            Function function = new Function(parent) { Name = name };
             return function;
         }
 

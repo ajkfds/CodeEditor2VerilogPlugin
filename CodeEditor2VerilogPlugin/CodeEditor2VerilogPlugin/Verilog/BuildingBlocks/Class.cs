@@ -285,6 +285,14 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 }
             }
 
+            // add implicit new function
+            if (class_ != null && !class_.NamedElements.ContainsKey("new"))
+            {
+                Function function = Function.Create(class_,"new");
+                class_.NamedElements.Add("new", function);
+            }
+
+
             if (word.RootParsedDocument?.Root == null)
             {
 
@@ -417,6 +425,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         Class baseClass = (Class)nameSpace.NamedElements[word.Text];
                         word.Color(CodeDrawStyle.ColorType.Keyword);
                         word.MoveNext();
+
+
+                        DataObjects.Variables.Object superClassObject = DataObjects.Variables.Object.Create("super", baseClass);
+                        superClassObject.Defined = true;
+                        class_.NamedElements.Add( superClassObject.Name,superClassObject );
 
                         foreach(INamedElement namedElement in baseClass.NamedElements.Values)
                         {
