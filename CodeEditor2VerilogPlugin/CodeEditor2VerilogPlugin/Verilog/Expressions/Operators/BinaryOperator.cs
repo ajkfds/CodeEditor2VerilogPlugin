@@ -192,7 +192,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
                 {
 
                 }
-                else if(primary1.BitWidth != primary2.BitWidth)
+                else if(primary1.BitWidth != primary2.BitWidth && primary2.BitWidth != null)
                 {
                     if (Reference != null) Reference.AddWarning("bitwidth mismatch " + primary1.BitWidth.ToString() + " " + Text + " " + primary2.BitWidth.ToString());
                 }

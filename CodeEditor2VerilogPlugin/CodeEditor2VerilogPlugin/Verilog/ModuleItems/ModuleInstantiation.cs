@@ -948,7 +948,7 @@ namespace pluginVerilog.Verilog.ModuleItems
             //    }
             //}
             //else 
-            if (port.BitWidth != expression.BitWidth && expression.Reference != null)
+            if (port.BitWidth != expression.BitWidth && expression.BitWidth != null && expression.Reference != null)
             {
                 expression.Reference.AddWarning("bit width mismatch " + port.BitWidth + " <- " + expression.BitWidth);
             }

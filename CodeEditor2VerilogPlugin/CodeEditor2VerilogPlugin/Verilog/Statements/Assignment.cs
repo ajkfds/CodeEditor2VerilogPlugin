@@ -255,7 +255,8 @@ namespace pluginVerilog.Verilog.Statements
                     lExpression != null &&
                     lExpression.BitWidth != null &&
                     expression.BitWidth != null &&
-                    lExpression.BitWidth != expression.BitWidth
+                    lExpression.BitWidth != expression.BitWidth &&
+                    expression is not Expressions.ConstantString
                     )
                 {
                     WordReference wRef = WordReference.CreateReferenceRange(
