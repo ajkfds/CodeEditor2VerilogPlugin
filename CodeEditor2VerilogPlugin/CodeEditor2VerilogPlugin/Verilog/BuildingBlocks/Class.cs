@@ -430,17 +430,17 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                         if(word.Text == "(")
                         {
-                            word.MoveNext();
+                            //word.MoveNext();
                             Dictionary<string, Expressions.Expression> portConnection = new Dictionary<string, Expressions.Expression>();
                             Expressions.ListOfArguments.ParseListOfArguments(word, nameSpace, null, portConnection);
-                            if (word.Text == ")")
-                            {
-                                word.MoveNext();
-                            }
-                            else
-                            {
-                                word.AddError("illegal argument");
-                            }
+                            //if (word.Text == ")")
+                            //{
+                            //    word.MoveNext();
+                            //}
+                            //else
+                            //{
+                            //    word.AddError("illegal argument");
+                            //}
                         }
 
                         DataObjects.Variables.Object superClassObject = DataObjects.Variables.Object.Create("super", baseClass);
