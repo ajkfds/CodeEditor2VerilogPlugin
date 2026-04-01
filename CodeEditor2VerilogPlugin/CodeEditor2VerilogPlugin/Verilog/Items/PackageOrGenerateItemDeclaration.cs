@@ -35,9 +35,12 @@ namespace pluginVerilog.Verilog.Items
             data_declaration ::=      [ const ] [ var ] [ lifetime ] data_type_or_implicit list_of_variable_decl_assignments ;10
                                     | type_declaration
                                     | package_import_declaration
-                                    | net_type_declaration       
+                                    | net_type_declaration
+
+            package_import_declaration ::=
+                "import" package_import_item { , package_import_item } ;
              */
-            if(word.Text == "typedef")
+            if (word.Text == "typedef")
             {
                 return DataObjects.Typedef.ParseDeclaration(word, nameSpace);
             }

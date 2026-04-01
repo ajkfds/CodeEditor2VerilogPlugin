@@ -431,14 +431,15 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         if(word.Text == "(")
                         {
                             word.MoveNext();
-                            parseListOfPortConnections(word, nameSpace, class_);
+                            Dictionary<string, Expressions.Expression> portConnection = new Dictionary<string, Expressions.Expression>();
+                            Expressions.ListOfArguments.ParseListOfArguments(word, nameSpace, null, portConnection);
                             if (word.Text == ")")
                             {
                                 word.MoveNext();
                             }
                             else
                             {
-                                word.AddError("illegal port connection");
+                                word.AddError("illegal argument");
                             }
                         }
 
@@ -500,186 +501,6 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
             return;
         }
-
-        private static void parseListOfPortConnections(
-            WordScanner word,
-            NameSpace nameSpace,
-            Class? class_)
-            //,
-            //ModuleInstantiation moduleInstantiation,
-            //WordReference moduleIdentifier
-        {
-            /*
-            list_of_port_connections ::= 
-                  ordered_port_connection { "," ordered_port_connection }
-                | named_port_connection { "," named_port_connection }
-             */
-
-            if (word.GetCharAt(0) == '.')
-            { // named port assignment
-                parseNamedPortConnections(word, nameSpace, class_);
-            }
-            else
-            { // ordered port assignment
-                parseOrderedPortConnections(word, nameSpace, class_);
-            }
-        }
-
-        private static void parseOrderedPortConnections(
-            WordScanner word,
-            NameSpace nameSpace,
-            Class? class_)
-            //,
-            //ModuleInstantiation moduleInstantiation,
-            //WordReference moduleIdentifier)
-        {
-            /*
-            ordered_port_connection ::= { attribute_instance } [ expression ]
-             */
-            int i = 0;
-            while (!word.Eof && word.Text != ")")
-            {
-                string pinName = "";
-                if (class_ != null && i < class_.PortsList.Count)
-                {
-                    pinName = class_.PortsList[i].Name;
-                    Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
-//                    if (word.Prototype && expression != null && !moduleInstantiation.PortConnection.ContainsKey(pinName)) moduleInstantiation.PortConnection.Add(pinName, expression);
-                }
-                else
-                {
-                    if (class_ != null) word.AddError("illegal port connection");
-                    Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
-                }
-                if (word.Text != ",")
-                {
-                    break;
-                }
-                else
-                {
-                    word.MoveNext();
-                }
-            }
-        }
-
-        private static void parseNamedPortConnections(
-            WordScanner word,
-            NameSpace nameSpace,
-            Class? class_)
-            //,
-            //ModuleInstantiation moduleInstantiation,
-            //WordReference moduleIdentifier)
-        {
-            /*
-            named_port_connection ::= 
-                  { attribute_instance } "." port_identifier [ "(" [ expression ] ")" ] 
-                | { attribute_instance } ".*"
-             
-             */
-
-            //bool wildcardConnection = false;
-
-            //if (word.Eof) return;
-
-            //List<string> notWrittenPortName;
-            //if (class_ == null)
-            //{
-            //    notWrittenPortName = new List<string>();
-            //}
-            //else
-            //{
-            //    notWrittenPortName = class_.Ports.Keys.ToList();
-            //}
-
-            //WordReference? wildcardRef = null;
-            //while (!word.Eof && word.Text == ".")
-            //{
-            //    word.MoveNext();    // .
-            //    if (word.Text == "*") // 23.3.2.4 Connecting module instances using wildcard named port connections ( .*)
-            //    {
-            //        wildcardConnection = true;
-            //        word.Color(CodeDrawStyle.ColorType.Identifier);
-            //        wildcardRef = word.GetReference();
-            //        word.MoveNext();
-            //        if (word.Text != ",")
-            //        {
-            //            break;
-            //        }
-            //        else
-            //        {
-            //            word.MoveNext();
-            //        }
-            //        continue;
-            //    }
-
-            //    string pinName = word.Text;
-            //    IndexReference startRef = word.CreateIndexReference();
-            //    if (notWrittenPortName.Contains(pinName)) notWrittenPortName.Remove(pinName);
-            //    WordReference pinReference = word.GetReference();
-            //    word.Color(CodeDrawStyle.ColorType.Identifier);
-
-            //    if (word.Prototype)
-            //    {
-            //        //if (moduleInstantiation.PortConnection.ContainsKey(pinName))
-            //        //{
-            //        //    word.AddPrototypeError("duplicated");
-            //        //}
-            //        word.MoveNext();
-            //    }
-            //    else
-            //    {
-            //        if (class_ != null)
-            //        {
-            //            if (class_.Ports.ContainsKey(pinName))
-            //            {
-
-            //            }
-            //            else
-            //            {
-            //                word.AddError("illegal port name");
-            //            }
-            //        }
-            //        word.MoveNext();
-
-            //        PortReference pRef = new PortReference(pinName, startRef, word.CreateIndexReference());
-            //        //moduleInstantiation.PortReferences.Add(pRef);
-            //    }
-
-            //    if (word.Text == "(")
-            //    {
-            //        parseNamedPortConnection(word, nameSpace, class_, moduleInstantiation, pinName, moduleIdentifier);
-            //    }
-            //    else
-            //    {
-            //        // 23.3.2.3 Connecting module instance using implicit named port connections
-            //        parseImplicitPortConnection(word, nameSpace, class_, moduleInstantiation, pinName, pinReference, moduleIdentifier);
-            //    }
-
-            //    if (word.Text != ",")
-            //    {
-            //        break;
-            //    }
-            //    else
-            //    {
-            //        word.MoveNext();
-            //    }
-            //}
-
-            //if (notWrittenPortName.Count != 0)
-            //{
-            //    if (wildcardConnection)
-            //    {
-            //        parseWidCardPortConnection(word, nameSpace, class_, moduleInstantiation, moduleIdentifier, notWrittenPortName, wildcardRef);
-            //    }
-            //    else
-            //    {
-            //        if (!word.Prototype) moduleIdentifier.AddWarning("missing port " + notWrittenPortName[0]);
-            //    }
-            //}
-
-        }
-
-
 
 
 

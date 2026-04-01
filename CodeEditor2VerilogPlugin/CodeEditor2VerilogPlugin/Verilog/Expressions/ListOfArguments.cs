@@ -17,10 +17,24 @@ namespace pluginVerilog.Verilog.Expressions
             Dictionary<string, Expressions.Expression> portConnection
             )
         {
+            ParseListOfArguments(word, usedNameSpace,
+            portNameSpace,
+            portConnection,
+            out _
+            );
+        }
+        public static void ParseListOfArguments(WordScanner word, NameSpace usedNameSpace,
+            IPortNameSpace? portNameSpace,
+            Dictionary<string, Expressions.Expression> portConnection,
+            out bool constantConnected
+            )
+        {
             /*
             list_of_arguments       ::= [ expression ] { , [ expression ] } { , "." identifier ( [ expression ] ) }
                                         | "." identifier ( [ expression ] ) { , "." identifier ( [ expression ] ) }
              */
+
+            constantConnected = true;
 
             if (word.Text != "(")
             {
@@ -54,7 +68,7 @@ namespace pluginVerilog.Verilog.Expressions
                 if (portNameSpace == null)
                 {
                     var index = word.CreateIndexReference();
-                    parseUndefinedPort(word, usedNameSpace, portNameSpace);
+                    parseUndefinedPort(word, usedNameSpace);
                     if (word.CreateIndexReference().IsSameAs(index)) break;
                     continue;
                 }
@@ -90,7 +104,7 @@ namespace pluginVerilog.Verilog.Expressions
                     return;
                 }
 
-                //if (!expression.Constant) returnConstant = false;
+                if (!expression.Constant) constantConnected = false;
 
                 if (!portConnection.ContainsKey(port.Name))
                 {
@@ -122,7 +136,7 @@ namespace pluginVerilog.Verilog.Expressions
 
                 if (portNameSpace == null)
                 {
-                    parseUndefinedNamedPort(word, usedNameSpace, portNameSpace);
+                    parseUndefinedNamedPort(word, usedNameSpace);
                     continue;
                 }
 
@@ -192,13 +206,13 @@ namespace pluginVerilog.Verilog.Expressions
             }
             else
             {
-                word.AddError("illegal function call end");
+                word.AddError("illegal arguments end");
             }
 
             return;
         }
 
-        private static void parseUndefinedPort(WordScanner word, NameSpace usedNameSpace, IPortNameSpace definedNameSpace)
+        private static void parseUndefinedPort(WordScanner word, NameSpace usedNameSpace)
         {
             if (word.Text == ")" || word.Text == ".") throw new Exception();
             if (word.Text == ",") // blank argument
@@ -206,7 +220,7 @@ namespace pluginVerilog.Verilog.Expressions
                 word.MoveNext();
                 return;
             }
-            Expression? expression = Expression.ParseCreate(word, (NameSpace)definedNameSpace);
+            Expression? expression = Expression.ParseCreate(word, usedNameSpace);
             if (word.Text == ",")
             {
                 word.MoveNext();
@@ -218,7 +232,7 @@ namespace pluginVerilog.Verilog.Expressions
             word.AddError("illegal argument");
             word.SkipToKeyword(";");
         }
-        private static void parseUndefinedNamedPort(WordScanner word, NameSpace usedNameSpace, IPortNameSpace definedNameSpace)
+        private static void parseUndefinedNamedPort(WordScanner word, NameSpace usedNameSpace)
         {
             if (word.Text != ".") throw new Exception();
 
@@ -244,7 +258,7 @@ namespace pluginVerilog.Verilog.Expressions
             }
             word.MoveNext();
 
-            Expression? expression = Expression.ParseCreate(word, (NameSpace)definedNameSpace);
+            Expression? expression = Expression.ParseCreate(word, usedNameSpace);
 
             if (word.Text != ")")
             {

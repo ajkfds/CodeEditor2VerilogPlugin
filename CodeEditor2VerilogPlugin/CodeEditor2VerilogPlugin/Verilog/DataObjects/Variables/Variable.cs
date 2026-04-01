@@ -200,7 +200,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 // a = 1;
                 // のような場合にclass aが存在した場合に、a=1をclass aのinstance生成と誤認しないために必要。
                 INamedElement? namedElement = nameSpace.GetNamedElementUpward(word.Text);
-                if (namedElement != null && namedElement is not pluginVerilog.Verilog.BuildingBlocks.Class) return false;
+                if (namedElement != null && namedElement is pluginVerilog.Verilog.DataObjects.Variables.Variable) return false;
             }
 
 
