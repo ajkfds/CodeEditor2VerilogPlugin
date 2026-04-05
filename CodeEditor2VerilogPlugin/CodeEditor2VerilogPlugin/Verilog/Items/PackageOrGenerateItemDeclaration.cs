@@ -30,7 +30,9 @@ namespace pluginVerilog.Verilog.Items
         public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
         {
             // data_declaration
-            if (DataObjects.Variables.Variable.ParseDeclaration(word, nameSpace)) return true;
+            if (await DataDeclaration.Parse(word, nameSpace)) return true;
+
+//            if (DataObjects.Variables.Variable.ParseDeclaration(word, nameSpace)) return true;
             /*
             data_declaration ::=      [ const ] [ var ] [ lifetime ] data_type_or_implicit list_of_variable_decl_assignments ;10
                                     | type_declaration
@@ -40,10 +42,10 @@ namespace pluginVerilog.Verilog.Items
             package_import_declaration ::=
                 "import" package_import_item { , package_import_item } ;
              */
-            if (word.Text == "typedef")
-            {
-                return DataObjects.Typedef.ParseDeclaration(word, nameSpace);
-            }
+            //if (word.Text == "typedef")
+            //{
+            //    return DataObjects.Typedef.ParseDeclaration(word, nameSpace);
+            //}
 
 
             switch (word.Text)

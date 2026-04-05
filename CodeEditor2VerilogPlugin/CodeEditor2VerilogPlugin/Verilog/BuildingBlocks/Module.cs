@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
@@ -16,6 +17,30 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
 
         }
+
+        /* SystemVerilog 2017 
+        
+        module_nonansi_header ::=
+            { attribute_instance } module_keyword [ lifetime ] module_identifier
+            { package_import_declaration } [ parameter_port_list ] list_of_ports ;
+
+        module_ansi_header ::=
+            { attribute_instance } module_keyword [ lifetime ] module_identifier
+            { package_import_declaration }1 [ parameter_port_list ] [ list_of_port_declarations ] ;
+
+        module_declaration ::=
+            module_nonansi_header [ timeunits_declaration ] { module_item }
+            "endmodule" [ : module_identifier ]
+            | module_ansi_header [ timeunits_declaration ] { non_port_module_item }
+            "endmodule" [ : module_identifier ]
+            | { attribute_instance } module_keyword [ lifetime ] module_identifier ( .* ) ;
+            [ timeunits_declaration ] { module_item } endmodule [ : module_identifier ]
+            | "extern" module_nonansi_header
+            | "extern" module_ansi_header
+
+        module_keyword ::= "module" | "macromodule"
+        
+         */
 
         // Port
         public Dictionary<string, DataObjects.Port> Ports { get; } = new Dictionary<string, DataObjects.Port>();
@@ -78,7 +103,6 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             word.Color(CodeDrawStyle.ColorType.Keyword);
             IndexReference beginReference = word.CreateIndexReference();
             word.MoveNext();
-
 
             // parse definitions
             Dictionary<string, Macro> macroKeep = new Dictionary<string, Macro>();
@@ -225,6 +249,12 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             Module module
             )
         {
+            if (word.Text == "import")
+            {
+                PackageImportDeclaration.Parse(word, module);
+            }
+
+
 
             while (true)
             {

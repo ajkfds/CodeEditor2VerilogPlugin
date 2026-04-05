@@ -428,19 +428,18 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         word.Color(CodeDrawStyle.ColorType.Keyword);
                         word.MoveNext();
 
+
+                        Function? constructor = null;
+                        if(baseClass != null)
+                        {
+                            baseClass.NamedElements.TryGetValue("new", out INamedElement? newElement);
+                            constructor = newElement as Function;
+                        }
+
                         if(word.Text == "(")
                         {
-                            //word.MoveNext();
                             Dictionary<string, Expressions.Expression> portConnection = new Dictionary<string, Expressions.Expression>();
-                            Expressions.ListOfArguments.ParseListOfArguments(word, nameSpace, null, portConnection);
-                            //if (word.Text == ")")
-                            //{
-                            //    word.MoveNext();
-                            //}
-                            //else
-                            //{
-                            //    word.AddError("illegal argument");
-                            //}
+                            Expressions.ListOfArguments.ParseListOfArguments(word, nameSpace, constructor, portConnection);
                         }
 
                         DataObjects.Variables.Object superClassObject = DataObjects.Variables.Object.Create("super", baseClass);
