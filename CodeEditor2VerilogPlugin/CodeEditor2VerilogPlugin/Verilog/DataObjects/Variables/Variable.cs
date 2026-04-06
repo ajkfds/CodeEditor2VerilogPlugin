@@ -269,6 +269,10 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 if (word.Text == "=") 
                 {
                     word.MoveNext();    // =
+                    if (variable.AssignedMap != null)
+                    {
+                        variable.AssignedMap.AssertAll();
+                    }
 
                     if (word.Text == "new")
                     {

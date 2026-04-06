@@ -500,6 +500,8 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                 if (word.Text == "=")
                 {
                     word.MoveNext();
+                    if (net.AssignedMap != null) net.AssignedMap.AssertAll();
+
                     Expressions.Expression? assignValue = Expressions.Expression.ParseCreate(word, nameSpace);
                     if(net.DefinedReference != null) net.AssignedReferences.Add(net.DefinedReference);
                     if(!word.Prototype && assignValue != null)
@@ -548,7 +550,6 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                     //}
                 }
                 nets.Add(net);
-                net.AssignedMap = new ArraysBoolMap(net.DataType, net.UnpackedArrays);
 
                 if (word.GetCharAt(0) != ',') break;
                 word.MoveNext(); // ,
