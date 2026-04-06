@@ -47,7 +47,7 @@ namespace pluginVerilog.Verilog.AutoComplete
 
             document.Replace(headIndex, length, ColorIndex, appendText);
             CodeEditor2.Controller.CodeEditor.SetCaretPosition(headIndex + selectStart);
-            CodeEditor2.Controller.CodeEditor.SetSelection(headIndex + selectStart, headIndex + selectLast - 2);
+            CodeEditor2.Controller.CodeEditor.SetSelection(headIndex + selectStart, headIndex + selectLast - 1);
             return System.Threading.Tasks.Task.CompletedTask;
         }
     }
