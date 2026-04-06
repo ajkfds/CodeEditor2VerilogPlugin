@@ -189,7 +189,7 @@ number
                     // system function call
                     if ( word.Text.StartsWith("$") )// && word.ProjectProperty.SystemFunctions.Keys.Contains(word.Text))
                     {
-                        return FunctionCall.ParseCreate(word, nameSpace,nameSpace);
+                        return FunctionCall.ParseCreate(word, nameSpace);
                     }
 
                     // assignment pattern
@@ -221,7 +221,7 @@ number
                     {
                         // It shall be illegal to omit the parentheses in a tf_call unless the subroutine is a task, void function,
                         // or class method. If the subroutine is a nonvoid class function method, it shall be illegal to omit the parentheses if the call is directly recursive.
-                        return FunctionCall.ParseCreate(word, nameSpace, nameSpace);
+                        return FunctionCall.ParseCreate(word, nameSpace);
                     }
 
                     string nameSpaceText = "";
@@ -320,7 +320,7 @@ number
                     // function call : for right side only
                     if (!lValue && element is Function)
                     {
-                        return FunctionCall.ParseCreate(word, targetNameSpace, nameSpace);
+                        return FunctionCall.ParseCreate(word, nameSpace);
                     }
 
                     if (element is DataObjects.Constants.Constants)

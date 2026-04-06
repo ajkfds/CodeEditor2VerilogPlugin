@@ -20,10 +20,6 @@ namespace pluginVerilog.Verilog.Expressions
         protected FunctionCall() { }
 
         public required string FunctionName { get; init; }
-        public new static FunctionCall? ParseCreate(WordScanner word, NameSpace nameSpace)
-        {
-            throw new Exception();
-        }
         public Dictionary<string, Expressions.Expression> PortConnection { get; set; } = new Dictionary<string, Expressions.Expression>();
 
         [JsonIgnore]
@@ -46,18 +42,22 @@ namespace pluginVerilog.Verilog.Expressions
                 return function;
             }
         }
+        public static new FunctionCall? ParseCreate(WordScanner word, NameSpace nameSpace)
+        {
+            return ParseCreate(word, nameSpace, nameSpace);
+        }
 
-        public static FunctionCall? ParseCreate(WordScanner word,NameSpace usedNameSpace, NameSpace definedNameSpace)
+        public static FunctionCall? ParseCreate(WordScanner word,NameSpace nameSpace,NameSpace functionDefinedNameSpace)
         {
             if (word.RootParsedDocument.ProjectProperty == null) throw new Exception();
 
-            FunctionCall functionCall = new FunctionCall() { FunctionName = word.Text, DefinedNameSpace = definedNameSpace,ProjectProperty=word.ProjectProperty };
+            FunctionCall functionCall = new FunctionCall() { FunctionName = word.Text, DefinedNameSpace = nameSpace, ProjectProperty=word.ProjectProperty };
             functionCall.Reference = word.GetReference();
 
             Function? function = null;
-            if (definedNameSpace.BuildingBlock.NamedElements.ContainsFunction(functionCall.FunctionName))
+            if (functionDefinedNameSpace.BuildingBlock.NamedElements.ContainsFunction(functionCall.FunctionName))
             {
-                function = (Function)definedNameSpace.BuildingBlock.NamedElements[functionCall.FunctionName];
+                function = (Function)functionDefinedNameSpace.BuildingBlock.NamedElements[functionCall.FunctionName];
             }
             else if (word.RootParsedDocument.ProjectProperty.SystemFunctions.ContainsKey(word.Text))
             {
@@ -65,7 +65,7 @@ namespace pluginVerilog.Verilog.Expressions
             }
             else
             {
-               INamedElement? namedElement = usedNameSpace.GetNamedElementUpward(functionCall.FunctionName);
+               INamedElement? namedElement = functionDefinedNameSpace.GetNamedElementUpward(functionCall.FunctionName);
                 if(namedElement is Function)
                 {
                     function = (Function)namedElement;
@@ -102,7 +102,7 @@ namespace pluginVerilog.Verilog.Expressions
             }
 
             // Use common ListOfArguments parser
-            ListOfArguments.ParseListOfArguments(word, usedNameSpace, function, functionCall.PortConnection,out bool returnConstant);
+            ListOfArguments.ParseListOfArguments(word, nameSpace, function, functionCall.PortConnection,out bool returnConstant);
 
             // Check if function call ended properly
             functionCall.Reference = WordReference.CreateReferenceRange(functionCall.Reference, word.GetReference());

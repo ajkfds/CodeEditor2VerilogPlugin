@@ -97,7 +97,7 @@ namespace pluginVerilog.Verilog.Expressions
                     continue;
                 }
 
-                Expression? expression = Expression.ParseCreate(word, (NameSpace)portNameSpace);
+                Expression? expression = Expression.ParseCreate(word, usedNameSpace);
                 if (expression == null)
                 {
                     word.SkipToKeyword(";");
