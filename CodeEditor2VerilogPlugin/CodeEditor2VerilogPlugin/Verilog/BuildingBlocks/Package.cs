@@ -39,11 +39,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
 
 
-        public static async System.Threading.Tasks.Task<Package> Create(WordScanner word, Attribute attribute, BuildingBlock parent, Data.IVerilogRelatedFile file, bool protoType)
+        public static async System.Threading.Tasks.Task<Package> ParseCreate(WordScanner word, Attribute attribute, BuildingBlock parent, Data.IVerilogRelatedFile file, bool protoType)
         {
-            return await Create(word, null, attribute, parent, file, protoType);
+            return await ParseCreate(word, null, attribute, parent, file, protoType);
         }
-        public static async System.Threading.Tasks.Task<Package> Create(
+        public static async System.Threading.Tasks.Task<Package> ParseCreate(
             WordScanner word,
             Dictionary<string, Expressions.Expression>? parameterOverrides,
             Attribute attribute,

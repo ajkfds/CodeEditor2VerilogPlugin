@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Parser
 {
-    public class VerilogInstanceParser : DocumentParser
+    public class VerilogParser : DocumentParser
     {
         /// <summary>
         /// Original Verilog File Parser Generator
@@ -23,15 +23,12 @@ namespace pluginVerilog.Parser
         /// <param name="token"></param>
         /// <exception cref="Exception"></exception>
         [SetsRequiredMembers]
-        public VerilogInstanceParser(
+        public VerilogParser(
             Data.IVerilogRelatedFile verilogRelatedFile,
             DocumentParser.ParseModeEnum parseMode,
             System.Threading.CancellationToken? token
             ) : base(verilogRelatedFile.ToTextFile(),parseMode, token)
         {
-            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
-            sw.Start();
-
             this.ParseMode = parseMode;
 
             CodeEditor2.Data.TextFile? textFile = verilogRelatedFile as CodeEditor2.Data.TextFile;
@@ -90,7 +87,7 @@ namespace pluginVerilog.Parser
         /// <exception cref="Exception"></exception>
         // create parser with parameter override
         [SetsRequiredMembers]
-        public VerilogInstanceParser(
+        public VerilogParser(
             Data.IVerilogRelatedFile verilogRelatedFile,
             string moduleName,
             Dictionary<string, Verilog.Expressions.Expression> parameterOverrides,
@@ -98,8 +95,6 @@ namespace pluginVerilog.Parser
             System.Threading.CancellationToken? token
             ) : base(verilogRelatedFile.ToTextFile(), parseMode,token)
         {
-            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
-            sw.Start();
 
             if (verilogRelatedFile == null) throw new Exception();
             if (verilogRelatedFile.CodeDocument == null) throw new Exception();
@@ -239,17 +234,12 @@ namespace pluginVerilog.Parser
 
         public override async System.Threading.Tasks.Task ParseAsync(CancellationToken? cancellationToken)
         {
-            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
-            sw.Start();
-
             word.GetFirst();
             word.CancellationToken = cancellationToken;
             word.RootParsedDocument.LockedDocument.Add(word.Document);
             if (File is not Data.VerilogFile) throw new Exception();
 
             Root root = await Root.ParseCreate(word,VerilogParsedDocument, File);
-
-            word.Dispose();
         }
     }
 }

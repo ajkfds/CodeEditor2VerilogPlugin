@@ -1,3 +1,4 @@
+using CodeEditor2.CodeEditor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,5 +16,9 @@ namespace pluginVerilog.Data
         bool SystemVerilog { get; }
 
         string AbsolutePath {  get; }
+
+        Verilog.ParsedDocument.ParseStatusEnum ParseStatus { get; set; }
+
+        void CheckDirty();
     }
 }

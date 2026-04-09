@@ -18,6 +18,7 @@ using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using System.Threading;
 using System.Threading.Tasks;
+using static pluginVerilog.Verilog.ParsedDocument;
 
 namespace pluginVerilog.Data
 {
@@ -69,6 +70,21 @@ namespace pluginVerilog.Data
             CodeEditor2.Data.Item.PolymorphicResolver.DerivedTypes.Add(new JsonDerivedType(typeof(VerilogFile)));
         }
 
+        public Verilog.ParsedDocument.ParseStatusEnum ParseStatus
+        {
+            get
+            {
+                Verilog.ParsedDocument? vParsedDocument = VerilogParsedDocument;
+                if(vParsedDocument==null) return ParseStatusEnum.NotParsed;
+                return vParsedDocument.ParseStatus;
+            }
+            set
+            {
+                Verilog.ParsedDocument? vParsedDocument = VerilogParsedDocument;
+                if (vParsedDocument == null) return;
+                vParsedDocument.ParseStatus = value;
+            }
+        }
         public static async Task<VerilogFile> CreateSystemVerilog(string relativePath, CodeEditor2.Data.Project project)
         {
             string name;
@@ -163,15 +179,7 @@ namespace pluginVerilog.Data
             }
 
             Verilog.ParsedDocument? vParsedDocument;
-            textFileLock.EnterReadLock();
-            try
-            {
-                vParsedDocument = ParsedDocument as Verilog.ParsedDocument;
-            }
-            finally
-            {
-                textFileLock.ExitReadLock();
-            }
+            vParsedDocument = newParsedDocument as Verilog.ParsedDocument;
 
             if (vParsedDocument == null)
             {
@@ -192,6 +200,13 @@ namespace pluginVerilog.Data
 
             if (codeDoc == null) return;
             if (newParsedDocument == null) return;
+
+            if(codeDoc.Version != vParsedDocument.Version)
+            {
+                // if code document is updated during parsing, do not accept parsed document because it may be outdated.
+                vParsedDocument.ParseStatus = Verilog.ParsedDocument.ParseStatusEnum.Outdated;
+                return;
+            }
 
             textFileLock.EnterWriteLock();
             try
@@ -431,9 +446,22 @@ namespace pluginVerilog.Data
             return node;
         }
 
+        public void CheckDirty() 
+        {
+            ParsedDocument? vParsedDocument = VerilogParsedDocument;
+            if (vParsedDocument == null) return;
+            CodeEditor2.CodeEditor.CodeDocument ? codeDocument = CodeDocument;
+            if(codeDocument == null) return;
+            if (codeDocument.Version != vParsedDocument.Version)
+            {
+                ParseStatus = Verilog.ParsedDocument.ParseStatusEnum.Outdated;
+            }
+        }
+
         public override DocumentParser CreateDocumentParser(DocumentParser.ParseModeEnum parseMode, System.Threading.CancellationToken? token)
         {
-            return new Parser.VerilogInstanceParser(this, parseMode, token);
+            CheckDirty();   
+            return new Parser.VerilogParser(this, parseMode, token);
         }
 
         // update sub-items from ParsedDocument

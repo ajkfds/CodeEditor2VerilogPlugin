@@ -12,10 +12,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using static CodeEditor2.Controller;
 using System.Text.Json.Serialization;
 using System.Threading;
+using System.Threading.Tasks;
+using static CodeEditor2.Controller;
+using static pluginVerilog.Verilog.ParsedDocument;
 
 namespace pluginVerilog.Data
 {
@@ -104,6 +105,33 @@ namespace pluginVerilog.Data
 
         public bool SystemVerilog { get { return RootFile.SystemVerilog; } }
 
+        public Verilog.ParsedDocument.ParseStatusEnum ParseStatus
+        {
+            get
+            {
+                Verilog.ParsedDocument? vParsedDocument = VerilogParsedDocument;
+                if (vParsedDocument == null) return ParseStatusEnum.NotParsed;
+                return vParsedDocument.ParseStatus;
+            }
+            set
+            {
+                Verilog.ParsedDocument? vParsedDocument = VerilogParsedDocument;
+                if (vParsedDocument == null) return;
+                vParsedDocument.ParseStatus = value;
+            }
+        }
+        public void CheckDirty()
+        {
+            ParsedDocument? vParsedDocument = VerilogParsedDocument;
+            if (vParsedDocument == null) return;
+            if (vParsedDocument.ParseStatus == ParseStatusEnum.Outdated) return;
+            CodeEditor2.CodeEditor.CodeDocument? codeDocument = CodeDocument;
+            if (codeDocument == null) return;
+            if (codeDocument.Version != vParsedDocument.Version)
+            {
+                ParseStatus = Verilog.ParsedDocument.ParseStatusEnum.Outdated;
+            }
+        }
         public bool ReplaceBy(
             VerilogHeaderInstance file
             )

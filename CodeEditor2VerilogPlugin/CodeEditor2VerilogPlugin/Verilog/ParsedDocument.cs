@@ -72,6 +72,19 @@ namespace pluginVerilog.Verilog
             return codeDocument;
         }
 
+        public ParseStatusEnum ParseStatus
+        {
+            get;
+            set;
+        } = ParseStatusEnum.NotParsed;
+        public enum ParseStatusEnum
+        {
+            NotParsed,
+            SkeltonParsed,
+            Parsed,
+            Outdated
+        }
+
         public static string KeyGenerator(
             Data.IVerilogRelatedFile verilogRelatedFile,
             string? moduleName,
@@ -272,6 +285,7 @@ namespace pluginVerilog.Verilog
         }
         public void AddNotice(int index, int length, string message)
         {
+            
             if (Project == null) return;
 
             CodeDocument? document = CodeDocument;

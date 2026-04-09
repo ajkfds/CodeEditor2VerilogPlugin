@@ -19,6 +19,7 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using YamlDotNet.Core.Tokens;
+using static pluginVerilog.Verilog.ParsedDocument;
 
 namespace pluginVerilog.Data
 {
@@ -210,6 +211,32 @@ namespace pluginVerilog.Data
                 }
             }
         }
+        public Verilog.ParsedDocument.ParseStatusEnum ParseStatus
+        {
+            get
+            {
+                Verilog.ParsedDocument? vParsedDocument = VerilogParsedDocument;
+                if (vParsedDocument == null) return ParseStatusEnum.NotParsed;
+                return vParsedDocument.ParseStatus;
+            }
+            set
+            {
+                Verilog.ParsedDocument? vParsedDocument = VerilogParsedDocument;
+                if (vParsedDocument == null) return;
+                vParsedDocument.ParseStatus = value;
+            }
+        }
+        public void CheckDirty()
+        {
+            ParsedDocument? vParsedDocument = VerilogParsedDocument;
+            if (vParsedDocument == null) return;
+            CodeEditor2.CodeEditor.CodeDocument? codeDocument = CodeDocument;
+            if (codeDocument == null) return;
+            if (codeDocument.Version != vParsedDocument.Version)
+            {
+                ParseStatus = Verilog.ParsedDocument.ParseStatusEnum.Outdated;
+            }
+        }
 
         public override string ID
         {
@@ -332,7 +359,6 @@ namespace pluginVerilog.Data
             {
                 textFileLock.ExitWriteLock();
             }
-//            SourceVerilogFile.RemoveModuleInstance(this);
         }
 
         public Data.VerilogFile SourceVerilogFile
@@ -470,8 +496,6 @@ namespace pluginVerilog.Data
             }
 
             NavigatePanelNode.UpdateVisual();
-
-//            if (oldParsedDocument != null) oldParsedDocument.Dispose();
         }
 
         public override bool ReparseRequested { 
@@ -555,13 +579,13 @@ namespace pluginVerilog.Data
 
         public override DocumentParser CreateDocumentParser(DocumentParser.ParseModeEnum parseMode, System.Threading.CancellationToken? token)
         {
+            CheckDirty();
             textFileLock.EnterReadLock();
             string moduleName = _moduleName;
             var parameterOverrides = _parameterOverrides;
             textFileLock.ExitReadLock();
 
-            return new Parser.VerilogInstanceParser(this, moduleName, parameterOverrides, parseMode,token);
-//            return new Parser.VerilogParser(this.SourceVerilogFile , ModuleName, ParameterOverrides, parseMode);
+            return new Parser.VerilogParser(this, moduleName, parameterOverrides, parseMode,token);
         }
 
 

@@ -1,3 +1,4 @@
+using CodeEditor2.CodeEditor;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -146,24 +147,9 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             // skip block
             if (parsedDocument.TargetBuildingBlockName != null)
             {
-                string moduleName = word.NextText;
-                if (moduleName != parsedDocument.TargetBuildingBlockName)
+                if (word.NextText != parsedDocument.TargetBuildingBlockName)
                 {
-                    word.MoveNext();
-                    IndexReference beginReference = word.CreateIndexReference();
-
-                    List<string> stopWords = new List<string> { "endmodule" };
-                    while (!word.Eof)
-                    {
-                        if (stopWords.Contains(word.Text)) break;   // TODO support hier module definition
-                        word.Color(CodeDrawStyle.ColorType.Inactivated);
-                        word.MoveNext();
-                    }
-
-                    IndexReference lastReference = word.CreateIndexReference();
-
-                    word.AppendBlock(beginReference, lastReference, moduleName, true);
-
+                    skipBlock(word, "module", "endmodule");
                     return;
                 }
             }
@@ -171,7 +157,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
             Module module;
 
-            if (parsedDocument.ParseMode == Parser.VerilogInstanceParser.ParseModeEnum.LoadParse)
+            if (parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse)
             {
                 if (parsedDocument.ParameterOverrides == null)
                 {
@@ -182,6 +168,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     module = await Module.ParseCreate(word, parsedDocument.ParameterOverrides, null , parsedDocument.Root, file, true);
                 }
                 parsedDocument.ReparseRequested = true;
+                parsedDocument.ParseStatus = ParsedDocument.ParseStatusEnum.SkeltonParsed;
             }
             else
             {
@@ -193,6 +180,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 {
                     module = await Module.ParseCreate(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, false);
                 }
+                parsedDocument.ParseStatus = ParsedDocument.ParseStatusEnum.Parsed;
             }
 
         }
@@ -201,30 +189,25 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
             if (word.Text != "package") System.Diagnostics.Debugger.Break();
 
-            if (parsedDocument.TargetBuildingBlockName != null)
+            if (word.NextText != parsedDocument.TargetBuildingBlockName)
             {
-                string moduleName = word.NextText;
-                if (moduleName != parsedDocument.TargetBuildingBlockName)
-                {
-                    word.SkipToKeyword("endpackage");
-                    word.MoveNext();
-                    return;
-                }
+                skipBlock(word, "package", "endpackage");
+                return;
             }
 
 
             Package package;
             //IndexReference iref = IndexReference.Create(parsedDocument);
 
-            if (parsedDocument.ParseMode == Parser.VerilogInstanceParser.ParseModeEnum.LoadParse)
+            if (parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse)
             {
                 if (parsedDocument.ParameterOverrides == null)
                 {
-                    package = await Package.Create(word, null, parsedDocument.Root, file, true);
+                    package = await Package.ParseCreate(word, null, parsedDocument.Root, file, true);
                 }
                 else
                 {
-                    package = await Package.Create(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, true);
+                    package = await Package.ParseCreate(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, true);
                 }
                 parsedDocument.ReparseRequested = true;
             }
@@ -232,11 +215,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
                 if (parsedDocument.ParameterOverrides == null)
                 {
-                    package = await Package.Create(word, null, parsedDocument.Root, file, false);
+                    package = await Package.ParseCreate(word, null, parsedDocument.Root, file, false);
                 }
                 else
                 {
-                    package = await Package.Create(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, false);
+                    package = await Package.ParseCreate(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, false);
                 }
             }
         }
@@ -245,22 +228,16 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
             if (word.Text != "program") System.Diagnostics.Debugger.Break();
 
-            if (parsedDocument.TargetBuildingBlockName != null)
+            if (word.NextText != parsedDocument.TargetBuildingBlockName)
             {
-                string moduleName = word.NextText;
-                if (moduleName != parsedDocument.TargetBuildingBlockName)
-                {
-                    word.SkipToKeyword("endprogram");
-                    word.MoveNext();
-                    return;
-                }
+                skipBlock(word, "program", "endprogram");
+                return;
             }
-
 
             Program program;
             //IndexReference iref = IndexReference.Create(parsedDocument);
 
-            if (parsedDocument.ParseMode == Parser.VerilogInstanceParser.ParseModeEnum.LoadParse)
+            if (parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse)
             {
                 if (parsedDocument.ParameterOverrides == null)
                 {
@@ -295,25 +272,49 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
         }
 
+        private static void skipBlock(WordScanner word, string startWord, string endWord)
+        {
+            if (word.Text != startWord) return;
+            word.MoveNext();
+            IndexReference beginReference = word.CreateIndexReference();
+
+            string identifier = word.Text;
+
+            List<string> stopWords = new List<string> { "endmodule" };
+            while (!word.Eof)
+            {
+                if (stopWords.Contains(word.Text)) break;   // TODO support hier module definition
+                word.Color(CodeDrawStyle.ColorType.Inactivated);
+                word.MoveNext();
+            }
+            if (word.Text == endWord) word.MoveNext();
+            if (word.Text == ":")
+            {
+                word.MoveNext();
+                if (word.Text == identifier) word.MoveNext();
+            }
+            IndexReference lastReference = word.CreateIndexReference();
+
+            word.AppendBlock(beginReference, lastReference, identifier, true);
+
+            return;
+
+        }
+
         private static async System.Threading.Tasks.Task parseInterface(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
         {
             if (word.Text != "interface") System.Diagnostics.Debugger.Break();
 
-            if (parsedDocument.TargetBuildingBlockName != null)
+            if (word.NextText != parsedDocument.TargetBuildingBlockName)
             {
-                string moduleName = word.NextText;
-                if (moduleName != parsedDocument.TargetBuildingBlockName)
-                {
-                    word.SkipToKeyword("endinterface");
-                    word.MoveNext();
-                    return;
-                }
+                skipBlock(word, "interface", "endinterface");
+                return;
             }
 
             Interface module;
             //IndexReference iref = IndexReference.Create(parsedDocument);
 
-            if (parsedDocument.ParseMode == Parser.VerilogInstanceParser.ParseModeEnum.LoadParse)
+            if (parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse)
             {
                 if (parsedDocument.ParameterOverrides == null)
                 {

@@ -12,6 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using static pluginVerilog.Verilog.ParsedDocument;
 
 namespace pluginVerilog.Data
 {
@@ -72,6 +73,32 @@ namespace pluginVerilog.Data
                 {
                     return RelativePath + ":" + ModuleName + ":" + ParameterId;
                 }
+            }
+        }
+        public Verilog.ParsedDocument.ParseStatusEnum ParseStatus
+        {
+            get
+            {
+                Verilog.ParsedDocument? vParsedDocument = VerilogParsedDocument;
+                if (vParsedDocument == null) return ParseStatusEnum.NotParsed;
+                return vParsedDocument.ParseStatus;
+            }
+            set
+            {
+                Verilog.ParsedDocument? vParsedDocument = VerilogParsedDocument;
+                if (vParsedDocument == null) return;
+                vParsedDocument.ParseStatus = value;
+            }
+        }
+        public void CheckDirty()
+        {
+            pluginVerilog.Verilog.ParsedDocument? vParsedDocument = VerilogParsedDocument;
+            if (vParsedDocument == null) return;
+            CodeEditor2.CodeEditor.CodeDocument? codeDocument = CodeDocument;
+            if (codeDocument == null) return;
+            if (codeDocument.Version != vParsedDocument.Version)
+            {
+                ParseStatus = Verilog.ParsedDocument.ParseStatusEnum.Outdated;
             }
         }
 
@@ -331,7 +358,7 @@ namespace pluginVerilog.Data
         public override DocumentParser CreateDocumentParser(DocumentParser.ParseModeEnum parseMode, System.Threading.CancellationToken? token)
         {
             //            return new Parser.VerilogParser(this, ModuleName, ParameterOverrides, parseMode);
-            return new Parser.VerilogInstanceParser(this.SourceVerilogFile, ModuleName, ParameterOverrides, parseMode, token);
+            return new Parser.VerilogParser(this.SourceVerilogFile, ModuleName, ParameterOverrides, parseMode, token);
         }
 
 

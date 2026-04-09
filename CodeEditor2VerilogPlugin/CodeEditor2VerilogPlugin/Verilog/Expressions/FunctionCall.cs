@@ -51,7 +51,7 @@ namespace pluginVerilog.Verilog.Expressions
         {
             if (word.RootParsedDocument.ProjectProperty == null) throw new Exception();
 
-            FunctionCall functionCall = new FunctionCall() { FunctionName = word.Text, DefinedNameSpace = nameSpace, ProjectProperty=word.ProjectProperty };
+            FunctionCall functionCall = new FunctionCall() { FunctionName = word.Text, DefinedNameSpace = functionDefinedNameSpace, ProjectProperty=word.ProjectProperty };
             functionCall.Reference = word.GetReference();
 
             Function? function = null;

@@ -139,14 +139,6 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             word.MoveNext();
             module.BlockBeginIndexReference = word.CreateIndexReference();
 
-            //if (word.RootParsedDocument.ParseMode == CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.LoadParse)
-            //{
-            //    while (!word.Eof)
-            //    {
-            //        if (word.Text == "endmodule") break;
-            //        word.MoveNext();
-            //    }
-            //} else
             if (!word.CellDefine && !protoType)
             {
                 // prototype parse
@@ -155,14 +147,6 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 await parseModule(prototypeWord, parameterOverrides, null, module);
                 prototypeWord.Dispose();
                 word.CheckCancelToken();
-
-                // remove all dataobjects to check definition order
-                //module.NamedElements.RemoveAll(
-                //    element =>
-                //    {
-                //        return (element is DataObjects.DataObject);
-                //    }
-                //);
 
                 // parse
                 word.RootParsedDocument.Macros = macroKeep;

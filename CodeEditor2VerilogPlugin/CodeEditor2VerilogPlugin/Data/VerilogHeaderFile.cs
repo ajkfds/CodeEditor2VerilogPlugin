@@ -13,6 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static CodeEditor2.Controller;
+using static pluginVerilog.Verilog.ParsedDocument;
 
 namespace pluginVerilog.Data
 {
@@ -58,6 +59,33 @@ namespace pluginVerilog.Data
             CustomizeItemEditorContextMenu += (x => EditorContextMenu.CustomizeEditorContextMenu(x));
         }
 
+        public Verilog.ParsedDocument.ParseStatusEnum ParseStatus
+        {
+            get
+            {
+                Verilog.ParsedDocument? vParsedDocument = VerilogParsedDocument;
+                if (vParsedDocument == null) return ParseStatusEnum.NotParsed;
+                return vParsedDocument.ParseStatus;
+            }
+            set
+            {
+                Verilog.ParsedDocument? vParsedDocument = VerilogParsedDocument;
+                if (vParsedDocument == null) return;
+                vParsedDocument.ParseStatus = value;
+            }
+        }
+
+        public void CheckDirty()
+        {
+            pluginVerilog.Verilog.ParsedDocument? vParsedDocument = VerilogParsedDocument;
+            if (vParsedDocument == null) return;
+            CodeEditor2.CodeEditor.CodeDocument? codeDocument = CodeDocument;
+            if (codeDocument == null) return;
+            if (codeDocument.Version != vParsedDocument.Version)
+            {
+                ParseStatus = Verilog.ParsedDocument.ParseStatusEnum.Outdated;
+            }
+        }
         protected override void CreateCodeDocument()
         {
             document = new pluginVerilog.CodeEditor.CodeDocument(this);

@@ -230,7 +230,6 @@ namespace pluginVerilog.Tool
                 verilogFile = (Data.InterfaceInstance)textFile;
             }
             if (verilogFile == null) return;
-            Debug.Print("start parseTextFile " +verilogFile.RelativePath);
 
             token?.ThrowIfCancellationRequested();
 
