@@ -501,20 +501,20 @@ namespace pluginVerilog.Data
         public override bool ReparseRequested { 
             get 
             {
-                textFileLock.EnterReadLock();
-                Verilog.ParsedDocument? vParsedDoc = VerilogParsedDocument;
-                textFileLock.ExitReadLock();
-
-                if (vParsedDoc == null) return true;
-                return vParsedDoc.ReparseRequested;
+                ParseStatusEnum parseStatus = ParseStatus;
+                switch (parseStatus)
+                {
+                    case ParseStatusEnum.Parsed:
+                        return false;
+                    default:
+                        return true;
+                }
             }
             set
             {
-                textFileLock.EnterReadLock();
-                Verilog.ParsedDocument? vParsedDoc = VerilogParsedDocument;
-                textFileLock.ExitReadLock();
-
-                if (vParsedDoc != null) vParsedDoc.ReparseRequested = value;
+                if (value != false) return;
+                ParseStatus = ParseStatusEnum.Outdated;
+                SourceVerilogFile.ReparseRequested = true;
             }
         }
 

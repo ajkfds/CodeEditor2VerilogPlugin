@@ -456,6 +456,77 @@ namespace pluginVerilog.Data
             {
                 ParseStatus = Verilog.ParsedDocument.ParseStatusEnum.Outdated;
             }
+
+        }
+
+        Dictionary<string, WeakReference<InstanceTextFile>> instanceDictionary = new Dictionary<string, WeakReference<InstanceTextFile>>();
+        public void RegisterInstanceFile(InstanceTextFile instanceTextFile)
+        {
+            textFileLock.EnterWriteLock();
+            try
+            {
+                if (instanceDictionary.TryGetValue(instanceTextFile.ID, out WeakReference<InstanceTextFile>? wref))
+                {
+                    instanceDictionary.Remove(instanceTextFile.ID);
+                }
+                instanceDictionary.Add(instanceTextFile.ID, new WeakReference<InstanceTextFile>(instanceTextFile));
+            }
+            finally
+            {
+                textFileLock.ExitWriteLock();
+            }
+        }
+
+        public bool TryGetInstanceTextFile(string ID,out InstanceTextFile? instanceTextFile)
+        {
+            textFileLock.EnterReadLock();
+            try{
+                instanceTextFile = null;
+                if (instanceDictionary.TryGetValue(ID, out WeakReference<InstanceTextFile>? wref))
+                {
+                    if (!wref.TryGetTarget(out instanceTextFile)) return false;
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            finally { 
+                textFileLock.ExitReadLock();
+            }
+        }
+
+
+        public void SetOutDated()
+        {
+            ParseStatus = Verilog.ParsedDocument.ParseStatusEnum.Outdated;
+            Verilog.ParsedDocument? vParsedDocument = VerilogParsedDocument;
+            if(vParsedDocument == null) return;
+            textFileLock.EnterWriteLock();
+            try
+            {
+                List<string> blankId = new List<string>();
+                foreach (var kvp in instanceDictionary)
+                {
+                    if(kvp.Value.TryGetTarget(out InstanceTextFile? instanceTextFile))
+                    {
+                        instanceTextFile.ParseStatus = Verilog.ParsedDocument.ParseStatusEnum.Outdated;
+                    }
+                    else
+                    {
+                        blankId.Add(kvp.Key);
+                    }
+                }
+                foreach (string id in blankId)
+                {
+                    instanceDictionary.Remove(id);
+                }
+            }
+            finally
+            {
+                textFileLock.ExitWriteLock();
+            }
         }
 
         public override DocumentParser CreateDocumentParser(DocumentParser.ParseModeEnum parseMode, System.Threading.CancellationToken? token)

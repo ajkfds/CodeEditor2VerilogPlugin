@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Data
 {
-    public class InstanceTextFile : CodeEditor2.Data.TextFile
+    public class InstanceTextFile : CodeEditor2.Data.TextFile, IVerilogRelatedFile
     {
 
         protected InstanceTextFile(CodeEditor2.Data.TextFile sourceTextFile)
@@ -26,5 +26,17 @@ namespace pluginVerilog.Data
                 return ret;
             }
         }
+
+        public virtual Verilog.ParsedDocument? VerilogParsedDocument { get; }
+
+        public virtual ProjectProperty ProjectProperty { get; }
+        public virtual bool SystemVerilog { get; }
+
+        public virtual string AbsolutePath { get; }
+
+        public virtual Verilog.ParsedDocument.ParseStatusEnum ParseStatus { get; set; }
+
+        public virtual void CheckDirty() { }
+
     }
 }

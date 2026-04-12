@@ -136,6 +136,15 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 }
             }
 
+            switch (parsedDocument.ParseMode)
+            {
+                case CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.LoadParse:
+                    parsedDocument.ParseStatus = ParsedDocument.ParseStatusEnum.SkeltonParsed;
+                    break;
+                default:
+                    parsedDocument.ParseStatus = ParsedDocument.ParseStatusEnum.Parsed;
+                    break;
+            }
             return root;
         }
 
