@@ -172,7 +172,7 @@ namespace pluginVerilog.Data.VerilogCommon
                 if (subElement.Name.StartsWith("\0", StringComparison.Ordinal)) continue; // reject unnamed elements
                 if (items.Find(x => x.Text == subElement.Name) != null) continue;   // reject duplicated elements
                 items.Add(
-                    new pluginVerilog.Data.VerilogCommon.AutoCompleteItem(
+                     new pluginVerilog.Data.VerilogCommon.AutoCompleteItem(
                         subElement.Name,
                         CodeDrawStyle.ColorIndex(subElement.ColorType),
                         candidateStartIndex,

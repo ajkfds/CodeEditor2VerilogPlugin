@@ -107,7 +107,7 @@ namespace pluginVerilog.Verilog.Snippets
                     string target = "{" + i.ToString() + "}";
                     if (!replaceText.Contains(target)) break;
                     startIndexes.Add(index + replaceText.IndexOf(target));
-                    lastIndexes.Add(index + replaceText.IndexOf(target) + initials[i].Length - 1);
+                    lastIndexes.Add(index + replaceText.IndexOf(target) + initials[i].Length);
                     replaceText = replaceText.Replace(target, initials[i]);
                 }
 
@@ -254,9 +254,12 @@ namespace pluginVerilog.Verilog.Snippets
                 {
                     int start, last;
                     CodeEditor2.Controller.CodeEditor.GetHighlightPosition(1, out start, out last);
-                    string text = document.CreateString(start, last - start + 1);
-                    CodeEditor2.Controller.CodeEditor.GetHighlightPosition(2, out start, out last);
-                    document.Replace(start, last - start + 1, 0, text);
+                    if (last > start)
+                    {
+                        string text = document.CreateString(start, last - start);
+                        CodeEditor2.Controller.CodeEditor.GetHighlightPosition(2, out start, out last);
+                        document.Replace(start, last - start, 0, text);
+                    }
                 });
 
                 // move next

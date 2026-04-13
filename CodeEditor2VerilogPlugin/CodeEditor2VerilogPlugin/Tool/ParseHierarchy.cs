@@ -236,7 +236,7 @@ namespace pluginVerilog.Tool
 
             bool doParse = false;
             if (verilogFile.ReparseRequested) doParse = true;
-            if (verilogFile.VerilogParsedDocument != null && verilogFile.VerilogParsedDocument.ErrorCount > 0) doParse = true;
+//            if (verilogFile.VerilogParsedDocument != null && verilogFile.VerilogParsedDocument.ErrorCount > 0) doParse = true;
             if (parseMode == ParseMode.ForceAllFiles) doParse = true;
 
             if (doParse)
