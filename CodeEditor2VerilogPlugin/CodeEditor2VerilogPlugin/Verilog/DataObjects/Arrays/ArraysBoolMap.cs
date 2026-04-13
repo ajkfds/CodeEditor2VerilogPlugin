@@ -87,7 +87,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
                     if (absoluteRangeExpression.MaxBitIndex == null) return;
                     if (absoluteRangeExpression.MinBitIndex == null) return;
                     start = start + dsize * (long)absoluteRangeExpression.MinBitIndex;
-                    last = start + dsize *((long)absoluteRangeExpression.MaxBitIndex- (long)absoluteRangeExpression.MinBitIndex) - 1;
+                    last = start + dsize *((long)absoluteRangeExpression.MaxBitIndex- (long)absoluteRangeExpression.MinBitIndex);
                     dimension--;
                 }
                 else

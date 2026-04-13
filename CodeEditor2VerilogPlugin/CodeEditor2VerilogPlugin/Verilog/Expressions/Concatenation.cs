@@ -111,6 +111,15 @@ namespace pluginVerilog.Verilog.Expressions
             word.MoveNext(); // }
             return concatenation;
         }
+
+        public override void AssertAssigned()
+        {
+            foreach(var exp in Expressions)
+            {
+                exp.AssertAssigned();
+            }
+        }
+
         /*
         concatenation           ::= { expression { , expression } }
         multiple_concatenation  ::= { constant_expression concatenation }
