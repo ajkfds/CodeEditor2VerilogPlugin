@@ -198,12 +198,14 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
             if (word.Text != "package") System.Diagnostics.Debugger.Break();
 
-            if (word.NextText != parsedDocument.TargetBuildingBlockName)
+            if (parsedDocument.TargetBuildingBlockName != null)
             {
-                skipBlock(word, "package", "endpackage");
-                return;
+                if (word.NextText != parsedDocument.TargetBuildingBlockName)
+                {
+                    skipBlock(word, "package", "endpackage");
+                    return;
+                }
             }
-
 
             Package package;
             //IndexReference iref = IndexReference.Create(parsedDocument);
@@ -237,11 +239,15 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
             if (word.Text != "program") System.Diagnostics.Debugger.Break();
 
-            if (word.NextText != parsedDocument.TargetBuildingBlockName)
+            if (parsedDocument.TargetBuildingBlockName != null)
             {
-                skipBlock(word, "program", "endprogram");
-                return;
+                if (word.NextText != parsedDocument.TargetBuildingBlockName)
+                {
+                    skipBlock(word, "program", "endprogram");
+                    return;
+                }
             }
+
 
             Program program;
             //IndexReference iref = IndexReference.Create(parsedDocument);
@@ -314,10 +320,13 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
             if (word.Text != "interface") System.Diagnostics.Debugger.Break();
 
-            if (word.NextText != parsedDocument.TargetBuildingBlockName)
+            if (parsedDocument.TargetBuildingBlockName != null)
             {
-                skipBlock(word, "interface", "endinterface");
-                return;
+                if (word.NextText != parsedDocument.TargetBuildingBlockName)
+                {
+                    skipBlock(word, "interface", "endinterface");
+                    return;
+                }
             }
 
             Interface module;
