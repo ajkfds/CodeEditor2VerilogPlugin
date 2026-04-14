@@ -157,34 +157,16 @@ namespace pluginVerilog.Verilog
         public List<string> UnfoundModules = new List<string>();
 
         // for IndexReference
+
+        private bool reparseRequested = true;
         public bool ReparseRequested
         {
             get {
-                if (ParseStatus == ParseStatusEnum.Parsed) return true;
-                return false;
+                return reparseRequested;
             }
             set {
-                if (value)
-                {
-                    ParseStatus = ParseStatusEnum.Parsed;
-                }
-                else
-                {
-                    ParseStatus = ParseStatusEnum.Outdated;
-                }
+                reparseRequested = value;
             }
-        }
-        public ParseStatusEnum ParseStatus
-        {
-            get;
-            set;
-        } = ParseStatusEnum.NotParsed;
-        public enum ParseStatusEnum
-        {
-            NotParsed,
-            SkeltonParsed,
-            Parsed,
-            Outdated
         }
 
         public void ReloadIncludeFiles()

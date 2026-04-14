@@ -1,3 +1,4 @@
+using Avalonia.Controls;
 using Avalonia.Threading;
 using CodeEditor2;
 using CodeEditor2.CodeEditor;
@@ -70,21 +71,6 @@ namespace pluginVerilog.Data
             CodeEditor2.Data.Item.PolymorphicResolver.DerivedTypes.Add(new JsonDerivedType(typeof(VerilogFile)));
         }
 
-        public Verilog.ParsedDocument.ParseStatusEnum ParseStatus
-        {
-            get
-            {
-                Verilog.ParsedDocument? vParsedDocument = VerilogParsedDocument;
-                if(vParsedDocument==null) return ParseStatusEnum.NotParsed;
-                return vParsedDocument.ParseStatus;
-            }
-            set
-            {
-                Verilog.ParsedDocument? vParsedDocument = VerilogParsedDocument;
-                if (vParsedDocument == null) return;
-                vParsedDocument.ParseStatus = value;
-            }
-        }
         public static async Task<VerilogFile> CreateSystemVerilog(string relativePath, CodeEditor2.Data.Project project)
         {
             string name;
@@ -204,7 +190,7 @@ namespace pluginVerilog.Data
             if(codeDoc.Version != vParsedDocument.Version)
             {
                 // if code document is updated during parsing, do not accept parsed document because it may be outdated.
-                vParsedDocument.ParseStatus = Verilog.ParsedDocument.ParseStatusEnum.Outdated;
+                vParsedDocument.ReparseRequested = true;
                 return;
             }
 
@@ -446,18 +432,6 @@ namespace pluginVerilog.Data
             return node;
         }
 
-        public void CheckDirty() 
-        {
-            ParsedDocument? vParsedDocument = VerilogParsedDocument;
-            if (vParsedDocument == null) return;
-            CodeEditor2.CodeEditor.CodeDocument ? codeDocument = CodeDocument;
-            if(codeDocument == null) return;
-            if (codeDocument.Version != vParsedDocument.Version)
-            {
-                ParseStatus = Verilog.ParsedDocument.ParseStatusEnum.Outdated;
-            }
-
-        }
 
         Dictionary<string, WeakReference<InstanceTextFile>> instanceDictionary = new Dictionary<string, WeakReference<InstanceTextFile>>();
         public void RegisterInstanceFile(InstanceTextFile instanceTextFile)
@@ -497,10 +471,37 @@ namespace pluginVerilog.Data
             }
         }
 
+        public override bool ReparseRequested
+        {
+            get 
+            {
+                Verilog.ParsedDocument? vParsedDocument = VerilogParsedDocument;
+                if (vParsedDocument == null) return true;
+                return vParsedDocument.ReparseRequested;
+            }
+            set
+            {
+                Verilog.ParsedDocument? vParsedDocument = VerilogParsedDocument;
+                if (vParsedDocument == null) return;
+                vParsedDocument.ReparseRequested = value;
+            }
+        }    
 
+        public void CheckDirty()
+        {
+            Verilog.ParsedDocument? vParsedDocument = VerilogParsedDocument;
+            if (vParsedDocument == null) return;
+            CodeEditor2.CodeEditor.CodeDocument? codeDocument = CodeDocument;
+            if (codeDocument == null) return;
+            if (codeDocument.Version != vParsedDocument.Version)
+            {
+                vParsedDocument.ReparseRequested = true;
+            }
+        }
         public void SetOutDated()
         {
-            ParseStatus = Verilog.ParsedDocument.ParseStatusEnum.Outdated;
+            ReparseRequested = true;
+
             Verilog.ParsedDocument? vParsedDocument = VerilogParsedDocument;
             if(vParsedDocument == null) return;
             textFileLock.EnterWriteLock();
@@ -511,7 +512,7 @@ namespace pluginVerilog.Data
                 {
                     if(kvp.Value.TryGetTarget(out InstanceTextFile? instanceTextFile))
                     {
-                        instanceTextFile.ParseStatus = Verilog.ParsedDocument.ParseStatusEnum.Outdated;
+                        instanceTextFile.ReparseRequested = true;
                     }
                     else
                     {

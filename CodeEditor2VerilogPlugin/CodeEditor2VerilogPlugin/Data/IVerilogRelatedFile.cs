@@ -16,9 +16,6 @@ namespace pluginVerilog.Data
         bool SystemVerilog { get; }
 
         string AbsolutePath {  get; }
-
-        Verilog.ParsedDocument.ParseStatusEnum ParseStatus { get; set; }
-
         void CheckDirty();
     }
 }

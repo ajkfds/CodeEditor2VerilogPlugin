@@ -105,31 +105,31 @@ namespace pluginVerilog.Data
 
         public bool SystemVerilog { get { return RootFile.SystemVerilog; } }
 
-        public Verilog.ParsedDocument.ParseStatusEnum ParseStatus
+        public override bool ReparseRequested
         {
             get
             {
                 Verilog.ParsedDocument? vParsedDocument = VerilogParsedDocument;
-                if (vParsedDocument == null) return ParseStatusEnum.NotParsed;
-                return vParsedDocument.ParseStatus;
+                if (vParsedDocument == null) return true;
+                return vParsedDocument.ReparseRequested;
             }
             set
             {
                 Verilog.ParsedDocument? vParsedDocument = VerilogParsedDocument;
                 if (vParsedDocument == null) return;
-                vParsedDocument.ParseStatus = value;
+                vParsedDocument.ReparseRequested = value;
             }
         }
         public void CheckDirty()
         {
             ParsedDocument? vParsedDocument = VerilogParsedDocument;
             if (vParsedDocument == null) return;
-            if (vParsedDocument.ParseStatus == ParseStatusEnum.Outdated) return;
+            if (vParsedDocument.ReparseRequested) return;
             CodeEditor2.CodeEditor.CodeDocument? codeDocument = CodeDocument;
             if (codeDocument == null) return;
             if (codeDocument.Version != vParsedDocument.Version)
             {
-                ParseStatus = Verilog.ParsedDocument.ParseStatusEnum.Outdated;
+                ReparseRequested = true;
             }
         }
         public bool ReplaceBy(

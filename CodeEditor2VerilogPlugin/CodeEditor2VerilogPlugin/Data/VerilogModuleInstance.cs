@@ -211,19 +211,19 @@ namespace pluginVerilog.Data
                 }
             }
         }
-        public Verilog.ParsedDocument.ParseStatusEnum ParseStatus
+        public override bool ReparseRequested
         {
             get
             {
                 Verilog.ParsedDocument? vParsedDocument = VerilogParsedDocument;
-                if (vParsedDocument == null) return ParseStatusEnum.NotParsed;
-                return vParsedDocument.ParseStatus;
+                if (vParsedDocument == null) return true;
+                return vParsedDocument.ReparseRequested;
             }
             set
             {
                 Verilog.ParsedDocument? vParsedDocument = VerilogParsedDocument;
                 if (vParsedDocument == null) return;
-                vParsedDocument.ParseStatus = value;
+                vParsedDocument.ReparseRequested = value;
             }
         }
         public void CheckDirty()
@@ -234,7 +234,7 @@ namespace pluginVerilog.Data
             if (codeDocument == null) return;
             if (codeDocument.Version != vParsedDocument.Version)
             {
-                ParseStatus = Verilog.ParsedDocument.ParseStatusEnum.Outdated;
+                ReparseRequested = true;
             }
         }
 
@@ -498,25 +498,6 @@ namespace pluginVerilog.Data
             NavigatePanelNode.UpdateVisual();
         }
 
-        public override bool ReparseRequested { 
-            get 
-            {
-                ParseStatusEnum parseStatus = ParseStatus;
-                switch (parseStatus)
-                {
-                    case ParseStatusEnum.Parsed:
-                        return false;
-                    default:
-                        return true;
-                }
-            }
-            set
-            {
-                if (value != false) return;
-                ParseStatus = ParseStatusEnum.Outdated;
-                SourceVerilogFile.ReparseRequested = true;
-            }
-        }
 
         private async Task acceptParameterizedParsedDocumentAsync(ParsedDocument newParsedDocument)
         {

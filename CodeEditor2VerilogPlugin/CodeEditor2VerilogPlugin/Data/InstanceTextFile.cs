@@ -34,8 +34,6 @@ namespace pluginVerilog.Data
 
         public virtual string AbsolutePath { get; }
 
-        public virtual Verilog.ParsedDocument.ParseStatusEnum ParseStatus { get; set; }
-
         public virtual void CheckDirty() { }
 
     }

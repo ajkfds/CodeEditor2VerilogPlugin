@@ -139,10 +139,10 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             switch (parsedDocument.ParseMode)
             {
                 case CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.LoadParse:
-                    parsedDocument.ParseStatus = ParsedDocument.ParseStatusEnum.SkeltonParsed;
+                    parsedDocument.ReparseRequested = true;
                     break;
                 default:
-                    parsedDocument.ParseStatus = ParsedDocument.ParseStatusEnum.Parsed;
+                    parsedDocument.ReparseRequested = false;
                     break;
             }
             return root;
@@ -177,7 +177,6 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     module = await Module.ParseCreate(word, parsedDocument.ParameterOverrides, null , parsedDocument.Root, file, true);
                 }
                 parsedDocument.ReparseRequested = true;
-                parsedDocument.ParseStatus = ParsedDocument.ParseStatusEnum.SkeltonParsed;
             }
             else
             {
@@ -189,7 +188,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 {
                     module = await Module.ParseCreate(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, false);
                 }
-                parsedDocument.ParseStatus = ParsedDocument.ParseStatusEnum.Parsed;
+                parsedDocument.ReparseRequested = false;
             }
 
         }

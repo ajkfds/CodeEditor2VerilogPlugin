@@ -142,8 +142,6 @@ namespace pluginVerilog.Tool
                                     if (first)
                                     {
                                         textFile.PostParse();
-//                                        ParseTask reEntryTask = new ParseTask(Id: textFile.Key, tarfgetTextFile: textFile, topLevel: false);
-//                                        ForceEnqueueWork(reEntryTask, workQueue, completeIds, signal);
                                     }
                                 }
 
@@ -237,7 +235,6 @@ namespace pluginVerilog.Tool
 
             bool doParse = false;
             if (verilogFile.ReparseRequested) doParse = true;
-//            if (verilogFile.VerilogParsedDocument != null && verilogFile.VerilogParsedDocument.ErrorCount > 0) doParse = true;
             if (parseMode == ParseMode.ForceAllFiles) doParse = true;
 
             if (doParse)
@@ -257,12 +254,7 @@ namespace pluginVerilog.Tool
                 if (parser.ParsedDocument != null)
                 {
                     await verilogFile.AcceptParsedDocumentAsync(parser.ParsedDocument);
-//                    async () => { await verilogFile.AcceptParsedDocumentAsync(parser.ParsedDocument); }
-                    //await Dispatcher.UIThread.InvokeAsync(
-                    //    );
-
-                    
-                    await verilogFile.UpdateAsync();
+//                    await verilogFile.UpdateAsync();
                 }
             }
 
@@ -321,7 +313,7 @@ namespace pluginVerilog.Tool
             if (parser.ParsedDocument != null)
             {
                 await verilogFile.AcceptParsedDocumentAsync(parser.ParsedDocument);
-                verilogFile.PostUIUpdate();
+//                verilogFile.PostUIUpdate();
             }
         }
 
