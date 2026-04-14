@@ -230,6 +230,7 @@ namespace pluginVerilog.Tool
                 verilogFile = (Data.InterfaceInstance)textFile;
             }
             if (verilogFile == null) return;
+            CodeEditor2.Controller.AppendLog("-- parse " + index.ToString() + " : " + verilogFile.ID);
 
             token?.ThrowIfCancellationRequested();
 
@@ -253,17 +254,16 @@ namespace pluginVerilog.Tool
                     CodeEditor2.Controller.AppendLog("parseHier "+index.ToString() + " : " + verilogFile.ID);
                 }
                 await parser.ParseAsync();
-                Debug.Print("complete parseAsync " + verilogFile.RelativePath);
                 if (parser.ParsedDocument != null)
                 {
-                    await Dispatcher.UIThread.InvokeAsync(
-                        async () => { await verilogFile.AcceptParsedDocumentAsync(parser.ParsedDocument); }
-                        );
+                    await verilogFile.AcceptParsedDocumentAsync(parser.ParsedDocument);
+//                    async () => { await verilogFile.AcceptParsedDocumentAsync(parser.ParsedDocument); }
+                    //await Dispatcher.UIThread.InvokeAsync(
+                    //    );
 
                     
                     await verilogFile.UpdateAsync();
                 }
-                Debug.Print("complete UpdateAsync " + verilogFile.RelativePath);
             }
 
             bool needReparse = false;

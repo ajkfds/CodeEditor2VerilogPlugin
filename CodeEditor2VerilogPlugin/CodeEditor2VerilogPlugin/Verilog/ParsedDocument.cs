@@ -72,18 +72,6 @@ namespace pluginVerilog.Verilog
             return codeDocument;
         }
 
-        public ParseStatusEnum ParseStatus
-        {
-            get;
-            set;
-        } = ParseStatusEnum.NotParsed;
-        public enum ParseStatusEnum
-        {
-            NotParsed,
-            SkeltonParsed,
-            Parsed,
-            Outdated
-        }
 
         public static string KeyGenerator(
             Data.IVerilogRelatedFile verilogRelatedFile,
@@ -169,13 +157,34 @@ namespace pluginVerilog.Verilog
         public List<string> UnfoundModules = new List<string>();
 
         // for IndexReference
-        private bool reparseRequested = false;
         public bool ReparseRequested
         {
-            get { return reparseRequested; }
-            set {
-                reparseRequested = value;
+            get {
+                if (ParseStatus == ParseStatusEnum.Parsed) return true;
+                return false;
             }
+            set {
+                if (value)
+                {
+                    ParseStatus = ParseStatusEnum.Parsed;
+                }
+                else
+                {
+                    ParseStatus = ParseStatusEnum.Outdated;
+                }
+            }
+        }
+        public ParseStatusEnum ParseStatus
+        {
+            get;
+            set;
+        } = ParseStatusEnum.NotParsed;
+        public enum ParseStatusEnum
+        {
+            NotParsed,
+            SkeltonParsed,
+            Parsed,
+            Outdated
         }
 
         public void ReloadIncludeFiles()
