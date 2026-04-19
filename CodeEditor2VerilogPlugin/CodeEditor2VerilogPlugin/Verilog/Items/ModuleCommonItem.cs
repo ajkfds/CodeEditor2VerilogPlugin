@@ -13,18 +13,18 @@ namespace pluginVerilog.Verilog.Items
         ## SystemVerilog 2012
 
         module_common_item ::= 
-              module_or_generate_item_declaration 
-            | interface_instantiation 
-            | program_instantiation 
-            | assertion_item 
+              module_or_generate_item_declaration v
+            | interface_instantiation v
+            | program_instantiation v
+            | assertion_item v
             | bind_directive 
-            | continuous_assign 
+            | continuous_assign v
             | net_alias 
             | initial_construct 
             | final_construct 
-            | always_construct 
-            | loop_generate_construct 
-            | conditional_generate_construct
+            | always_construct v
+            | loop_generate_construct v
+            | conditional_generate_constructv
             | elaboration_system_task
         */
 
@@ -49,6 +49,8 @@ namespace pluginVerilog.Verilog.Items
                 // bind_directive
                 // net_alias
                 // final_construct
+                case "final":
+                    return await ModuleItems.FinalConstruct.Parse(word, nameSpace);
                 // elaboration_system_task
 
                 // continuous_assign
