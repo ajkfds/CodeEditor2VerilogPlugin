@@ -431,7 +431,19 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
 
             // data_type_or_implicit
             WordReference dataTypeRef = word.GetReference();
-            DataTypes.IDataType? dataType = DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, DataTypes.DataTypeEnum.Logic);
+
+
+            // identifierがclass_nameとしてすでに定義されているときに、identiferをclass_nameと誤認するのを防ぐ。
+            // wire             identifier = expression;
+            // wire class_name  identifier;
+            DataTypes.IDataType? dataType = null;
+            if (word.NextText == "=" || word.NextText == ";")
+            {
+                dataType = DataTypes.LogicType.Create(false, null);
+            } else {
+                dataType = DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, DataTypes.DataTypeEnum.Logic);
+            }
+            
             if (dataType == null) return true;
             if(!dataType.IsValidForNet)
             {
