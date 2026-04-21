@@ -1,8 +1,5 @@
 using CodeEditor2.CodeEditor.CodeComplete;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Statements
@@ -29,7 +26,7 @@ namespace pluginVerilog.Verilog.Statements
         public void DisposeSubReference()
         {
             Expression.DisposeSubReference(true);
-            foreach(CaseItem caseItem in CaseItems)
+            foreach (CaseItem caseItem in CaseItems)
             {
                 caseItem.DisposeSubRefrence();
             }
@@ -81,7 +78,7 @@ namespace pluginVerilog.Verilog.Statements
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
-            if(word.GetCharAt(0) == '(')
+            if (word.GetCharAt(0) == '(')
             {
                 word.MoveNext();
             }
@@ -99,7 +96,7 @@ namespace pluginVerilog.Verilog.Statements
                 word.AddError(") expected");
             }
 
-            if(word.Text == "matches" || word.Text == "inside")
+            if (word.Text == "matches" || word.Text == "inside")
             {
                 word.AddSystemVerilogError();
                 word.Color(CodeDrawStyle.ColorType.Keyword);
@@ -136,13 +133,13 @@ namespace pluginVerilog.Verilog.Statements
 
             public void DisposeSubRefrence()
             {
-                foreach(pluginVerilog.Verilog.Expressions.Expression expression in Expressions)
+                foreach (pluginVerilog.Verilog.Expressions.Expression expression in Expressions)
                 {
                     expression.DisposeSubReference(true);
                 }
                 Statement.DisposeSubReference();
             }
-            public static async Task<CaseItem> ParseCreate(WordScanner word,NameSpace nameSpace)
+            public static async Task<CaseItem> ParseCreate(WordScanner word, NameSpace nameSpace)
             {
                 //            case_item ::=       expression { , expression } : statement_or_null 
                 //                                | default[ : ] statement_or_null
@@ -161,14 +158,14 @@ namespace pluginVerilog.Verilog.Statements
                 }
 
                 Expressions.Expression expression = Verilog.Expressions.Expression.ParseCreate(word, nameSpace);
-                if(expression == null)
+                if (expression == null)
                 {
                     word.AddError("illegal expression item");
                     return null;
                 }
                 caseItem.Expressions.Add(expression);
 
-                while(!word.Eof && word.GetCharAt(0) == ',')
+                while (!word.Eof && word.GetCharAt(0) == ',')
                 {
                     word.MoveNext();
                     expression = Verilog.Expressions.Expression.ParseCreate(word, nameSpace);
@@ -183,7 +180,9 @@ namespace pluginVerilog.Verilog.Statements
                 if (word.GetCharAt(0) == ':')
                 {
                     word.MoveNext();
-                }else{
+                }
+                else
+                {
                     word.AddError(": exptected");
                     return null;
                 }

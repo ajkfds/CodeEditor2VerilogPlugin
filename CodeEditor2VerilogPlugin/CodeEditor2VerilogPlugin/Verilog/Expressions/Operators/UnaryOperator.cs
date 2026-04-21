@@ -1,9 +1,6 @@
 using pluginVerilog.Verilog.DataObjects;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Expressions.Operators
 {
@@ -106,7 +103,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
             {
                 Reference = Primary.Reference;
             }
-            SyncContext.PropageteClockDomainFrom(Primary.SyncContext,Reference);
+            SyncContext.PropageteClockDomainFrom(Primary.SyncContext, Reference);
             if (Operated != null) Operated(this);
             return this;
         }

@@ -1,13 +1,5 @@
-using Avalonia.Input;
-using CodeEditor2.Data;
-using pluginVerilog.Verilog.DataObjects.Arrays;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 using System.Text.Json.Serialization;
 
 
@@ -20,7 +12,7 @@ namespace pluginVerilog.Verilog.Expressions
         public List<Expression> Expressions = new List<Expression>();
         public required string FunctionName { get; init; }
 
-//        public required NameSpace DefinedNameSpace { init; get; }
+        //        public required NameSpace DefinedNameSpace { init; get; }
 
         public required BuiltInMethod BuiltInMethod { init; get; }
         [JsonIgnore]
@@ -63,9 +55,9 @@ namespace pluginVerilog.Verilog.Expressions
             word.Color(CodeDrawStyle.ColorType.Identifier);
             word.MoveNext();
 
-            if(word.GetCharAt(0) != '(')
+            if (word.GetCharAt(0) != '(')
             {
-                if(method != null && method.Ports.Count != 0)
+                if (method != null && method.Ports.Count != 0)
                 {
                     word.AddError("illegal function call");
                     return null;
@@ -79,7 +71,7 @@ namespace pluginVerilog.Verilog.Expressions
 
             if (word.Text == ")")
             {
-                if (method != null && method.Ports.Count !=0)
+                if (method != null && method.Ports.Count != 0)
                 {
                     word.AddError("too few arguments");
                 }
@@ -92,13 +84,13 @@ namespace pluginVerilog.Verilog.Expressions
             while (!word.Eof)
             {
                 Expression? expression = Expression.ParseCreate(word, usedNameSpace);
-                if(expression == null)
+                if (expression == null)
                 {
                     return null;
                 }
                 if (!expression.Constant) returnConstant = false;
                 methodCall.Expressions.Add(expression);
-                if(method != null)
+                if (method != null)
                 {
                     if (i >= method.Ports.Count)
                     {
@@ -106,11 +98,12 @@ namespace pluginVerilog.Verilog.Expressions
                     }
                     else
                     {
-                        if (method.PortsList[i] != null 
-                            && expression != null 
+                        if (method.PortsList[i] != null
+                            && expression != null
                             && method.PortsList[i] != null
-                        ){
-                            if(method.PortsList[i].BitWidth != expression.BitWidth)
+                        )
+                        {
+                            if (method.PortsList[i].BitWidth != expression.BitWidth)
                             {
                                 word.AddWarning("bitwidth mismatch");
                             }
@@ -119,18 +112,18 @@ namespace pluginVerilog.Verilog.Expressions
                 }
 
 
-                if(word.Text == ")")
+                if (word.Text == ")")
                 {
-                    if (method != null && i < method.Ports.Count-1)
+                    if (method != null && i < method.Ports.Count - 1)
                     {
                         word.AddError("too few arguments");
                     }
-                    methodCall.Reference = WordReference.CreateReferenceRange(methodCall.Reference,word.GetReference());
+                    methodCall.Reference = WordReference.CreateReferenceRange(methodCall.Reference, word.GetReference());
                     methodCall.Constant = returnConstant;
                     word.MoveNext();
                     break;
                 }
-                else if(word.Text == ",")
+                else if (word.Text == ",")
                 {
                     word.MoveNext();
                 }

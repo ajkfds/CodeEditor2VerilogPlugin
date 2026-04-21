@@ -1,8 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Expressions
 {
@@ -31,7 +27,7 @@ namespace pluginVerilog.Verilog.Expressions
             label.AppendText(" }");
         }
 
-        public static Primary? ParseCreateConcatenationOrMultipleConcatenation(WordScanner word, NameSpace nameSpace, bool lValue,bool acceptImplicitNet)
+        public static Primary? ParseCreateConcatenationOrMultipleConcatenation(WordScanner word, NameSpace nameSpace, bool lValue, bool acceptImplicitNet)
         {
             WordReference reference = word.GetReference();
             word.MoveNext(); // {
@@ -45,7 +41,7 @@ namespace pluginVerilog.Verilog.Expressions
             {
                 if (acceptImplicitNet)
                 {
-                    exp1 = Expression.ParseCreateAcceptImplicitNet(word, nameSpace,false);
+                    exp1 = Expression.ParseCreateAcceptImplicitNet(word, nameSpace, false);
                 }
                 else
                 {
@@ -82,7 +78,7 @@ namespace pluginVerilog.Verilog.Expressions
                 }
                 if (lValue)
                 {
-                    exp1 = Expression.ParseCreateVariableLValue(word, nameSpace,acceptImplicitNet);
+                    exp1 = Expression.ParseCreateVariableLValue(word, nameSpace, acceptImplicitNet);
                 }
                 else
                 {
@@ -107,14 +103,14 @@ namespace pluginVerilog.Verilog.Expressions
                     return null;
                 }
             }
-            concatenation.Reference = WordReference.CreateReferenceRange(reference,word.GetReference());
+            concatenation.Reference = WordReference.CreateReferenceRange(reference, word.GetReference());
             word.MoveNext(); // }
             return concatenation;
         }
 
         public override void AssertAssigned()
         {
-            foreach(var exp in Expressions)
+            foreach (var exp in Expressions)
             {
                 exp.AssertAssigned();
             }
@@ -157,7 +153,7 @@ namespace pluginVerilog.Verilog.Expressions
         public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
             label.AppendText("{ ");
-            if(MultipleExpression!=null) label.AppendLabel(MultipleExpression.GetLabel());
+            if (MultipleExpression != null) label.AppendLabel(MultipleExpression.GetLabel());
             if (Expression != null)
             {
                 label.AppendText(" ");
@@ -165,7 +161,7 @@ namespace pluginVerilog.Verilog.Expressions
             }
             label.AppendText(" }");
         }
-        public static MultipleConcatenation? ParseCreate(WordScanner word, NameSpace nameSpace, Expression multipleExpression,WordReference reference)
+        public static MultipleConcatenation? ParseCreate(WordScanner word, NameSpace nameSpace, Expression multipleExpression, WordReference reference)
         {
             Expression? exp = Concatenation.ParseCreate(word, nameSpace);
 
@@ -177,16 +173,16 @@ namespace pluginVerilog.Verilog.Expressions
             MultipleConcatenation multipleConcatenation = new MultipleConcatenation();
             multipleConcatenation.MultipleExpression = multipleExpression;
             multipleConcatenation.Expression = exp;
-            multipleConcatenation.Reference = WordReference.CreateReferenceRange(reference,word.GetReference());
-            if(exp != null) multipleConcatenation.Constant = exp.Constant & multipleConcatenation.Constant;
+            multipleConcatenation.Reference = WordReference.CreateReferenceRange(reference, word.GetReference());
+            if (exp != null) multipleConcatenation.Constant = exp.Constant & multipleConcatenation.Constant;
 
-            if(exp != null && multipleExpression != null)
+            if (exp != null && multipleExpression != null)
             {
                 if (exp.BitWidth != null && multipleExpression.Value != null)
                 {
                     multipleConcatenation.BitWidth = (int)exp.BitWidth * (int)multipleExpression.Value;
                 }
-                if(exp.Constant && multipleExpression.Constant)
+                if (exp.Constant && multipleExpression.Constant)
                 {
                     multipleConcatenation.Constant = true;
                 }

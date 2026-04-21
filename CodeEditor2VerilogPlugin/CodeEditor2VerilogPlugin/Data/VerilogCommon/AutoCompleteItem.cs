@@ -1,19 +1,13 @@
 using Avalonia.Media;
-using CodeEditor2;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Data.VerilogCommon
 {
-    public class AutoCompleteItem: CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem
+    public class AutoCompleteItem : CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem
     {
         //public AutoCompleteItem(string text, byte colorIndex, Color color) : base(text,colorIndex,color)
         //{
         //}
-        public AutoCompleteItem(string text, byte colorIndex, int headIndex,int length, Color color, string svgPath) : base(text, colorIndex, color, svgPath)
+        public AutoCompleteItem(string text, byte colorIndex, int headIndex, int length, Color color, string svgPath) : base(text, colorIndex, color, svgPath)
         {
             this.headIndex = headIndex;
             this.length = length;

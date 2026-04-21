@@ -1,11 +1,6 @@
-using DynamicData;
 using pluginVerilog.Verilog.DataObjects.Arrays;
-using pluginVerilog.Verilog.DataObjects.DataTypes;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
@@ -38,8 +33,9 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         // bit          2state  >=1bit      
         public virtual bool PartSelectable { get { return false; } }
 
-        public int? BitWidth {
-            get 
+        public int? BitWidth
+        {
+            get
             {
                 int size = 0;
                 switch (Type)
@@ -57,13 +53,13 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                         return null;
                 }
 
-                foreach(Arrays.PackedArray array in PackedDimensions)
+                foreach (Arrays.PackedArray array in PackedDimensions)
                 {
                     if (array.Size == null) return null;
                     size = size * (int)array.Size;
                 }
                 return size;
-            } 
+            }
         }
         public bool IsVector { get { return true; } }
 
@@ -114,13 +110,13 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         public IDataType Clone()
         {
             List<PackedArray> array = new List<PackedArray>();
-            foreach(var packedDimension in PackedDimensions)
+            foreach (var packedDimension in PackedDimensions)
             {
                 array.Add(packedDimension.Clone());
             }
             return IntegerVectorType.Create(Type, Signed, array);
         }
-        public static IntegerVectorType Create(DataTypeEnum dataType, bool signed,List<Arrays.PackedArray>? packedDimensions)
+        public static IntegerVectorType Create(DataTypeEnum dataType, bool signed, List<Arrays.PackedArray>? packedDimensions)
         {
             switch (dataType)
             {
@@ -129,11 +125,11 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 case DataTypeEnum.Reg:
                     break;
                 default:
-                    if(System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+                    if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
                     throw new Exception();
             }
-            IntegerVectorType integerVectorType = new IntegerVectorType() { Type = dataType,Signed = signed };
-            if(packedDimensions == null)
+            IntegerVectorType integerVectorType = new IntegerVectorType() { Type = dataType, Signed = signed };
+            if (packedDimensions == null)
             {
                 integerVectorType.PackedDimensions.Clear();
             }
@@ -144,13 +140,13 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             return integerVectorType;
         }
 
-        public static IntegerVectorType? parse(WordScanner word,NameSpace nameSpace,DataTypeEnum dataType)
+        public static IntegerVectorType? parse(WordScanner word, NameSpace nameSpace, DataTypeEnum dataType)
         {
 
             bool signed = false;
 
             word.Color(CodeDrawStyle.ColorType.Keyword);
-            if(dataType == DataTypeEnum.Bit | dataType == DataTypeEnum.Logic)
+            if (dataType == DataTypeEnum.Bit | dataType == DataTypeEnum.Logic)
             {
                 word.AddSystemVerilogError();
             }
@@ -173,7 +169,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 word.AddError("illegal reg declaration");
                 return null;
             }
-            var integerVectorType = new IntegerVectorType() { Type = dataType,Signed = signed };
+            var integerVectorType = new IntegerVectorType() { Type = dataType, Signed = signed };
 
             while (word.GetCharAt(0) == '[')
             {
@@ -186,7 +182,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
                 PackedArray? packedArray = range as Arrays.PackedArray;
 
-                if(packedArray != null)
+                if (packedArray != null)
                 {
                     integerVectorType.PackedDimensions.Add(packedArray);
                 }

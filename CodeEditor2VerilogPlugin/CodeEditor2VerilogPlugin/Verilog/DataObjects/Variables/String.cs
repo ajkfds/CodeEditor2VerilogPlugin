@@ -1,21 +1,15 @@
-
-using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
-using pluginVerilog.Verilog.Expressions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
     public class String : ValueVariable, IPartSelectableDataObject
     {
-        protected String() { 
+        protected String()
+        {
         }
 
-        public override int? BitWidth {
+        public override int? BitWidth
+        {
             get
             {
                 if (Length == null) return null;
@@ -24,7 +18,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         }
 
         public int? Length = null;
-        public static new String Create(string name,IDataType dataType)
+        public static new String Create(string name, IDataType dataType)
         {
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.String);
 
@@ -51,7 +45,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public override Variable Clone(string name)
         {
-            String val = new String() { Name = name,Defined=Defined };
+            String val = new String() { Name = name, Defined = Defined };
             foreach (var unpackedArray in UnpackedArrays)
             {
                 val.UnpackedArrays.Add(unpackedArray.Clone());

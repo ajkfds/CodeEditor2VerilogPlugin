@@ -1,9 +1,5 @@
 using Avalonia.Media;
 using CodeEditor2.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.FileTypes
@@ -37,14 +33,14 @@ namespace pluginVerilog.FileTypes
                 body = body.Substring(body.IndexOf(System.IO.Path.DirectorySeparatorChar));
             }
 
-            if(body.EndsWith(".v") || body.EndsWith(".V"))
+            if (body.EndsWith(".v") || body.EndsWith(".V"))
             {
                 body = body.Substring(0, body.Length - 2);
             }
 
             using (System.IO.StreamWriter sw = new System.IO.StreamWriter(project.GetAbsolutePath(relativeFilePath)))
             {
-                sw.Write("module "+body+";\n");
+                sw.Write("module " + body + ";\n");
                 sw.Write("\n");
                 sw.Write("endmodule\n");
             }

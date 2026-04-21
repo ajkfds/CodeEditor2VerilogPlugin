@@ -1,8 +1,5 @@
 using CodeEditor2.CodeEditor.CodeComplete;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Statements
@@ -15,7 +12,7 @@ namespace pluginVerilog.Verilog.Statements
         public string Name { get; protected set; }
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public IStatement? Statement { get; protected set; }
-        public Expressions.Expression? Expression {  get; protected set; }
+        public Expressions.Expression? Expression { get; protected set; }
         public NamedElements NamedElements => new NamedElements();
         public AutocompleteItem CreateAutoCompleteItem()
         {
@@ -39,7 +36,7 @@ namespace pluginVerilog.Verilog.Statements
          */
         public static async Task<WaitStatement?> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
-            if(word.Text =="wait_order") return parseCreate_wait_fork(word, nameSpace);
+            if (word.Text == "wait_order") return parseCreate_wait_fork(word, nameSpace);
 
             if (word.Text != "wait") throw new Exception();
 
@@ -113,4 +110,4 @@ namespace pluginVerilog.Verilog.Statements
         }
 
     }
-    }
+}

@@ -1,20 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Drawing;
-using pluginVerilog.Verilog.BuildingBlocks;
+using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Threading;
-using System.ComponentModel;
-using CodeEditor2.Tools;
-using System.Diagnostics.CodeAnalysis;
-using DynamicData;
 using pluginVerilog.Data;
 using pluginVerilog.FileTypes;
-using Avalonia.Controls;
-using CodeEditor2.NavigatePanel;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 
 namespace pluginVerilog.NavigatePanel
 {
@@ -66,7 +58,7 @@ namespace pluginVerilog.NavigatePanel
             {
                 base.OnSelected(); // update context menu
 
-                if(TextFile == null)
+                if (TextFile == null)
                 {
                     if (NodeSelected != null) NodeSelected();
                     await UpdateAsync();
@@ -91,7 +83,7 @@ namespace pluginVerilog.NavigatePanel
             }
             finally
             {
-                onSelecting= false;
+                onSelecting = false;
             }
         }
 
@@ -99,7 +91,7 @@ namespace pluginVerilog.NavigatePanel
 
         public override async Task UpdateAsync()
         {
-            if(VerilogFile == null)
+            if (VerilogFile == null)
             {
                 return;
             }
@@ -176,12 +168,12 @@ namespace pluginVerilog.NavigatePanel
         {
             if (!Dispatcher.UIThread.CheckAccess())
             {
-                Dispatcher.UIThread.Invoke(()=> { UpdateVisual(); });
+                Dispatcher.UIThread.Invoke(() => { UpdateVisual(); });
                 return;
             }
 
             string text = "-";
-            if (FileItem != null) text=FileItem.Name;
+            if (FileItem != null) text = FileItem.Name;
             Text = text;
 
             if (VerilogFile == null) return;
@@ -220,7 +212,7 @@ namespace pluginVerilog.NavigatePanel
                         SvgPath = "CodeEditor2VerilogPlugin/Assets/Icons/exclamation_triangle.svg",
                         Color = CodeEditor2.Global.Color_Error,
                         OverridePosition = AjkAvaloniaLibs.Libs.Icons.OverridePosition.DownLeft
-                    }); 
+                    });
                 }
                 else if (verilogRelatedFile.VerilogParsedDocument.WarningCount > 0)
                 {

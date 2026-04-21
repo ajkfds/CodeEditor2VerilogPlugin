@@ -1,9 +1,6 @@
 using pluginVerilog.Verilog.Expressions;
-using pluginVerilog.Verilog.Expressions.Operators;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Statements
@@ -67,7 +64,7 @@ namespace pluginVerilog.Verilog.Statements
                                 | { attribute_instance } disable_statement
                                 | { attribute_instance } system_task_enable  
         */
-        public static async Task<IStatement?> ParseCreateStatement(WordScanner word, NameSpace nameSpace,List<string>? clockDomains = null )
+        public static async Task<IStatement?> ParseCreateStatement(WordScanner word, NameSpace nameSpace, List<string>? clockDomains = null)
         {
             /*
             A.6.4 Statements
@@ -128,7 +125,7 @@ namespace pluginVerilog.Verilog.Statements
 
             string? statement_label = null;
 
-            if(word.NextText == ":" && !General.ListOfKeywords.Contains(word.Text) && !General.IsIdentifier(word.Text))
+            if (word.NextText == ":" && !General.ListOfKeywords.Contains(word.Text) && !General.IsIdentifier(word.Text))
             {
                 word.MoveNext();
                 statement_label = word.Text;
@@ -194,10 +191,10 @@ namespace pluginVerilog.Verilog.Statements
 
                 // disable_statement 
                 case "disable":
-                    return DisableStatement.ParseCreate(word,nameSpace, statement_label);
+                    return DisableStatement.ParseCreate(word, nameSpace, statement_label);
 
                 case "force":
-                    return ForceStatement.ParseCreate(word,nameSpace, statement_label);
+                    return ForceStatement.ParseCreate(word, nameSpace, statement_label);
                 case "release":
                     return ReleaseStatement.ParseCreate(word, nameSpace, statement_label);
 
@@ -281,7 +278,8 @@ namespace pluginVerilog.Verilog.Statements
                             {
                                 word.AddError("unsupported system task");
                                 return SystemTask.SkipArguments.ParseCreate(word, nameSpace);
-                            }else if(word.RootParsedDocument.ProjectProperty.SystemTaskParsers[word.Text] != null)
+                            }
+                            else if (word.RootParsedDocument.ProjectProperty.SystemTaskParsers[word.Text] != null)
                             {
                                 return word.RootParsedDocument.ProjectProperty.SystemTaskParsers[word.Text](word, nameSpace);
                             }
@@ -290,15 +288,17 @@ namespace pluginVerilog.Verilog.Statements
                                 return SystemTask.SystemTask.ParseCreate(word, nameSpace);
                             }
                         }
-                        else if (General.IsIdentifier(word.Text)){
-                            return TaskEnable.ParseCreate(word, nameSpace,nameSpace);
+                        else if (General.IsIdentifier(word.Text))
+                        {
+                            return TaskEnable.ParseCreate(word, nameSpace, nameSpace);
                         }
-                    }else if (word.Text =="void" && nextText == "'")
+                    }
+                    else if (word.Text == "void" && nextText == "'")
                     {
                         return VoidFunctionCall.ParseCreate(word, nameSpace);
                     }
 
-                    IncOrDecExpression? incOrDecExpression = IncOrDecExpression.ParseCreate(word, nameSpace,false);
+                    IncOrDecExpression? incOrDecExpression = IncOrDecExpression.ParseCreate(word, nameSpace, false);
                     if (incOrDecExpression != null)
                     {
                         if (word.Text != ";")
@@ -312,20 +312,20 @@ namespace pluginVerilog.Verilog.Statements
                         return incOrDecExpression;
                     }
 
-                    Expressions.Expression? expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace,false);
-                    if( expression is Expressions.UnfoundObjectReference)
+                    Expressions.Expression? expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace, false);
+                    if (expression is Expressions.UnfoundObjectReference)
                     {
                         word.SkipToKeyword(";");
                         if (word.Text == ";") word.MoveNext();
                         return null;
                     }
 
-                    if(expression != null && expression is Expressions.TaskReference)// Expressions.TaskReference)
+                    if (expression != null && expression is Expressions.TaskReference)// Expressions.TaskReference)
                     {
                         Expressions.TaskReference taskReference = (Expressions.TaskReference)expression;
                         return TaskEnable.ParseCreate(taskReference, word, nameSpace);
                     }
-                    if(expression != null && expression is Expressions.FunctionCall)
+                    if (expression != null && expression is Expressions.FunctionCall)
                     {
                         Expressions.FunctionCall functionCall = (Expressions.FunctionCall)expression;
                         if (word.Text == ";")
@@ -338,7 +338,7 @@ namespace pluginVerilog.Verilog.Statements
                         }
                         if (functionCall.Function?.ReturnVariable == null) return VoidFunctionCall.Create(functionCall);
                     }
-                    if(expression != null && expression is BuiltinMethodCall)
+                    if (expression != null && expression is BuiltinMethodCall)
                     {
                         Expressions.BuiltinMethodCall methodCall = (Expressions.BuiltinMethodCall)expression;
                         if (word.Text == ";")
@@ -368,7 +368,7 @@ namespace pluginVerilog.Verilog.Statements
                             break;
                         // nonblocking_assignment ;
                         case "<=":
-                            statement = NonBlockingAssignment.ParseCreate(word, nameSpace, expression,clockDomains);
+                            statement = NonBlockingAssignment.ParseCreate(word, nameSpace, expression, clockDomains);
                             break;
                         case "+=":
                         case "-=":
@@ -390,10 +390,10 @@ namespace pluginVerilog.Verilog.Statements
                             word.MoveNext();
                             return null;
                         default:
-                            if(expression.Reference!= null && !word.Prototype) expression.Reference.AddError("illegal statement");
+                            if (expression.Reference != null && !word.Prototype) expression.Reference.AddError("illegal statement");
                             return null;
                     }
-                    if(word.GetCharAt(0) != ';')
+                    if (word.GetCharAt(0) != ';')
                     {
                         word.AddError("; expected");
                     }
@@ -405,7 +405,7 @@ namespace pluginVerilog.Verilog.Statements
             }
         }
 
-        private static async Task<IStatement> ParseUniquePriority(WordScanner word, NameSpace nameSpace,string? statement_label)
+        private static async Task<IStatement> ParseUniquePriority(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             switch (word.Text)
             {
@@ -429,7 +429,7 @@ namespace pluginVerilog.Verilog.Statements
             {
                 // conditional_statement 
                 case "if":
-                    return await ConditionalStatement.ParseCreate(word, nameSpace,statement_label);
+                    return await ConditionalStatement.ParseCreate(word, nameSpace, statement_label);
 
                 // case_statement 
                 case "case":
@@ -455,7 +455,7 @@ namespace pluginVerilog.Verilog.Statements
 
         public static async Task<IStatement?> ParseCreateStatementOrNull(WordScanner word, NameSpace nameSpace, List<string>? clockDomains = null)
         {
-            if(word.GetCharAt(0) == ';')
+            if (word.GetCharAt(0) == ';')
             {
                 word.MoveNext();
                 return null;
@@ -466,7 +466,7 @@ namespace pluginVerilog.Verilog.Statements
 
         public static async Task<IStatement?> ParseCreateFunctionStatement(WordScanner word, NameSpace nameSpace)
         {
-            return await ParseCreateStatement(word,nameSpace);
+            return await ParseCreateStatement(word, nameSpace);
         }
     }
 

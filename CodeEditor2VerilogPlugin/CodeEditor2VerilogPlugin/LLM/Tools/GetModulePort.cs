@@ -1,17 +1,14 @@
-using Avalonia.Controls.Documents;
 using CodeEditor2.LLM.Tools;
 using Microsoft.Extensions.AI;
 using pluginVerilog.Verilog.BuildingBlocks;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.LLM.Tools
 {
-    public class GetModulePort:LLMTool
+    public class GetModulePort : LLMTool
     {
         public GetModulePort(CodeEditor2.Data.Project project) : base(project) { }
         public override AIFunction GetAIFunction() { return AIFunctionFactory.Create(Run, "get_module_definition"); }

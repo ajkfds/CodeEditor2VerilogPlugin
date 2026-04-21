@@ -1,16 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace pluginVerilog.Verilog.DataObjects.Arrays
 {
     public class PackedArray : IArray
     {
         public bool Constant { get; protected set; } = false;
 
-        protected  PackedArray()
+        protected PackedArray()
         {
         }
         public bool IsValidForNet { get { return true; } }

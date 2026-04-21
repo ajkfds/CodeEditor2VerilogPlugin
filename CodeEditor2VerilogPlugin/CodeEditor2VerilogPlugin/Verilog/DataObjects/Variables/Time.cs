@@ -1,9 +1,4 @@
 using pluginVerilog.Verilog.DataObjects.DataTypes;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
@@ -11,7 +6,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected Time() { }
 
-        public static new Time Create(string name,IDataType dataType)
+        public static new Time Create(string name, IDataType dataType)
         {
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.Time);
             DataTypes.IntegerAtomType dType = dataType as DataTypes.IntegerAtomType;

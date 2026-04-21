@@ -1,9 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
+using System;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
@@ -11,9 +7,9 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected Logic() { }
 
- //       public override CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Variable;
+        //       public override CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Variable;
 
-        public static new Logic Create(string name,IDataType dataType)
+        public static new Logic Create(string name, IDataType dataType)
         {
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.Logic);
             DataTypes.IntegerVectorType? dType = dataType as DataTypes.IntegerVectorType;

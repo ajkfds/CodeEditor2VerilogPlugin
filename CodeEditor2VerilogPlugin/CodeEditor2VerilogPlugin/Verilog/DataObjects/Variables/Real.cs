@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CodeEditor2.CodeEditor.CodeComplete;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
@@ -12,7 +6,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected Real() { }
 
-        public static new Real Create(string name,IDataType dataType)
+        public static new Real Create(string name, IDataType dataType)
         {
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.Real);
 

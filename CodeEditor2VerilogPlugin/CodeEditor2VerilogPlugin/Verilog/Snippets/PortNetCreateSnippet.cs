@@ -1,17 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Text;
-using System.Threading.Tasks;
 using CodeEditor2.CodeEditor;
 using CodeEditor2.CodeEditor.PopupMenu;
-using CodeEditor2.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
-using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.DataObjects.Nets;
 using pluginVerilog.Verilog.ModuleItems;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace pluginVerilog.Verilog.Snippets
 {
@@ -54,7 +49,7 @@ namespace pluginVerilog.Verilog.Snippets
                 if (moduleInstantiation == null) continue;
 
                 if (iref.IsSmallerThan(moduleInstantiation.BeginIndexReference)) continue;
-                if (moduleInstantiation.LastIndexReference==null || iref.IsGreaterThan(moduleInstantiation.LastIndexReference)) continue;
+                if (moduleInstantiation.LastIndexReference == null || iref.IsGreaterThan(moduleInstantiation.LastIndexReference)) continue;
 
                 await writeModuleInstanceAsync(codeDocument, index, moduleInstantiation);
                 return;
@@ -78,7 +73,7 @@ namespace pluginVerilog.Verilog.Snippets
                 moduleInstantiation.BeginIndexReference.Indexes.Last(),
                 moduleInstantiation.LastIndexReference.Indexes.Last() - moduleInstantiation.BeginIndexReference.Indexes.Last() + 1,
                 0,
-                CreateString(moduleInstantiation,"\t",projectProperty)
+                CreateString(moduleInstantiation, "\t", projectProperty)
                 );
             CodeEditor2.Controller.CodeEditor.SetSelection(codeDocument.CaretIndex, codeDocument.CaretIndex);
             CodeEditor2.Controller.CodeEditor.RequestReparsePost();
@@ -86,10 +81,10 @@ namespace pluginVerilog.Verilog.Snippets
 
         public List<string> RemoveSuffixList = new List<string> { "_I", "_O", "_IO" };
 
-        private string CreateString(ModuleInstantiation moduleInstantiation,string indent, ProjectProperty projectProperty)
+        private string CreateString(ModuleInstantiation moduleInstantiation, string indent, ProjectProperty projectProperty)
         {
             Module? instancedModule = moduleInstantiation.GetInstancedBuildingBlock() as Module;
-//            Module? instancedModule = projectProperty.GetBuildingBlock(moduleInstantiation.SourceName) as Module;
+            //            Module? instancedModule = projectProperty.GetBuildingBlock(moduleInstantiation.SourceName) as Module;
             if (instancedModule == null) return "";
             StringBuilder sbDefine = new StringBuilder();
 
@@ -168,9 +163,9 @@ namespace pluginVerilog.Verilog.Snippets
                 else
                 {
                     string portName = port.Name;
-                    foreach(string removeSuffix in RemoveSuffixList)
+                    foreach (string removeSuffix in RemoveSuffixList)
                     {
-                        if(portName.EndsWith(removeSuffix, StringComparison.OrdinalIgnoreCase))
+                        if (portName.EndsWith(removeSuffix, StringComparison.OrdinalIgnoreCase))
                         {
                             portName = portName.Substring(0, portName.Length - removeSuffix.Length);
                         }
@@ -180,22 +175,23 @@ namespace pluginVerilog.Verilog.Snippets
                     sb.Append(valueName);
 
                     BuildingBlock? buildingBlock = moduleInstantiation.GetInstancedBuildingBlock();
-                    if(buildingBlock != null && !buildingBlock.NamedElements.ContainsKey(valueName)){
+                    if (buildingBlock != null && !buildingBlock.NamedElements.ContainsKey(valueName))
+                    {
 
 
-                        if(port.DataObject != null)
+                        if (port.DataObject != null)
                         {
-                            if(port.DataObject is DataObjects.Nets.Net)
+                            if (port.DataObject is DataObjects.Nets.Net)
                             {
                                 DataObjects.Nets.Net net = (DataObjects.Nets.Net)port.DataObject;
-                                DataObjects.Nets.Net newNet = DataObjects.Nets.Net.Create(valueName,Net.NetTypeEnum.Wire,port.DataObject.DataType.Clone());
+                                DataObjects.Nets.Net newNet = DataObjects.Nets.Net.Create(valueName, Net.NetTypeEnum.Wire, port.DataObject.DataType.Clone());
                                 sbDefine.Append(newNet.CreateTypeString());
                             }
-                            else if(port.DataObject is DataObjects.Variables.IntegerVectorValueVariable)
+                            else if (port.DataObject is DataObjects.Variables.IntegerVectorValueVariable)
                             {
                                 DataObjects.Variables.IntegerVectorValueVariable vector = (DataObjects.Variables.IntegerVectorValueVariable)port.DataObject;
-                                DataObjects.Nets.Net newNet = DataObjects.Nets.Net.Create(valueName, Net.NetTypeEnum.Wire, DataObjects.DataTypes.LogicType.Create(false,null));
-                                foreach(var dimension in vector.PackedDimensions)
+                                DataObjects.Nets.Net newNet = DataObjects.Nets.Net.Create(valueName, Net.NetTypeEnum.Wire, DataObjects.DataTypes.LogicType.Create(false, null));
+                                foreach (var dimension in vector.PackedDimensions)
                                 {
                                     newNet.PackedDimensions.Add(dimension.Clone());
                                 }

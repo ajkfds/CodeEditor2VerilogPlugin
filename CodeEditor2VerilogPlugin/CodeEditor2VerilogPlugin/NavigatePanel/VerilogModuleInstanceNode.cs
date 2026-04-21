@@ -1,16 +1,8 @@
 using Avalonia.Controls;
-using Avalonia.Media;
 using Avalonia.Threading;
-using CodeEditor2.NavigatePanel;
-using pluginVerilog.Verilog.BuildingBlocks;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Security.AccessControl;
-using System.Text;
 using System.Threading.Tasks;
-using YamlDotNet.Serialization;
 
 namespace pluginVerilog.NavigatePanel
 {
@@ -42,10 +34,10 @@ namespace pluginVerilog.NavigatePanel
 
         public Data.IVerilogRelatedFile? VerilogRelatedFile
         {
-            get 
+            get
             {
                 if (Item == null) return null;
-                return (Data.IVerilogRelatedFile)Item; 
+                return (Data.IVerilogRelatedFile)Item;
             }
         }
         public CodeEditor2.Data.ITextFile? ITextFile
@@ -82,7 +74,7 @@ namespace pluginVerilog.NavigatePanel
         private volatile bool onSelecting = false;
         public override async void OnSelected()
         {
-            if(onSelecting) return;
+            if (onSelecting) return;
             onSelecting = true;
             try
             {
@@ -224,7 +216,7 @@ namespace pluginVerilog.NavigatePanel
 
             if (VerilogFile == null) return;
 
-            if(VerilogModuleInstance != null) Image = VerilogFileNode.GetIcon(VerilogModuleInstance);
+            if (VerilogModuleInstance != null) Image = VerilogFileNode.GetIcon(VerilogModuleInstance);
 
             UpdateSubNodes();
         }

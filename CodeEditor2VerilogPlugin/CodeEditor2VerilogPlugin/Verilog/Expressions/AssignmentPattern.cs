@@ -1,9 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static pluginVerilog.Verilog.Expressions.AssignmentPatternWithKeys;
 
 namespace pluginVerilog.Verilog.Expressions
 {
@@ -47,10 +43,10 @@ namespace pluginVerilog.Verilog.Expressions
             }
 
 
-                while (word.Text != "}" & !word.Eof)
-                {
-                    word.MoveNext();
-                }
+            while (word.Text != "}" & !word.Eof)
+            {
+                word.MoveNext();
+            }
             if (word.Text != "}")
             {
                 word.AddError("illegal assignment pattern");
@@ -78,7 +74,7 @@ namespace pluginVerilog.Verilog.Expressions
             while (!word.Eof)
             {
                 if (word.NextText != ":") break;
-                var item = new KeyExpressionPair() { Key = word.Text,KeyReference= word.CrateWordReference() };
+                var item = new KeyExpressionPair() { Key = word.Text, KeyReference = word.CrateWordReference() };
                 if (word.Text == "default") word.Color(CodeDrawStyle.ColorType.Keyword);
                 word.MoveNext();
 

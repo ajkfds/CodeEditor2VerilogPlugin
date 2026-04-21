@@ -1,10 +1,3 @@
-using CodeEditor2.CodeEditor.CodeComplete;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace pluginVerilog.Verilog.Statements
 {
     public static class ProceduralAssertionStatement
@@ -65,7 +58,7 @@ namespace pluginVerilog.Verilog.Statements
                     if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
                     return null;
             }
-            
+
 
             if (word.NextText == "property")
             { // concurrent assertion

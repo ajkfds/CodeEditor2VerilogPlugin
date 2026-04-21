@@ -1,18 +1,11 @@
-using Avalonia.Input;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.Arrays;
-using pluginVerilog.Verilog.DataObjects.Constants;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.DataObjects.Nets;
 using pluginVerilog.Verilog.DataObjects.Variables;
-using ReactiveUI;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Runtime.InteropServices.ComTypes;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Expressions
 {
@@ -230,22 +223,22 @@ namespace pluginVerilog.Verilog.Expressions
                     }
                     else
                     {
-                        if(rangeExpression is AbsoluteRangeExpression)
+                        if (rangeExpression is AbsoluteRangeExpression)
                         {
                             AbsoluteRangeExpression absoluteRangeExpression = (AbsoluteRangeExpression)rangeExpression;
                             UnPackedArray oldArray = val.UnpackedArrays[unpackedArrayIndex];
                             if (!word.Prototype)
                             {
-                                if(
+                                if (
                                     absoluteRangeExpression.MaxBitIndex != null && absoluteRangeExpression.MinBitIndex != null &&
                                     oldArray.MinIndex != null && oldArray.MaxIndex != null
                                     )
                                 {
-                                    if(
+                                    if (
                                         absoluteRangeExpression.MaxBitIndex < oldArray.MinIndex ||
                                         absoluteRangeExpression.MaxBitIndex > oldArray.MaxIndex ||
                                         absoluteRangeExpression.MinBitIndex < oldArray.MinIndex ||
-                                        absoluteRangeExpression.MinBitIndex > oldArray.MaxIndex 
+                                        absoluteRangeExpression.MinBitIndex > oldArray.MaxIndex
                                         )
                                     {
                                         absoluteRangeExpression.WordReference.AddError("index out of range");
@@ -355,12 +348,12 @@ namespace pluginVerilog.Verilog.Expressions
                 }
                 else if (originalDataObject is DataObjects.Constants.Parameter)
                 {
-//                    var constants = (DataObjects.Constants.Parameter)originalDataObject;
-//                    if (constants.Expression != null)
-//                    {
-//                        val.Value = constants.Expression.Value;
-////                        val.BitWidth = constants.Expression.BitWidth;
-//                    }
+                    //                    var constants = (DataObjects.Constants.Parameter)originalDataObject;
+                    //                    if (constants.Expression != null)
+                    //                    {
+                    //                        val.Value = constants.Expression.Value;
+                    ////                        val.BitWidth = constants.Expression.BitWidth;
+                    //                    }
                 }
                 else if (originalDataObject is Net)
                 {
@@ -379,7 +372,7 @@ namespace pluginVerilog.Verilog.Expressions
             }
             if (assigned)
             {
-                if(!partial) originalObject.AssignedReferences.Add(val.Reference);
+                if (!partial) originalObject.AssignedReferences.Add(val.Reference);
             }
             else
             {

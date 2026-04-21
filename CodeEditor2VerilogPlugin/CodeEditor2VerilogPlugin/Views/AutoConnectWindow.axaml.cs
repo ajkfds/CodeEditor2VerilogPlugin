@@ -3,25 +3,15 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
-using Avalonia.Layout;
 using Avalonia.Media;
-using Avalonia.Styling;
-using CodeEditor2.CodeEditor.PopupMenu;
-using CodeEditor2.Data;
-using DynamicData;
 using ExCSS;
-using pluginVerilog.Data;
 using pluginVerilog.Verilog;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.ModuleItems;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
-using System.Linq.Expressions;
-using Tmds.DBus.Protocol;
 using static pluginVerilog.CodeDrawStyle;
 using static pluginVerilog.Verilog.ModPort;
 
@@ -46,7 +36,7 @@ namespace pluginVerilog.Views
             CodeEditor2.Tools.VerticalGridConstructor gridConstructor = new CodeEditor2.Tools.VerticalGridConstructor();
             Content = gridConstructor.Grid;
 
-            gridConstructor.AppendContol(HeaderTextBlock,(int)FontSize);
+            gridConstructor.AppendContol(HeaderTextBlock, (int)FontSize);
 
             ListBox0.SetValue(ScrollViewer.VerticalScrollBarVisibilityProperty, ScrollBarVisibility.Auto);
             gridConstructor.AppendContolFill(ListBox0);
@@ -85,11 +75,11 @@ namespace pluginVerilog.Views
                 ConnectionItem item;
                 if (!moduleInstantiation.PortConnection.ContainsKey(port.Name))
                 {
-                    item = new ConnectionItem(port, null,instanedBuildingBlock,buildingBlock);
+                    item = new ConnectionItem(port, null, instanedBuildingBlock, buildingBlock);
                 }
                 else
                 {
-                    item = new ConnectionItem(port, moduleInstantiation.PortConnection[port.Name],instanedBuildingBlock, buildingBlock);
+                    item = new ConnectionItem(port, moduleInstantiation.PortConnection[port.Name], instanedBuildingBlock, buildingBlock);
                 }
                 item.FontSize = FontSize;
                 ListBox0.Items.Add(item);
@@ -100,7 +90,7 @@ namespace pluginVerilog.Views
                RoutingStrategies.Tunnel | RoutingStrategies.Bubble,
                handledEventsToo: true);
 
-            if(ListBox0.Items.Count > 0)
+            if (ListBox0.Items.Count > 0)
             {
                 ListBox0.SelectedIndex = 0;
             }
@@ -125,7 +115,7 @@ namespace pluginVerilog.Views
             Accept = true;
 
 
-            foreach(var item in ListBox0.Items)
+            foreach (var item in ListBox0.Items)
             {
                 ConnectionItem? citem = item as ConnectionItem;
                 if (citem == null) continue;
@@ -136,7 +126,7 @@ namespace pluginVerilog.Views
                 }
                 else
                 {
-                    moduleInstantiation.PortConnection.Add(citem.Port.Name,Verilog.Expressions.Expression.CreateTempExpression(citem.target.CreateString()));
+                    moduleInstantiation.PortConnection.Add(citem.Port.Name, Verilog.Expressions.Expression.CreateTempExpression(citem.target.CreateString()));
                 }
             }
             Close();
@@ -167,7 +157,7 @@ namespace pluginVerilog.Views
                 return;
             }
 
-            if(e.Key == Avalonia.Input.Key.Left || e.Key == Avalonia.Input.Key.Space)
+            if (e.Key == Avalonia.Input.Key.Left || e.Key == Avalonia.Input.Key.Space)
             {
                 connection.Accept();
             }
@@ -184,7 +174,7 @@ namespace pluginVerilog.Views
 
         private void moveDownWard()
         {
-            if(ListBox0.SelectedIndex < ListBox0.Items.Count - 1)
+            if (ListBox0.SelectedIndex < ListBox0.Items.Count - 1)
                 ListBox0.SelectedIndex++;
         }
 
@@ -209,7 +199,7 @@ namespace pluginVerilog.Views
         }
         public class ConnectionItem : AjkAvaloniaLibs.Controls.ListViewItem
         {
-            public ConnectionItem(Verilog.DataObjects.Port port, Verilog.Expressions.Expression? expression,BuildingBlock instanceBuildingBlock,BuildingBlock buildingBlock) : base()
+            public ConnectionItem(Verilog.DataObjects.Port port, Verilog.Expressions.Expression? expression, BuildingBlock instanceBuildingBlock, BuildingBlock buildingBlock) : base()
             {
                 this.Port = port;
                 this.Expression = expression;
@@ -260,23 +250,24 @@ namespace pluginVerilog.Views
             private List<ColorLabel> GetCantidates()
             {
                 List<(int, ColorLabel)> cantidates = new List<(int, ColorLabel)>();
-                
-                foreach(var namedElement in BuildingBlock.NamedElements)
+
+                foreach (var namedElement in BuildingBlock.NamedElements)
                 {
                     string portName = Port.Name;
 
-                    if (namedElement.Name.ToLower() == portName.ToLower()) {
+                    if (namedElement.Name.ToLower() == portName.ToLower())
+                    {
                         ColorLabel label = new ColorLabel();
                         label.AppendText(namedElement.Name, Avalonia.Media.Colors.Red);
                         cantidates.Add((0, label));
                         continue;
                     }
 
-                    foreach(string removePortSuffix in removePortSuffixs)
+                    foreach (string removePortSuffix in removePortSuffixs)
                     {
                         if (Port.Name.EndsWith(removePortSuffix))
                         {
-                            portName = Port.Name.Substring(0,Port.Name.Length - removePortSuffix.Length);
+                            portName = Port.Name.Substring(0, Port.Name.Length - removePortSuffix.Length);
 
                             if (namedElement.Name.ToLower() == portName.ToLower())
                             {

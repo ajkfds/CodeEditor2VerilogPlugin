@@ -1,9 +1,5 @@
 using pluginVerilog.Verilog.BuildingBlocks;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog
 {
@@ -73,7 +69,7 @@ namespace pluginVerilog.Verilog
                         }
                     }
 
-                    if(General.IsSimpleIdentifier(paramName) && expression != null)
+                    if (General.IsSimpleIdentifier(paramName) && expression != null)
                     {
                         if (expression != null) parameterOverrides.Add(paramName, expression);
                     }

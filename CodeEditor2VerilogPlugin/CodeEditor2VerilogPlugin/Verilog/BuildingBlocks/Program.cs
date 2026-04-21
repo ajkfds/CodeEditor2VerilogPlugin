@@ -1,11 +1,9 @@
+using CodeEditor2.CodeEditor.CodeComplete;
+using pluginVerilog.Verilog.ModuleItems;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using CodeEditor2.CodeEditor.CodeComplete;
-using pluginVerilog.Verilog.ModuleItems;
-using ReactiveUI;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
@@ -307,7 +305,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                             }
 
                             program.NamedElements.Remove(vkp.Key);
-                            DataObjects.Constants.Parameter param = new DataObjects.Constants.Parameter() { Name = vkp.Key, DefinedReference = vkp.Value.Reference, Expression=vkp.Value };
+                            DataObjects.Constants.Parameter param = new DataObjects.Constants.Parameter() { Name = vkp.Key, DefinedReference = vkp.Value.Reference, Expression = vkp.Value };
                             program.NamedElements.Add(param.Name, param);
                         }
                         else

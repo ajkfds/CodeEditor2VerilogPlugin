@@ -1,9 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using pluginVerilog.Verilog.DataObjects;
+using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Items
 {
@@ -28,13 +24,13 @@ namespace pluginVerilog.Verilog.Items
             | elaboration_system_task
         */
 
-        public static async Task<bool> Parse(WordScanner word,NameSpace nameSpace)
+        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
         {
 
 
 
             // module_or_generate_item_declaration
-            if (await ModuleOrGenerateItemDeclaration.Parse(word, nameSpace.BuildingBlock )) return true;
+            if (await ModuleOrGenerateItemDeclaration.Parse(word, nameSpace.BuildingBlock)) return true;
             //assertion_item::= concurrent_assertion_item | deferred_immediate_assertion_item
 
             switch (word.Text)

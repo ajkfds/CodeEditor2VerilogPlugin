@@ -1,13 +1,8 @@
 using CodeEditor2.CodeEditor.CodeComplete;
-using pluginVerilog.Verilog.DataObjects.Arrays;
-using pluginVerilog.Verilog.DataObjects.DataTypes;
-using pluginVerilog.Verilog.DataObjects.Variables;
 using pluginVerilog.Verilog.ModuleItems;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
@@ -28,7 +23,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         public Dictionary<string, DataObjects.Port> Ports { get; } = new Dictionary<string, DataObjects.Port>();
         public List<DataObjects.Port> PortsList { get; } = new List<DataObjects.Port>();
 
-//        public Dictionary<string, ModPort> ModPorts { get; } = new Dictionary<string, ModPort>();
+        //        public Dictionary<string, ModPort> ModPorts { get; } = new Dictionary<string, ModPort>();
         //        public WordReference NameReference;
         //        public List<string> PortParameterNameList { get; } = new List<string>();
 
@@ -66,7 +61,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
         public static async System.Threading.Tasks.Task<Interface> Create(WordScanner word, NameSpace nameSpace, Attribute? attribute, BuildingBlock parent, Data.IVerilogRelatedFile file, bool protoType)
         {
-            return await Create(word,nameSpace, null, attribute, parent, file, protoType);
+            return await Create(word, nameSpace, null, attribute, parent, file, protoType);
         }
         public static async System.Threading.Tasks.Task<Interface> Create(
             WordScanner word,
@@ -99,7 +94,8 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             word.MoveNext();
 
             // indentifier
-            Interface interface_ = new Interface() {
+            Interface interface_ = new Interface()
+            {
                 BeginIndexReference = beginReference,
                 Name = word.Text,
                 Parent = parent,
@@ -185,13 +181,13 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
                 if (interface_.Parent.NamedElements.ContainsKey(interface_.Name))
                 {
-                    if(protoType)
+                    if (protoType)
                     {
                         word.AddError("duplicate interface");
                     }
                     else
                     {
-                        interface_.Parent.NamedElements .Replace(interface_.Name,interface_);
+                        interface_.Parent.NamedElements.Replace(interface_.Name, interface_);
                     }
 
                 }

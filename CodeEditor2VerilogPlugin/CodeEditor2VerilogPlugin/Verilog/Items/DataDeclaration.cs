@@ -1,8 +1,3 @@
-using pluginVerilog.Verilog.DataObjects.Nets;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Items
@@ -30,7 +25,7 @@ namespace pluginVerilog.Verilog.Items
             }
 
             // package_import_declaration
-            if(word.Text== "import")
+            if (word.Text == "import")
             {
                 PackageImportDeclaration.Parse(word, nameSpace);
                 return true;

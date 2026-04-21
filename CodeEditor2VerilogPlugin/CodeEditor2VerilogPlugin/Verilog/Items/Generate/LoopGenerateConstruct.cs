@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace pluginVerilog.Verilog.Items.Generate
 {
     public class LoopGenerateConstruct
@@ -40,7 +34,7 @@ namespace pluginVerilog.Verilog.Items.Generate
             }
             word.MoveNext();
 
-            if (! GenvarInitialization.Parse(word, module))
+            if (!GenvarInitialization.Parse(word, module))
             {
                 return true;
             }

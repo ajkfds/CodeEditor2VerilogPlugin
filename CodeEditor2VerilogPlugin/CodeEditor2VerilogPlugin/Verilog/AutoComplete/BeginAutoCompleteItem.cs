@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using CodeEditor2.CodeEditor.CodeComplete;
 
 namespace pluginVerilog.Verilog.AutoComplete
@@ -47,7 +42,7 @@ namespace pluginVerilog.Verilog.AutoComplete
 
             document.Replace(headIndex, length, ColorIndex, appendText);
             CodeEditor2.Controller.CodeEditor.SetCaretPosition(headIndex + selectStart);
-            CodeEditor2.Controller.CodeEditor.SetSelection(headIndex + selectStart, headIndex + selectLast-1);
+            CodeEditor2.Controller.CodeEditor.SetSelection(headIndex + selectStart, headIndex + selectLast - 1);
             return System.Threading.Tasks.Task.CompletedTask;
         }
     }

@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.Arrays
 {
@@ -85,7 +81,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
 
             return null;
         }
-        public UnPackedArray(Expressions.Expression widthExpression) 
+        public UnPackedArray(Expressions.Expression widthExpression)
         {
             if (widthExpression == null) return;
 
@@ -93,7 +89,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
             if (!SizeExpression0.Constant) return;
 
             double? width = widthExpression.Value;
-            if(width != null)
+            if (width != null)
             {
                 Size = (int)width;
                 MinIndex = 0;
@@ -108,7 +104,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
             MaxIndex = Size - 1;
         }
 
-        public UnPackedArray(Expressions.Expression expression0, Expressions.Expression expression1) 
+        public UnPackedArray(Expressions.Expression expression0, Expressions.Expression expression1)
         {
             if (expression0 == null || expression1 == null) return;
 
@@ -119,7 +115,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
             double? max = expression0.Value;
             double? min = expression1.Value;
             if (max == null || min == null) return;
-            
+
             if (min > max)
             {
                 double? temp = max;
@@ -143,7 +139,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
             StringBuilder sb = new StringBuilder();
             sb.Append("[");
             sb.Append(SizeExpression0.CreateString());
-            if(SizeExpression1 != null)
+            if (SizeExpression1 != null)
             {
                 sb.Append(":");
                 sb.Append(SizeExpression1.CreateString());
@@ -154,7 +150,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
 
         public UnPackedArray Clone()
         {
-            UnPackedArray unPackedArray = new UnPackedArray() { SizeExpression0 = SizeExpression0, SizeExpression1 = SizeExpression1, MinIndex = MinIndex, MaxIndex = MaxIndex,Size = Size };
+            UnPackedArray unPackedArray = new UnPackedArray() { SizeExpression0 = SizeExpression0, SizeExpression1 = SizeExpression1, MinIndex = MinIndex, MaxIndex = MaxIndex, Size = Size };
             return unPackedArray;
         }
 
@@ -182,7 +178,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
             if (indexExpression.Value == null) return false;
             int index = (int)indexExpression.Value;
 
-            if ( MaxIndex != null && index > MaxIndex) return true;
+            if (MaxIndex != null && index > MaxIndex) return true;
             if (MinIndex != null && index < MinIndex) return true;
             return false;
         }

@@ -1,14 +1,8 @@
-using Avalonia.Controls;
 using CodeEditor2.CodeEditor.CodeComplete;
-using Microsoft.Extensions.Logging.Abstractions;
-using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.Expressions;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Statements
 {
@@ -52,9 +46,9 @@ namespace pluginVerilog.Verilog.Statements
             LValue.DisposeSubReference(true);
             Expression.DisposeSubReference(true);
         }
-        public static NonBlockingAssignment? ParseCreate(WordScanner word,NameSpace nameSpace,Expressions.Expression lExpression, List<string>? clockDomains = null)
+        public static NonBlockingAssignment? ParseCreate(WordScanner word, NameSpace nameSpace, Expressions.Expression lExpression, List<string>? clockDomains = null)
         {
-            if(word.Text != "<=")
+            if (word.Text != "<=")
             {
                 System.Diagnostics.Debugger.Break();
                 return null;
@@ -72,9 +66,9 @@ namespace pluginVerilog.Verilog.Statements
 
             Expressions.Expression? expression;
 
-            if(word.Text == "'" && word.NextText == "{")
+            if (word.Text == "'" && word.NextText == "{")
             {
-                expression = Expressions.AssignmentPattern.ParseCreate(word, nameSpace,false);
+                expression = Expressions.AssignmentPattern.ParseCreate(word, nameSpace, false);
             }
             else
             {
@@ -88,10 +82,11 @@ namespace pluginVerilog.Verilog.Statements
                 return null;
             }
 
-            if (!word.Prototype) {
-                if(
-                    lExpression != null && 
-                    lExpression.BitWidth != null && 
+            if (!word.Prototype)
+            {
+                if (
+                    lExpression != null &&
+                    lExpression.BitWidth != null &&
                     expression.BitWidth != null &&
                     lExpression.BitWidth != expression.BitWidth
                     )
@@ -114,7 +109,7 @@ namespace pluginVerilog.Verilog.Statements
                 lExpression.AppendRefrencedDataObjects(dataObjects);
                 lExpression.AssertAssigned();
 
-                foreach(DataObject dataObject in dataObjects)
+                foreach (DataObject dataObject in dataObjects)
                 {
                     DataObject? targetDataObject = nameSpace.GetNamedElementUpward(dataObject.Name) as DataObject;
                     if (targetDataObject == null) continue;
@@ -122,7 +117,7 @@ namespace pluginVerilog.Verilog.Statements
                     foreach (string clockDomain in clockDomains)
                     {
                         INamedElement? namedElemect = nameSpace.GetNamedElementUpward(clockDomain);
-                        if(namedElemect is DataObject clkObject)
+                        if (namedElemect is DataObject clkObject)
                         {
                             if (clkObject.SyncContext.IsReset) continue;
                         }
@@ -182,7 +177,7 @@ namespace pluginVerilog.Verilog.Statements
         public static BlockingAssignedAction? Assigned;
         public static BlockingAssignment? ParseCreate(WordScanner word, NameSpace nameSpace, Expressions.Expression lExpression)
         {
-            switch(word.Text)
+            switch (word.Text)
             {
                 case "=":
                 case "+=":
@@ -217,14 +212,14 @@ namespace pluginVerilog.Verilog.Statements
 
             if (word.Text == "new")
             {
-                return parseCreateClassNewAssignment(word, nameSpace,lExpression);
+                return parseCreateClassNewAssignment(word, nameSpace, lExpression);
             }
 
             // delay or event control
 
             Expressions.Expression? expression;
 
-            if (word.Text=="'" && word.NextText == "{")
+            if (word.Text == "'" && word.NextText == "{")
             {
                 Expressions.AssignmentPattern assignmentPattern = Expressions.AssignmentPattern.ParseCreate(word, nameSpace, false) as Expressions.AssignmentPattern;
                 BlockingAssignment assignment = new BlockingAssignment();
@@ -239,7 +234,7 @@ namespace pluginVerilog.Verilog.Statements
                 {
                     // classname :: new ();
                     BlockingAssignment? assignment = parseCreateClassNewAssignment(word, nameSpace, lExpression);
-                    if(assignment != null) return assignment;
+                    if (assignment != null) return assignment;
 
                     word.AddError("illegal expression");
                     word.SkipToKeyword(";");
@@ -267,11 +262,12 @@ namespace pluginVerilog.Verilog.Statements
                 }
             }
 
-            if (!word.Prototype && lExpression != null && expression != null) {
+            if (!word.Prototype && lExpression != null && expression != null)
+            {
                 lExpression.SyncContext.PropageteClockDomainFrom(expression.SyncContext, equalPointer);
             }
 
-            if(lExpression!= null)
+            if (lExpression != null)
             {
                 BlockingAssignment assignment = new BlockingAssignment();
                 assignment.LValue = lExpression;
@@ -291,11 +287,11 @@ namespace pluginVerilog.Verilog.Statements
             // dynamic_array_new ::= "new" [ expression ] [ ( expression ) ]
 
             BuildingBlocks.Class? class_ = word.ProjectProperty.GetBuildingBlock(word.Text) as BuildingBlocks.Class;
-            if(class_ != null)
+            if (class_ != null)
             {
                 word.Color(CodeDrawStyle.ColorType.Identifier);
                 word.MoveNext();
-                if(word.Text != "::")
+                if (word.Text != "::")
                 {
                     word.AddError(":: required");
                     return null;
@@ -304,10 +300,10 @@ namespace pluginVerilog.Verilog.Statements
             }
             else
             {
-                if(lExpression is Expressions.DataObjectReference)
+                if (lExpression is Expressions.DataObjectReference)
                 {
                     Expressions.DataObjectReference dref = (Expressions.DataObjectReference)lExpression;
-                    if(dref.TargetDataObject is DataObjects.Variables.Object)
+                    if (dref.TargetDataObject is DataObjects.Variables.Object)
                     {
                         DataObjects.Variables.Object? obj = (DataObjects.Variables.Object)dref.TargetDataObject;
                         class_ = obj.Class;
@@ -322,7 +318,7 @@ namespace pluginVerilog.Verilog.Statements
             if (word.Text == "(")
             {
                 word.MoveNext();
-                while(word.Text!=")" && !word.Eof)
+                while (word.Text != ")" && !word.Eof)
                 {
                     Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
                     if (expression == null) break;
@@ -339,7 +335,7 @@ namespace pluginVerilog.Verilog.Statements
             else
             {
                 Expressions.Expression? exp = Expressions.Expression.ParseCreate(word, nameSpace);
-                if(exp != null)
+                if (exp != null)
                 {
                     // shallow clone
                 }

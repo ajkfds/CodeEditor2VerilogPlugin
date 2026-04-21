@@ -1,12 +1,7 @@
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
-using pluginVerilog.Verilog.Expressions;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
@@ -29,7 +24,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             if (dataType.Type != DataTypeEnum.UserDefined) throw new Exception();
             UserDefinedType userDefinedType = (UserDefinedType)dataType;
 
-            UserDefinedVariable val = new UserDefinedVariable() { Name = name,UserDefinedType = userDefinedType };
+            UserDefinedVariable val = new UserDefinedVariable() { Name = name, UserDefinedType = userDefinedType };
             IDataType originalType = userDefinedType.OriginalDataType;
 
             val.DataType = dataType;

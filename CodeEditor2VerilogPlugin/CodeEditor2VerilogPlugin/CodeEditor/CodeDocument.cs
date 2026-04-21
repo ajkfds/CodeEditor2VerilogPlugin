@@ -1,23 +1,15 @@
-using Avalonia.Media;
-using AvaloniaEdit;
-using AvaloniaEdit.Document;
-using CodeEditor2.CodeEditor;
-using Microsoft.VisualBasic.FileIO;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.CodeEditor
 {
     public class CodeDocument : CodeEditor2.CodeEditor.CodeDocument
     {
-        public CodeDocument(Data.IVerilogRelatedFile file) :base(file as CodeEditor2.Data.TextFile) 
-        { 
+        public CodeDocument(Data.IVerilogRelatedFile file) : base(file as CodeEditor2.Data.TextFile)
+        {
         }
 
-        public CodeDocument(string text) : base(null,text)
+        public CodeDocument(string text) : base(null, text)
         {
         }
 
@@ -87,7 +79,7 @@ namespace pluginVerilog.CodeEditor
             {
                 int line = GetLineAt(index);
                 headIndex = GetLineStartIndex(line);
-    //            headIndex = index;
+                //            headIndex = index;
                 //length = 0;
                 //char ch = GetCharAt(index);
                 //if (ch == ' ' || ch == '\r' || ch == '\n' || ch == '\t') return;
@@ -107,17 +99,17 @@ namespace pluginVerilog.CodeEditor
                 int nextIndex;
                 Verilog.WordPointer.WordTypeEnum wordType;
                 string sectionName = "";
-                Verilog.WordPointer.FetchNext(this, ref headIndex, out length, out nextIndex, out wordType,ref sectionName);
+                Verilog.WordPointer.FetchNext(this, ref headIndex, out length, out nextIndex, out wordType, ref sectionName);
 
-                while(nextIndex <= index && index < Length)
+                while (nextIndex <= index && index < Length)
                 {
                     headIndex = nextIndex;
-                    Verilog.WordPointer.FetchNext(this, ref headIndex, out length, out nextIndex, out wordType,ref sectionName);
+                    Verilog.WordPointer.FetchNext(this, ref headIndex, out length, out nextIndex, out wordType, ref sectionName);
                 }
             }
         }
 
-        public List<string> GetHierWords(int index,out bool endWithDot)
+        public List<string> GetHierWords(int index, out bool endWithDot)
         {
             lock (this)
             {
@@ -144,7 +136,7 @@ namespace pluginVerilog.CodeEditor
                 // get words on the index line until index
                 while (headIndex < Length)
                 {
-                    Verilog.WordPointer.FetchNext(this, ref headIndex, out length, out nextIndex, out wordType,ref sectioName);
+                    Verilog.WordPointer.FetchNext(this, ref headIndex, out length, out nextIndex, out wordType, ref sectioName);
                     if (length == 0) break;
                     if (headIndex >= index) break;
                     ret.Add(CreateString(headIndex, length));
@@ -152,24 +144,24 @@ namespace pluginVerilog.CodeEditor
                 }
 
                 // search wors from end
-                int i= ret.Count - 1;
+                int i = ret.Count - 1;
                 if (i >= 0 && ret[i] != ".")
                 {
                     endWithDot = false;
                     i--; // skip last non . word
                 }
 
-                while (i>=0)
+                while (i >= 0)
                 {
                     if (ret[i] != ".") break; // end if not .
                     ret.RemoveAt(i);
                     i--;
 
-    //                if (i == 0) break;
+                    //                if (i == 0) break;
                     i--;
                 }
 
-                for(int j = 0; j <= i; j++) // remove before heir description
+                for (int j = 0; j <= i; j++) // remove before heir description
                 {
                     ret.RemoveAt(0);
                 }
@@ -188,7 +180,7 @@ namespace pluginVerilog.CodeEditor
                 int lineLength = GetLineLength(line);
 
                 int i = headIndex;
-                while( i < headIndex + lineLength)
+                while (i < headIndex + lineLength)
                 {
                     if (GetCharAt(i) != '\t' && GetCharAt(i) != ' ') break;
                     sb.Append(GetCharAt(i));

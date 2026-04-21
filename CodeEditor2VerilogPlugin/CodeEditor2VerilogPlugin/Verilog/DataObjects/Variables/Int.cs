@@ -1,11 +1,5 @@
-using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
-using pluginVerilog.Verilog.DataObjects.Nets;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
@@ -31,7 +25,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public override Variable Clone(string name)
         {
-            Int val = new Int() { Name = name,Defined= Defined };
+            Int val = new Int() { Name = name, Defined = Defined };
             val.DataType = DataType;
             val.Signed = Signed;
             foreach (var unpackedArray in UnpackedArrays)

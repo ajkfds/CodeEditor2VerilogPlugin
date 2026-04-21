@@ -1,20 +1,12 @@
 using Avalonia.Threading;
-using CodeEditor2.CodeEditor;
 using CodeEditor2.Data;
-using CodeEditor2.FileTypes;
 using pluginVerilog.Data;
-using pluginVerilog.FileTypes;
-using pluginVerilog.Verilog.Statements;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace pluginVerilog.Tool
 {
@@ -32,8 +24,9 @@ namespace pluginVerilog.Tool
         public static void PostParseAsync(CodeEditor2.Data.TextFile textFile, ParseMode parseMode)
         {
             Dispatcher.UIThread.Post(
-                async () => { 
-                    await ParseAsync(textFile, parseMode);  
+                async () =>
+                {
+                    await ParseAsync(textFile, parseMode);
                 });
         }
 
@@ -113,7 +106,7 @@ namespace pluginVerilog.Tool
             firstHierTaskCount.Append(true);
             EnqueueWork(task, workQueue, completeIds, signal);
 
-            for(int i=0; i<workerCount; i++)
+            for (int i = 0; i < workerCount; i++)
             { // pend reparse first task
                 firstHierTaskCount.Append(false);
             }
@@ -128,9 +121,9 @@ namespace pluginVerilog.Tool
                     while (true)
                     {
                         token?.ThrowIfCancellationRequested();
-                        if(await signal.WaitAsync(TimeSpan.FromMicroseconds(500)))
+                        if (await signal.WaitAsync(TimeSpan.FromMicroseconds(500)))
                         {
-                            if(workQueue.TryDequeue(out var newTask))
+                            if (workQueue.TryDequeue(out var newTask))
                             {
                                 Interlocked.Increment(ref activeTaskCount);
 
@@ -146,12 +139,13 @@ namespace pluginVerilog.Tool
                                 }
 
                                 var currentCount = Interlocked.Decrement(ref activeTaskCount);
-                                if(currentCount == 0 && workQueue.IsEmpty)
+                                if (currentCount == 0 && workQueue.IsEmpty)
                                 {
                                     break;
                                 }
                             }
-                        }else if(activeTaskCount == 0 && workQueue.IsEmpty)
+                        }
+                        else if (activeTaskCount == 0 && workQueue.IsEmpty)
                         {
                             break;
                         }
@@ -201,7 +195,7 @@ namespace pluginVerilog.Tool
             signal.Release(); // start worker
         }
         private static async Task parseTextFile(
-            int index, 
+            int index,
             ParseTask task,
             ConcurrentStack<CodeEditor2.Data.TextFile> reparseTargetFiles,
             ConcurrentQueue<ParseTask> workQueue,
@@ -244,17 +238,17 @@ namespace pluginVerilog.Tool
 
                 if (parseMode == ParseMode.ForceAllFiles)
                 {
-                    CodeEditor2.Controller.AppendLog("parseHier "+index.ToString()+" : " + verilogFile.ID, Avalonia.Media.Colors.Cyan);
+                    CodeEditor2.Controller.AppendLog("parseHier " + index.ToString() + " : " + verilogFile.ID, Avalonia.Media.Colors.Cyan);
                 }
                 else
                 {
-                    CodeEditor2.Controller.AppendLog("parseHier "+index.ToString() + " : " + verilogFile.ID);
+                    CodeEditor2.Controller.AppendLog("parseHier " + index.ToString() + " : " + verilogFile.ID);
                 }
                 await parser.ParseAsync();
                 if (parser.ParsedDocument != null)
                 {
                     await verilogFile.AcceptParsedDocumentAsync(parser.ParsedDocument);
-//                    await verilogFile.UpdateAsync();
+                    //                    await verilogFile.UpdateAsync();
                 }
             }
 
@@ -264,7 +258,7 @@ namespace pluginVerilog.Tool
 
             List<Item> items = new List<Item>();
             items = verilogFile.Items.ToList();
-            
+
             foreach (var item in items)
             {
                 if (item is CodeEditor2.Data.TextFile tfile)
@@ -275,7 +269,7 @@ namespace pluginVerilog.Tool
                         firstHierTaskCount.Append(false);
                     }
                     EnqueueWork(newTask, workQueue, completeIds, signal);
-                    
+
                 }
             }
         }
@@ -313,7 +307,7 @@ namespace pluginVerilog.Tool
             if (parser.ParsedDocument != null)
             {
                 await verilogFile.AcceptParsedDocumentAsync(parser.ParsedDocument);
-//                verilogFile.PostUIUpdate();
+                //                verilogFile.PostUIUpdate();
             }
         }
 

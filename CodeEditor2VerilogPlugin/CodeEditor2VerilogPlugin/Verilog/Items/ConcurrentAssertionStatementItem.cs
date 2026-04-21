@@ -1,20 +1,17 @@
 using CodeEditor2.CodeEditor.CodeComplete;
 using pluginVerilog.Verilog.Assertion;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Items
 {
     public class ConcurrentAssertionStatementItem : INamedElement
     {
-        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace,string? blockIdentifier)
+        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace, string? blockIdentifier)
         {
-            if(word.NextText !="property" || word.Text != "assert")
+            if (word.NextText != "property" || word.Text != "assert")
             {
-                if(System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+                if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
                 throw new Exception();
             }
 
@@ -42,7 +39,7 @@ namespace pluginVerilog.Verilog.Items
 
         public required AssertPropertyStatement AssertPropertyStatement { get; set; }
 
-        public required string Name {  get; set; }
+        public required string Name { get; set; }
 
         public CodeDrawStyle.ColorType ColorType
         {

@@ -1,9 +1,5 @@
 using Avalonia.Media;
 using CodeEditor2.FileTypes;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.FileTypes
@@ -12,7 +8,7 @@ namespace pluginVerilog.FileTypes
     {
         public override string ID { get { return "TestResultFile"; } }
 
-        public override bool IsThisFileType(string relativeFilePath,CodeEditor2.Data.Project project)
+        public override bool IsThisFileType(string relativeFilePath, CodeEditor2.Data.Project project)
         {
             if (
                 relativeFilePath.ToLower().EndsWith(".verilog.result")

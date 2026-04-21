@@ -1,4 +1,3 @@
-using DynamicData.Binding;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.DataObjects.Nets;
@@ -6,12 +5,6 @@ using pluginVerilog.Verilog.DataObjects.Variables;
 using pluginVerilog.Verilog.Expressions;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace pluginVerilog.Verilog
 {
@@ -41,7 +34,7 @@ namespace pluginVerilog.Verilog
             import_export ::= import | export 
          */
         //        modport_declaration::= modport modport_item { , modport_item };
-        
+
         public static bool Parse(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "modport") throw new Exception();
@@ -188,9 +181,9 @@ namespace pluginVerilog.Verilog
                 word.MoveNext();
 
                 Expressions.Expression? expression;
-                if(direction == Port.DirectionEnum.Output)
+                if (direction == Port.DirectionEnum.Output)
                 {
-                    expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace,false);
+                    expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace, false);
                 }
                 else
                 {
@@ -217,7 +210,7 @@ namespace pluginVerilog.Verilog
                 Expressions.Expression? expression;
                 if (direction == Port.DirectionEnum.Output)
                 {
-                    expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace,false);
+                    expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace, false);
                 }
                 else
                 {
@@ -232,7 +225,7 @@ namespace pluginVerilog.Verilog
             return true;
         }
 
-        private void registerPort(string identifier,Port.DirectionEnum direction, Expression? expression)
+        private void registerPort(string identifier, Port.DirectionEnum direction, Expression? expression)
         {
             Port port = new Port { Direction = direction, Name = identifier };
             port.Expression = expression;
@@ -256,7 +249,7 @@ namespace pluginVerilog.Verilog
                 }
                 else
                 {
-                    DataObjects.DataTypes.IntegerVectorType dType = DataObjects.DataTypes.LogicType.Create( false, null);
+                    DataObjects.DataTypes.IntegerVectorType dType = DataObjects.DataTypes.LogicType.Create(false, null);
                     Logic logic = Logic.Create(identifier, dType);
 
                     if (intVectorVar != null)
@@ -293,7 +286,7 @@ namespace pluginVerilog.Verilog
             public DirectionEnum Direction { get; internal set; } = DirectionEnum.Undefined;
             public Expressions.Expression Expression { get; internal set; } = null;
         }
-        
+
 
 
 

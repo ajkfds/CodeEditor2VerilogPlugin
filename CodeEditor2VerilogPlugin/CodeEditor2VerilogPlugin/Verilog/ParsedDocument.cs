@@ -1,35 +1,22 @@
-using Avalonia.Media.TextFormatting;
 using CodeEditor2.CodeEditor.CodeComplete;
 using CodeEditor2.CodeEditor.Parser;
 using CodeEditor2.CodeEditor.PopupHint;
-using ExCSS;
 using pluginVerilog.CodeEditor;
 using pluginVerilog.FileTypes;
-using pluginVerilog.NavigatePanel;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
-using pluginVerilog.Verilog.DataObjects.Variables;
 using pluginVerilog.Verilog.ModuleItems;
-using Svg;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Tracing;
 using System.Linq;
-using System.Net.Http.Headers;
-using System.Reflection.Metadata;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using static AjkAvaloniaLibs.Controls.ColorLabel;
-using CodeComplete = CodeEditor2.CodeEditor.CodeComplete;
 
 namespace pluginVerilog.Verilog
 {
     public class ParsedDocument : CodeEditor2.CodeEditor.ParsedDocument
     {
-        public ParsedDocument(Data.IVerilogRelatedFile file,string key, IndexReference? indexReference, DocumentParser.ParseModeEnum parseMode) : base((CodeEditor2.Data.TextFile)file, key, getCodeDocument(file).Version,parseMode)
+        public ParsedDocument(Data.IVerilogRelatedFile file, string key, IndexReference? indexReference, DocumentParser.ParseModeEnum parseMode) : base((CodeEditor2.Data.TextFile)file, key, getCodeDocument(file).Version, parseMode)
         {
             CodeDocument? document = file.CodeDocument as CodeDocument;
             if (document == null) throw new Exception();
@@ -38,9 +25,9 @@ namespace pluginVerilog.Verilog
             if (file is SystemVerilogFile || file is SystemVerilogHeaderFile) SystemVerilog = true;
 
             fileRef = new WeakReference<Data.IVerilogRelatedFile>(file);
-            if(indexReference == null)
+            if (indexReference == null)
             {
-                IndexReference = IndexReference.Create(this,document,0);
+                IndexReference = IndexReference.Create(this, document, 0);
             }
             else
             {
@@ -65,7 +52,7 @@ namespace pluginVerilog.Verilog
             CodeDocument? codeDocument = file.CodeDocument as CodeDocument;
 
             codeDocument = file.CodeDocument as pluginVerilog.CodeEditor.CodeDocument;
-            if(codeDocument == null)
+            if (codeDocument == null)
             {
                 System.Diagnostics.Debugger.Break();
             }
@@ -115,7 +102,7 @@ namespace pluginVerilog.Verilog
 
         ~ParsedDocument()
         {
-//            System.Diagnostics.Debug.Print("### pasedDocument.Finalize " + id+"::"+ObjectID);
+            //            System.Diagnostics.Debug.Print("### pasedDocument.Finalize " + id+"::"+ObjectID);
         }
 
         private System.WeakReference<Data.IVerilogRelatedFile> fileRef;
@@ -161,17 +148,19 @@ namespace pluginVerilog.Verilog
         private bool reparseRequested = true;
         public bool ReparseRequested
         {
-            get {
+            get
+            {
                 return reparseRequested;
             }
-            set {
+            set
+            {
                 reparseRequested = value;
             }
         }
 
         public void ReloadIncludeFiles()
         {
-            foreach(var includeFile in IncludeFiles.Values)
+            foreach (var includeFile in IncludeFiles.Values)
             {
                 includeFile.Close();
             }
@@ -219,7 +208,7 @@ namespace pluginVerilog.Verilog
         [JsonIgnore]
         public int NoticeCount = 0;
 
-        public void AddError(int index,int length ,string message)
+        public void AddError(int index, int length, string message)
         {
             if (Project == null) return;
 
@@ -261,7 +250,7 @@ namespace pluginVerilog.Verilog
             if (WarningCount < 100)
             {
                 int lineNo = document.GetLineAt(index);
-               Messages.Add(new Verilog.ParsedDocument.Message(vFile, message, Verilog.ParsedDocument.Message.MessageType.Warning, index, lineNo, length, Project));
+                Messages.Add(new Verilog.ParsedDocument.Message(vFile, message, Verilog.ParsedDocument.Message.MessageType.Warning, index, lineNo, length, Project));
             }
             else if (WarningCount == 100)
             {
@@ -276,7 +265,7 @@ namespace pluginVerilog.Verilog
         }
         public void AddNotice(int index, int length, string message)
         {
-            
+
             if (Project == null) return;
 
             CodeDocument? document = CodeDocument;
@@ -351,7 +340,7 @@ namespace pluginVerilog.Verilog
                             "CodeEditor2/Assets/Icons/exclamation_triangle.svg",
                             Avalonia.Media.Color.FromArgb(100, 255, 150, 150)
                             ));
-                        ret.AppendText(message.Text+"\n", Avalonia.Media.Colors.Pink);
+                        ret.AppendText(message.Text + "\n", Avalonia.Media.Colors.Pink);
                         break;
                     case Message.MessageType.Warning:
                         ret.AppendIconImage(AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
@@ -385,12 +374,12 @@ namespace pluginVerilog.Verilog
 
             {
                 BuildingBlock? buildingBlock = root.GetBuildingBlock(iref);
-                if(buildingBlock != null) space = buildingBlock.GetHierarchyNameSpace(iref);
+                if (buildingBlock != null) space = buildingBlock.GetHierarchyNameSpace(iref);
             }
 
             int count = ret.ItemCount;
 
-            if(space != null)
+            if (space != null)
             {
                 foreach (IBuildingBlockInstantiation instantiation in space.BuildingBlock.NamedElements.Values.OfType<IBuildingBlockInstantiation>())
                 {
@@ -413,7 +402,7 @@ namespace pluginVerilog.Verilog
                     Macro macro = Macros[text.Substring(1)];
                     macro.AppendLabel(ret, Macros);
                 }
-                else if(iref.RootParsedDocument.Macros.ContainsKey(text.Substring(1)))
+                else if (iref.RootParsedDocument.Macros.ContainsKey(text.Substring(1)))
                 {
                     Macro macro = iref.RootParsedDocument.Macros[text.Substring(1)];
                     macro.AppendLabel(ret, Macros);
@@ -424,17 +413,21 @@ namespace pluginVerilog.Verilog
             if (space != null)
             {
                 INamedElement? namedElement = space.GetNamedElementUpward(text);
-                if (namedElement != null) { 
-                    if(namedElement is DataObject)
+                if (namedElement != null)
+                {
+                    if (namedElement is DataObject)
                     {
                         ((DataObject)namedElement).AppendLabel(ret);
-                    } else if(namedElement is Function)
+                    }
+                    else if (namedElement is Function)
                     {
-                        ((Function)namedElement).AppendLabel(ret) ;
-                    } else if(namedElement is Task)
+                        ((Function)namedElement).AppendLabel(ret);
+                    }
+                    else if (namedElement is Task)
                     {
                         ((Task)namedElement).AppendLabel(ret);
-                    } else if(namedElement is DataObjects.Typedef)
+                    }
+                    else if (namedElement is DataObjects.Typedef)
                     {
                         ((DataObjects.Typedef)namedElement).AppendLabel(ret);
                     }
@@ -456,15 +449,15 @@ namespace pluginVerilog.Verilog
             }
 
 
-//            if (space.BuildingBlock.Functions.ContainsKey(text))
-//            {
-////                ret.Add(new Popup.FunctionPopup(space.BuildingBlock.Functions[text]));
-//            }
+            //            if (space.BuildingBlock.Functions.ContainsKey(text))
+            //            {
+            ////                ret.Add(new Popup.FunctionPopup(space.BuildingBlock.Functions[text]));
+            //            }
 
-//            if (space.BuildingBlock.Tasks.ContainsKey(text))
-//            {
-////                ret.Add(new Popup.TaskPopup(space.BuildingBlock.Tasks[text]));
-//            }
+            //            if (space.BuildingBlock.Tasks.ContainsKey(text))
+            //            {
+            ////                ret.Add(new Popup.TaskPopup(space.BuildingBlock.Tasks[text]));
+            //            }
 
             return ret;
         }
@@ -490,7 +483,7 @@ namespace pluginVerilog.Verilog
 
         public NameSpace? GetNameSpace(IndexReference iref)
         {
-            if(Root == null) return null;
+            if (Root == null) return null;
             // get current buldingBlock
             NameSpace? space = null;
             foreach (BuildingBlock buildingBlock in Root.BuildingBlocks.Values)
@@ -505,7 +498,7 @@ namespace pluginVerilog.Verilog
         }
 
 
-        private NameSpace? getSearchNameSpace(NameSpace? nameSpace,List<string> hier)
+        private NameSpace? getSearchNameSpace(NameSpace? nameSpace, List<string> hier)
         {
             if (ProjectProperty == null) return null;
             if (nameSpace == null) return null;
@@ -538,9 +531,9 @@ namespace pluginVerilog.Verilog
                 }
 
                 hier.RemoveAt(0);
-                return getSearchNameSpace(bBlock,hier);
+                return getSearchNameSpace(bBlock, hier);
             }
-            else if(nameSpace.NamedElements.ContainsKey(hier[0]))
+            else if (nameSpace.NamedElements.ContainsKey(hier[0]))
             {
                 NameSpace? space = nameSpace.NamedElements[hier[0]] as NameSpace;
                 hier.RemoveAt(0);
@@ -611,7 +604,7 @@ namespace pluginVerilog.Verilog
         //    }
         //}
 
-        public void appendAutoCompleteINamedElements(List<AutocompleteItem> items, NameSpace nameSpace,string candidate)
+        public void appendAutoCompleteINamedElements(List<AutocompleteItem> items, NameSpace nameSpace, string candidate)
         {
             bool add = false;
             foreach (INamedElement element in nameSpace.NamedElements.Values)
@@ -637,7 +630,7 @@ namespace pluginVerilog.Verilog
 
         public static AppendKeywordAutoCompleteItemsDelegate AppendKeywordAutoCompleteItems = appendKeywordAutoCompleteItems;
 
-        private static void appendKeywordAutoCompleteItems(List<AutocompleteItem> items,string candidate,int candidateStartIndex, bool systemVerilog)
+        private static void appendKeywordAutoCompleteItems(List<AutocompleteItem> items, string candidate, int candidateStartIndex, bool systemVerilog)
         {
             appendItems(items, candidate, new AutoComplete.BeginAutoCompleteItem());
             appendItems(items, candidate, new AutoComplete.CaseAutocompleteItem());
@@ -753,8 +746,8 @@ namespace pluginVerilog.Verilog
             };
 
 
-            
-            foreach ((string,int) keyword in keywords)
+
+            foreach ((string, int) keyword in keywords)
             {
                 if (!keyword.Item1.StartsWith(candidate)) continue;
                 if (candidate.Length < keyword.Item2) continue;
@@ -854,7 +847,7 @@ namespace pluginVerilog.Verilog
 
         public new class Message : CodeEditor2.CodeEditor.ParsedDocument.Message
         {
-            public Message(Data.IVerilogRelatedFile file,string text, MessageType type, int index, int lineNo,int length,CodeEditor2.Data.Project project)
+            public Message(Data.IVerilogRelatedFile file, string text, MessageType type, int index, int lineNo, int length, CodeEditor2.Data.Project project)
             {
                 this.fileRef = new WeakReference<Data.IVerilogRelatedFile>(file);
                 this.Text = text;

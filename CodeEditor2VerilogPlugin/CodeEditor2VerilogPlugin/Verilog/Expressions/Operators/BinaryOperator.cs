@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Expressions.Operators
 {
@@ -178,7 +176,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
             Constant = constant;
             Value = value;
             BitWidth = bitWidth;
-            
+
             Primary ret = this;
             if (Primary1 != null && Primary1.Reference != null && Primary2 != null && Primary2.Reference != null)
             {
@@ -192,13 +190,13 @@ namespace pluginVerilog.Verilog.Expressions.Operators
                 {
 
                 }
-                else if(primary1.BitWidth != primary2.BitWidth && primary2.BitWidth != null)
+                else if (primary1.BitWidth != primary2.BitWidth && primary2.BitWidth != null)
                 {
                     if (Reference != null) Reference.AddWarning("bitwidth mismatch " + primary1.BitWidth.ToString() + " " + Text + " " + primary2.BitWidth.ToString());
                 }
             }
 
-            if (Primary1 !=null) SyncContext.PropageteClockDomainFrom(Primary1.SyncContext, Primary1.Reference);
+            if (Primary1 != null) SyncContext.PropageteClockDomainFrom(Primary1.SyncContext, Primary1.Reference);
             if (Primary2 != null) SyncContext.PropageteClockDomainFrom(Primary2.SyncContext, Primary2.Reference);
             if (Operated != null) Operated(this);
             return this;

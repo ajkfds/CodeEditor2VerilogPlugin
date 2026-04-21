@@ -1,13 +1,8 @@
 using Avalonia.Controls;
-using Avalonia.Media;
 using Avalonia.Threading;
 using pluginVerilog.Data;
-using pluginVerilog.Verilog.BuildingBlocks;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.NavigatePanel
@@ -130,7 +125,7 @@ namespace pluginVerilog.NavigatePanel
             if (!Dispatcher.UIThread.CheckAccess())
             {
                 Dispatcher.UIThread.Post(
-                        new Action(async() =>
+                        new Action(async () =>
                         {
                             try
                             {

@@ -1,14 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace pluginVerilog.Verilog
 {
     public class CommentScanner
     {
-        public CommentScanner(CodeEditor2.CodeEditor.CodeDocument document,int commentStart,int commentEnd)
+        public CommentScanner(CodeEditor2.CodeEditor.CodeDocument document, int commentStart, int commentEnd)
         {
             this.document = document;
             this.commentStart = commentStart;
@@ -26,9 +20,9 @@ namespace pluginVerilog.Verilog
 
         public void SkipToChar(char ch)
         {
-            while(index < commentEnd)
+            while (index < commentEnd)
             {
-                if(document.GetCharAt(index) == ch)
+                if (document.GetCharAt(index) == ch)
                 {
                     getNext();
                     return;
@@ -74,7 +68,7 @@ namespace pluginVerilog.Verilog
 
         public void Color(CodeDrawStyle.ColorType colorType)
         {
-            document.TextColors.SetColorAt(index, CodeDrawStyle.ColorIndex(colorType),indexEnd-index);
+            document.TextColors.SetColorAt(index, CodeDrawStyle.ColorIndex(colorType), indexEnd - index);
         }
         public string Text
         {
@@ -121,7 +115,7 @@ namespace pluginVerilog.Verilog
                     break;
                 }
                 indexEnd++;
-                if (ch == ':' || ch == ',' ) // single char separators
+                if (ch == ':' || ch == ',') // single char separators
                 {
                     return;
                 }
@@ -131,7 +125,7 @@ namespace pluginVerilog.Verilog
             while (indexEnd < commentEnd)
             {
                 ch = document.GetCharAt(indexEnd);
-                if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r'|| ch == ':' || ch==','|| ch=='@')
+                if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' || ch == ':' || ch == ',' || ch == '@')
                 {
                     break;
                 }

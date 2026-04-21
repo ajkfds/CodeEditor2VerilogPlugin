@@ -1,18 +1,13 @@
-using Avalonia.Threading;
 using CodeEditor2.CodeEditor;
 using CodeEditor2.CodeEditor.CodeComplete;
 using CodeEditor2.CodeEditor.Parser;
 using CodeEditor2.CodeEditor.PopupHint;
 using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
-using pluginVerilog.Verilog.BuildingBlocks;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using static pluginVerilog.Verilog.ParsedDocument;
 
 namespace pluginVerilog.Data
 {
@@ -53,7 +48,7 @@ namespace pluginVerilog.Data
                 Data.VerilogFile? vFile = file as Data.VerilogFile;
                 if (vFile == null) throw new Exception();
 
-//                vFile.RegisterModuleInstance(fileItem);
+                //                vFile.RegisterModuleInstance(fileItem);
 
                 if (vFile.SystemVerilog) fileItem.SystemVerilog = true;
             }
@@ -163,7 +158,7 @@ namespace pluginVerilog.Data
             }
 
             parsedDocument = null;
-//            SourceVerilogFile.RemoveModuleInstance(this);
+            //            SourceVerilogFile.RemoveModuleInstance(this);
         }
 
         public string ParameterId

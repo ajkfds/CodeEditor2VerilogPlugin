@@ -1,13 +1,8 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog
 {
@@ -15,7 +10,7 @@ namespace pluginVerilog.Verilog
     {
         protected IndexReference() { }
 
-        public static IndexReference Create(WordPointer wordPointer,List<WordPointer> stocks)
+        public static IndexReference Create(WordPointer wordPointer, List<WordPointer> stocks)
         {
             IndexReference ret = new IndexReference();
 
@@ -40,7 +35,7 @@ namespace pluginVerilog.Verilog
 
             return ret;
         }
-        public static IndexReference Create(ParsedDocument parsedDocument, CodeEditor.CodeDocument document,int index)
+        public static IndexReference Create(ParsedDocument parsedDocument, CodeEditor.CodeDocument document, int index)
         {
             IndexReference ret = new IndexReference();
 
@@ -132,7 +127,7 @@ namespace pluginVerilog.Verilog
         {
             get
             {
-                return indexes;   
+                return indexes;
             }
         }
 
@@ -198,7 +193,7 @@ namespace pluginVerilog.Verilog
                 i = indexReference.indexes.Count;
             }
 
-            for (int j = 0; j < i-1; j++)
+            for (int j = 0; j < i - 1; j++)
             {
                 if (indexes[j] != indexReference.indexes[j]) return false;
             }

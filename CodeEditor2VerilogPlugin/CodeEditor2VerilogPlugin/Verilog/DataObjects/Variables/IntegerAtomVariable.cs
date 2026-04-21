@@ -1,10 +1,6 @@
+using pluginVerilog.Verilog.DataObjects.DataTypes;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using pluginVerilog.Verilog.DataObjects.DataTypes;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
@@ -27,7 +23,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             switch (dataType.Type)
             {
                 case DataTypeEnum.Byte:
-                    return Byte.Create(name,dataType);
+                    return Byte.Create(name, dataType);
                 case DataTypeEnum.Shortint:
                     return Shortint.Create(name, dataType);
                 case DataTypeEnum.Int:

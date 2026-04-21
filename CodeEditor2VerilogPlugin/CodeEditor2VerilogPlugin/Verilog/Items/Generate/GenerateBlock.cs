@@ -1,8 +1,4 @@
 using pluginVerilog.Verilog.BuildingBlocks;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Items.Generate
@@ -105,7 +101,7 @@ namespace pluginVerilog.Verilog.Items.Generate
             {
                 while (!word.Eof)
                 {
-                    if(generateBlock != null)
+                    if (generateBlock != null)
                     {
                         if (!await GenerateItem.Parse(word, generateBlock)) break;
                     }
@@ -144,7 +140,7 @@ namespace pluginVerilog.Verilog.Items.Generate
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 word.MoveNext();
 
-                if(word.Text == ":")
+                if (word.Text == ":")
                 {
                     word.MoveNext();
                     if (name == word.Text)

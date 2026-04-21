@@ -1,4 +1,3 @@
-using Avalonia.Controls;
 using CodeEditor2.Data;
 using DynamicData;
 using pluginVerilog.Verilog.BuildingBlocks;
@@ -6,18 +5,8 @@ using pluginVerilog.Verilog.CommentAnnotation;
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.DataObjects.Nets;
-using pluginVerilog.Verilog.DataObjects.Variables;
-using pluginVerilog.Verilog.ModuleItems;
-using ReactiveUI;
 using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.SqlClient;
-using System.Drawing.Drawing2D;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static pluginVerilog.Verilog.ModPort;
 
 namespace pluginVerilog.Verilog.DataObjects
 {
@@ -25,7 +14,8 @@ namespace pluginVerilog.Verilog.DataObjects
     {
         public DirectionEnum Direction = DirectionEnum.Undefined;
 
-        public List<DataObjects.Arrays.PackedArray>? PackedDimensions {
+        public List<DataObjects.Arrays.PackedArray>? PackedDimensions
+        {
             get
             {
                 if (DataObject == null) return null;
@@ -57,9 +47,9 @@ namespace pluginVerilog.Verilog.DataObjects
             get
             {
                 int bitWidth = 1;
-                if (PackedDimensions != null) 
+                if (PackedDimensions != null)
                 {
-                    foreach(PackedArray packedArray in PackedDimensions)
+                    foreach (PackedArray packedArray in PackedDimensions)
                     {
                         if (packedArray.Size != null) bitWidth *= (int)packedArray.Size;
                     }
@@ -76,7 +66,7 @@ namespace pluginVerilog.Verilog.DataObjects
         }
 
         public DataObject? DataObject { set; get; } = null;
-//        public IInstantiation Instantiation{  set; get; } = null;
+        //        public IInstantiation Instantiation{  set; get; } = null;
         public string Comment = "";
         public string? PortGroupName = null;
 
@@ -107,13 +97,13 @@ namespace pluginVerilog.Verilog.DataObjects
             Ref
         }
 
-        public static Port? Create(string name, Project project,DirectionEnum direction,DataObject dataObject)
+        public static Port? Create(string name, Project project, DirectionEnum direction, DataObject dataObject)
         {
-            Port port = new Port() { DefinitionReference = null, Name = name, Project = project, Direction = direction,DataObject = dataObject };
+            Port port = new Port() { DefinitionReference = null, Name = name, Project = project, Direction = direction, DataObject = dataObject };
             return port;
         }
 
-        public string CreateDefinitionString() 
+        public string CreateDefinitionString()
         {
             AjkAvaloniaLibs.Controls.ColorLabel label = GetLabel();
             return label.CreateString();
@@ -180,7 +170,7 @@ namespace pluginVerilog.Verilog.DataObjects
                     label.AppendText(" ");
                 }
             }
-            if(Comment != "")
+            if (Comment != "")
             {
                 label.AppendText(" // " + Comment, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Comment));
             }
@@ -219,7 +209,7 @@ namespace pluginVerilog.Verilog.DataObjects
         // list_of_port_identifiers::= port_identifier { , port_identifier }
         // range ::= [ msb_constant_expression : lsb_constant_expression ]  
 
-        public static void ParsePortDeclarations(WordScanner word,NameSpace nameSpace)
+        public static void ParsePortDeclarations(WordScanner word, NameSpace nameSpace)
         {
             // end with ) or ;
 
@@ -230,7 +220,7 @@ namespace pluginVerilog.Verilog.DataObjects
             Port? definedPort;
 
             PortAnnotation.ParsePreComment(word, nameSpace, null, ref portGroup);
-            if (ParsePortDeclaration(word, nameSpace, true, ref prevDataType, ref prevNetType, ref prevDirection,out definedPort))
+            if (ParsePortDeclaration(word, nameSpace, true, ref prevDataType, ref prevNetType, ref prevDirection, out definedPort))
             {
                 if (definedPort != null)
                 {
@@ -254,7 +244,7 @@ namespace pluginVerilog.Verilog.DataObjects
                     PortAnnotation.ParsePostComment(word, nameSpace, definedPort);
                 }
             }
-            else if(!nameSpace.BuildingBlock.AnsiStylePortDefinition)
+            else if (!nameSpace.BuildingBlock.AnsiStylePortDefinition)
             {
                 while (!word.Eof)
                 {
@@ -287,7 +277,7 @@ namespace pluginVerilog.Verilog.DataObjects
             return true;
         }
 
-        private static bool ParsePortDeclaration(WordScanner word, NameSpace nameSpace, bool firstPort, ref IDataType? prevDataType, ref Net.NetTypeEnum? prevNetType, ref DirectionEnum? prevDirection,out Port? definedPort)
+        private static bool ParsePortDeclaration(WordScanner word, NameSpace nameSpace, bool firstPort, ref IDataType? prevDataType, ref Net.NetTypeEnum? prevNetType, ref DirectionEnum? prevDirection, out Port? definedPort)
         {
 
 
@@ -369,7 +359,7 @@ namespace pluginVerilog.Verilog.DataObjects
                 default:
                     break;
             }
-            if(direction != null)
+            if (direction != null)
             {
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 word.MoveNext();
@@ -380,7 +370,7 @@ namespace pluginVerilog.Verilog.DataObjects
             IDataType? dataType = null;
             if (netType == null)
             {
-                if ( word.NextText =="," || word.NextText==")")
+                if (word.NextText == "," || word.NextText == ")")
                 {
                     // implicit net かつ identifierと同名のDataTypeが定義されていたときの処理
                     // implicit net としての解釈を有線する必要がある。
@@ -392,7 +382,7 @@ namespace pluginVerilog.Verilog.DataObjects
             }
 
             Interface? interface_ = null;
-            if(direction == null && netType == null && dataType == null)
+            if (direction == null && netType == null && dataType == null)
             {
                 if (parseInterfacePort(word, nameSpace))
                 {
@@ -403,11 +393,11 @@ namespace pluginVerilog.Verilog.DataObjects
                 }
             }
 
-            if ( direction == null && netType == null && dataType == null && interface_ == null )
+            if (direction == null && netType == null && dataType == null && interface_ == null)
             {
                 if (firstPort)
                 {
-                    if((word.NextText == "," || word.NextText == ")")) // Without this, a port of an undefined type will be recognized as a non-ANSI format.
+                    if ((word.NextText == "," || word.NextText == ")")) // Without this, a port of an undefined type will be recognized as a non-ANSI format.
                     {
                         //For the first port in the port list:
                         //  — If the direction, port kind, and data type are all omitted, then the port shall be assumed to be a
@@ -462,7 +452,7 @@ namespace pluginVerilog.Verilog.DataObjects
                     //      — If the data type is declared with the explicit data_type syntax, the port kind shall default to variable.
                     //      — A ref port is always a variable.
                     case DirectionEnum.Output:
-                        if(dataType == null)
+                        if (dataType == null)
                         {
                             netType = buildingBlock.DefaultNetType;
                         }
@@ -478,9 +468,9 @@ namespace pluginVerilog.Verilog.DataObjects
             // — If the data type is omitted, it shall default to logic except for interconnect ports which have no data type.
             // parse packed dimensions for net without explicit datatype
             List<DataObjects.Arrays.PackedArray> packedDimensions = new List<DataObjects.Arrays.PackedArray>();
-            if(dataType == null)
+            if (dataType == null)
             {
-                while (word.Text=="[")
+                while (word.Text == "[")
                 {
                     DataObjects.Arrays.PackedArray? range = DataObjects.Arrays.PackedArray.ParseCreate(word, nameSpace);
                     if (range == null) break;
@@ -509,29 +499,29 @@ namespace pluginVerilog.Verilog.DataObjects
 
             Port port = new Port() { DefinitionReference = word.CrateWordReference(), Name = word.Text, Project = word.Project };
             port.Direction = (DirectionEnum)direction;
-            if(netType != null)
+            if (netType != null)
             {
-                if (dataType == null) dataType = DataTypes.LogicType.Create(false,packedDimensions);
-                Net net = Net.Create(port.Name,(Net.NetTypeEnum)netType, dataType);
+                if (dataType == null) dataType = DataTypes.LogicType.Create(false, packedDimensions);
+                Net net = Net.Create(port.Name, (Net.NetTypeEnum)netType, dataType);
                 net.DefinedReference = word.CrateWordReference();
                 port.DataObject = net;
             }
-            else if(dataType != null)
+            else if (dataType != null)
             {
                 Variables.Variable variable = Variables.Variable.Create(port.Name, dataType);
                 variable.DefinedReference = word.CrateWordReference();
                 port.DataObject = variable;
             }
-            else if(interface_ != null)
+            else if (interface_ != null)
             {
-//                Interface interface_instance = interface_ .
+                //                Interface interface_instance = interface_ .
             }
 
 
             addPort(word, nameSpace, port);
             definedPort = port;
 
-            if(port.DataObject != null)
+            if (port.DataObject != null)
             {
                 switch (port.Direction)
                 {
@@ -545,8 +535,8 @@ namespace pluginVerilog.Verilog.DataObjects
                     case DirectionEnum.Undefined:
                         break;
                     case DirectionEnum.Ref:
-//                        port.DataObject.AssignedReferences.Add(word.GetReference());
-//                        port.DataObject.UsedReferences.Add(word.GetReference());
+                        //                        port.DataObject.AssignedReferences.Add(word.GetReference());
+                        //                        port.DataObject.UsedReferences.Add(word.GetReference());
                         break;
                     case DirectionEnum.Output:
                         port.DataObject.UsedReferences.Add(word.GetReference());
@@ -567,7 +557,7 @@ namespace pluginVerilog.Verilog.DataObjects
             // ansi_port_declaration		::=   [ net_port_header | interface_port_header ] port_identifier { unpacked_dimension } [ = constant_expression ] 
             //								    | [ variable_port_header ]                    port_identifier { variable_dimension } [ = constant_expression ]
 
-            if(dataType != null)
+            if (dataType != null)
             { // variable port
                 // { variable_dimension }
                 while (!word.Eof && word.Text == "[")
@@ -582,13 +572,16 @@ namespace pluginVerilog.Verilog.DataObjects
                         {
                             port.DataObject.UnpackedArrays.Add(unPackedArray);
                         }
-                    } else if (array is Queue)
+                    }
+                    else if (array is Queue)
                     {
                         port.DataObject = (Queue)array;
-                    } else if (array is AssociativeArray)
+                    }
+                    else if (array is AssociativeArray)
                     {
                         port.DataObject = (AssociativeArray)array;
-                    }else if(array is DynamicArray)
+                    }
+                    else if (array is DynamicArray)
                     {
                         port.DataObject = (DynamicArray)array;
                     }
@@ -680,7 +673,7 @@ namespace pluginVerilog.Verilog.DataObjects
             }
         }
 
-        private static void addPort(WordScanner word, NameSpace nameSpace,Port port)
+        private static void addPort(WordScanner word, NameSpace nameSpace, Port port)
         {
             IModuleOrInterfaceOrProgram? block = nameSpace.BuildingBlock as IModuleOrInterfaceOrProgram;
             if (block == null)
@@ -713,7 +706,7 @@ namespace pluginVerilog.Verilog.DataObjects
                 {
                     DataObject? dataObject = block.NamedElements.GetDataObject(port.Name);
 
-                    if(dataObject == null)
+                    if (dataObject == null)
                     {
                         block.NamedElements.Add(port.Name, port.DataObject);
                     }
@@ -744,7 +737,7 @@ namespace pluginVerilog.Verilog.DataObjects
             Interface? interface_ = null;
             {
                 BuildingBlock? upperBuldingBlock = nameSpace.BuildingBlock.SearchBuildingBlockUpward(word.Text);
-                if(upperBuldingBlock is Interface)
+                if (upperBuldingBlock is Interface)
                 {
                     interface_ = (Interface)upperBuldingBlock;
                 }
@@ -767,25 +760,25 @@ namespace pluginVerilog.Verilog.DataObjects
                 word.AddError("undefined interface");
 
 
-//                return false;
+                //                return false;
             }
-//            string? modPortName = null;
+            //            string? modPortName = null;
 
             BuildingBlock buildingBlock = nameSpace.BuildingBlock;
             word.Color(CodeDrawStyle.ColorType.Identifier);
             word.MoveNext();
-            
+
             if (word.Text == ".")
             {
                 word.MoveNext();
 
                 word.Color(CodeDrawStyle.ColorType.Identifier);
-                if(interface_ != null && !interface_.NamedElements.ContainsModPort(word.Text))
+                if (interface_ != null && !interface_.NamedElements.ContainsModPort(word.Text))
                 {
                     word.AddError("illegal modport name");
                     return true;
                 }
-                if(interface_!= null)
+                if (interface_ != null)
                 {
                     ModPort modPort = (ModPort)interface_.NamedElements[word.Text];
                     word.MoveNext();
@@ -800,8 +793,8 @@ namespace pluginVerilog.Verilog.DataObjects
                 word.AddError("illegal identifier");
                 return true;
             }
-            InterfaceInstance iInst = InterfaceInstance.CreatePortInstance(word, identifier,nameSpace);
-//            iInst.ModPortName = modPortName;
+            InterfaceInstance iInst = InterfaceInstance.CreatePortInstance(word, identifier, nameSpace);
+            //            iInst.ModPortName = modPortName;
             word.Color(CodeDrawStyle.ColorType.Variable);
             word.MoveNext();
 
@@ -815,14 +808,14 @@ namespace pluginVerilog.Verilog.DataObjects
 
             return true;
         }
-        private static bool parseModPort(WordScanner word, NameSpace nameSpace,Interface interface_, ModPort modPort)
+        private static bool parseModPort(WordScanner word, NameSpace nameSpace, Interface interface_, ModPort modPort)
         {
             if (!General.IsIdentifier(word.Text))
             {
                 word.AddError("illegal identifier");
                 return true;
             }
-            ModportInstance iModport = ModportInstance.Create(word.Text,interface_, modPort);
+            ModportInstance iModport = ModportInstance.Create(word.Text, interface_, modPort);
             word.Color(iModport.ColorType);
             word.MoveNext();
 
@@ -961,12 +954,12 @@ namespace pluginVerilog.Verilog.DataObjects
             if (dataType == null)
             {
                 DataTypes.IntegerVectorType vectorType = LogicType.Create(false, null);
-                    if(word.Text == "[")
-                    {
+                if (word.Text == "[")
+                {
                     DataObjects.Arrays.PackedArray? range = DataObjects.Arrays.PackedArray.ParseCreate(word, nameSpace);
                     if (range != null) vectorType.PackedDimensions.Add(range);
 
-                    }
+                }
 
                 dataType = vectorType;
             }
@@ -984,9 +977,9 @@ namespace pluginVerilog.Verilog.DataObjects
 
                 Port port = new Port() { DefinitionReference = word.CrateWordReference(), Name = word.Text, Project = word.Project };
                 port.Direction = (DirectionEnum)direction;
-                port.DataObject = Variables.Variable.Create(port.Name,dataType);
+                port.DataObject = Variables.Variable.Create(port.Name, dataType);
 
-                if( nameSpace is Function)
+                if (nameSpace is Function)
                 {
                     Function? function = nameSpace as Function;
                     if (function == null) throw new Exception();
@@ -999,7 +992,8 @@ namespace pluginVerilog.Verilog.DataObjects
                     {
                         if (word.Prototype) port.DefinitionReference.AddError("duplicated");
                     }
-                }else if(nameSpace is Task)
+                }
+                else if (nameSpace is Task)
                 {
                     Task? task = nameSpace as Task;
                     if (task == null) throw new Exception();
@@ -1079,7 +1073,7 @@ namespace pluginVerilog.Verilog.DataObjects
             while (!word.Eof && word.Text != ")" && word.Text != "end")
             {
                 ParseTfPortItem(word, nameSpace, portNameSpace, firstPort, ref prevDirection, ref prevDataType);
-                if(word.Text == ",")
+                if (word.Text == ",")
                 {
                     word.MoveNext();
                 }
@@ -1091,7 +1085,7 @@ namespace pluginVerilog.Verilog.DataObjects
 
         }
 
-        public static bool ParseTfPortItem(WordScanner word, NameSpace nameSpace, IPortNameSpace portNameSpace, bool first,ref DirectionEnum? prevDirection, ref IDataType? prevDataType)
+        public static bool ParseTfPortItem(WordScanner word, NameSpace nameSpace, IPortNameSpace portNameSpace, bool first, ref DirectionEnum? prevDirection, ref IDataType? prevDataType)
         {
             // tf_port_item    ::= { attribute_instance } [ tf_port_direction ] [ var ] data_type_or_implicit [ port_identifier { variable_dimension } [ = expression ] ]
 
@@ -1124,7 +1118,7 @@ namespace pluginVerilog.Verilog.DataObjects
                     direction = DirectionEnum.Ref;
                     word.Color(CodeDrawStyle.ColorType.Keyword);
                     word.MoveNext();
-                    if(word.Text == "ref")
+                    if (word.Text == "ref")
                     {
                         word.Color(CodeDrawStyle.ColorType.Keyword);
                         word.MoveNext();
@@ -1154,9 +1148,9 @@ namespace pluginVerilog.Verilog.DataObjects
             // or if the argument direction is explicitly specified.
             // Otherwise, the data type is inherited from the previous argument.
 
-            if(dataType == null)
+            if (dataType == null)
             {
-                if(first || direction != null)
+                if (first || direction != null)
                 {
                     DataTypes.IntegerVectorType vectorType = LogicType.Create(false, null);
                     if (word.Text == "[")
@@ -1178,7 +1172,7 @@ namespace pluginVerilog.Verilog.DataObjects
 
             // There is a default direction of input if no direction has been specified. Once a direction is given,
             // subsequent formals default to the same direction. 
-            if(direction == null)
+            if (direction == null)
             {
                 direction = DirectionEnum.Input;
             }
@@ -1192,7 +1186,7 @@ namespace pluginVerilog.Verilog.DataObjects
 
             Port port = new Port() { DefinitionReference = word.CrateWordReference(), Name = word.Text, Project = word.Project };
             port.Direction = (DirectionEnum)direction;
-            port.DataObject = Variables.Variable.Create(port.Name,dataType);
+            port.DataObject = Variables.Variable.Create(port.Name, dataType);
             word.Color(CodeDrawStyle.ColorType.Variable);
 
             if (portNameSpace.Ports.ContainsKey(port.Name))
@@ -1223,7 +1217,7 @@ namespace pluginVerilog.Verilog.DataObjects
             {
                 portNameSpace.NamedElements.Add(port.DataObject.Name, port.DataObject);
             }
-            if(!word.Prototype) port.DataObject.Defined = true;
+            if (!word.Prototype) port.DataObject.Defined = true;
 
             word.MoveNext();
 
@@ -1260,11 +1254,11 @@ namespace pluginVerilog.Verilog.DataObjects
                 }
             }
 
-            if(word.Text == "=")
+            if (word.Text == "=")
             {
                 word.AddSystemVerilogError();
                 word.MoveNext();
-                Expressions.Expression? exp = Expressions.Expression.ParseCreate(word,nameSpace);
+                Expressions.Expression? exp = Expressions.Expression.ParseCreate(word, nameSpace);
             }
 
             prevDirection = port.Direction;

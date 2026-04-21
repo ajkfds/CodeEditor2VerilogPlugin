@@ -1,20 +1,10 @@
-using Avalonia.Controls;
-using CodeEditor2;
 using CodeEditor2.Data;
-using pluginVerilog.Data;
 using pluginVerilog.FileTypes;
 using pluginVerilog.Verilog;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.ModuleItems;
-using Svg.FilterEffects;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Data
 {
@@ -51,29 +41,29 @@ namespace pluginVerilog.Data
             if (buildingBlock == null) return null;
 
             setup.TopName = buildingBlock.Name;
-            searchHier(verilogFile,setup.TopName,ids,setup,setup.TopName);
+            searchHier(verilogFile, setup.TopName, ids, setup, setup.TopName);
 
             if (setup.UnfoundModules.Count != 0)
             {
                 foreach (var module in setup.UnfoundModules)
                 {
-                    CodeEditor2.Controller.AppendLog(verilogFile.Project.Name+":"+ module + " unfound", Avalonia.Media.Colors.Red);
+                    CodeEditor2.Controller.AppendLog(verilogFile.Project.Name + ":" + module + " unfound", Avalonia.Media.Colors.Red);
                 }
                 return null;
             }
             return setup;
         }
 
-        private static void searchHier(IVerilogRelatedFile file,string buildingBlockName,List<string> ids,SimulationSetup setup,string path)
+        private static void searchHier(IVerilogRelatedFile file, string buildingBlockName, List<string> ids, SimulationSetup setup, string path)
         {
             if (ids.Contains(file.ID)) return;
             ParsedDocument? parsedDocument = file.VerilogParsedDocument;
             if (parsedDocument == null) return;
 
-            appendFile(file,setup);
-            foreach(string unfound in parsedDocument.UnfoundModules)
+            appendFile(file, setup);
+            foreach (string unfound in parsedDocument.UnfoundModules)
             {
-                CodeEditor2.Controller.AppendLog("unfound instance on "+file.RelativePath);
+                CodeEditor2.Controller.AppendLog("unfound instance on " + file.RelativePath);
                 if (!setup.UnfoundModules.Contains(unfound)) setup.UnfoundModules.Add(unfound);
 
             }
@@ -82,7 +72,7 @@ namespace pluginVerilog.Data
                 if (file.ProjectProperty.ExtenralLibraryPath.ContainsKey(external))
                 {
                     string libPath = file.ProjectProperty.ExtenralLibraryPath[external];
-                    if(!setup.ExternalLibraryPathList.Contains(libPath)) setup.ExternalLibraryPathList.Add(libPath);
+                    if (!setup.ExternalLibraryPathList.Contains(libPath)) setup.ExternalLibraryPathList.Add(libPath);
                 }
             }
 
@@ -93,7 +83,7 @@ namespace pluginVerilog.Data
             if (!parsedDocument.Root.BuildingBlocks.ContainsKey(buildingBlockName)) return;
             BuildingBlock buildingBlock = parsedDocument.Root.BuildingBlocks[buildingBlockName];
 
-            searchNameSpace(file, ids, buildingBlock, setup,path);
+            searchNameSpace(file, ids, buildingBlock, setup, path);
             //foreach(var item in file.Items.Values)
             //{
             //    if(item is IVerilogRelatedFile)
@@ -103,20 +93,20 @@ namespace pluginVerilog.Data
             //}
         }
 
-        private static void searchNameSpace(IVerilogRelatedFile file, List<string> ids, NameSpace nameSpace, SimulationSetup setup,string path)
+        private static void searchNameSpace(IVerilogRelatedFile file, List<string> ids, NameSpace nameSpace, SimulationSetup setup, string path)
         {
-            foreach(INamedElement element in nameSpace.NamedElements.Values)
+            foreach (INamedElement element in nameSpace.NamedElements.Values)
             {
-                if(element is NameSpace)
+                if (element is NameSpace)
                 {
                     NameSpace subNameSpace = (NameSpace)element;
                     string newPath = path + "." + subNameSpace.Name;
-                    searchNameSpace(file,ids,subNameSpace, setup, newPath);
+                    searchNameSpace(file, ids, subNameSpace, setup, newPath);
                 }
-                else if(element is ModuleInstantiation)
+                else if (element is ModuleInstantiation)
                 {
                     ModuleInstantiation moduleInstantiation = (ModuleInstantiation)element;
-                    if(nameSpace.BuildingBlock.Project.Name != moduleInstantiation.SourceProjectName)
+                    if (nameSpace.BuildingBlock.Project.Name != moduleInstantiation.SourceProjectName)
                     {
                         string newPath = path + "." + moduleInstantiation.Name;
                         setup.ExternalProjectEntryInstance.Add(
@@ -124,13 +114,13 @@ namespace pluginVerilog.Data
                             CodeEditor2.Global.Projects[moduleInstantiation.SourceProjectName]
                             );
                     }
-                    if (file.Items.TryGetValue(moduleInstantiation.Name,out CodeEditor2.Data.Item? item))
+                    if (file.Items.TryGetValue(moduleInstantiation.Name, out CodeEditor2.Data.Item? item))
                     {
                         string newPath = moduleInstantiation.Name;
                         if (path != "") newPath = path + "." + newPath;
 
                         var subfile = item as IVerilogRelatedFile;
-                        if(subfile != null) searchHier(subfile,moduleInstantiation.SourceName, ids, setup, newPath);
+                        if (subfile != null) searchHier(subfile, moduleInstantiation.SourceName, ids, setup, newPath);
                     }
                 }
             }
@@ -139,7 +129,7 @@ namespace pluginVerilog.Data
 
         private static void appendFile(IVerilogRelatedFile file, SimulationSetup setup)
         {
-            if(file is pluginVerilog.Data.VerilogFile || file is SystemVerilogFile)
+            if (file is pluginVerilog.Data.VerilogFile || file is SystemVerilogFile)
             {
                 if (setup.Files.Contains(file)) return;
                 setup.Files.Add(file);
@@ -156,7 +146,8 @@ namespace pluginVerilog.Data
                 {
                     if (setup.Files.Contains(sourceFile)) return;
                     setup.Files.Add(sourceFile);
-                } else
+                }
+                else
                 {
                     CodeEditor2.Data.Project project = sourceFile.Project;
                     SimulationSetup pSetup;
@@ -178,7 +169,7 @@ namespace pluginVerilog.Data
             }
         }
 
-        private static void appendVerilogHeaderInstance(VerilogHeaderInstance file,SimulationSetup setup)
+        private static void appendVerilogHeaderInstance(VerilogHeaderInstance file, SimulationSetup setup)
         {
             if (file.Project == setup.Project)
             {

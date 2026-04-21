@@ -1,12 +1,7 @@
-using CodeEditor2.Data;
 using CodeEditor2.LLM.Tools;
 using Microsoft.Extensions.AI;
-using pluginVerilog.Tool;
-using pluginVerilog.Verilog.BuildingBlocks;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,7 +10,7 @@ namespace pluginVerilog.LLM.Tools
 {
     public class RunVerilogSimulation : LLMTool
     {
-        public RunVerilogSimulation(CodeEditor2.Data.Project project,CodeEditor2.Tests.ITest simulation) : base(project) 
+        public RunVerilogSimulation(CodeEditor2.Data.Project project, CodeEditor2.Tests.ITest simulation) : base(project)
         {
             this.simulation = simulation;
         }
@@ -27,7 +22,8 @@ namespace pluginVerilog.LLM.Tools
         [Description("module name")]
         string moduleName,
         CancellationToken cancellationToken
-        ) {
+        )
+        {
             ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
             if (projectProperty == null) throw new Exception();
             var file = projectProperty.GetBuildingBlock(moduleName)?.File;
@@ -39,13 +35,14 @@ namespace pluginVerilog.LLM.Tools
             try
             {
                 log = await simulation.RunSimulationAsync(cancellationToken);
-            }catch (OperationCanceledException)
+            }
+            catch (OperationCanceledException)
             {
                 return "simulation calceled.";
             }
 
             StringBuilder sb = new StringBuilder();
-            sb.Append(verilogFile.RelativePath+" simulation result");
+            sb.Append(verilogFile.RelativePath + " simulation result");
             sb.Append("\n");
             sb.Append("```");
             sb.Append(log);

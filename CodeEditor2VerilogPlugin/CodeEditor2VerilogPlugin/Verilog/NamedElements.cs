@@ -1,13 +1,8 @@
-using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.ModuleItems;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http.Headers;
-using System.Runtime.InteropServices.ComTypes;
-using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog
 {
@@ -29,9 +24,9 @@ namespace pluginVerilog.Verilog
             }
         }
 
-        public void RemoveAll(Func<INamedElement,bool> match)
+        public void RemoveAll(Func<INamedElement, bool> match)
         {
-            foreach(string key in itemDict.Where( (kvp)=> { return match(kvp.Value); }).Select( kvp => kvp.Key ).ToList())
+            foreach (string key in itemDict.Where((kvp) => { return match(kvp.Value); }).Select(kvp => kvp.Key).ToList())
             {
                 INamedElement namedElement = itemDict[key];
                 itemList.Remove(namedElement);
@@ -91,7 +86,7 @@ namespace pluginVerilog.Verilog
             itemDict.Add(key, item);
         }
 
-        public void Replace(string key,INamedElement item)
+        public void Replace(string key, INamedElement item)
         {
             INamedElement oldItem = itemDict[key];
             int index = itemList.IndexOf(oldItem);

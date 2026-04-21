@@ -1,25 +1,11 @@
-using Avalonia.Controls.Shapes;
 using Avalonia.Input;
 using Avalonia.Threading;
-using CodeEditor2.CodeEditor;
-using CodeEditor2.CodeEditor.CodeComplete;
-using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Views;
-using pluginVerilog.CodeEditor;
-using pluginVerilog.Verilog.BuildingBlocks;
-using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.ModuleItems;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Security.Cryptography;
-using System.Security.Principal;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using static AjkAvaloniaLibs.Libs.Icons;
-using static pluginVerilog.Tool.ParseHierarchy;
 
 namespace pluginVerilog.Verilog.Snippets
 {
@@ -133,7 +119,8 @@ namespace pluginVerilog.Verilog.Snippets
                 if (moduleInstantiation == null) return;
                 if (buildingBlock == null) return;
 
-                await Dispatcher.UIThread.InvokeAsync(async () => {
+                await Dispatcher.UIThread.InvokeAsync(async () =>
+                {
                     Views.AutoConnectWindow autoConnectWindow = new Views.AutoConnectWindow(moduleInstantiation, buildingBlock);
                     autoConnectWindow.WindowStartupLocation = Avalonia.Controls.WindowStartupLocation.CenterOwner;
                     Avalonia.Controls.Window window = CodeEditor2.Controller.GetMainWindow();

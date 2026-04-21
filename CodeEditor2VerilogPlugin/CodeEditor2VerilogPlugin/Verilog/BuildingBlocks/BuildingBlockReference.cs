@@ -1,11 +1,5 @@
-using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.ModuleItems;
-using ReactiveUI;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
@@ -62,7 +56,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 if (targetBuildingBlock != null && targetBuildingBlock.NamedElements.ContainsKey(word.Text))
                 {
                     INamedElement subNamedElement = targetBuildingBlock.NamedElements[word.Text];
-                    if(subNamedElement is ModuleInstantiation)
+                    if (subNamedElement is ModuleInstantiation)
                     {
                         ModuleInstantiation moduleInstantiation = (ModuleInstantiation)subNamedElement;
                         targetBuildingBlock = moduleInstantiation.GetInstancedBuildingBlock();
@@ -72,7 +66,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
             return null;
         }
-        private BuildingBlock? parse(WordScanner word, NameSpace nameSpace,BuildingBlock? targetBuildingBlock)
+        private BuildingBlock? parse(WordScanner word, NameSpace nameSpace, BuildingBlock? targetBuildingBlock)
         {
             if (word.NextText != "::" && word.NextText != "." && word.NextText != "#") return targetBuildingBlock;
 
@@ -91,9 +85,9 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
 
 
-        private BuildingBlock? SearchBuildingBlockUpward(string name,BuildingBlock baseBuildingBlock)
+        private BuildingBlock? SearchBuildingBlockUpward(string name, BuildingBlock baseBuildingBlock)
         {
-            if(baseBuildingBlock.BuildingBlocks.ContainsKey(name)) return baseBuildingBlock.BuildingBlocks[name];
+            if (baseBuildingBlock.BuildingBlocks.ContainsKey(name)) return baseBuildingBlock.BuildingBlocks[name];
             if (baseBuildingBlock.Parent == null || baseBuildingBlock.Parent.BuildingBlock == null) return null;
             return SearchBuildingBlockUpward(name, baseBuildingBlock.Parent.BuildingBlock);
         }

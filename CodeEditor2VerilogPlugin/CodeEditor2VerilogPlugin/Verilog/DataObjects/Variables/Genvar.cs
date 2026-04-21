@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
@@ -56,7 +51,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                     {
                         if (nameSpace.NamedElements.ContainsKey(val.Name))
                         {
-//                            nameRef.AddError("duplicated net name");
+                            //                            nameRef.AddError("duplicated net name");
                         }
                         else
                         {

@@ -1,9 +1,4 @@
-using pluginVerilog.Verilog.BuildingBlocks;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog
 {
@@ -20,14 +15,15 @@ namespace pluginVerilog.Verilog
         {
         }
 
-        public static NamedGeneratedBlock Create(WordScanner word,NameSpace parent, IndexReference beginReference)
+        public static NamedGeneratedBlock Create(WordScanner word, NameSpace parent, IndexReference beginReference)
         {
-            NamedGeneratedBlock block = new NamedGeneratedBlock(parent) { 
-                BeginIndexReference = beginReference, 
+            NamedGeneratedBlock block = new NamedGeneratedBlock(parent)
+            {
+                BeginIndexReference = beginReference,
                 DefinitionReference = word.CrateWordReference(),
                 Name = word.Text,
-                Parent = parent, 
-                Project = word.Project 
+                Parent = parent,
+                Project = word.Project
             };
             return block;
         }

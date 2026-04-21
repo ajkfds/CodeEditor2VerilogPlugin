@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace pluginVerilog.Verilog.Items.Generate
 {
     public class GenvarIteration
@@ -46,19 +40,19 @@ namespace pluginVerilog.Verilog.Items.Generate
                     word.AddError("should be genvar_iteration");
                     return false;
                 }
-                if(expression is not Expressions.Operators.IncDecOperator)
+                if (expression is not Expressions.Operators.IncDecOperator)
                 {
                     word.AddError("should be genvar_iteration");
                     return true;
                 }
                 Expressions.Operators.IncDecOperator op = (Expressions.Operators.IncDecOperator)expression;
-                if(op.Primary is not Expressions.DataObjectReference)
+                if (op.Primary is not Expressions.DataObjectReference)
                 {
                     op.Primary.Reference.AddError("must be genvar");
                     return true;
                 }
                 Expressions.DataObjectReference dataObjectReference = (Expressions.DataObjectReference)op.Primary;
-                if(dataObjectReference.TargetDataObject is not DataObjects.Variables.Genvar)
+                if (dataObjectReference.TargetDataObject is not DataObjects.Variables.Genvar)
                 {
                     op.Primary.Reference.AddError("must be genvar");
                     return true;

@@ -1,12 +1,3 @@
-using CodeEditor2.Shells;
-using ExCSS;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TextMateSharp.Model;
-
 namespace pluginVerilog.Verilog
 {
     // A.2.2.2 Strengths
@@ -23,10 +14,10 @@ namespace pluginVerilog.Verilog
 
     public enum Strengths
     {
-        supply0,strong0,pull0,weak0,
-        supply1,strong1,pull1,weak1,
-        highz0,highz1,
-        small,medium,large
+        supply0, strong0, pull0, weak0,
+        supply1, strong1, pull1, weak1,
+        highz0, highz1,
+        small, medium, large
     }
 
     //public class ChargeStrength
@@ -191,8 +182,8 @@ namespace pluginVerilog.Verilog
 
 
 
-        public class DriveStrength
-        {
+    public class DriveStrength
+    {
         protected DriveStrength() { }
 
         public Strengths Strength0;
@@ -330,9 +321,9 @@ namespace pluginVerilog.Verilog
         // pullup_strength      ::= (strength0, strength1) | (strength1, strength0) | (strength1 ) 
         public static DriveStrength ParseCreatePullUp(WordScanner word, NameSpace nameSpace)
         {
-            return parseCreatePullUpDown(word,nameSpace,true);
+            return parseCreatePullUpDown(word, nameSpace, true);
         }
-        private static DriveStrength parseCreatePullUpDown(WordScanner word, NameSpace nameSpace,bool pullUp)
+        private static DriveStrength parseCreatePullUpDown(WordScanner word, NameSpace nameSpace, bool pullUp)
         {
             string nextText = word.NextText;
 

@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace pluginVerilog.Verilog.Expressions
 {
     public class Time : Primary
@@ -14,7 +8,7 @@ namespace pluginVerilog.Verilog.Expressions
         public required UnitEnum Unit { get; set; }
         public enum UnitEnum
         {
-            s , ms , us , ns , ps , fs
+            s, ms, us, ns, ps, fs
         }
     }
 }

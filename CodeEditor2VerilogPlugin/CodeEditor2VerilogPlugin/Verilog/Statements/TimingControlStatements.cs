@@ -1,10 +1,5 @@
 using pluginVerilog.Verilog.Expressions;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Statements
 {
@@ -18,7 +13,7 @@ namespace pluginVerilog.Verilog.Statements
         protected DelayControl() { }
 
         public Expressions.Expression DelayValue { get; protected set; }
-        public static DelayControl? ParseCreate(WordScanner word,NameSpace nameSpace)
+        public static DelayControl? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             /*
             delay_control ::=
@@ -46,7 +41,7 @@ namespace pluginVerilog.Verilog.Statements
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
-            if(word.Text != "(")
+            if (word.Text != "(")
             {   // delay_value
                 Expressions.Expression? expression = Primary.ParseCreate(word, nameSpace);
                 if (expression == null)
@@ -86,7 +81,7 @@ namespace pluginVerilog.Verilog.Statements
                         }
                     }
                 }
-                if(word.Text != ")")
+                if (word.Text != ")")
                 {
                     word.AddError("illegal delay control");
                     return null;
@@ -95,7 +90,7 @@ namespace pluginVerilog.Verilog.Statements
             }
 
             DelayControl delayControl = new DelayControl();
-//            delayControl.DelayValue = expression;
+            //            delayControl.DelayValue = expression;
             return delayControl;
         }
     }
@@ -128,11 +123,11 @@ namespace pluginVerilog.Verilog.Statements
             if (word.GetCharAt(0) == '(')
             {
                 word.MoveNext(); // (
-                if(word.GetCharAt(0) == '*')
+                if (word.GetCharAt(0) == '*')
                 {
                     word.Color(CodeDrawStyle.ColorType.Keyword);
                     word.MoveNext(); // *
-                    if(word.GetCharAt(0) != ')')
+                    if (word.GetCharAt(0) != ')')
                     {
                         word.AddError("illegal event contol");
                         return null;
@@ -141,7 +136,7 @@ namespace pluginVerilog.Verilog.Statements
                 }
                 else
                 {
-                    eventExpressions = EventExpression.ParseCreate(word, nameSpace,clockDomains);
+                    eventExpressions = EventExpression.ParseCreate(word, nameSpace, clockDomains);
                     if (word.GetCharAt(0) != ')' || eventExpressions.Count == 0)
                     {
                         word.AddError("illegal event contol");
@@ -220,7 +215,7 @@ namespace pluginVerilog.Verilog.Statements
                         eventExpression = null;
                         break;
                 }
-                if(eventExpression == null)
+                if (eventExpression == null)
                 {
                     break;
                 }
@@ -239,7 +234,7 @@ namespace pluginVerilog.Verilog.Statements
                     word.MoveNext();
                     eventExpression.EventType = EventTypeEnum.Posedge;
                     eventExpression.Expression = Expressions.Expression.ParseCreate(word, nameSpace);
-                    if(clockDomains != null && eventExpression.Expression != null) addClockDomain(eventExpression.Expression, clockDomains);
+                    if (clockDomains != null && eventExpression.Expression != null) addClockDomain(eventExpression.Expression, clockDomains);
                     break;
                 case "negedge":
                     word.Color(CodeDrawStyle.ColorType.Keyword);

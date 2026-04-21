@@ -1,17 +1,5 @@
-using Avalonia.Controls;
 using Avalonia.Controls.Documents;
-using Avalonia.Controls;
-using ExCSS;
-using HarfBuzzSharp;
-using SkiaSharp;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static CodeEditor2.Controller;
-using static System.Net.Mime.MediaTypeNames;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace pluginVerilog.MessageView
 {
@@ -52,10 +40,10 @@ namespace pluginVerilog.MessageView
         {
             if (File != null && File.CodeDocument != null)
             {
-//                File.CodeDocument.SelectionStart = index;
-//                File.CodeDocument.SelectionLast = index + length;
+                //                File.CodeDocument.SelectionStart = index;
+                //                File.CodeDocument.SelectionLast = index + length;
                 CodeEditor2.Controller.CodeEditor.SetCaretPosition(index);
-                CodeEditor2.Controller.CodeEditor.SetSelection(index, index + length-1);
+                CodeEditor2.Controller.CodeEditor.SetSelection(index, index + length - 1);
             }
             CodeEditor2.Controller.CodeEditor.PostScrollToCaret();
         }

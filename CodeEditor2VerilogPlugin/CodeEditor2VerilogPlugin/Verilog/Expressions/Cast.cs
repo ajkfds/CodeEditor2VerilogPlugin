@@ -1,11 +1,6 @@
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace pluginVerilog.Verilog.Expressions
 {
@@ -44,7 +39,7 @@ namespace pluginVerilog.Verilog.Expressions
         }
 
 
-        string Text="";
+        string Text = "";
 
         // constant_cast    ::= casting_type ' ( constant_expression )
         // cast             ::=  casting_type ' ( expression )
@@ -88,7 +83,7 @@ namespace pluginVerilog.Verilog.Expressions
             return ParseCreate(word, nameSpace, constExpression, constExpression.Reference);
         }
 
-        public static Primary? ParseCreate(WordScanner word, NameSpace nameSpace, Expressions.Expression constExpression,WordReference reference)
+        public static Primary? ParseCreate(WordScanner word, NameSpace nameSpace, Expressions.Expression constExpression, WordReference reference)
         {
             if (!constExpression.Constant)
             {
@@ -118,7 +113,7 @@ namespace pluginVerilog.Verilog.Expressions
             cast.Constant = exp1.Constant;
             cast.BitWidth = (int?)constExpression.Value;
             cast.Value = exp1.Value;
-//            cast.ConstantValueString =cast.BitWidth.Value.ToString()
+            //            cast.ConstantValueString =cast.BitWidth.Value.ToString()
 
             if (cast.BitWidth != null && cast.Value != null)
             {
@@ -137,7 +132,7 @@ namespace pluginVerilog.Verilog.Expressions
             IDataType? dataType = null;
 
             Verilog.INamedElement? namedElement = nameSpace.GetNamedElementUpward(word.Text);
-            if(namedElement != null)
+            if (namedElement != null)
             {
                 word.Color(namedElement.ColorType);
                 word.MoveNext();
@@ -145,17 +140,18 @@ namespace pluginVerilog.Verilog.Expressions
                 {
                     dataType = namedElement as IDataType;
                 }
-                else if(namedElement is DataObjects.Constants.Constants)
+                else if (namedElement is DataObjects.Constants.Constants)
                 {
                     DataObjects.Constants.Constants constant = (DataObjects.Constants.Constants)namedElement;
-                    return ParseCreate(word, nameSpace, constant.Expression,wordReference);
+                    return ParseCreate(word, nameSpace, constant.Expression, wordReference);
                 }
                 else
                 {
                     word.AddError("illegal cast");
                     return null;
                 }
-            }else
+            }
+            else
             {
                 dataType = DataTypeFactory.ParseCreate(word, nameSpace, null);
             }
@@ -169,7 +165,7 @@ namespace pluginVerilog.Verilog.Expressions
             }
             word.MoveNext();
 
-            if (word.Eof || word.Text!="(")
+            if (word.Eof || word.Text != "(")
             {
                 word.AddError("illegal cast");
                 return null;
@@ -177,7 +173,7 @@ namespace pluginVerilog.Verilog.Expressions
             word.MoveNext();
 
             Expression? exp1 = Expression.ParseCreate(word, nameSpace);
-            if (word.Eof || exp1 == null || word.Text!=")")
+            if (word.Eof || exp1 == null || word.Text != ")")
             {
                 word.AddError("illegal cast");
                 return null;

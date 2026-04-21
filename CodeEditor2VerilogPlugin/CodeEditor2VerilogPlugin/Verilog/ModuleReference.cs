@@ -1,8 +1,5 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog
 {
@@ -20,9 +17,9 @@ namespace pluginVerilog.Verilog
                 sb.Append(Name);
                 sb.Append(":");
                 bool first = true;
-                foreach(var pair in Parameters)
+                foreach (var pair in Parameters)
                 {
-                    if(first)
+                    if (first)
                     {
                         sb.Append(",");
                         first = false;

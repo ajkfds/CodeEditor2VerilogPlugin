@@ -1,10 +1,3 @@
-using pluginVerilog.Verilog.BuildingBlocks;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace pluginVerilog.Verilog.ModuleItems
 {
     public class ParameterOverride
@@ -30,7 +23,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                 }
                 word.MoveNext();
                 Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
-                if(param != null && expression != null)
+                if (param != null && expression != null)
                 {
 
                 }
@@ -38,7 +31,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                 word.MoveNext();
             }
 
-            if(word.Text!= ";")
+            if (word.Text != ";")
             {
                 word.AddError("; required");
             }

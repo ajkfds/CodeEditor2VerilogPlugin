@@ -1,15 +1,10 @@
-using CodeEditor2.CodeEditor;
 using CodeEditor2.CodeEditor.Parser;
 using pluginVerilog.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Parser
 {
@@ -27,7 +22,7 @@ namespace pluginVerilog.Parser
             Data.IVerilogRelatedFile verilogRelatedFile,
             DocumentParser.ParseModeEnum parseMode,
             System.Threading.CancellationToken? token
-            ) : base(verilogRelatedFile.ToTextFile(),parseMode, token)
+            ) : base(verilogRelatedFile.ToTextFile(), parseMode, token)
         {
             this.ParseMode = parseMode;
 
@@ -36,7 +31,7 @@ namespace pluginVerilog.Parser
             this.TextFile = textFile;
 
             VerilogFile? verilogFile = verilogRelatedFile as VerilogFile;
-            if(verilogFile == null) 
+            if (verilogFile == null)
             {
                 VerilogModuleInstance? verilogModuleInstance = verilogRelatedFile as VerilogModuleInstance;
                 if (verilogModuleInstance != null) verilogFile = verilogModuleInstance.SourceVerilogFile;
@@ -46,7 +41,7 @@ namespace pluginVerilog.Parser
             fileRef = new WeakReference<Data.VerilogFile>(verilogFile);
 
             string key = Verilog.ParsedDocument.KeyGenerator(verilogRelatedFile, null, null);
-            parsedDocument = new Verilog.ParsedDocument(verilogRelatedFile,key, null, parseMode);
+            parsedDocument = new Verilog.ParsedDocument(verilogRelatedFile, key, null, parseMode);
             parsedDocument.Version = verilogRelatedFile.CodeDocument.Version;
 
             // swap CodeDocument to new one
@@ -55,12 +50,12 @@ namespace pluginVerilog.Parser
             parsedDocument.CodeDocument = new CodeEditor.CodeDocument(verilogRelatedFile); // use verilog codeDocument
             parsedDocument.CodeDocument.CopyTextOnlyFrom(originalCodeDocument);
             this.Document = parsedDocument.CodeDocument;
-            
+
             if (verilogRelatedFile is Data.VerilogFile)
             {
                 VerilogFile? file = verilogRelatedFile as Data.VerilogFile;
                 if (file == null) throw new Exception();
-                if(file.SystemVerilog) parsedDocument.SystemVerilog = true;
+                if (file.SystemVerilog) parsedDocument.SystemVerilog = true;
             }
 
             if (verilogRelatedFile is Data.VerilogModuleInstance)
@@ -73,7 +68,7 @@ namespace pluginVerilog.Parser
             word = new Verilog.WordScanner(VerilogDocument, parsedDocument, parsedDocument.SystemVerilog);
             word.CancellationToken = token;
 
-//            System.Diagnostics.Debug.Print("Parser Construct " + sw.ElapsedMilliseconds.ToString());
+            //            System.Diagnostics.Debug.Print("Parser Construct " + sw.ElapsedMilliseconds.ToString());
         }
 
         /// <summary>
@@ -93,7 +88,7 @@ namespace pluginVerilog.Parser
             Dictionary<string, Verilog.Expressions.Expression> parameterOverrides,
             DocumentParser.ParseModeEnum parseMode,
             System.Threading.CancellationToken? token
-            ) : base(verilogRelatedFile.ToTextFile(), parseMode,token)
+            ) : base(verilogRelatedFile.ToTextFile(), parseMode, token)
         {
 
             if (verilogRelatedFile == null) throw new Exception();
@@ -114,8 +109,8 @@ namespace pluginVerilog.Parser
 
             fileRef = new WeakReference<Data.VerilogFile>(verilogFile);
             string key = Verilog.ParsedDocument.KeyGenerator(verilogFile, moduleName, parameterOverrides);
-            
-            parsedDocument = new Verilog.ParsedDocument(verilogRelatedFile,key,null, parseMode);
+
+            parsedDocument = new Verilog.ParsedDocument(verilogRelatedFile, key, null, parseMode);
 
             // swap CodeDocument to new one
             CodeEditor.CodeDocument originalCodeDocument = parsedDocument.CodeDocument;
@@ -126,7 +121,7 @@ namespace pluginVerilog.Parser
             if (
                 (verilogFile != null && verilogFile.SystemVerilog) ||
                 (verilogModuleInstance != null && verilogModuleInstance.SystemVerilog)
-            )                
+            )
             {
                 parsedDocument.SystemVerilog = true;
             }
@@ -136,7 +131,7 @@ namespace pluginVerilog.Parser
             parsedDocument.TargetBuildingBlockName = moduleName;
             word = new Verilog.WordScanner(VerilogDocument, parsedDocument, parsedDocument.SystemVerilog);
 
-//            System.Diagnostics.Debug.Print("Parser Construct " + sw.ElapsedMilliseconds.ToString());
+            //            System.Diagnostics.Debug.Print("Parser Construct " + sw.ElapsedMilliseconds.ToString());
         }
 
         public Verilog.WordScanner word;
@@ -152,15 +147,19 @@ namespace pluginVerilog.Parser
         }
 
         private Verilog.ParsedDocument parsedDocument;
-        public override CodeEditor2.CodeEditor.ParsedDocument ParsedDocument {
-            get {
-                return parsedDocument as CodeEditor2.CodeEditor.ParsedDocument; 
-            } 
+        public override CodeEditor2.CodeEditor.ParsedDocument ParsedDocument
+        {
+            get
+            {
+                return parsedDocument as CodeEditor2.CodeEditor.ParsedDocument;
+            }
         }
-        public virtual Verilog.ParsedDocument VerilogParsedDocument {
-            get {
-                return parsedDocument; 
-            } 
+        public virtual Verilog.ParsedDocument VerilogParsedDocument
+        {
+            get
+            {
+                return parsedDocument;
+            }
         }
 
         //        private Dictionary<string, Verilog.Expressions.Expression> parameterOverrides;
@@ -239,7 +238,7 @@ namespace pluginVerilog.Parser
             word.RootParsedDocument.LockedDocument.Add(word.Document);
             if (File is not Data.VerilogFile) throw new Exception();
 
-            Root root = await Root.ParseCreate(word,VerilogParsedDocument, File);
+            Root root = await Root.ParseCreate(word, VerilogParsedDocument, File);
         }
     }
 }

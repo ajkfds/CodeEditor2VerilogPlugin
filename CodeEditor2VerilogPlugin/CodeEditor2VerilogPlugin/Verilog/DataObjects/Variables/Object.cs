@@ -1,9 +1,6 @@
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
@@ -26,7 +23,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             label.AppendText(Class.Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
             label.AppendText(" ");
         }
-        public static new Object Create(string name,IDataType dataType)
+        public static new Object Create(string name, IDataType dataType)
         {
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.Class);
             BuildingBlocks.Class? class_ = dataType as BuildingBlocks.Class;
@@ -42,7 +39,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         private static void defineElements(INamedElement namedElement)
         {
-            foreach(INamedElement subElement in namedElement.NamedElements)
+            foreach (INamedElement subElement in namedElement.NamedElements)
             {
                 Variable? variable = subElement as Variable;
                 if (variable != null) variable.Defined = true;

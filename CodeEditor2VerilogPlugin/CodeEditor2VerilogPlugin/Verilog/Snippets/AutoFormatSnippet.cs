@@ -1,14 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Text;
-using System.Threading.Tasks;
 using Avalonia.Media;
 using CodeEditor2.CodeEditor;
 using CodeEditor2.CodeEditor.PopupMenu;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.ModuleItems;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace pluginVerilog.Verilog.Snippets
 {
@@ -67,9 +63,9 @@ namespace pluginVerilog.Verilog.Snippets
             string indent = vCodeDocument.GetIndentString(index);
 
             string? moduleString = moduleInstantiation.CreateString("\t");
-            if(moduleString == null)
+            if (moduleString == null)
             {
-                CodeEditor2.Controller.AppendLog("illegal module instance",Colors.Red);
+                CodeEditor2.Controller.AppendLog("illegal module instance", Colors.Red);
                 return;
             }
 

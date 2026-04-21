@@ -1,14 +1,7 @@
 using CodeEditor2.CodeEditor.CodeComplete;
-using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.Variables;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace pluginVerilog.Verilog
 {
@@ -18,10 +11,10 @@ namespace pluginVerilog.Verilog
 
         public static BuiltInMethod Create(string name, Variable? returnValue, List<Port> ports)
         {
-            BuiltInMethod builtInMethod = new BuiltInMethod() { Name=name, ReturnVariable=returnValue };
-            foreach(Port port in ports)
+            BuiltInMethod builtInMethod = new BuiltInMethod() { Name = name, ReturnVariable = returnValue };
+            foreach (Port port in ports)
             {
-                builtInMethod.Ports.Add(port.Name,port);
+                builtInMethod.Ports.Add(port.Name, port);
                 builtInMethod.PortsList.Add(port);
             }
             return builtInMethod;

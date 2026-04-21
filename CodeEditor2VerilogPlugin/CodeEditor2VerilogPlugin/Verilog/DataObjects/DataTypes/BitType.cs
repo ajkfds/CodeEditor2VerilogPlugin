@@ -1,8 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
@@ -10,7 +6,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
     {
         public static BitType Create(bool signed, List<Arrays.PackedArray>? packedDimensions)
         {
-            BitType type = new BitType() { Type = DataTypeEnum.Bit, Signed = signed};
+            BitType type = new BitType() { Type = DataTypeEnum.Bit, Signed = signed };
             if (packedDimensions == null)
             {
                 type.PackedDimensions.Clear();

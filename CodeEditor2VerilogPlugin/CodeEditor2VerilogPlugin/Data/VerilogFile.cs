@@ -1,4 +1,3 @@
-using Avalonia.Controls;
 using Avalonia.Threading;
 using CodeEditor2;
 using CodeEditor2.CodeEditor;
@@ -7,10 +6,8 @@ using CodeEditor2.CodeEditor.Parser;
 using CodeEditor2.CodeEditor.PopupHint;
 using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
-using DynamicData;
 using pluginVerilog.CodeEditor;
 using pluginVerilog.Verilog.BuildingBlocks;
-using pluginVerilog.Verilog.ModuleItems;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -19,7 +16,6 @@ using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using System.Threading;
 using System.Threading.Tasks;
-using static pluginVerilog.Verilog.ParsedDocument;
 
 namespace pluginVerilog.Data
 {
@@ -187,7 +183,7 @@ namespace pluginVerilog.Data
             if (codeDoc == null) return;
             if (newParsedDocument == null) return;
 
-            if(codeDoc.Version != vParsedDocument.Version)
+            if (codeDoc.Version != vParsedDocument.Version)
             {
                 // if code document is updated during parsing, do not accept parsed document because it may be outdated.
                 vParsedDocument.ReparseRequested = true;
@@ -219,9 +215,10 @@ namespace pluginVerilog.Data
             await UpdateAsync();
 
             // update Navigate panel node visual for this item
-            _ = Task.Run(async() => {
+            _ = Task.Run(async () =>
+            {
                 await NavigatePanelNode.UpdateAsync();
-                });
+            });
         }
 
 
@@ -258,14 +255,14 @@ namespace pluginVerilog.Data
                     Controller.MessageView.Update(includeFile.VerilogParsedDocument);
                 }
 
-//                includeFile.NavigatePanelNode.UpdateVisual();
+                //                includeFile.NavigatePanelNode.UpdateVisual();
 
                 // update nested include file
                 await updateIncludeFilesAsync(includeFile.VerilogParsedDocument, item.Items);
             }
         }
 
-        public SemaphoreSlim BaseParseSemapho = new SemaphoreSlim(1,1);
+        public SemaphoreSlim BaseParseSemapho = new SemaphoreSlim(1, 1);
 
 
 
@@ -317,9 +314,9 @@ namespace pluginVerilog.Data
             }
             else
             {
-                if(instancedParsedDocumentRefs.TryGetValue(key,out WeakReference < ParsedDocument >? weakRef))
+                if (instancedParsedDocumentRefs.TryGetValue(key, out WeakReference<ParsedDocument>? weakRef))
                 {
-                    if(weakRef == null)
+                    if (weakRef == null)
                     {
                         instancedParsedDocumentRefs.TryRemove(key, out _);
                         return null;
@@ -354,7 +351,7 @@ namespace pluginVerilog.Data
             }
             else
             {
-                instancedParsedDocumentRefs.AddOrUpdate(id,new WeakReference<ParsedDocument>(parsedDocument),(key,oldValue) => new WeakReference<ParsedDocument>(parsedDocument));
+                instancedParsedDocumentRefs.AddOrUpdate(id, new WeakReference<ParsedDocument>(parsedDocument), (key, oldValue) => new WeakReference<ParsedDocument>(parsedDocument));
             }
         }
 
@@ -451,10 +448,11 @@ namespace pluginVerilog.Data
             }
         }
 
-        public bool TryGetInstanceTextFile(string ID,out InstanceTextFile? instanceTextFile)
+        public bool TryGetInstanceTextFile(string ID, out InstanceTextFile? instanceTextFile)
         {
             textFileLock.EnterReadLock();
-            try{
+            try
+            {
                 instanceTextFile = null;
                 if (instanceDictionary.TryGetValue(ID, out WeakReference<InstanceTextFile>? wref))
                 {
@@ -466,14 +464,15 @@ namespace pluginVerilog.Data
                     return false;
                 }
             }
-            finally { 
+            finally
+            {
                 textFileLock.ExitReadLock();
             }
         }
 
         public override bool ReparseRequested
         {
-            get 
+            get
             {
                 Verilog.ParsedDocument? vParsedDocument = VerilogParsedDocument;
                 if (vParsedDocument == null) return true;
@@ -485,7 +484,7 @@ namespace pluginVerilog.Data
                 if (vParsedDocument == null) return;
                 vParsedDocument.ReparseRequested = value;
             }
-        }    
+        }
 
         public void CheckDirty()
         {
@@ -503,14 +502,14 @@ namespace pluginVerilog.Data
             ReparseRequested = true;
 
             Verilog.ParsedDocument? vParsedDocument = VerilogParsedDocument;
-            if(vParsedDocument == null) return;
+            if (vParsedDocument == null) return;
             textFileLock.EnterWriteLock();
             try
             {
                 List<string> blankId = new List<string>();
                 foreach (var kvp in instanceDictionary)
                 {
-                    if(kvp.Value.TryGetTarget(out InstanceTextFile? instanceTextFile))
+                    if (kvp.Value.TryGetTarget(out InstanceTextFile? instanceTextFile))
                     {
                         instanceTextFile.ReparseRequested = true;
                     }
@@ -532,7 +531,7 @@ namespace pluginVerilog.Data
 
         public override DocumentParser CreateDocumentParser(DocumentParser.ParseModeEnum parseMode, System.Threading.CancellationToken? token)
         {
-            CheckDirty();   
+            CheckDirty();
             return new Parser.VerilogParser(this, parseMode, token);
         }
 
@@ -599,7 +598,7 @@ namespace pluginVerilog.Data
             Verilog.ParsedDocument? parsedDoc = VerilogParsedDocument;
             if (parsedDoc == null) return toolItems;
             List<ToolItem> toolItems2 = VerilogCommon.AutoComplete.GetToolItems(this, index);
-            foreach(ToolItem item in toolItems2)
+            foreach (ToolItem item in toolItems2)
             {
                 toolItems.Add(item);
             }

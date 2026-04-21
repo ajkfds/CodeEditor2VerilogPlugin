@@ -2,10 +2,7 @@ using CodeEditor2.CodeEditor.CodeComplete;
 using pluginVerilog.Verilog.BuildingBlocks;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace pluginVerilog.Verilog.Statements
 {
@@ -55,7 +52,7 @@ namespace pluginVerilog.Verilog.Statements
         list_of_block_variable_identifiers ::=  block_variable_type { , block_variable_type } 
         block_variable_type ::=  variable_identifier        | variable_identifier dimension { dimension }  
         */
-        public static async Task<IStatement?> ParseCreate(WordScanner word,NameSpace nameSpace,string? statement_label, List<string>? clockDomains = null)
+        public static async Task<IStatement?> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label, List<string>? clockDomains = null)
         {
             if (word.Text != "begin") throw new Exception();
 
@@ -82,7 +79,7 @@ namespace pluginVerilog.Verilog.Statements
             }
         }
 
-        private static List<string> endKeyword = new List<string> { "endmodule","endtask","endtask","endinterface","endfunction"};
+        private static List<string> endKeyword = new List<string> { "endmodule", "endtask", "endtask", "endinterface", "endfunction" };
         private static async Task<IStatement?> parseCreateUnnamedSequentialBlock(WordScanner word, NameSpace nameSpace, IndexReference beginIndex, List<string>? clockDomains = null)
         {
             SequentialBlock sequentialBlock = new SequentialBlock();
@@ -147,12 +144,14 @@ namespace pluginVerilog.Verilog.Statements
             while (!word.Eof && word.Text != "end")
             {
                 IStatement? statement = await Verilog.Statements.Statements.ParseCreateStatement(word, nameSpace, clockDomains);
-                if(statement != null)
+                if (statement != null)
                 {
                     sequentialBlock.Statements.Add(statement);
-                } else {
+                }
+                else
+                {
                     if (endKeyword.Contains(word.Text)) break;
-                    while(!word.Eof && word.Text != "end" && !endKeyword.Contains(word.Text))
+                    while (!word.Eof && word.Text != "end" && !endKeyword.Contains(word.Text))
                     {
                         if (word.Text == ";")
                         {
@@ -209,7 +208,7 @@ namespace pluginVerilog.Verilog.Statements
             { // implementation
                 if (nameSpace.NamedElements.ContainsKey(name) && nameSpace.NamedElements[name] is NamedSequentialBlock)
                 {
-//                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    //                    word.Color(CodeDrawStyle.ColorType.Identifier);
                     namedBlock = (NamedSequentialBlock)nameSpace.NamedElements[name];
                 }
                 else
@@ -277,7 +276,7 @@ namespace pluginVerilog.Verilog.Statements
             if (word.Text == ":")
             {
                 word.MoveNext();
-                if(endKeyword.Contains(word.Text) || word.Text == "end")
+                if (endKeyword.Contains(word.Text) || word.Text == "end")
                 {
                     word.AddError("block name required");
                 }
@@ -302,7 +301,7 @@ namespace pluginVerilog.Verilog.Statements
 
     }
 
-    public class NamedSequentialBlock : Verilog.NameSpace,IStatement
+    public class NamedSequentialBlock : Verilog.NameSpace, IStatement
     {
         public void DisposeSubReference()
         {

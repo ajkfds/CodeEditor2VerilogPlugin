@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace pluginVerilog.Verilog.DataObjects.Arrays
 {
     public class DynamicArray : DataObject, IArray
@@ -30,7 +24,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
         }
         public override DataObject Clone()
         {
-            return new DynamicArray() { DataObject = DataObject,Name = DataObject.Name };
+            return new DynamicArray() { DataObject = DataObject, Name = DataObject.Name };
         }
 
         public override DataObject Clone(string name)

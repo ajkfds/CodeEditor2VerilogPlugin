@@ -1,9 +1,4 @@
 using CodeEditor2.CodeEditor.CodeComplete;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Statements
 {
@@ -47,7 +42,7 @@ namespace pluginVerilog.Verilog.Statements
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
-            ret.LValue = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace,false);
+            ret.LValue = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace, false);
 
             if (word.Text != ";")
             {

@@ -1,17 +1,10 @@
-using Avalonia;
 using CodeEditor2.CodeEditor.CodeComplete;
-using pluginVerilog.Data;
-using pluginVerilog.Verilog.BuildingBlocks;
+using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.DataObjects.Variables;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Text.Json.Serialization;
-using pluginVerilog.Verilog.DataObjects.Arrays;
 
 namespace pluginVerilog.Verilog.DataObjects
 {
@@ -124,7 +117,7 @@ namespace pluginVerilog.Verilog.DataObjects
             get
             {
                 if (wr_DefinedNameSpace == null) return null;
-                if(!wr_DefinedNameSpace.TryGetTarget(out NameSpace? nameSpace))
+                if (!wr_DefinedNameSpace.TryGetTarget(out NameSpace? nameSpace))
                 {
                     return null;
                 }
@@ -143,7 +136,7 @@ namespace pluginVerilog.Verilog.DataObjects
         /// <param name="dataType"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public static DataObject Create(string name,DataTypes.IDataType dataType)
+        public static DataObject Create(string name, DataTypes.IDataType dataType)
         {
             switch (dataType.Type)
             {
@@ -181,25 +174,25 @@ namespace pluginVerilog.Verilog.DataObjects
                     return Variables.String.Create(name, dataType);
                 case DataTypeEnum.Chandle:
                     return Variables.Chandle.Create(name, dataType);
-//                case DataTypeEnum.Virtual:
-//                    return .Create(dataType);
+                //                case DataTypeEnum.Virtual:
+                //                    return .Create(dataType);
                 case DataTypeEnum.Class:
                     if (System.Diagnostics.Debugger.IsAttached)
                     {
                         System.Diagnostics.Debugger.Break();
                     }
-                    return Variables.Object.Create(name,dataType);
-//                case DataTypeEnum.Interface:
-//                    return InterfaceInstance.Create(name,dataType);
+                    return Variables.Object.Create(name, dataType);
+                //                case DataTypeEnum.Interface:
+                //                    return InterfaceInstance.Create(name,dataType);
                 case DataTypeEnum.Event:
-                    return Event.Create(name,dataType);
-//                case DataTypeEnum.CoverGroup:
-//                    return .Create(dataType);
+                    return Event.Create(name, dataType);
+                //                case DataTypeEnum.CoverGroup:
+                //                    return .Create(dataType);
                 case DataTypeEnum.Struct:
                     return Struct.Create(name, dataType);
                 case DataTypeEnum.UserDefined:
                     return UserDefinedVariable.Create(name, dataType);
-//        TypeReference
+                    //        TypeReference
 
             }
             throw new NotImplementedException();
@@ -215,7 +208,7 @@ namespace pluginVerilog.Verilog.DataObjects
         /// DataObjectの名称
         /// </summary>
         public required string Name { get; init; }
-        
+
         /// <summary>
         /// 定義時に後ろにつけられた説明コメント
         /// </summary>
@@ -243,12 +236,13 @@ namespace pluginVerilog.Verilog.DataObjects
         }
         public virtual int? BitWidth
         {
-            get {
+            get
+            {
                 int? bitWith = null;
-                if(DataType != null && DataType.BitWidth != null)
+                if (DataType != null && DataType.BitWidth != null)
                 {
                     bitWith = (int)(DataType.BitWidth);
-                    foreach(Arrays.UnPackedArray unPackedArray in UnpackedArrays)
+                    foreach (Arrays.UnPackedArray unPackedArray in UnpackedArrays)
                     {
                         if (unPackedArray.Size == null) return null;
                         bitWith = bitWith * (int)unPackedArray.Size;

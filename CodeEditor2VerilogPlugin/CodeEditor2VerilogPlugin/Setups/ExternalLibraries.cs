@@ -1,15 +1,8 @@
-using CodeEditor2.Parser;
-using ExCSS;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Text;
-using System.Threading.Tasks;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace pluginVerilog.Setups
 {
@@ -32,26 +25,26 @@ namespace pluginVerilog.Setups
 
                 ExternalLibrariesSetup externalLibrariesSetup = new ExternalLibrariesSetup() { ExternalLibraries = libs };
                 CodeEditor2.Parser.YamlParsedDocument? yamlParsedDocument = yamlParser.ParsedDocument as CodeEditor2.Parser.YamlParsedDocument;
-                if(yamlParsedDocument != null) yamlParsedDocument.ParsedObject = externalLibrariesSetup;
+                if (yamlParsedDocument != null) yamlParsedDocument.ParsedObject = externalLibrariesSetup;
 
-                ProjectProperty? projectProperty = yamlParser.TextFile.Project.ProjectProperties[Plugin.StaticID]  as ProjectProperty;
+                ProjectProperty? projectProperty = yamlParser.TextFile.Project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
                 if (projectProperty == null) return;
 
                 projectProperty.ExtenralLibraryPath.Clear();
 
-                foreach(ExternalLibarary externalLibarary in externalLibrariesSetup.ExternalLibraries)
+                foreach (ExternalLibarary externalLibarary in externalLibrariesSetup.ExternalLibraries)
                 {
                     if (externalLibarary == null) continue;
                     if (externalLibarary.Modules == null) continue;
 
-                    foreach(string module in externalLibarary.Modules)
+                    foreach (string module in externalLibarary.Modules)
                     {
                         if (projectProperty.ExtenralLibraryPath.ContainsKey(module)) continue;
                         projectProperty.ExtenralLibraryPath.Add(module, externalLibarary.Path);
                     }
                 }
             }
-            catch(YamlException ex)
+            catch (YamlException ex)
             {
                 yamlParser.Document.Marks.SetMarkAt((int)ex.Start.Index, (int)ex.End.Index - (int)ex.Start.Index, 0);
             }
@@ -67,7 +60,7 @@ namespace pluginVerilog.Setups
             CodeEditor2.Parser.YamlParsedDocument? yamlParsedDocument = yamlFile.ParsedDocument as CodeEditor2.Parser.YamlParsedDocument;
             if (yamlParsedDocument == null) return;
             ExternalLibrariesSetup? externalLibrariesSetup = yamlParsedDocument.ParsedObject as ExternalLibrariesSetup;
-//            yamlFile.Project.
+            //            yamlFile.Project.
         }
         public List<ExternalLibarary> ExternalLibraries { get; set; }
 

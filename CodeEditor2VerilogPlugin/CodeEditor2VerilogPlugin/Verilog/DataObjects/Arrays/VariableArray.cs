@@ -1,8 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.Arrays
 {
@@ -39,7 +35,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
         }
 
         // Constructors
-        public static IArray? ParseCreate(DataObject dataObject,WordScanner word, NameSpace nameSpace)
+        public static IArray? ParseCreate(DataObject dataObject, WordScanner word, NameSpace nameSpace)
         {
             word.MoveNext(); // [
 
@@ -63,7 +59,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
                 if (word.Text == "]")
                 {
                     word.MoveNext();
-                    return AssociativeArray.Create(dataObject,null);
+                    return AssociativeArray.Create(dataObject, null);
                 }
                 else
                 {
@@ -87,7 +83,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
             }
 
             Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace, false);
-            if(expression != null)
+            if (expression != null)
             {
                 return UnPackedArray.ParseCreate(word, nameSpace, expression);
             }

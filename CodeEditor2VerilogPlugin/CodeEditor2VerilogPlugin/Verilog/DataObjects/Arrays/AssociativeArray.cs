@@ -1,16 +1,10 @@
 using pluginVerilog.Verilog.DataObjects.Variables;
-using ReactiveUI;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace pluginVerilog.Verilog.DataObjects.Arrays
 {
-    public class AssociativeArray : DataObject,IArray
+    public class AssociativeArray : DataObject, IArray
     {
         protected AssociativeArray() { }
         public int? Size { get; protected set; } = null;

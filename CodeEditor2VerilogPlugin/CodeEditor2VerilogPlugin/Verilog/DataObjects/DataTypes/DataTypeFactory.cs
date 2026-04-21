@@ -1,11 +1,6 @@
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects.Arrays;
-using pluginVerilog.Verilog.DataObjects.Variables;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
@@ -194,7 +189,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
             {
                 INamedElement? namedElement = nameSpace.GetNamedElementUpward(word.Text);
-                if(namedElement != null)
+                if (namedElement != null)
                 {
                     // class
                     if (namedElement is BuildingBlocks.Class)
@@ -245,7 +240,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             BuildingBlock? buildingBlock = word.ProjectProperty.GetBuildingBlock(word.Text);
             if (buildingBlock is Class)
             {
-                Class class_ =(Class) buildingBlock;
+                Class class_ = (Class)buildingBlock;
                 word.Color(CodeDrawStyle.ColorType.Identifier);
                 word.MoveNext();
                 return class_;
@@ -306,7 +301,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     dType = ByteType.Create(signed);
                     break;
                 case DataTypeEnum.Shortint:
-                    dType= ShortIntType.Create(signed);
+                    dType = ShortIntType.Create(signed);
                     break;
                 case DataTypeEnum.Int:
                     dType = IntType.Create(signed);
@@ -363,7 +358,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 return null;
             }
 
-            IDataType? dtype = ParseCreate(word, nameSpace,null);
+            IDataType? dtype = ParseCreate(word, nameSpace, null);
             if (dtype == null)
             {
                 Expressions.Expression? ex = Expressions.Expression.ParseCreate(word, nameSpace);

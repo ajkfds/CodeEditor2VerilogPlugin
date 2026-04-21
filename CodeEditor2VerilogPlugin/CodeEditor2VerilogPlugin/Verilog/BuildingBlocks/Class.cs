@@ -1,26 +1,17 @@
 using AjkAvaloniaLibs.Controls;
-using Avalonia.Input;
-using CodeEditor2.CodeEditor;
 using CodeEditor2.CodeEditor.CodeComplete;
-using CodeEditor2.Data;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.ModuleItems;
-using Svg;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using static pluginVerilog.Verilog.ModuleItems.ModuleInstantiation;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
     public class Class : BuildingBlock, IModuleOrInterface, IModuleOrInterfaceOrCheckerOrClass, DataObjects.DataTypes.IDataType, IPortNameSpace
     {
-        protected Class() : base(null,null)
+        protected Class() : base(null, null)
         {
 
         }
@@ -73,9 +64,10 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             get { return cellDefine; }
         }
 
-        public DataTypeEnum Type {
+        public DataTypeEnum Type
+        {
             get { return DataTypeEnum.Class; }
-            set { } 
+            set { }
         }
         public static async System.Threading.Tasks.Task ParseDeclaration(WordScanner word, NameSpace nameSpace)
         {
@@ -102,7 +94,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
         }
 
-        
+
         public IDataType Clone()
         {
             Class class_ = new Class()
@@ -115,9 +107,9 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 Project = Project,
                 IsVirtual = IsVirtual
             };
-            foreach(var namedElement in NamedElements)
+            foreach (var namedElement in NamedElements)
             {
-                class_.NamedElements.Add(namedElement.Name,namedElement);
+                class_.NamedElements.Add(namedElement.Name, namedElement);
             }
             return class_;
         }
@@ -132,7 +124,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             Dictionary<string, Expressions.Expression>? parameterOverrides
             )
         {
-//            bool protoType = false;
+            //            bool protoType = false;
             /*
             class_declaration ::=  
                     [ "virtual" ] "class" [ lifetime ] class_identifier [ parameter_port_list ] [ "extends" class_type [ ( list_of_arguments ) ] ]  
@@ -155,7 +147,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
              
              */
             bool virtial = false;
-            if(word.Text == "virtual")
+            if (word.Text == "virtual")
             {
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 word.MoveNext();
@@ -189,7 +181,8 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 return null;
             }
 
-            Class class_ = new Class() {
+            Class class_ = new Class()
+            {
                 BeginIndexReference = beginReference,
                 DefinitionReference = word.CrateWordReference(),
                 File = word.RootParsedDocument.File,
@@ -204,11 +197,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             if (word.CellDefine) class_.cellDefine = true;
             word.MoveNext();
 
-            if(nameSpace.BuildingBlock is Root)
+            if (nameSpace.BuildingBlock is Root)
             {
                 // prototype parse
                 WordScanner prototypeWord = word.Clone();
-//                WordScanner prototypeWord = word;
+                //                WordScanner prototypeWord = word;
                 prototypeWord.Prototype = true;
                 await parseClassItems(prototypeWord, nameSpace, parameterOverrides, null, class_);
                 prototypeWord.Dispose();
@@ -290,7 +283,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             // add implicit new function
             if (class_ != null && !class_.NamedElements.ContainsKey("new"))
             {
-                Function function = Function.Create(class_,"new");
+                Function function = Function.Create(class_, "new");
                 class_.NamedElements.Add("new", function);
             }
 
@@ -303,13 +296,13 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
                 word.RootParsedDocument.Root.BuildingBlocks.Add(class_.Name, class_);
             }
-            else if(word.Prototype)
+            else if (word.Prototype)
             {
                 word.AddError("duplicated class name");
             }
             else
             {
-                word.RootParsedDocument.Root.BuildingBlocks[class_.Name]=class_;
+                word.RootParsedDocument.Root.BuildingBlocks[class_.Name] = class_;
             }
 
             return class_;
@@ -332,7 +325,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             NameSpace nameSpace,
             //            string parameterOverrideModueName,
             Dictionary<string, Expressions.Expression>? parameterOverrides,
-            Attribute? attribute, 
+            Attribute? attribute,
             Class class_
             )
         {
@@ -413,7 +406,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
 
                 // [ "extends" class_type[(list_of_arguments)] ]  
-                if(word.Text == "extends")
+                if (word.Text == "extends")
                 {
                     word.Color(CodeDrawStyle.ColorType.Keyword);
                     word.MoveNext();
@@ -430,13 +423,13 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
 
                         Function? constructor = null;
-                        if(baseClass != null)
+                        if (baseClass != null)
                         {
                             baseClass.NamedElements.TryGetValue("new", out INamedElement? newElement);
                             constructor = newElement as Function;
                         }
 
-                        if(word.Text == "(")
+                        if (word.Text == "(")
                         {
                             Dictionary<string, Expressions.Expression> portConnection = new Dictionary<string, Expressions.Expression>();
                             Expressions.ListOfArguments.ParseListOfArguments(word, nameSpace, constructor, portConnection);
@@ -444,23 +437,26 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                         DataObjects.Variables.Object superClassObject = DataObjects.Variables.Object.Create("super", baseClass);
                         superClassObject.Defined = true;
-                        class_.NamedElements.Add( superClassObject.Name,superClassObject );
+                        class_.NamedElements.Add(superClassObject.Name, superClassObject);
 
-                        foreach(INamedElement namedElement in baseClass.NamedElements.Values)
+                        foreach (INamedElement namedElement in baseClass.NamedElements.Values)
                         {
-                            if(namedElement is DataObjects.DataObject)
+                            if (namedElement is DataObjects.DataObject)
                             {
                                 DataObjects.DataObject dataObject = (DataObjects.DataObject)namedElement;
                                 if (!class_.NamedElements.ContainsKey(namedElement.Name)) class_.NamedElements.Add(namedElement.Name, namedElement);
-                            } else if(namedElement is Typedef)
+                            }
+                            else if (namedElement is Typedef)
                             {
                                 Typedef typeDef = (Typedef)namedElement;
                                 if (!class_.NamedElements.ContainsKey(namedElement.Name)) class_.NamedElements.Add(namedElement.Name, namedElement);
-                            } else if(namedElement is Function)
+                            }
+                            else if (namedElement is Function)
                             {
                                 Function function = (Function)namedElement;
                                 if (!class_.NamedElements.ContainsKey(namedElement.Name)) class_.NamedElements.Add(namedElement.Name, namedElement);
-                            } else if(namedElement is Task)
+                            }
+                            else if (namedElement is Task)
                             {
                                 Task task = (Task)namedElement;
                                 if (!class_.NamedElements.ContainsKey(namedElement.Name)) class_.NamedElements.Add(namedElement.Name, namedElement);
@@ -511,9 +507,9 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
             base.AppendAutoCompleteItem(items);
 
-            foreach(INamedElement namedElement in NamedElements.Values)
+            foreach (INamedElement namedElement in NamedElements.Values)
             {
-                if(namedElement is IBuildingBlockInstantiation)
+                if (namedElement is IBuildingBlockInstantiation)
                 {
                     IBuildingBlockInstantiation instantiation = (IBuildingBlockInstantiation)namedElement;
                     items.Add(newItem(instantiation.Name, CodeDrawStyle.ColorType.Identifier));

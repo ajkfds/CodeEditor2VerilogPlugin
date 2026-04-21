@@ -1,16 +1,10 @@
+using Avalonia.Input;
+using CodeEditor2.CodeEditor;
+using CodeEditor2.Views;
+using pluginVerilog.Verilog.BuildingBlocks;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using CodeEditor2.CodeEditor;
-using System.Drawing;
-using pluginVerilog.Verilog.BuildingBlocks;
-using Avalonia.Input;
-using CodeEditor2.Views;
-using Avalonia.Media;
-using static System.Net.Mime.MediaTypeNames;
-using System.Reflection.Metadata;
 
 namespace pluginVerilog.Verilog.Snippets
 {
@@ -53,7 +47,7 @@ namespace pluginVerilog.Verilog.Snippets
                 if (vFile == null) return;
 
                 ParsedDocument? parentParsedDocument = vFile.VerilogParsedDocument;
-                if(parentParsedDocument == null) return;
+                if (parentParsedDocument == null) return;
                 BuildingBlock? module = parentParsedDocument.GetBuildingBlockAt(vFile.CodeDocument.CaretIndex);
                 if (module == null) return;
 
@@ -150,7 +144,7 @@ namespace pluginVerilog.Verilog.Snippets
                     CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
                     break;
             }
-    }
+        }
 
         private void moveToNextHighlight(out bool moved)
         {

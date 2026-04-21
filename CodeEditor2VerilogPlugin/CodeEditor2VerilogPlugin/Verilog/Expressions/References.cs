@@ -1,9 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using pluginVerilog.Verilog.ModuleItems;
 
 namespace pluginVerilog.Verilog.Expressions
 {
@@ -24,7 +19,7 @@ namespace pluginVerilog.Verilog.Expressions
             get
             {
                 IPortNameSpace ret;
-                if(taskReferenceRef == null || !taskReferenceRef.TryGetTarget(out ret)) return null;
+                if (taskReferenceRef == null || !taskReferenceRef.TryGetTarget(out ret)) return null;
                 return ret;
             }
             protected set
@@ -47,10 +42,11 @@ namespace pluginVerilog.Verilog.Expressions
             if (taskNameSpace.BuildingBlock.NamedElements.ContainsTask(ret.TaskName))
             {
                 ret.Task = (Task)taskNameSpace.BuildingBlock.NamedElements[ret.TaskName];
-            }else if (taskNameSpace.BuildingBlock.NamedElements.ContainsFunction(ret.TaskName))
+            }
+            else if (taskNameSpace.BuildingBlock.NamedElements.ContainsFunction(ret.TaskName))
             {
                 Function function = (Function)taskNameSpace.BuildingBlock.NamedElements[ret.TaskName];
-                if(function.ReturnVariable != null)
+                if (function.ReturnVariable != null)
                 {
                     word.AddError("illegal task name");
                 }
@@ -59,7 +55,7 @@ namespace pluginVerilog.Verilog.Expressions
                     ret.Task = function;
                 }
             }
-            else if(!word.Prototype)
+            else if (!word.Prototype)
             {
                 word.AddError("illegal task name");
             }

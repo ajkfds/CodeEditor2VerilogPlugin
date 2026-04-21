@@ -1,8 +1,3 @@
-using pluginVerilog.Verilog.BuildingBlocks;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.ModuleItems
@@ -10,7 +5,7 @@ namespace pluginVerilog.Verilog.ModuleItems
     public class AlwaysConstruct
     {
         protected AlwaysConstruct() { }
-        public Statements.IStatement? Statement { get; protected set;}
+        public Statements.IStatement? Statement { get; protected set; }
 
         /* ## Verilog2001
             always_construct ::= always statement     */
@@ -48,7 +43,7 @@ namespace pluginVerilog.Verilog.ModuleItems
 
             AlwaysConstruct always = new AlwaysConstruct();
             always.Statement = await Statements.Statements.ParseCreateStatement(word, nameSpace);
-            if(always.Statement == null)
+            if (always.Statement == null)
             {
                 word.AddError("illegal always construct");
                 return null;

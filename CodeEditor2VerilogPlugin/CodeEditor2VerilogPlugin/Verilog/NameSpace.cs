@@ -1,22 +1,14 @@
 using Avalonia.Input;
 using CodeEditor2.CodeEditor.CodeComplete;
 using pluginVerilog.Verilog.BuildingBlocks;
-using pluginVerilog.Verilog.DataObjects.Nets;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace pluginVerilog.Verilog
 {
     public class NameSpace : Item, INamedElement
     {
-        protected NameSpace(BuildingBlocks.BuildingBlock buildingBlock,NameSpace parent)
+        protected NameSpace(BuildingBlocks.BuildingBlock buildingBlock, NameSpace parent)
         {
             BuildingBlock = buildingBlock;
             Parent = parent;
@@ -35,7 +27,7 @@ namespace pluginVerilog.Verilog
                 "CodeEditor2/Assets/Icons/tag.svg"
                 );
         }
-        public virtual CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable ; } }
+        public virtual CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
 
         public NamedElements NamedElements { get; } = new NamedElements();
 
@@ -59,7 +51,7 @@ namespace pluginVerilog.Verilog
             return Parent.GetNamedElementUpward(name);
         }
 
-        public INamedElement? GetNamedElementUpward(string name,out NameSpace? nameSpace)
+        public INamedElement? GetNamedElementUpward(string name, out NameSpace? nameSpace)
         {
             nameSpace = null;
             if (NamedElements.ContainsKey(name))
@@ -68,7 +60,7 @@ namespace pluginVerilog.Verilog
                 return NamedElements[name];
             }
             if (Parent == null) return null;
-            return Parent.GetNamedElementUpward(name,out nameSpace);
+            return Parent.GetNamedElementUpward(name, out nameSpace);
         }
 
 
@@ -76,7 +68,7 @@ namespace pluginVerilog.Verilog
         {
             foreach (INamedElement namedElement in BuildingBlock.NamedElements.Values)
             {
-                if(namedElement is Function)
+                if (namedElement is Function)
                 {
                     Function function = (Function)namedElement;
                     if (function.BeginIndexReference == null) continue;
@@ -86,7 +78,7 @@ namespace pluginVerilog.Verilog
                     if (iref.IsGreaterThan(function.LastIndexReference)) continue;
                     return function.GetHierarchyNameSpaceDownward(iref);
                 }
-                else if(namedElement is Task)
+                else if (namedElement is Task)
                 {
                     Task task = (Task)namedElement;
                     if (task.BeginIndexReference == null) continue;
@@ -102,7 +94,7 @@ namespace pluginVerilog.Verilog
         }
         public NameSpace GetHierarchyNameSpaceDownward(IndexReference iref)
         {
-            foreach(INamedElement element in NamedElements.Values)
+            foreach (INamedElement element in NamedElements.Values)
             {
                 NameSpace? nameSpace = element as NameSpace;
                 if (nameSpace == null) continue;
@@ -121,7 +113,7 @@ namespace pluginVerilog.Verilog
             List<ModuleItems.IBuildingBlockInstantiation> list = new List<ModuleItems.IBuildingBlockInstantiation>();
             return getBuildingBlockInstantiations(this, list);
         }
-        private List<ModuleItems.IBuildingBlockInstantiation> getBuildingBlockInstantiations(NameSpace nameSpace,List<ModuleItems.IBuildingBlockInstantiation> list)
+        private List<ModuleItems.IBuildingBlockInstantiation> getBuildingBlockInstantiations(NameSpace nameSpace, List<ModuleItems.IBuildingBlockInstantiation> list)
         {
             foreach (INamedElement namedElement in nameSpace.NamedElements.Values)
             {
@@ -142,11 +134,11 @@ namespace pluginVerilog.Verilog
         {
             return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(text, CodeDrawStyle.ColorIndex(colorType), Global.CodeDrawStyle.Color(colorType));
         }
-        public virtual void AppendAutoCompleteItem( List<AutocompleteItem> items)
+        public virtual void AppendAutoCompleteItem(List<AutocompleteItem> items)
         {
             foreach (INamedElement element in NamedElements.Values)
             {
-                if(element is DataObject)
+                if (element is DataObject)
                 {
                     DataObjects.DataObject variable = (DataObjects.DataObject)element;
                     if (variable is DataObjects.Nets.Net)
@@ -165,30 +157,33 @@ namespace pluginVerilog.Verilog
                     {
                         items.Add(newItem(variable.Name, CodeDrawStyle.ColorType.Variable));
                     }
-                } else if(element is NameSpace)
+                }
+                else if (element is NameSpace)
                 {
                     NameSpace space = (NameSpace)element;
                     if (space.Name == null) System.Diagnostics.Debugger.Break();
                     if (space.Name == null) continue;
                     items.Add(newItem(space.Name, CodeDrawStyle.ColorType.Identifier));
 
-                }else if(element is DataObjects.Constants.Constants)
+                }
+                else if (element is DataObjects.Constants.Constants)
                 {
                     DataObjects.Constants.Constants constants = (DataObjects.Constants.Constants)element;
                     items.Add(newItem(constants.Name, CodeDrawStyle.ColorType.Parameter));
-                }else if(element is Function)
+                }
+                else if (element is Function)
                 {
                     Function function = (Function)element;
                     items.Add(newItem(function.Name, CodeDrawStyle.ColorType.Identifier));
                 }
-                else if(element is Task)
+                else if (element is Task)
                 {
                     Task task = (Task)element;
                     items.Add(newItem(task.Name, CodeDrawStyle.ColorType.Identifier));
                 }
             }
 
-            if(Parent != null)
+            if (Parent != null)
             {
                 Parent.AppendAutoCompleteItem(items);
             }
@@ -209,7 +204,7 @@ namespace pluginVerilog.Verilog
             }
             else
             {
-                
+
             }
             return null;
         }

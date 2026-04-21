@@ -1,8 +1,4 @@
-using pluginVerilog.Verilog.BuildingBlocks;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.ModuleItems
@@ -19,7 +15,7 @@ namespace pluginVerilog.Verilog.ModuleItems
         {
             List<ModuleItems.ContinuousAssign> continuousAssigns = ModuleItems.ContinuousAssign.ParseCreate(word, nameSpace);
 
-            
+
             return await System.Threading.Tasks.Task.FromResult(true);
         }
 
@@ -28,7 +24,7 @@ namespace pluginVerilog.Verilog.ModuleItems
             // continuous_assign::= assign[drive_strength][delay3] list_of_net_assignments;
             // list_of_net_assignments::= net_assignment { , net_assignment }
             // net_assignment::= net_lvalue = expression
-            if(word.Text != "assign")
+            if (word.Text != "assign")
             {
                 System.Diagnostics.Debugger.Break();
             }
@@ -63,11 +59,12 @@ namespace pluginVerilog.Verilog.ModuleItems
                 }
                 continuousAssigns.Add(continuousAssign);
 
-                if(word.Text == ";")
+                if (word.Text == ";")
                 {
                     word.MoveNext();
                     break;
-                }else if(word.Text == ",")
+                }
+                else if (word.Text == ",")
                 {
                     word.MoveNext();
                     continue;

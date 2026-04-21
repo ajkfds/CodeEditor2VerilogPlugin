@@ -1,14 +1,10 @@
-using AjkAvaloniaLibs.Controls;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog
 {
-    public class WeakReferenceDictionary<K,T> where K:notnull where T: class 
+    public class WeakReferenceDictionary<K, T> where K : notnull where T : class
     {
         private Dictionary<K, System.WeakReference<T>> itemRefs = new Dictionary<K, WeakReference<T>>();
 
@@ -100,7 +96,7 @@ namespace pluginVerilog
             }
         }
 
-        public List<K> GetMatchedKeyList(Func<T,bool> isMatched)
+        public List<K> GetMatchedKeyList(Func<T, bool> isMatched)
         {
             List<K> resultKeys = new List<K>();
             List<K> removeKeys = new List<K>();
@@ -111,7 +107,8 @@ namespace pluginVerilog
                 if (!itemRefs[itemRef.Key].TryGetTarget(out item))
                 {
                     removeKeys.Add(itemRef.Key);
-                }else if (isMatched(item))
+                }
+                else if (isMatched(item))
                 {
                     resultKeys.Add(itemRef.Key);
                 }
@@ -135,7 +132,7 @@ namespace pluginVerilog
             {
                 List<K> removeKeys = new List<K>();
 
-                foreach(var itemRef in itemRefs)
+                foreach (var itemRef in itemRefs)
                 {
                     T? item;
                     if (!itemRefs[itemRef.Key].TryGetTarget(out item))
@@ -145,7 +142,7 @@ namespace pluginVerilog
 
                 }
 
-                foreach(var key in removeKeys)
+                foreach (var key in removeKeys)
                 {
                     itemRefs.Remove(key);
                 }

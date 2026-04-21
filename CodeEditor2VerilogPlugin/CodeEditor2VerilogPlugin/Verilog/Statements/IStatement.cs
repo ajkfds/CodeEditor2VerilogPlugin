@@ -1,12 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace pluginVerilog.Verilog.Statements
 {
-    public interface IStatement: INamedElement
+    public interface IStatement : INamedElement
     {
         void DisposeSubReference();
 

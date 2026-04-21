@@ -1,8 +1,5 @@
 using CodeEditor2.CodeEditor.CodeComplete;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Statements
@@ -15,7 +12,7 @@ namespace pluginVerilog.Verilog.Statements
         public NamedElements NamedElements => new NamedElements();
         public void DisposeSubReference()
         {
-            foreach(ConditionStatementPair pair in ConditionStatementPairs)
+            foreach (ConditionStatementPair pair in ConditionStatementPairs)
             {
                 pair.ConditionalExpression.DisposeSubReference(true);
                 pair.Statement.DisposeSubReference();
@@ -54,14 +51,14 @@ namespace pluginVerilog.Verilog.Statements
                                             | function_if_else_if_statement
         function_if_else_if_statement   ::= if (expression ) function_statement_or_null { else if (expression) function_statement_or_null } [ else function_statement_or_null]
         */
-        public static async Task<ConditionalStatement?> ParseCreate(WordScanner word, NameSpace nameSpace,string? statement_label, List<string>? clockDomains = null)
+        public static async Task<ConditionalStatement?> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label, List<string>? clockDomains = null)
         {
             System.Diagnostics.Debug.Assert(word.Text == "if");
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext(); // if
 
             ConditionalStatement conditionalStatement = new ConditionalStatement() { Name = "" };
-            if(statement_label != null) { conditionalStatement.Name = statement_label; }
+            if (statement_label != null) { conditionalStatement.Name = statement_label; }
 
             if (word.GetCharAt(0) != '(')
             {
@@ -84,7 +81,7 @@ namespace pluginVerilog.Verilog.Statements
             }
             word.MoveNext(); // )
 
-            IStatement? statement = await Statements.ParseCreateStatementOrNull(word, nameSpace,clockDomains);
+            IStatement? statement = await Statements.ParseCreateStatementOrNull(word, nameSpace, clockDomains);
             if (statement == null)
             {
                 word.AddError("illegal conditional expression");
@@ -123,7 +120,7 @@ namespace pluginVerilog.Verilog.Statements
                     word.MoveNext(); // )
 
                     statement = await Statements.ParseCreateStatementOrNull(word, nameSpace, clockDomains);
-                    if(statement !=null) conditionalStatement.ConditionStatementPairs.Add(new ConditionStatementPair(conditionExpression, statement));
+                    if (statement != null) conditionalStatement.ConditionStatementPairs.Add(new ConditionStatementPair(conditionExpression, statement));
                 }
                 else
                 {

@@ -1,18 +1,10 @@
-using Avalonia.Input;
-using CodeEditor2.Data;
 using pluginVerilog.Verilog.DataObjects.Variables;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using static pluginVerilog.Verilog.DataObjects.DataTypes.Enum;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace pluginVerilog.Verilog.DataObjects.Arrays
 {
-    public class Queue : DataObject,IArray
+    public class Queue : DataObject, IArray
     {
         // defined in section 7.10
         protected Queue() { }
@@ -73,7 +65,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
                 if (word.Text == "]")
                 {
                     word.MoveNext(); // ]
-                    return Create(dataObject,expression);
+                    return Create(dataObject, expression);
                 }
                 else
                 {
@@ -135,7 +127,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
                 Port? port = Port.Create("item", null, Port.DirectionEnum.Input, dataObject);
                 if (port != null) ports.Add(port);
                 BuiltInMethod builtInMethod = BuiltInMethod.Create("push_back", null, ports);
-                queue.NamedElements.Add(builtInMethod.Name,builtInMethod);
+                queue.NamedElements.Add(builtInMethod.Name, builtInMethod);
             }
 
 
@@ -144,7 +136,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
         public override DataObject Clone()
         {
             Queue queue = Queue.Create(DataObject.Clone(), MaxSizeExpression);
-           return queue;
+            return queue;
         }
 
         public override DataObject Clone(string name)

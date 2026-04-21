@@ -1,8 +1,4 @@
 using pluginVerilog.Verilog.DataObjects.Nets;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Items
@@ -32,7 +28,7 @@ namespace pluginVerilog.Verilog.Items
             // data_declaration
             if (await DataDeclaration.Parse(word, nameSpace)) return true;
 
-//            if (DataObjects.Variables.Variable.ParseDeclaration(word, nameSpace)) return true;
+            //            if (DataObjects.Variables.Variable.ParseDeclaration(word, nameSpace)) return true;
             /*
             data_declaration ::=      [ const ] [ var ] [ lifetime ] data_type_or_implicit list_of_variable_decl_assignments ;10
                                     | type_declaration
@@ -106,7 +102,7 @@ namespace pluginVerilog.Verilog.Items
                     break;
 
                 // class_constructor_declaration
-                
+
                 // local_parameter_declaration;
                 // parameter_declaration;
                 case "parameter":
@@ -126,7 +122,7 @@ namespace pluginVerilog.Verilog.Items
 
                 // etc
                 case "(*":
-                    Attribute attribute = Attribute.ParseCreate(word,nameSpace);
+                    Attribute attribute = Attribute.ParseCreate(word, nameSpace);
                     break;
                 // errpr trap
                 case "endgenerate":

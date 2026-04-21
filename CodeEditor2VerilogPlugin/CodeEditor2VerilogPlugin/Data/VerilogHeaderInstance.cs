@@ -1,4 +1,3 @@
-using Avalonia.Threading;
 //using CodeEditor2.CodeEditor;
 using CodeEditor2.CodeEditor.CodeComplete;
 using CodeEditor2.CodeEditor.Parser;
@@ -7,16 +6,10 @@ using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
 using pluginVerilog.CodeEditor;
 using pluginVerilog.Verilog;
-using pluginVerilog.Verilog.ModuleItems;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading;
-using System.Threading.Tasks;
-using static CodeEditor2.Controller;
-using static pluginVerilog.Verilog.ParsedDocument;
 
 namespace pluginVerilog.Data
 {
@@ -30,7 +23,7 @@ namespace pluginVerilog.Data
             nodeRefDictionaryLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
         }
 
-        
+
         public static VerilogHeaderInstance? Create(
             string relativePath,
             string name,
@@ -44,7 +37,7 @@ namespace pluginVerilog.Data
             VerilogHeaderFile? vhFile = fileItem as VerilogHeaderFile;
 
             if (vhFile == null) return null;
-            
+
 
             //string name;
             //if (relativePath.Contains(System.IO.Path.DirectorySeparatorChar))
@@ -55,10 +48,11 @@ namespace pluginVerilog.Data
             //{
             //    name = relativePath;
             //}
-            VerilogHeaderInstance instance = new VerilogHeaderInstance(vhFile) {
+            VerilogHeaderInstance instance = new VerilogHeaderInstance(vhFile)
+            {
                 Name = name,
                 Project = project,
-                RelativePath = relativePath 
+                RelativePath = relativePath
             };
 
             instance.ID = id;
@@ -247,7 +241,7 @@ namespace pluginVerilog.Data
                 textFileLock.EnterReadLock();
                 try
                 {
-                    if(parsedDocument==null) throw new Exception();
+                    if (parsedDocument == null) throw new Exception();
                     return parsedDocument;
                 }
                 finally
@@ -358,7 +352,7 @@ namespace pluginVerilog.Data
 
         public override async System.Threading.Tasks.Task SaveAsync()
         {
-            if(SourceTextFile == null) return;
+            if (SourceTextFile == null) return;
             await SourceTextFile.SaveAsync();
         }
 
@@ -396,7 +390,7 @@ namespace pluginVerilog.Data
             //    source.AcceptParsedDocument(newParsedDocument);
 
 
-//            ReparseRequested = VerilogParsedDocument.ReparseRequested;
+            //            ReparseRequested = VerilogParsedDocument.ReparseRequested;
             await UpdateAsync();
         }
 
@@ -427,7 +421,7 @@ namespace pluginVerilog.Data
 
         protected override CodeEditor2.NavigatePanel.NavigatePanelNode CreateNode()
         {
-            NavigatePanel.VerilogHeaderInstanceNode node = new NavigatePanel.VerilogHeaderInstanceNode(this,Project);
+            NavigatePanel.VerilogHeaderInstanceNode node = new NavigatePanel.VerilogHeaderInstanceNode(this, Project);
             return node;
         }
 
@@ -439,7 +433,7 @@ namespace pluginVerilog.Data
             if (parseMode != DocumentParser.ParseModeEnum.EditParse) return null;
 
             // Use Parent File Parser for Edit Parse
-            return parentFile.CreateDocumentParser(parseMode,token);
+            return parentFile.CreateDocumentParser(parseMode, token);
         }
 
         // update sub-items from ParsedDocument

@@ -1,9 +1,4 @@
-using pluginVerilog.Verilog.DataObjects.Variables;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog
 {
@@ -15,7 +10,7 @@ namespace pluginVerilog.Verilog
         //        text_macro_identifier::= (From Annex A - A.9.3) simple_identifier
         protected Macro() { }
 
-        public static Macro Create(string name,string macroText)
+        public static Macro Create(string name, string macroText)
         {
             Macro macro = new Macro();
 
@@ -27,7 +22,7 @@ namespace pluginVerilog.Verilog
             // seprarate identifier & argument
             if (text.StartsWith("(") && text.Contains(")"))
             {
-                string argumentsText = text.Substring(1, text.IndexOf(")")-1);
+                string argumentsText = text.Substring(1, text.IndexOf(")") - 1);
                 text = text.Substring(argumentsText.Length + 2);
 
                 string[] arguments = argumentsText.Split(',');
@@ -49,7 +44,7 @@ namespace pluginVerilog.Verilog
         public List<string> Aurguments = null;
         public string MacroText;
 
-        public void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label,Dictionary<string,Macro> macros)
+        public void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label, Dictionary<string, Macro> macros)
         {
             if (Name == null) return;
             label.AppendText(Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Identifier));
@@ -58,8 +53,9 @@ namespace pluginVerilog.Verilog
             label.AppendText("\r\n");
 
             string fixedText = MacroText;
-            while (fixedText.Contains("`")){
-                foreach(Macro macro in macros.Values)
+            while (fixedText.Contains("`"))
+            {
+                foreach (Macro macro in macros.Values)
                 {
                     string searchString = "`" + macro.Name;
                     if (fixedText.Contains(searchString))

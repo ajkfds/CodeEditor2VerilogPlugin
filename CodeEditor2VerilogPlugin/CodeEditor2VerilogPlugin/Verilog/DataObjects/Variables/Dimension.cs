@@ -1,11 +1,3 @@
-using SkiaSharp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
     public class Dimension
@@ -48,7 +40,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             if (word.GetCharAt(0) == ']')
             {
                 word.MoveNext();
-                Dimension range = new Dimension() { MsbBitExpression = msbExpression,LsbBitExpression = msbExpression };
+                Dimension range = new Dimension() { MsbBitExpression = msbExpression, LsbBitExpression = msbExpression };
                 return range;
             }
 
@@ -76,7 +68,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             }
             word.MoveNext(); // [
             {
-                Dimension range = new Dimension() { MsbBitExpression=msbExpression,LsbBitExpression = msbExpression };
+                Dimension range = new Dimension() { MsbBitExpression = msbExpression, LsbBitExpression = msbExpression };
                 return range;
             }
         }

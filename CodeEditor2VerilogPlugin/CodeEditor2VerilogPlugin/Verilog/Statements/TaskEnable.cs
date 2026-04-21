@@ -1,9 +1,4 @@
 using CodeEditor2.CodeEditor.CodeComplete;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Statements
 {
@@ -46,13 +41,13 @@ namespace pluginVerilog.Verilog.Statements
         {
             return ParseCreate(word, nameSpace, nameSpace);
         }
-        public static TaskEnable? ParseCreate(WordScanner word, NameSpace nameSpace,NameSpace taskNameSpace)
+        public static TaskEnable? ParseCreate(WordScanner word, NameSpace nameSpace, NameSpace taskNameSpace)
         {
             Expressions.TaskReference taskReference = Verilog.Expressions.TaskReference.ParseCreate(word, nameSpace, taskNameSpace);
             return ParseCreate(taskReference, word, nameSpace);
         }
 
-        public static TaskEnable? ParseCreate(Expressions.TaskReference taskReference,WordScanner word,NameSpace nameSpace)
+        public static TaskEnable? ParseCreate(Expressions.TaskReference taskReference, WordScanner word, NameSpace nameSpace)
         {
 
             IPortNameSpace task = taskReference.Task;
@@ -74,7 +69,7 @@ namespace pluginVerilog.Verilog.Statements
                     {   // undefined task
                         expression = Expressions.Expression.ParseCreate(word, nameSpace);
                     }
-                    else if(portCount == 0 && task.PortsList.Count ==0 && word.Text == ")")
+                    else if (portCount == 0 && task.PortsList.Count == 0 && word.Text == ")")
                     {   // blank ()
                         if (!word.SystemVerilog)
                         {
@@ -100,7 +95,7 @@ namespace pluginVerilog.Verilog.Statements
                         }
                         else
                         {
-                            expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace,false);
+                            expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace, false);
                         }
                         if (expression == null)
                         {
@@ -112,7 +107,7 @@ namespace pluginVerilog.Verilog.Statements
 
                     if (word.Text == ")")
                     {
-                        if (task != null && task.Ports.Count != portCount+1) word.AddError("missing ports.");
+                        if (task != null && task.Ports.Count != portCount + 1) word.AddError("missing ports.");
                         break;
                     }
                     else if (word.Text == ",")

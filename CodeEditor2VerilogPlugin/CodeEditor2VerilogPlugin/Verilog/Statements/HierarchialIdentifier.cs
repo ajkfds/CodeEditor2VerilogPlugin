@@ -1,13 +1,6 @@
 using pluginVerilog.Verilog.BuildingBlocks;
-using pluginVerilog.Verilog.Expressions;
 using pluginVerilog.Verilog.ModuleItems;
-using pluginVerilog.Verilog;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace pluginVerilog.Verilog.Statements
 {
@@ -20,7 +13,7 @@ namespace pluginVerilog.Verilog.Statements
         protected HierarchialIdentifier() { }
 
         List<string> Identifiers = new List<string>();
-        private NameSpace BaseNameSpace { init; get; } 
+        private NameSpace BaseNameSpace { init; get; }
 
         public NameSpace? GetNameSpace(NameSpace baseNameSpace)
         {
@@ -59,13 +52,13 @@ namespace pluginVerilog.Verilog.Statements
             }
         }
 
-        private HierarchialIdentifier? parseHierarchy(WordScanner word, NameSpace nameSpace,HierarchialIdentifier hierarchialIdentifier)
+        private HierarchialIdentifier? parseHierarchy(WordScanner word, NameSpace nameSpace, HierarchialIdentifier hierarchialIdentifier)
         {
             if (word.Eof) return hierarchialIdentifier;
             if (word.NextText != ".") return hierarchialIdentifier;
 
             INamedElement element = nameSpace.NamedElements[word.Text];
-            if (element is　Verilog.DataObjects.DataObject)
+            if (element is Verilog.DataObjects.DataObject)
             {
                 return hierarchialIdentifier;
             }

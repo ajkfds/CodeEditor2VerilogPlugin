@@ -1,16 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Avalonia.Threading;
-using CodeEditor2.CodeEditor;
 using CodeEditor2.Data;
-using Microsoft.Playwright;
-using pluginVerilog.Verilog;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.ModuleItems;
-using static pluginVerilog.Verilog.DataObjects.DataTypes.Enum;
+using System;
+using System.Collections.Generic;
 
 namespace pluginVerilog.Data.VerilogCommon
 {
@@ -97,9 +90,9 @@ namespace pluginVerilog.Data.VerilogCommon
                 newVhInstance.ExternalProject = true;
             }
             VerilogHeaderInstance? oldInstanceTextFile = null;
-            if (item.Items.TryGetValue(keyName,out CodeEditor2.Data.Item? gotItem))
+            if (item.Items.TryGetValue(keyName, out CodeEditor2.Data.Item? gotItem))
             {
-                if(gotItem == null) throw new Exception();
+                if (gotItem == null) throw new Exception();
                 oldInstanceTextFile = gotItem as VerilogHeaderInstance;
             }
 
@@ -130,7 +123,7 @@ namespace pluginVerilog.Data.VerilogCommon
 
                 if (verilogFile.Items.TryGetValue(buldingBlock.Name, out CodeEditor2.Data.Item? gotItem))
                 {   // has same name item
-                    if(gotItem == null) throw new Exception();
+                    if (gotItem == null) throw new Exception();
                     CodeEditor2.Data.Item subItem = gotItem;
 
                     if (buldingBlock is Module)
@@ -138,7 +131,7 @@ namespace pluginVerilog.Data.VerilogCommon
                         VerilogModuleInstance? oldItem = subItem as VerilogModuleInstance;
                         Module module = (Module)buldingBlock;
 
-                        if(oldItem != null && module != null && oldItem.Name == module.Name && oldItem.ModuleName == module.Name)
+                        if (oldItem != null && module != null && oldItem.Name == module.Name && oldItem.ModuleName == module.Name)
                         {
                             alreadyExist = true;
                             newSubItems.Add(oldItem.Name, oldItem);
@@ -167,7 +160,7 @@ namespace pluginVerilog.Data.VerilogCommon
                         VerilogModuleInstance? instance = VerilogModuleInstance.Create(moduleInstantiation);
                         if (instance == null) throw new Exception();
                         instance.ModuleName = module.Name;
-//                        instance.SourceTextFile = module.File;
+                        //                        instance.SourceTextFile = module.File;
                         newSubItems.Add(instance.Name, instance);
 
                     }
@@ -180,7 +173,7 @@ namespace pluginVerilog.Data.VerilogCommon
             }
         }
 
-        private static void addSubItemsSingleBuldingBlock(IVerilogRelatedFile item,string? moduleName, Dictionary<string, CodeEditor2.Data.Item> newSubItems, CodeEditor2.Data.Item? parent,Project project)
+        private static void addSubItemsSingleBuldingBlock(IVerilogRelatedFile item, string? moduleName, Dictionary<string, CodeEditor2.Data.Item> newSubItems, CodeEditor2.Data.Item? parent, Project project)
         {
             if (item.VerilogParsedDocument?.Root == null) throw new Exception();
 
@@ -201,7 +194,7 @@ namespace pluginVerilog.Data.VerilogCommon
                 {
                     bool alreadyExist = false;
 
-                    if (item.Items.TryGetValue(instantiation.Name,out CodeEditor2.Data.Item? gotItem))
+                    if (item.Items.TryGetValue(instantiation.Name, out CodeEditor2.Data.Item? gotItem))
                     {   // has same name item
                         if (gotItem == null) throw new Exception();
                         CodeEditor2.Data.Item subItem = gotItem;
@@ -217,7 +210,7 @@ namespace pluginVerilog.Data.VerilogCommon
                             if (projectProperty == null) throw new Exception();
 
                             Data.IVerilogRelatedFile? ivFile = projectProperty.GetFileOfBuildingBlock(moduleInstantiation.SourceName);
-                            if(ivFile != null)
+                            if (ivFile != null)
                             {
                                 string instanceKey = Verilog.ParsedDocument.KeyGenerator(ivFile, moduleInstantiation.SourceName, moduleInstantiation.ParameterOverrides);
 
@@ -260,7 +253,7 @@ namespace pluginVerilog.Data.VerilogCommon
                             VerilogModuleInstance? newVerilogModuleInstance = VerilogModuleInstance.Create((ModuleInstantiation)instantiation);
                             if (newSubItems.ContainsKey(instantiation.Name) || newVerilogModuleInstance == null) continue;
                             newVerilogModuleInstance.Parent = parent;
-                            if(parent is VerilogModuleInstance && ((VerilogModuleInstance)parent).ExternalProject)
+                            if (parent is VerilogModuleInstance && ((VerilogModuleInstance)parent).ExternalProject)
                             {
                                 newVerilogModuleInstance.ExternalProject = true;
                             }

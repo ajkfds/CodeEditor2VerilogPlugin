@@ -1,15 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace pluginVerilog.Verilog.Expressions
 {
     public class Null : Primary
     {
         protected Null() { }
-        public static new Null ParseCreate(WordScanner word,NameSpace nameSpace)
+        public static new Null ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             word.Color(CodeDrawStyle.ColorType.Variable);
             Null null_ = new Null();

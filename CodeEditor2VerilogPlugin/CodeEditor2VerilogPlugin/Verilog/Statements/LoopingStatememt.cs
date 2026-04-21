@@ -3,10 +3,6 @@ using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.Expressions;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Statements
@@ -28,7 +24,7 @@ namespace pluginVerilog.Verilog.Statements
         }
         public void DisposeSubReference()
         {
-            if(Statement != null) Statement.DisposeSubReference();
+            if (Statement != null) Statement.DisposeSubReference();
         }
 
         public IStatement? Statement;
@@ -102,7 +98,7 @@ namespace pluginVerilog.Verilog.Statements
 
             doStatement.Statement = await Statements.ParseCreateStatement(word, nameSpace);
 
-            if(word.Eof || word.Text != "while")
+            if (word.Eof || word.Text != "while")
             {
                 word.AddError("while required");
                 word.SkipToKeyword(";");
@@ -110,7 +106,7 @@ namespace pluginVerilog.Verilog.Statements
             }
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
-            if(word.Eof || word.Text != "(")
+            if (word.Eof || word.Text != "(")
             {
                 word.AddError("(expression) required");
                 word.SkipToKeyword(";");
@@ -138,7 +134,7 @@ namespace pluginVerilog.Verilog.Statements
                 word.AddError("; requited");
             }
 
-                return doStatement;
+            return doStatement;
         }
     }
     public class RepeatStatement : IStatement
@@ -221,7 +217,7 @@ namespace pluginVerilog.Verilog.Statements
         public void DisposeSubReference()
         {
             Expression.DisposeSubReference(true);
-            if(Statement!=null) Statement.DisposeSubReference();
+            if (Statement != null) Statement.DisposeSubReference();
         }
 
         public Expressions.Expression Expression;
@@ -265,7 +261,7 @@ namespace pluginVerilog.Verilog.Statements
 
     public class ForStatememt : NameSpace, IStatement
     {
-        protected ForStatememt(BuildingBlocks.BuildingBlock buildingBlock,NameSpace nameSpace) : base(buildingBlock, nameSpace)
+        protected ForStatememt(BuildingBlocks.BuildingBlock buildingBlock, NameSpace nameSpace) : base(buildingBlock, nameSpace)
         {
 
         }
@@ -311,12 +307,13 @@ namespace pluginVerilog.Verilog.Statements
 
         public static async Task<ForStatememt?> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
-            ForStatememt forStatement = new ForStatememt(nameSpace.BuildingBlock, nameSpace) {
-                BeginIndexReference = word.CreateIndexReference(), 
-                DefinitionReference = word.CrateWordReference(), 
-                Name = "", 
+            ForStatememt forStatement = new ForStatememt(nameSpace.BuildingBlock, nameSpace)
+            {
+                BeginIndexReference = word.CreateIndexReference(),
+                DefinitionReference = word.CrateWordReference(),
+                Name = "",
                 Parent = nameSpace,
-                Project = word.Project 
+                Project = word.Project
             };
 
             word.Color(CodeDrawStyle.ColorType.Keyword);
@@ -349,10 +346,10 @@ namespace pluginVerilog.Verilog.Statements
             }
 
             // for_initialization
-            if(!Verilog.DataObjects.Variables.Variable.ParseDeclaration(word, forStatement)) // define index parameter
+            if (!Verilog.DataObjects.Variables.Variable.ParseDeclaration(word, forStatement)) // define index parameter
             {
                 Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, forStatement);
-                if(expression == null)
+                if (expression == null)
                 {
                     word.AddError("illegal for_initialization");
                     return null;
@@ -395,14 +392,14 @@ namespace pluginVerilog.Verilog.Statements
             }
 
             // for_step
-            IncOrDecExpression? incOrDecExpression = IncOrDecExpression.ParseCreate(word, forStatement,false);
-            if(incOrDecExpression != null)
+            IncOrDecExpression? incOrDecExpression = IncOrDecExpression.ParseCreate(word, forStatement, false);
+            if (incOrDecExpression != null)
             {
 
             }
             else
             {
-                DataObjects.VariableAssignment? assign = Verilog.DataObjects.VariableAssignment.ParseCreate(word, forStatement,false);
+                DataObjects.VariableAssignment? assign = Verilog.DataObjects.VariableAssignment.ParseCreate(word, forStatement, false);
                 if (assign == null)
                 {
                     forStatement.Expression = Expressions.Expression.ParseCreate(word, forStatement);
@@ -434,19 +431,19 @@ namespace pluginVerilog.Verilog.Statements
 
         public void DisposeSubReference()
         {
-            if(Statement != null) Statement.DisposeSubReference();
+            if (Statement != null) Statement.DisposeSubReference();
         }
 
 
         public Expressions.DataObjectReference? TargetReference;
-        public List<DataObjects.DataObject> LoopVariables = new List<DataObject>(); 
+        public List<DataObjects.DataObject> LoopVariables = new List<DataObject>();
         public IStatement? Statement;
 
         // "foreach" "(" ps_or_hierarchical_array_identifier [ loop_variables ] ")" statement
         // ps_or_hierarchical_array_identifier ::= [implicit_class_handle. | class_scope | package_scope] hierarchical_array_identifier
         public static async Task<ForeachStatement> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
-            ForeachStatement foreachStatement = new ForeachStatement(nameSpace.BuildingBlock,nameSpace)
+            ForeachStatement foreachStatement = new ForeachStatement(nameSpace.BuildingBlock, nameSpace)
             {
                 BeginIndexReference = word.CreateIndexReference(),
                 DefinitionReference = word.CrateWordReference(),
@@ -466,7 +463,7 @@ namespace pluginVerilog.Verilog.Statements
 
             foreachStatement.TargetReference = Expressions.DataObjectReference.ParseCreateWoRange(word, nameSpace, foreachStatement, true);
 
-            if(word.Text!="[")
+            if (word.Text != "[")
             {
                 word.AddError("[ expected");
                 word.SkipToKeyword(";");
@@ -487,7 +484,7 @@ namespace pluginVerilog.Verilog.Statements
                 word.MoveNext();
 
                 if (word.Text == "]") break;
-                if(word.Text != ",")
+                if (word.Text != ",")
                 {
                     word.AddError("illegal loop variables");
                     break;
@@ -495,10 +492,11 @@ namespace pluginVerilog.Verilog.Statements
                 word.MoveNext();
             }
 
-            if(word.Text == "]")
+            if (word.Text == "]")
             {
                 word.MoveNext(); //"["
-            }else
+            }
+            else
             {
                 word.AddError("] required");
             }

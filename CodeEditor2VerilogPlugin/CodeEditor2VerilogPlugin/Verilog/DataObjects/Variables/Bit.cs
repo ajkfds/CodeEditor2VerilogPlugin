@@ -1,12 +1,3 @@
-using pluginVerilog.Verilog.DataObjects.Arrays;
-using pluginVerilog.Verilog.DataObjects.DataTypes;
-using pluginVerilog.Verilog.DataObjects.Nets;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
     public class Bit : IntegerVectorValueVariable
@@ -29,7 +20,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             return val;
         }
 
-        public static new Bit Create(string name,DataTypes.IDataType dataType)
+        public static new Bit Create(string name, DataTypes.IDataType dataType)
         {
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypes.DataTypeEnum.Bit);
             DataTypes.IntegerVectorType dType = (DataTypes.IntegerVectorType)dataType;

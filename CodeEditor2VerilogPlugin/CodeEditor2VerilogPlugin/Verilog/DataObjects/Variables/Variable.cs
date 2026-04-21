@@ -1,16 +1,7 @@
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
-using pluginVerilog.Verilog.Statements;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
-using TextMateSharp.Model;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
@@ -49,7 +40,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         /// </summary>
         /// <param name="dataType"></param>
         /// <returns></returns>
-        public static new Variable Create(string name,IDataType dataType)
+        public static new Variable Create(string name, IDataType dataType)
         {
             /*
             6.8 Variable declarations 
@@ -140,37 +131,37 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public static bool ParseDeclaration(WordScanner word, NameSpace nameSpace)
         {
-        // data_declaration::=    [ "const" ] ["var"] [lifetime] data_type_or_implicit list_of_variable_decl_assignments;
-        //                      | type_declaration
-        //                      | package_import_declaration11
-        //                      | net_type_declaration
-        // lifetime ::= static | automatic 
+            // data_declaration::=    [ "const" ] ["var"] [lifetime] data_type_or_implicit list_of_variable_decl_assignments;
+            //                      | type_declaration
+            //                      | package_import_declaration11
+            //                      | net_type_declaration
+            // lifetime ::= static | automatic 
 
-        // list_of_variable_decl_assignments ::= variable_decl_assignment { , variable_decl_assignment } 
+            // list_of_variable_decl_assignments ::= variable_decl_assignment { , variable_decl_assignment } 
 
-        // variable_decl_assignment     ::=   variable_identifier                                   { variable_dimension }  [ = expression]
-        //                                  | dynamic_array_variable_identifier unsized_dimension   { variable_dimension }  [ = dynamic_array_new]
-        //                                  | class_variable_identifier                                                     [ = class_new]
+            // variable_decl_assignment     ::=   variable_identifier                                   { variable_dimension }  [ = expression]
+            //                                  | dynamic_array_variable_identifier unsized_dimension   { variable_dimension }  [ = dynamic_array_new]
+            //                                  | class_variable_identifier                                                     [ = class_new]
 
-        // variable_dimension::=
-        //        unsized_dimension
-        //      | unpacked_dimension
-        //      | associative_dimension
-        //      | queue_dimension
+            // variable_dimension::=
+            //        unsized_dimension
+            //      | unpacked_dimension
+            //      | associative_dimension
+            //      | queue_dimension
 
-        // unsized_dimension::= "[" "]"
+            // unsized_dimension::= "[" "]"
 
-        // associative_dimension ::=
-        //        "[" data_type "]"
-        //      | "[" "*" "]"
+            // associative_dimension ::=
+            //        "[" data_type "]"
+            //      | "[" "*" "]"
 
-        // unpacked_dimension ::=
-        //        "[" constant_range "]"
-        //      | "[" constant_expression "]"
+            // unpacked_dimension ::=
+            //        "[" constant_range "]"
+            //      | "[" constant_expression "]"
 
-        // queue_dimension::= "[" "$" [ ":" constant_expression] "]"
+            // queue_dimension::= "[" "$" [ ":" constant_expression] "]"
 
-            bool pointerMoved= false;
+            bool pointerMoved = false;
 
             if (word.Text == "const")
             {
@@ -186,7 +177,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 pointerMoved = true;
             }
 
-            if (word.Text == "static" | word.Text=="automatic")
+            if (word.Text == "static" | word.Text == "automatic")
             {
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 word.MoveNext();
@@ -209,7 +200,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
             List<DataObject> vars = new List<DataObject>();
 
-            while (!word.Eof && word.Text !=";")
+            while (!word.Eof && word.Text != ";")
             {
                 string name = word.Text;
                 if (!General.IsIdentifier(name))
@@ -218,7 +209,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                     break;
                 }
 
-                DataObject variable = Variable.Create(word.Text,dataType);
+                DataObject variable = Variable.Create(word.Text, dataType);
                 variable.DefinedNameSpace = nameSpace;
                 if (variable == null) return true;
                 variable.DefinedReference = word.GetReference();
@@ -228,21 +219,23 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
                 // { variable_dimension }
                 List<UnPackedArray>? unpackedArrays = new List<UnPackedArray>();
-                while(word.Text == "[" && !word.Eof)
+                while (word.Text == "[" && !word.Eof)
                 {
-                    IArray? array = DataObjects.Arrays.VariableArray.ParseCreate(variable,word, nameSpace);
-                    if(array is UnPackedArray)
+                    IArray? array = DataObjects.Arrays.VariableArray.ParseCreate(variable, word, nameSpace);
+                    if (array is UnPackedArray)
                     {
                         UnPackedArray unPackedArray = (UnPackedArray)array;
                         variable.UnpackedArrays.Add(unPackedArray);
 
                         if (unpackedArrays != null) unpackedArrays.Add(unPackedArray);
-                    }else if(array is Queue)
+                    }
+                    else if (array is Queue)
                     {
                         Queue queue = (Queue)array;
                         variable = queue;
                         unpackedArrays = null;
-                    }else if(array is AssociativeArray)
+                    }
+                    else if (array is AssociativeArray)
                     {
                         AssociativeArray associativeArray = (AssociativeArray)array;
                         variable = associativeArray;
@@ -254,19 +247,20 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 // create assigned map if variable_dimension is generated only from unpackedarrays
                 if (unpackedArrays != null)
                 {
-                    if( dataType is IntegerAtomType)
+                    if (dataType is IntegerAtomType)
                     {
                         if (dataType.BitWidth == null) throw new Exception();
                         int bitWidth = (int)dataType.BitWidth;
-                        variable.AssignedMap = new ArraysBoolMap(bitWidth,dataType.PackedDimensions, unpackedArrays);
-                    }else if( dataType is IntegerVectorType)
+                        variable.AssignedMap = new ArraysBoolMap(bitWidth, dataType.PackedDimensions, unpackedArrays);
+                    }
+                    else if (dataType is IntegerVectorType)
                     {
                         variable.AssignedMap = new ArraysBoolMap(dataType.PackedDimensions, unpackedArrays);
                     }
                 }
 
                 bool assigned = false;
-                if (word.Text == "=") 
+                if (word.Text == "=")
                 {
                     word.MoveNext();    // =
                     if (variable.AssignedMap != null)
@@ -278,7 +272,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                     {
                         word.Color(CodeDrawStyle.ColorType.Keyword);
                         word.MoveNext();
-                        if(word.Text == "[") // dynamic array size
+                        if (word.Text == "[") // dynamic array size
                         {
                             word.MoveNext();
 
@@ -294,17 +288,18 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                             }
                         }
 
-                        if(word.Text == "(")
+                        if (word.Text == "(")
                         {
                             word.MoveNext();
-                            while (!word.Eof && word.Text !=")")
+                            while (!word.Eof && word.Text != ")")
                             {
                                 Expressions.Expression? exp = Expressions.Expression.ParseCreate(word, nameSpace);
                                 if (word.Text == ",")
                                 {
                                     word.MoveNext();
                                     continue;
-                                }else if(word.Text == ")")
+                                }
+                                else if (word.Text == ")")
                                 {
                                     break;
                                 }
@@ -314,7 +309,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                                     break;
                                 }
                             }
-                            if(word.Text ==")") word.MoveNext();
+                            if (word.Text == ")") word.MoveNext();
                         }
                         assigned = true;
                     }
@@ -350,7 +345,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                                 variable.AssignedReferences.Add(variable.DefinedReference);
                                 if (variable.BitWidth != exp.BitWidth && !word.Prototype && exp.BitWidth != null && exp.Reference != null && !word.Prototype)
                                 {
-                                    exp.Reference.AddWarning("Bitwidth mismatch "+variable.BitWidth.ToString()+" = "+exp.BitWidth.ToString());
+                                    exp.Reference.AddWarning("Bitwidth mismatch " + variable.BitWidth.ToString() + " = " + exp.BitWidth.ToString());
                                 }
                             }
                         }
@@ -367,18 +362,19 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                     {   // duplicated name
                         INamedElement oldNamedElect = nameSpace.NamedElements[variable.Name];
                         DataObject? oldDataObject = oldNamedElect as DataObject;
-                        
-                        if(oldDataObject != null && oldDataObject.DefinedNameSpace?.BuildingBlock != nameSpace.BuildingBlock)
+
+                        if (oldDataObject != null && oldDataObject.DefinedNameSpace?.BuildingBlock != nameSpace.BuildingBlock)
                         { // override base class
 
-                        }else if (nameSpace.BuildingBlock.AnsiStylePortDefinition)
-                        {   
+                        }
+                        else if (nameSpace.BuildingBlock.AnsiStylePortDefinition)
+                        {
                             variable.DefinedReference?.AddError("duplicate");
                         }
                         else
                         {
                             BuildingBlocks.IModuleOrInterfaceOrProgram? buildingBlockWithPorts = nameSpace.BuildingBlock as BuildingBlocks.IModuleOrInterfaceOrProgram;
-                            if(buildingBlockWithPorts == null)
+                            if (buildingBlockWithPorts == null)
                             {
                                 variable.DefinedReference?.AddError("duplicate");
                             }
@@ -396,7 +392,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                             }
 
                         }
-//                        word.AddError("duplicate");
+                        //                        word.AddError("duplicate");
                     }
                 }
                 else
@@ -409,7 +405,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                     else
                     {
                         Variable? preDefined = nameSpace.NamedElements[variable.Name] as Variable;
-                        if(preDefined != null) preDefined.Defined = true;
+                        if (preDefined != null) preDefined.Defined = true;
                     }
                 }
                 variable.AssignedMap = new ArraysBoolMap(dataType, unpackedArrays);
@@ -439,7 +435,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
             string comment = word.GetNextComment();
 
-            if(comment != "")
+            if (comment != "")
             {
                 foreach (DataObject variable in vars)
                 {

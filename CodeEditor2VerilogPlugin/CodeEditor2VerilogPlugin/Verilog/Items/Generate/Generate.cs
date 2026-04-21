@@ -1,9 +1,4 @@
-using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.Items.Generate;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog
@@ -95,7 +90,7 @@ namespace pluginVerilog.Verilog
                     return true;
                 }
                 word.Color(CodeDrawStyle.ColorType.Identifier);
-                block = NamedGeneratedBlock.Create(word,nameSpace, beginReference);
+                block = NamedGeneratedBlock.Create(word, nameSpace, beginReference);
                 if (word.Prototype)
                 {
                     if (nameSpace.NamedElements.ContainsKey(word.Text))
@@ -111,7 +106,7 @@ namespace pluginVerilog.Verilog
                 {
                     if (nameSpace.NamedElements.ContainsKey(word.Text))
                     {
-//                        word.AddPrototypeError("duplicated identifier");
+                        //                        word.AddPrototypeError("duplicated identifier");
                     }
                     else
                     {
@@ -135,7 +130,7 @@ namespace pluginVerilog.Verilog
             else
             {
                 int beginCount = 0;
-//                word.AddError("illegal sequential block");
+                //                word.AddError("illegal sequential block");
                 while (!word.Eof && word.Text != "endgenerate")
                 {
                     if (word.Text == "begin")
@@ -161,7 +156,7 @@ namespace pluginVerilog.Verilog
                 if (word.Text == ":")
                 {
                     word.MoveNext();
-                    if(block != null && word.Text== block.Name)
+                    if (block != null && word.Text == block.Name)
                     {
                         word.Color(CodeDrawStyle.ColorType.Identifier);
                         word.MoveNext();
@@ -185,7 +180,7 @@ namespace pluginVerilog.Verilog
         {
             if (word.Text != "begin") return false;
 
-            string identifier="";
+            string identifier = "";
             // generate_block ::= begin[ : generate_block_identifier]  { generate_item } end
             word.Color(CodeDrawStyle.ColorType.Keyword);
             WordReference beginRef = word.GetReference();

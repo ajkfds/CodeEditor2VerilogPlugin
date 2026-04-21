@@ -1,9 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TextMateSharp.Model;
 
 namespace pluginVerilog.Verilog.Expressions
 {
@@ -54,7 +49,7 @@ namespace pluginVerilog.Verilog.Expressions
                 return range;
             }
 
-            if(word.Text == ":")
+            if (word.Text == ":")
             {
                 word.MoveNext();
                 Expression? exp2 = Expression.ParseCreate(word, nameSpace);
@@ -139,7 +134,7 @@ namespace pluginVerilog.Verilog.Expressions
             MsbExpression = expression1;
             LsbExpression = expression2;
             if (LsbExpression == null || MsbExpression == null) return;
-            if(MsbExpression.Constant && LsbExpression.Constant && MsbExpression.Value != null && LsbExpression.Value != null)
+            if (MsbExpression.Constant && LsbExpression.Constant && MsbExpression.Value != null && LsbExpression.Value != null)
             {
                 BitWidth = (int)MsbExpression.Value - (int)LsbExpression.Value + 1;
             }
@@ -206,7 +201,7 @@ namespace pluginVerilog.Verilog.Expressions
         public override string CreateString()
         {
             if (LsbExpression == null || MsbExpression == null) return "[:]";
-            return "[" + MsbExpression.CreateString() +":"+ LsbExpression.CreateString() + "]";
+            return "[" + MsbExpression.CreateString() + ":" + LsbExpression.CreateString() + "]";
         }
     }
     public class RelativePlusRangeExpression : RangeExpression
@@ -265,7 +260,7 @@ namespace pluginVerilog.Verilog.Expressions
         }
         public override string CreateString()
         {
-            if (BaseExpression == null || WidthExpression == null) return"[?]";
+            if (BaseExpression == null || WidthExpression == null) return "[?]";
             return "[" + BaseExpression.CreateString() + "-:" + WidthExpression.CreateString() + "]";
         }
     }

@@ -1,8 +1,5 @@
 using CodeEditor2.CodeEditor.CodeComplete;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Statements
@@ -13,7 +10,7 @@ namespace pluginVerilog.Verilog.Statements
         protected ProceduralTimingControlStatement() { }
         public void DisposeSubReference()
         {
-            if(Statement != null) Statement.DisposeSubReference();
+            if (Statement != null) Statement.DisposeSubReference();
         }
         public string Name { get; protected set; }
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
@@ -32,7 +29,7 @@ namespace pluginVerilog.Verilog.Statements
                 "CodeEditor2/Assets/Icons/tag.svg"
                 );
         }
-        public static async Task<ProceduralTimingControlStatement?> ParseCreate(WordScanner word, NameSpace nameSpace,string? statement_label, List<string>? clockDomains = null)
+        public static async Task<ProceduralTimingControlStatement?> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label, List<string>? clockDomains = null)
         {
             switch (word.Text)
             {
@@ -47,12 +44,12 @@ namespace pluginVerilog.Verilog.Statements
                     }
                 case "@":
                     {
-                        ProceduralTimingControlStatement statement = new ProceduralTimingControlStatement(){ Name = "" };
+                        ProceduralTimingControlStatement statement = new ProceduralTimingControlStatement() { Name = "" };
                         if (statement_label != null) { statement.Name = statement_label; }
 
                         if (clockDomains == null) clockDomains = new List<string>();
                         statement.EventControl = EventControl.ParseCreate(word, nameSpace, clockDomains);
-                        statement.Statement = await Statements.ParseCreateStatementOrNull(word, nameSpace,clockDomains);
+                        statement.Statement = await Statements.ParseCreateStatementOrNull(word, nameSpace, clockDomains);
                         return statement;
                     }
                 default:

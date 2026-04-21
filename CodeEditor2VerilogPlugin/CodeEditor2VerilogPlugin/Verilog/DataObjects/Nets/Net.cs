@@ -1,16 +1,12 @@
-using Avalonia;
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
-using pluginVerilog.Verilog.DataObjects.Variables;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.Nets
 {
-    public class Net : DataObject,IPackedDataObject
+    public class Net : DataObject, IPackedDataObject
     {
         protected Net() { }
 
@@ -18,7 +14,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
         {
             get
             {
-                if(DataType is DataTypes.IntegerAtomType)
+                if (DataType is DataTypes.IntegerAtomType)
                 {
                     return ((DataTypes.IntegerAtomType)DataType).Signed;
                 }
@@ -36,7 +32,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             {
                 int bitWidth = 1;
                 if (DataType != null && DataType.BitWidth != null) bitWidth = (int)DataType.BitWidth;
-                foreach(UnPackedArray unPackedArray in UnpackedArrays)
+                foreach (UnPackedArray unPackedArray in UnpackedArrays)
                 {
                     if (unPackedArray.Size == null) return null;
                     bitWidth = bitWidth * (int)unPackedArray.Size;
@@ -126,7 +122,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                 label.AppendText("signed ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
             }
 
-            if(DataType != null)
+            if (DataType != null)
             {
                 DataType.AppendTypeLabel(label);
                 label.AppendText(" ");
@@ -163,7 +159,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
         {
             Net net = new Net() { Name = name };
             net.NetType = netType;
-            if(dataType == null)
+            if (dataType == null)
             {
                 net.DataType = DataTypes.LogicType.Create(false, null);
             }
@@ -172,7 +168,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                 net.DataType = dataType;
             }
             DataTypes.IDataType? baseDataType = dataType;
-            while(baseDataType is UserDefinedType)
+            while (baseDataType is UserDefinedType)
             {
                 baseDataType = ((UserDefinedType)baseDataType).OriginalDataType;
             }
@@ -187,7 +183,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                     net.NamedElements.Add(dataObject.Name, dataObject);
                 }
             }
-            net.AssignedMap = new ArraysBoolMap(1, net.DataType.PackedDimensions,new List<UnPackedArray>());
+            net.AssignedMap = new ArraysBoolMap(1, net.DataType.PackedDimensions, new List<UnPackedArray>());
             return net;
         }
 
@@ -235,7 +231,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
 
             if (DataType != null)
             {
-                if(DataType.Type== DataTypes.DataTypeEnum.Logic)
+                if (DataType.Type == DataTypes.DataTypeEnum.Logic)
                 {
                     bool first = true;
                     foreach (Arrays.PackedArray range in PackedDimensions)
@@ -413,7 +409,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
 
             // [drive_strength | charge_strength]
             DriveStrength? driveStrength = DriveStrength.ParseCreate(word, nameSpace);
-            if(driveStrength == null)
+            if (driveStrength == null)
             {
                 ChargeStrength? chargeStrength = ChargeStrength.ParseCreate(word, nameSpace);
             }
@@ -423,7 +419,8 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             {
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 word.MoveNext();
-            }else if(word.Text == "scalared")
+            }
+            else if (word.Text == "scalared")
             {
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 word.MoveNext();
@@ -440,12 +437,14 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             if (word.NextText == "=" || word.NextText == ";")
             {
                 dataType = DataTypes.LogicType.Create(false, null);
-            } else {
+            }
+            else
+            {
                 dataType = DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, DataTypes.DataTypeEnum.Logic);
             }
-            
+
             if (dataType == null) return true;
-            if(!dataType.IsValidForNet)
+            if (!dataType.IsValidForNet)
             {
                 dataTypeRef.AddError("illegal data type for net");
                 dataType = DataTypes.LogicType.Create(false, null);
@@ -467,8 +466,8 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             List<Net> nets = new List<Net>();
             while (!word.Eof)
             {
-                Net net = Net.Create(word.Text,netType, dataType);
-//                net.NetType = netType;
+                Net net = Net.Create(word.Text, netType, dataType);
+                //                net.NetType = netType;
 
                 net.DefinedReference = word.GetReference();
                 if (word.Active)
@@ -478,9 +477,9 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                         if (nameSpace.NamedElements.ContainsKey(net.Name))
                         {
                             BuildingBlocks.IModuleOrInterfaceOrProgram? portBlock = nameSpace.BuildingBlock as BuildingBlocks.IModuleOrInterfaceOrProgram;
-                            if(portBlock != null && portBlock.Ports.ContainsKey(net.Name))
+                            if (portBlock != null && portBlock.Ports.ContainsKey(net.Name))
                             {   // for non-ansi style port definition
-                                nameSpace.NamedElements.Replace(net.Name,net);
+                                nameSpace.NamedElements.Replace(net.Name, net);
                                 portBlock.Ports[net.Name].DataObject = net;
                             }
                             else
@@ -515,19 +514,19 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                     if (net.AssignedMap != null) net.AssignedMap.AssertAll();
 
                     Expressions.Expression? assignValue = Expressions.Expression.ParseCreate(word, nameSpace);
-                    if(net.DefinedReference != null) net.AssignedReferences.Add(net.DefinedReference);
-                    if(!word.Prototype && assignValue != null)
+                    if (net.DefinedReference != null) net.AssignedReferences.Add(net.DefinedReference);
+                    if (!word.Prototype && assignValue != null)
                     {
-                        if(net.BitWidth == null)
+                        if (net.BitWidth == null)
                         {
                             if (assignValue.BitWidth != 1 & !word.Prototype)
                             {
                                 assignValue.Reference.AddWarning("Size mismatch 1 <- " + assignValue.BitWidth.ToString());
                             }
                         }
-                        else if(assignValue.BitWidth != net.BitWidth & !word.Prototype && assignValue.Reference != null)
+                        else if (assignValue.BitWidth != net.BitWidth & !word.Prototype && assignValue.Reference != null)
                         {
-                            assignValue.Reference.AddWarning("Size mismatch "+ net.BitWidth.ToString() +" <- "+assignValue.BitWidth.ToString() );
+                            assignValue.Reference.AddWarning("Size mismatch " + net.BitWidth.ToString() + " <- " + assignValue.BitWidth.ToString());
                         }
                     }
                 }
@@ -538,9 +537,9 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                     while (word.Text == "[" && !word.Eof)
                     {
                         IArray? array = DataObjects.Arrays.UnPackedArray.ParseCreate(word, nameSpace);
-                        if(array is not null)
+                        if (array is not null)
                         {
-                            if(array is UnPackedArray)
+                            if (array is UnPackedArray)
                             {
                                 net.UnpackedArrays.Add((UnPackedArray)array);
                             }
@@ -594,9 +593,9 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
         }
         public override DataObject Clone(string name)
         {
-            Net net = new Net() { Name = name, DefinedReference = DefinedReference, DataType = DataType,Defined = Defined };
-            if(DataType != null) net.DataType = DataType.Clone();
-            foreach(var unpackedArray in UnpackedArrays)
+            Net net = new Net() { Name = name, DefinedReference = DefinedReference, DataType = DataType, Defined = Defined };
+            if (DataType != null) net.DataType = DataType.Clone();
+            foreach (var unpackedArray in UnpackedArrays)
             {
                 net.UnpackedArrays.Add(unpackedArray.Clone());
             }

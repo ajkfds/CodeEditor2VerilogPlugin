@@ -1,10 +1,4 @@
-using pluginVerilog.Verilog.Expressions;
-using pluginVerilog.Verilog.Property;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Sequence
 {

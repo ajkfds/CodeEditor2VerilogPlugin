@@ -1,16 +1,9 @@
 using Avalonia.Controls;
-using Avalonia.Input;
-using CodeEditor2.CodeEditor;
 using CodeEditor2.Data;
-using ExCSS;
 using pluginVerilog.Data;
 using pluginVerilog.Verilog;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.CodeEditor
 {
@@ -32,7 +25,7 @@ namespace pluginVerilog.CodeEditor
                     );
                 menuItem_GoToDefinition.Click += MenuItem_GoToDefinition_Click;
                 contextMenu.Items.Add(menuItem_GoToDefinition);
-                if (!TryGetGotoDefinition(out _,out _, out _))
+                if (!TryGetGotoDefinition(out _, out _, out _))
                 {
                     menuItem_GoToDefinition.IsEnabled = false;
                 }
@@ -51,7 +44,7 @@ namespace pluginVerilog.CodeEditor
                     );
                 menuItem_GoToDriver.Click += MenuItem_GoToDriver_Click;
                 contextMenu.Items.Add(menuItem_GoToDriver);
-                if (!TryGetGotoDriver(out _,out _, out _))
+                if (!TryGetGotoDriver(out _, out _, out _))
                 {
                     menuItem_GoToDriver.IsEnabled = false;
                 }
@@ -87,7 +80,7 @@ namespace pluginVerilog.CodeEditor
             string word = verilogRelatedFile.CodeDocument.CreateString(headindex, length);
 
             Verilog.ParsedDocument? parsedDocument = verilogRelatedFile.VerilogParsedDocument;
-            if(parsedDocument == null) return null;
+            if (parsedDocument == null) return null;
             CodeDocument? codeDocument = verilogRelatedFile.CodeDocument as CodeDocument;
             if (codeDocument == null) return null;
 

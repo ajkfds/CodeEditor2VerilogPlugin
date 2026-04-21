@@ -1,10 +1,5 @@
-using CodeEditor2.CodeEditor;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
@@ -65,7 +60,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
         }
 
-//        public Dictionary<string, BuildingBlock> BuldingBlocks = new Dictionary<string, BuildingBlock>();
+        //        public Dictionary<string, BuildingBlock> BuldingBlocks = new Dictionary<string, BuildingBlock>();
 
 
         public BuildingBlock? GetBuildingBlock(IndexReference indexReference)
@@ -87,7 +82,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             if (!BuildingBlocks.ContainsKey(name)) return null;
             return BuildingBlocks[name];
         }
-        public static async System.Threading.Tasks.Task<Root> ParseCreate(WordScanner word, ParsedDocument parsedDocument,Data.VerilogFile file)
+        public static async System.Threading.Tasks.Task<Root> ParseCreate(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
         {
             Root root = new Root()
             {
@@ -174,7 +169,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 }
                 else
                 {
-                    module = await Module.ParseCreate(word, parsedDocument.ParameterOverrides, null , parsedDocument.Root, file, true);
+                    module = await Module.ParseCreate(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, true);
                 }
                 parsedDocument.ReparseRequested = true;
             }
@@ -267,7 +262,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
                 if (parsedDocument.ParameterOverrides == null)
                 {
-                    program = await Program.Parse(word, null, parsedDocument.Root, file,  false);
+                    program = await Program.Parse(word, null, parsedDocument.Root, file, false);
                 }
                 else
                 {

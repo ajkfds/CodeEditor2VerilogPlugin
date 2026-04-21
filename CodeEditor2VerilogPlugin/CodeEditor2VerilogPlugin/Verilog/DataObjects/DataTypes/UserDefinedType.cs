@@ -1,20 +1,17 @@
 using AjkAvaloniaLibs.Controls;
 using pluginVerilog.Verilog.DataObjects.Arrays;
-using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
     public class UserDefinedType : IDataType, IPartSelectableDataType
     {
-        public DataTypeEnum Type { get{ return DataTypeEnum.UserDefined; }}
+        public DataTypeEnum Type { get { return DataTypeEnum.UserDefined; } }
 
         public required Typedef Typedef { get; init; }
-        public IDataType OriginalDataType { get
+        public IDataType OriginalDataType
+        {
+            get
             {
                 return Typedef.VariableType;
             }
@@ -42,7 +39,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             {
                 int? bitWidth = OriginalDataType.BitWidth;
                 if (bitWidth == null) return null;
-                foreach(var packedArray in PackedDimensions)
+                foreach (var packedArray in PackedDimensions)
                 {
                     bitWidth = bitWidth * packedArray.Size;
                 }
@@ -72,7 +69,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         {
             label.AppendText(Typedef.Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Identifier));
             label.AppendText(" ");
-            foreach(var packedArray in PackedDimensions)
+            foreach (var packedArray in PackedDimensions)
             {
                 packedArray.AppendLabel(label);
                 label.AppendText(" ");
@@ -86,7 +83,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             {
                 userDefinedType.PackedDimensions.Add(packedArray.Clone());
             }
-            if(packedDimensions != null)
+            if (packedDimensions != null)
             {
                 foreach (var packedArray in packedDimensions)
                 {
@@ -103,7 +100,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         public IDataType Clone()
         {
             UserDefinedType userDefinedType = new UserDefinedType { Typedef = Typedef };
-            foreach(var packedArray in PackedDimensions)
+            foreach (var packedArray in PackedDimensions)
             {
                 userDefinedType.PackedDimensions.Add(packedArray.Clone());
             }

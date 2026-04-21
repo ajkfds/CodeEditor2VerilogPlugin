@@ -2,20 +2,13 @@ using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Threading;
 using CodeEditor2.CodeEditor;
-using CodeEditor2.Data;
-using CodeEditor2.NavigatePanel;
-using CodeEditor2.Views;
-using pluginVerilog.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.Expressions;
 using pluginVerilog.Verilog.ModuleItems;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using static pluginVerilog.Tool.ParseHierarchy;
 
 namespace pluginVerilog.Verilog.Snippets
 {
@@ -103,7 +96,7 @@ namespace pluginVerilog.Verilog.Snippets
                 DataObject? dataObject = element as DataObject;
                 if (dataObject == null) continue;
 
-                if (dataObject.DefinedReference != null && dataObject.DefinedReference != null && 
+                if (dataObject.DefinedReference != null && dataObject.DefinedReference != null &&
                     caretIndex >= dataObject.DefinedReference.Index && caretIndex < dataObject.DefinedReference.Index + dataObject.DefinedReference.Length)
                 {
                     return dataObject;

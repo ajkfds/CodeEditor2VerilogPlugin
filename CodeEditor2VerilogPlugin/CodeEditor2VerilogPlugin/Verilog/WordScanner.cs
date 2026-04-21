@@ -1,27 +1,20 @@
-using Avalonia.Remote.Protocol;
 using pluginVerilog.CodeEditor;
 using pluginVerilog.Data;
-using pluginVerilog.Parser;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Data;
 using System.Linq;
-using System.Net;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace pluginVerilog.Verilog
 {
     public class WordScanner : IDisposable
     {
-        public WordScanner( CodeEditor.CodeDocument document, Verilog.ParsedDocument parsedDocument,bool systemVerilog) : this(document,parsedDocument,systemVerilog,false)
+        public WordScanner(CodeEditor.CodeDocument document, Verilog.ParsedDocument parsedDocument, bool systemVerilog) : this(document, parsedDocument, systemVerilog, false)
         {
         }
 
-        public WordScanner(CodeEditor.CodeDocument document, Verilog.ParsedDocument parsedDocument, bool systemVerilog,bool supressCompilerDirectiveError)
+        public WordScanner(CodeEditor.CodeDocument document, Verilog.ParsedDocument parsedDocument, bool systemVerilog, bool supressCompilerDirectiveError)
         {
             RootParsedDocument = parsedDocument;
             wordPointer = new WordPointer(document, parsedDocument);
@@ -95,7 +88,7 @@ namespace pluginVerilog.Verilog
         {
             get
             {
-                if(stock.Count == 0)
+                if (stock.Count == 0)
                 {
                     return wordPointer;
                 }
@@ -155,7 +148,7 @@ namespace pluginVerilog.Verilog
         static System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
         public WordScanner Clone()
         {
-            WordScanner ret = new WordScanner(wordPointer.Document, RootParsedDocument,systemVerilog,true);
+            WordScanner ret = new WordScanner(wordPointer.Document, RootParsedDocument, systemVerilog, true);
             ret.wordPointer = wordPointer.Clone();
             ret.nonGeneratedCount = nonGeneratedCount;
             ret.prototype = prototype;
@@ -203,11 +196,11 @@ namespace pluginVerilog.Verilog
             appendBlock(startIndexReference, lastIndexReference, null, null);
         }
 
-        public void AppendBlock(IndexReference startIndexReference, IndexReference lastIndexReference, string name,bool defaultClose)
+        public void AppendBlock(IndexReference startIndexReference, IndexReference lastIndexReference, string name, bool defaultClose)
         {
             appendBlock(startIndexReference, lastIndexReference, name, defaultClose);
         }
-        public void appendBlock(IndexReference startIndexReference, IndexReference lastIndexReference, string? name,bool? defaultClose)
+        public void appendBlock(IndexReference startIndexReference, IndexReference lastIndexReference, string? name, bool? defaultClose)
         {
             if (startIndexReference.Indexes.Count != lastIndexReference.Indexes.Count) return;
             for (int i = 0; i < startIndexReference.Indexes.Count - 1; i++)
@@ -217,13 +210,13 @@ namespace pluginVerilog.Verilog
 
             if (wordPointer.Document.GetLineAt(startIndexReference.Indexes.Last()) == wordPointer.Document.GetLineAt(lastIndexReference.Indexes.Last())) return;
 
-            if(name == null)
+            if (name == null)
             {
                 wordPointer.AppendBlock(startIndexReference.Indexes.Last(), lastIndexReference.Indexes.Last());
             }
-            else if(defaultClose != null)
+            else if (defaultClose != null)
             {
-                 wordPointer.AppendBlock(startIndexReference.Indexes.Last(), lastIndexReference.Indexes.Last(),name, (bool)defaultClose);
+                wordPointer.AppendBlock(startIndexReference.Indexes.Last(), lastIndexReference.Indexes.Last(), name, (bool)defaultClose);
             }
         }
 
@@ -249,13 +242,13 @@ namespace pluginVerilog.Verilog
 
         public void AddPrototypeError(string message)
         {
-//            if (prototype) return;
+            //            if (prototype) return;
             wordPointer.AddError(message);
         }
 
         public void AddPrototypeWarning(string message)
         {
-//            if (prototype) return;
+            //            if (prototype) return;
             wordPointer.AddWarning(message);
         }
 
@@ -274,9 +267,9 @@ namespace pluginVerilog.Verilog
         {
             ApplyPrototypeRule(rule, "");
         }
-        public void ApplyPrototypeRule(Rule rule,string message)
+        public void ApplyPrototypeRule(Rule rule, string message)
         {
-//            if (!prototype) System.Diagnostics.Debugger.Break();
+            //            if (!prototype) System.Diagnostics.Debugger.Break();
             applyRule(rule, message);
         }
         public void ApplyRule(Rule rule)
@@ -286,9 +279,9 @@ namespace pluginVerilog.Verilog
         public void ApplyRule(Rule rule, string message)
         {
             if (prototype) return;
-            applyRule(rule,message);
+            applyRule(rule, message);
         }
-        private void applyRule(Rule rule,string message)
+        private void applyRule(Rule rule, string message)
         {
             switch (rule.Severity)
             {
@@ -308,7 +301,7 @@ namespace pluginVerilog.Verilog
         {
             get
             {
-                if(stock.Count == 0)
+                if (stock.Count == 0)
                 {
                     return wordPointer.Index;
                 }
@@ -481,8 +474,8 @@ namespace pluginVerilog.Verilog
         {
             get
             {
-                if(stock.Count == 0) return wordPointer.Eof;
-                for(int i= stock.Count - 1; i >= 0; i--)
+                if (stock.Count == 0) return wordPointer.Eof;
+                for (int i = stock.Count - 1; i >= 0; i--)
                 {
                     if (!stock[i].Eof) return false;
                 }
@@ -541,7 +534,7 @@ namespace pluginVerilog.Verilog
                 wordPointer = _wp;
                 nonGeneratedCount = _nonGeneratedCount;
                 prototype = _prototype;
-                if(stock.Count != _stock.Count)
+                if (stock.Count != _stock.Count)
                 {
                     stock.Clear();
                     foreach (var wp in _stock)
@@ -740,7 +733,7 @@ namespace pluginVerilog.Verilog
                 case "`nounconnected_drive":
                 case "`unconnected_drive":
                     wordPointer.Color(CodeDrawStyle.ColorType.Keyword);
-                    if(!SupressCompilerDerectiveError) wordPointer.AddError("unsupported compiler directive");
+                    if (!SupressCompilerDerectiveError) wordPointer.AddError("unsupported compiler directive");
                     wordPointer.MoveNext();
                     break;
                 case "`timescale":
@@ -837,7 +830,7 @@ namespace pluginVerilog.Verilog
             string macroText = wordPointer.Text;
             int index = wordPointer.Index;
 
-            while(macroText.EndsWith("\\") && !wordPointer.Eof)
+            while (macroText.EndsWith("\\") && !wordPointer.Eof)
             {
                 macroText = macroText.Substring(0, macroText.Length - 1);
                 wordPointer.MoveNextUntilEol();
@@ -872,7 +865,7 @@ namespace pluginVerilog.Verilog
             else
             {
                 identifier = macroText.Substring(0, separatorIndex);
-                wordPointer.Color(CodeDrawStyle.ColorType.Identifier, index, index+separatorIndex);
+                wordPointer.Color(CodeDrawStyle.ColorType.Identifier, index, index + separatorIndex);
                 macroText = macroText.Substring(separatorIndex);
             }
 
@@ -906,7 +899,7 @@ namespace pluginVerilog.Verilog
         {
             wordPointer.Color(CodeDrawStyle.ColorType.Keyword);
             wordPointer.MoveNext();
-            if(wordPointer.WordType != WordPointer.WordTypeEnum.String || wordPointer.Text.Length<=2)
+            if (wordPointer.WordType != WordPointer.WordTypeEnum.String || wordPointer.Text.Length <= 2)
             {
                 if (!SupressCompilerDerectiveError) wordPointer.AddError("\" expected");
                 wordPointer.MoveNextUntilEol();
@@ -931,7 +924,7 @@ namespace pluginVerilog.Verilog
             string filePath = wordPointer.Text;
             filePath = filePath.Substring(1, filePath.Length - 2);
 
-            if (filePath.Contains('/') && System.IO.Path.DirectorySeparatorChar !='/')
+            if (filePath.Contains('/') && System.IO.Path.DirectorySeparatorChar != '/')
             {
                 filePath = filePath.Replace('/', System.IO.Path.DirectorySeparatorChar);
             }
@@ -950,7 +943,7 @@ namespace pluginVerilog.Verilog
             {
                 rootFile = stock[0].VerilogFile;
             }
-//            Data.IVerilogRelatedFile file = wordPointer.VerilogFile;
+            //            Data.IVerilogRelatedFile file = wordPointer.VerilogFile;
 
             if (rootFile == null)
             {
@@ -1001,12 +994,14 @@ namespace pluginVerilog.Verilog
             }
 
             // search same filename in full project
-            if(wordPointer.ParsedDocument!= null && wordPointer.ParsedDocument.Project !=null) {
+            if (wordPointer.ParsedDocument != null && wordPointer.ParsedDocument.Project != null)
+            {
 
                 CodeEditor2.Data.File? fFile = wordPointer.ParsedDocument.Project.SearchFile(
-                    (f)=> {
-                    if (f.Name == filePath) return true;
-                    return false;
+                    (f) =>
+                    {
+                        if (f.Name == filePath) return true;
+                        return false;
                     });
                 if (fFile != null)
                 {
@@ -1031,7 +1026,7 @@ namespace pluginVerilog.Verilog
             {
                 macro = RootParsedDocument.Macros[macroIdentifier];
             }
-            else if(RootParsedDocument.ProjectProperty.Macros.ContainsKey(macroIdentifier))
+            else if (RootParsedDocument.ProjectProperty.Macros.ContainsKey(macroIdentifier))
             {
                 macro = RootParsedDocument.ProjectProperty.Macros[macroIdentifier];
             }
@@ -1039,7 +1034,7 @@ namespace pluginVerilog.Verilog
             {
                 if (!SupressCompilerDerectiveError) wordPointer.AddError("unsupported macro call");
                 wordPointer.MoveNext();
-                if(wordPointer.Text == "(")
+                if (wordPointer.Text == "(")
                 {
                     int bracketCount = 1;
                     while (true)
@@ -1060,10 +1055,10 @@ namespace pluginVerilog.Verilog
             string macroText = macro.MacroText;
             if (macro.Aurguments != null)
             {
-                parseMacroArguments(macro,out macroText);
+                parseMacroArguments(macro, out macroText);
             }
 
-            if(macroText == "")
+            if (macroText == "")
             {
                 wordPointer.MoveNext();
                 return;
@@ -1073,11 +1068,11 @@ namespace pluginVerilog.Verilog
             CodeEditor.CodeDocument codeDocument = new CodeEditor.CodeDocument(macroText);
             string key = "";// Verilog.ParsedDocument.KeyGenerator(wordPointer.VerilogFile,) .KeyGenerator(wordPointer.ParsedDocument, wordPointer.Index);
             ParsedDocument newParsedDocument = new ParsedDocument(
-                (IVerilogRelatedFile)wordPointer.ParsedDocument.TextFile, 
+                (IVerilogRelatedFile)wordPointer.ParsedDocument.TextFile,
                 key,
-                null, 
+                null,
                 wordPointer.ParsedDocument.ParseMode);
-            WordPointer newPointer = new WordPointer(codeDocument, newParsedDocument );// wordPointer.ParsedDocument);
+            WordPointer newPointer = new WordPointer(codeDocument, newParsedDocument);// wordPointer.ParsedDocument);
 
             wordPointer = newPointer;
 
@@ -1101,7 +1096,7 @@ namespace pluginVerilog.Verilog
             return;
         }
 
-        private   void parseMacroArguments(Macro macro,out string macroText)
+        private void parseMacroArguments(Macro macro, out string macroText)
         {
             macroText = macro.MacroText;
             wordPointer.MoveNext();
@@ -1183,7 +1178,7 @@ namespace pluginVerilog.Verilog
         private void diveIntoIncludeFile(string relativeFilePath)
         {
             if (wordPointer.ParsedDocument.File == null) return;
-            string id = wordPointer.ParsedDocument.File.ID + "," + relativeFilePath + "(" + wordPointer.Index+")";
+            string id = wordPointer.ParsedDocument.File.ID + "," + relativeFilePath + "(" + wordPointer.Index + ")";
 
             Data.IVerilogRelatedFile rootFile;
             if (stock.Count == 0)
@@ -1222,7 +1217,7 @@ namespace pluginVerilog.Verilog
                 }
                 else
                 {
-                    addIncludeFile(relativeFilePath, rootFile, id, indexReference, out newParsedDocument,wordPointer.Index);
+                    addIncludeFile(relativeFilePath, rootFile, id, indexReference, out newParsedDocument, wordPointer.Index);
                 }
             }
             if (newParsedDocument == null) return;
@@ -1232,7 +1227,7 @@ namespace pluginVerilog.Verilog
             stock.Add(wordPointer);
             wordPointer = newPointer;
             wordPointer.Document._tag = "diveInto";
-//            System.Diagnostics.Debug.Print("### "+newParsedDocument.File.Name+"  "+wordPointer.InhibitColor.ToString());
+            //            System.Diagnostics.Debug.Print("### "+newParsedDocument.File.Name+"  "+wordPointer.InhibitColor.ToString());
 
             if (wordPointer.Eof)
             {
@@ -1258,7 +1253,7 @@ namespace pluginVerilog.Verilog
             }
         }
 
-        private void addIncludeFile(string relativeFilePath, IVerilogRelatedFile rootFile,string id, IndexReference indexReference, out ParsedDocument? newParsedDocument,int callIndex)
+        private void addIncludeFile(string relativeFilePath, IVerilogRelatedFile rootFile, string id, IndexReference indexReference, out ParsedDocument? newParsedDocument, int callIndex)
         {
             string name;
             if (relativeFilePath.Contains(System.IO.Path.DirectorySeparatorChar))
@@ -1304,7 +1299,7 @@ namespace pluginVerilog.Verilog
 
             if (vhInstance == null)
             {
-                if(!Prototype & !SupressCompilerDerectiveError) wordPointer.AddError("illegal file");
+                if (!Prototype & !SupressCompilerDerectiveError) wordPointer.AddError("illegal file");
                 if (wordPointer.Text.StartsWith("\"") || wordPointer.Text.StartsWith("'")) wordPointer.MoveNext();
                 newParsedDocument = null;
                 return;
@@ -1318,7 +1313,7 @@ namespace pluginVerilog.Verilog
             }
             else
             {
-//                wordPointer.ParsedDocument.IncludeFiles[vhInstance.ID] = vhInstance;
+                //                wordPointer.ParsedDocument.IncludeFiles[vhInstance.ID] = vhInstance;
                 vhInstance = wordPointer.ParsedDocument.IncludeFiles[vhInstance.ID];
             }
 
@@ -1326,8 +1321,8 @@ namespace pluginVerilog.Verilog
             if (parent == null) throw new Exception();
             vhInstance.Parent = parent;
 
-            string key = Verilog.ParsedDocument.KeyGenerator(vhInstance.Parent.ID,vhInstance, null, null);
-            newParsedDocument = new Verilog.ParsedDocument(vhInstance,key, indexReference, RootParsedDocument.ParseMode);
+            string key = Verilog.ParsedDocument.KeyGenerator(vhInstance.Parent.ID, vhInstance, null, null);
+            newParsedDocument = new Verilog.ParsedDocument(vhInstance, key, indexReference, RootParsedDocument.ParseMode);
             CodeDocument? originalDocument = vhInstance.CodeDocument as CodeDocument;
             if (originalDocument == null) throw new Exception();
 

@@ -1,9 +1,4 @@
 using pluginVerilog.Verilog.Statements;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Assertion
@@ -28,7 +23,7 @@ namespace pluginVerilog.Verilog.Assertion
         public static async Task<PropertySpec> ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             EventControl? eventControl = null;
-            if(word.Text=="@") eventControl = EventControl.ParseCreate(word, nameSpace);
+            if (word.Text == "@") eventControl = EventControl.ParseCreate(word, nameSpace);
             Expressions.Expression? disableIffExpression = null;
 
             if (word.Text == "disable")
@@ -74,8 +69,8 @@ namespace pluginVerilog.Verilog.Assertion
             }
 
 
-            PropertySpec propertySpec = new PropertySpec() 
-            { 
+            PropertySpec propertySpec = new PropertySpec()
+            {
                 EventControl = eventControl,
                 DisableIffExpression = disableIffExpression,
             };

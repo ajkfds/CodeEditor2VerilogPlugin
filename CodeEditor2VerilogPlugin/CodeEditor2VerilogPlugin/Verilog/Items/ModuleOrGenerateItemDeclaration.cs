@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace pluginVerilog.Verilog.Items
 {
     public class ModuleOrGenerateItemDeclaration
@@ -40,7 +34,7 @@ namespace pluginVerilog.Verilog.Items
                 case "default":
                     word.Color(CodeDrawStyle.ColorType.Keyword);
                     word.MoveNext();
-                    if(word.Text == "clocking")
+                    if (word.Text == "clocking")
                     {
                         word.Color(CodeDrawStyle.ColorType.Keyword);
                         word.MoveNext();

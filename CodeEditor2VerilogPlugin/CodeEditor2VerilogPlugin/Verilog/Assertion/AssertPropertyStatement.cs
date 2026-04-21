@@ -1,9 +1,5 @@
 using CodeEditor2.CodeEditor.CodeComplete;
-using pluginVerilog.Verilog.Statements;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Assertion
@@ -37,7 +33,7 @@ namespace pluginVerilog.Verilog.Assertion
             if (word.Eof || word.Text != ")") return await exitTask(word, nameSpace, assertPropertyStatement);
             word.MoveNext();
 
-            if(word.Text != "else")
+            if (word.Text != "else")
             {
                 assertPropertyStatement.PassStatement = await Statements.Statements.ParseCreateStatement(word, nameSpace);
             }
@@ -62,7 +58,7 @@ namespace pluginVerilog.Verilog.Assertion
 
 
         public string Name { get; set; } = "";
-        
+
         public CodeDrawStyle.ColorType ColorType
         {
             get

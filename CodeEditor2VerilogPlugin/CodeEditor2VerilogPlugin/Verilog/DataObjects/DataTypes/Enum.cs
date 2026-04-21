@@ -1,20 +1,15 @@
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.DataObjects.Constants;
-using pluginVerilog.Verilog.DataObjects.DataTypes;
-using pluginVerilog.Verilog.DataObjects.Variables;
 using pluginVerilog.Verilog.Expressions;
-using ReactiveUI;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
     public class Enum : IDataType, IPartSelectableDataType
     {
-        public virtual DataTypeEnum Type {
+        public virtual DataTypeEnum Type
+        {
             get
             {
                 return DataTypeEnum.Enum;
@@ -67,7 +62,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             {
                 enum_.PackedDimensions.Add(packedDimension.Clone());
             }
-            foreach(var item in Items)
+            foreach (var item in Items)
             {
                 enum_.Items.Add(item.Clone());
             }
@@ -99,7 +94,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 case "longint":
                 case "integer":
                 case "time":
-                    type.BaseType =  IntegerAtomType.ParseCreate(word, nameSpace);
+                    type.BaseType = IntegerAtomType.ParseCreate(word, nameSpace);
                     break;
                 default:
                     // In the absence of a data type declaration, the default data type shall be int.
@@ -108,7 +103,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     break;
             }
 
-            if(word.Eof | word.Text != "{")
+            if (word.Eof | word.Text != "{")
             {
                 word.AddError("{ required");
                 return null;
@@ -116,7 +111,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             word.MoveNext(); // "{"
 
             int index = 0;
-            while( !word.Eof | word.Text != "}")
+            while (!word.Eof | word.Text != "}")
             {
                 if (!parseItem(type, word, nameSpace, ref index)) break;
 
@@ -137,7 +132,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             return type;
         }
 
-        private static bool parseItem(Enum enum_,WordScanner word, NameSpace nameSpace, ref int index)
+        private static bool parseItem(Enum enum_, WordScanner word, NameSpace nameSpace, ref int index)
         {
             /*
             enum_name_declaration::=
@@ -173,7 +168,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             }
 
             item.Index = index;
-            if(enum_.BaseType != null)
+            if (enum_.BaseType != null)
             {
                 EnumConstants constants = EnumConstants.Create(item.Identifier, enum_.BaseType, wordReference, Expressions.Expression.CreateTempExpression(index.ToString()));
                 if (word.Prototype)

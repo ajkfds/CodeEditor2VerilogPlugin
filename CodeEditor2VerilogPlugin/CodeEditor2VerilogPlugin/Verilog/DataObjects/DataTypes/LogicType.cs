@@ -1,9 +1,4 @@
-using pluginVerilog.Verilog.DataObjects.Arrays;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
@@ -23,14 +18,16 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             }
             return type;
         }
-        public override bool IsValidForNet { 
-            get {
-                foreach(var array in PackedDimensions)
+        public override bool IsValidForNet
+        {
+            get
+            {
+                foreach (var array in PackedDimensions)
                 {
-                    if(!array.IsValidForNet) return false;
+                    if (!array.IsValidForNet) return false;
                 }
-                return true; 
-            } 
+                return true;
+            }
         }
     }
 }

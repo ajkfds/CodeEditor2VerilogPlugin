@@ -1,10 +1,6 @@
+using pluginVerilog.Verilog.DataObjects.DataTypes;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using pluginVerilog.Verilog.DataObjects;
-using pluginVerilog.Verilog.DataObjects.DataTypes;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
@@ -61,13 +57,14 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         public IDataType? BaseType { get; protected set; } = null;
         public List<DataTypes.Enum.Item> Items = new List<DataTypes.Enum.Item>();
 
-        public DataObjects.Arrays.PackedArray? Range {
+        public DataObjects.Arrays.PackedArray? Range
+        {
             get
             {
                 if (PackedDimensions.Count < 1) return null;
                 return PackedDimensions[0];
             }
-        } 
+        }
 
 
         //public override void AppendLabel(ColorLabel label)
@@ -94,14 +91,14 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         //{
         //}
 
-        public static new Enum Create(string name,DataTypes.IDataType dataType)
+        public static new Enum Create(string name, DataTypes.IDataType dataType)
         {
             DataTypes.Enum? dType = dataType as DataTypes.Enum;
             if (dType == null) throw new Exception();
 
             Enum val = new Enum() { Name = name };
             val.DataType = dType;
-            foreach(var item in dType.Items)
+            foreach (var item in dType.Items)
             {
                 val.Items.Add(item);
             }

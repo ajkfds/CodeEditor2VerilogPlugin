@@ -1,18 +1,12 @@
-using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.DataObjects.Nets;
-using pluginVerilog.Verilog.ModuleItems;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
     public class BuildingBlock : NameSpace, INamedElement
     {
-        protected BuildingBlock(BuildingBlock buildingBlock, NameSpace parent) :base(buildingBlock, parent)
+        protected BuildingBlock(BuildingBlock buildingBlock, NameSpace parent) : base(buildingBlock, parent)
         {
         }
 
@@ -58,7 +52,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
             foreach (var element in nameSpace.NamedElements.Values)
             {
-                if(element is Net)
+                if (element is Net)
                 {
                     Net net = (Net)element;
                     if (net.DefinedReference == null) continue;

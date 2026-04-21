@@ -2,20 +2,14 @@ using pluginVerilog.Data;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.Expressions;
 using pluginVerilog.Verilog.ModuleItems;
-using pluginVerilog.Verilog.Statements;
-using Splat;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml;
 
 namespace pluginVerilog.Verilog
 {
     public class HierarchyConnection
     {
-        public HierarchyConnection(pluginVerilog.Data.IVerilogRelatedFile file,pluginVerilog.Verilog.DataObjects.DataObject dataObject)
+        public HierarchyConnection(pluginVerilog.Data.IVerilogRelatedFile file, pluginVerilog.Verilog.DataObjects.DataObject dataObject)
         {
             Node = new ConnectionNode(file, dataObject);
 
@@ -24,7 +18,7 @@ namespace pluginVerilog.Verilog
         public ConnectionNode? Node = null;
         public class ConnectionNode
         {
-            public ConnectionNode(pluginVerilog.Data.IVerilogRelatedFile file,DataObjects.DataObject dataObject)
+            public ConnectionNode(pluginVerilog.Data.IVerilogRelatedFile file, DataObjects.DataObject dataObject)
             {
                 this.DataObject = dataObject;
                 this.File = file;
@@ -40,11 +34,11 @@ namespace pluginVerilog.Verilog
 
             public List<ConnectionNode> Driver = new List<ConnectionNode>();
             public List<ConnectionNode> Receiver = new List<ConnectionNode>();
-            private void searchModulePort(Data.VerilogModuleInstance moduleInstance,DataObject dataObject)
+            private void searchModulePort(Data.VerilogModuleInstance moduleInstance, DataObject dataObject)
             {
                 if (moduleInstance.Module == null) return;
                 if (!moduleInstance.Module.Ports.TryGetValue(dataObject.Name, out Port? port)) return;
-                
+
                 IVerilogRelatedFile? parentFile = File.Parent as IVerilogRelatedFile;
                 if (parentFile == null) return;
                 Verilog.ParsedDocument? parentParsedDocument = parentFile.VerilogParsedDocument;
@@ -64,20 +58,21 @@ namespace pluginVerilog.Verilog
 
                 if (port.Direction == Port.DirectionEnum.Input)
                 {
-                    if(connextionExpression is DataObjectReference)
+                    if (connextionExpression is DataObjectReference)
                     {
                         DataObjectReference variableReference = (DataObjectReference)connextionExpression;
                         DataObject? connectionDataObject = variableReference.TargetDataObject;
-                        if(connectionDataObject is null) return;
-                        foreach( var assign in connectionDataObject.AssignedReferences)
+                        if (connectionDataObject is null) return;
+                        foreach (var assign in connectionDataObject.AssignedReferences)
                         {
 
                         }
                     }
-                    
-                }else if(port.Direction == Port.DirectionEnum.Output)
+
+                }
+                else if (port.Direction == Port.DirectionEnum.Output)
                 {
-                    
+
                 }
             }
             private void searchModuleInstance(Data.VerilogModuleInstance moduleInstance, DataObject dataObject)
@@ -87,7 +82,7 @@ namespace pluginVerilog.Verilog
 
                 if (port.Direction == Port.DirectionEnum.Input)
                 {
-//                    moduleInstance.Module.NamedElements
+                    //                    moduleInstance.Module.NamedElements
                 }
                 else if (port.Direction == Port.DirectionEnum.Output)
                 {
@@ -102,7 +97,7 @@ namespace pluginVerilog.Verilog
             public ConnectionNode? Source;
             public List<ConnectionNode>? Destination;
 
-            
+
 
         }
 
@@ -132,16 +127,16 @@ namespace pluginVerilog.Verilog
         //    Expression expression = instanceElement.PortConnection[port.Name];
         //    if(expression is VariableReference variableReference)
         //    {
-                
+
         //    }
 
 
         //    return null;
         //}
 
-        private DataObject? getModuleInstancePortConnection(ModuleItems.ModuleInstantiation moduleInst,string portName)
+        private DataObject? getModuleInstancePortConnection(ModuleItems.ModuleInstantiation moduleInst, string portName)
         {
-            if(!moduleInst.PortConnection.ContainsKey(portName)) return null;
+            if (!moduleInst.PortConnection.ContainsKey(portName)) return null;
             Expressions.Expression expression = moduleInst.PortConnection[portName];
 
             return null;
@@ -150,14 +145,14 @@ namespace pluginVerilog.Verilog
         private ModuleItems.ModuleInstantiation? getParentModuleInstance(CodeEditor2.Data.File file)
         {
             Data.VerilogModuleInstance? moduleInstance = file as Data.VerilogModuleInstance;
-            if(moduleInstance == null) return null;
+            if (moduleInstance == null) return null;
             string instanceName = moduleInstance.Name;
 
             Data.IVerilogRelatedFile? parentFile = file.Parent as Data.IVerilogRelatedFile;
-            if(parentFile?.VerilogParsedDocument?.Root?.NamedElements.ContainsKey(instanceName) != true) return null;
+            if (parentFile?.VerilogParsedDocument?.Root?.NamedElements.ContainsKey(instanceName) != true) return null;
             INamedElement namedElement = parentFile.VerilogParsedDocument.Root.NamedElements[instanceName];
             Verilog.ModuleItems.ModuleInstantiation? moduleInst = namedElement as Verilog.ModuleItems.ModuleInstantiation;
-            if(moduleInst == null) return null;
+            if (moduleInst == null) return null;
             return moduleInst;
         }
 

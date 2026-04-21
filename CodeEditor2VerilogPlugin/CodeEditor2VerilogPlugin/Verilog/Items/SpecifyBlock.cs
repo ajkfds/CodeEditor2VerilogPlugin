@@ -1,8 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Items
 {
@@ -22,7 +18,7 @@ namespace pluginVerilog.Verilog.Items
                 word.MoveNext();
             }
 
-            if (word.Text== "endspecify")
+            if (word.Text == "endspecify")
             {
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 word.MoveNext();

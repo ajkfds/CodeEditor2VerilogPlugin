@@ -1,9 +1,5 @@
 using pluginVerilog.Verilog.Sequence;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Property
 {
@@ -66,7 +62,7 @@ namespace pluginVerilog.Verilog.Property
             while (!word.Eof)
             {
                 SequenceExpr? sequenceExpr = SequenceExpr.ParseCreate(word, nameSpace);
-                if(sequenceExpr != null)
+                if (sequenceExpr != null)
                 {
                     primaries.Add(sequenceExpr);
                     continue;

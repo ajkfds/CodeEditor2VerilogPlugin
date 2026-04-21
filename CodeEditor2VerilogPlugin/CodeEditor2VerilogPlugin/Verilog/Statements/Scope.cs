@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Text.Json.Serialization;
 
 namespace pluginVerilog.Verilog.Statements
@@ -15,7 +10,7 @@ namespace pluginVerilog.Verilog.Statements
     public class Scope
     {
         public string Name { get; set; } = string.Empty;
-        
+
         [JsonIgnore]
         private ProjectProperty projectProperty { init; get; }
         public Scope? ParseCreate(WordScanner word, NameSpace nameSpace)
@@ -30,12 +25,12 @@ namespace pluginVerilog.Verilog.Statements
                 word.Color(CodeDrawStyle.ColorType.Identifier);
                 word.MoveNext();
                 word.MoveNext(); // skip "::"
-                return new PackageScope() { Name = name,projectProperty = word.ProjectProperty };
+                return new PackageScope() { Name = name, projectProperty = word.ProjectProperty };
             }
 
             BuildingBlocks.BuildingBlock? buildingBlock = word.ProjectProperty.GetBuildingBlock(name);
-            
-            
+
+
             if (buildingBlock == null)
             {
                 word.AddError($"undefined scope {name}");
@@ -45,19 +40,20 @@ namespace pluginVerilog.Verilog.Statements
         }
         public BuildingBlocks.BuildingBlock? BuildingBlock
         {
-            get { 
-                return projectProperty.GetBuildingBlock(Name); 
+            get
+            {
+                return projectProperty.GetBuildingBlock(Name);
             }
         }
     }
 
-    public class  PackageScope : Scope
+    public class PackageScope : Scope
     {
-        
+
     }
 
-    public class  ClassScope : Scope
+    public class ClassScope : Scope
     {
-        
+
     }
 }

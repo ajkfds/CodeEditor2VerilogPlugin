@@ -1,14 +1,7 @@
 using Avalonia.Controls;
-using Avalonia.Controls.Documents;
-using Avalonia.Controls.Primitives;
 using Avalonia.Media;
 using CodeEditor2.Data;
 using CodeEditor2.Tools;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Views
 {
@@ -21,7 +14,7 @@ namespace pluginVerilog.Views
         ItemPropertyForm form;
         CodeEditor2.NavigatePanel.NavigatePanelNode node;
         TextBox compileOptionText = new TextBox();
-        public ProjectPropertyTab(ProjectProperty projectProperty, ItemPropertyForm form, CodeEditor2.NavigatePanel.NavigatePanelNode node,Project project)
+        public ProjectPropertyTab(ProjectProperty projectProperty, ItemPropertyForm form, CodeEditor2.NavigatePanel.NavigatePanelNode node, Project project)
         {
             this.projectProperty = projectProperty;
             this.project = project;
@@ -34,10 +27,11 @@ namespace pluginVerilog.Views
             CodeEditor2.Tools.VerticalGridConstructor gridConstructor = new VerticalGridConstructor();
             tab.Content = gridConstructor.Grid;
 
-            gridConstructor.AppendText("Parse Option",true);
+            gridConstructor.AppendText("Parse Option", true);
             gridConstructor.AppendText("option");
 
-            compileOptionText = new TextBox() { 
+            compileOptionText = new TextBox()
+            {
                 AcceptsReturn = true,
                 TextWrapping = TextWrapping.Wrap
             };

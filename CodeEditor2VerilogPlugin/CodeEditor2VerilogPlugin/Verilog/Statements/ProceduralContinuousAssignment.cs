@@ -1,9 +1,4 @@
 using CodeEditor2.CodeEditor.CodeComplete;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Statements
 {
@@ -48,7 +43,7 @@ namespace pluginVerilog.Verilog.Statements
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
-            Expressions.Expression? lvalue = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace,false);
+            Expressions.Expression? lvalue = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace, false);
 
             if (word.Text != "=") return null;
             WordReference equalPointer = word.CrateWordReference();
@@ -68,7 +63,7 @@ namespace pluginVerilog.Verilog.Statements
             if (lvalue == null || value == null) return null;
             ProceduralContinuousAssignment ret = new ProceduralContinuousAssignment() { LValue = lvalue, Value = value };
 
-            lvalue.SyncContext.PropageteClockDomainFrom(value.SyncContext,equalPointer);
+            lvalue.SyncContext.PropageteClockDomainFrom(value.SyncContext, equalPointer);
             return ret;
         }
     }

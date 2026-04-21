@@ -1,12 +1,5 @@
-using AvaloniaEdit.Rendering;
 using CodeEditor2.CodeEditor.CodeComplete;
-using Microsoft.Playwright;
 using pluginVerilog.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.AutoComplete
 {
@@ -45,9 +38,9 @@ namespace pluginVerilog.Verilog.AutoComplete
 
             {
                 BuildingBlocks.BuildingBlock? buildingBlock = vfile.VerilogParsedDocument?.GetBuildingBlockAt(prevIndex);
-                if(buildingBlock != null)
+                if (buildingBlock != null)
                 {
-                    foreach(INamedElement namedElement in buildingBlock.NamedElements)
+                    foreach (INamedElement namedElement in buildingBlock.NamedElements)
                     {
                         if (namedElement is not Verilog.DataObjects.Constants.Constants) continue;
                         if (namedElement.Name.StartsWith(CaseHeader))

@@ -1,9 +1,4 @@
 using CodeEditor2.CodeEditor.CodeComplete;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Statements
 {
@@ -40,7 +35,7 @@ namespace pluginVerilog.Verilog.Statements
 
             Expressions.Expression ex = Expressions.Expression.ParseCreate(word, nameSpace);
 
-            if(ex is Verilog.Expressions.DataObjectReference)
+            if (ex is Verilog.Expressions.DataObjectReference)
             {
                 var valRef = ex as Expressions.DataObjectReference;
                 if (valRef.TargetDataObject is DataObjects.Variables.Event)

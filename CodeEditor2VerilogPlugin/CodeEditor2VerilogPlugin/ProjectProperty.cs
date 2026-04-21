@@ -1,9 +1,4 @@
 using AjkAvaloniaLibs.Libs.Json;
-using Avalonia.Controls;
-using Avalonia.Controls.Platform;
-using Avalonia.Input;
-using Avalonia.OpenGL;
-using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
 using CodeEditor2.Tools;
 using pluginVerilog.Data;
@@ -11,15 +6,7 @@ using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.ModuleItems;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace pluginVerilog
 {
@@ -29,7 +16,7 @@ namespace pluginVerilog
         //{
         //    this.project = project;
         //}
-        public ProjectProperty(Project project, ProjectProperty.Setup setup) : base(project,setup)
+        public ProjectProperty(Project project, ProjectProperty.Setup setup) : base(project, setup)
         {
             CompileOption = setup.CompileOption;
         }
@@ -38,9 +25,9 @@ namespace pluginVerilog
 
         public Verilog.AutoComplete.Setup SnippetSetup = new Verilog.AutoComplete.Setup();
 
-        public override void InitializePropertyForm(ItemPropertyForm form, CodeEditor2.NavigatePanel.NavigatePanelNode node,Project project)
+        public override void InitializePropertyForm(ItemPropertyForm form, CodeEditor2.NavigatePanel.NavigatePanelNode node, Project project)
         {
-            base.InitializePropertyForm(form, node,project);
+            base.InitializePropertyForm(form, node, project);
             if (node is CodeEditor2.NavigatePanel.ProjectNode)
             {
                 Views.ProjectPropertyTab tab = new Views.ProjectPropertyTab(this, form, node, project);
@@ -109,7 +96,7 @@ namespace pluginVerilog
             {
                 Data.VerilogFile? file = GetFileOfBuildingBlock(instantiation.SourceName) as Data.VerilogFile;
                 if (file == null) return null;
-                string InstanceKey = Verilog.ParsedDocument.KeyGenerator(file,instantiation.SourceName,instantiation.ParameterOverrides);
+                string InstanceKey = Verilog.ParsedDocument.KeyGenerator(file, instantiation.SourceName, instantiation.ParameterOverrides);
 
                 Verilog.ParsedDocument? parsedDocument = file.GetInstancedParsedDocument(InstanceKey) as Verilog.ParsedDocument;
                 if (parsedDocument == null) return null;
@@ -121,7 +108,7 @@ namespace pluginVerilog
 
         public void loadMacros(JsonReader jsonReader)
         {
-            using(var reader = jsonReader.GetNextObjectReader())
+            using (var reader = jsonReader.GetNextObjectReader())
             {
                 while (true)
                 {
@@ -185,7 +172,7 @@ namespace pluginVerilog
         public CodeEditor2.CodeEditor.ParsedDocument? GetParsedDocument(string id)
         {
             if (id == null) throw new Exception();
-            
+
             if (pdocs.ContainsKey(id))
             {
                 return pdocs[id];
@@ -201,9 +188,9 @@ namespace pluginVerilog
         private WeakReferenceDictionary<string, Data.IVerilogRelatedFile> buildingBlockFileTable = new WeakReferenceDictionary<string, Data.IVerilogRelatedFile>();
         private WeakReferenceDictionary<string, BuildingBlock> buildingBlockTable = new WeakReferenceDictionary<string, BuildingBlock>();
 
-        public void RegisterBuildingBlock(string buildingBlockName,BuildingBlock buildingBlock, VerilogFile file)
+        public void RegisterBuildingBlock(string buildingBlockName, BuildingBlock buildingBlock, VerilogFile file)
         {
-            if(file == null)
+            if (file == null)
             {
                 if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
             }
@@ -235,7 +222,7 @@ namespace pluginVerilog
             bool ret2 = false;
             ret1 = buildingBlockTable.HasItem(moduleName);
             ret2 = buildingBlockFileTable.HasItem(moduleName);
-            if (ret1!=ret2)
+            if (ret1 != ret2)
             {
                 System.Diagnostics.Debugger.Break();
             }
@@ -279,7 +266,9 @@ namespace pluginVerilog
         public List<string> GetObjectsNameList()
         {
             return buildingBlockTable.GetMatchedKeyList(
-                (x) => { return (x is Object)|| (x is Interface)||(x is Program); 
+                (x) =>
+                {
+                    return (x is Object) || (x is Interface) || (x is Program);
                 });
         }
 

@@ -1,20 +1,12 @@
 using AjkAvaloniaLibs.Controls;
 using pluginVerilog.Verilog.DataObjects.Arrays;
-using pluginVerilog.Verilog.DataObjects.Constants;
-using pluginVerilog.Verilog.DataObjects.Variables;
 using pluginVerilog.Verilog.Expressions;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Security.AccessControl;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
     public class StructType : IDataType, IPartSelectableDataType
-    { 
+    {
         public virtual DataTypeEnum Type
         {
             get
@@ -28,21 +20,23 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         }
         public virtual bool PartSelectable { get { return Packable; } }
 
-        public bool IsValidForNet { 
-            get {
-                foreach(var member in Members.Values)
+        public bool IsValidForNet
+        {
+            get
+            {
+                foreach (var member in Members.Values)
                 {
                     if (!member.DatType.IsValidForNet) return false;
                 }
                 return true;
-            } 
+            }
         }
         public int? BitWidth
         {
             get
             {
                 int size = 0;
-                foreach(Member member in Members.Values)
+                foreach (Member member in Members.Values)
                 {
                     if (member.DatType.BitWidth == null)
                     {
@@ -56,7 +50,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
         public virtual List<DataObjects.Arrays.PackedArray> PackedDimensions { get; protected set; } = new List<DataObjects.Arrays.PackedArray>();
 
-        public bool Tagged = false; 
+        public bool Tagged = false;
         public bool Packed = false;
         public bool Signed = false;
 
@@ -81,12 +75,12 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         public void AppendTypeLabel(ColorLabel label)
         {
             label.AppendText("struct", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-            if(Packed) label.AppendText(" packed", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-            if(Signed) label.AppendText(" signed", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-            if(Members.Count != 0)
+            if (Packed) label.AppendText(" packed", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+            if (Signed) label.AppendText(" signed", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+            if (Members.Count != 0)
             {
                 label.AppendText("{\n");
-                foreach(Member member in Members.Values)
+                foreach (Member member in Members.Values)
                 {
                     label.AppendText("\t");
                     member.AppendTypeLabel(label);
@@ -104,7 +98,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             {
                 structType.Members.Add(member.Identifier, member.Clone());
             }
-            foreach(var packedDimention in PackedDimensions)
+            foreach (var packedDimention in PackedDimensions)
             {
                 structType.PackedDimensions.Add(packedDimention.Clone());
             }
@@ -113,14 +107,14 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
         public static StructType? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
-            if (word.Text != "struct" ) System.Diagnostics.Debugger.Break();
+            if (word.Text != "struct") System.Diagnostics.Debugger.Break();
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.AddSystemVerilogError();
             word.MoveNext();
 
             StructType type = new StructType();
 
-            if(word.Text == "tagged")
+            if (word.Text == "tagged")
             {
                 type.Tagged = true;
                 word.Color(CodeDrawStyle.ColorType.Keyword);
@@ -160,7 +154,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 if (word.Text == ";")
                 {
                     word.MoveNext();
-//                    if (word.Text == "}") word.AddError("illegal ;");
+                    //                    if (word.Text == "}") word.AddError("illegal ;");
                 }
             }
 
@@ -222,7 +216,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 if (word.Text == "[")
                 {
                     var packedArray = PackedArray.ParseCreate(word, nameSpace);
-                    if(packedArray != null) dimensions.Add(packedArray);
+                    if (packedArray != null) dimensions.Add(packedArray);
                 }
 
                 Expressions.Expression? exp = null;
@@ -248,7 +242,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 }
                 else
                 {
-                    struct_.Members.Add(identifier,member);
+                    struct_.Members.Add(identifier, member);
                 }
 
                 if (word.Text != ",") return true;
@@ -308,7 +302,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             public Member Clone()
             {
                 Member member = new Member() { Identifier = Identifier, DatType = DatType, Value = Value };
-                foreach(var packedArray in Dimentions)
+                foreach (var packedArray in Dimentions)
                 {
                     member.Dimentions.Add(packedArray.Clone());
                 }
@@ -317,7 +311,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             public void AppendTypeLabel(ColorLabel label)
             {
                 DatType.AppendTypeLabel(label);
-                foreach(var packedArray in Dimentions)
+                foreach (var packedArray in Dimentions)
                 {
                     packedArray.AppendLabel(label);
                     label.AppendText(" ");

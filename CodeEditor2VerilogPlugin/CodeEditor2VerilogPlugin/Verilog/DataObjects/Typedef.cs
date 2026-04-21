@@ -1,12 +1,6 @@
 using CodeEditor2.CodeEditor.CodeComplete;
-using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
-using pluginVerilog.Verilog.DataObjects.Nets;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects
 {
@@ -104,7 +98,7 @@ namespace pluginVerilog.Verilog.DataObjects
                 }
             }
 
-            if(word.Text != ";")
+            if (word.Text != ";")
             {
                 word.AddError("; expected");
                 return true;

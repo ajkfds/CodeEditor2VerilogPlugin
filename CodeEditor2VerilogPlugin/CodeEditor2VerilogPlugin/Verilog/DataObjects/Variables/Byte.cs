@@ -1,9 +1,5 @@
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
@@ -19,14 +15,14 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         public override Byte Clone(string name)
         {
             Byte val = new Byte() { Name = name, Defined = Defined, Signed = Signed };
-            if(DataType != null) val.DataType = DataType.Clone();
+            if (DataType != null) val.DataType = DataType.Clone();
             foreach (var unpackedArray in UnpackedArrays)
             {
                 val.UnpackedArrays.Add(unpackedArray.Clone());
             }
             return val;
         }
-        public static new Byte Create(string name,IDataType dataType)
+        public static new Byte Create(string name, IDataType dataType)
         {
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.Byte);
             DataTypes.IntegerAtomType? dType = dataType as DataTypes.IntegerAtomType;

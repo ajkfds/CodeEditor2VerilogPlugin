@@ -1,16 +1,5 @@
-using CodeEditor2.Data;
-using ExCSS;
-using pluginVerilog.Verilog.DataObjects;
-using pluginVerilog.Verilog.DataObjects.Arrays;
-using ReactiveUI;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Text.Json.Serialization;
 
 namespace pluginVerilog.Verilog.Expressions
@@ -47,11 +36,11 @@ namespace pluginVerilog.Verilog.Expressions
             return ParseCreate(word, nameSpace, nameSpace);
         }
 
-        public static FunctionCall? ParseCreate(WordScanner word,NameSpace nameSpace,NameSpace functionDefinedNameSpace)
+        public static FunctionCall? ParseCreate(WordScanner word, NameSpace nameSpace, NameSpace functionDefinedNameSpace)
         {
             if (word.RootParsedDocument.ProjectProperty == null) throw new Exception();
 
-            FunctionCall functionCall = new FunctionCall() { FunctionName = word.Text, DefinedNameSpace = functionDefinedNameSpace, ProjectProperty=word.ProjectProperty };
+            FunctionCall functionCall = new FunctionCall() { FunctionName = word.Text, DefinedNameSpace = functionDefinedNameSpace, ProjectProperty = word.ProjectProperty };
             functionCall.Reference = word.GetReference();
 
             Function? function = null;
@@ -61,12 +50,12 @@ namespace pluginVerilog.Verilog.Expressions
             }
             else if (word.RootParsedDocument.ProjectProperty.SystemFunctions.ContainsKey(word.Text))
             {
-            //
+                //
             }
             else
             {
-               INamedElement? namedElement = functionDefinedNameSpace.GetNamedElementUpward(functionCall.FunctionName);
-                if(namedElement is Function)
+                INamedElement? namedElement = functionDefinedNameSpace.GetNamedElementUpward(functionCall.FunctionName);
+                if (namedElement is Function)
                 {
                     function = (Function)namedElement;
                 }
@@ -90,7 +79,7 @@ namespace pluginVerilog.Verilog.Expressions
 
             if (word.Text != "(")
             {
-                if(function != null && function.Ports.Count != 0)
+                if (function != null && function.Ports.Count != 0)
                 {
                     word.AddError("illegal function call");
                     return null;
@@ -102,7 +91,7 @@ namespace pluginVerilog.Verilog.Expressions
             }
 
             // Use common ListOfArguments parser
-            ListOfArguments.ParseListOfArguments(word, nameSpace, function, functionCall.PortConnection,out bool returnConstant);
+            ListOfArguments.ParseListOfArguments(word, nameSpace, function, functionCall.PortConnection, out bool returnConstant);
 
             // Check if function call ended properly
             functionCall.Reference = WordReference.CreateReferenceRange(functionCall.Reference, word.GetReference());
@@ -156,9 +145,9 @@ namespace pluginVerilog.Verilog.Expressions
                 return;
             }
             word.MoveNext();
-            
+
             Expression? expression = Expression.ParseCreate(word, definedNameSpace);
-            
+
             if (word.Text != ")")
             {
                 word.AddError("( required");

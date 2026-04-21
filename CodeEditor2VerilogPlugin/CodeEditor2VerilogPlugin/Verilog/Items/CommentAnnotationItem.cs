@@ -1,15 +1,8 @@
-using ReactiveUI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace pluginVerilog.Verilog.Items
 {
     public static class CommentAnnotationItem
     {
-        public static void Parse(WordScanner word,NameSpace nameSpace)
+        public static void Parse(WordScanner word, NameSpace nameSpace)
         {
             if (!word.GetPreviousComment().Contains("@")) return;
 
@@ -37,7 +30,7 @@ namespace pluginVerilog.Verilog.Items
                         comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
                         comment.MoveNext();
                     }
-                    else if(comment.Text == word.ProjectProperty.AnnotationCommands.Discard)
+                    else if (comment.Text == word.ProjectProperty.AnnotationCommands.Discard)
                     {
                         comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
                         comment.MoveNext();
@@ -50,7 +43,7 @@ namespace pluginVerilog.Verilog.Items
                             {
                                 string name = comment.Text;
                                 DataObjects.DataObject? dataObject = nameSpace.NamedElements.GetDataObject(name);
-                                if(dataObject == null)
+                                if (dataObject == null)
                                 {
                                     break;
                                 }
@@ -66,7 +59,7 @@ namespace pluginVerilog.Verilog.Items
                             comment.MoveNext();
                         }
                     }
-                    else if(comment.Text == word.ProjectProperty.AnnotationCommands.Markdown)
+                    else if (comment.Text == word.ProjectProperty.AnnotationCommands.Markdown)
                     {
                         comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
                         comment.MoveNextUntilEol();

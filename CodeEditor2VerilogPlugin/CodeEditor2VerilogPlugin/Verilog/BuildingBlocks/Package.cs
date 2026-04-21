@@ -1,10 +1,8 @@
+using CodeEditor2.CodeEditor.CodeComplete;
+using pluginVerilog.Verilog.ModuleItems;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CodeEditor2.CodeEditor.CodeComplete;
-using pluginVerilog.Verilog.ModuleItems;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {

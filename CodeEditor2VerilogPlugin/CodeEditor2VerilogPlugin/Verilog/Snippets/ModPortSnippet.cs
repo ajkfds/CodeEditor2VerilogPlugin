@@ -1,12 +1,8 @@
 using Avalonia.Input;
 using CodeEditor2.Views;
-using pluginVerilog.Verilog.DataObjects;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using System.Threading.Tasks;
 
 
 namespace pluginVerilog.Verilog.Snippets
@@ -62,14 +58,14 @@ namespace pluginVerilog.Verilog.Snippets
                 }
             }
 
-            foreach(ModPort modport in interface_.NamedElements.Values.OfType<ModPort>())
+            foreach (ModPort modport in interface_.NamedElements.Values.OfType<ModPort>())
             {
-                foreach(var port in modport.Ports.Values)
+                foreach (var port in modport.Ports.Values)
                 {
                     string expName = port.Expression.CreateString();
 
                     if (!newModPortDirection.ContainsKey(expName)) continue;
-                    if(
+                    if (
                         port.Direction == ModPort.Port.DirectionEnum.Output ||
                         port.Direction == ModPort.Port.DirectionEnum.Inout
                         )
@@ -80,16 +76,16 @@ namespace pluginVerilog.Verilog.Snippets
             }
 
             StringBuilder sb = new StringBuilder();
-            sb.Append(indent+ "modport {0} (\n");
+            sb.Append(indent + "modport {0} (\n");
 
             bool firstPort = true;
 
-            foreach(var nameDirection in newModPortDirection)
+            foreach (var nameDirection in newModPortDirection)
             {
                 if (!firstPort) sb.Append(",\n");
 
                 // modport definition
-                switch(nameDirection.Value)
+                switch (nameDirection.Value)
                 {
                     case ModPort.Port.DirectionEnum.Input:
                         sb.Append("input\t." + nameDirection.Key);

@@ -1,10 +1,3 @@
-using CodeEditor2.CodeEditor;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace pluginVerilog.Data
 {
     public interface IVerilogRelatedFile : CodeEditor2.Data.ITextFile
@@ -15,7 +8,7 @@ namespace pluginVerilog.Data
         ProjectProperty ProjectProperty { get; }
         bool SystemVerilog { get; }
 
-        string AbsolutePath {  get; }
+        string AbsolutePath { get; }
         void CheckDirty();
     }
 }

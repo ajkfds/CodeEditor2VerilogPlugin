@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
@@ -12,9 +6,9 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected Shortreal() { }
 
-        public static new Shortreal Create(string name,IDataType dataType)
+        public static new Shortreal Create(string name, IDataType dataType)
         {
-            System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.Shortreal );
+            System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.Shortreal);
 
             Shortreal val = new Shortreal() { Name = name };
             val.DataType = dataType;

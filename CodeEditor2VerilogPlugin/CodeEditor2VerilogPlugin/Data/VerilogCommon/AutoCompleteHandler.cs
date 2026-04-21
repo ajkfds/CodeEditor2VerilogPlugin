@@ -1,20 +1,11 @@
-using Avalonia.Controls.Shapes;
 using Avalonia.Input;
-using CodeEditor2.CodeEditor;
 using CodeEditor2.CodeEditor.CodeComplete;
 using CodeEditor2.CodeEditor.PopupHint;
 using CodeEditor2.CodeEditor.PopupMenu;
-using CodeEditor2.Data;
 using pluginVerilog.Verilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using static pluginVerilog.Verilog.DataObjects.DataTypes.Enum;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace pluginVerilog.Data.VerilogCommon
 {
@@ -73,12 +64,12 @@ namespace pluginVerilog.Data.VerilogCommon
             toolItems.Add(new Verilog.Snippets.ModPortSnippet());
             toolItems.Add(new Verilog.Snippets.ConnectionCheckSnippet());
 
-            if(AppendToolItems != null) AppendToolItems(toolItems, item, index);
+            if (AppendToolItems != null) AppendToolItems(toolItems, item, index);
 
             return toolItems;
         }
         // Append Tools
-        public delegate void AppendToolItemDelegate (List<ToolItem> toolItems, IVerilogRelatedFile item, int index);
+        public delegate void AppendToolItemDelegate(List<ToolItem> toolItems, IVerilogRelatedFile item, int index);
         public static AppendToolItemDelegate? AppendToolItems;
 
         public static List<AutocompleteItem>? GetAutoCompleteItems(IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, int index, out string candidateWord)
@@ -91,7 +82,7 @@ namespace pluginVerilog.Data.VerilogCommon
             int line = item.CodeDocument.GetLineAt(index);
             int lineStartIndex = item.CodeDocument.GetLineStartIndex(line);
 
-            if(!GetAutoCompleteTarget(item, parsedDocument, index, out NameSpace? nameSpace,out INamedElement? element, out candidateWord, out int candidateStartIndex))
+            if (!GetAutoCompleteTarget(item, parsedDocument, index, out NameSpace? nameSpace, out INamedElement? element, out candidateWord, out int candidateStartIndex))
             {
                 return null;
             }
@@ -129,15 +120,15 @@ namespace pluginVerilog.Data.VerilogCommon
             }
 
 
-            if(element == null)
+            if (element == null)
             {
                 if (nameSpace != null)
                 {
                     // search upward
-                    appendItemsUpward(items, nameSpace, candidateStartIndex,candidateWord);
+                    appendItemsUpward(items, nameSpace, candidateStartIndex, candidateWord);
                 }
                 // keywords
-                Verilog.ParsedDocument.AppendKeywordAutoCompleteItems(items, candidateWord,candidateStartIndex, parsedDocument.SystemVerilog);
+                Verilog.ParsedDocument.AppendKeywordAutoCompleteItems(items, candidateWord, candidateStartIndex, parsedDocument.SystemVerilog);
             }
             else // sub element
             {
@@ -164,7 +155,7 @@ namespace pluginVerilog.Data.VerilogCommon
         }
 
 
-        public static void appendItemsUpward(List<AutocompleteItem> items, NameSpace nameSpace,int candidateStartIndex, string candidateWord)
+        public static void appendItemsUpward(List<AutocompleteItem> items, NameSpace nameSpace, int candidateStartIndex, string candidateWord)
         {
             foreach (INamedElement subElement in nameSpace.NamedElements.Values)
             {
@@ -184,10 +175,10 @@ namespace pluginVerilog.Data.VerilogCommon
             }
             if (nameSpace.Parent != null)
             {
-                appendItemsUpward(items, nameSpace.Parent,candidateStartIndex, candidateWord);
+                appendItemsUpward(items, nameSpace.Parent, candidateStartIndex, candidateWord);
             }
         }
-        public static bool GetAutoCompleteTarget(IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, int index,out NameSpace? nameSpace, out INamedElement? element, out string candidate,out int candidateStartIndex)
+        public static bool GetAutoCompleteTarget(IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, int index, out NameSpace? nameSpace, out INamedElement? element, out string candidate, out int candidateStartIndex)
         {
             candidate = "";
             candidateStartIndex = 0;
@@ -265,11 +256,12 @@ namespace pluginVerilog.Data.VerilogCommon
                     }
                 }
 
-                (string,int) lastWord = ("",0);
-                if(words.Count == 0)
+                (string, int) lastWord = ("", 0);
+                if (words.Count == 0)
                 {
                     lastWord = ("", 0);
-                }else if (words.Last().Item1 == "." || words.Last().Item1 == "::" || words.Last().Item1 == "->")
+                }
+                else if (words.Last().Item1 == "." || words.Last().Item1 == "::" || words.Last().Item1 == "->")
                 {
                     lastWord = ("", words.Last().Item2 + words.Last().Item1.Length);
                     blockEndIndex = words.Last().Item2;
@@ -301,7 +293,7 @@ namespace pluginVerilog.Data.VerilogCommon
                 nameSpace = parsedDocument.GetNameSpace(iref);
             }
 
-            string elementText = lineText.Substring(blockStartIndex,blockEndIndex-blockStartIndex);
+            string elementText = lineText.Substring(blockStartIndex, blockEndIndex - blockStartIndex);
             element = null;
             {
                 // create short document to parse current pretext
@@ -311,7 +303,7 @@ namespace pluginVerilog.Data.VerilogCommon
                 Verilog.Expressions.Expression? expression = null;
                 while (!word.Eof)
                 {
-                    if(nameSpace != null) expression = Verilog.Expressions.Expression.ParseCreate(word, nameSpace);
+                    if (nameSpace != null) expression = Verilog.Expressions.Expression.ParseCreate(word, nameSpace);
                     if (expression == null) word.MoveNext();
                 }
                 if (expression is Verilog.Expressions.DataObjectReference)
@@ -399,7 +391,7 @@ namespace pluginVerilog.Data.VerilogCommon
                     //     [caret]
                     // end
                     item.CodeDocument.Replace(lineHeadIndex, indentLength, 0, new String('\t', prevTabs + 1) + "\r\n" + new String('\t', prevTabs));
-                    CodeEditor2.Controller.CodeEditor.SetCaretPosition( item.CodeDocument.CaretIndex + prevTabs + 1 + 1 - indentLength);
+                    CodeEditor2.Controller.CodeEditor.SetCaretPosition(item.CodeDocument.CaretIndex + prevTabs + 1 + 1 - indentLength);
                     return;
                 }
                 else
@@ -436,7 +428,7 @@ namespace pluginVerilog.Data.VerilogCommon
 
         private static bool isNextEnd(IVerilogRelatedFile item, int index)
         {
-            if(item.CodeDocument == null) return false;
+            if (item.CodeDocument == null) return false;
 
             int prevInex = index;
             if (prevInex < item.CodeDocument.Length &&

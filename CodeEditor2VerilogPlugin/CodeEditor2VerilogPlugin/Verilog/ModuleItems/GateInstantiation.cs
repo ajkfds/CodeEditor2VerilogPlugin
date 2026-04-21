@@ -1,8 +1,3 @@
-using pluginVerilog.Verilog.BuildingBlocks;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.ModuleItems
@@ -103,7 +98,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                 case "xor":
                 case "xnor":
                     NInputGate? ngate = NInputGate.ParseCreate(word, nameSpace);
-                    if(word.Text == ";")
+                    if (word.Text == ";")
                     {
                         word.MoveNext();
                     }
@@ -153,7 +148,7 @@ namespace pluginVerilog.Verilog.ModuleItems
 
             }
             word.AddError("not implemented");
-            while(!word.Eof && word.Text != ";")
+            while (!word.Eof && word.Text != ";")
             {
                 word.MoveNext();
             }
@@ -171,7 +166,7 @@ namespace pluginVerilog.Verilog.ModuleItems
         {
             bool pullup = false;
             if (word.Text == "pullup") pullup = true;
-            WordReference beginRef= word.CrateWordReference();
+            WordReference beginRef = word.CrateWordReference();
 
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
@@ -239,7 +234,7 @@ namespace pluginVerilog.Verilog.ModuleItems
             {
                 delay = Delay3.ParseCreate(word, nameSpace as NameSpace);
             }
-            if(word.Text != "(" && General.IsIdentifier(word.Text))
+            if (word.Text != "(" && General.IsIdentifier(word.Text))
             {
                 name = word.Text;
                 word.Color(CodeDrawStyle.ColorType.Identifier);
@@ -281,7 +276,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                 Delay3 delay3 = Delay3.ParseCreate(word, nameSpace as NameSpace);
             }
             // mos_switch_instance              ::= [name_of_gate_instance] (output_terminal, input_terminal, enable_terminal) 
-            while(!word.Eof && word.Text != ";")
+            while (!word.Eof && word.Text != ";")
             {
                 string name = "";
                 if (word.Text != "(" && General.IsIdentifier(word.Text))
@@ -300,8 +295,8 @@ namespace pluginVerilog.Verilog.ModuleItems
                 {
                     word.MoveNext();
 
-                    Expressions.Expression? output_terminal = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace as NameSpace,true);
-                    if(word.Text != ",")
+                    Expressions.Expression? output_terminal = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace as NameSpace, true);
+                    if (word.Text != ",")
                     {
                         word.AddError(", required");
                         word.SkipToKeyword(";");
@@ -330,7 +325,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                 }
             }
 
-            if(word.Text == ";")
+            if (word.Text == ";")
             {
                 word.MoveNext();
             }
@@ -347,7 +342,7 @@ namespace pluginVerilog.Verilog.ModuleItems
         protected EnableGate() { }
 
         Delay3? Delay3;
-//        DriveStrength DriveStrength;
+        //        DriveStrength DriveStrength;
 
         //                          | enable_gatetype   [drive_strength]        [delay3]    enable_gate_instance        { , enable_gate_instance }; 
         // enable_gate_instance             ::= [name_of_gate_instance] (output_terminal, input_terminal, enable_terminal) 
@@ -400,7 +395,7 @@ namespace pluginVerilog.Verilog.ModuleItems
         protected NInputGate() { }
 
         Delay2? Delay2;
-//        DriveStrength DriveStrength;
+        //        DriveStrength DriveStrength;
 
         // n_input_gatetype  [drive_strength]        [delay2]    n_input_gate_instance       {, n_input_gate_instance }; 
         // n_input_gate_instance            ::= [name_of_gate_instance] (output_terminal, input_terminal { , input_terminal } ) 
@@ -431,7 +426,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                 while (!word.Eof)
                 {
                     Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace as NameSpace);
-                    if(word.Text != ",")
+                    if (word.Text != ",")
                     {
                         break;
                     }
@@ -456,7 +451,7 @@ namespace pluginVerilog.Verilog.ModuleItems
         protected NOutputGate() { }
 
         Delay2? Delay2;
-//        DriveStrength DriveStrength;
+        //        DriveStrength DriveStrength;
 
         // n_output_gatetype [drive_strength]        [delay2]    n_output_gate_instance      { , n_output_gate_instance }; 
         // n_output_gate_instance           ::= [name_of_gate_instance] (output_terminal { , output_terminal } , input_terminal ) 

@@ -1,8 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
@@ -19,7 +16,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public override Chandle Clone(string name)
         {
-            Chandle val = new Chandle() { Name = name,Defined = Defined };
+            Chandle val = new Chandle() { Name = name, Defined = Defined };
             val.PackedDimensions = PackedDimensions;
             foreach (var unpackedArray in UnpackedArrays)
             {
@@ -62,7 +59,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         //{
         //}
 
-        public static new Chandle Create(string name,DataTypes.IDataType dataType)
+        public static new Chandle Create(string name, DataTypes.IDataType dataType)
         {
             DataTypes.Chandle? dType = dataType as DataTypes.Chandle;
             if (dType == null) throw new Exception();

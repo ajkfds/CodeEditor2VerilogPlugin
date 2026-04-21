@@ -1,18 +1,7 @@
 using Avalonia.Controls;
-using CodeEditor2;
-using CodeEditor2.FileTypes;
-using CodeEditor2.Views;
-using CodeEditor2Plugin;
-using pluginVerilog.LLM;
+using CodeEditor2.LLM;
 using pluginVerilog.NavigatePanel;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using CodeEditor2.LLM;
 
 namespace pluginVerilog
 {
@@ -21,7 +10,7 @@ namespace pluginVerilog
         public static string StaticID = "Verilog";
         public string Id { get { return StaticID; } }
 
-        public static Avalonia.Media.Color ThemeColor = Avalonia.Media.Color.FromArgb(255, 255, 139,0);
+        public static Avalonia.Media.Color ThemeColor = Avalonia.Media.Color.FromArgb(255, 255, 139, 0);
 
         public bool Register()
         {

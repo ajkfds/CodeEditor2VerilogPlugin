@@ -1,9 +1,7 @@
 using pluginVerilog.Verilog.DataObjects;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Expressions.Operators
 {
@@ -16,7 +14,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
-            if(word.Eof || word.Text != "{")
+            if (word.Eof || word.Text != "{")
             {
                 word.AddError("{ expected");
                 return;
@@ -28,7 +26,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
                 Expression? exp = Expression.ParseCreate(word, nameSpace);
                 if (exp == null)
                 {
-                    DataObjects.Arrays.PackedArray ? range = DataObjects.Arrays.PackedArray.ParseCreate(word, nameSpace);
+                    DataObjects.Arrays.PackedArray? range = DataObjects.Arrays.PackedArray.ParseCreate(word, nameSpace);
                     if (range == null) break;
                     Ranges.Add(range);
                 }
@@ -88,7 +86,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
             Primary.AppendRefrencedDataObjects(referencedObjects);
         }
 
-        public static new InsideOperator? ParseCreate(WordScanner word,NameSpace nameSpace)
+        public static new InsideOperator? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "inside") return null;
             return new InsideOperator(word, "inside", 8, nameSpace);
@@ -97,7 +95,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
         public delegate void OperatedAction(InsideOperator unaryOperator);
         public static OperatedAction? Operated;
 
-        public InsideOperator Operate(Primary primary,bool prototype)
+        public InsideOperator Operate(Primary primary, bool prototype)
         {
             Primary = primary;
             bool constant = false;

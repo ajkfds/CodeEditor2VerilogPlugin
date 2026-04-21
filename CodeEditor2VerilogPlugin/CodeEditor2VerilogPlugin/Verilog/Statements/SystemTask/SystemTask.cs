@@ -1,9 +1,4 @@
 using CodeEditor2.CodeEditor.CodeComplete;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Statements.SystemTask
 {
@@ -50,7 +45,7 @@ namespace pluginVerilog.Verilog.Statements.SystemTask
                         {
                             word.AddError("missed expression");
                             word.SkipToKeyword(";");
-                            if(word.Text == ";")
+                            if (word.Text == ";")
                             {
                                 word.MoveNext();
                             }

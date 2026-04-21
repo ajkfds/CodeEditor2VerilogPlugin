@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace pluginVerilog.Verilog.DataObjects
 {
     public class VariableAssignment
@@ -17,8 +11,8 @@ namespace pluginVerilog.Verilog.DataObjects
         }
         public Expressions.Expression NetLValue { get; protected set; }
         public Expressions.Expression Expression { get; protected set; }
- 
-        public static VariableAssignment? ParseCreate(WordScanner word, NameSpace nameSpace,bool acceptImplicitNet)
+
+        public static VariableAssignment? ParseCreate(WordScanner word, NameSpace nameSpace, bool acceptImplicitNet)
         {
             // variable_assignment  ::= variable_lvalue = expression
             // variable_lvalue      ::= hierarchical_variable_identifier
@@ -49,7 +43,7 @@ namespace pluginVerilog.Verilog.DataObjects
             if (expression == null) return null;
             variableAssign.Expression = expression;
 
-            lExpression.SyncContext.PropageteClockDomainFrom(expression.SyncContext,equalPointer);
+            lExpression.SyncContext.PropageteClockDomainFrom(expression.SyncContext, equalPointer);
 
             if (!word.Prototype)
             {
@@ -61,7 +55,7 @@ namespace pluginVerilog.Verilog.DataObjects
                     )
                 {
                     WordReference wRef = WordReference.CreateReferenceRange(variableAssign.NetLValue.Reference, variableAssign.Expression.Reference);
-//                    wRef.AddWarning("bit width mismatch " + variableAssign.NetLValue.BitWidth + " <- " + variableAssign.Expression.BitWidth);
+                    //                    wRef.AddWarning("bit width mismatch " + variableAssign.NetLValue.BitWidth + " <- " + variableAssign.Expression.BitWidth);
                     wRef.ApplyRule(word.ProjectProperty.RuleSet.AssignmentBitwidthMismatch, "bit width mismatch " + variableAssign.NetLValue.BitWidth + " <- " + variableAssign.Expression.BitWidth);
                 }
             }

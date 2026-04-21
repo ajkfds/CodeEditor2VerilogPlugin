@@ -1,10 +1,5 @@
 using CodeEditor2.CodeEditor.CodeComplete;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using static pluginVerilog.Verilog.Statements.ConditionalStatement;
 
 namespace pluginVerilog.Verilog.Statements
 {
@@ -65,7 +60,7 @@ namespace pluginVerilog.Verilog.Statements
 
             IStatement? statement = await Statements.ParseCreateStatementOrNull(word, nameSpace);
             conditionalStatement.Statement = statement;
-            
+
             while (word.Text == "else")
             {
                 word.Color(CodeDrawStyle.ColorType.Keyword);

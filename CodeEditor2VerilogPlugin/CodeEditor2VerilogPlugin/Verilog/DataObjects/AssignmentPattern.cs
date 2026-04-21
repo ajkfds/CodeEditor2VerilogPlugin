@@ -1,12 +1,5 @@
-using pluginVerilog.Verilog.DataObjects.Variables;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Emit;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
-using static pluginVerilog.Verilog.DataObjects.AssignmentPatternWithKey;
 
 namespace pluginVerilog.Verilog.DataObjects
 {
@@ -47,7 +40,7 @@ namespace pluginVerilog.Verilog.DataObjects
         {
             return ParseCreate(word, nameSpace, false);
         }
-        public static new AssignmentPattern ParseCreate(WordScanner word,NameSpace nameSpace, bool lValue)
+        public static new AssignmentPattern ParseCreate(WordScanner word, NameSpace nameSpace, bool lValue)
         {
             AssignmentPattern assignmentPattern;
 
@@ -58,7 +51,7 @@ namespace pluginVerilog.Verilog.DataObjects
 
             if (word.NextText == ":")
             {
-                if(lValue == true)
+                if (lValue == true)
                 {
                     word.AddError("assignment pattern cannot used for left side of assignment");
                 }
@@ -95,7 +88,7 @@ namespace pluginVerilog.Verilog.DataObjects
         {
             AssignmentPatternWithKey assignmentPattern = new AssignmentPatternWithKey();
 
-            while(!word.Eof & word.Text != "}")
+            while (!word.Eof & word.Text != "}")
             {
                 string key = word.Text;
                 WordReference keyReference = word.GetReference();

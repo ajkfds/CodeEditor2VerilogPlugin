@@ -1,18 +1,13 @@
-using pluginVerilog.Verilog.BuildingBlocks;
-using pluginVerilog.Verilog.DataObjects.Nets;
 using pluginVerilog.Verilog.DataObjects;
+using pluginVerilog.Verilog.DataObjects.Nets;
 using pluginVerilog.Verilog.Items;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using pluginVerilog.Verilog.DataObjects.Variables;
 //using Microsoft.CodeAnalysis.Emit;
 
 namespace pluginVerilog.Verilog
 {
-    public class Task : NameSpace,IPortNameSpace
+    public class Task : NameSpace, IPortNameSpace
     {
         /*
         // # SystemVerilog2017
@@ -89,7 +84,7 @@ namespace pluginVerilog.Verilog
         // task_body_declaration    ::=   [ interface_identifier . | class_scope ] task_identifier ; { tf_item_declaration } { statement_or_null } endtask [ : task_identifier ] 
         //                              | [ interface_identifier . | class_scope ] task_identifier ( [ tf_port_list ] ) ; { block_item_declaration } { statement_or_null } endtask [ : task_identifier ]
          */
-        protected Task(NameSpace parent) : base(parent.BuildingBlock , parent)
+        protected Task(NameSpace parent) : base(parent.BuildingBlock, parent)
         {
         }
 
@@ -135,12 +130,13 @@ namespace pluginVerilog.Verilog
                 return;
             }
 
-            Task task = new Task(nameSpace) { 
-                BeginIndexReference = beginReference, 
-                DefinitionReference = word.CrateWordReference(), 
-                Name = word.Text, 
-                Parent = nameSpace, 
-                Project = word.Project 
+            Task task = new Task(nameSpace)
+            {
+                BeginIndexReference = beginReference,
+                DefinitionReference = word.CrateWordReference(),
+                Name = word.Text,
+                Parent = nameSpace,
+                Project = word.Project
             };
             task.BuildingBlock = nameSpace.BuildingBlock;
 
@@ -152,7 +148,7 @@ namespace pluginVerilog.Verilog
             {
                 if (nameSpace.BuildingBlock.NamedElements.ContainsTask(task.Name))
                 {
-                    nameSpace.BuildingBlock.NamedElements.Replace(task.Name,task);
+                    nameSpace.BuildingBlock.NamedElements.Replace(task.Name, task);
                 }
                 else
                 {
@@ -176,14 +172,14 @@ namespace pluginVerilog.Verilog
                         time_declaration block_reg_declaration ::= reg[signed][range]                    list_of_block_variable_identifiers;
             */
 
-            int x=0;
+            int x = 0;
             x++;
 
             if (word.Text == ";")
             {
                 parse_task_items_non_ansi(word, nameSpace, task);
             }
-            else if(word.Text =="(")
+            else if (word.Text == "(")
             {
                 await parse_task_items_ansi(word, nameSpace, task);
             }
@@ -222,7 +218,7 @@ namespace pluginVerilog.Verilog
                 {
                     if (word.SystemVerilog)
                     {
-                        while(!word.Eof && word.Text != "endtask")
+                        while (!word.Eof && word.Text != "endtask")
                         {
                             switch (word.Text)
                             {
@@ -235,7 +231,7 @@ namespace pluginVerilog.Verilog
                                 default:
                                     break;
                             }
-                            var index =  word.CreateIndexReference();
+                            var index = word.CreateIndexReference();
                             Statements.IStatement statement = await Statements.Statements.ParseCreateFunctionStatement(word, task);
                             if (word.CreateIndexReference().IsSameAs(index))
                             {
@@ -297,12 +293,13 @@ namespace pluginVerilog.Verilog
                 return;
             }
 
-            Task task = new Task(nameSpace) { 
+            Task task = new Task(nameSpace)
+            {
                 BeginIndexReference = beginReference,
-                DefinitionReference = word.CrateWordReference() ,
-                Name = word.Text, 
+                DefinitionReference = word.CrateWordReference(),
+                Name = word.Text,
                 Parent = nameSpace,
-                Project = word.Project 
+                Project = word.Project
             };
             task.BuildingBlock = nameSpace.BuildingBlock;
 
@@ -314,7 +311,7 @@ namespace pluginVerilog.Verilog
             {
                 if (nameSpace.BuildingBlock.NamedElements.ContainsTask(task.Name))
                 {
-                    nameSpace.BuildingBlock.NamedElements.Replace(task.Name,task);
+                    nameSpace.BuildingBlock.NamedElements.Replace(task.Name, task);
                 }
                 else
                 {

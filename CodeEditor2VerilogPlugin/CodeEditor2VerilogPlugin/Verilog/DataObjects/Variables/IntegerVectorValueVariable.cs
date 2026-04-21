@@ -1,11 +1,6 @@
+using pluginVerilog.Verilog.DataObjects.DataTypes;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using pluginVerilog.Verilog.DataObjects;
-using pluginVerilog.Verilog.DataObjects.DataTypes;
-using pluginVerilog.Verilog.DataObjects.Variables;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
@@ -19,17 +14,17 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         {
             get
             {
-                if(DataType == null) return new List<DataObjects.Arrays.PackedArray>();
+                if (DataType == null) return new List<DataObjects.Arrays.PackedArray>();
                 return DataType.PackedDimensions;
             }
         }
 
-        public new static IntegerVectorValueVariable Create(string name,IDataType dataType)
+        public new static IntegerVectorValueVariable Create(string name, IDataType dataType)
         {
             switch (dataType.Type)
             {
                 case DataTypeEnum.Bit:
-                    return Bit.Create(name,dataType);
+                    return Bit.Create(name, dataType);
                 case DataTypeEnum.Logic:
                     return Logic.Create(name, dataType);
                 case DataTypeEnum.Reg:

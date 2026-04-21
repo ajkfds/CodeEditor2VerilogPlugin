@@ -1,10 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace pluginVerilog.Verilog
 {
@@ -31,7 +25,8 @@ namespace pluginVerilog.Verilog
             if (word.Text == "import")
             {
                 import = true;
-            }else if(word.Text == "export")
+            }
+            else if (word.Text == "export")
             {
                 import = false;
             }
@@ -42,7 +37,7 @@ namespace pluginVerilog.Verilog
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
-            if(word.Text =="\""+ "DPI-C" + "\"")
+            if (word.Text == "\"" + "DPI-C" + "\"")
             {
 
             }
@@ -98,13 +93,13 @@ namespace pluginVerilog.Verilog
                 }
 
             }
-            if(word.Text == "task")
+            if (word.Text == "task")
             {
                 if (shouldBeFunction) word.AddError("cannot use task with pure keyword");
                 await Task.ParsePrototype(word, nameSpace);
                 return;
             }
-            if(word.Text == "function")
+            if (word.Text == "function")
             {
                 await Function.ParsePrototype(word, nameSpace);
                 return;

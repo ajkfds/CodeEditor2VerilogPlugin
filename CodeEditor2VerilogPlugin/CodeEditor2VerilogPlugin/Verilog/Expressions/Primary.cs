@@ -1,40 +1,25 @@
-using Avalonia.Controls;
-using Avalonia.Controls.Documents;
-using Avalonia.Markup.Xaml.MarkupExtensions;
-using Avalonia.OpenGL;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.DataObjects.Nets;
-using pluginVerilog.Verilog.DataObjects.Variables;
 using pluginVerilog.Verilog.ModuleItems;
 using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Drawing.Text;
-using System.IO;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Runtime.Intrinsics.X86;
-using System.Security.AccessControl;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace pluginVerilog.Verilog.Expressions
 {
     public abstract class Primary : Expression
     {
-        protected Primary() {
+        protected Primary()
+        {
             Constant = false;
         }
-        
-//        public virtual bool Constant { get; protected set; }
-//        public virtual double? Value { get; protected set; }
-//        public virtual int? BitWidth { get; protected set; }
+
+        //        public virtual bool Constant { get; protected set; }
+        //        public virtual double? Value { get; protected set; }
+        //        public virtual int? BitWidth { get; protected set; }
         //        public bool Signed { get; protected set; }
-//        public WordReference Reference { get; protected set; }
+        //        public WordReference Reference { get; protected set; }
 
         //public static Primary Create(bool constant, double? value, int? bitWidth)
         //{
@@ -155,7 +140,7 @@ number
         {
             return parseCreate(word, nameSpace, true, acceptImplicitNet);
         }
-        private static Primary? parseCreate(WordScanner word, NameSpace nameSpace,bool lValue,bool acceptImplicitNet)
+        private static Primary? parseCreate(WordScanner word, NameSpace nameSpace, bool lValue, bool acceptImplicitNet)
         {
             //if (word.Text == "srif") System.Diagnostics.Debugger.Break();
 
@@ -167,35 +152,36 @@ number
                     if (word.GetCharAt(0) == '{')
                     {
                         return Concatenation.ParseCreateConcatenationOrMultipleConcatenation(word, nameSpace, lValue, acceptImplicitNet);
-                    }else if(word.GetCharAt(0) == '(')
+                    }
+                    else if (word.GetCharAt(0) == '(')
                     {
                         return Bracket.ParseCreateBracketOrMinTypMax(word, nameSpace);
                     }
                     return null;
                 case WordPointer.WordTypeEnum.String:
-                    return ConstantString.ParseCreate(word,nameSpace);
+                    return ConstantString.ParseCreate(word, nameSpace);
                 case WordPointer.WordTypeEnum.Text:
                     // null
-                    if(word.Text == "null")
+                    if (word.Text == "null")
                     {
                         return Null.ParseCreate(word, nameSpace);
                     }
                     // dollar primitive
-                    if(word.Text == "$")
+                    if (word.Text == "$")
                     {
                         return DollarMark.ParseCreate(word, nameSpace);
                     }
 
                     // system function call
-                    if ( word.Text.StartsWith("$") )// && word.ProjectProperty.SystemFunctions.Keys.Contains(word.Text))
+                    if (word.Text.StartsWith("$"))// && word.ProjectProperty.SystemFunctions.Keys.Contains(word.Text))
                     {
                         return FunctionCall.ParseCreate(word, nameSpace);
                     }
 
                     // assignment pattern
-                    if(word.Text =="'" && word.NextText == "{")
+                    if (word.Text == "'" && word.NextText == "{")
                     {
-                        return AssignmentPattern.ParseCreate(word, nameSpace,lValue);
+                        return AssignmentPattern.ParseCreate(word, nameSpace, lValue);
                     }
 
                     // cast
@@ -205,19 +191,19 @@ number
                     }
 
                     // keyword
-                    if ( General.ListOfKeywords.Contains(word.Text) )
+                    if (General.ListOfKeywords.Contains(word.Text))
                     {
                         return null;
                     }
 
                     // abosrt if not ideftifier
-                    if ( !General.IsIdentifier(word.Text) )
+                    if (!General.IsIdentifier(word.Text))
                     {
                         return null;
                     }
 
                     // function call (function recarsive call)
-                    if ( word.NextText=="(" && word.Text == nameSpace.Name )
+                    if (word.NextText == "(" && word.Text == nameSpace.Name)
                     {
                         // It shall be illegal to omit the parentheses in a tf_call unless the subroutine is a task, void function,
                         // or class method. If the subroutine is a nonvoid class function method, it shall be illegal to omit the parentheses if the call is directly recursive.
@@ -230,7 +216,7 @@ number
                     // Class scope resolution operator
                     if (word.NextText == "::")
                     {
-//                        string a = "";
+                        //                        string a = "";
                     }
 
                     if (word.Text == "this" && word.NextText == ".")
@@ -260,7 +246,7 @@ number
 
                         // search downward
                         NameSpace? searchDownwardNameSpace = searchNameSpace(word, targetNameSpace, ref nameSpaceText);
-                        if(searchDownwardNameSpace is UnfoundNameSpace)
+                        if (searchDownwardNameSpace is UnfoundNameSpace)
                         {
                             word.RootParsedDocument.ReparseRequested = true;
                             return new UnfoundObjectReference() { Reference = ((UnfoundNameSpace)searchDownwardNameSpace).Reference };
@@ -269,7 +255,7 @@ number
                         {
                             if (nameSpaceText != "") acceptImplicitNet = false;
                             targetNameSpace = searchDownwardNameSpace;
-                            if(word.Text == "")
+                            if (word.Text == "")
                             {
                                 return new NameSpaceReference(searchDownwardNameSpace);
                             }
@@ -281,13 +267,14 @@ number
                                 targetNameSpace = nameSpace;
                             }
                         }
-                        if(targetNameSpace is BuildingBlocks.Class)
+                        if (targetNameSpace is BuildingBlocks.Class)
                         {
-                            if(word.Text == "::")
+                            if (word.Text == "::")
                             {
                                 word.MoveNext();
                             }
-                        }else if(targetNameSpace is BuildingBlocks.Module)
+                        }
+                        else if (targetNameSpace is BuildingBlocks.Module)
                         {
 
                         }
@@ -303,7 +290,7 @@ number
                     {
                         element = targetNameSpace.GetNamedElementUpward(word.Text);
                     }
-                    
+
                     // variable reference
                     if (element is DataObject)
                     {
@@ -314,7 +301,7 @@ number
                     // task reference : for left side only
                     if (lValue && element is Task)
                     {
-                        return TaskReference.ParseCreate(word, nameSpace,targetNameSpace);
+                        return TaskReference.ParseCreate(word, nameSpace, targetNameSpace);
                     }
 
                     // function call : for right side only
@@ -367,8 +354,8 @@ number
                         return parseDataObject(word, nameSpace, targetNameSpace, lValue, nameSpaceText);
                     }
 
-                    IDataType? dataType =  DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, null);
-                    if(dataType != null)
+                    IDataType? dataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, null);
+                    if (dataType != null)
                     {
                         DataTypeReference dataTypeReference = new DataTypeReference { IDataType = dataType };
                         return dataTypeReference;
@@ -378,13 +365,13 @@ number
             return null;
         }
 
-        public static NameSpace? searchNameSpace(WordScanner word, NameSpace nameSpace,ref string nameSpaceText)
+        public static NameSpace? searchNameSpace(WordScanner word, NameSpace nameSpace, ref string nameSpaceText)
         {
             if (!General.IsIdentifier(word.Text) || General.ListOfKeywords.Contains(word.Text))
             {
                 return nameSpace;
             }
-            if(word.NextText=="(" || word.NextText == ";")
+            if (word.NextText == "(" || word.NextText == ";")
             {
                 return nameSpace;
             }
@@ -465,7 +452,7 @@ number
             {
                 nameSpaceText += word.Text;
                 word.Color(CodeDrawStyle.ColorType.Identifier);
-                if(word.NextText == ".")
+                if (word.NextText == ".")
                 {
                     word.MoveNext();
                     nameSpaceText += ".";
@@ -473,7 +460,7 @@ number
                     continue;
                 }
 
-                if(!word.Prototype) WordReference.CreateReferenceRange(beginRef, word.GetReference()).AddError("unfound object");
+                if (!word.Prototype) WordReference.CreateReferenceRange(beginRef, word.GetReference()).AddError("unfound object");
                 word.MoveNext();
                 break;
             } while (!word.Eof);
@@ -481,10 +468,10 @@ number
             WordReference wordReference = WordReference.CreateReferenceRange(beginRef, word.GetReference());
 
             word.RootParsedDocument.ReparseRequested = true;
-            return new UnfoundNameSpace() { DefinitionReference = beginRef, Name = "?", Reference= wordReference};
+            return new UnfoundNameSpace() { DefinitionReference = beginRef, Name = "?", Reference = wordReference };
         }
 
-        public static Primary? parseDataObject(WordScanner word, NameSpace nameSpace, INamedElement owner, bool lValue,string nameSpaceText)
+        public static Primary? parseDataObject(WordScanner word, NameSpace nameSpace, INamedElement owner, bool lValue, string nameSpaceText)
         {
             DataObjectReference? dataObjectReference = DataObjectReference.ParseCreate(word, nameSpace, owner, lValue);
 
@@ -506,7 +493,7 @@ number
 
             if (!dataObjectReference.TargetDataObject.NamedElements.ContainsKey(word.Text))
             {
-                if(word.NextText=="(" || word.NextText == ";")
+                if (word.NextText == "(" || word.NextText == ";")
                 {
                     return parseUndefinedFunction(word);
                 }
@@ -525,21 +512,21 @@ number
             {
                 if (nameSpaceText != "") nameSpaceText = nameSpaceText + ".";
                 nameSpaceText = nameSpaceText + dataObjectReference.DatObjectName + ".";
-                return parseDataObject(word, nameSpace, dataObjectReference.TargetDataObject, lValue,nameSpaceText);
+                return parseDataObject(word, nameSpace, dataObjectReference.TargetDataObject, lValue, nameSpaceText);
             }
 
             // Since Task and Function are also namespaces, they need to be processed before namespaces.
 
             if (element is BuiltInMethod)
             {
-                BuiltinMethodCall? builtinMethodCall = BuiltinMethodCall.ParseCreate(word, nameSpace,dataObjectReference.TargetDataObject);
+                BuiltinMethodCall? builtinMethodCall = BuiltinMethodCall.ParseCreate(word, nameSpace, dataObjectReference.TargetDataObject);
                 return builtinMethodCall;
             }
 
             // task reference : for left side only
             if (lValue && element is Task && obj != null)
             {
-                TaskReference task =TaskReference.ParseCreate(word, nameSpace.BuildingBlock,obj.Class);
+                TaskReference task = TaskReference.ParseCreate(word, nameSpace.BuildingBlock, obj.Class);
                 return task;
             }
 
@@ -548,7 +535,7 @@ number
             {
                 FunctionCall? func = FunctionCall.ParseCreate(word, nameSpace, obj.Class);
                 Function? function = func?.Function;
-                if(function!= null && function.ReturnVariable == null) return func;
+                if (function != null && function.ReturnVariable == null) return func;
             }
 
             // function call : for right side only
@@ -595,7 +582,7 @@ number
         }
 
 
-        private static Primary? subParseCreate(WordScanner word, NameSpace nameSpace,bool lValue, bool acceptImplicitNet)
+        private static Primary? subParseCreate(WordScanner word, NameSpace nameSpace, bool lValue, bool acceptImplicitNet)
         {
             if (nameSpace == null) throw new Exception();
 
@@ -622,9 +609,10 @@ number
 
                         if (word.NextText == ".")
                         {
-                            if(
+                            if (
                                 nameSpace.BuildingBlock.NamedElements.ContainsIBuldingBlockInstantiation(word.Text)
-                            ){ // module instance
+                            )
+                            { // module instance
 
                                 IBuildingBlockWithModuleInstance? buildingBlock = nameSpace.BuildingBlock as IBuildingBlockWithModuleInstance;
                                 if (buildingBlock == null) throw new Exception();
@@ -645,7 +633,8 @@ number
                                     word.AddError("illegal variable");
                                 }
                                 return primary;
-                            } else if (nameSpace.NamedElements.ContainsKey(word.Text) && nameSpace.NamedElements[word.Text] is NameSpace)
+                            }
+                            else if (nameSpace.NamedElements.ContainsKey(word.Text) && nameSpace.NamedElements[word.Text] is NameSpace)
                             { // namespaces
                                 word.Color(CodeDrawStyle.ColorType.Identifier);
                                 NameSpace space = (NameSpace)nameSpace.NamedElements[word.Text];
@@ -665,7 +654,8 @@ number
                         {
                             if (
                                 nameSpace.BuildingBlock.NamedElements.ContainsIBuldingBlockInstantiation(word.Text)
-                            ){ // module instance
+                            )
+                            { // module instance
                                 IBuildingBlockWithModuleInstance? buildingBlock = nameSpace.BuildingBlock as IBuildingBlockWithModuleInstance;
                                 if (buildingBlock == null) throw new Exception();
 
@@ -673,12 +663,12 @@ number
                                 IBuildingBlockInstantiation instantiation = (IBuildingBlockInstantiation)nameSpace.BuildingBlock.NamedElements[word.Text];
                                 string moduleName = instantiation.SourceName;
 
-                                if(word.RootParsedDocument.ProjectProperty == null) return null;
+                                if (word.RootParsedDocument.ProjectProperty == null) return null;
                                 BuildingBlock? module = word.RootParsedDocument.ProjectProperty.GetBuildingBlock(moduleName);
                                 if (module == null) return null;
                                 word.MoveNext();
 
-                                if(word.Text == ".")
+                                if (word.Text == ".")
                                 {
                                     word.MoveNext();
                                     Primary? primary = subParseCreate(word, module, lValue, acceptImplicitNet);
@@ -693,14 +683,15 @@ number
                                     return new NameSpaceReference(module);
                                 }
 
-                            }else if(nameSpace is BuildingBlock && nameSpace.BuildingBlock.NamedElements.ContainsKey(word.Text) && nameSpace.BuildingBlock.NamedElements[word.Text] is Task)
+                            }
+                            else if (nameSpace is BuildingBlock && nameSpace.BuildingBlock.NamedElements.ContainsKey(word.Text) && nameSpace.BuildingBlock.NamedElements[word.Text] is Task)
                             {
                                 return TaskReference.ParseCreate(word, nameSpace.BuildingBlock, acceptImplicitNet);
                             }
                             else if (nameSpace.NamedElements.ContainsKey(word.Text) && nameSpace.NamedElements[word.Text] is NameSpace)
                             {
                                 word.Color(CodeDrawStyle.ColorType.Identifier);
-                                NameSpace space = (NameSpace) nameSpace.NamedElements[word.Text];
+                                NameSpace space = (NameSpace)nameSpace.NamedElements[word.Text];
                                 if (space == null) return null;
                                 word.MoveNext();
                                 return new NameSpaceReference(space);

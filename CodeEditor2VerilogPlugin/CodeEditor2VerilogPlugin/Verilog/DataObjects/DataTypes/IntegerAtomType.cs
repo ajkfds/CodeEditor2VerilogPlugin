@@ -1,18 +1,15 @@
 using pluginVerilog.Verilog.DataObjects.Arrays;
-using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.Expressions;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Headers;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
     public class IntegerAtomType : IDataType, IPartSelectableDataType
     {
-        protected IntegerAtomType() {
+        protected IntegerAtomType()
+        {
             int? bitWidth = BitWidth;
             if (bitWidth == null) bitWidth = 1;
             PackedDimensions.Add(new Arrays.PackedArray((int)bitWidth - 1, 0));
@@ -72,7 +69,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             switch (word.Text)
             {
                 case "byte":
-                    return parse(word,nameSpace,DataTypeEnum.Byte);
+                    return parse(word, nameSpace, DataTypeEnum.Byte);
                 case "shortint":
                     return parse(word, nameSpace, DataTypeEnum.Shortint);
                 case "int":
@@ -123,7 +120,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             return sb.ToString();
         }
 
-        protected static IntegerAtomType Create(DataTypeEnum dataType,bool signed)
+        protected static IntegerAtomType Create(DataTypeEnum dataType, bool signed)
         {
             switch (dataType)
             {
@@ -154,7 +151,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         public IDataType Clone()
         {
             IDataType dataType = IntegerAtomType.Create(Type, Signed);
-            foreach(var packedArray in PackedDimensions)
+            foreach (var packedArray in PackedDimensions)
             {
                 dataType.PackedDimensions.Add(packedArray.Clone());
             }
@@ -180,7 +177,8 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 word.MoveNext();
                 integerAtomType.Signed = true;
-            }else if (word.Text == "unsigned")
+            }
+            else if (word.Text == "unsigned")
             {
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 word.MoveNext();

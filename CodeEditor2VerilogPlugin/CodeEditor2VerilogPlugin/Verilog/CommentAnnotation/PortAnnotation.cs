@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace pluginVerilog.Verilog.CommentAnnotation
 {
     public static class PortAnnotation
@@ -19,7 +13,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
 
             while (!comment.EOC)
             {
-                if ( comment.Text == word.ProjectProperty.AnnotationCommands.PortGroup )
+                if (comment.Text == word.ProjectProperty.AnnotationCommands.PortGroup)
                 {
                     pasePortGroup(comment, nameSpace, ref portGroup, word.ProjectProperty);
                     return;
@@ -56,7 +50,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
                 {
                     if (comment.Text.Contains(word.ProjectProperty.AnnotationCommands.Synchronized))
                     {
-                        parseSyncAnnotation(comment, nameSpace, port,word.ProjectProperty);
+                        parseSyncAnnotation(comment, nameSpace, port, word.ProjectProperty);
                     }
                     else if (comment.Text.Contains(word.ProjectProperty.AnnotationCommands.Clock))
                     {
@@ -81,7 +75,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
         private static void pasePortGroup(CommentScanner comment, NameSpace nameSpace, ref string? portGroup, ProjectProperty projectProperty)
         {
             comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
-            
+
             if (projectProperty.AnnotationKeyValueDelimiter != "")
             {
                 comment.MoveNext();
@@ -95,7 +89,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
             portGroup = comment.Text;
         }
 
-        private static void parseSyncAnnotation(CommentScanner comment, NameSpace nameSpace, Verilog.DataObjects.Port port,ProjectProperty projectProperty)
+        private static void parseSyncAnnotation(CommentScanner comment, NameSpace nameSpace, Verilog.DataObjects.Port port, ProjectProperty projectProperty)
         {
             comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
             comment.MoveNext();
@@ -117,7 +111,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
             while (!comment.EOC)
             {
                 string syncTarget = comment.Text;
-                if(syncTarget == "clock")
+                if (syncTarget == "clock")
                 {
                     port.AppendAnnotation("clock", "");
                     if (port.DataObject != null) port.DataObject.SyncContext.AssignToClock();
@@ -139,7 +133,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
                     break;
                 }
                 port.AppendAnnotation("sync", syncTarget);
-                if (port.DataObject != null) port.DataObject.SyncContext.AddClockDomain(syncTarget,port.DefinitionReference);
+                if (port.DataObject != null) port.DataObject.SyncContext.AddClockDomain(syncTarget, port.DefinitionReference);
                 comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
                 comment.MoveNext();
 

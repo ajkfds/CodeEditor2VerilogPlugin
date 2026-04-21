@@ -1,15 +1,9 @@
-using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
-using pluginVerilog.Verilog.Expressions;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
-    public class Struct : Variable,IPackedDataObject, IPartSelectableDataType
+    public class Struct : Variable, IPackedDataObject, IPartSelectableDataType
     {
         protected Struct() { }
         public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
@@ -18,7 +12,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         {
             get
             {
-                if(StructType == null) return new List<DataObjects.Arrays.PackedArray>();
+                if (StructType == null) return new List<DataObjects.Arrays.PackedArray>();
                 return StructType.PackedDimensions;
             }
         }

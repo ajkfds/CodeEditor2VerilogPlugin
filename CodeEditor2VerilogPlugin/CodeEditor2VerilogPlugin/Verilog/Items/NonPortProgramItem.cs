@@ -1,8 +1,3 @@
-using pluginVerilog.Verilog.Items.Generate;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Items
@@ -20,8 +15,8 @@ namespace pluginVerilog.Verilog.Items
                 | program_generate_item
             
          */
-        
-         
+
+
 
 
         public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)

@@ -1,23 +1,14 @@
 using Avalonia.Platform;
-using Avalonia.Threading;
-using DynamicData;
-using Microsoft.Extensions.AI;
 using pluginVerilog.LLM.Tools;
-using pluginVerilog.Verilog.BuildingBlocks;
-using Svg;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.LLM
 {
     public static class InitializeLLMAgent
     {
-        public static void Run(CodeEditor2.Data.Project project, CodeEditor2.LLM.LLMAgent agent,bool useFunctioncallApi) 
+        public static void Run(CodeEditor2.Data.Project project, CodeEditor2.LLM.LLMAgent agent, bool useFunctioncallApi)
         {
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
             CancellationToken cancellationToken = cancellationTokenSource.Token;

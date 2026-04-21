@@ -1,24 +1,13 @@
-using AjkAvaloniaLibs.Controls;
-using CodeEditor2.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
-using pluginVerilog.Verilog.Expressions;
-using pluginVerilog.Verilog.ModuleItems;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects
 {
     internal class ModportInstance : DataObject, INamedElement
     {
         public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
-        public static ModportInstance Create(string identifier,Interface interface_, ModPort modPort)
+        public static ModportInstance Create(string identifier, Interface interface_, ModPort modPort)
         {
-            ModportInstance modportInstance = new ModportInstance() { Name = identifier, ModPort = modPort, InterfaceName=interface_.Name, ModportName=modPort.Name };
+            ModportInstance modportInstance = new ModportInstance() { Name = identifier, ModPort = modPort, InterfaceName = interface_.Name, ModportName = modPort.Name };
 
             foreach (var element in modPort.NamedElements.Values)
             {
@@ -40,7 +29,7 @@ namespace pluginVerilog.Verilog.DataObjects
                 if (namedElements != null) return namedElements;
                 namedElements = new NamedElements();
 
-                foreach(var element in ModPort.NamedElements.Values)
+                foreach (var element in ModPort.NamedElements.Values)
                 {
                     namedElements.Add(element.Name, element);
                 }

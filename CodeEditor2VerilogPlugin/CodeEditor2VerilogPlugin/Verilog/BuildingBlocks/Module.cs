@@ -1,17 +1,13 @@
-using CodeEditor2.CodeEditor;
 using CodeEditor2.CodeEditor.CodeComplete;
 using pluginVerilog.Verilog.Items;
 using pluginVerilog.Verilog.ModuleItems;
-using Splat.ModeDetection;
 using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
-    public class Module : BuildingBlock, IModuleOrInterface, IPortNameSpace , IBuildingBlockWithModuleInstance, IModuleOrInterfaceOrCheckerOrClass
+    public class Module : BuildingBlock, IModuleOrInterface, IPortNameSpace, IBuildingBlockWithModuleInstance, IModuleOrInterfaceOrCheckerOrClass
     {
         protected Module() : base(null, null)
         {
@@ -72,7 +68,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
         public static async Task<Module> ParseCreate(WordScanner word, Attribute attribute, BuildingBlock parent, Data.IVerilogRelatedFile file, bool protoType)
         {
-            return await ParseCreate(word, null, attribute,parent, file, protoType);
+            return await ParseCreate(word, null, attribute, parent, file, protoType);
         }
 
         public static async Task<Module> ParseCreate(
@@ -173,7 +169,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
             if (module.BlockBeginIndexReference != null)
             {
-                word.AppendBlock(module.BlockBeginIndexReference, module.LastIndexReference,module.Name,false);
+                word.AppendBlock(module.BlockBeginIndexReference, module.LastIndexReference, module.Name, false);
             }
             word.MoveNext();
 
@@ -539,13 +535,14 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
         public override List<string> GetExitKeywords()
         {
-            return new List<string> {
-//                "module","endmodule",
-//                "function","endfunction",
-//                "task","endtask",
-//                "always","initial",
-//                "assign","specify","endspecify",
-//                "generate","endgenerate"
+            return new List<string>
+            {
+                //                "module","endmodule",
+                //                "function","endfunction",
+                //                "task","endtask",
+                //                "always","initial",
+                //                "assign","specify","endspecify",
+                //                "generate","endgenerate"
             };
         }
 

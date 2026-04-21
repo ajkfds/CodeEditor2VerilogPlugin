@@ -1,12 +1,4 @@
-using pluginVerilog.Verilog.DataObjects.Arrays;
-using Svg;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using static pluginVerilog.Verilog.ModPort;
 
 namespace pluginVerilog.Verilog.DataObjects
 {
@@ -47,11 +39,12 @@ namespace pluginVerilog.Verilog.DataObjects
         {
             isReset = true;
         }
-        public bool IsClock 
-        { get
+        public bool IsClock
+        {
+            get
             {
                 return isClock;
-            } 
+            }
         }
 
         public bool IsReset
@@ -71,14 +64,14 @@ namespace pluginVerilog.Verilog.DataObjects
             {
                 bool matched = true;
                 if (!Data.Contains(domainName)) matched = false;
-                if (!matched && alartWordRef != null) alartWordRef.AddWarning("sync mismatch "+domainName+" assigned");
+                if (!matched && alartWordRef != null) alartWordRef.AddWarning("sync mismatch " + domainName + " assigned");
             }
         }
-        public void PropageteClockDomainFrom(SyncContext syncContext,WordReference? alartWordRef)
+        public void PropageteClockDomainFrom(SyncContext syncContext, WordReference? alartWordRef)
         {
             if (Data.Count == 0)
             { // assign new context
-                foreach(var sync in syncContext.Data)
+                foreach (var sync in syncContext.Data)
                 {
                     Data.Add(sync);
                 }
@@ -86,11 +79,11 @@ namespace pluginVerilog.Verilog.DataObjects
             else
             {
                 bool matched = true;
-                foreach(var sync in syncContext.Data)
+                foreach (var sync in syncContext.Data)
                 {
-                    if(!Data.Contains(sync)) matched = false;
+                    if (!Data.Contains(sync)) matched = false;
                 }
-                if(!matched && alartWordRef != null) alartWordRef.AddWarning("sync mismatch");
+                if (!matched && alartWordRef != null) alartWordRef.AddWarning("sync mismatch");
             }
         }
 

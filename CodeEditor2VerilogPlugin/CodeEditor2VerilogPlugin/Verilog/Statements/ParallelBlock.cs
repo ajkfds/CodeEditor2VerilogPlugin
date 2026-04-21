@@ -2,10 +2,7 @@ using CodeEditor2.CodeEditor.CodeComplete;
 using pluginVerilog.Verilog.BuildingBlocks;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace pluginVerilog.Verilog.Statements
 {
@@ -18,7 +15,7 @@ namespace pluginVerilog.Verilog.Statements
         public NamedElements NamedElements => new NamedElements();
         public void DisposeSubReference()
         {
-            foreach(IStatement statement in Statements)
+            foreach (IStatement statement in Statements)
             {
                 statement.DisposeSubReference();
             }
@@ -64,7 +61,7 @@ namespace pluginVerilog.Verilog.Statements
             ParallelBlock sequentialBlock = new ParallelBlock();
             List<string> join_families = new List<string> { "join", "join_any", "join_none" };
 
-            while (!word.Eof && !join_families.Contains(word.Text) )
+            while (!word.Eof && !join_families.Contains(word.Text))
             {
                 IStatement? statement = await Verilog.Statements.Statements.ParseCreateStatement(word, nameSpace);
                 if (statement == null) break;
@@ -136,7 +133,7 @@ namespace pluginVerilog.Verilog.Statements
                 }
             }
             word.MoveNext();
-            
+
             while (!word.Eof && word.Text != "join")
             {
                 IStatement? statement = null;
@@ -169,7 +166,7 @@ namespace pluginVerilog.Verilog.Statements
     {
         public void DisposeSubReference()
         {
-            foreach(IStatement statement in Statements)
+            foreach (IStatement statement in Statements)
             {
                 statement.DisposeSubReference();
             }

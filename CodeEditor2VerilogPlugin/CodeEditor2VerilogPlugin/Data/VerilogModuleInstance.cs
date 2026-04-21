@@ -5,21 +5,12 @@ using CodeEditor2.CodeEditor.Parser;
 using CodeEditor2.CodeEditor.PopupHint;
 using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
-using DynamicData;
 using pluginVerilog.CodeEditor;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.ModuleItems;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reactive.Threading.Tasks;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading;
 using System.Threading.Tasks;
-using YamlDotNet.Core.Tokens;
-using static pluginVerilog.Verilog.ParsedDocument;
 
 namespace pluginVerilog.Data
 {
@@ -27,9 +18,9 @@ namespace pluginVerilog.Data
     {
 
         private string _moduleName = "";
-        public required string ModuleName 
-        { 
-            set 
+        public required string ModuleName
+        {
+            set
             {
                 textFileLock.EnterWriteLock();
                 try
@@ -99,9 +90,9 @@ namespace pluginVerilog.Data
             Data.IVerilogRelatedFile? file = projectProperty.GetFileOfBuildingBlock(moduleInstantiation.SourceName);
             if (file == null) return null;
 
-           CodeEditor2.Data.TextFile? textFile = file as CodeEditor2.Data.TextFile;
+            CodeEditor2.Data.TextFile? textFile = file as CodeEditor2.Data.TextFile;
             if (textFile == null) throw new Exception();
-            VerilogModuleInstance fileItem = new VerilogModuleInstance(textFile) 
+            VerilogModuleInstance fileItem = new VerilogModuleInstance(textFile)
             {
                 ModuleName = moduleInstantiation.SourceName,
                 ParameterOverrides = moduleInstantiation.ParameterOverrides,
@@ -109,7 +100,7 @@ namespace pluginVerilog.Data
                 RelativePath = file.RelativePath,
                 Name = moduleInstantiation.Name
             };
-            if(moduleInstantiation.Project != project)
+            if (moduleInstantiation.Project != project)
             {
                 fileItem.ExternalProject = true;
             }
@@ -132,8 +123,8 @@ namespace pluginVerilog.Data
             CustomizeItemEditorContextMenu += (x => EditorContextMenu.CustomizeEditorContextMenu(x));
         }
         private bool _systemVerilog = false;
-        public bool SystemVerilog 
-        { 
+        public bool SystemVerilog
+        {
             get
             {
                 textFileLock.EnterReadLock();
@@ -253,7 +244,7 @@ namespace pluginVerilog.Data
         {
 
 
-            System.Diagnostics.Debug.Print("### VerilogModuleInstance ReplaceBy "+ID);
+            System.Diagnostics.Debug.Print("### VerilogModuleInstance ReplaceBy " + ID);
             ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
             if (projectProperty == null) throw new Exception();
 
@@ -471,7 +462,7 @@ namespace pluginVerilog.Data
                 await acceptParameterizedParsedDocumentAsync(newParsedDocument);
             }
 
-            if(source.ParsedDocument != null)// && source.ParsedDocument.Version != newParsedDocument.Version)
+            if (source.ParsedDocument != null)// && source.ParsedDocument.Version != newParsedDocument.Version)
             {
                 Verilog.ParsedDocument vParsedDocument = (Verilog.ParsedDocument)newParsedDocument;
                 Verilog.ParsedDocument sourceParsedDocument = (Verilog.ParsedDocument)source.ParsedDocument;
@@ -566,7 +557,7 @@ namespace pluginVerilog.Data
             var parameterOverrides = _parameterOverrides;
             textFileLock.ExitReadLock();
 
-            return new Parser.VerilogParser(this, moduleName, parameterOverrides, parseMode,token);
+            return new Parser.VerilogParser(this, moduleName, parameterOverrides, parseMode, token);
         }
 
 
@@ -587,7 +578,8 @@ namespace pluginVerilog.Data
             }
 
             await Dispatcher.UIThread.InvokeAsync(
-                async () => { 
+                async () =>
+                {
                     await VerilogCommon.Updater.UpdateAsync(this);
                     NavigatePanelNode.UpdateVisual();
                     if (CodeEditor2.Controller.NavigatePanel.GetSelectedFile() == this)

@@ -1,17 +1,6 @@
+using CodeEditor2.CodeEditor.PopupMenu;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Drawing;
-using pluginVerilog.Verilog.BuildingBlocks;
-using Avalonia.Input;
-using CodeEditor2.Views;
-using Avalonia.Media;
-using static System.Net.Mime.MediaTypeNames;
-using static pluginVerilog.Verilog.Snippets.ModuleInstanceSnippet;
-using System.Reflection.Metadata;
-using CodeEditor2.CodeEditor.PopupMenu;
 
 
 namespace pluginVerilog.Verilog.Snippets

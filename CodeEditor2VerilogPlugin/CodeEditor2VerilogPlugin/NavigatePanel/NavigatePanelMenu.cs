@@ -1,16 +1,11 @@
-using AjkAvaloniaLibs.Controls;
+using Avalonia.Controls;
+using CodeEditor2;
 using CodeEditor2.Data;
 using CodeEditor2.NavigatePanel;
-using CodeEditor2;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Avalonia.Controls;
 using pluginVerilog.Verilog.BuildingBlocks;
-using System.Security.Cryptography.X509Certificates;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace pluginVerilog.NavigatePanel
 {
@@ -27,7 +22,7 @@ namespace pluginVerilog.NavigatePanel
                 return false;
             }) as MenuItem;
 
-            if(menuItem_Add == null)
+            if (menuItem_Add == null)
             {
                 menuItem_Add = CodeEditor2.Global.CreateMenuItem(
                     "Add", "MenuItem_Add"
@@ -67,7 +62,7 @@ namespace pluginVerilog.NavigatePanel
         private static async Task generateFile(
             string typeName,
             string extension,
-            Action<System.IO.StreamWriter,string> streamWriter
+            Action<System.IO.StreamWriter, string> streamWriter
             )
         {
             NavigatePanelNode? node = CodeEditor2.Controller.NavigatePanel.GetSelectedNode();
@@ -78,7 +73,7 @@ namespace pluginVerilog.NavigatePanel
             string relativePath = getRelativeFolderPath(node);
             if (!relativePath.EndsWith(System.IO.Path.DirectorySeparatorChar) && relativePath != "") relativePath += System.IO.Path.DirectorySeparatorChar;
 
-            CodeEditor2.Tools.InputWindow window = new CodeEditor2.Tools.InputWindow("Create new "+typeName, "new "+typeName+" name");
+            CodeEditor2.Tools.InputWindow window = new CodeEditor2.Tools.InputWindow("Create new " + typeName, "new " + typeName + " name");
             await window.ShowDialog(Controller.GetMainWindow());
 
             if (window.Cancel) return;
@@ -90,12 +85,12 @@ namespace pluginVerilog.NavigatePanel
             BuildingBlock? buildingBlock = projectProperty.GetBuildingBlock(name);
             if (buildingBlock != null)
             {
-                CodeEditor2.Controller.AppendLog("Duplicate BuildingBlock Name ;" + buildingBlock.File.RelativePath, Avalonia.Media.Colors.Red );
+                CodeEditor2.Controller.AppendLog("Duplicate BuildingBlock Name ;" + buildingBlock.File.RelativePath, Avalonia.Media.Colors.Red);
                 return;
             }
 
             // create file
-            string fileName = name + "."+ extension;
+            string fileName = name + "." + extension;
             string path = project.GetAbsolutePath(relativePath + fileName);
             if (System.IO.File.Exists(path))
             {
@@ -109,7 +104,8 @@ namespace pluginVerilog.NavigatePanel
                     {
                         streamWriter(sw, name);
                     }
-                }catch (Exception ex)
+                }
+                catch (Exception ex)
                 {
                     Controller.AppendLog("** error : NavigatePanelMenu.generateFile", Avalonia.Media.Colors.Red);
                     Controller.AppendLog(ex.Message, Avalonia.Media.Colors.Red);
@@ -124,7 +120,8 @@ namespace pluginVerilog.NavigatePanel
             try
             {
                 await generateFile("verilog module", "v",
-                    (sw, name) => {
+                    (sw, name) =>
+                    {
                         sw.Write("`timescale 1ns / 1ps\n");
                         sw.Write("\n");
                         sw.Write("module " + name + ";\n");
@@ -145,7 +142,8 @@ namespace pluginVerilog.NavigatePanel
             try
             {
                 await generateFile("system verilog module", "sv",
-                    (sw, name) => {
+                    (sw, name) =>
+                    {
                         sw.Write("`timescale 1ns / 1ps\n");
                         sw.Write("\n");
                         sw.Write("module " + name + ";\n");
@@ -167,7 +165,8 @@ namespace pluginVerilog.NavigatePanel
             try
             {
                 await generateFile("system verilog interface", "sv",
-                    (sw, name) => {
+                    (sw, name) =>
+                    {
                         sw.Write("interface " + name + ";\n");
                         sw.Write("\n");
                         sw.Write("endinterface\n");

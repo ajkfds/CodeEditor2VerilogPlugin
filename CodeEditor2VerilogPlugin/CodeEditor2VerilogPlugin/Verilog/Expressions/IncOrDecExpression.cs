@@ -1,11 +1,5 @@
 using CodeEditor2.CodeEditor.CodeComplete;
 using pluginVerilog.Verilog.Statements;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TextMateSharp.Grammars;
 
 namespace pluginVerilog.Verilog.Expressions
 {
@@ -42,7 +36,7 @@ namespace pluginVerilog.Verilog.Expressions
             bool increment = false;
             WordReference wref;
 
-            if (word.Text =="++" || word.Text == "--")
+            if (word.Text == "++" || word.Text == "--")
             {
                 wref = word.GetReference();
                 if (word.Text == "++")
@@ -65,17 +59,17 @@ namespace pluginVerilog.Verilog.Expressions
                 {
                     dataObjectReference = (DataObjectReference)primary;
                 }
-                else if(primary==null)
+                else if (primary == null)
                 {
                     word.MoveNext();
-                    if(!word.Prototype) word.AddError("illegal inc_or_dec_expression");
+                    if (!word.Prototype) word.AddError("illegal inc_or_dec_expression");
                 }
                 else
                 {
                     word.AddError("illegal inc_or_dec_expression");
                 }
             }
-            else if(word.NextText=="++" || word.NextText == "--")
+            else if (word.NextText == "++" || word.NextText == "--")
             {
                 wref = word.GetReference();
                 Primary? primary = Primary.ParseCreate(word, nameSpace, acceptImplicitNet);
@@ -96,7 +90,8 @@ namespace pluginVerilog.Verilog.Expressions
                 if (word.Text == "++")
                 {
                     increment = true;
-                }else if (word.Text == "--")
+                }
+                else if (word.Text == "--")
                 {
                     increment = false;
                 }

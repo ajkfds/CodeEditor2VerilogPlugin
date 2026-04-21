@@ -1,11 +1,6 @@
 using pluginVerilog.Verilog;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace pluginVerilog
 {
@@ -21,14 +16,14 @@ namespace pluginVerilog
 
         public Dictionary<string, Verilog.Expressions.Expression?> AttributeSpecs = new Dictionary<string, Verilog.Expressions.Expression?>();
 
-        public static Attribute ParseCreate(Verilog.WordScanner word,NameSpace nameSpace)
+        public static Attribute ParseCreate(Verilog.WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "(*") throw new Exception();
             word.Color(CodeDrawStyle.ColorType.Identifier);
             word.MoveNext();
 
             Attribute attr = new Attribute();
-            while ( !word.Eof )
+            while (!word.Eof)
             {
                 if (!General.IsIdentifier(word.Text))
                 {
@@ -40,12 +35,12 @@ namespace pluginVerilog
 
                 Verilog.Expressions.Expression? expression = null;
 
-                if ( word.Text == "=")
+                if (word.Text == "=")
                 {
                     word.MoveNext();    // =
 
                     expression = Verilog.Expressions.Expression.ParseCreate(word, nameSpace);
-                    if(expression != null && !expression.Constant)
+                    if (expression != null && !expression.Constant)
                     {
                         expression.Reference.AddError("must be constant");
                         expression = null;
@@ -63,8 +58,8 @@ namespace pluginVerilog
                     break;
                 }
             }
-            
-            while(word.Text != "*)" && !word.Eof)
+
+            while (word.Text != "*)" && !word.Eof)
             {
                 if (General.ListOfKeywords.Contains(word.Text)) break;
                 word.MoveNext();

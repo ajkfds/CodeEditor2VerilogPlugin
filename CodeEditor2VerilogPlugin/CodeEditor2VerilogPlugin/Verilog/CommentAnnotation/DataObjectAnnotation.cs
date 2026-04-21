@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace pluginVerilog.Verilog.CommentAnnotation
 {
     public static class DataObjectAnnotaion
@@ -95,7 +89,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
                 {
                     break;
                 }
-                dataObject.SyncContext.AddClockDomain(syncTarget,dataObject.DefinedReference);
+                dataObject.SyncContext.AddClockDomain(syncTarget, dataObject.DefinedReference);
                 comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
                 comment.MoveNext();
 
@@ -148,7 +142,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
             comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
             dataObject.SyncContext.AssignToReset();
             comment.MoveNext();
-      }
+        }
 
     }
 }

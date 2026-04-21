@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace pluginVerilog.Verilog.Expressions
 {
     public class Bracket : Primary
@@ -15,7 +9,7 @@ namespace pluginVerilog.Verilog.Expressions
         public override void DisposeSubReference(bool keepThisReference)
         {
             base.DisposeSubReference(keepThisReference);
-            if(Expression!=null) Expression.DisposeSubReference(false);
+            if (Expression != null) Expression.DisposeSubReference(false);
         }
 
         public override AjkAvaloniaLibs.Controls.ColorLabel GetLabel()

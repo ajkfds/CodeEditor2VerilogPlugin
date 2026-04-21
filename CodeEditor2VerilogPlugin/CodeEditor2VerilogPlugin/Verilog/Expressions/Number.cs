@@ -1,10 +1,6 @@
-using Avalonia.Controls.Documents;
 //using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Expressions
 {
@@ -165,10 +161,10 @@ namespace pluginVerilog.Verilog.Expressions
             stringBuilder.Append(Text);
         }
 
-        public static Primary? ParseCreateNumberOrCast(WordScanner word,NameSpace nameSpace, bool lValue)
+        public static Primary? ParseCreateNumberOrCast(WordScanner word, NameSpace nameSpace, bool lValue)
         {
             word.Color(CodeDrawStyle.ColorType.Number);
-            
+
 
             Number number = new Number();
             number.Constant = true;
@@ -183,7 +179,7 @@ namespace pluginVerilog.Verilog.Expressions
 
             while (index < word.Length)
             {
-                if(word.GetCharAt(index) == '\'')
+                if (word.GetCharAt(index) == '\'')
                 {
                     apostropheIndex = index;
                     break;
@@ -214,7 +210,7 @@ namespace pluginVerilog.Verilog.Expressions
                     word.MoveNext();
                     return new Time() { Number = number, Unit = Time.UnitEnum.s };
                 }
-                else if (index+2 == word.Length && word.GetCharAt(index + 1)=='s') // time_unit : ms | us | ns | ps | fs
+                else if (index + 2 == word.Length && word.GetCharAt(index + 1) == 's') // time_unit : ms | us | ns | ps | fs
                 {
                     number.NumberType = NumberTypeEnum.Decimal;
                     number.Value = long.Parse(sb.ToString());
@@ -265,7 +261,8 @@ namespace pluginVerilog.Verilog.Expressions
                 parseAfterApostrophe(word, nameSpace, index, apostropheIndex, number, sb);
                 return number;
             }
-            else {
+            else
+            {
                 if (apostropheIndex + 1 == word.Length)
                 {
                     // cast
@@ -281,7 +278,7 @@ namespace pluginVerilog.Verilog.Expressions
                     return Cast.ParseCreate(word, nameSpace, number);
                 }
 
-                parseAfterApostrophe(word, nameSpace,index, apostropheIndex, number, sb);
+                parseAfterApostrophe(word, nameSpace, index, apostropheIndex, number, sb);
                 return number;
             }
         }
@@ -320,7 +317,7 @@ namespace pluginVerilog.Verilog.Expressions
         //}
 
 
-        public static Primary? parseAfterApostrophe(WordScanner word, NameSpace nameSpace, int index,int apostropheIndex, Number number,StringBuilder sb)
+        public static Primary? parseAfterApostrophe(WordScanner word, NameSpace nameSpace, int index, int apostropheIndex, Number number, StringBuilder sb)
         {
             // parse after apostrophe
             index = apostropheIndex + 1;
@@ -370,7 +367,8 @@ namespace pluginVerilog.Verilog.Expressions
                 case 'z':
                 case 'X':
                 case 'Z':
-                    if (word.Length == 2) {
+                    if (word.Length == 2)
+                    {
                         number = parseSingleBitPadding(word, index);
                         return number;
                     }
@@ -476,13 +474,13 @@ namespace pluginVerilog.Verilog.Expressions
             }
 
             double value;
-            if(double.TryParse(sb.ToString(),out value))
+            if (double.TryParse(sb.ToString(), out value))
             {
                 number.Value = value;
                 number.NumberType = NumberTypeEnum.Real;
                 number.Constant = true;
             }
-//            word.MoveNext();
+            //            word.MoveNext();
             return true;
         }
 
@@ -531,7 +529,7 @@ namespace pluginVerilog.Verilog.Expressions
                 index++;
             }
             int value;
-            if(int.TryParse(sb.ToString(), out value))
+            if (int.TryParse(sb.ToString(), out value))
             {
                 number.Value = value;
                 number.Constant = true;
@@ -554,7 +552,7 @@ namespace pluginVerilog.Verilog.Expressions
             }
 
             bool valueHeadError = false;
-            while(index<word.Length && word.GetCharAt(index) == '_')
+            while (index < word.Length && word.GetCharAt(index) == '_')
             {
                 valueHeadError = true;
                 index++;
@@ -592,7 +590,7 @@ namespace pluginVerilog.Verilog.Expressions
             }
             else
             {
-                if(int.TryParse(sb.ToString(),out int temp_int))
+                if (int.TryParse(sb.ToString(), out int temp_int))
                 {
                     number.Value = temp_int;
                     number.Constant = true;
@@ -668,7 +666,7 @@ namespace pluginVerilog.Verilog.Expressions
                 hexHeadError = true;
                 index++;
             }
-            if(hexHeadError) word.AddError("_ not allowed at head of hex value");
+            if (hexHeadError) word.AddError("_ not allowed at head of hex value");
 
             if (!isHexDigit(word.GetCharAt(index)))
             {
@@ -690,10 +688,10 @@ namespace pluginVerilog.Verilog.Expressions
                 }
                 index++;
             }
-            if(sb.Length <= 10)
+            if (sb.Length <= 10)
             {
                 int value;
-                if(int.TryParse(sb.ToString(),System.Globalization.NumberStyles.HexNumber, null, out value))
+                if (int.TryParse(sb.ToString(), System.Globalization.NumberStyles.HexNumber, null, out value))
                 {
                     number.Value = value;
                     number.Constant = true;

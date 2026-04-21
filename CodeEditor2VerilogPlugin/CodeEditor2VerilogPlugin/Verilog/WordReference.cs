@@ -1,11 +1,6 @@
-using ExCSS;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog
 {
@@ -16,7 +11,7 @@ namespace pluginVerilog.Verilog
         public static WordReference Create(WordPointer wordPointer, List<WordPointer> stocks)
         {
             WordReference wRef = new WordReference();
-            wRef.indexReference = IndexReference.Create(wordPointer,stocks);
+            wRef.indexReference = IndexReference.Create(wordPointer, stocks);
             wRef.length = wordPointer.Length;
             return wRef;
         }
@@ -70,7 +65,8 @@ namespace pluginVerilog.Verilog
         public static WordReference CreateReferenceRange(WordReference fromReference, WordReference toReference)
         {
             WordReference ret = toReference.Clone();
-            if (fromReference.IsPintSameHierarchy(toReference)){
+            if (fromReference.IsPintSameHierarchy(toReference))
+            {
                 ret.indexReference = fromReference.indexReference;
                 ret.length = toReference.Index - fromReference.Index + toReference.length;
             }
@@ -78,7 +74,8 @@ namespace pluginVerilog.Verilog
         }
 
         [JsonIgnore]
-        public CodeEditor2.CodeEditor.ParsedDocument? ParsedDocument {
+        public CodeEditor2.CodeEditor.ParsedDocument? ParsedDocument
+        {
             get
             {
                 return indexReference.ParsedDocument;
@@ -96,7 +93,7 @@ namespace pluginVerilog.Verilog
         {
             ApplyRule(rule, "");
         }
-        public void ApplyRule(Rule rule,string message)
+        public void ApplyRule(Rule rule, string message)
         {
             switch (rule.Severity)
             {
@@ -140,7 +137,7 @@ namespace pluginVerilog.Verilog
 
         public void Color(CodeDrawStyle.ColorType colorType)
         {
-            if(Document == null) return;
+            if (Document == null) return;
             Document.TextColors.SetColorAt(Index, CodeDrawStyle.ColorIndex(colorType), length);
         }
     }

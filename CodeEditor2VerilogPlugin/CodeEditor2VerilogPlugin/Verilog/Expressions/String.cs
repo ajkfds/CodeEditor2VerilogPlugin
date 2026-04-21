@@ -1,15 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace pluginVerilog.Verilog.Expressions
 {
     public class ConstantString : Primary
     {
         protected ConstantString() { }
-        public static new ConstantString ParseCreate(WordScanner word,NameSpace nameSpace)
+        public static new ConstantString ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             word.Color(CodeDrawStyle.ColorType.Number);
             ConstantString str = new ConstantString();
@@ -18,10 +12,10 @@ namespace pluginVerilog.Verilog.Expressions
             str.Reference = word.GetReference();
             str.BitWidth = (word.Text.Length - 2) * 8;
             str.Constant = true;
-            if(str.BitWidth <= 16)
+            if (str.BitWidth <= 16)
             {
                 int value = 0;
-                for(int i = 1;i< word.Text.Length-1; i++)
+                for (int i = 1; i < word.Text.Length - 1; i++)
                 {
                     value = value << 8;
                     value = value + word.Text[i];

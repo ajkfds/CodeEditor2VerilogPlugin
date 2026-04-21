@@ -1,11 +1,7 @@
 using AjkAvaloniaLibs.Controls;
-using DynamicData;
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
@@ -61,7 +57,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         }
         public static RealTimeType Create(List<Arrays.PackedArray>? packedDimensions)
         {
-            RealTimeType realTimeType = new RealTimeType() {};
+            RealTimeType realTimeType = new RealTimeType() { };
             if (packedDimensions == null)
             {
                 realTimeType.PackedDimensions.Clear();

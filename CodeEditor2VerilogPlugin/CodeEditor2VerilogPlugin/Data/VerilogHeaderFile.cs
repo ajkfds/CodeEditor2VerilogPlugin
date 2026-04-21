@@ -1,19 +1,12 @@
-using Avalonia.Threading;
 using CodeEditor2.CodeEditor;
 using CodeEditor2.CodeEditor.Parser;
 using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
 using pluginVerilog.CodeEditor;
 using pluginVerilog.Verilog;
-using pluginVerilog.Verilog.BuildingBlocks;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using static CodeEditor2.Controller;
-using static pluginVerilog.Verilog.ParsedDocument;
 
 namespace pluginVerilog.Data
 {
@@ -38,10 +31,10 @@ namespace pluginVerilog.Data
                 RelativePath = relativePath,
                 Name = name
             };
-//            fileItem.readFromFile();
+            //            fileItem.readFromFile();
             await fileItem.FileCheck();
 
-//            return System.Threading.Tasks.Task.FromResult(fileItem);
+            //            return System.Threading.Tasks.Task.FromResult(fileItem);
             return fileItem;
         }
 
@@ -208,10 +201,10 @@ namespace pluginVerilog.Data
             Data.IVerilogRelatedFile? parentFile = Parent as Data.IVerilogRelatedFile;
             if (parentFile == null) return null;
             // do not parse again for background parse. header file is parsed with parent file.
-            if (parseMode != DocumentParser.ParseModeEnum.EditParse ) return null;
+            if (parseMode != DocumentParser.ParseModeEnum.EditParse) return null;
 
             // Use Parent File Parser for Edit Parse
-            return parentFile.CreateDocumentParser(parseMode,token);
+            return parentFile.CreateDocumentParser(parseMode, token);
         }
 
         public override List<ToolItem> GetToolItems(int index)

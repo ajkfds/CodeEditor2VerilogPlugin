@@ -1,8 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog
 {
@@ -17,7 +14,7 @@ namespace pluginVerilog.Verilog
             this.ParsedDocument = parsedDocument;
             if (this.ParsedDocument == null) throw new Exception();
             string? sectionName = SectionName;
-            fetchNext(this.Document,ref index, out length, out nextIndex, out wordType, ref sectionName, !InhibitColor);
+            fetchNext(this.Document, ref index, out length, out nextIndex, out wordType, ref sectionName, !InhibitColor);
             SectionName = sectionName;
         }
 
@@ -86,22 +83,22 @@ namespace pluginVerilog.Verilog
         public void Color(CodeDrawStyle.ColorType colorType)
         {
             if (InhibitColor) return;
-            Document.TextColors.SetColorAt(index, CodeDrawStyle.ColorIndex(colorType),length);
+            Document.TextColors.SetColorAt(index, CodeDrawStyle.ColorIndex(colorType), length);
         }
 
-        public void Color(CodeDrawStyle.ColorType colorType,int start,int last)
+        public void Color(CodeDrawStyle.ColorType colorType, int start, int last)
         {
             if (InhibitColor) return;
             Document.TextColors.SetColorAt(start, CodeDrawStyle.ColorIndex(colorType), last - start);
         }
 
-        public void AppendBlock(int startIndex,int lastIndex)
+        public void AppendBlock(int startIndex, int lastIndex)
         {
             Document.AppendBlock(startIndex, lastIndex);
         }
-        public void AppendBlock(int startIndex, int lastIndex,string name,bool defaultClose)
+        public void AppendBlock(int startIndex, int lastIndex, string name, bool defaultClose)
         {
-            Document.AppendBlock(startIndex, lastIndex,name,defaultClose);
+            Document.AppendBlock(startIndex, lastIndex, name, defaultClose);
         }
 
         /// <summary>
@@ -164,7 +161,7 @@ namespace pluginVerilog.Verilog
                          commentSkippedPrev          commentSkipped
 
             */
-            if(nextIndex >= Document.Length)
+            if (nextIndex >= Document.Length)
             {
                 commentSkippedPrev = false;
                 index = Document.Length;
@@ -174,7 +171,7 @@ namespace pluginVerilog.Verilog
 
             index = nextIndex;
             SectionName = nextSection;
-            
+
             if (Eof)
             {
                 commentSkippedPrev = false;
@@ -191,7 +188,8 @@ namespace pluginVerilog.Verilog
                 fetchNext(Document, ref index, out length, out nextIndex, out wordType, ref nextSection, (!InhibitColor));
             }
 
-            if (wordType == WordTypeEnum.Comment){ // fist word is comment
+            if (wordType == WordTypeEnum.Comment)
+            { // fist word is comment
                 commentSkippedPrev = true;
                 commentIndexPrev = index;
                 while (wordType == WordTypeEnum.Comment)
@@ -279,7 +277,7 @@ namespace pluginVerilog.Verilog
                         // get next Index
                         index_temp = commentNextAfterIndex;
                         fetchNext(Document, ref index_temp, out length_temp, out commentNextAfterIndex, out wordTypeEnum_temp, ref section_temp, !InhibitColor);
-                        if(wordTypeEnum_temp != WordTypeEnum.Comment)
+                        if (wordTypeEnum_temp != WordTypeEnum.Comment)
                         {
                             commentNextAfterIndex = temp;
                             break;
@@ -323,7 +321,7 @@ namespace pluginVerilog.Verilog
         {
             if (!commentNextFetched) fetchNextComment();
             if (!commentNextFetched) return "";
-            return Document.CreateString(nextIndex, commentNextAfterIndex-nextIndex);
+            return Document.CreateString(nextIndex, commentNextAfterIndex - nextIndex);
         }
 
         public CommentScanner GetPreviousCommentScanner()
@@ -395,8 +393,8 @@ namespace pluginVerilog.Verilog
             )
         {
             fetchNext(
-                document, 
-                ref index, out length, out nextIndex, 
+                document,
+                ref index, out length, out nextIndex,
                 out wordType, ref sectionName,
                 false
                 );
@@ -414,7 +412,7 @@ namespace pluginVerilog.Verilog
         /// <param name="colorComment"></param>
         private static void fetchNext(
             CodeEditor2.CodeEditor.CodeDocument document,
-            ref int index, out int length, out int nextIndex, 
+            ref int index, out int length, out int nextIndex,
             out WordTypeEnum wordType,
             ref string sectionName,
             bool colorComment
@@ -428,10 +426,10 @@ namespace pluginVerilog.Verilog
             {
 
                 // skip blanks before word
-                while(docLength > index)
+                while (docLength > index)
                 {
                     ch = document.GetCharAt(index);
-                    if(ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r')
+                    if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r')
                     {
                         index++;
                         continue;
@@ -440,7 +438,7 @@ namespace pluginVerilog.Verilog
                     if (!charClass0[ch]) break;
                     index++;
                 }
-                if(index == docLength)
+                if (index == docLength)
                 {
                     length = 0;
                     nextIndex = index;
@@ -483,7 +481,7 @@ namespace pluginVerilog.Verilog
                         break;
                     case 3: // operators
                         wordType = WordTypeEnum.Symbol;
-                        fetchNextAtOperator(document, ref nextIndex, ref wordType,ref sectionName, colorComment);
+                        fetchNextAtOperator(document, ref nextIndex, ref wordType, ref sectionName, colorComment);
                         break;
                     case 4: // double quote
                         wordType = WordTypeEnum.String;
@@ -492,7 +490,7 @@ namespace pluginVerilog.Verilog
                             docLength > nextIndex
                         )
                         {
-                            if(document.GetCharAt(nextIndex) == '\\' && document.Length> nextIndex+1 )
+                            if (document.GetCharAt(nextIndex) == '\\' && document.Length > nextIndex + 1)
                             {
                                 if (document.GetCharAt(nextIndex + 1) == '\\') // escaped backslash
                                 {
@@ -503,7 +501,7 @@ namespace pluginVerilog.Verilog
                                     nextIndex++;
                                     continue;
                                 }
-                                if (document.GetCharAt(nextIndex+1) == '\"') // escaped double quote
+                                if (document.GetCharAt(nextIndex + 1) == '\"') // escaped double quote
                                 {
                                     nextIndex++;
                                     nextIndex++;
@@ -511,14 +509,14 @@ namespace pluginVerilog.Verilog
                                 }
                             }
 
-                            if(document.GetCharAt(nextIndex) == '\"')
+                            if (document.GetCharAt(nextIndex) == '\"')
                             {
-                                if(document.Length > nextIndex) nextIndex++; // last double quote
+                                if (document.Length > nextIndex) nextIndex++; // last double quote
                                 break;
                             }
                             nextIndex++;
                         }
-                        
+
                         break;
                     case 5: // blackslash
                         wordType = WordTypeEnum.Text;
@@ -746,9 +744,9 @@ namespace pluginVerilog.Verilog
                 nextIndex++;
                 while (docLength > nextIndex && document.GetCharAt(nextIndex) != '\n')
                 {
-                    if(colorComment && document.GetCharAt(nextIndex) == '@')
+                    if (colorComment && document.GetCharAt(nextIndex) == '@')
                     {
-                        ParseInLineComments(document, ref nextIndex, ref wordType,ref sectionName);
+                        ParseInLineComments(document, ref nextIndex, ref wordType, ref sectionName);
                         continue;
                     }
                     nextIndex++;
@@ -835,8 +833,8 @@ namespace pluginVerilog.Verilog
                 op2 == "~^" ||
                 op2 == "^~" ||
                 op2 == "**" ||
-//                op2 == "(*" ||
-//                op2 == "*)" ||
+                //                op2 == "(*" ||
+                //                op2 == "*)" ||
                 op2 == "+:" ||
                 op2 == "-:" ||
                 op2 == "=>" ||
@@ -871,8 +869,8 @@ namespace pluginVerilog.Verilog
         }
 
         private static void ParseInLineComments(
-            CodeEditor2.CodeEditor.CodeDocument document, 
-            ref int nextIndex, 
+            CodeEditor2.CodeEditor.CodeDocument document,
+            ref int nextIndex,
             ref WordTypeEnum wordType,
             ref string sectionName
             )
@@ -889,7 +887,7 @@ namespace pluginVerilog.Verilog
                 ch = document.GetCharAt(nextIndex);
                 if (ch == '\n') return;
                 if (ch != target[i]) return;
-//                document.TextColors.SetColorAt(nextIndex, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Comment));
+                //                document.TextColors.SetColorAt(nextIndex, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Comment));
                 nextIndex++;
                 i++;
 
@@ -898,7 +896,7 @@ namespace pluginVerilog.Verilog
 
             for (int j = nextIndex - i; j < nextIndex; j++)
             {
-//                document.TextColors.SetColorAt(j, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.HighLightedComment));
+                //                document.TextColors.SetColorAt(j, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.HighLightedComment));
             }
             while (docLength > nextIndex)
             {
@@ -911,7 +909,7 @@ namespace pluginVerilog.Verilog
             {
                 ch = document.GetCharAt(nextIndex);
                 if (ch == '\n' || ch == '\r') break;
-//                document.TextColors.SetColorAt(nextIndex, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.HighLightedComment));
+                //                document.TextColors.SetColorAt(nextIndex, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.HighLightedComment));
                 sb.Append(ch);
                 nextIndex++;
             }

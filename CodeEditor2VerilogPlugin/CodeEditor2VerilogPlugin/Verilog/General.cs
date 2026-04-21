@@ -1,8 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog
 {
@@ -27,11 +23,11 @@ namespace pluginVerilog
 
         // Identifier /////////////////////////////////////////////////////////
 
-        public static bool IsHierarchicalIdentifier(string value,out string[] hierarchy)
+        public static bool IsHierarchicalIdentifier(string value, out string[] hierarchy)
         {
-            if (!value.Contains('.')) { hierarchy = new string[]{ value }; return true; }
+            if (!value.Contains('.')) { hierarchy = new string[] { value }; return true; }
             string[] hiers = value.Split('.');
-            foreach(string identifier in hiers)
+            foreach (string identifier in hiers)
             {
                 if (!IsIdentifier(identifier)) { hierarchy = null; return false; }
             }
@@ -53,7 +49,7 @@ namespace pluginVerilog
             if (identifierTable[value[index]] != 1) return false;
             index++;
 
-            while (index <value.Length)
+            while (index < value.Length)
             {
                 if (value[index] >= 128) return false;
                 if (identifierTable[value[index]] == 0) return false;
@@ -66,7 +62,7 @@ namespace pluginVerilog
         {
             // escaped_identifier ::= \{Any_ASCII_character_except_white_space} white_space 
             if (value.Length <= 2) return false;
-            if (value[0] !=System.IO.Path.DirectorySeparatorChar) return false;
+            if (value[0] != System.IO.Path.DirectorySeparatorChar) return false;
             return true;
         }
 
@@ -87,7 +83,7 @@ namespace pluginVerilog
                 index++;
             }
 
-            if(General.ListOfKeywords.Contains(value)) return false;
+            if (General.ListOfKeywords.Contains(value)) return false;
             return true;
         }
 
@@ -220,9 +216,9 @@ namespace pluginVerilog
             "config",
             "deassign",
             "defparam",
-            "design",       
+            "design",
             "edge",
-            "endconfig",            
+            "endconfig",
             "endprimitive",
             "endspecify",
             "endtable",

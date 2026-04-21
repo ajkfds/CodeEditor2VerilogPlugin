@@ -1,4 +1,3 @@
-using Avalonia.Controls.Shapes;
 using Avalonia.Input;
 using Avalonia.Threading;
 using CodeEditor2.CodeEditor.CodeComplete;
@@ -7,13 +6,8 @@ using CodeEditor2.Views;
 using pluginVerilog.Verilog.DataObjects;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Principal;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using static AjkAvaloniaLibs.Libs.Icons;
-using static pluginVerilog.Tool.ParseHierarchy;
 
 namespace pluginVerilog.Verilog.Snippets
 {
@@ -186,7 +180,8 @@ namespace pluginVerilog.Verilog.Snippets
                     result = await _eventTcs.Task;
                     checkLine = null;
                     if (result != "moveNext") return;
-                } else if (clocks.Count == 1)
+                }
+                else if (clocks.Count == 1)
                 { // use default value
 
                 }
@@ -222,7 +217,8 @@ namespace pluginVerilog.Verilog.Snippets
                     result = await _eventTcs.Task;
                     checkLine = null;
                     if (result != "moveNext") return;
-                }else if (resets.Count == 1)
+                }
+                else if (resets.Count == 1)
                 { // use default value
 
                 }
@@ -265,7 +261,7 @@ namespace pluginVerilog.Verilog.Snippets
                 // move next
                 await CodeEditor2.Controller.CodeEditor.SelectHighlightAsync(3);    // move carlet to next highlight
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 CodeEditor2.Controller.AppendLog("##Exception " + ex.Message, Avalonia.Media.Colors.Red);
             }
@@ -293,11 +289,11 @@ namespace pluginVerilog.Verilog.Snippets
             // overrider return & escape
             if (!CodeEditor2.Controller.CodeEditor.IsPopupMenuOpened)
             {
-                if (e.Key == Key.Escape || e.Key == Key.Up )
+                if (e.Key == Key.Escape || e.Key == Key.Up)
                 {
                     CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
                     e.Handled = true;
-                } 
+                }
                 else if (e.Key == Key.Return)
                 {
                     if (_eventTcs != null) _eventTcs.TrySetResult("moveNext");
@@ -332,9 +328,9 @@ namespace pluginVerilog.Verilog.Snippets
             if (document == null) return;
 
             int? carletPosition = CodeEditor2.Controller.CodeEditor.GetCaretPosition();
-            if(carletPosition == null) return;
+            if (carletPosition == null) return;
             int line = document.GetLineAt((int)carletPosition);
-            CodeEditor2.Controller.AppendLog("line "+line.ToString()+"=="+checkLine.ToString());
+            CodeEditor2.Controller.AppendLog("line " + line.ToString() + "==" + checkLine.ToString());
             if (line != checkLine) CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
 
         }

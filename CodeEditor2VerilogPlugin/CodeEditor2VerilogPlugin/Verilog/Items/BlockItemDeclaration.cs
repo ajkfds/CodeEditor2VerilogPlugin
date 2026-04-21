@@ -1,8 +1,4 @@
 using pluginVerilog.Verilog.DataObjects.Nets;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Items
@@ -64,7 +60,7 @@ namespace pluginVerilog.Verilog.Items
 
                 // etc
                 case "(*":
-                    Attribute attribute = Attribute.ParseCreate(word,nameSpace);
+                    Attribute attribute = Attribute.ParseCreate(word, nameSpace);
                     break;
                 // errpr trap
                 case "endgenerate":

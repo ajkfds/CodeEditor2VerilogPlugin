@@ -1,16 +1,8 @@
-using DynamicData.Kernel;
 using pluginVerilog.Verilog.BuildingBlocks;
-using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.Expressions;
-using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static pluginVerilog.Verilog.DataObjects.Nets.Net;
 
 namespace pluginVerilog.Verilog.DataObjects.Constants
 {
@@ -55,7 +47,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
         {
             AppendTypeLabel(label);
 
-            if(DataType != null)
+            if (DataType != null)
             {
                 label.AppendText(" ");
                 label.AppendText(DataType.CreateString());
@@ -153,7 +145,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
             {
                 constantType = ConstantTypeEnum.localparam;
             }
-            else if(word.Text == "specparam")
+            else if (word.Text == "specparam")
             {
                 constantType = ConstantTypeEnum.specparam;
             }
@@ -165,7 +157,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
             word.MoveNext();
 
             DataObjects.DataTypes.IDataType? dataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, (NameSpace)module, null);
-            if(dataType == null)
+            if (dataType == null)
             {
                 bool? singed = null;
                 if (word.Text == "signed")
@@ -236,21 +228,22 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                                     return;
                             }
                             constants.ConstantType = constantType;
-                            if(dataType == null && expression is Expressions.Number)
+                            if (dataType == null && expression is Expressions.Number)
                             {
                                 Expressions.Number number = (Expressions.Number)expression;
-                                if(number.NumberType == Expressions.Number.NumberTypeEnum.Real)
+                                if (number.NumberType == Expressions.Number.NumberTypeEnum.Real)
                                 {
                                     dataType = DataTypes.RealType.Create(null);
                                 }
-                                else if(number.BitWidth != null)
+                                else if (number.BitWidth != null)
                                 {
-                                    PackedArray packedArray = new PackedArray((int)number.BitWidth-1,0);
+                                    PackedArray packedArray = new PackedArray((int)number.BitWidth - 1, 0);
                                     List<PackedArray> packedArrays = new List<PackedArray>() { packedArray };
                                     dataType = DataTypes.LogicType.Create(number.Signed, packedArrays);
-                                }else
+                                }
+                                else
                                 {
-                                    PackedArray packedArray = new PackedArray(31,0);
+                                    PackedArray packedArray = new PackedArray(31, 0);
                                     List<PackedArray> packedArrays = new List<PackedArray>() { packedArray };
                                     dataType = DataTypes.LogicType.Create(number.Signed, packedArrays);
                                 }
@@ -391,7 +384,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                 switch (constantType)
                 {
                     case ConstantTypeEnum.localparam:
-                        constants = new Localparam() { Name = identifier, DefinedReference = nameReference, Expression= expression };
+                        constants = new Localparam() { Name = identifier, DefinedReference = nameReference, Expression = expression };
                         break;
                     case ConstantTypeEnum.parameter:
                         constants = new Parameter() { Name = identifier, DefinedReference = nameReference, Expression = expression };
@@ -414,13 +407,13 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                     }
                     else if (number.BitWidth != null)
                     {
-                        PackedArray packedArray = new PackedArray((int)number.BitWidth-1,0);
+                        PackedArray packedArray = new PackedArray((int)number.BitWidth - 1, 0);
                         List<PackedArray> packedArrays = new List<PackedArray>() { packedArray };
                         dataType = DataTypes.LogicType.Create(number.Signed, packedArrays);
                     }
                     else
                     {
-                        PackedArray packedArray = new PackedArray(31,0);
+                        PackedArray packedArray = new PackedArray(31, 0);
                         List<PackedArray> packedArrays = new List<PackedArray>() { packedArray };
                         dataType = DataTypes.LogicType.Create(number.Signed, packedArrays);
                     }

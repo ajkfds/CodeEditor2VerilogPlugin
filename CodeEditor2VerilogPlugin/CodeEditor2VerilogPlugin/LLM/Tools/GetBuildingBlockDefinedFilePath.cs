@@ -1,8 +1,6 @@
 using Microsoft.Extensions.AI;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -24,7 +22,7 @@ namespace pluginVerilog.LLM.Tools
             指定されたbuilding block(module,class,program)が定義されているrtlファイルのfile pathを取得します。
             file pathはproject rootに対する相対パスです。
             """)]
-            
+
         public async Task<string> Run(
         [Description("building block name")] string buildingBlockName)
         {
@@ -35,7 +33,7 @@ namespace pluginVerilog.LLM.Tools
             var file = projectProperty.GetBuildingBlock(buildingBlockName)?.File;
             if (file == null || file.CodeDocument == null) return "not found";
 
-            
+
             StringBuilder sb = new StringBuilder();
             sb.Append(file.RelativePath);
 

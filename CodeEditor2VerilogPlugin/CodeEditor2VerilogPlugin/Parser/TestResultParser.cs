@@ -1,11 +1,6 @@
 using CodeEditor2.CodeEditor.Parser;
 using CodeEditor2.Tests;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Parser
@@ -48,14 +43,14 @@ namespace pluginVerilog.Parser
         }
         public override async Task ParseAsync()
         {
-            if(TestResultParsedDocument == null) return;
+            if (TestResultParsedDocument == null) return;
 
             for (int line = 1; line < Document.Lines; line++)
             {
                 if (tryParseLine(line, "result", out string result))
                 {
-                    if(result =="passed") TestResultParsedDocument.Passed = true;
-                    if(result=="failed") TestResultParsedDocument.Failed = true;
+                    if (result == "passed") TestResultParsedDocument.Passed = true;
+                    if (result == "failed") TestResultParsedDocument.Failed = true;
                 }
                 if (tryParseLine(line, "hash", out string hash))
                 {
@@ -63,7 +58,7 @@ namespace pluginVerilog.Parser
                 }
                 if (tryParseLine(line, "testName", out string textName))
                 {
-                    TestResultParsedDocument.TestName= textName;
+                    TestResultParsedDocument.TestName = textName;
                 }
             }
         }
