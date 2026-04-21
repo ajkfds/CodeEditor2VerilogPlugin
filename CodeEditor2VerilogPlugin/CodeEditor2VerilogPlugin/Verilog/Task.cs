@@ -368,28 +368,6 @@ namespace pluginVerilog.Verilog
                             word.MoveNext();
                         }
                         continue;
-                    /*
-                    case "reg": // block_reg_declaration
-                        Verilog.DataObjects.Variables.Reg.ParseDeclaration(word, function);
-                        continue;
-                    // event_declaration
-                    case "integer": // integer_declaration
-                        Verilog.DataObjects.Variables.Integer.ParseDeclaration(word, function);
-                        continue;
-                    case "localparameter": // local_parameter_declaration
-                    case " parameter":  // parameter_declaration
-                        Verilog.DataObjects.Constants.Parameter.ParseCreateDeclaration(word, function, null);
-                        continue;
-                    case "real": // real_declaration
-                        Verilog.DataObjects.Variables.Real.ParseDeclaration(word, function);
-                        continue;
-                    case "realtime": // realtime_declaration
-                        Verilog.DataObjects.Variables.Realtime.ParseDeclaration(word, function);
-                        continue;
-                    case "time": // time_declaration
-                        Verilog.DataObjects.Variables.Time.ParseDeclaration(word, function);
-                        continue;
-                    */
                     case "wire": // illegal format
                         word.AddError("illegal block_item_declaration");
                         Net.ParseDeclaration(word, function);
