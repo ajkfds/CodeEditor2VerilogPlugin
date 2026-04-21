@@ -334,8 +334,23 @@ namespace pluginVerilog.Verilog
             if (word.Text != ";") System.Diagnostics.Debugger.Break();
             word.MoveNext();
 
+            // tf_item_declaration::=
+            //          block_item_declaration
+            //          | tf_port_declaration
+
             while (!word.Eof)
             {
+                /*
+                block_item_declaration ::=
+                    { attribute_instance } data_declaration
+                    | { attribute_instance } local_parameter_declaration ;
+                    | { attribute_instance } parameter_declaration ;
+                    | { attribute_instance } let_declaration 
+                */
+
+
+                if (DataDeclaration.Parse(word, function)) continue;
+
                 switch (word.Text)
                 {
                     case "input": // tf_input_declaration
@@ -353,6 +368,7 @@ namespace pluginVerilog.Verilog
                             word.MoveNext();
                         }
                         continue;
+                    /*
                     case "reg": // block_reg_declaration
                         Verilog.DataObjects.Variables.Reg.ParseDeclaration(word, function);
                         continue;
@@ -373,8 +389,9 @@ namespace pluginVerilog.Verilog
                     case "time": // time_declaration
                         Verilog.DataObjects.Variables.Time.ParseDeclaration(word, function);
                         continue;
-                    case "wire": // illegal format for Verilog 2001
-                        word.AddError("not supported(Verilog2001)");
+                    */
+                    case "wire": // illegal format
+                        word.AddError("illegal block_item_declaration");
                         Net.ParseDeclaration(word, function);
                         continue;
                     default:

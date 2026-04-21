@@ -13,7 +13,7 @@ namespace pluginVerilog.Verilog.Items
         package_import_declaration ::=
             "import" package_import_item { , package_import_item } ;
          */
-        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
+        public static bool Parse(WordScanner word, NameSpace nameSpace)
         {
             // [ const ] [ var ] [ lifetime ] data_type_or_implicit list_of_variable_decl_assignments ;
             if (DataObjects.Variables.Variable.ParseDeclaration(word, nameSpace)) return true;

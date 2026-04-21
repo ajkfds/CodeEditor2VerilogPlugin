@@ -26,7 +26,7 @@ namespace pluginVerilog.Verilog.Items
         public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
         {
             // data_declaration
-            if (await DataDeclaration.Parse(word, nameSpace)) return true;
+            if (DataDeclaration.Parse(word, nameSpace)) return true;
 
             //            if (DataObjects.Variables.Variable.ParseDeclaration(word, nameSpace)) return true;
             /*
