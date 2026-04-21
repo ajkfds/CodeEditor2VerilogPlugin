@@ -572,6 +572,9 @@ namespace pluginVerilog.Verilog
         {
             switch (wordPointer.Text)
             {
+                case "`pragma":
+                    PragmaDirective.Parse(wordPointer);
+                    break;
                 case "`include":
                     parseInclude();
                     break;
