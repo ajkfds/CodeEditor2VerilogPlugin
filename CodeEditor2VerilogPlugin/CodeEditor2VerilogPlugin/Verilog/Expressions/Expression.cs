@@ -466,6 +466,10 @@ namespace pluginVerilog.Verilog.Expressions
                 IncDecOperator incDecOperator = IncDecOperator.ParseCreate(word);
                 if (incDecOperator != null)
                 {
+                    if (word.Text == "(*")
+                    {
+                        Attribute attribute = Attribute.ParseCreate(word, nameSpace);
+                    }
                     if (word.Eof)
                     {
                         word.AddError("illegal unary Operator");
@@ -479,6 +483,10 @@ namespace pluginVerilog.Verilog.Expressions
                     }
                     Primaries.Add(primary);
                     Primaries.Add(incDecOperator);
+                    if (word.Text == "(*")
+                    {
+                        Attribute attribute = Attribute.ParseCreate(word, nameSpace);
+                    }
                 }
                 else
                 {
@@ -499,6 +507,10 @@ namespace pluginVerilog.Verilog.Expressions
                         Primaries.Add(primary);
                         Primaries.Add(unaryOperator);
                         //                        addOperator(unaryOperator, Primaries, operatorStock);
+                        if (word.Text == "(*")
+                        {
+                            Attribute attribute = Attribute.ParseCreate(word, nameSpace);
+                        }
                     }
                     else
                     {
@@ -512,6 +524,10 @@ namespace pluginVerilog.Verilog.Expressions
             if (word.GetCharAt(0) == '?')
             {
                 word.MoveNext();
+                if (word.Text == "(*")
+                {
+                    Attribute attribute = Attribute.ParseCreate(word, nameSpace);
+                }
                 do
                 {
                     if (!parseExpressionPrimaries(word, nameSpace, Primaries, operatorStock, ref reference, false, acceptImplicitNet))
@@ -547,6 +563,10 @@ namespace pluginVerilog.Verilog.Expressions
             if (binaryOperator != null)
             {
                 addOperator(binaryOperator, Primaries, operatorStock);
+                if (word.Text == "(*")
+                {
+                    Attribute attribute = Attribute.ParseCreate(word, nameSpace);
+                }
             }
             else if (acceptAssignment)
             {

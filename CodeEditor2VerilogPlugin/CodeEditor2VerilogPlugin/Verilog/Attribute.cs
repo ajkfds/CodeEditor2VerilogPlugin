@@ -19,7 +19,7 @@ namespace pluginVerilog
         public static Attribute ParseCreate(Verilog.WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "(*") throw new Exception();
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+//            word.Color(CodeDrawStyle.ColorType.Identifier);
             word.MoveNext();
 
             Attribute attr = new Attribute();
@@ -31,6 +31,7 @@ namespace pluginVerilog
                     break;
                 }
                 string name = word.Text;
+                word.Color(CodeDrawStyle.ColorType.Identifier);
                 word.MoveNext();
 
                 Verilog.Expressions.Expression? expression = null;
@@ -67,7 +68,7 @@ namespace pluginVerilog
 
             if (word.Text == "*)")
             {
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+//                word.Color(CodeDrawStyle.ColorType.Identifier);
                 word.MoveNext();
             }
             return attr;
