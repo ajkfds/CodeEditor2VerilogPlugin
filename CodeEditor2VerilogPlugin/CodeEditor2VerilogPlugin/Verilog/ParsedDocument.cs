@@ -637,7 +637,6 @@ namespace pluginVerilog.Verilog
             appendItems(items, candidate, new AutoComplete.FunctionAutocompleteItem());
             appendItems(items, candidate, new AutoComplete.GenerateAutoCompleteItem());
             appendItems(items, candidate, new AutoComplete.ModuleAutocompleteItem());
-            appendItems(items, candidate, new AutoComplete.InterfaceAutocompleteItem());
             appendItems(items, candidate, new AutoComplete.TaskAutocompleteItem());
             if (candidate == "<=") items.Add(new AutoComplete.NonBlockingAssignmentAutoCompleteItem());
 
@@ -761,6 +760,8 @@ namespace pluginVerilog.Verilog
                     );
                 items.Add(item);
             }
+
+            appendItems(items, candidate, new AutoComplete.InterfaceAutocompleteItem());
 
             if (systemVerilog)
             {
