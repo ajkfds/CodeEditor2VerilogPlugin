@@ -66,6 +66,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
 
             foreach (RangeExpression rangeExpression in rangeExpressions)
             {
+                if (dimension < 0) break;
                 dsize = dsize / dimensions[dimension];
 
                 if (rangeExpression is SingleBitRangeExpression)
