@@ -25,7 +25,34 @@ namespace pluginVerilog.Data
         public virtual Verilog.ParsedDocument? VerilogParsedDocument { get; }
 
         public virtual ProjectProperty ProjectProperty { get; }
-        public virtual bool SystemVerilog { get; }
+        private bool _systemVerilog = false;
+        public bool SystemVerilog
+        {
+            get
+            {
+                textFileLock.EnterReadLock();
+                try
+                {
+                    return _systemVerilog;
+                }
+                finally
+                {
+                    textFileLock.ExitReadLock();
+                }
+            }
+            set
+            {
+                textFileLock.EnterWriteLock();
+                try
+                {
+                    _systemVerilog = value;
+                }
+                finally
+                {
+                    textFileLock.ExitWriteLock();
+                }
+            }
+        }
 
         public virtual string AbsolutePath { get; }
 

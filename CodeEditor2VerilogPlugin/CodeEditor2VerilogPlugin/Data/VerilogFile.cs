@@ -11,6 +11,7 @@ using pluginVerilog.Verilog.BuildingBlocks;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
@@ -94,7 +95,7 @@ namespace pluginVerilog.Data
         /// failse : verilog file
         /// </summary>
 
-        private bool systemVerilog = false;
+        private bool _systemVerilog = false;
         public bool SystemVerilog
         {
             get
@@ -102,7 +103,7 @@ namespace pluginVerilog.Data
                 textFileLock.EnterReadLock();
                 try
                 {
-                    return systemVerilog;
+                    return _systemVerilog;
                 }
                 finally
                 {
@@ -114,7 +115,7 @@ namespace pluginVerilog.Data
                 textFileLock.EnterWriteLock();
                 try
                 {
-                    systemVerilog = value;
+                    _systemVerilog = value;
                 }
                 finally
                 {
@@ -133,7 +134,7 @@ namespace pluginVerilog.Data
 
         protected override void CreateCodeDocument()
         {
-            document = new pluginVerilog.CodeEditor.CodeDocument(this);
+            CodeDocument = new pluginVerilog.CodeEditor.CodeDocument(this);
         }
 
         /// <summary>
@@ -143,22 +144,12 @@ namespace pluginVerilog.Data
         public override async Task AcceptParsedDocumentAsync(ParsedDocument? newParsedDocument)
         {
             ParsedDocument? oldParsedDocument;
-            textFileLock.EnterReadLock();
-            oldParsedDocument = ParsedDocument;
-            textFileLock.ExitReadLock();
+            oldParsedDocument = ParsedDocument; // no lock is needed. ParsedDocument property is thread safe
 
             if (oldParsedDocument == newParsedDocument) return;
 
             // swap ParsedDocument
-            textFileLock.EnterWriteLock();
-            try
-            {
-                ParsedDocument = newParsedDocument;
-            }
-            finally
-            {
-                textFileLock.ExitWriteLock();
-            }
+            ParsedDocument = newParsedDocument; // no lock is needed. ParsedDocument property is thread safe
 
             Verilog.ParsedDocument? vParsedDocument;
             vParsedDocument = newParsedDocument as Verilog.ParsedDocument;
@@ -170,15 +161,7 @@ namespace pluginVerilog.Data
             }
 
             CodeEditor.CodeDocument? codeDoc;
-            textFileLock.EnterReadLock();
-            try
-            {
-                codeDoc = document as pluginVerilog.CodeEditor.CodeDocument;
-            }
-            finally
-            {
-                textFileLock.ExitReadLock();
-            }
+            codeDoc = CodeDocument as pluginVerilog.CodeEditor.CodeDocument; // no lock is needed. CodeDocument property is thread safe
 
             if (codeDoc == null) return;
             if (newParsedDocument == null) return;
@@ -273,9 +256,7 @@ namespace pluginVerilog.Data
             StringBuilder sb = new StringBuilder();
             sb.Append("## " + Name + "\r\n");
 
-            textFileLock.EnterReadLock();
-            Verilog.ParsedDocument? parsedDocument = ParsedDocument as Verilog.ParsedDocument;
-            textFileLock.ExitReadLock();
+            Verilog.ParsedDocument? parsedDocument = ParsedDocument as Verilog.ParsedDocument; // no lock is needed. ParsedDocument property is thread safe
 
             if (parsedDocument != null)
             {
@@ -302,15 +283,7 @@ namespace pluginVerilog.Data
             ParsedDocument? ret;
             if (key == "")
             {
-                textFileLock.EnterReadLock();
-                try
-                {
-                    return ParsedDocument;
-                }
-                finally
-                {
-                    textFileLock.ExitReadLock();
-                }
+                return ParsedDocument; // no lock is needed. ParsedDocument property is thread safe
             }
             else
             {
@@ -339,15 +312,7 @@ namespace pluginVerilog.Data
         {
             if (id == "")
             {
-                textFileLock.EnterWriteLock();
-                try
-                {
-                    ParsedDocument = parsedDocument;
-                }
-                finally
-                {
-                    textFileLock.ExitWriteLock();
-                }
+                ParsedDocument = parsedDocument; // no lock is needed. ParsedDocument property is thread safe
             }
             else
             {
@@ -366,17 +331,7 @@ namespace pluginVerilog.Data
 
         public override void Dispose()
         {
-            Verilog.ParsedDocument? vParsedDocument;
-            textFileLock.EnterReadLock();
-            try
-            {
-                vParsedDocument = ParsedDocument as Verilog.ParsedDocument;
-            }
-            finally
-            {
-                textFileLock.ExitReadLock();
-            }
-
+            Verilog.ParsedDocument? vParsedDocument = ParsedDocument as Verilog.ParsedDocument; // no lock is needed. ParsedDocument property is thread safe
             if (vParsedDocument != null)
             {
                 foreach (var incFile in vParsedDocument.IncludeFiles.Values)
@@ -387,22 +342,12 @@ namespace pluginVerilog.Data
             base.Dispose();
         }
 
-        [JsonInclude]
-        public override CodeEditor2.CodeEditor.ParsedDocument? ParsedDocument { get; set; }
 
         public Verilog.ParsedDocument? VerilogParsedDocument
         {
             get
             {
-                textFileLock.EnterReadLock();
-                try
-                {
-                    return ParsedDocument as Verilog.ParsedDocument;
-                }
-                finally
-                {
-                    textFileLock.ExitReadLock();
-                }
+                return ParsedDocument as Verilog.ParsedDocument; // no lock is needed. ParsedDocument property is thread safe
             }
         }
 

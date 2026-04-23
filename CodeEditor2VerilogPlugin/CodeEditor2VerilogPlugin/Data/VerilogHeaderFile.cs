@@ -80,38 +80,9 @@ namespace pluginVerilog.Data
         }
         protected override void CreateCodeDocument()
         {
-            document = new pluginVerilog.CodeEditor.CodeDocument(this);
+            CodeDocument = new pluginVerilog.CodeEditor.CodeDocument(this);
         }
         public bool SystemVerilog { get { return false; } }
-        //public override CodeEditor2.CodeEditor.CodeDocument? CodeDocument
-        //{
-        //    get
-        //    {
-        //        if (document != null && document as CodeEditor.CodeDocument == null) System.Diagnostics.Debugger.Break();
-        //        if (document == null)
-        //        {
-        //            try
-        //            {
-        //                while (!readFromFile())
-        //                {
-        //                    System.Threading.Thread.Sleep(10);
-        //                }
-        //            }
-        //            catch
-        //            {
-        //                document = null;
-        //            }
-        //        }
-        //        return document;
-        //    }
-        //    protected set
-        //    {
-        //        if (value == null) throw new Exception();
-        //        CodeEditor.CodeDocument? codeDocument = value as CodeEditor.CodeDocument;
-        //        if (codeDocument == null) throw new Exception();
-        //        document = codeDocument;
-        //    }
-        //}
 
         // update sub-items from ParsedDocument
         public override async System.Threading.Tasks.Task UpdateAsync()
@@ -126,12 +97,13 @@ namespace pluginVerilog.Data
             {
                 using (System.IO.StreamReader sr = new System.IO.StreamReader(Project.GetAbsolutePath(RelativePath)))
                 {
-                    document = new CodeEditor.CodeDocument(this);
+                    CodeEditor.CodeDocument doc = new CodeEditor.CodeDocument(this);
                     string text = sr.ReadToEnd();
-                    document.Replace(0, 0, 0, text);
-                    document.ClearHistory();
-                    document._tag = "readFormFile";
-                    document.Clean();
+                    doc.Replace(0, 0, 0, text);
+                    doc.ClearHistory();
+                    doc._tag = "readFormFile";
+                    doc.Clean();
+                    CodeDocument = doc;
                     return true;
                 }
             }

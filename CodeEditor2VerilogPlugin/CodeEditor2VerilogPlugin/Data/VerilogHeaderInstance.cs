@@ -134,24 +134,12 @@ namespace pluginVerilog.Data
             if (!IsSameAs(file as File)) return false;
 
             // Use write lock for updating state
-            textFileLock.EnterWriteLock();
-            try
-            {
-                parsedDocument = file.parsedDocument;
-            }
-            finally
-            {
-                textFileLock.ExitWriteLock();
-            }
+            ParsedDocument = file.ParsedDocument;
 
             // CodeDocument is from source file, so read lock is sufficient
-            textFileLock.EnterReadLock();
             var codeDoc = CodeDocument;
-            textFileLock.ExitReadLock();
 
-            file.textFileLock.EnterReadLock();
             var fileCodeDoc = file.CodeDocument;
-            file.textFileLock.ExitReadLock();
 
             if (codeDoc != null && fileCodeDoc != null)
             {
@@ -226,45 +214,26 @@ namespace pluginVerilog.Data
 
         public override void Close()
         {
-            textFileLock.EnterReadLock();
             var parsed = VerilogParsedDocument;
-            textFileLock.ExitReadLock();
 
             if (parsed != null) parsed.ReloadIncludeFiles();
             //SourceVerilogFile.Close();
         }
 
-        public override CodeEditor2.CodeEditor.ParsedDocument? ParsedDocument
-        {
-            get
-            {
-                textFileLock.EnterReadLock();
-                try
-                {
-                    if (parsedDocument == null) throw new Exception();
-                    return parsedDocument;
-                }
-                finally
-                {
-                    textFileLock.ExitReadLock();
-                }
-            }
-            set
-            {
-                Verilog.ParsedDocument? vParsedDocument = value as Verilog.ParsedDocument;
-                if (vParsedDocument == null) throw new Exception();
-
-                textFileLock.EnterWriteLock();
-                try
-                {
-                    parsedDocument = vParsedDocument;
-                }
-                finally
-                {
-                    textFileLock.ExitWriteLock();
-                }
-            }
-        }
+        //public override CodeEditor2.CodeEditor.ParsedDocument? ParsedDocument
+        //{
+        //    get
+        //    {
+        //        if (ParsedDocument == null) throw new Exception();
+        //        return ParsedDocument;
+        //    }
+        //    set
+        //    {
+        //        Verilog.ParsedDocument? vParsedDocument = value as Verilog.ParsedDocument;
+        //        if (vParsedDocument == null) throw new Exception();
+        //        ParsedDocument = vParsedDocument;
+        //    }
+        //}
 
         protected Dictionary<WeakReference<CodeEditor2.Data.Item?>, WeakReference<CodeEditor2.NavigatePanel.NavigatePanelNode>> nodeRefDictionary
             = new Dictionary<WeakReference<CodeEditor2.Data.Item?>, WeakReference<CodeEditor2.NavigatePanel.NavigatePanelNode>>();
@@ -356,21 +325,11 @@ namespace pluginVerilog.Data
             await SourceTextFile.SaveAsync();
         }
 
-        public Verilog.ParsedDocument VerilogParsedDocument
+        public Verilog.ParsedDocument? VerilogParsedDocument
         {
             get
             {
-                textFileLock.EnterReadLock();
-                try
-                {
-                    Verilog.ParsedDocument? vParsedDocument = parsedDocument as Verilog.ParsedDocument;
-                    if (vParsedDocument == null) throw new Exception();
-                    return vParsedDocument;
-                }
-                finally
-                {
-                    textFileLock.ExitReadLock();
-                }
+                return ParsedDocument as Verilog.ParsedDocument;
             }
         }
 
@@ -506,9 +465,7 @@ namespace pluginVerilog.Data
 
         public override List<AutocompleteItem>? GetAutoCompleteItems(int index, out string cantidateWord)
         {
-            textFileLock.EnterReadLock();
             var parsed = VerilogParsedDocument;
-            textFileLock.ExitReadLock();
 
             return VerilogCommon.AutoComplete.GetAutoCompleteItems(this, parsed, index, out cantidateWord);
         }

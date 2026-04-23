@@ -157,7 +157,7 @@ namespace pluginVerilog.Data
                 }
             }
 
-            parsedDocument = null;
+            ParsedDocument = null;
             //            SourceVerilogFile.RemoveModuleInstance(this);
         }
 
@@ -200,26 +200,30 @@ namespace pluginVerilog.Data
         {
             get
             {
-                if (parsedDocument == null)
+                if (ParameterOverrides.Count == 0)
                 {
-                    if (ParameterOverrides.Count == 0)
-                    {
-                        Data.VerilogFile file = SourceVerilogFile;
-                        if (file == null) return null;
-                        parsedDocument = file.ParsedDocument;
-                    }
-                    else
-                    {
-                        Data.VerilogFile source = SourceVerilogFile;
-                        parsedDocument = source.GetInstancedParsedDocument(ParameterId);
-                    }
+                    Data.VerilogFile file = SourceVerilogFile;
+                    if (file == null) return null;
+                    return file.ParsedDocument;
                 }
-
-                return parsedDocument;
+                else
+                {
+                    Data.VerilogFile source = SourceVerilogFile;
+                    return source.GetInstancedParsedDocument(ParameterId);
+                }
             }
             set
             {
-                parsedDocument = value;
+                if (ParameterOverrides.Count == 0)
+                {
+                    Data.VerilogFile file = SourceVerilogFile;
+                    file.ParsedDocument = value;
+                }
+                else
+                {
+                    Data.VerilogFile source = SourceVerilogFile;
+                    if(value!=null) source.RegisterInstanceParsedDocument(ParameterId, value, this);
+                }
             }
         }
         public override async Task SaveAsync()
