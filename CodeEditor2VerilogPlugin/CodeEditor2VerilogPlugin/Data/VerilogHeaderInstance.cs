@@ -16,11 +16,68 @@ namespace pluginVerilog.Data
     public class VerilogHeaderInstance : InstanceTextFile, IVerilogRelatedFile
     {
 
+        private string _id = string.Empty;
+        public override string ID
+        {
+            get
+            {
+                textFileLock.EnterReadLock();
+                try
+                {
+                    return _id;
+                }
+                finally
+                {
+                    textFileLock.ExitReadLock();
+                }
+            }
+            set
+            {
+                textFileLock.EnterWriteLock();
+                try
+                {
+                    _id = value;
+                }
+                finally
+                {
+                    textFileLock.ExitWriteLock();
+                }
+            }
+        }
+
+        private string _moduleName = string.Empty;
+        public string ModuleName
+        {
+            get
+            {
+                textFileLock.EnterReadLock();
+                try
+                {
+                    return _moduleName;
+                }
+                finally
+                {
+                    textFileLock.ExitReadLock();
+                }
+            }
+            set
+            {
+                textFileLock.EnterWriteLock();
+                try
+                {
+                    _moduleName = value;
+                }
+                finally
+                {
+                    textFileLock.ExitWriteLock();
+                }
+            }
+        }
+
+
+        // ------------------------
         protected VerilogHeaderInstance(CodeEditor2.Data.TextFile sourceTextFile) : base(sourceTextFile)
         {
-            idLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
-            moduleNameLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
-            nodeRefDictionaryLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
         }
 
 
@@ -67,35 +124,6 @@ namespace pluginVerilog.Data
         public IVerilogRelatedFile RootFile { get; protected set; }
         public IndexReference InstancedReference { get; protected set; }
 
-        private readonly ReaderWriterLockSlim idLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
-        private string id = string.Empty;
-        public override string ID
-        {
-            get
-            {
-                idLock.EnterReadLock();
-                try
-                {
-                    return id;
-                }
-                finally
-                {
-                    idLock.ExitReadLock();
-                }
-            }
-            set
-            {
-                idLock.EnterWriteLock();
-                try
-                {
-                    id = value;
-                }
-                finally
-                {
-                    idLock.ExitWriteLock();
-                }
-            }
-        }
 
         public bool SystemVerilog { get { return RootFile.SystemVerilog; } }
 
@@ -163,35 +191,6 @@ namespace pluginVerilog.Data
         }
 
 
-        private readonly ReaderWriterLockSlim moduleNameLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
-        private string moduleName = string.Empty;
-        public string ModuleName
-        {
-            get
-            {
-                moduleNameLock.EnterReadLock();
-                try
-                {
-                    return moduleName;
-                }
-                finally
-                {
-                    moduleNameLock.ExitReadLock();
-                }
-            }
-            set
-            {
-                moduleNameLock.EnterWriteLock();
-                try
-                {
-                    moduleName = value;
-                }
-                finally
-                {
-                    moduleNameLock.ExitWriteLock();
-                }
-            }
-        }
 
 
         public string ParameterId
@@ -237,85 +236,68 @@ namespace pluginVerilog.Data
 
         protected Dictionary<WeakReference<CodeEditor2.Data.Item?>, WeakReference<CodeEditor2.NavigatePanel.NavigatePanelNode>> nodeRefDictionary
             = new Dictionary<WeakReference<CodeEditor2.Data.Item?>, WeakReference<CodeEditor2.NavigatePanel.NavigatePanelNode>>();
-        private readonly ReaderWriterLockSlim nodeRefDictionaryLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
 
         public override CodeEditor2.NavigatePanel.NavigatePanelNode NavigatePanelNode
         {
             get
             {
-                nodeRefDictionaryLock.EnterWriteLock();
-                try
+                CodeEditor2.NavigatePanel.NavigatePanelNode? node = null;
+                List<WeakReference<CodeEditor2.Data.Item?>> disposeRefs = new List<WeakReference<CodeEditor2.Data.Item?>>();
+
+                // search parent based table
+                foreach (var pair in nodeRefDictionary)
                 {
-                    CodeEditor2.NavigatePanel.NavigatePanelNode? node = null;
-                    List<WeakReference<CodeEditor2.Data.Item?>> disposeRefs = new List<WeakReference<CodeEditor2.Data.Item?>>();
-
-                    // search parent based table
-                    foreach (var pair in nodeRefDictionary)
+                    var parentRef = pair.Key;
+                    if (!parentRef.TryGetTarget(out var parent))
                     {
-                        var parentRef = pair.Key;
-                        if (!parentRef.TryGetTarget(out var parent))
-                        {
-                            disposeRefs.Add(parentRef);
-                            continue;
-                        }
-                        if (parent != Parent) continue;
-
-                        var nodeRef = pair.Value;
-                        if (nodeRef.TryGetTarget(out node)) break;
+                        disposeRefs.Add(parentRef);
+                        continue;
                     }
+                    if (parent != Parent) continue;
 
-                    // remove unconnected weakRefs
-                    foreach (var disposeRef in disposeRefs)
-                    {
-                        nodeRefDictionary.Remove(disposeRef);
-                    }
-
-                    if (node == null)
-                    {
-                        node = CreateNode();
-                        if (node == null) throw new Exception();
-
-                        WeakReference<CodeEditor2.Data.Item?> parent = new WeakReference<CodeEditor2.Data.Item?>(Parent);
-                        nodeRefDictionary.Add(parent, new WeakReference<CodeEditor2.NavigatePanel.NavigatePanelNode>(node));
-                    }
-
-                    return node;
+                    var nodeRef = pair.Value;
+                    if (nodeRef.TryGetTarget(out node)) break;
                 }
-                finally
+
+                // remove unconnected weakRefs
+                foreach (var disposeRef in disposeRefs)
                 {
-                    nodeRefDictionaryLock.ExitWriteLock();
+                    nodeRefDictionary.Remove(disposeRef);
                 }
+
+                if (node == null)
+                {
+                    node = CreateNode();
+                    if (node == null) throw new Exception();
+
+                    WeakReference<CodeEditor2.Data.Item?> parent = new WeakReference<CodeEditor2.Data.Item?>(Parent);
+                    nodeRefDictionary.Add(parent, new WeakReference<CodeEditor2.NavigatePanel.NavigatePanelNode>(node));
+                }
+
+                return node;
             }
             protected set
             {
-                nodeRefDictionaryLock.EnterWriteLock();
-                try
-                {
-                    WeakReference<CodeEditor2.Data.Item?>? indexRef = null;
+                WeakReference<CodeEditor2.Data.Item?>? indexRef = null;
 
-                    // search parent based table
-                    foreach (var pair in nodeRefDictionary)
-                    {
-                        var parentRef = pair.Key;
-                        if (!parentRef.TryGetTarget(out var parent))
-                        {
-                            continue;
-                        }
-                        if (parent != Parent) continue;
-                        indexRef = parentRef;
-                    }
-
-                    if (indexRef != null)
-                    {
-                        nodeRefDictionary.Remove(indexRef);
-                    }
-                    WeakReference<CodeEditor2.Data.Item?> parentNewRef = new WeakReference<CodeEditor2.Data.Item?>(Parent);
-                    nodeRefDictionary.Add(parentNewRef, new WeakReference<CodeEditor2.NavigatePanel.NavigatePanelNode>(value));
-                }
-                finally
+                // search parent based table
+                foreach (var pair in nodeRefDictionary)
                 {
-                    nodeRefDictionaryLock.ExitWriteLock();
+                    var parentRef = pair.Key;
+                    if (!parentRef.TryGetTarget(out var parent))
+                    {
+                        continue;
+                    }
+                    if (parent != Parent) continue;
+                    indexRef = parentRef;
                 }
+
+                if (indexRef != null)
+                {
+                    nodeRefDictionary.Remove(indexRef);
+                }
+                WeakReference<CodeEditor2.Data.Item?> parentNewRef = new WeakReference<CodeEditor2.Data.Item?>(Parent);
+                nodeRefDictionary.Add(parentNewRef, new WeakReference<CodeEditor2.NavigatePanel.NavigatePanelNode>(value));
             }
         }
 

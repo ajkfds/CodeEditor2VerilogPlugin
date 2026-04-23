@@ -186,7 +186,7 @@ namespace pluginVerilog.Data
                     }
                 }
 
-                reparseRequested = vParsedDocument.ReparseRequested;
+                _reparseRequested = vParsedDocument.ReparseRequested;
             }
             finally
             {

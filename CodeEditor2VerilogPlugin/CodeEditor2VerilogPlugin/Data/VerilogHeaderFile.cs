@@ -47,10 +47,53 @@ namespace pluginVerilog.Data
                 return id;
             }
         }
+
+        Dictionary<string, WeakReference<InstanceTextFile>> instanceDictionary = new Dictionary<string, WeakReference<InstanceTextFile>>();
+        public void RegisterInstanceFile(InstanceTextFile instanceTextFile)
+        {
+            textFileLock.EnterWriteLock();
+            try
+            {
+                if (instanceDictionary.TryGetValue(instanceTextFile.ID, out WeakReference<InstanceTextFile>? wref))
+                {
+                    instanceDictionary.Remove(instanceTextFile.ID);
+                }
+                instanceDictionary.Add(instanceTextFile.ID, new WeakReference<InstanceTextFile>(instanceTextFile));
+            }
+            finally
+            {
+                textFileLock.ExitWriteLock();
+            }
+        }
+
+        public bool TryGetInstanceTextFile(string ID, out InstanceTextFile? instanceTextFile)
+        {
+            textFileLock.EnterReadLock();
+            try
+            {
+                instanceTextFile = null;
+                if (instanceDictionary.TryGetValue(ID, out WeakReference<InstanceTextFile>? wref))
+                {
+                    if (!wref.TryGetTarget(out instanceTextFile)) return false;
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            finally
+            {
+                textFileLock.ExitReadLock();
+            }
+        }
+
+
         static VerilogHeaderFile()
         {
             CustomizeItemEditorContextMenu += (x => EditorContextMenu.CustomizeEditorContextMenu(x));
         }
+
 
         public override bool ReparseRequested
         {
