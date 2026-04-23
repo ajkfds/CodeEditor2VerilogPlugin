@@ -10,122 +10,24 @@ namespace pluginVerilog.Data
             sourceFileRef = new WeakReference<CodeEditor2.Data.TextFile>(sourceTextFile);
         }
 
-        private bool _externalProject = false;
-        public bool ExternalProject
-        {
-            get
-            {
-                textFileLock.EnterReadLock();
-                try
-                {
-                    return _externalProject;
-                }
-                finally
-                {
-                    textFileLock.ExitReadLock();
-                }
-            }
-            set
-            {
-                textFileLock.EnterWriteLock();
-                try
-                {
-                    _externalProject = value;
-                }
-                finally
-                {
-                    textFileLock.ExitWriteLock();
-                }
-            }
-        }
-
+        public bool ExternalProject { set; get; } = false;
         private System.WeakReference<CodeEditor2.Data.TextFile> sourceFileRef;
         public CodeEditor2.Data.TextFile? SourceTextFile
         {
             get
             {
-                textFileLock.EnterReadLock();
-                try
-                {
-                    CodeEditor2.Data.TextFile? ret;
-                    if (!sourceFileRef.TryGetTarget(out ret)) return null;
-                    return ret;
-                }
-                finally
-                {
-                    textFileLock.ExitReadLock();
-                }
+                CodeEditor2.Data.TextFile? ret;
+                if (!sourceFileRef.TryGetTarget(out ret)) return null;
+                return ret;
             }
         }
 
-        public virtual Verilog.ParsedDocument? VerilogParsedDocument
-        {
-            get
-            {
-                return ParsedDocument as Verilog.ParsedDocument;
-            }
-        }
+        public virtual Verilog.ParsedDocument? VerilogParsedDocument { get; }
 
-        public virtual ProjectProperty ProjectProperty
-        {
-            get
-            {
-                textFileLock.EnterReadLock();
-                try
-                {
-                    CodeEditor2.Data.TextFile? sourceFile = SourceTextFile;
-                    if (sourceFile == null) throw new Exception("SourceTextFile is null");
-                    CodeEditor2.Data.Project? project = sourceFile.Project;
-                    if (project == null) throw new Exception("Project is null");
-                    ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
-                    if (projectProperty == null) throw new Exception("ProjectProperty not found");
-                    return projectProperty;
-                }
-                finally
-                {
-                    textFileLock.ExitReadLock();
-                }
-            }
-        }
+        public virtual ProjectProperty ProjectProperty { get; }
+        public virtual bool SystemVerilog { get; }
 
-        public virtual bool SystemVerilog
-        {
-            get
-            {
-                textFileLock.EnterReadLock();
-                try
-                {
-                    CodeEditor2.Data.TextFile? sourceFile = SourceTextFile;
-                    if (sourceFile is IVerilogRelatedFile vFile)
-                    {
-                        return vFile.SystemVerilog;
-                    }
-                    return false;
-                }
-                finally
-                {
-                    textFileLock.ExitReadLock();
-                }
-            }
-        }
-
-        public virtual string AbsolutePath
-        {
-            get
-            {
-                textFileLock.EnterReadLock();
-                try
-                {
-                    CodeEditor2.Data.TextFile? sourceFile = SourceTextFile;
-                    if (sourceFile == null) throw new Exception("SourceTextFile is null");
-                    return sourceFile.AbsolutePath;
-                }
-                finally
-                {
-                    textFileLock.ExitReadLock();
-                }
-            }
-        }
+        public virtual string AbsolutePath { get; }
 
         public virtual void CheckDirty() { }
 
