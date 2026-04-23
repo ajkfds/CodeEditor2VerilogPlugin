@@ -165,19 +165,15 @@ namespace pluginVerilog.Data
                 textFileLock.EnterReadLock();
                 try
                 {
-                    return _getKey();
+                    string moduleName = _moduleName;
+                    var parameterOverrides = _parameterOverrides;
+                    return Verilog.ParsedDocument.KeyGenerator(this, moduleName, parameterOverrides);
                 }
                 finally
                 {
                     textFileLock.ExitReadLock();
                 }
             }
-        }
-        private string _getKey()
-        {
-            string moduleName = _moduleName;
-            var parameterOverrides = _parameterOverrides;
-            return Verilog.ParsedDocument.KeyGenerator(this, moduleName, parameterOverrides);
         }
 
         public Module? Module
@@ -206,26 +202,50 @@ namespace pluginVerilog.Data
         {
             get
             {
-                Verilog.ParsedDocument? vParsedDocument = VerilogParsedDocument;
-                if (vParsedDocument == null) return true;
-                return vParsedDocument.ReparseRequested;
+                textFileLock.EnterReadLock();
+                try
+                {
+                    Verilog.ParsedDocument? vParsedDocument = ParsedDocument as Verilog.ParsedDocument;
+                    if (vParsedDocument == null) return true;
+                    return vParsedDocument.ReparseRequested;
+                }
+                finally
+                {
+                    textFileLock.ExitReadLock();
+                }
             }
             set
             {
-                Verilog.ParsedDocument? vParsedDocument = VerilogParsedDocument;
-                if (vParsedDocument == null) return;
-                vParsedDocument.ReparseRequested = value;
+                textFileLock.EnterReadLock();
+                try
+                {
+                    Verilog.ParsedDocument? vParsedDocument = ParsedDocument as Verilog.ParsedDocument;
+                    if (vParsedDocument == null) return;
+                    vParsedDocument.ReparseRequested = value;
+                }
+                finally
+                {
+                    textFileLock.ExitReadLock();
+                }
             }
         }
         public void CheckDirty()
         {
-            ParsedDocument? vParsedDocument = VerilogParsedDocument;
-            if (vParsedDocument == null) return;
-            CodeEditor2.CodeEditor.CodeDocument? codeDocument = CodeDocument;
-            if (codeDocument == null) return;
-            if (codeDocument.Version != vParsedDocument.Version)
+            textFileLock.EnterReadLock();
+            try
             {
-                ReparseRequested = true;
+                Verilog.ParsedDocument? vParsedDocument = ParsedDocument as Verilog.ParsedDocument;
+                if (vParsedDocument == null) return;
+                CodeEditor2.CodeEditor.CodeDocument? codeDocument = CodeDocument;
+                if (codeDocument == null) return;
+                if (codeDocument.Version != vParsedDocument.Version)
+                {
+                    ReparseRequested = true;
+                }
+            }
+            finally
+            {
+                textFileLock.ExitReadLock();
             }
         }
 
@@ -318,8 +338,8 @@ namespace pluginVerilog.Data
             textFileLock.EnterReadLock();
             try
             {
-                vParsedDoc = VerilogParsedDocument;
-                parsedDoc = ParsedDocument;
+                vParsedDoc = ParsedDocument as Verilog.ParsedDocument;
+                parsedDoc = parsedDocument;
             }
             finally
             {
@@ -329,7 +349,7 @@ namespace pluginVerilog.Data
             if (vParsedDoc != null)
             {
                 textFileLock.EnterReadLock();
-                var parameterOverrides = ParameterOverrides;
+                var parameterOverrides = _parameterOverrides;
                 textFileLock.ExitReadLock();
 
                 if (parsedDoc != null && parameterOverrides.Count != 0)
@@ -344,7 +364,7 @@ namespace pluginVerilog.Data
             textFileLock.EnterWriteLock();
             try
             {
-                ParsedDocument = null;
+                parsedDocument = null;
             }
             finally
             {
@@ -366,7 +386,7 @@ namespace pluginVerilog.Data
         public override void Close()
         {
             textFileLock.EnterReadLock();
-            Verilog.ParsedDocument? vParsedDoc = VerilogParsedDocument;
+            Verilog.ParsedDocument? vParsedDoc = ParsedDocument as Verilog.ParsedDocument;
             textFileLock.ExitReadLock();
 
             if (vParsedDoc != null) vParsedDoc.ReloadIncludeFiles();
@@ -381,10 +401,10 @@ namespace pluginVerilog.Data
                 textFileLock.EnterReadLock();
                 try
                 {
-                    {
-                        Data.VerilogFile source = SourceVerilogFile;
-                        parsedDocument = source.GetInstancedParsedDocument(_getKey());
-                    }
+                    Data.VerilogFile source = SourceVerilogFile;
+                    string moduleName = _moduleName;
+                    var parameterOverrides = _parameterOverrides;
+                    parsedDocument = source.GetInstancedParsedDocument(Verilog.ParsedDocument.KeyGenerator(this, moduleName, parameterOverrides));
                     return parsedDocument;
                 }
                 finally
@@ -430,7 +450,15 @@ namespace pluginVerilog.Data
         {
             get
             {
-                return parsedDocument as Verilog.ParsedDocument;
+                textFileLock.EnterReadLock();
+                try
+                {
+                    return parsedDocument as Verilog.ParsedDocument;
+                }
+                finally
+                {
+                    textFileLock.ExitReadLock();
+                }
             }
         }
 
@@ -441,9 +469,18 @@ namespace pluginVerilog.Data
             Data.VerilogFile source = SourceVerilogFile;
             if (source == null) return;
 
+            string key;
             textFileLock.EnterReadLock();
-            string key = _getKey();
-            textFileLock.ExitReadLock();
+            try
+            {
+                string moduleName = _moduleName;
+                var parameterOverrides = _parameterOverrides;
+                key = Verilog.ParsedDocument.KeyGenerator(this, moduleName, parameterOverrides);
+            }
+            finally
+            {
+                textFileLock.ExitReadLock();
+            }
 
             ParsedDocument? oldParsedDocument;
             textFileLock.EnterWriteLock();
@@ -506,7 +543,7 @@ namespace pluginVerilog.Data
             }
 
             textFileLock.EnterReadLock();
-            Verilog.ParsedDocument? vParsedDoc = VerilogParsedDocument;
+            Verilog.ParsedDocument? vParsedDoc = parsedDocument as Verilog.ParsedDocument;
             textFileLock.ExitReadLock();
 
             if (vParsedDoc == null)
@@ -529,13 +566,11 @@ namespace pluginVerilog.Data
 
 
 
-        public ProjectProperty ProjectProperty
+        public override ProjectProperty ProjectProperty
         {
             get
             {
-                ProjectProperty? projectProperty = Project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
-                if (projectProperty == null) throw new Exception();
-                return projectProperty;
+                return base.ProjectProperty;
             }
         }
 
@@ -603,7 +638,7 @@ namespace pluginVerilog.Data
         public override PopupItem? GetPopupItem(ulong version, int index)
         {
             textFileLock.EnterReadLock();
-            Verilog.ParsedDocument? vParsedDoc = VerilogParsedDocument;
+            Verilog.ParsedDocument? vParsedDoc = parsedDocument as Verilog.ParsedDocument;
             textFileLock.ExitReadLock();
 
             if (vParsedDoc == null) return null;
@@ -619,7 +654,7 @@ namespace pluginVerilog.Data
         {
             candidateWord = "";
             textFileLock.EnterReadLock();
-            Verilog.ParsedDocument? vParsedDoc = VerilogParsedDocument;
+            Verilog.ParsedDocument? vParsedDoc = parsedDocument as Verilog.ParsedDocument;
             textFileLock.ExitReadLock();
 
             if (vParsedDoc == null) return null;
@@ -629,4 +664,3 @@ namespace pluginVerilog.Data
 
     }
 }
-

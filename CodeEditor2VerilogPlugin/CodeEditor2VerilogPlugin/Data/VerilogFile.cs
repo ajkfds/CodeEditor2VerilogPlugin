@@ -388,7 +388,33 @@ namespace pluginVerilog.Data
         }
 
         [JsonInclude]
-        public override CodeEditor2.CodeEditor.ParsedDocument? ParsedDocument { get; set; }
+        public override CodeEditor2.CodeEditor.ParsedDocument? ParsedDocument
+        {
+            get
+            {
+                textFileLock.EnterReadLock();
+                try
+                {
+                    return parsedDocument;
+                }
+                finally
+                {
+                    textFileLock.ExitReadLock();
+                }
+            }
+            set
+            {
+                textFileLock.EnterWriteLock();
+                try
+                {
+                    parsedDocument = value;
+                }
+                finally
+                {
+                    textFileLock.ExitWriteLock();
+                }
+            }
+        }
 
         public Verilog.ParsedDocument? VerilogParsedDocument
         {

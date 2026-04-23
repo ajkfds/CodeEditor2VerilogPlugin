@@ -14,9 +14,63 @@ namespace pluginVerilog.Data
     public class InterfaceInstance : InstanceTextFile, IVerilogRelatedFile
     {
 
-        public required string ModuleName { set; get; }
+        private string _moduleName = "";
+        public required string ModuleName
+        {
+            set
+            {
+                textFileLock.EnterWriteLock();
+                try
+                {
+                    _moduleName = value;
+                }
+                finally
+                {
+                    textFileLock.ExitWriteLock();
+                }
+            }
+            get
+            {
+                textFileLock.EnterReadLock();
+                try
+                {
+                    return _moduleName;
+                }
+                finally
+                {
+                    textFileLock.ExitReadLock();
+                }
+            }
+        }
 
-        public required Dictionary<string, Verilog.Expressions.Expression> ParameterOverrides;
+        private Dictionary<string, Verilog.Expressions.Expression> _parameterOverrides = new Dictionary<string, Verilog.Expressions.Expression>();
+        public required Dictionary<string, Verilog.Expressions.Expression> ParameterOverrides
+        {
+            set
+            {
+                textFileLock.EnterWriteLock();
+                try
+                {
+                    _parameterOverrides = value;
+                }
+                finally
+                {
+                    textFileLock.ExitWriteLock();
+                }
+            }
+            get
+            {
+                textFileLock.EnterReadLock();
+                try
+                {
+                    return _parameterOverrides;
+                }
+                finally
+                {
+                    textFileLock.ExitReadLock();
+                }
+            }
+        }
 
         protected InterfaceInstance(CodeEditor2.Data.TextFile sourceTextFile) : base(sourceTextFile)
         {
@@ -54,7 +108,34 @@ namespace pluginVerilog.Data
             }
             return fileItem;
         }
-        public bool SystemVerilog { get; set; } = false;
+        private bool _systemVerilog = false;
+        public bool SystemVerilog
+        {
+            get
+            {
+                textFileLock.EnterReadLock();
+                try
+                {
+                    return _systemVerilog;
+                }
+                finally
+                {
+                    textFileLock.ExitReadLock();
+                }
+            }
+            set
+            {
+                textFileLock.EnterWriteLock();
+                try
+                {
+                    _systemVerilog = value;
+                }
+                finally
+                {
+                    textFileLock.ExitWriteLock();
+                }
+            }
+        }
 
         public override string ID
         {
@@ -325,13 +406,11 @@ namespace pluginVerilog.Data
 
 
 
-        public ProjectProperty ProjectProperty
+        public override ProjectProperty ProjectProperty
         {
             get
             {
-                ProjectProperty? projectProperty = Project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
-                if (projectProperty == null) throw new Exception();
-                return projectProperty;
+                return base.ProjectProperty;
             }
         }
 
