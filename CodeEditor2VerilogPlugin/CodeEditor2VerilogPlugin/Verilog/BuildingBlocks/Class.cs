@@ -71,7 +71,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         }
         public static async System.Threading.Tasks.Task ParseDeclaration(WordScanner word, NameSpace nameSpace)
         {
-            Class? class_ = await Create(word, nameSpace);
+            Class? class_ = await ParseCreate(word, nameSpace);
             if (class_ == null) return;
 
             if (word.Prototype)
@@ -114,11 +114,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             return class_;
         }
 
-        public static async Task<Class?> Create(WordScanner word, NameSpace nameSpace)
+        public static async Task<Class?> ParseCreate(WordScanner word, NameSpace nameSpace)
         {
-            return await Create(word, nameSpace, null);
+            return await ParseCreate(word, nameSpace, null);
         }
-        public static async Task<Class?> Create(
+        public static async Task<Class?> ParseCreate(
             WordScanner word,
             NameSpace nameSpace,
             Dictionary<string, Expressions.Expression>? parameterOverrides
@@ -288,13 +288,9 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
 
 
-            if (word.RootParsedDocument?.Root == null)
+            if (!nameSpace.BuildingBlock.BuildingBlocks.ContainsKey(class_.Name))
             {
-
-            }
-            else if (!word.RootParsedDocument.Root.BuildingBlocks.ContainsKey(class_.Name))
-            {
-                word.RootParsedDocument.Root.BuildingBlocks.Add(class_.Name, class_);
+                nameSpace.BuildingBlock.BuildingBlocks.Add(class_.Name, class_);
             }
             else if (word.Prototype)
             {
@@ -302,7 +298,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
             else
             {
-                word.RootParsedDocument.Root.BuildingBlocks[class_.Name] = class_;
+                nameSpace.BuildingBlock.BuildingBlocks[class_.Name] = class_;
             }
 
             return class_;
