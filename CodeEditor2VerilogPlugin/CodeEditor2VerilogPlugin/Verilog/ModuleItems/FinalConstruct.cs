@@ -12,14 +12,14 @@ namespace pluginVerilog.Verilog.ModuleItems
 
         public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
         {
-            ModuleItems.InitialConstruct? initial = await ModuleItems.InitialConstruct.ParseCreate(word, nameSpace);
+            ModuleItems.FinalConstruct? initial = await ModuleItems.FinalConstruct.ParseCreate(word, nameSpace);
             return true;
         }
 
         public static async Task<FinalConstruct?> ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             //    initial_construct   ::= initial statement
-            System.Diagnostics.Debug.Assert(word.Text == "initial");
+            System.Diagnostics.Debug.Assert(word.Text == "final");
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
