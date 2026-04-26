@@ -16,12 +16,29 @@ namespace pluginVerilog.Data.VerilogCommon
         private int headIndex = -1;
         private int length = -1;
 
-        //public override System.Threading.Tasks.Task ApplyAsync()
-        //{
-        //    if (codeDocument == null) return Task.CompletedTask;
-        //    codeDocument.Replace(headIndex, length, ColorIndex, Text);
-        //    Controller.CodeEditor.SetCaretPosition(headIndex + Text.Length);
-        //    return Task.CompletedTask;
-        //}
+        // autocomplete item作成時に取得したheadindex, lengthの場所を更新する
+        public override System.Threading.Tasks.Task ApplyAsync()
+        {
+            if (codeDocument == null) return System.Threading.Tasks.Task.CompletedTask;
+            int prevIndex = codeDocument.CaretIndex;
+            if (codeDocument.GetLineStartIndex(codeDocument.GetLineAt(prevIndex)) != prevIndex && prevIndex != 0)
+            {
+                prevIndex--;
+            }
+            if (codeDocument.GetCharAt(prevIndex) == '.')
+            {
+                int index = codeDocument.CaretIndex;
+                codeDocument.Replace(index, 0, ColorIndex, Text);
+                CodeEditor2.Controller.CodeEditor.SetCaretPosition(index + Text.Length);
+            }
+            else
+            {
+                // delete after last .
+                codeDocument.Replace(headIndex, length, ColorIndex, Text);
+                CodeEditor2.Controller.CodeEditor.SetCaretPosition(headIndex + Text.Length);
+            }
+            CodeEditor2.Controller.CodeEditor.AutoCompleteHandled();
+            return System.Threading.Tasks.Task.CompletedTask;
+        }
     }
 }
