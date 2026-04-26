@@ -1,3 +1,4 @@
+using Avalonia.Input;
 using pluginVerilog.Verilog.DataObjects.Variables;
 using System;
 using System.Collections.Generic;
@@ -13,10 +14,11 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
 
         public override CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Variable;
 
-        public static AssociativeArray Create(DataObject dataObject, DataTypes.IDataType? indexDataType)
+        public static AssociativeArray Create( DataObject dataObject, DataTypes.IDataType? indexDataType )
         {
             AssociativeArray associativeArray = new AssociativeArray() { Name = dataObject.Name };
             associativeArray.IndexDataType = indexDataType;
+            associativeArray.DataObject = dataObject;
 
             DataTypes.IntegerVectorType? integerVectorType = indexDataType as DataTypes.IntegerVectorType;
             if (integerVectorType != null)
@@ -101,10 +103,14 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
 
 
         public DataTypes.IDataType? IndexDataType { get; set; } = null;
+        public DataObject DataObject { get; set; } = null;
 
         public override DataObject Clone()
         {
-            throw new NotImplementedException();
+            AssociativeArray associativeArray = AssociativeArray.Create( DataObject, IndexDataType );
+            return associativeArray;
+
+//            throw new NotImplementedException();
         }
 
         public override DataObject Clone(string name)
