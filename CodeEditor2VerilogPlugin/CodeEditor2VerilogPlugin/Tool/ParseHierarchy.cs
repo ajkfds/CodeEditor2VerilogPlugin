@@ -1,5 +1,6 @@
 using Avalonia.Threading;
 using CodeEditor2.Data;
+using Microsoft.Extensions.AI;
 using pluginVerilog.Data;
 using System;
 using System.Collections.Concurrent;
@@ -30,15 +31,18 @@ namespace pluginVerilog.Tool
                 });
         }
 
-        public static async Task ParseAsync(CodeEditor2.Data.TextFile textFile, ParseMode parseMode)
+        public static async Task<(List<IVerilogRelatedFile> files, List<IVerilogRelatedFile> includeFiles)?> ParseAsync(CodeEditor2.Data.TextFile textFile, ParseMode parseMode)
         {
+            ConcurrentDictionary<string, IVerilogRelatedFile> filesDict = new ConcurrentDictionary<string, IVerilogRelatedFile>();
+            ConcurrentDictionary<string, IVerilogRelatedFile> includeFilesDict = new ConcurrentDictionary<string, IVerilogRelatedFile>();
+            
             if (parseMode == ParseMode.ForceAllFiles) // dont cancel
             {
                 await Task.Run(async () =>
                 {
-                    await runParallel(textFile, parseMode, null);
+                    await runParallel(textFile, parseMode,filesDict,includeFilesDict, null);
                 });
-                return;
+                return null;
             }
 
 
@@ -60,7 +64,7 @@ namespace pluginVerilog.Tool
 
             _currentTask = Task.Run(async () =>
             {
-                await runParallel(textFile, parseMode, token);
+                await runParallel(textFile, parseMode, filesDict, includeFilesDict, token);
             }, token);
 
             try
@@ -80,7 +84,7 @@ namespace pluginVerilog.Tool
             {
                 _currentTask = null;
             }
-            return;
+            return (filesDict.Values.ToList() , includeFilesDict.Values.ToList());
         }
 
         public record ParseTask(
@@ -88,7 +92,10 @@ namespace pluginVerilog.Tool
             CodeEditor2.Data.TextFile tarfgetTextFile,
             bool topLevel = false
             );
-        private static async Task runParallel(CodeEditor2.Data.TextFile textFile, ParseMode parseMode, CancellationToken? token)
+        private static async Task runParallel(CodeEditor2.Data.TextFile textFile, ParseMode parseMode,
+            ConcurrentDictionary<string, IVerilogRelatedFile> files,
+            ConcurrentDictionary<string, IVerilogRelatedFile> includeFiles,
+            CancellationToken? token)
         {
             textFile.ReparseRequested = true;
 
@@ -127,7 +134,7 @@ namespace pluginVerilog.Tool
                             {
                                 Interlocked.Increment(ref activeTaskCount);
 
-                                await parseTextFile(index, newTask, reparseTargetFiles, workQueue, completeIds, firstHierTaskCount, signal, parseMode, token);
+                                await parseTextFile(index, newTask, reparseTargetFiles, workQueue, completeIds, firstHierTaskCount,files,includeFiles, signal, parseMode, token);
 
                                 // re-entry top level task after all 2nd level task complete
                                 if (firstHierTaskCount.TryPop(out bool first))
@@ -162,7 +169,7 @@ namespace pluginVerilog.Tool
             {
                 reparseTargetFiles.TryPop(out CodeEditor2.Data.TextFile? tfile);
                 if (tfile == null) continue;
-                await reparseText(tfile, parseMode, token);
+                await reparseText(tfile,files,includeFiles, parseMode, token);
             }
 
             if (parseMode == ParseMode.ForceAllFiles)
@@ -201,6 +208,8 @@ namespace pluginVerilog.Tool
             ConcurrentQueue<ParseTask> workQueue,
             ConcurrentDictionary<string, bool> completeIds,
             ConcurrentStack<bool> firstHierTaskCount,
+            ConcurrentDictionary<string, IVerilogRelatedFile> files,
+            ConcurrentDictionary<string, IVerilogRelatedFile> includeFiles,
             SemaphoreSlim signal,
             ParseMode parseMode,
             CancellationToken? token
@@ -250,11 +259,25 @@ namespace pluginVerilog.Tool
                     await verilogFile.AcceptParsedDocumentAsync(parser.ParsedDocument);
                     //                    await verilogFile.UpdateAsync();
                 }
+
+                Verilog.ParsedDocument? parsedDocument = parser.ParsedDocument as Verilog.ParsedDocument;
+                if(parsedDocument !=null)
+                {
+                    files.AddOrUpdate(verilogFile.RelativePath, verilogFile, (key, oldItem) => { return verilogFile; });
+                    foreach (var include in parsedDocument.IncludeFiles.Values)
+                    {
+                        includeFiles.AddOrUpdate(include.RelativePath, include, (key, oldItem) => { return include; });
+                    }
+                }
             }
 
             bool needReparse = false;
             if (verilogFile.ReparseRequested) needReparse = true;
-            if (needReparse) reparseTargetFiles.Push((CodeEditor2.Data.TextFile)verilogFile);
+
+            if (needReparse)
+            {
+                reparseTargetFiles.Push((CodeEditor2.Data.TextFile)verilogFile);
+            }
 
             List<Item> items = new List<Item>();
             items = verilogFile.Items.ToList();
@@ -274,7 +297,10 @@ namespace pluginVerilog.Tool
             }
         }
 
-        private static async Task reparseText(CodeEditor2.Data.TextFile textFile, ParseMode parseMode, CancellationToken? token)
+        private static async Task reparseText(CodeEditor2.Data.TextFile textFile,
+            ConcurrentDictionary<string, IVerilogRelatedFile> files,
+            ConcurrentDictionary<string, IVerilogRelatedFile> includeFiles,
+            ParseMode parseMode, CancellationToken? token)
         {
             Data.IVerilogRelatedFile? verilogFile = null;
             if (textFile is Data.VerilogModuleInstance)
@@ -304,10 +330,16 @@ namespace pluginVerilog.Tool
                 CodeEditor2.Controller.AppendLog("reparseHier : " + verilogFile.ID);
             }
             await parser.ParseAsync();
-            if (parser.ParsedDocument != null)
+            Verilog.ParsedDocument? parsedDocument = parser.ParsedDocument as Verilog.ParsedDocument;
+            if (parsedDocument != null)
             {
-                await verilogFile.AcceptParsedDocumentAsync(parser.ParsedDocument);
-                //                verilogFile.PostUIUpdate();
+                await verilogFile.AcceptParsedDocumentAsync(parsedDocument);
+
+                files.AddOrUpdate(verilogFile.RelativePath, verilogFile, (key, oldItem) => { return verilogFile; });
+                foreach (var include in parsedDocument.IncludeFiles.Values)
+                {
+                    files.AddOrUpdate(include.RelativePath, include, (key, oldItem) => { return include; });
+                }
             }
         }
 
