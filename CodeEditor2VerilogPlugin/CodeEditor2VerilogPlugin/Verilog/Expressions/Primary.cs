@@ -307,7 +307,7 @@ number
                     // function call : for right side only
                     if (!lValue && element is Function)
                     {
-                        return FunctionCall.ParseCreate(word, nameSpace);
+                        return FunctionCall.ParseCreate(word, nameSpace,targetNameSpace);
                     }
 
                     if (element is DataObjects.Constants.Constants)
