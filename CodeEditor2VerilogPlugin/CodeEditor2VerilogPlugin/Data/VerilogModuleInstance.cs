@@ -98,14 +98,17 @@ namespace pluginVerilog.Data
                 return _getKey();
             }
         }
+        /// <summary>
+        /// Atomically generates the key from module name and parameter overrides while holding the read lock.
+        /// This ensures that the key is consistent - both values are read in a single atomic operation.
+        /// </summary>
         private string _getKey()
         {
             textFileLock.EnterReadLock();
             try
             {
-                string moduleName = _moduleName;
-                var parameterOverrides = _parameterOverrides;
-                return Verilog.ParsedDocument.KeyGenerator(this, moduleName, parameterOverrides);
+                // Read both values atomically within the same lock acquisition
+                return Verilog.ParsedDocument.KeyGenerator(this, _moduleName, _parameterOverrides);
             }
             finally
             {
@@ -180,7 +183,19 @@ namespace pluginVerilog.Data
             {
                 Verilog.ParsedDocument? vpd = VerilogParsedDocument; // no lock is needed. VerilogParsedDocument property is thread safe
                 if (vpd?.Root == null) return null;
-                string moduleName = _moduleName;
+                
+                // Atomically read module name while holding read lock
+                textFileLock.EnterReadLock();
+                string moduleName;
+                try
+                {
+                    moduleName = _moduleName;
+                }
+                finally
+                {
+                    textFileLock.ExitReadLock();
+                }
+                
                 if (vpd.Root.BuildingBlocks.TryGetValue(moduleName, out var block))
                 {
                     return block as Module;
@@ -288,7 +303,17 @@ namespace pluginVerilog.Data
 
             if (vParsedDoc != null)
             {
-                var parameterOverrides = ParameterOverrides;
+                // Atomically read parameter overrides while holding read lock
+                Dictionary<string, Verilog.Expressions.Expression> parameterOverrides;
+                textFileLock.EnterReadLock();
+                try
+                {
+                    parameterOverrides = _parameterOverrides;
+                }
+                finally
+                {
+                    textFileLock.ExitReadLock();
+                }
 
                 if (parsedDoc != null && parameterOverrides.Count != 0)
                 {
@@ -438,8 +463,21 @@ namespace pluginVerilog.Data
         public override DocumentParser CreateDocumentParser(DocumentParser.ParseModeEnum parseMode, System.Threading.CancellationToken? token)
         {
             CheckDirty();
-            string moduleName = _moduleName;
-            var parameterOverrides = _parameterOverrides;
+            
+            // Atomically read both module name and parameter overrides while holding read lock
+            string moduleName;
+            Dictionary<string, Verilog.Expressions.Expression> parameterOverrides;
+            
+            textFileLock.EnterReadLock();
+            try
+            {
+                moduleName = _moduleName;
+                parameterOverrides = _parameterOverrides;
+            }
+            finally
+            {
+                textFileLock.ExitReadLock();
+            }
 
             return new Parser.VerilogParser(this, moduleName, parameterOverrides, parseMode, token);
         }

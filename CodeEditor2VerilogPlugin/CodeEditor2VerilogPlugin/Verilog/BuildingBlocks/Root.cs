@@ -160,31 +160,17 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
             Module module;
 
-            if (parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse)
+            // Parse mode is now handled at the end of ParseCreate, not per-block
+            // This prevents cascading re-parses that cause instability
+            if (parsedDocument.ParameterOverrides == null)
             {
-                if (parsedDocument.ParameterOverrides == null)
-                {
-                    module = await Module.ParseCreate(word, null, parsedDocument.Root, file, true);
-                }
-                else
-                {
-                    module = await Module.ParseCreate(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, true);
-                }
-                parsedDocument.ReparseRequested = true;
+                module = await Module.ParseCreate(word, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
             }
             else
             {
-                if (parsedDocument.ParameterOverrides == null)
-                {
-                    module = await Module.ParseCreate(word, null, parsedDocument.Root, file, false);
-                }
-                else
-                {
-                    module = await Module.ParseCreate(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, false);
-                }
-                parsedDocument.ReparseRequested = false;
+                module = await Module.ParseCreate(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
             }
-
+            // Note: ReparseRequested is now set only once at the end of ParseCreate based on ParseMode
         }
 
         private static async System.Threading.Tasks.Task parsePackage(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
@@ -203,29 +189,17 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             Package package;
             //IndexReference iref = IndexReference.Create(parsedDocument);
 
-            if (parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse)
+            // Parse mode is now handled at the end of ParseCreate, not per-block
+            // This prevents cascading re-parses that cause instability
+            if (parsedDocument.ParameterOverrides == null)
             {
-                if (parsedDocument.ParameterOverrides == null)
-                {
-                    package = await Package.ParseCreate(word, null, parsedDocument.Root, file, true);
-                }
-                else
-                {
-                    package = await Package.ParseCreate(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, true);
-                }
-                parsedDocument.ReparseRequested = true;
+                package = await Package.ParseCreate(word, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
             }
             else
             {
-                if (parsedDocument.ParameterOverrides == null)
-                {
-                    package = await Package.ParseCreate(word, null, parsedDocument.Root, file, false);
-                }
-                else
-                {
-                    package = await Package.ParseCreate(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, false);
-                }
+                package = await Package.ParseCreate(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
             }
+            // Note: ReparseRequested is now set only once at the end of ParseCreate based on ParseMode
         }
 
         private static async System.Threading.Tasks.Task parseProgram(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
@@ -245,39 +219,28 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             Program program;
             //IndexReference iref = IndexReference.Create(parsedDocument);
 
-            if (parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse)
+            // Parse mode is now handled at the end of ParseCreate, not per-block
+            // This prevents cascading re-parses that cause instability
+            if (parsedDocument.ParameterOverrides == null)
             {
-                if (parsedDocument.ParameterOverrides == null)
-                {
-                    program = await Program.Parse(word, null, parsedDocument.Root, file, true);
-                }
-                else
-                {
-                    program = await Program.Parse(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, true);
-                }
-                parsedDocument.ReparseRequested = true;
+                program = await Program.Parse(word, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
             }
             else
             {
-                if (parsedDocument.ParameterOverrides == null)
-                {
-                    program = await Program.Parse(word, null, parsedDocument.Root, file, false);
-                }
-                else
-                {
-                    program = await Program.Parse(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, false);
-                }
+                program = await Program.Parse(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
             }
 
             bool added = parsedDocument.Root.AddOrUpdateBuildingBlock(program.Name, program);
             if (added)
             {
+                // Only set ReparseRequested if building block was actually added for the first time
                 parsedDocument.ReparseRequested = true;
             }
             else
             {
                 word.AddError("duplicated module name");
             }
+            // Note: ReparseRequested for ParseMode is now set only once at the end of ParseCreate based on ParseMode
         }
 
         private static void skipBlock(WordScanner word, string startWord, string endWord)
@@ -325,33 +288,21 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             Interface module;
             //IndexReference iref = IndexReference.Create(parsedDocument);
 
-            if (parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse)
+            // Parse mode is now handled at the end of ParseCreate, not per-block
+            // This prevents cascading re-parses that cause instability
+            if (parsedDocument.ParameterOverrides == null)
             {
-                if (parsedDocument.ParameterOverrides == null)
-                {
-                    module = await Interface.Create(word, parsedDocument.Root, null, parsedDocument.Root, file, true);
-                }
-                else
-                {
-                    module = await Interface.Create(word, parsedDocument.Root, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, true);
-                }
-                parsedDocument.ReparseRequested = true;
+                module = await Interface.Create(word, parsedDocument.Root, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
             }
             else
             {
-                if (parsedDocument.ParameterOverrides == null)
-                {
-                    module = await Interface.Create(word, parsedDocument.Root, null, parsedDocument.Root, file, false);
-                }
-                else
-                {
-                    module = await Interface.Create(word, parsedDocument.Root, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, false);
-                }
+                module = await Interface.Create(word, parsedDocument.Root, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
             }
 
             bool added = parsedDocument.Root.AddOrUpdateBuildingBlock(module.Name, module);
             if (added)
             {
+                // Only set ReparseRequested if building block was actually added for the first time
                 parsedDocument.ReparseRequested = true;
             }
             else
@@ -362,6 +313,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 }
                 // If not prototype, the update is already done by AddOrUpdateBuildingBlock
             }
+            // Note: ReparseRequested for ParseMode is now set only once at the end of ParseCreate based on ParseMode
         }
 
     }
