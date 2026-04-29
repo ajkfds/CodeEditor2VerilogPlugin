@@ -79,8 +79,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
         public BuildingBlock? GetBuildingBlock(string name)
         {
-            if (!BuildingBlocks.ContainsKey(name)) return null;
-            return BuildingBlocks[name];
+            return GetBuildingBlock(name);
         }
         public static async System.Threading.Tasks.Task<Root> ParseCreate(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
         {
@@ -270,9 +269,9 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 }
             }
 
-            if (!parsedDocument.Root.BuildingBlocks.ContainsKey(program.Name))
+            bool added = parsedDocument.Root.AddOrUpdateBuildingBlock(program.Name, program);
+            if (added)
             {
-                parsedDocument.Root.BuildingBlocks.Add(program.Name, program);
                 parsedDocument.ReparseRequested = true;
             }
             else
@@ -350,9 +349,9 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 }
             }
 
-            if (!parsedDocument.Root.BuildingBlocks.ContainsKey(module.Name))
+            bool added = parsedDocument.Root.AddOrUpdateBuildingBlock(module.Name, module);
+            if (added)
             {
-                parsedDocument.Root.BuildingBlocks.Add(module.Name, module);
                 parsedDocument.ReparseRequested = true;
             }
             else
@@ -361,10 +360,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 {
                     word.AddPrototypeError("duplicated buldingblock name");
                 }
-                else
-                {
-                    parsedDocument.Root.BuildingBlocks[module.Name] = module;
-                }
+                // If not prototype, the update is already done by AddOrUpdateBuildingBlock
             }
         }
 

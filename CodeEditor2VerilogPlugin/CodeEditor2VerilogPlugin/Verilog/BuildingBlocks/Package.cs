@@ -153,11 +153,8 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
 
             // register with the parent module
-            if (!parent.BuildingBlocks.ContainsKey(package.Name))
-            {
-                parent.BuildingBlocks.Add(package.Name, package);
-            }
-            else
+            bool added = parent.AddOrUpdateBuildingBlock(package.Name, package);
+            if (!added)
             {
                 package.NameReference.AddError("duplicated package name");
             }

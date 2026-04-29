@@ -99,7 +99,7 @@ namespace pluginVerilog.NavigatePanel
 
                     try
                     {
-                        await Tool.ParseHierarchy.ParseAsync(ModuleInstance, Tool.ParseHierarchy.ParseMode.SearchReparseReqestedTree);
+                        Tool.ParseHierarchy.PostParseAsync(ModuleInstance, Tool.ParseHierarchy.ParseMode.SearchReparseReqestedTree);
                     }
                     catch (Exception ex)
                     {

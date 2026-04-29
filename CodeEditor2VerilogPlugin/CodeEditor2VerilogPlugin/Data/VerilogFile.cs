@@ -499,9 +499,10 @@ namespace pluginVerilog.Data
             }
         }
 
-        public override async Task ParseHierarchyAsync(Action<ITextFile> action)
+        public override Task ParseHierarchyAsync(Action<ITextFile> action)
         {
-            await Tool.ParseHierarchy.ParseAsync(this, Tool.ParseHierarchy.ParseMode.ForceAllFiles);
+            Tool.ParseHierarchy.PostParseAsync(this, Tool.ParseHierarchy.ParseMode.ForceAllFiles);
+            return Task.CompletedTask;
         }
 
         // Auto Complete Handler

@@ -189,20 +189,14 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
 
             // register with the parent module
-            if (!parent.BuildingBlocks.ContainsKey(module.Name))
-            {
-                parent.BuildingBlocks.Add(module.Name, module);
-            }
-            else
+            bool added = parent.AddOrUpdateBuildingBlock(module.Name, module);
+            if (!added)
             {
                 if (protoType)
                 {
                     module.NameReference.AddError("duplicated module name");
                 }
-                else
-                {
-                    module.BuildingBlocks[module.Name] = module;
-                }
+                // If not prototype, the update is already done by AddOrUpdateBuildingBlock
             }
 
             return module;

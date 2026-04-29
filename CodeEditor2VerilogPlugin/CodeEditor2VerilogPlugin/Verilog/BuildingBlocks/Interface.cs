@@ -199,20 +199,14 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
 
             // register with the parent module
-            if (!parent.BuildingBlocks.ContainsKey(interface_.Name))
-            {
-                parent.BuildingBlocks.Add(interface_.Name, interface_);
-            }
-            else
+            bool added = parent.AddOrUpdateBuildingBlock(interface_.Name, interface_);
+            if (!added)
             {
                 if (protoType)
                 {
                     interface_.NameReference.AddError("duplicated interface name");
                 }
-                else
-                {
-                    interface_.BuildingBlocks[interface_.Name] = interface_;
-                }
+                // If not prototype, the update is already done by AddOrUpdateBuildingBlock
             }
 
             return interface_;

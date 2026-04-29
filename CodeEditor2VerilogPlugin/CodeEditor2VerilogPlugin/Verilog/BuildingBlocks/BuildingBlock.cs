@@ -10,6 +10,10 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
         }
 
+        /// <summary>
+        /// Lock for thread-safe access to BuildingBlocks dictionary
+        /// </summary>
+        protected readonly object buildingBlocksLock = new object();
 
         #region IDesignElementContainer
 
@@ -18,6 +22,61 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         /// </summary>
         public Dictionary<string, BuildingBlock> BuildingBlocks { get; set; } = new Dictionary<string, BuildingBlock>();
 
+        /// <summary>
+        /// Atomically adds or updates a building block in the dictionary.
+        /// Thread-safe operation using lock.
+        /// </summary>
+        /// <param name="name">The name/key of the building block</param>
+        /// <param name="buildingBlock">The building block to add or update</param>
+        /// <returns>True if added, false if updated</returns>
+        public bool AddOrUpdateBuildingBlock(string name, BuildingBlock buildingBlock)
+        {
+            lock (buildingBlocksLock)
+            {
+                if (BuildingBlocks.ContainsKey(name))
+                {
+                    BuildingBlocks[name] = buildingBlock;
+                    return false;
+                }
+                else
+                {
+                    BuildingBlocks.Add(name, buildingBlock);
+                    return true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Atomically gets a building block by name.
+        /// Thread-safe operation using lock.
+        /// </summary>
+        /// <param name="name">The name/key of the building block</param>
+        /// <returns>The building block if found, null otherwise</returns>
+        public BuildingBlock? GetBuildingBlock(string name)
+        {
+            lock (buildingBlocksLock)
+            {
+                if (BuildingBlocks.TryGetValue(name, out var block))
+                {
+                    return block;
+                }
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Atomically checks if a building block exists.
+        /// Thread-safe operation using lock.
+        /// </summary>
+        /// <param name="name">The name/key to check</param>
+        /// <returns>True if exists, false otherwise</returns>
+        public bool ContainsBuildingBlock(string name)
+        {
+            lock (buildingBlocksLock)
+            {
+                return BuildingBlocks.ContainsKey(name);
+            }
+        }
 
         public virtual string FileId { get; protected set; }
 

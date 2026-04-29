@@ -296,17 +296,10 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
 
 
-            if (!nameSpace.BuildingBlock.BuildingBlocks.ContainsKey(class_.Name))
-            {
-                nameSpace.BuildingBlock.BuildingBlocks.Add(class_.Name, class_);
-            }
-            else if (word.Prototype)
+            bool added = nameSpace.BuildingBlock.AddOrUpdateBuildingBlock(class_.Name, class_);
+            if (!added && word.Prototype)
             {
                 word.AddError("duplicated class name");
-            }
-            else
-            {
-                nameSpace.BuildingBlock.BuildingBlocks[class_.Name] = class_;
             }
 
             return class_;

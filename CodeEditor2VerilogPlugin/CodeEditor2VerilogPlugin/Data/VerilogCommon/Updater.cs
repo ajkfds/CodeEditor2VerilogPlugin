@@ -15,6 +15,11 @@ namespace pluginVerilog.Data.VerilogCommon
         /// Update the Items member of this object according to the rootItem.ParsedDocument.
         /// </summary>
         /// <param name="item"></param>
+        /// <summary>
+        /// Lock for atomic items update to prevent partial updates during reads
+        /// </summary>
+        private static readonly object _itemsUpdateLock = new object();
+
         public static async System.Threading.Tasks.Task UpdateAsync(IVerilogRelatedFile item)
         {
             if (!Dispatcher.UIThread.CheckAccess()) System.Diagnostics.Debugger.Break();
@@ -30,52 +35,84 @@ namespace pluginVerilog.Data.VerilogCommon
                 item.VerilogParsedDocument.Root == null
                 )
             {
-                // dispose all sub items
-                lock (item.Items)
+                // dispose all sub items - use atomic update to prevent partial state
+                lock (_itemsUpdateLock)
                 {
-                    foreach (CodeEditor2.Data.Item subItem in item.Items) subItem.Dispose();
-                    item.Items.Clear();
+                    // Take a snapshot and dispose outside the main items lock if needed
+                    var itemsToDispose = new List<CodeEditor2.Data.Item>();
+                    lock (item.Items)
+                    {
+                        foreach (CodeEditor2.Data.Item subItem in item.Items)
+                        {
+                            itemsToDispose.Add(subItem);
+                        }
+                        item.Items.Clear();
+                    }
+                    // Dispose after clearing to avoid deadlock
+                    foreach (var subItem in itemsToDispose)
+                    {
+                        subItem.Dispose();
+                    }
                 }
                 return;
             }
 
-            lock (item.Items)
+            // create new items list
+            Dictionary<string, CodeEditor2.Data.Item> newSubItems = new Dictionary<string, CodeEditor2.Data.Item>();
+
+            // Build new sub-items dictionary first (outside the lock)
+            // add vh instance
+            foreach (VerilogHeaderInstance newVhInstance in item.VerilogParsedDocument.IncludeFiles.Values)
             {
-                // create new items list
-                Dictionary<string, CodeEditor2.Data.Item> newSubItems = new Dictionary<string, CodeEditor2.Data.Item>();
+                addVhInstance(newSubItems, item, newVhInstance);
+            }
 
-                // add vh instance
-                foreach (VerilogHeaderInstance newVhInstance in item.VerilogParsedDocument.IncludeFiles.Values)
+            if (item is VerilogModuleInstance)
+            {
+                string? moduleName = null;
+                VerilogModuleInstance? verilogModuleInstance = item as VerilogModuleInstance;
+                moduleName = verilogModuleInstance?.ModuleName;
+                addSubItemsSingleBuldingBlock(item, moduleName, newSubItems, parent, project);
+            }
+            else if (item is VerilogFile)
+            {
+                VerilogFile verilogFile = (VerilogFile)item;
+                if (item.VerilogParsedDocument.Root.BuildingBlocks.Count == 1)
                 {
-                    addVhInstance(newSubItems, item, newVhInstance);
+                    addSubItemsSingleBuldingBlock(item, null, newSubItems, parent, project);
                 }
+                else
+                {
+                    addSubItemsMultiBuildingBlock(verilogFile, newSubItems, parent, project);
+                }
+            }
 
-                if (item is VerilogModuleInstance)
+            // Atomic swap: dispose old items and replace with new ones in a single operation
+            lock (_itemsUpdateLock)
+            {
+                var oldItems = new List<CodeEditor2.Data.Item>();
+                
+                // Atomically swap items: clear old and add new in one locked operation
+                lock (item.Items)
                 {
-                    string? moduleName = null;
-                    VerilogModuleInstance? verilogModuleInstance = item as VerilogModuleInstance;
-                    moduleName = verilogModuleInstance?.ModuleName;
-                    addSubItemsSingleBuldingBlock(item, moduleName, newSubItems, parent, project);
-                }
-                else if (item is VerilogFile)
-                {
-                    VerilogFile verilogFile = (VerilogFile)item;
-                    if (item.VerilogParsedDocument.Root.BuildingBlocks.Count == 1)
+                    // Capture old items for disposal
+                    foreach (var oldItem in item.Items)
                     {
-                        addSubItemsSingleBuldingBlock(item, null, newSubItems, parent, project);
+                        oldItems.Add(oldItem);
                     }
-                    else
+                    
+                    // Clear and populate in a single atomic operation
+                    item.Items.Clear();
+                    foreach (CodeEditor2.Data.Item i in newSubItems.Values)
                     {
-                        addSubItemsMultiBuildingBlock(verilogFile, newSubItems, parent, project);
+                        item.Items.AddOrUpdate(i.Name, i);
                     }
                 }
-
-                List<CodeEditor2.Data.Item> itemsCopy = new List<CodeEditor2.Data.Item>();
-
-                item.Items.Clear();
-                foreach (CodeEditor2.Data.Item i in newSubItems.Values)
+                
+                // Dispose old items after the atomic swap is complete
+                foreach (var oldItem in oldItems)
                 {
-                    item.Items.AddOrUpdate(i.Name, i);
+                    oldItem.Dispose();
                 }
             }
         }

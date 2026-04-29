@@ -13,8 +13,34 @@ namespace pluginVerilog.Tool
 {
     public class ParseHierarchy
     {
-        private static Task? _currentTask;
-        private static CancellationTokenSource? _cts;
+        /// <summary>
+        /// Parse request record for queue-based processing
+        /// </summary>
+        public record ParseRequest(
+            CodeEditor2.Data.TextFile TextFile,
+            ParseMode Mode,
+            DateTime Timestamp
+        );
+
+        /// <summary>
+        /// Queue for pending parse requests
+        /// </summary>
+        private static readonly ConcurrentQueue<ParseRequest> _parseQueue = new();
+
+        /// <summary>
+        /// Indicates if a queue processor is running
+        /// </summary>
+        private static volatile bool _isProcessingQueue = false;
+
+        /// <summary>
+        /// Semaphore to ensure only one parse operation runs at a time
+        /// </summary>
+        private static readonly SemaphoreSlim _parseLock = new(1, 1);
+
+        /// <summary>
+        /// Timestamp of the currently executing parse request
+        /// </summary>
+        private static DateTime _currentParseTimestamp = DateTime.MinValue;
 
         public enum ParseMode
         {
@@ -22,69 +48,94 @@ namespace pluginVerilog.Tool
             ForceAllFiles,
             ThisFileOnly
         }
+
+        /// <summary>
+        /// Enqueues a parse request and starts queue processing if not already running.
+        /// Replaces the immediate cancellation approach with queue-based sequential processing.
+        /// All parse modes (including ForceAllFiles) now go through the queue.
+        /// </summary>
         public static void PostParseAsync(CodeEditor2.Data.TextFile textFile, ParseMode parseMode)
         {
-            Dispatcher.UIThread.Post(
-                async () =>
+            Dispatcher.UIThread.Post(() =>
+            {
+                var request = new ParseRequest(textFile, parseMode, DateTime.UtcNow);
+                _parseQueue.Enqueue(request);
+
+                // Start queue processor if not already running
+                if (!_isProcessingQueue)
                 {
-                    await ParseAsync(textFile, parseMode);
-                });
+                    _ = ProcessQueueAsync();
+                }
+            });
         }
 
-        public static async Task<(List<IVerilogRelatedFile> files, List<IVerilogRelatedFile> includeFiles)?> ParseAsync(CodeEditor2.Data.TextFile textFile, ParseMode parseMode)
+        /// <summary>
+        /// Synchronous parse that waits for completion.
+        /// For backward compatibility - prefer using PostParseAsync for non-blocking behavior.
+        /// </summary>
+        public static async Task ParseAsync(CodeEditor2.Data.TextFile textFile, ParseMode parseMode)
+        {
+            await _parseLock.WaitAsync();
+            try
+            {
+                await ParseInternalAsync(textFile, parseMode);
+            }
+            finally
+            {
+                _parseLock.Release();
+            }
+        }
+
+        /// <summary>
+        /// Processes parse requests from the queue sequentially.
+        /// Only one parse operation runs at a time, ensuring consistent results.
+        /// </summary>
+        private static async Task ProcessQueueAsync()
+        {
+            _isProcessingQueue = true;
+            try
+            {
+                while (_parseQueue.TryDequeue(out var request))
+                {
+                    // Wait for any currently running parse to complete
+                    await _parseLock.WaitAsync();
+                    try
+                    {
+                        _currentParseTimestamp = request.Timestamp;
+                        await ParseAsync(request.TextFile, request.Mode);
+                    }
+                    finally
+                    {
+                        _parseLock.Release();
+                    }
+                }
+            }
+            finally
+            {
+                _isProcessingQueue = false;
+            }
+        }
+
+        /// <summary>
+        /// Internal implementation that performs the actual parsing.
+        /// Returns parsed files and include files for non-ForceAllFiles modes.
+        /// </summary>
+        private static async Task<(List<IVerilogRelatedFile> files, List<IVerilogRelatedFile> includeFiles)?> ParseInternalAsync(CodeEditor2.Data.TextFile textFile, ParseMode parseMode)
         {
             ConcurrentDictionary<string, IVerilogRelatedFile> filesDict = new ConcurrentDictionary<string, IVerilogRelatedFile>();
             ConcurrentDictionary<string, IVerilogRelatedFile> includeFilesDict = new ConcurrentDictionary<string, IVerilogRelatedFile>();
-            
-            if (parseMode == ParseMode.ForceAllFiles) // dont cancel
-            {
-                await Task.Run(async () =>
-                {
-                    await runParallel(textFile, parseMode,filesDict,includeFilesDict, null);
-                });
-                return null;
-            }
-
-
-            if (_cts != null)
-            {
-                textFile.ReparseRequested = true;
-                _cts.Cancel();
-
-                try
-                {
-                    // wait completion of the previous task
-                    //if (_currentTask != null) await _currentTask;
-                }
-                catch (OperationCanceledException) { }
-            }
-
-            _cts = new CancellationTokenSource();
-            CancellationToken token = _cts.Token;
-
-            _currentTask = Task.Run(async () =>
-            {
-                await runParallel(textFile, parseMode, filesDict, includeFilesDict, token);
-            }, token);
 
             try
             {
-                await _currentTask;
-            }
-            catch (OperationCanceledException)
-            {
-                _currentTask = null;
+                await runParallel(textFile, parseMode, filesDict, includeFilesDict, null);
             }
             catch (Exception ex)
             {
                 if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
                 CodeEditor2.Controller.AppendLog("# Exception : " + ex.Message, Avalonia.Media.Colors.Red);
             }
-            finally
-            {
-                _currentTask = null;
-            }
-            return (filesDict.Values.ToList() , includeFilesDict.Values.ToList());
+
+            return (filesDict.Values.ToList(), includeFilesDict.Values.ToList());
         }
 
         public record ParseTask(
