@@ -145,6 +145,10 @@ namespace pluginVerilog.Verilog.Expressions
                     DataObjects.Constants.Constants constant = (DataObjects.Constants.Constants)namedElement;
                     return ParseCreate(word, nameSpace, constant.Expression, wordReference);
                 }
+                else if(namedElement is DataObjects.Typedef)
+                {
+                    dataType = ((DataObjects.Typedef)namedElement).VariableType;
+                }
                 else
                 {
                     word.AddError("illegal cast");
