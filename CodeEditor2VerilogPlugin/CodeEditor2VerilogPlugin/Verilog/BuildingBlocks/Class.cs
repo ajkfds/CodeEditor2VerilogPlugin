@@ -2,9 +2,11 @@ using AjkAvaloniaLibs.Controls;
 using CodeEditor2.CodeEditor.CodeComplete;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
+using pluginVerilog.Verilog.DataObjects.Variables;
 using pluginVerilog.Verilog.ModuleItems;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
@@ -13,6 +15,12 @@ namespace pluginVerilog.Verilog.BuildingBlocks
     {
         protected Class() : base(null, null)
         {
+            { //function int len();
+                List<Port> ports = new List<Port>();
+                Variable returnVal = DataObjects.Variables.Int.Create("randomize", Verilog.DataObjects.DataTypes.IntType.Create(false));
+                BuiltInMethod builtInMethod = BuiltInMethod.Create("randomize", returnVal, ports);
+                NamedElements.Add(builtInMethod.Name, builtInMethod);
+            }
 
         }
         public bool Packable
