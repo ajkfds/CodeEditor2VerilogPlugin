@@ -87,14 +87,26 @@ namespace pluginVerilog.Tool
         }
 
         /// <summary>
+        /// Semaphore to ensure only one queue processor runs at a time
+        /// </summary>
+        private static readonly SemaphoreSlim _queueProcessorLock = new(1, 1);
+
+        /// <summary>
         /// Processes parse requests from the queue sequentially.
         /// Only one parse operation runs at a time, ensuring consistent results.
         /// </summary>
         private static async Task ProcessQueueAsync()
         {
-            _isProcessingQueue = true;
+            // Try to acquire the queue processor lock to prevent concurrent execution
+            if (!await _queueProcessorLock.WaitAsync(TimeSpan.FromMilliseconds(100)))
+            {
+                // Another queue processor is already running, just return
+                return;
+            }
+
             try
             {
+                _isProcessingQueue = true;
                 while (_parseQueue.TryDequeue(out var request))
                 {
                     // Wait for any currently running parse to complete
@@ -102,7 +114,9 @@ namespace pluginVerilog.Tool
                     try
                     {
                         _currentParseTimestamp = request.Timestamp;
-                        await ParseAsync(request.TextFile, request.Mode);
+                        // Call ParseInternalAsync directly to avoid deadlock
+                        // (ParseAsync also tries to acquire _parseLock)
+                        await ParseInternalAsync(request.TextFile, request.Mode);
                     }
                     finally
                     {
@@ -113,6 +127,7 @@ namespace pluginVerilog.Tool
             finally
             {
                 _isProcessingQueue = false;
+                _queueProcessorLock.Release();
             }
         }
 
