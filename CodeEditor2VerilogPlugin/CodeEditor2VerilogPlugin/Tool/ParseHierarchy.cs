@@ -42,6 +42,17 @@ namespace pluginVerilog.Tool
         /// </summary>
         private static DateTime _currentParseTimestamp = DateTime.MinValue;
 
+        /// <summary>
+        /// CancellationTokenSource for the currently running parse operation.
+        /// Used to cancel running parses when a ForceAllFiles parse is requested.
+        /// </summary>
+        private static CancellationTokenSource? _currentParseCts = null;
+
+        /// <summary>
+        /// Lock object for synchronizing access to _currentParseCts
+        /// </summary>
+        private static readonly object _ctsLock = new object();
+
         public enum ParseMode
         {
             SearchReparseReqestedTree,
@@ -93,7 +104,7 @@ namespace pluginVerilog.Tool
 
         /// <summary>
         /// Processes parse requests from the queue sequentially.
-        /// Only one parse operation runs at a time, ensuring consistent results.
+        /// ForceAllFiles parse requests cancel any running non-ForceAll parse and clear the queue.
         /// </summary>
         private static async Task ProcessQueueAsync()
         {
@@ -114,6 +125,19 @@ namespace pluginVerilog.Tool
                     try
                     {
                         _currentParseTimestamp = request.Timestamp;
+
+                        // Check if this is a ForceAllFiles request
+                        if (request.Mode == ParseMode.ForceAllFiles)
+                        {
+                            // Cancel any currently running parse
+                            CancelCurrentParse();
+
+                            // Clear the queue of any pending non-ForceAll requests
+                            ClearNonForceAllFromQueue();
+
+                            CodeEditor2.Controller.AppendLog("ForceAllFiles requested - cancelled running parse and cleared queue", Avalonia.Media.Colors.Yellow);
+                        }
+
                         // Call ParseInternalAsync directly to avoid deadlock
                         // (ParseAsync also tries to acquire _parseLock)
                         await ParseInternalAsync(request.TextFile, request.Mode);
@@ -132,22 +156,85 @@ namespace pluginVerilog.Tool
         }
 
         /// <summary>
+        /// Cancels the currently running parse operation if any
+        /// </summary>
+        private static void CancelCurrentParse()
+        {
+            lock (_ctsLock)
+            {
+                if (_currentParseCts != null)
+                {
+                    if (!_currentParseCts.IsCancellationRequested)
+                    {
+                        _currentParseCts.Cancel();
+                        CodeEditor2.Controller.AppendLog("Cancelled running parse operation", Avalonia.Media.Colors.Orange);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Clears all non-ForceAllFiles requests from the queue.
+        /// ForceAllFiles requests are kept (unlikely but possible edge case).
+        /// </summary>
+        private static void ClearNonForceAllFromQueue()
+        {
+            var tempQueue = new ConcurrentQueue<ParseRequest>();
+            while (_parseQueue.TryDequeue(out var request))
+            {
+                // Keep only ForceAllFiles requests
+                if (request.Mode == ParseMode.ForceAllFiles)
+                {
+                    tempQueue.Enqueue(request);
+                }
+            }
+            // Put back the ForceAllFiles requests (if any)
+            while (tempQueue.TryDequeue(out var request))
+            {
+                _parseQueue.Enqueue(request);
+            }
+        }
+
+        /// <summary>
         /// Internal implementation that performs the actual parsing.
         /// Returns parsed files and include files for non-ForceAllFiles modes.
+        /// Creates a CancellationTokenSource that can be used to cancel the parse operation.
         /// </summary>
         private static async Task<(List<IVerilogRelatedFile> files, List<IVerilogRelatedFile> includeFiles)?> ParseInternalAsync(CodeEditor2.Data.TextFile textFile, ParseMode parseMode)
         {
             ConcurrentDictionary<string, IVerilogRelatedFile> filesDict = new ConcurrentDictionary<string, IVerilogRelatedFile>();
             ConcurrentDictionary<string, IVerilogRelatedFile> includeFilesDict = new ConcurrentDictionary<string, IVerilogRelatedFile>();
 
+            // Create a new CancellationTokenSource for this parse operation
+            CancellationTokenSource cts = new CancellationTokenSource();
+
+            // Store the CTS so it can be cancelled by a subsequent ForceAllFiles request
+            lock (_ctsLock)
+            {
+                _currentParseCts = cts;
+            }
+
             try
             {
-                await runParallel(textFile, parseMode, filesDict, includeFilesDict, null);
+                await runParallel(textFile, parseMode, filesDict, includeFilesDict, cts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                CodeEditor2.Controller.AppendLog("Parse operation cancelled", Avalonia.Media.Colors.Orange);
             }
             catch (Exception ex)
             {
                 if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
                 CodeEditor2.Controller.AppendLog("# Exception : " + ex.Message, Avalonia.Media.Colors.Red);
+            }
+            finally
+            {
+                // Clear the CTS reference after the parse completes
+                lock (_ctsLock)
+                {
+                    _currentParseCts = null;
+                }
+                cts.Dispose();
             }
 
             return (filesDict.Values.ToList(), includeFilesDict.Values.ToList());
@@ -176,12 +263,12 @@ namespace pluginVerilog.Tool
 
             // entry first
             ParseTask task = new ParseTask(Id: textFile.Key, tarfgetTextFile: textFile, topLevel: true);
-            firstHierTaskCount.Append(true);
+            firstHierTaskCount.Push(true);
             EnqueueWork(task, workQueue, completeIds, signal);
 
             for (int i = 0; i < workerCount; i++)
             { // pend reparse first task
-                firstHierTaskCount.Append(false);
+                firstHierTaskCount.Push(false);
             }
 
             // boot workers
@@ -355,7 +442,7 @@ namespace pluginVerilog.Tool
                     ParseTask newTask = new ParseTask(Id: tfile.Key, tarfgetTextFile: tfile);
                     if (task.topLevel)
                     {
-                        firstHierTaskCount.Append(false);
+                        firstHierTaskCount.Push(false);
                     }
                     EnqueueWork(newTask, workQueue, completeIds, signal);
 
