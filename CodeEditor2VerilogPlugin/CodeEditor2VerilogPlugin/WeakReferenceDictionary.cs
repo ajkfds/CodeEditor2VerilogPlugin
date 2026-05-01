@@ -1,122 +1,65 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 
 namespace pluginVerilog
 {
     public class WeakReferenceDictionary<K, T> where K : notnull where T : class
     {
-        private Dictionary<K, System.WeakReference<T>> itemRefs = new Dictionary<K, WeakReference<T>>();
+        private ConcurrentDictionary<K, System.WeakReference<T>> itemRefs = new ConcurrentDictionary<K, WeakReference<T>>();
 
         public int Count { get { return itemRefs.Count; } }
         public void Register(K key, T item)
         {
-            lock (itemRefs)
-            {
-                if (itemRefs.ContainsKey(key))
-                {
-                    T? prevItem;
-                    if (itemRefs[key].TryGetTarget(out prevItem))
-                    {   // replace item
-                        itemRefs[key] = new WeakReference<T>(item);
-                        return;
-                    }
-                    else
-                    {
-                        // prevItem already lost
-                        itemRefs.Remove(key);  // remove lost reference 
-                    }
-                }
-
-                itemRefs.Add(key, new WeakReference<T>(item));
-            }
+            WeakReference < T > weakRef = new WeakReference<T>(item);
+            itemRefs.AddOrUpdate(key, weakRef, (k, old) => { return weakRef; });
         }
 
         public bool Remove(K key)
         {
-            lock (itemRefs)
-            {
-                if (itemRefs.ContainsKey(key))
-                {
-                    itemRefs.Remove(key);
-                    return true;
-                }
-                else
-                {
-                    // no target file
-                    return false;
-                }
-            }
+            return itemRefs.TryRemove(key, out _);
         }
 
         public bool HasItem(K key)
         {
-            lock (itemRefs)
-            {
-                if (itemRefs.ContainsKey(key))
-                {
-                    T? prevFile;
-                    if (itemRefs[key].TryGetTarget(out prevFile))
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        itemRefs.Remove(key);
-                        return false;
-                    }
-                }
-                else
-                {
-                    return false;
-                }
-            }
+            return itemRefs.ContainsKey(key);
         }
 
         public T? GetItem(K key)
         {
-            lock (itemRefs)
+            if(!itemRefs.TryGetValue(key, out var weakRef))
             {
-                if (itemRefs.ContainsKey(key))
-                {
-                    T? item;
-                    if (itemRefs[key].TryGetTarget(out item))
-                    {
-                        return item;
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                }
-                else
-                {
-                    return null;
-                }
+                return null;
+            }
+            T? item;
+            if (weakRef.TryGetTarget(out item))
+            {
+                return item;
+            }
+            else
+            {
+                itemRefs.TryRemove(key, out _);
+                return null;
             }
         }
 
         public List<K> GetMatchedKeyList(Func<T, bool> isMatched)
         {
             List<K> resultKeys = new List<K>();
-            List<K> removeKeys = new List<K>();
 
-            foreach (var itemRef in itemRefs)
+            foreach (var weakRefKvp in itemRefs)
             {
                 T? item;
-                if (!itemRefs[itemRef.Key].TryGetTarget(out item))
+                if (!weakRefKvp.Value.TryGetTarget(out item))
                 {
-                    removeKeys.Add(itemRef.Key);
+                    itemRefs.TryRemove(weakRefKvp.Key, out _);
                 }
                 else if (isMatched(item))
                 {
-                    resultKeys.Add(itemRef.Key);
+                    resultKeys.Add(weakRefKvp.Key);
                 }
-            }
 
-            foreach (var key in removeKeys)
-            {
-                itemRefs.Remove(key);
             }
             return resultKeys;
         }
@@ -128,23 +71,12 @@ namespace pluginVerilog
 
         public void CleanDictionary()
         {
-            lock (itemRefs)
+            foreach (var weakRefKvp in itemRefs)
             {
-                List<K> removeKeys = new List<K>();
-
-                foreach (var itemRef in itemRefs)
+                T? item;
+                if (!weakRefKvp.Value.TryGetTarget(out item))
                 {
-                    T? item;
-                    if (!itemRefs[itemRef.Key].TryGetTarget(out item))
-                    {
-                        removeKeys.Add(itemRef.Key);
-                    }
-
-                }
-
-                foreach (var key in removeKeys)
-                {
-                    itemRefs.Remove(key);
+                    itemRefs.TryRemove(weakRefKvp.Key, out _);
                 }
             }
         }
