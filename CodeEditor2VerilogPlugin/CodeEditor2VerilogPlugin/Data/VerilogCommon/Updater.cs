@@ -154,19 +154,19 @@ namespace pluginVerilog.Data.VerilogCommon
             if (verilogFile.VerilogParsedDocument?.Root == null) throw new Exception();
 
             // add building block instance
-            foreach (BuildingBlock buldingBlock in verilogFile.VerilogParsedDocument.Root.BuildingBlocks.Values)
+            foreach (var buldingBlockKvp in verilogFile.VerilogParsedDocument.Root.BuildingBlocks)
             {
                 bool alreadyExist = false;
 
-                if (verilogFile.Items.TryGetValue(buldingBlock.Name, out CodeEditor2.Data.Item? gotItem))
+                if (verilogFile.Items.TryGetValue(buldingBlockKvp.Value.Name, out CodeEditor2.Data.Item? gotItem))
                 {   // has same name item
                     if (gotItem == null) throw new Exception();
                     CodeEditor2.Data.Item subItem = gotItem;
 
-                    if (buldingBlock is Module)
+                    if (buldingBlockKvp.Value is Module)
                     {
                         VerilogModuleInstance? oldItem = subItem as VerilogModuleInstance;
-                        Module module = (Module)buldingBlock;
+                        Module module = (Module)buldingBlockKvp.Value;
 
                         if (oldItem != null && module != null && oldItem.Name == module.Name && oldItem.ModuleName == module.Name)
                         {
@@ -179,9 +179,9 @@ namespace pluginVerilog.Data.VerilogCommon
 
                 if (!alreadyExist)
                 {
-                    if (buldingBlock is Module)
+                    if (buldingBlockKvp.Value is Module)
                     {
-                        Module module = (Module)buldingBlock;
+                        Module module = (Module)buldingBlockKvp.Value;
 
                         ModuleInstantiation moduleInstantiation = new ModuleInstantiation()
                         {
@@ -201,7 +201,7 @@ namespace pluginVerilog.Data.VerilogCommon
                         newSubItems.Add(instance.Name, instance);
 
                     }
-                    else if (buldingBlock is Interface)
+                    else if (buldingBlockKvp.Value is Interface)
                     {
 
                     }

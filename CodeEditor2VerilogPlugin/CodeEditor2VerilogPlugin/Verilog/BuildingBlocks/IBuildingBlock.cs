@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
@@ -11,7 +12,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         // definition tree parents
         NameSpace Parent { get; }
         // definition tree chiledren
-        Dictionary<string, BuildingBlock> BuildingBlocks { get; }
+        ConcurrentDictionary<string, BuildingBlock> BuildingBlocks { get; }
 
         NameSpace? GetHierarchyNameSpace(IndexReference index);
         DataObjects.Constants.Constants? GetConstants(string identifier);

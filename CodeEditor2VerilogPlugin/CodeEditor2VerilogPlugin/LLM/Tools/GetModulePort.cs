@@ -22,8 +22,11 @@ namespace pluginVerilog.LLM.Tools
             if (file == null || file.CodeDocument == null) return "not found";
             Verilog.ParsedDocument? pdoc = file.VerilogParsedDocument;
             if (pdoc == null) return "not found";
-            if (!pdoc.Root.BuildingBlocks.ContainsKey(moduleName)) return "not found";
-            BuildingBlock buildingBlock = pdoc.Root.BuildingBlocks[moduleName];
+            if(!pdoc.Root.BuildingBlocks.TryGetValue(moduleName,out BuildingBlock? buildingBlock))
+            {
+                return "not found";
+            }
+            buildingBlock = pdoc.Root.BuildingBlocks[moduleName];
             Verilog.IPortNameSpace? portNameSpace = buildingBlock as Verilog.IPortNameSpace;
             if (portNameSpace == null) return "not found";
 

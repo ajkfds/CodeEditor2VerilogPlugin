@@ -101,8 +101,11 @@ namespace pluginVerilog
                 Verilog.ParsedDocument? parsedDocument = file.GetInstancedParsedDocument(InstanceKey) as Verilog.ParsedDocument;
                 if (parsedDocument == null) return null;
                 if (parsedDocument.Root == null) return null;
-                if (!parsedDocument.Root.BuildingBlocks.ContainsKey(instantiation.SourceName)) return null;
-                return parsedDocument.Root.BuildingBlocks[instantiation.SourceName];
+                if(!parsedDocument.Root.BuildingBlocks.TryGetValue(instantiation.SourceName, out BuildingBlock? buildingBlock))
+                {
+                    return null;
+                }
+                return buildingBlock;
             }
         }
 
@@ -281,8 +284,12 @@ namespace pluginVerilog
 
             if (file.VerilogParsedDocument == null) return null;
             if (file.VerilogParsedDocument.Root == null) return null;
-            if (!file.VerilogParsedDocument.Root.BuildingBlocks.ContainsKey(buildingBlockName)) return null;
-            return file.VerilogParsedDocument.Root.BuildingBlocks[buildingBlockName] as BuildingBlock;
+
+            if (!file.VerilogParsedDocument.Root.BuildingBlocks.TryGetValue(buildingBlockName, out BuildingBlock? buildingBlock))
+            {
+                return null;
+            }
+            return buildingBlock;
         }
 
 

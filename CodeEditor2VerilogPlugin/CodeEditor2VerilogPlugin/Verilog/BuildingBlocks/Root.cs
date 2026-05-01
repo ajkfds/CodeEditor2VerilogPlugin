@@ -77,10 +77,6 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             return null;
         }
 
-        public BuildingBlock? GetBuildingBlock(string name)
-        {
-            return GetBuildingBlock(name);
-        }
         public static async System.Threading.Tasks.Task<Root> ParseCreate(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
         {
             Root root = new Root()

@@ -80,8 +80,10 @@ namespace pluginVerilog.Data
             {
                 appendVerilogHeaderInstance(ifile, setup);
             }
-            if (!parsedDocument.Root.BuildingBlocks.ContainsKey(buildingBlockName)) return;
-            BuildingBlock buildingBlock = parsedDocument.Root.BuildingBlocks[buildingBlockName];
+            if(!parsedDocument.Root.BuildingBlocks.TryGetValue(buildingBlockName,out BuildingBlock? buildingBlock))
+            {
+                return;
+            }
 
             searchNameSpace(file, ids, buildingBlock, setup, path);
             //foreach(var item in file.Items.Values)

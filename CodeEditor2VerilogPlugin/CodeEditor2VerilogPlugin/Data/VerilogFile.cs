@@ -179,10 +179,9 @@ namespace pluginVerilog.Data
                 // Register New Building Block
                 if (vParsedDocument.Root != null)
                 {
-                    foreach (BuildingBlock buildingBlock in vParsedDocument.Root.BuildingBlocks.Values)
+                    foreach (var buildingBlockKvp in vParsedDocument.Root.BuildingBlocks)
                     {
-                        // register new parsedDocument
-                        ProjectProperty.RegisterBuildingBlock(buildingBlock.Name, buildingBlock, this);
+                        ProjectProperty.RegisterBuildingBlock(buildingBlockKvp.Key, buildingBlockKvp.Value, this);
                     }
                 }
 

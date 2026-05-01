@@ -186,19 +186,15 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
 
             // register with the parent bulidingblock
-            if (!parent.BuildingBlocks.ContainsKey(program.Name))
-            {
-                parent.BuildingBlocks.Add(program.Name, program);
+            if (parent.AddOrUpdateBuildingBlock(program.Name, program))
+            { // added
+
             }
             else
-            {
+            { // update
                 if (protoType)
                 {
                     program.NameReference.AddError("duplicated program name");
-                }
-                else
-                {
-                    program.BuildingBlocks[program.Name] = program;
                 }
             }
 

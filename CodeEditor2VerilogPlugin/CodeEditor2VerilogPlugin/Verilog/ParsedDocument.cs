@@ -471,12 +471,12 @@ namespace pluginVerilog.Verilog
         {
             if (Root == null) return null;
             IndexReference iref = IndexReference.Create(this.IndexReference, index);
-            foreach (BuildingBlock module in Root.BuildingBlocks.Values)
+            foreach (var moduleKvp in Root.BuildingBlocks)
             {
-                if (iref.IsSmallerThan(module.BeginIndexReference)) continue;
-                if (module.LastIndexReference == null) continue;
-                if (iref.IsGreaterThan(module.LastIndexReference)) continue;
-                return module;
+                if (iref.IsSmallerThan(moduleKvp.Value.BeginIndexReference)) continue;
+                if (moduleKvp.Value.LastIndexReference == null) continue;
+                if (iref.IsGreaterThan(moduleKvp.Value.LastIndexReference)) continue;
+                return moduleKvp.Value;
             }
             return null;
         }
@@ -486,12 +486,12 @@ namespace pluginVerilog.Verilog
             if (Root == null) return null;
             // get current buldingBlock
             NameSpace? space = null;
-            foreach (BuildingBlock buildingBlock in Root.BuildingBlocks.Values)
+            foreach (var buildingBlockKvp in Root.BuildingBlocks)
             {
-                if (iref.IsSmallerThan(buildingBlock.BeginIndexReference)) continue;
-                if (buildingBlock.LastIndexReference == null) break;
-                if (iref.IsGreaterThan(buildingBlock.LastIndexReference)) continue;
-                space = buildingBlock.GetHierarchyNameSpace(iref);
+                if (iref.IsSmallerThan(buildingBlockKvp.Value.BeginIndexReference)) continue;
+                if (buildingBlockKvp.Value.LastIndexReference == null) break;
+                if (iref.IsGreaterThan(buildingBlockKvp.Value.LastIndexReference)) continue;
+                space = buildingBlockKvp.Value.GetHierarchyNameSpace(iref);
                 break;
             }
             return space;

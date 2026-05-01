@@ -42,10 +42,8 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 word.MoveNext();
                 word.MoveNext(); // ::
 
-                if (targetBuildingBlock != null && targetBuildingBlock.BuildingBlocks.ContainsKey(word.Text))
-                {
-                    targetBuildingBlock = targetBuildingBlock.BuildingBlocks[word.Text];
-                }
+                if (targetBuildingBlock != null) targetBuildingBlock.BuildingBlocks.TryGetValue(word.Text, out targetBuildingBlock);
+
                 return parse(word, nameSpace, targetBuildingBlock);
             }
             if (word.NextText == ".") // hierarchy identifier
