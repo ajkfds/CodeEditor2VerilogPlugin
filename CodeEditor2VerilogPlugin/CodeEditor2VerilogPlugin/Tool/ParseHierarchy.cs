@@ -281,7 +281,7 @@ namespace pluginVerilog.Tool
                     while (true)
                     {
                         token?.ThrowIfCancellationRequested();
-                        if (await signal.WaitAsync(TimeSpan.FromMicroseconds(500)))
+                        if (await signal.WaitAsync(TimeSpan.FromMicroseconds(100)))
                         {
                             if (workQueue.TryDequeue(out var newTask))
                             {
