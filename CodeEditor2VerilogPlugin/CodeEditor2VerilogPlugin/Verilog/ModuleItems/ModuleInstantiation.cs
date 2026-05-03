@@ -305,18 +305,10 @@ namespace pluginVerilog.Verilog.ModuleItems
                 // swap to parameter overrided module
                 if (instancedModule != null)
                 {
-                    // ここで問題がでている。
                     if (parameterOverrides.Count != 0)
                     {
                         instancedModule = word.ProjectProperty.GetInstancedBuildingBlock(moduleInstantiation) as Module;
                     }
-
-                    if (moduleName == "scr1_tcm" && instancedModule == null)
-                    {
-                        string a = "";
-                    }
-
-
 
                     VerilogFile? baseFile = word.ProjectProperty.GetFileOfBuildingBlock(moduleName) as VerilogFile;
 /*
@@ -357,21 +349,12 @@ namespace pluginVerilog.Verilog.ModuleItems
                     }
 */
 
-                    if (moduleName == "scr1_tcm" && instancedModule == null)
-                    {
-                        //System.Diagnostics.Debugger.Break();
-                    }
 
 
                     if (instancedModule == null)
                     {
                         //                        nameSpace.BuildingBlock.ReparseRequested = true;
                         //                        word.RootParsedDocument.ReparseRequested = true;
-                        if (moduleName == "scr1_tcm" && instancedModule == null)
-                        {
-                            //System.Diagnostics.Debugger.Break();
-                        }
-
                         word.AddError("not parsed yet.");
                     }
                 }
