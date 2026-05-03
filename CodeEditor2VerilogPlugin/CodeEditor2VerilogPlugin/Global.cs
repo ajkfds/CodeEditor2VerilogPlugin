@@ -45,7 +45,7 @@ namespace pluginVerilog
                         Data.VerilogFile? vFile = file as Data.VerilogFile;
                         if (vFile == null) continue;
 
-                        sw.Write(vFile.DebugInfo());
+//                        sw.Write(vFile.DebugInfo());
                     }
                 }
 

@@ -10,6 +10,7 @@ using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.ModuleItems;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Data
@@ -76,18 +77,25 @@ namespace pluginVerilog.Data
             }
         }
 
+        // ModuleInstaceでparsedDocumentを保持しないとSourceFile側で保持するのはWeakReferenceだけなので消えてしまう。
+        private CodeEditor2.CodeEditor.ParsedDocument? _parsedDocument;
         public override CodeEditor2.CodeEditor.ParsedDocument? ParsedDocument
         {
             get
             {
                 Data.VerilogFile source = SourceVerilogFile;
                 ParsedDocument? parsedDocument = source.GetInstancedParsedDocument(_getKey());
+
+                // 取得するたびに保持しているparsedDocumentを最新のものに置き換える。
+                // 不要なparsedDocumentのGC回収を促進するため。
+                _parsedDocument = parsedDocument;
                 return parsedDocument;
             }
             set
             {
-                Data.VerilogFile source = SourceVerilogFile;
-                source.RegisterInstanceParsedDocument(_getKey(), value, this);
+                // ModuleInstanceで保持する。instanceが消えないようにするために。
+                _parsedDocument = value;
+                // Sourceへの登録はAcceptParseDocument側で行う
             }
         }
 
@@ -494,7 +502,7 @@ namespace pluginVerilog.Data
             await Dispatcher.UIThread.InvokeAsync(
                 async () =>
                 {
-                    await VerilogCommon.Updater.UpdateAsync(this);
+                    await VerilogCommon.Updater.UpdateAsync(this, itemUpdateSemaphore);
                     NavigatePanelNode.UpdateVisual();
                     if (CodeEditor2.Controller.NavigatePanel.GetSelectedFile() == this)
                     {

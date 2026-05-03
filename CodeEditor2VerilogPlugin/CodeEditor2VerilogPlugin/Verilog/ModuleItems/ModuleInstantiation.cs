@@ -167,11 +167,15 @@ namespace pluginVerilog.Verilog.ModuleItems
             string moduleName = word.Text;
             IndexReference beginIndexReference = word.CreateIndexReference();
 
-
+            // instance対象となるmoduleを取得する
             Module? instancedModule = word.ProjectProperty.GetBuildingBlock(moduleName) as Module;
+            if(moduleName == "scr1_tcm" && instancedModule == null)
+            {
+                System.Diagnostics.Debugger.Break();
+            }
             string moduleComment = word.GetNextComment();
             {
-                if (word.GetNextComment().Contains("@project"))
+                if (word.GetNextComment().Contains("@project")) // 他project moduleのinstance取得
                 {
                     var comment = word.GetNextCommentScanner();
                     while (!comment.EOC)
@@ -194,6 +198,10 @@ namespace pluginVerilog.Verilog.ModuleItems
                     }
                 }
             }
+            if (moduleName == "scr1_tcm" && instancedModule == null)
+            {
+                System.Diagnostics.Debugger.Break();
+            }
             if (instancedModule == null)
             {
                 if (word.ProjectProperty.ExtenralLibraryPath.ContainsKey(moduleName))
@@ -207,7 +215,12 @@ namespace pluginVerilog.Verilog.ModuleItems
                     word.RootParsedDocument.ReparseRequested = true;
                     if (!word.RootParsedDocument.UnfoundModules.Contains(moduleName)) word.RootParsedDocument.UnfoundModules.Add(moduleName);
                     CodeEditor2.Controller.AppendLog("## unfound " + moduleName + " at " + buildingBlock.Name, Avalonia.Media.Colors.Orange);
+                    if (moduleName == "scr1_tcm") System.Diagnostics.Debugger.Break();
                 }
+            }
+            if (moduleName == "scr1_tcm" && instancedModule == null)
+            {
+                System.Diagnostics.Debugger.Break();
             }
 
             //Data.VerilogFile? baseFile = instancedModule?.File as Data.VerilogFile;
@@ -292,18 +305,26 @@ namespace pluginVerilog.Verilog.ModuleItems
                 // swap to parameter overrided module
                 if (instancedModule != null)
                 {
+                    // ここで問題がでている。
                     if (parameterOverrides.Count != 0)
                     {
                         instancedModule = word.ProjectProperty.GetInstancedBuildingBlock(moduleInstantiation) as Module;
                     }
 
-                    VerilogFile? baseFile = word.ProjectProperty.GetFileOfBuildingBlock(moduleName) as VerilogFile;
-
-                    if (word.RootParsedDocument.ParseMode == CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.EditParse)
+                    if (moduleName == "scr1_tcm" && instancedModule == null)
                     {
+                        string a = "";
+                    }
+
+
+
+                    VerilogFile? baseFile = word.ProjectProperty.GetFileOfBuildingBlock(moduleName) as VerilogFile;
+/*
+                    if (word.RootParsedDocument.ParseMode == CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.EditParse)
+                    { // editparse時処理
+
                         if (instancedModule == null && baseFile != null)
                         {
-
                             VerilogModuleInstance? instance = VerilogModuleInstance.Create(moduleInstantiation);
                             var baseParser = instance?.CreateDocumentParser(CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.LoadParse, word.CancellationToken);
                             if (instance != null && baseParser != null)
@@ -311,32 +332,49 @@ namespace pluginVerilog.Verilog.ModuleItems
                                 await baseParser.ParseAsync();
                                 if (baseParser.ParsedDocument != null)
                                 {
-                                    await Dispatcher.UIThread.InvokeAsync(
-                                        async () =>
-                                        {
-                                            if (word.RootParsedDocument.File != null) word.RootParsedDocument.File.Items.AddOrUpdate(instance.Name, instance);
-                                            Verilog.ParsedDocument vParsedDocument = (Verilog.ParsedDocument)baseParser.ParsedDocument;
-                                            vParsedDocument.ReparseRequested = true;
-                                            await instance.AcceptParsedDocumentAsync(baseParser.ParsedDocument);
-                                        }
-                                    );
+                                    if (word.RootParsedDocument.File != null) word.RootParsedDocument.File.Items.AddOrUpdate(instance.Name, instance);
+                                    Verilog.ParsedDocument vParsedDocument = (Verilog.ParsedDocument)baseParser.ParsedDocument;
+                                    vParsedDocument.ReparseRequested = true;
+                                    await instance.AcceptParsedDocumentAsync(baseParser.ParsedDocument);
+                                    //await Dispatcher.UIThread.InvokeAsync(
+                                    //    async () =>
+                                    //    {
+                                    //        if (word.RootParsedDocument.File != null) word.RootParsedDocument.File.Items.AddOrUpdate(instance.Name, instance);
+                                    //        Verilog.ParsedDocument vParsedDocument = (Verilog.ParsedDocument)baseParser.ParsedDocument;
+                                    //        vParsedDocument.ReparseRequested = true;
+                                    //        await instance.AcceptParsedDocumentAsync(baseParser.ParsedDocument);
+                                    //    }
+                                    //);
                                 }
                             }
 
                             instancedModule = word.ProjectProperty.GetInstancedBuildingBlock(moduleInstantiation) as Module;
                         }
-
+                        if (moduleName == "scr1_tcm" && instancedModule == null)
+                        {
+                            System.Diagnostics.Debugger.Break();
+                        }
                     }
+*/
+
+                    if (moduleName == "scr1_tcm" && instancedModule == null)
+                    {
+                        //System.Diagnostics.Debugger.Break();
+                    }
+
 
                     if (instancedModule == null)
                     {
                         //                        nameSpace.BuildingBlock.ReparseRequested = true;
                         //                        word.RootParsedDocument.ReparseRequested = true;
+                        if (moduleName == "scr1_tcm" && instancedModule == null)
+                        {
+                            //System.Diagnostics.Debugger.Break();
+                        }
 
                         word.AddError("not parsed yet.");
                     }
                 }
-
                 //                moduleInstantiation.InstancedModule = instancedModule;
 
                 if (word.Prototype)

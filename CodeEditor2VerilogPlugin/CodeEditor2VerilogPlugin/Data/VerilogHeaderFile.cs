@@ -6,6 +6,7 @@ using pluginVerilog.CodeEditor;
 using pluginVerilog.Verilog;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Data
@@ -128,10 +129,11 @@ namespace pluginVerilog.Data
         public bool SystemVerilog { get { return false; } }
 
         // update sub-items from ParsedDocument
+        private readonly SemaphoreSlim _updateSemaphore = new SemaphoreSlim(1, 1);
         public override async System.Threading.Tasks.Task UpdateAsync()
         {
             await base.UpdateAsync();
-            await VerilogCommon.Updater.UpdateAsync(this);
+            await VerilogCommon.Updater.UpdateAsync(this, _updateSemaphore);
         }
         // read text document from file
         private bool readFromFile()

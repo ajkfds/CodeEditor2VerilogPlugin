@@ -7,6 +7,7 @@ using CodeEditor2.Data;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Data
@@ -360,10 +361,10 @@ namespace pluginVerilog.Data
             return new Parser.VerilogParser(this.SourceVerilogFile, ModuleName, ParameterOverrides, parseMode, token);
         }
 
-
+        private readonly SemaphoreSlim _updateSemaphore = new SemaphoreSlim(1, 1);
         public override async Task UpdateAsync()
         {
-            await VerilogCommon.Updater.UpdateAsync(this);
+            await VerilogCommon.Updater.UpdateAsync(this, _updateSemaphore);
         }
         // Auto Complete Handler
 

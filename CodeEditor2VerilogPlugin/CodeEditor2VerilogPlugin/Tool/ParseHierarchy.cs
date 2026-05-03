@@ -354,6 +354,9 @@ namespace pluginVerilog.Tool
             workQueue.Enqueue(parse);
             signal.Release(); // start worker
         }
+
+
+        ///上位から下層にむけてのparse、並列に動作する
         private static async Task parseTextFile(
             int index,
             ParseTask task,
@@ -368,6 +371,7 @@ namespace pluginVerilog.Tool
             CancellationToken? token
             )
         {
+
             CodeEditor2.Data.TextFile textFile = task.tarfgetTextFile;
             Data.IVerilogRelatedFile? verilogFile = null;
             if (textFile is Data.VerilogModuleInstance)
@@ -450,11 +454,13 @@ namespace pluginVerilog.Tool
             }
         }
 
+        // 下層から上層に向けての再parse。
         private static async Task reparseText(CodeEditor2.Data.TextFile textFile,
             ConcurrentDictionary<string, IVerilogRelatedFile> files,
             ConcurrentDictionary<string, IVerilogRelatedFile> includeFiles,
             ParseMode parseMode, CancellationToken? token)
         {
+
             Data.IVerilogRelatedFile? verilogFile = null;
             if (textFile is Data.VerilogModuleInstance)
             {

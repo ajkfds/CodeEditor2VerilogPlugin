@@ -249,33 +249,34 @@ namespace pluginVerilog.Data
 
 
         private ConcurrentDictionary<string, System.WeakReference<ParsedDocument>> instancedParsedDocumentRefs = new ConcurrentDictionary<string, WeakReference<ParsedDocument>>();
+//        private static ConcurrentDictionary<string, ParsedDocument> instancedParsedDocumenTests = new ConcurrentDictionary<string, ParsedDocument>();
 
-        internal string DebugInfo()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("## " + Name + "\r\n");
+        //internal string DebugInfo()
+        //{
+        //    StringBuilder sb = new StringBuilder();
+        //    sb.Append("## " + Name + "\r\n");
 
-            Verilog.ParsedDocument? parsedDocument = ParsedDocument as Verilog.ParsedDocument; // no lock is needed. ParsedDocument property is thread safe
+        //    Verilog.ParsedDocument? parsedDocument = ParsedDocument as Verilog.ParsedDocument; // no lock is needed. ParsedDocument property is thread safe
 
-            if (parsedDocument != null)
-            {
-                sb.Append(",pd.ReparseRequested:" + parsedDocument.ReparseRequested + ",pd.Version" + parsedDocument.Version);
-            }
-            sb.Append("\r\n");
-            foreach (var kvPair in instancedParsedDocumentRefs)
-            {
-                ParsedDocument? pDoc;
-                if (!kvPair.Value.TryGetTarget(out pDoc)) continue;
-                Verilog.ParsedDocument? iParsedDocument = pDoc as Verilog.ParsedDocument;
+        //    if (parsedDocument != null)
+        //    {
+        //        sb.Append(",pd.ReparseRequested:" + parsedDocument.ReparseRequested + ",pd.Version" + parsedDocument.Version);
+        //    }
+        //    sb.Append("\r\n");
+        //    foreach (var kvPair in instancedParsedDocumentRefs)
+        //    {
+        //        ParsedDocument? pDoc;
+        //        if (!kvPair.Value.TryGetTarget(out pDoc)) continue;
+        //        Verilog.ParsedDocument? iParsedDocument = pDoc as Verilog.ParsedDocument;
 
-                if (iParsedDocument != null)
-                {
-                    sb.Append(",pd.ReparseRequested:" + iParsedDocument.ReparseRequested + ",pd.Version" + iParsedDocument.Version);
-                }
-                sb.Append("\r\n");
-            }
-            return sb.ToString();
-        }
+        //        if (iParsedDocument != null)
+        //        {
+        //            sb.Append(",pd.ReparseRequested:" + iParsedDocument.ReparseRequested + ",pd.Version" + iParsedDocument.Version);
+        //        }
+        //        sb.Append("\r\n");
+        //    }
+        //    return sb.ToString();
+        //}
 
         public ParsedDocument? GetInstancedParsedDocument(string key)
         {
@@ -295,13 +296,20 @@ namespace pluginVerilog.Data
                     }
                     else
                     {
-                        weakRef.TryGetTarget(out ret);
-                        return ret;
+                        if(weakRef.TryGetTarget(out ret))
+                        {
+                            return ret;
+                        }
+                        else
+                        {
+                            // もしweakrefrenceの参照先が内容が失われているなら消しておく。
+                            instancedParsedDocumentRefs.TryRemove(key, out _);
+                            return null;
+                        }
                     }
                 }
                 else
                 {
-                    instancedParsedDocumentRefs.TryRemove(key, out _);
                     return null;
                 }
             }
@@ -309,12 +317,18 @@ namespace pluginVerilog.Data
 
         public void RegisterInstanceParsedDocument(string id, ParsedDocument parsedDocument, InstanceTextFile moduleInstance)
         {
+            if(parsedDocument == null && System.Diagnostics.Debugger.IsAttached)
+            {
+                System.Diagnostics.Debugger.Break();
+            }　
+
             if (id == "")
             {
                 ParsedDocument = parsedDocument; // no lock is needed. ParsedDocument property is thread safe
             }
             else
             {
+//                instancedParsedDocumenTests.AddOrUpdate(id, parsedDocument, (key, oldVaue) => { return parsedDocument; });
                 instancedParsedDocumentRefs.AddOrUpdate(id, new WeakReference<ParsedDocument>(parsedDocument), (key, oldValue) => new WeakReference<ParsedDocument>(parsedDocument));
             }
         }
@@ -489,7 +503,7 @@ namespace pluginVerilog.Data
                 return;
             }
 
-            await VerilogCommon.Updater.UpdateAsync(this);
+            await VerilogCommon.Updater.UpdateAsync(this, itemUpdateSemaphore);
             NavigatePanelNode.UpdateVisual();
             if (CodeEditor2.Controller.NavigatePanel.GetSelectedFile() == this)
             {

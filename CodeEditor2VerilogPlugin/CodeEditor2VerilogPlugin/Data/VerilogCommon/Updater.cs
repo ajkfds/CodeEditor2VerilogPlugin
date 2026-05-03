@@ -4,6 +4,7 @@ using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.ModuleItems;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace pluginVerilog.Data.VerilogCommon
 {
@@ -18,9 +19,8 @@ namespace pluginVerilog.Data.VerilogCommon
         /// <summary>
         /// Lock for atomic items update to prevent partial updates during reads
         /// </summary>
-        private static readonly object _itemsUpdateLock = new object();
 
-        public static async System.Threading.Tasks.Task UpdateAsync(IVerilogRelatedFile item)
+        public static async System.Threading.Tasks.Task UpdateAsync(IVerilogRelatedFile item, SemaphoreSlim _semaphore)
         {
             if (!Dispatcher.UIThread.CheckAccess()) System.Diagnostics.Debugger.Break();
 
@@ -36,7 +36,8 @@ namespace pluginVerilog.Data.VerilogCommon
                 )
             {
                 // dispose all sub items - use atomic update to prevent partial state
-                lock (_itemsUpdateLock)
+                await _semaphore.WaitAsync();
+                try
                 {
                     // Take a snapshot and dispose outside the main items lock if needed
                     var itemsToDispose = new List<CodeEditor2.Data.Item>();
@@ -53,6 +54,10 @@ namespace pluginVerilog.Data.VerilogCommon
                     {
                         subItem.Dispose();
                     }
+                }
+                finally
+                {
+                    _semaphore.Release();
                 }
                 return;
             }
@@ -76,6 +81,7 @@ namespace pluginVerilog.Data.VerilogCommon
             }
             else if (item is VerilogFile)
             {
+                // 複数のmoduleを含むroot itemは子として各moduleのinstanceを生成させる
                 VerilogFile verilogFile = (VerilogFile)item;
                 if (item.VerilogParsedDocument.Root.BuildingBlocks.Count == 1)
                 {
@@ -88,7 +94,9 @@ namespace pluginVerilog.Data.VerilogCommon
             }
 
             // Atomic swap: dispose old items and replace with new ones in a single operation
-            lock (_itemsUpdateLock)
+
+            await _semaphore.WaitAsync();
+            try
             {
                 var oldItems = new List<CodeEditor2.Data.Item>();
                 
@@ -114,6 +122,10 @@ namespace pluginVerilog.Data.VerilogCommon
                 {
                     oldItem.Dispose();
                 }
+            }
+            finally
+            {
+                _semaphore.Release();
             }
         }
 
