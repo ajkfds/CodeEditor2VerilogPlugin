@@ -461,7 +461,19 @@ namespace pluginVerilog.Verilog.Statements
             }
             word.MoveNext();
 
-            foreachStatement.TargetReference = Expressions.DataObjectReference.ParseCreateWoRange(word, nameSpace, foreachStatement, true);
+            //foreachStatement.TargetReference = Expressions.DataObjectReference.ParseCreateWoRange(word, nameSpace, foreachStatement, true);
+            Primary? primary = Primary.ParseCreateWoRange(word, nameSpace,false);
+            if(primary is DataObjectReference)
+            {
+
+            }
+            else
+            {
+                if (primary != null) primary.Reference.AddError("illegal object");
+                else word.AddError("illegal object");
+            }
+//            Expression? target = Expressions.Expression.ParseCreate(word, nameSpace);
+            //foreachStatement.TargetReference = Expressions.DataObjectReference.ParseCreateWoRange(word, nameSpace, foreachStatement, true);
 
             if (word.Text != "[")
             {
@@ -469,8 +481,12 @@ namespace pluginVerilog.Verilog.Statements
                 word.SkipToKeyword(";");
                 return foreachStatement;
             }
+            else
+            {
+                word.MoveNext();
+            }
 
-            while (!word.Eof && word.Text != "[")
+            while (!word.Eof && word.Text != "]")
             {
                 string name = word.Text;
                 if (General.ListOfKeywords.Contains(name))
@@ -479,8 +495,12 @@ namespace pluginVerilog.Verilog.Statements
                     break;
                 }
                 DataObjects.DataTypes.IDataType dataType = DataObjects.DataTypes.IntType.Create(false);
-                DataObjects.DataObject.Create(name, dataType);
+                DataObjects.DataObject index = DataObjects.DataObject.Create(name, dataType);
                 word.Color(CodeDrawStyle.ColorType.Variable);
+                if (!foreachStatement.NamedElements.ContainsKey(index.Name)) foreachStatement.NamedElements.Add(index.Name, index);
+                else word.AddError("illegal index");
+                if (!word.Prototype) index.Defined = true;
+
                 word.MoveNext();
 
                 if (word.Text == "]") break;
@@ -508,7 +528,7 @@ namespace pluginVerilog.Verilog.Statements
             }
             word.MoveNext();
 
-            foreachStatement.Statement = await Statements.ParseCreateStatement(word, nameSpace);
+            foreachStatement.Statement = await Statements.ParseCreateStatement(word, foreachStatement);
 
             return foreachStatement;
         }

@@ -186,7 +186,7 @@ namespace pluginVerilog.NavigatePanel
         public static IImage? GetIcon(IVerilogRelatedFile verilogRelatedFile)
         {
             // Icon badge will update only in UI thread
-            if (System.Threading.Thread.CurrentThread.Name != "UI")
+            if (!Dispatcher.UIThread.CheckAccess())
             {
                 throw new Exception();
             }

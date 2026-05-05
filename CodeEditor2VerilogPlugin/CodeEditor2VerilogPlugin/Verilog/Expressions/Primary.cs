@@ -134,13 +134,17 @@ number
         }
         public static new Primary? ParseCreate(WordScanner word, NameSpace nameSpace, bool acceptImplicitNet)
         {
-            return parseCreate(word, nameSpace, false, acceptImplicitNet);
+            return parseCreate(word, nameSpace, false, acceptImplicitNet,true);
         }
         public static Primary? ParseCreateLValue(WordScanner word, NameSpace nameSpace, bool acceptImplicitNet)
         {
-            return parseCreate(word, nameSpace, true, acceptImplicitNet);
+            return parseCreate(word, nameSpace, true, acceptImplicitNet,true);
         }
-        private static Primary? parseCreate(WordScanner word, NameSpace nameSpace, bool lValue, bool acceptImplicitNet)
+        public static Primary? ParseCreateWoRange(WordScanner word, NameSpace nameSpace, bool acceptImplicitNet)
+        {
+            return parseCreate(word, nameSpace, false, acceptImplicitNet, false);
+        }
+        private static Primary? parseCreate(WordScanner word, NameSpace nameSpace, bool lValue, bool acceptImplicitNet, bool acceptRange = true)
         {
             //if (word.Text == "srif") System.Diagnostics.Debugger.Break();
 
@@ -294,7 +298,7 @@ number
                     // variable reference
                     if (element is DataObject)
                     {
-                        return parseDataObject(word, nameSpace, targetNameSpace, lValue, nameSpaceText);
+                        return parseDataObject(word, nameSpace, targetNameSpace, lValue, acceptRange, nameSpaceText);
                     }
 
                     // Since Task and Function are also namespaces, they need to be processed before namespaces.
@@ -351,7 +355,7 @@ number
                             word.ApplyPrototypeRule(word.ProjectProperty.RuleSet.ImplicitNetDeclaretion);
                         }
 
-                        return parseDataObject(word, nameSpace, targetNameSpace, lValue, nameSpaceText);
+                        return parseDataObject(word, nameSpace, targetNameSpace, lValue, acceptRange, nameSpaceText);
                     }
 
                     IDataType? dataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, null);
@@ -413,11 +417,26 @@ number
 
             if (element is IBuildingBlockInstantiation)
             {
-                word.Color(CodeDrawStyle.ColorType.Identifier);
-                word.MoveNext();
                 IBuildingBlockInstantiation buildingBlockInstantiation = (IBuildingBlockInstantiation)element;
                 BuildingBlock? buildingBlock = buildingBlockInstantiation.GetInstancedBuildingBlock();
-                if (buildingBlock == null) return null;
+                if (buildingBlock != null)
+                {
+                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.MoveNext();
+                } else {
+                    if (word.NextText == ".")
+                    { // unfound heirarchy
+                        return searchUnfoundNameSpace(word, ref nameSpaceText);
+                    }
+                    else
+                    {
+                        nameSpaceText += word.Text;
+                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        return new UnfoundNameSpace() { DefinitionReference = word.GetReference(), Name = nameSpaceText, Reference = word.GetReference() };
+                    }
+                }
+
+
                 if (word.Text == ".")
                 {
                     word.MoveNext();
@@ -471,9 +490,9 @@ number
             return new UnfoundNameSpace() { DefinitionReference = beginRef, Name = "?", Reference = wordReference };
         }
 
-        public static Primary? parseDataObject(WordScanner word, NameSpace nameSpace, INamedElement owner, bool lValue, string nameSpaceText)
+        public static Primary? parseDataObject(WordScanner word, NameSpace nameSpace, INamedElement owner, bool lValue, bool acceptRange, string nameSpaceText)
         {
-            DataObjectReference? dataObjectReference = DataObjectReference.ParseCreate(word, nameSpace, owner, lValue);
+            DataObjectReference? dataObjectReference = DataObjectReference.ParseCreate(word, nameSpace, owner, lValue, acceptRange);
 
             if (dataObjectReference == null) return null;
             if (dataObjectReference.TargetDataObject == null) return null;
@@ -512,7 +531,7 @@ number
             {
                 if (nameSpaceText != "") nameSpaceText = nameSpaceText + ".";
                 nameSpaceText = nameSpaceText + dataObjectReference.DatObjectName + ".";
-                return parseDataObject(word, nameSpace, dataObjectReference.TargetDataObject, lValue, nameSpaceText);
+                return parseDataObject(word, nameSpace, dataObjectReference.TargetDataObject, lValue, acceptRange, nameSpaceText);
             }
 
             // Since Task and Function are also namespaces, they need to be processed before namespaces.
@@ -582,7 +601,7 @@ number
         }
 
 
-        private static Primary? subParseCreate(WordScanner word, NameSpace nameSpace, bool lValue, bool acceptImplicitNet)
+        private static Primary? subParseCreate(WordScanner word, NameSpace nameSpace, bool lValue, bool acceptImplicitNet, bool acceptRange)
         {
             if (nameSpace == null) throw new Exception();
 
@@ -596,7 +615,7 @@ number
                     return null;
                 case WordPointer.WordTypeEnum.Text:
                     {
-                        var variable = DataObjectReference.ParseCreate(word, nameSpace, nameSpace, lValue);
+                        var variable = DataObjectReference.ParseCreate(word, nameSpace, nameSpace, lValue, acceptRange);
                         if (variable != null) return variable;
 
                         var parameter = ParameterReference.ParseCreate(word, nameSpace);
@@ -627,7 +646,7 @@ number
                                 word.MoveNext();
                                 word.MoveNext(); // .
 
-                                Primary? primary = subParseCreate(word, module, lValue, acceptImplicitNet);
+                                Primary? primary = subParseCreate(word, module, lValue, acceptImplicitNet, acceptRange);
                                 if (primary == null)
                                 {
                                     word.AddError("illegal variable");
@@ -642,7 +661,7 @@ number
                                 word.MoveNext();
                                 word.MoveNext(); // .
 
-                                Primary? primary = subParseCreate(word, space, lValue, acceptImplicitNet);
+                                Primary? primary = subParseCreate(word, space, lValue, acceptImplicitNet, acceptRange);
                                 if (primary == null)
                                 {
                                     word.AddError("illegal variable");
@@ -671,7 +690,7 @@ number
                                 if (word.Text == ".")
                                 {
                                     word.MoveNext();
-                                    Primary? primary = subParseCreate(word, module, lValue, acceptImplicitNet);
+                                    Primary? primary = subParseCreate(word, module, lValue, acceptImplicitNet, acceptRange);
                                     if (primary == null)
                                     {
                                         word.AddError("illegal variable");

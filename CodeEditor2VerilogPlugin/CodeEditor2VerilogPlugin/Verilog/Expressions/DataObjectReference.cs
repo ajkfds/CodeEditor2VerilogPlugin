@@ -113,16 +113,18 @@ namespace pluginVerilog.Verilog.Expressions
             return val;
         }
 
-        public static DataObjectReference? ParseCreate(WordScanner word, NameSpace nameSpace, INamedElement owner, bool assigned)
-        {
-            return parseCreate(word, nameSpace, owner, assigned, true);
-        }
+        //public static DataObjectReference? ParseCreate(WordScanner word, NameSpace nameSpace, INamedElement owner, bool assigned)
+        //{
+        //    return parseCreate(word, nameSpace, owner, assigned, true);
+        //}
 
-        // for foreach parse. get DataObject reference w/o range parse
-        public static DataObjectReference? ParseCreateWoRange(WordScanner word, NameSpace nameSpace, INamedElement owner, bool assigned)
-        {
-            return parseCreate(word, nameSpace, owner, assigned, false);
-        }
+
+
+        //// for foreach parse. get DataObject reference w/o range parse
+        //public static DataObjectReference? ParseCreateWoRange(WordScanner word, NameSpace nameSpace, INamedElement owner, bool assigned)
+        //{
+        //    return parseCreate(word, nameSpace, owner, assigned, false);
+        //}
 
         /// <summary>
         /// Parse and Create DataObject Reference
@@ -133,7 +135,7 @@ namespace pluginVerilog.Verilog.Expressions
         /// <param name="assigned"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        private static DataObjectReference? parseCreate(WordScanner word, NameSpace nameSpace, INamedElement owner, bool assigned, bool acceptRange)
+        public static DataObjectReference? ParseCreate(WordScanner word, NameSpace nameSpace, INamedElement owner, bool assigned, bool acceptRange = true)
         {
             if (!owner.NamedElements.ContainsDataObject(word.Text)) return null;
             DataObjects.DataObject originalDataObject = (DataObjects.DataObject)owner.NamedElements[word.Text];
@@ -194,7 +196,7 @@ namespace pluginVerilog.Verilog.Expressions
                 int unpackedArrayIndex = 0;
                 while (!word.Eof)
                 {
-                    if (word.Text != "[") break;
+                    if (word.Text != "[" | !acceptRange) break;
                     if (val.UnpackedArrays.Count <= unpackedArrayIndex) break;
 
                     RangeExpression? rangeExpression = RangeExpression.ParseCreate(word, nameSpace);
@@ -262,7 +264,7 @@ namespace pluginVerilog.Verilog.Expressions
 
                 while (!word.Eof)
                 {
-                    if (word.Text != "[")
+                    if (word.Text != "[" | !acceptRange)
                     {
                         break;
                     }
@@ -326,7 +328,7 @@ namespace pluginVerilog.Verilog.Expressions
                 break;
             }
 
-            while (word.Text == "[" && !word.Eof)
+            while (word.Text == "[" && !word.Eof && acceptRange)
             {
                 word.AddError("illegal range");
                 word.SkipToKeywords(new List<string> { "]", ";" });
