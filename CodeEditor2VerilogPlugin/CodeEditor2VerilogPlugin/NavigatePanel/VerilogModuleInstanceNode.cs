@@ -64,10 +64,11 @@ namespace pluginVerilog.NavigatePanel
 
         public override void OnDeSelected()
         {
-            if (ModuleInstance?.SourceTextFile != null)
-            {
-                ModuleInstance.SourceTextFile.PostParse();
-            }
+            if (ModuleInstance?.SourceTextFile == null) return;
+            if (ModuleInstance?.ParsedDocument?.Version != null && ModuleInstance?.ParsedDocument?.Version == ModuleInstance?.CodeDocument?.Version) return;
+
+            // 未parseのものが残っている場合はbackgroundでparseしておく
+            ModuleInstance?.SourceTextFile.PostParse();
         }
 
 
@@ -78,8 +79,6 @@ namespace pluginVerilog.NavigatePanel
             onSelecting = true;
             try
             {
-                System.Diagnostics.Debug.Print("##MI " + Text + " " + Indent.ToString());
-
                 base.OnSelected(); // update context enu
 
                 if (ModuleInstance == null)

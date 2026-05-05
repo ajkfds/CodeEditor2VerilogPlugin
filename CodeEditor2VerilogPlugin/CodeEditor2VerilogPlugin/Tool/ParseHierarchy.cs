@@ -245,7 +245,10 @@ namespace pluginVerilog.Tool
             CodeEditor2.Data.TextFile tarfgetTextFile,
             bool topLevel = false
             );
-        private static async Task runParallel(CodeEditor2.Data.TextFile textFile, ParseMode parseMode,
+
+        private static async Task runParallel(
+            CodeEditor2.Data.TextFile textFile, 
+            ParseMode parseMode,
             ConcurrentDictionary<string, IVerilogRelatedFile> files,
             ConcurrentDictionary<string, IVerilogRelatedFile> includeFiles,
             CancellationToken? token)
@@ -294,7 +297,10 @@ namespace pluginVerilog.Tool
                                 {
                                     if (first)
                                     {
-                                        textFile.PostParse();
+                                        ParseTask task = new ParseTask(Id: textFile.Key, tarfgetTextFile: textFile, topLevel: true);
+                                        EnqueueWork(task, workQueue, completeIds, signal);
+                                        //
+                                        //                                        textFile.PostParse();
                                     }
                                 }
 
@@ -388,7 +394,6 @@ namespace pluginVerilog.Tool
                 verilogFile = (Data.InterfaceInstance)textFile;
             }
             if (verilogFile == null) return;
-            CodeEditor2.Controller.AppendLog("-- parse " + index.ToString() + " : " + verilogFile.ID);
 
             token?.ThrowIfCancellationRequested();
 
@@ -414,7 +419,25 @@ namespace pluginVerilog.Tool
                 if (parser.ParsedDocument != null)
                 {
                     await verilogFile.AcceptParsedDocumentAsync(parser.ParsedDocument);
-                    //                    await verilogFile.UpdateAsync();
+
+                    //// EditParse時はeditor側で更新するのでColorMark updateの必要はない
+                    //if (newParsedDocument.ParseMode != DocumentParser.ParseModeEnum.EditParse && CodeEditor2.Controller.NavigatePanel.GetSelectedFile() == this)
+                    //{
+                    //    textFileLock.EnterWriteLock();
+                    //    try
+                    //    {
+                    //        codeDoc.CopyColorMarkFrom(newParsedDocument.)
+                    //    }
+                    //    finally
+                    //    {
+                    //        textFileLock.ExitWriteLock();
+                    //    }
+                    //    targetCodeDocument.CopyColorMarkFrom(parser.Document);
+                    //    // update current view
+                    //    targetTextFile.PostUIUpdate();
+                    //}
+
+                    ////                    await verilogFile.UpdateAsync();
                 }
 
                 Verilog.ParsedDocument? parsedDocument = parser.ParsedDocument as Verilog.ParsedDocument;
@@ -430,6 +453,7 @@ namespace pluginVerilog.Tool
 
             bool needReparse = false;
             if (verilogFile.ReparseRequested) needReparse = true;
+            if (verilogFile.VerilogParsedDocument != null && verilogFile.VerilogParsedDocument.ErrorCount != 0) needReparse = true;
 
             if (needReparse)
             {

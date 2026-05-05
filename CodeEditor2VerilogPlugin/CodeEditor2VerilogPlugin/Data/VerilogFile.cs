@@ -203,6 +203,7 @@ namespace pluginVerilog.Data
             {
                 await NavigatePanelNode.UpdateAsync();
             });
+
         }
 
 
