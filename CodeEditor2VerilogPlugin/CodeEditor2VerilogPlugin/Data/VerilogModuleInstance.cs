@@ -377,6 +377,7 @@ namespace pluginVerilog.Data
 
         public override async Task AcceptParsedDocumentAsync(ParsedDocument newParsedDocument)
         {
+            if (Plugin.StopParse) return;
 
             if (newParsedDocument == null) throw new Exception();
             Data.VerilogFile source = SourceVerilogFile;

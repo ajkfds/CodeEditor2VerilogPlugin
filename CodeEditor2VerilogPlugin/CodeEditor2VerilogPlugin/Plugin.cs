@@ -77,7 +77,32 @@ namespace pluginVerilog
 
         public bool Initialize()
         {
-            // Menu
+            // Tool Menu
+            {
+                MenuItem menuItem = CodeEditor2.Controller.Menu.Tool;
+                MenuItem verilogToolMenuItem = CodeEditor2.Global.CreateMenuItem(
+                    "Verilog",
+                    "menuItem_verilogToolMenuItem",
+                    "CodeEditor2VerilogPlugin/Assets/Icons/verilogDocument.svg",
+                    ThemeColor
+                    );
+                menuItem.Items.Add(verilogToolMenuItem);
+
+
+                {
+                    MenuItem newMenuItem = CodeEditor2.Global.CreateMenuItem(
+                        "StopParser",
+                        "menuItem_StopParser",
+                        "CodeEditor2/Assets/Icons/play.svg",
+                        ThemeColor
+                        );
+                    menuItem.Items.Add(newMenuItem);
+                    newMenuItem.Click += MenuItem_StopParse_Click;
+                }
+
+            }
+
+
             {
                 MenuItem menuItem = CodeEditor2.Controller.Menu.Tool;
                 MenuItem newMenuItem = CodeEditor2.Global.CreateMenuItem(
@@ -90,6 +115,7 @@ namespace pluginVerilog
                 newMenuItem.Click += MenuItem_CreateSnapShot_Click;
             }
 
+            // context menu
             pluginVerilog.NavigatePanel.VerilogFileNode.CustomizeNavigateNodeContextMenu += CustomizeNavigateNodeContextMenuHandler;
             return true;
         }
@@ -119,6 +145,13 @@ namespace pluginVerilog
                 if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
                 CodeEditor2.Controller.AppendLog("# Exception : " + ex.Message, Avalonia.Media.Colors.Red);
             }
+        }
+
+
+        internal static bool StopParse = false;
+        private static void MenuItem_StopParse_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            StopParse = !StopParse;
         }
 
         private void projectCreated(CodeEditor2.Data.Project project, CodeEditor2.Data.Project.Setup? setup)

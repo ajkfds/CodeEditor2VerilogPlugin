@@ -317,6 +317,7 @@ namespace pluginVerilog.Data
 
         public override async System.Threading.Tasks.Task AcceptParsedDocumentAsync(CodeEditor2.CodeEditor.ParsedDocument newParsedDocument)
         {
+            if (Plugin.StopParse) return;
             //{
             //    Data.VerilogFile source = SourceVerilogFile;
             //    if (source == null) return;

@@ -143,6 +143,8 @@ namespace pluginVerilog.Data
         /// <param name="newParsedDocument"></param>
         public override async Task AcceptParsedDocumentAsync(ParsedDocument? newParsedDocument)
         {
+            if (Plugin.StopParse) return;
+
             ParsedDocument? oldParsedDocument;
             oldParsedDocument = ParsedDocument; // no lock is needed. ParsedDocument property is thread safe
 
