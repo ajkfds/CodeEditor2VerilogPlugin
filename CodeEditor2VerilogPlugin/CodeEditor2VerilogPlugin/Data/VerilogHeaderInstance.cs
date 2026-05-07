@@ -315,9 +315,16 @@ namespace pluginVerilog.Data
             }
         }
 
-        public override async System.Threading.Tasks.Task AcceptParsedDocumentAsync(CodeEditor2.CodeEditor.ParsedDocument newParsedDocument)
+        public override async System.Threading.Tasks.Task AcceptParsedDocumentAsync(CodeEditor2.CodeEditor.Parser.DocumentParser parser)
         {
             if (Plugin.StopParse) return;
+
+            TextFile? textFile = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync();
+            if (textFile == this)
+            {
+                textFile.CodeDocument?.CopyColorMarkFrom(parser.Document);
+                CodeEditor2.Controller.CodeEditor.PostRefresh();
+            }
             //{
             //    Data.VerilogFile source = SourceVerilogFile;
             //    if (source == null) return;
@@ -334,6 +341,8 @@ namespace pluginVerilog.Data
 
             //            ReparseRequested = VerilogParsedDocument.ReparseRequested;
             await UpdateAsync();
+
+            NavigatePanelNode.UpdateVisual();
         }
 
 
@@ -383,17 +392,19 @@ namespace pluginVerilog.Data
         {
             await base.UpdateAsync();
 
-            if (Parent == null)
-            {
-                await VerilogCommon.Updater.UpdateAsync(this, itemUpdateSemaphore);
-            }
-            CodeEditor2.Data.Item? item = Parent;
+            //if (Parent == null)
+            //{
+            //    await VerilogCommon.Updater.UpdateAsync(this, itemUpdateSemaphore);
+            //}
+
+            // search parent verilogFile hierachy
+            CodeEditor2.Data.Item? parentItem = Parent;
             while (true)
             {
-                if (item == null) break;
-                if (item is VerilogHeaderFile)
+                if (parentItem == null) break;
+                if (parentItem is VerilogHeaderFile)
                 {
-                    item = item.Parent;
+                    parentItem = parentItem.Parent;
                 }
                 else
                 {
@@ -401,9 +412,9 @@ namespace pluginVerilog.Data
                 }
             }
 
-            if (item != null && item is VerilogFile)
+            if (parentItem != null && parentItem is VerilogFile)
             {
-                VerilogFile vFile = (VerilogFile)item;
+                VerilogFile vFile = (VerilogFile)parentItem;
                 await VerilogCommon.Updater.UpdateAsync(vFile, itemUpdateSemaphore);
             }
         }

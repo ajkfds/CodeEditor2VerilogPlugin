@@ -52,7 +52,7 @@ namespace pluginVerilog.NavigatePanel
         private volatile bool onSelecting = false;
         public override async void OnSelected()
         {
-            if (onSelecting) return;
+            if (onSelecting) return;    // select re-entrantの抑止
             onSelecting = true;
             try
             {
@@ -73,8 +73,8 @@ namespace pluginVerilog.NavigatePanel
 
                 if (TextFile == null) return;
 
+                // post hier parse on background
                 Tool.ParseHierarchy.PostParseAsync(TextFile, Tool.ParseHierarchy.ParseMode.SearchReparseReqestedTree);
-                //await Tool.ParseHierarchy.ParseAsync(TextFile, Tool.ParseHierarchy.ParseMode.SearchReparseReqestedTree);
             }
             catch (Exception ex)
             {
@@ -91,29 +91,26 @@ namespace pluginVerilog.NavigatePanel
 
         public override async Task UpdateAsync()
         {
-            if (VerilogFile == null)
-            {
-                return;
-            }
+            return;
+        }
+
+        public override void UpdateVisual()
+        {
             if (!Dispatcher.UIThread.CheckAccess())
             {
-                Dispatcher.UIThread.Post(
-                        new Action(async () =>
-                        {
-                            try
-                            {
-                                await VerilogFile.UpdateAsync(); // UpdateVisual called in this method on the  UI thread
-                            }
-                            catch (Exception ex)
-                            {
-                                CodeEditor2.Controller.AppendLog("#Exception " + ex.Message, Avalonia.Media.Colors.Red);
-                            }
-                        })
-                    );
+                Dispatcher.UIThread.Invoke(() => { UpdateVisual(); });
                 return;
             }
-            await VerilogFile.UpdateAsync(); // UpdateVisual called in this method on the  UI thread
-            return;
+
+            string text = "-";
+            if (FileItem != null) text = FileItem.Name;
+            Text = text;
+
+            if (VerilogFile == null) return;
+
+            Image = GetIcon(VerilogFile);
+
+            UpdateSubNodes();
         }
 
         public void UpdateSubNodes()
@@ -164,24 +161,7 @@ namespace pluginVerilog.NavigatePanel
             }
         }
 
-        public override void UpdateVisual()
-        {
-            if (!Dispatcher.UIThread.CheckAccess())
-            {
-                Dispatcher.UIThread.Invoke(() => { UpdateVisual(); });
-                return;
-            }
 
-            string text = "-";
-            if (FileItem != null) text = FileItem.Name;
-            Text = text;
-
-            if (VerilogFile == null) return;
-
-            Image = GetIcon(VerilogFile);
-
-            UpdateSubNodes();
-        }
 
         public static IImage? GetIcon(IVerilogRelatedFile verilogRelatedFile)
         {
@@ -254,6 +234,7 @@ namespace pluginVerilog.NavigatePanel
         }
         public static new Action<ContextMenu>? CustomizeSpecificNodeContextMenu;
         protected override Action<ContextMenu>? customizeSpecificNodeContextMenu => CustomizeSpecificNodeContextMenu;
+
 
 
     }

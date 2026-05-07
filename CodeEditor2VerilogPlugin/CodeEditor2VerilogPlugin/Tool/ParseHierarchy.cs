@@ -137,6 +137,11 @@ namespace pluginVerilog.Tool
 
                             CodeEditor2.Controller.AppendLog("ForceAllFiles requested - cancelled running parse and cleared queue", Avalonia.Media.Colors.Yellow);
                         }
+                        else
+                        {
+                            // Cancel any currently running parse
+                            CancelCurrentParse();
+                        }
 
                         // Call ParseInternalAsync directly to avoid deadlock
                         // (ParseAsync also tries to acquire _parseLock)
@@ -329,6 +334,7 @@ namespace pluginVerilog.Tool
                 reparseTargetFiles.TryPop(out CodeEditor2.Data.TextFile? tfile);
                 if (tfile == null) continue;
                 await reparseText(tfile,files,includeFiles, parseMode, token);
+                token?.ThrowIfCancellationRequested();
             }
 
             if (parseMode == ParseMode.ForceAllFiles)
@@ -418,7 +424,7 @@ namespace pluginVerilog.Tool
                 await parser.ParseAsync();
                 if (parser.ParsedDocument != null)
                 {
-                    await verilogFile.AcceptParsedDocumentAsync(parser.ParsedDocument);
+                    await verilogFile.AcceptParsedDocumentAsync(parser);
 
                     //// EditParse時はeditor側で更新するのでColorMark updateの必要はない
                     //if (newParsedDocument.ParseMode != DocumentParser.ParseModeEnum.EditParse && CodeEditor2.Controller.NavigatePanel.GetSelectedFile() == this)
@@ -516,7 +522,7 @@ namespace pluginVerilog.Tool
             Verilog.ParsedDocument? parsedDocument = parser.ParsedDocument as Verilog.ParsedDocument;
             if (parsedDocument != null)
             {
-                await verilogFile.AcceptParsedDocumentAsync(parsedDocument);
+                await verilogFile.AcceptParsedDocumentAsync(parser);
 
                 files.AddOrUpdate(verilogFile.RelativePath, verilogFile, (key, oldItem) => { return verilogFile; });
                 foreach (var include in parsedDocument.IncludeFiles.Values)

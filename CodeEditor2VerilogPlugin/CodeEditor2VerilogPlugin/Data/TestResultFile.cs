@@ -31,9 +31,9 @@ namespace pluginVerilog.Data
             return fileItem;
         }
 
-        public override async Task AcceptParsedDocumentAsync(CodeEditor2.CodeEditor.ParsedDocument newParsedDocument)
+        public override async Task AcceptParsedDocumentAsync(CodeEditor2.CodeEditor.Parser.DocumentParser parser)
         {
-            await base.AcceptParsedDocumentAsync(newParsedDocument);
+            await base.AcceptParsedDocumentAsync(parser);
 
             //            Project.FileClassify = new TestR(Project);
         }

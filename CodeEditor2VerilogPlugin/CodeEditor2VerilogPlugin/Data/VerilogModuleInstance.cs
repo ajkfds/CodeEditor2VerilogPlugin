@@ -375,9 +375,12 @@ namespace pluginVerilog.Data
             }
         }
 
-        public override async Task AcceptParsedDocumentAsync(ParsedDocument newParsedDocument)
+        public override async Task AcceptParsedDocumentAsync(CodeEditor2.CodeEditor.Parser.DocumentParser parser)
         {
             if (Plugin.StopParse) return;
+
+            CodeEditor2.CodeEditor.ParsedDocument? newParsedDocument = parser.ParsedDocument;
+            if (newParsedDocument == null) return;
 
             if (newParsedDocument == null) throw new Exception();
             Data.VerilogFile source = SourceVerilogFile;
@@ -400,7 +403,7 @@ namespace pluginVerilog.Data
                 Verilog.ParsedDocument sourceParsedDocument = (Verilog.ParsedDocument)source.ParsedDocument;
                 if (sourceParsedDocument.Root != null && sourceParsedDocument.Root.BuildingBlocks.Count == 1)
                 {
-                    await source.AcceptParsedDocumentAsync(newParsedDocument);
+                    await source.AcceptParsedDocumentAsync(parser);
                 }
                 else
                 {
@@ -414,6 +417,12 @@ namespace pluginVerilog.Data
                 {
                     ReparseRequested = vParsedDocument.ReparseRequested;
                 }
+            }
+            TextFile? textFile = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync();
+            if (textFile == this)
+            {
+                textFile.CodeDocument?.CopyColorMarkFrom(parser.Document);
+                CodeEditor2.Controller.CodeEditor.PostRefresh();
             }
 
             NavigatePanelNode.UpdateVisual();
@@ -497,20 +506,29 @@ namespace pluginVerilog.Data
         {
             await base.UpdateAsync();
 
-            CodeEditor2.CodeEditor.ParsedDocument? parsedDoc;
-            parsedDoc = ParsedDocument;
+            if (!Dispatcher.UIThread.CheckAccess())
+            {
+                await Dispatcher.UIThread.InvokeAsync(() => UpdateAsync());
+                return;
+            }
 
-            await Dispatcher.UIThread.InvokeAsync(
-                async () =>
-                {
-                    await VerilogCommon.Updater.UpdateAsync(this, itemUpdateSemaphore);
-                    NavigatePanelNode.UpdateVisual();
-                    if (CodeEditor2.Controller.NavigatePanel.GetSelectedFile() == this)
-                    {
-                        CodeEditor2.Controller.CodeEditor.PostRefresh();
-                        if (parsedDoc != null) CodeEditor2.Controller.MessageView.Update(parsedDoc);
-                    }
-                });
+            await base.UpdateAsync();
+            await VerilogCommon.Updater.UpdateAsync(this, itemUpdateSemaphore);
+            
+            //CodeEditor2.CodeEditor.ParsedDocument? parsedDoc;
+            //parsedDoc = ParsedDocument;
+
+            //await Dispatcher.UIThread.InvokeAsync(
+            //    async () =>
+            //    {
+            //        await VerilogCommon.Updater.UpdateAsync(this, itemUpdateSemaphore);
+            //        NavigatePanelNode.UpdateVisual();
+            //        if (CodeEditor2.Controller.NavigatePanel.GetSelectedFile() == this)
+            //        {
+            //            CodeEditor2.Controller.CodeEditor.PostRefresh();
+            //            if (parsedDoc != null) CodeEditor2.Controller.MessageView.Update(parsedDoc);
+            //        }
+            //    });
         }
 
 

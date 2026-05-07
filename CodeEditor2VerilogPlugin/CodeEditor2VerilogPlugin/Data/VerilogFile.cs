@@ -141,8 +141,11 @@ namespace pluginVerilog.Data
         /// Accdept new Parsed Document for this Verilog File
         /// </summary>
         /// <param name="newParsedDocument"></param>
-        public override async Task AcceptParsedDocumentAsync(ParsedDocument? newParsedDocument)
+        public override async Task AcceptParsedDocumentAsync(CodeEditor2.CodeEditor.Parser.DocumentParser parser)
         {
+            CodeEditor2.CodeEditor.ParsedDocument? newParsedDocument = parser.ParsedDocument;
+            if (newParsedDocument == null) return;
+
             if (Plugin.StopParse) return;
 
             ParsedDocument? oldParsedDocument;
@@ -194,16 +197,15 @@ namespace pluginVerilog.Data
                 textFileLock.ExitWriteLock();
             }
 
-            await updateIncludeFilesAsync(vParsedDocument, Items);
-
-            await UpdateAsync();
-
-            // update Navigate panel node visual for this item
-            _ = Task.Run(async () =>
+            TextFile? textFile = await Controller.CodeEditor.GetTextFileAsync();
+            if (textFile == this)
             {
-                await NavigatePanelNode.UpdateAsync();
-            });
+                textFile.CodeDocument?.CopyColorMarkFrom(parser.Document);
+                CodeEditor2.Controller.CodeEditor.PostRefresh();
+            }
 
+            await updateIncludeFilesAsync(vParsedDocument, Items);
+            await UpdateAsync();
         }
 
 
@@ -231,6 +233,7 @@ namespace pluginVerilog.Data
                 Data.VerilogHeaderInstance item = headerItems[includeFile.ID];
                 if (item.CodeDocument == null) continue;
 
+                if (includeFile.VerilogParsedDocument == null) continue;
                 item.CodeDocument.CopyColorMarkFrom(includeFile.VerilogParsedDocument.CodeDocument);
 
                 // If this include file is selected in the editor, update the editor display.
@@ -240,8 +243,6 @@ namespace pluginVerilog.Data
                     Controller.MessageView.Update(includeFile.VerilogParsedDocument);
                 }
 
-                //                includeFile.NavigatePanelNode.UpdateVisual();
-
                 // update nested include file
                 await updateIncludeFilesAsync(includeFile.VerilogParsedDocument, item.Items);
             }
@@ -250,36 +251,11 @@ namespace pluginVerilog.Data
         public SemaphoreSlim BaseParseSemapho = new SemaphoreSlim(1, 1);
 
 
+        #region Instance ParsedDocument Registration
+        // Instance ParsedDocument Registration
+        // このファイルがインスタンスされたときにそのインスタンスのWeakReferenceを保持する
 
         private ConcurrentDictionary<string, System.WeakReference<ParsedDocument>> instancedParsedDocumentRefs = new ConcurrentDictionary<string, WeakReference<ParsedDocument>>();
-//        private static ConcurrentDictionary<string, ParsedDocument> instancedParsedDocumenTests = new ConcurrentDictionary<string, ParsedDocument>();
-
-        //internal string DebugInfo()
-        //{
-        //    StringBuilder sb = new StringBuilder();
-        //    sb.Append("## " + Name + "\r\n");
-
-        //    Verilog.ParsedDocument? parsedDocument = ParsedDocument as Verilog.ParsedDocument; // no lock is needed. ParsedDocument property is thread safe
-
-        //    if (parsedDocument != null)
-        //    {
-        //        sb.Append(",pd.ReparseRequested:" + parsedDocument.ReparseRequested + ",pd.Version" + parsedDocument.Version);
-        //    }
-        //    sb.Append("\r\n");
-        //    foreach (var kvPair in instancedParsedDocumentRefs)
-        //    {
-        //        ParsedDocument? pDoc;
-        //        if (!kvPair.Value.TryGetTarget(out pDoc)) continue;
-        //        Verilog.ParsedDocument? iParsedDocument = pDoc as Verilog.ParsedDocument;
-
-        //        if (iParsedDocument != null)
-        //        {
-        //            sb.Append(",pd.ReparseRequested:" + iParsedDocument.ReparseRequested + ",pd.Version" + iParsedDocument.Version);
-        //        }
-        //        sb.Append("\r\n");
-        //    }
-        //    return sb.ToString();
-        //}
 
         public ParsedDocument? GetInstancedParsedDocument(string key)
         {
@@ -299,7 +275,7 @@ namespace pluginVerilog.Data
                     }
                     else
                     {
-                        if(weakRef.TryGetTarget(out ret))
+                        if (weakRef.TryGetTarget(out ret))
                         {
                             return ret;
                         }
@@ -320,10 +296,10 @@ namespace pluginVerilog.Data
 
         public void RegisterInstanceParsedDocument(string id, ParsedDocument parsedDocument, InstanceTextFile moduleInstance)
         {
-            if(parsedDocument == null && System.Diagnostics.Debugger.IsAttached)
+            if (parsedDocument == null && System.Diagnostics.Debugger.IsAttached)
             {
                 System.Diagnostics.Debugger.Break();
-            }　
+            }
 
             if (id == "")
             {
@@ -331,7 +307,6 @@ namespace pluginVerilog.Data
             }
             else
             {
-//                instancedParsedDocumenTests.AddOrUpdate(id, parsedDocument, (key, oldVaue) => { return parsedDocument; });
                 instancedParsedDocumentRefs.AddOrUpdate(id, new WeakReference<ParsedDocument>(parsedDocument), (key, oldValue) => new WeakReference<ParsedDocument>(parsedDocument));
             }
         }
@@ -344,6 +319,9 @@ namespace pluginVerilog.Data
                 if (!r.Value.TryGetTarget(out ret)) instancedParsedDocumentRefs.TryRemove(r.Key, out _);
             }
         }
+
+        #endregion
+
 
         public override void Dispose()
         {
@@ -391,6 +369,10 @@ namespace pluginVerilog.Data
         }
 
 
+        #region instance file registration ----------------------------------------------------------------------------------------------------------
+
+        // instance先からの逆weak reference
+        // Reparse Requestの伝搬に使用する。
         Dictionary<string, WeakReference<InstanceTextFile>> instanceDictionary = new Dictionary<string, WeakReference<InstanceTextFile>>();
         public void RegisterInstanceFile(InstanceTextFile instanceTextFile)
         {
@@ -430,6 +412,9 @@ namespace pluginVerilog.Data
                 textFileLock.ExitReadLock();
             }
         }
+
+        #endregion
+
 
         public override bool ReparseRequested
         {
@@ -499,20 +484,15 @@ namespace pluginVerilog.Data
         // update sub-items from ParsedDocument
         public override async Task UpdateAsync()
         {
-            await base.UpdateAsync();
             if (!Dispatcher.UIThread.CheckAccess())
             {
                 await Dispatcher.UIThread.InvokeAsync(() => UpdateAsync());
                 return;
             }
 
+            await base.UpdateAsync();
             await VerilogCommon.Updater.UpdateAsync(this, itemUpdateSemaphore);
-            NavigatePanelNode.UpdateVisual();
-            if (CodeEditor2.Controller.NavigatePanel.GetSelectedFile() == this)
-            {
-                CodeEditor2.Controller.CodeEditor.PostRefresh();
-                if (ParsedDocument != null) CodeEditor2.Controller.MessageView.Update(ParsedDocument);
-            }
+
         }
 
         public override Task ParseHierarchyAsync(Action<ITextFile> action)
@@ -521,28 +501,8 @@ namespace pluginVerilog.Data
             return Task.CompletedTask;
         }
 
-        // Auto Complete Handler
-
-        //public override void AfterKeyDown(System.Windows.Forms.KeyEventArgs e)
-        //{
-        //    VerilogCommon.AutoComplete.AfterKeyDown(this, e);
-        //}
-
-        //public override void AfterKeyPressed(System.Windows.Forms.KeyPressEventArgs e)
-        //{
-        //    VerilogCommon.AutoComplete.AfterKeyPressed(this, e);
-        //}
-
-        //public override void BeforeKeyPressed(System.Windows.Forms.KeyPressEventArgs e)
-        //{
-        //    VerilogCommon.AutoComplete.BeforeKeyPressed(this, e);
-        //}
-
-        //public override void BeforeKeyDown(System.Windows.Forms.KeyEventArgs e)
-        //{
-        //    VerilogCommon.AutoComplete.BeforeKeyDown(this, e);
-        //}
-
+        // UI override --------------------------------------------------------------------------------------
+        
         public override PopupItem? GetPopupItem(ulong version, int index)
         {
             Verilog.ParsedDocument? parsedDoc = VerilogParsedDocument;

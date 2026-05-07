@@ -87,17 +87,13 @@ namespace pluginVerilog.NavigatePanel
                     return;
                 }
 
-                //System.Diagnostics.Debug.Print("## VerilogModuleInstanceNode.OnSelected");
-
-
-
                 await CodeEditor2.Controller.CodeEditor.SetTextFileAsync(ModuleInstance, true);
                 UpdateVisual();
 
                 if (CodeEditor2.Global.StopParse) return;
 
+                // post hier parse on background
                 Tool.ParseHierarchy.PostParseAsync(ModuleInstance, Tool.ParseHierarchy.ParseMode.SearchReparseReqestedTree);
-                //await Tool.ParseHierarchy.ParseAsync(ModuleInstance, Tool.ParseHierarchy.ParseMode.SearchReparseReqestedTree);
             }
             catch (Exception ex)
             {

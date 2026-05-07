@@ -243,18 +243,17 @@ namespace pluginVerilog.Data
             }
         }
 
-        public override async Task AcceptParsedDocumentAsync(ParsedDocument newParsedDocument)
+        public override async Task AcceptParsedDocumentAsync(CodeEditor2.CodeEditor.Parser.DocumentParser parser)
         {
-            //            Verilog.ParsedDocument? vParsedDocument = newParsedDocument as Verilog.ParsedDocument;
-            //            if (vParsedDocument == null) return;
+            CodeEditor2.CodeEditor.ParsedDocument? newParsedDocument = parser.ParsedDocument;
+            if (newParsedDocument == null) return;
 
-            //            parsedDocument = vParsedDocument;
             Data.VerilogFile source = SourceVerilogFile;
             if (source == null) return;
 
             if (ParameterOverrides.Count == 0)
             {
-                await source.AcceptParsedDocumentAsync(newParsedDocument);
+                await source.AcceptParsedDocumentAsync(parser);
             }
             else
             {
