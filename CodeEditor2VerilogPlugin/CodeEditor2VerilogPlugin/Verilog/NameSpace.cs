@@ -138,7 +138,7 @@ namespace pluginVerilog.Verilog
         {
             foreach (INamedElement element in NamedElements.Values)
             {
-                if (element is DataObject)
+                if (element is DataObjects.DataObject)
                 {
                     DataObjects.DataObject variable = (DataObjects.DataObject)element;
                     if (variable is DataObjects.Nets.Net)
