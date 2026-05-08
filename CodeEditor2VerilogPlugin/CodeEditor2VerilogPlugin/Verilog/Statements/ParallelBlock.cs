@@ -78,6 +78,7 @@ namespace pluginVerilog.Verilog.Statements
             return sequentialBlock;
         }
 
+        private static List<string> endKeyword = new List<string> { "endmodule", "endtask", "endtask", "endinterface", "endfunction" };
         private static async Task<IStatement> parseNamedParallelBlock(WordScanner word, NameSpace nameSpace, IndexReference beginIndex)
         {
             NamedParallelBlock namedBlock;
@@ -150,7 +151,25 @@ namespace pluginVerilog.Verilog.Statements
             }
             word.Color(CodeDrawStyle.ColorType.Keyword);
             namedBlock.LastIndexReference = word.CreateIndexReference();
-            word.MoveNext(); // end
+            word.MoveNext(); // join
+
+            if (word.Text == ":")
+            {
+                word.MoveNext();
+                if (endKeyword.Contains(word.Text) || word.Text == "end")
+                {
+                    word.AddError("block name required");
+                }
+                else if (namedBlock.Name != word.Text)
+                {
+                    word.AddError("illegal block name");
+                }
+                else
+                {
+                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.MoveNext();
+                }
+            }
 
             if (word.Active && namedBlock.Name != null && !nameSpace.NamedElements.ContainsKey(namedBlock.Name))
             {
