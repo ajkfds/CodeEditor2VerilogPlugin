@@ -115,6 +115,30 @@ namespace pluginVerilog.Verilog.Statements
                                     | event_expression or event_expression
                                     | event_expression , event_expression
             */
+
+
+            /* SystemVerilog 2017
+            
+            event_control ::=
+                  @ hierarchical_event_identifier
+                | @ ( event_expression )
+                | @*
+                | @ (*)
+                | @ ps_or_hierarchical_sequence_identifier             
+
+            event_expression ::=
+                  [ edge_identifier ] expression [ "iff" expression ]
+                | sequence_instance [ "iff" expression ]
+                | event_expression "or" event_expression
+                | event_expression "," event_expression
+                | "(" event_expression ")"
+
+            edge_identifier ::=
+                  "posedge" 
+                | "negedge" 
+                | "edge"
+
+            */
             System.Diagnostics.Debug.Assert(word.Text == "@");
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
@@ -240,6 +264,13 @@ namespace pluginVerilog.Verilog.Statements
                     word.Color(CodeDrawStyle.ColorType.Keyword);
                     word.MoveNext();
                     eventExpression.EventType = EventTypeEnum.Negedge;
+                    eventExpression.Expression = Expressions.Expression.ParseCreate(word, nameSpace);
+                    if (clockDomains != null && eventExpression.Expression != null) addClockDomain(eventExpression.Expression, clockDomains);
+                    break;
+                case "edge":
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+                    eventExpression.EventType = EventTypeEnum.Both;
                     eventExpression.Expression = Expressions.Expression.ParseCreate(word, nameSpace);
                     if (clockDomains != null && eventExpression.Expression != null) addClockDomain(eventExpression.Expression, clockDomains);
                     break;
