@@ -60,44 +60,81 @@ namespace pluginVerilog.Verilog.Items
 
         class_scope ::= class_type ::  
        */
-
-        /*
-         
-        random_qualifier data_declaration
-        
-        class_item_qualifier task_declaration/function_declaration/class_constructor_declaration/data_declaration
-
-        [ "pure" ] "virtual" task_declaration/function_declaration/{ class_item_qualifier } method_prototype ;/class_constructor_declaration
-         
-        "extern" ({ method_qualifier } method_prototype ;)/({ method_qualifier } class_constructor_prototype)
-         
-        "const" { class_item_qualifier } data_type const_identifier [ = constant_expression ] ; 
-         */
-
         public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
         {
-            // data_declaration
-            if (DataObjects.Variables.Variable.ParseDeclaration(word, nameSpace)) return true;
+            return await Parse(word, nameSpace, null);
+        }
 
-            switch (word.Text)
+        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace,Attribute? attribute)
+        {
+            // { attribute_instance } class_property
             {
-                // task_declaration
+                // { property_qualifier } data_declaration  
+                if (DataObjects.Variables.Variable.ParseDeclaration(word, nameSpace)) return true;
+
+                // TODO
+                // "const" { class_item_qualifier } data_type const_identifier [ = constant_expression ] ; 
+                //class_item_qualifier ::= 
+                //      "static"  
+                //    | "protected"  
+                //    | "local"   
+                if (word.Text == "const")
+                {
+                    return parseConst(word, nameSpace);
+                }
+            }
+
+                switch (word.Text)
+            {
+                case "endclass":
+                    return false;
+
+                // { attribute_instance }
+                case "(*":
+                    Attribute attr = Attribute.ParseCreate(word, nameSpace);
+                    await Parse(word, nameSpace, attr);
+                    return true;
+                // ;
+                case ";":
+                    word.MoveNext();
+                    return true;
+                // local_parameter_declaration;
+                // parameter_declaration;
+                case "parameter":
+                case "localparam":
+                    if(attribute != null)
+                    {
+                        attribute.Reference.AddError("attribute instance is not accepted");
+                    }
+                    DataObjects.Constants.Constants.ParseCreateDeclaration(word, nameSpace, attribute);
+                    return true;
+                // { attribute_instance } class_method
+                //        { method_qualifier } task_declaration  
                 case "task":
                     await Task.Parse(word, nameSpace);
                     return true;
 
-                // function_declaration
+                //      | { method_qualifier } function_declaration  
                 case "function":
                     await Function.ParseFunctionOrConstructor(word, nameSpace);
                     return true;
-
-                case "const":
-                    return parseConst(word, nameSpace);
-                case "endclass":
-                    return false;
-
-                // temporary TODO implemet
+                //      | "pure" "virtual" { class_item_qualifier } method_prototype ;  
                 case "pure":
+                    return await MethodPrototype.ParseCreateWithPureVirtual(word, nameSpace);
+                //      | "extern" { method_qualifier } method_prototype ;
+                case "extern":
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+                    return await MethodPrototype.ParseCreate(word, nameSpace);
+
+                //      | { method_qualifier } class_constructor_declaration  
+                //      | "extern" { method_qualifier } class_constructor_prototype
+
+
+                // TODO
+                // { attribute_instance } class_constraint
+                // { attribute_instance } class_declaration
+                // { attribute_instance } covergroup_declaration
                 case "virtual":
                 case "rand":
                 case "randc":
@@ -108,10 +145,21 @@ namespace pluginVerilog.Verilog.Items
                     word.MoveNext();
                     await Parse(word, nameSpace);
                     return true;
-
                 default:
-                    return await NonPortModuleItem.Parse(word, nameSpace);
+                    break;
             }
+            return false;
+
+
+
+
+            //switch (word.Text)
+            //{
+            //    // temporary TODO implemet
+
+            //    default:
+            //        return await NonPortModuleItem.Parse(word, nameSpace);
+            //}
         }
 
         private static bool parseConst(WordScanner word, NameSpace nameSpace)
