@@ -14,15 +14,17 @@ namespace pluginVerilog
             */
         protected Attribute() { }
 
+        public required WordReference Reference { set; get; }
+
         public Dictionary<string, Verilog.Expressions.Expression?> AttributeSpecs = new Dictionary<string, Verilog.Expressions.Expression?>();
 
         public static Attribute ParseCreate(Verilog.WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "(*") throw new Exception();
-//            word.Color(CodeDrawStyle.ColorType.Identifier);
+            //            word.Color(CodeDrawStyle.ColorType.Identifier);
+            Attribute attr = new Attribute() { Reference = word.GetReference() };
             word.MoveNext();
 
-            Attribute attr = new Attribute();
             while (!word.Eof)
             {
                 if (!General.IsIdentifier(word.Text))
@@ -68,6 +70,7 @@ namespace pluginVerilog
 
             if (word.Text == "*)")
             {
+                attr.Reference = WordReference.CreateReferenceRange(attr.Reference,word.CrateWordReference());
 //                word.Color(CodeDrawStyle.ColorType.Identifier);
                 word.MoveNext();
             }
