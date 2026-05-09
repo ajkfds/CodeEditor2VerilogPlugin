@@ -134,6 +134,16 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             get { return DataTypeEnum.Class; }
             set { }
         }
+
+        /// <summary>
+        /// Base class that this class extends (if any)
+        /// </summary>
+        public Class? ExtendedClass { get; private set; }
+
+        /// <summary>
+        /// List of interface classes that this class implements
+        /// </summary>
+        public List<InterfaceClass> ImplementedInterfaceClasses { get; } = new List<InterfaceClass>();
         public static async System.Threading.Tasks.Task ParseDeclaration(WordScanner word, NameSpace nameSpace)
         {
             Class? class_ = await ParseCreate(word, nameSpace);
@@ -170,11 +180,16 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 Name = Name,
                 Parent = Parent,
                 Project = Project,
-                IsVirtual = IsVirtual
+                IsVirtual = IsVirtual,
+                ExtendedClass = ExtendedClass
             };
             foreach (var namedElement in NamedElements)
             {
                 class_.NamedElements.Add(namedElement.Name, namedElement);
+            }
+            foreach (var iface in ImplementedInterfaceClasses)
+            {
+                class_.ImplementedInterfaceClasses.Add(iface);
             }
             return class_;
         }
@@ -459,7 +474,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 //} // list_of_ports or list_of_posrt_declarations
 
 
-                // [ "extends" class_type[(list_of_arguments)] ]  
+                // [ "extends" class_type [ ( list_of_arguments ) ] ]  
                 if (word.Text == "extends")
                 {
                     word.Color(CodeDrawStyle.ColorType.Keyword);
@@ -472,9 +487,29 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     else
                     {
                         Class baseClass = (Class)nameSpace.NamedElements[word.Text];
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        class_.ExtendedClass = baseClass; // Store reference to extended class
+                        word.Color(CodeDrawStyle.ColorType.Identifier);
                         word.MoveNext();
 
+                        // parameter_value_assignment (optional)
+                        // class_type can have parameter values like: base_class#(32, 8)
+                        if (word.Text == "#")
+                        {
+                            word.MoveNext();
+                            if (word.Text == "(")
+                            {
+                                word.MoveNext();
+                                if (word.Text != ")")
+                                {
+                                    // Parse parameter expressions
+                                    word.SkipToKeyword(")");
+                                }
+                                if (word.Text == ")")
+                                {
+                                    word.MoveNext();
+                                }
+                            }
+                        }
 
                         Function? constructor = null;
                         if (baseClass != null)
@@ -493,27 +528,28 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         superClassObject.Defined = true;
                         class_.NamedElements.Add(superClassObject.Name, superClassObject);
 
+                        // Inherit elements from base class
                         foreach (INamedElement namedElement in baseClass.NamedElements.Values)
                         {
                             if (namedElement is DataObjects.DataObject)
                             {
                                 DataObjects.DataObject dataObject = (DataObjects.DataObject)namedElement;
-                                if (!class_.NamedElements.ContainsKey(namedElement.Name)) class_.NamedElements.Add(namedElement.Name, namedElement);
+                                if (!class_.NamedElements.ContainsKey(namedElement.Name)) class_.NamedElements.Add(namedElement.Name, dataObject);
                             }
                             else if (namedElement is Typedef)
                             {
                                 Typedef typeDef = (Typedef)namedElement;
-                                if (!class_.NamedElements.ContainsKey(namedElement.Name)) class_.NamedElements.Add(namedElement.Name, namedElement);
+                                if (!class_.NamedElements.ContainsKey(namedElement.Name)) class_.NamedElements.Add(namedElement.Name, typeDef);
                             }
                             else if (namedElement is Function)
                             {
                                 Function function = (Function)namedElement;
-                                if (!class_.NamedElements.ContainsKey(namedElement.Name)) class_.NamedElements.Add(namedElement.Name, namedElement);
+                                if (!class_.NamedElements.ContainsKey(namedElement.Name)) class_.NamedElements.Add(namedElement.Name, function);
                             }
                             else if (namedElement is Task)
                             {
                                 Task task = (Task)namedElement;
-                                if (!class_.NamedElements.ContainsKey(namedElement.Name)) class_.NamedElements.Add(namedElement.Name, namedElement);
+                                if (!class_.NamedElements.ContainsKey(namedElement.Name)) class_.NamedElements.Add(namedElement.Name, task);
                             }
                         }
 
@@ -532,7 +568,6 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 }
 
                 // ["implements" interface_class_type { , interface_class_type } ] ;
-
                 if (word.Text == "implements")
                 {
                     word.Color(CodeDrawStyle.ColorType.Keyword);
@@ -540,12 +575,57 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                     while (!word.Eof)
                     {
-                        string interface_class_type = word.Text;
-                        word.Color(CodeDrawStyle.ColorType.Identifier);
-                        word.MoveNext();
+                        // interface_class_type ::= ps_class_identifier [ parameter_value_assignment ]
+                        if (!nameSpace.NamedElements.ContainsKey(word.Text) || !(nameSpace.NamedElements[word.Text] is InterfaceClass))
+                        {
+                            word.AddError("illegal interface_class_type");
+                        }
+                        else
+                        {
+                            InterfaceClass interfaceClass = (InterfaceClass)nameSpace.NamedElements[word.Text];
+                            word.Color(CodeDrawStyle.ColorType.Identifier);
+                            word.MoveNext();
 
-                        if (word.Text != ",") break;
-                        word.MoveNext();
+                            // parameter_value_assignment (optional)
+                            // interface_class_type can have parameter values like: my_interface_class#(32)
+                            if (word.Text == "#")
+                            {
+                                word.MoveNext();
+                                if (word.Text == "(")
+                                {
+                                    word.MoveNext();
+                                    if (word.Text != ")")
+                                    {
+                                        // Parse parameter expressions
+                                        word.SkipToKeyword(")");
+                                    }
+                                    if (word.Text == ")")
+                                    {
+                                        word.MoveNext();
+                                    }
+                                }
+                            }
+
+                            // Add to implemented interface classes list
+                            class_.ImplementedInterfaceClasses.Add(interfaceClass);
+
+                            // Inherit elements from implemented interface class (methods, typedefs, etc.)
+                            foreach (INamedElement namedElement in interfaceClass.NamedElements.Values)
+                            {
+                                if (!class_.NamedElements.ContainsKey(namedElement.Name))
+                                {
+                                    class_.NamedElements.Add(namedElement.Name, namedElement);
+                                }
+                            }
+                        }
+
+                        if (word.Text == ",")
+                        {
+                            word.Color(CodeDrawStyle.ColorType.Keyword);
+                            word.MoveNext();
+                            continue;
+                        }
+                        break;
                     }
                 }
 
