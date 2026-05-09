@@ -201,6 +201,70 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             index++;
             return true;
         }
+        /*
+。
+5. num()
+プロトタイプ: 
+引数: なし。
+戻り値: その列挙型で定義されている要素の数を整数（int）で返します
+。
+6. name()
+プロトタイプ: function string name();
+引数: なし。
+戻り値: 現在の列挙値の**名前を表す文字列（string）**を返します
+。
+現在の値が列挙型のメンバーではない場合、空の文字列を返します
+。 
+ */
+        public void AppendChiledNamedElements(NamedElements namedElements)
+        {
+            { // function void first();
+                List<Port> ports = new List<Port>();
+                BuiltInMethod builtInMethod = BuiltInMethod.Create("first", null, ports);
+                namedElements.Add(builtInMethod.Name, builtInMethod);
+            }
+
+            { // function void last();
+                List<Port> ports = new List<Port>();
+                BuiltInMethod builtInMethod = BuiltInMethod.Create("last", null, ports);
+                namedElements.Add(builtInMethod.Name, builtInMethod);
+            }
+
+            { // function enum next( int unsigned N = 1 )
+                List<Port> ports = new List<Port>();
+                Port? port = Port.Create("N", null, Port.DirectionEnum.Input, DataObjects.Variables.Int.Create("N", DataTypes.IntType.Create(false)));
+                if (port != null) ports.Add(port);
+                Variables.Variable returnVal = DataObjects.Variables.Enum.Create("next", this);
+                BuiltInMethod builtInMethod = BuiltInMethod.Create("next", returnVal, ports);
+                namedElements.Add(builtInMethod.Name, builtInMethod);
+            }
+
+            { // function enum prev( int unsigned N = 1 )
+                List<Port> ports = new List<Port>();
+                Port? port = Port.Create("N", null, Port.DirectionEnum.Input, DataObjects.Variables.Int.Create("N", DataTypes.IntType.Create(false)));
+                if (port != null) ports.Add(port);
+                Variables.Variable returnVal = DataObjects.Variables.Enum.Create("prev", this);
+                BuiltInMethod builtInMethod = BuiltInMethod.Create("prev", returnVal, ports);
+                namedElements.Add(builtInMethod.Name, builtInMethod);
+            }
+
+            { // function int num()
+                List<Port> ports = new List<Port>();
+                Variables.Variable returnVal = DataObjects.Variables.Int.Create("num", DataTypes.IntType.Create(false));
+                BuiltInMethod builtInMethod = BuiltInMethod.Create("num", returnVal, ports);
+                namedElements.Add(builtInMethod.Name, builtInMethod);
+            }
+
+            { // function string name()
+                List<Port> ports = new List<Port>();
+                Variables.Variable returnVal = DataObjects.Variables.String.Create("name", DataTypes.StringType.Create(null));
+                BuiltInMethod builtInMethod = BuiltInMethod.Create("name", returnVal, ports);
+                namedElements.Add(builtInMethod.Name, builtInMethod);
+            }
+
+
+        }
+
 
         public IDataType? ParsePartSelect(WordScanner word, NameSpace nameSpace)
         {

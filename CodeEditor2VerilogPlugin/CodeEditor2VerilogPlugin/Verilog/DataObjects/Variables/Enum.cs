@@ -91,6 +91,21 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         //{
         //}
 
+        private NamedElements? namedElements = null;
+        public override NamedElements NamedElements
+        {
+            get
+            {
+                if (namedElements != null) return namedElements;
+                namedElements = new NamedElements();
+
+                if (DataType == null) return namedElements;
+                DataType.AppendChiledNamedElements(namedElements);
+                return namedElements;
+            }
+        }
+
+
         public static new Enum Create(string name, DataTypes.IDataType dataType)
         {
             DataTypes.Enum? dType = dataType as DataTypes.Enum;
