@@ -1,3 +1,4 @@
+using pluginVerilog.Verilog.Assertion;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Items
@@ -28,13 +29,35 @@ namespace pluginVerilog.Verilog.Items
                 word.MoveNext();
                 word.MoveNext();
             }
-            if (word.NextText == "property")
+
+            // Handle assert property
+            if (word.Text == "assert" && word.NextText == "property")
             {
-                switch (word.Text)
-                {
-                    case "assert":
-                        return await ConcurrentAssertionStatementItem.Parse(word, nameSpace, blockIdentifier);
-                }
+                return await ConcurrentAssertionStatementItem.ParseAssertProperty(word, nameSpace, blockIdentifier);
+            }
+
+            // Handle assume property
+            if (word.Text == "assume" && word.NextText == "property")
+            {
+                return await ConcurrentAssertionStatementItem.ParseAssumeProperty(word, nameSpace, blockIdentifier);
+            }
+
+            // Handle cover property
+            if (word.Text == "cover" && word.NextText == "property")
+            {
+                return await ConcurrentAssertionStatementItem.ParseCoverProperty(word, nameSpace, blockIdentifier);
+            }
+
+            // Handle restrict property
+            if (word.Text == "restrict" && word.NextText == "property")
+            {
+                return await ConcurrentAssertionStatementItem.ParseRestrictProperty(word, nameSpace, blockIdentifier);
+            }
+
+            // Handle cover sequence
+            if (word.Text == "cover" && word.NextText == "sequence")
+            {
+                return await ConcurrentAssertionStatementItem.ParseCoverSequence(word, nameSpace, blockIdentifier);
             }
 
             if (blockIdentifier == null) return false;

@@ -240,8 +240,24 @@ namespace pluginVerilog.Verilog.Statements
                 case "assert":
                 case "assume":
                 case "cover":
+                    // Check if it's a concurrent assertion (with property keyword)
+                    if (word.NextText == "property")
+                    {
+                        return await ProceduralAssertionStatement.ParseCreate(word, nameSpace, statement_label);
+                    }
                     return await ImmidiateAssertionStatement.ParseCreate(word, nameSpace, statement_label);
+
+                // restrict property (concurrent assertion)
+                case "restrict":
+                    if (word.NextText == "property")
+                    {
+                        return await ProceduralAssertionStatement.ParseCreate(word, nameSpace, statement_label);
+                    }
                     break;
+
+                // expect_property_statement
+                case "expect":
+                    return await ExpectPropertyStatement.ParseCreate(word, nameSpace, statement_label);
 
                 default:
 
@@ -403,6 +419,7 @@ namespace pluginVerilog.Verilog.Statements
                     }
                     return statement;
             }
+            return null;
         }
 
         private static async Task<IStatement> ParseUniquePriority(WordScanner word, NameSpace nameSpace, string? statement_label)

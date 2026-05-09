@@ -1,6 +1,6 @@
 namespace pluginVerilog.Verilog.Assertion
 {
-    internal class PropertyExpression
+    public class PropertyExpression
     {
         /*
         property_expr ::=
@@ -40,5 +40,9 @@ namespace pluginVerilog.Verilog.Assertion
             | property_instance
             | clocking_event property_expr 
          */
+        public static new PropertyExpression? ParseCreate(WordScanner word, NameSpace nameSpace)
+        {
+            return new PropertyExpression();
+        }
     }
 }

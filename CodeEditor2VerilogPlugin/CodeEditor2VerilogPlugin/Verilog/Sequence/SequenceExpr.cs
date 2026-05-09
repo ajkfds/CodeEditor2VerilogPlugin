@@ -121,11 +121,11 @@ namespace pluginVerilog.Verilog.Sequence
                     continue;
                 }
 
-                // Check for expression (base case)
-                var booleanExpression = SequenceBooleanExpression.ParseCreate(word, nameSpace);
-                if (booleanExpression != null)
+                // Check for expression_or_dist (expression with optional dist clause)
+                var distExpr = DistExpression.ParseCreate(word, nameSpace);
+                if (distExpr != null)
                 {
-                    sequenceExpr.SubExpressions.Add(booleanExpression);
+                    sequenceExpr.SubExpressions.Add(distExpr);
                     // Check for boolean abbreviation after expression
                     var boolAbbrev = ParseBooleanAbbreviation(word, nameSpace);
                     if (boolAbbrev != null)
@@ -274,18 +274,41 @@ namespace pluginVerilog.Verilog.Sequence
             }
             word.MoveNext();
 
-            // Parse sequence expressions inside first_match
-            List<SequenceExpr> exprs = new List<SequenceExpr>();
-            while (!word.Eof && word.Text != ")")
+            // Parse first sequence expression
+            SequenceExpr? firstSeqExpr = ParseCreate(word, nameSpace);
+            if (firstSeqExpr == null)
             {
+                word.AddError("sequence expression expected");
+                if (word.Text == ")") word.MoveNext();
+                return null;
+            }
+
+            SequenceExpr firstMatchExpr = new SequenceExpr();
+            firstMatchExpr.SubExpressions.Add(new FirstMatchMarker());
+            foreach (var item in firstSeqExpr.SubExpressions)
+            {
+                firstMatchExpr.SubExpressions.Add(item);
+            }
+
+            // Parse additional sequence expressions and sequence_match_items
+            while (word.Text == ",")
+            {
+                word.MoveNext();
+                
+                // Try to parse as sequence_match_item first
+                var matchItem = SequenceMatchItem.ParseCreate(word, nameSpace);
+                if (matchItem != null)
+                {
+                    firstMatchExpr.SubExpressions.Add(matchItem);
+                    continue;
+                }
+
+                // Otherwise, parse as sequence expression
                 SequenceExpr? innerExpr = ParseCreate(word, nameSpace);
                 if (innerExpr == null) break;
-                exprs.Add(innerExpr);
-
-                if (word.Text == ",")
+                foreach (var item in innerExpr.SubExpressions)
                 {
-                    word.MoveNext();
-                    // sequence_match_item would go here
+                    firstMatchExpr.SubExpressions.Add(item);
                 }
             }
 
@@ -294,17 +317,6 @@ namespace pluginVerilog.Verilog.Sequence
                 word.MoveNext();
             }
 
-            if (exprs.Count == 0) return null;
-            
-            SequenceExpr firstMatchExpr = new SequenceExpr();
-            firstMatchExpr.SubExpressions.Add(new FirstMatchMarker());
-            foreach (var expr in exprs)
-            {
-                foreach (var item in expr.SubExpressions)
-                {
-                    firstMatchExpr.SubExpressions.Add(item);
-                }
-            }
             return firstMatchExpr;
         }
 
@@ -319,27 +331,40 @@ namespace pluginVerilog.Verilog.Sequence
             SequenceExpr parenExpr = new SequenceExpr();
             bool hasContent = false;
 
-            while (!word.Eof && word.Text != ")")
+            // Parse first sequence expression
+            SequenceExpr? innerExpr = ParseCreate(word, nameSpace);
+            if (innerExpr != null)
             {
-                // Try to parse a sequence expression
-                SequenceExpr? innerExpr = ParseCreate(word, nameSpace);
-                if (innerExpr != null)
+                foreach (var item in innerExpr.SubExpressions)
                 {
-                    parenExpr.SubExpressions.Add(innerExpr);
+                    parenExpr.SubExpressions.Add(item);
+                }
+                hasContent = true;
+            }
+
+            // Parse additional items (sequence_match_items separated by commas)
+            while (word.Text == ",")
+            {
+                word.MoveNext();
+                
+                // Try to parse as sequence_match_item
+                var matchItem = SequenceMatchItem.ParseCreate(word, nameSpace);
+                if (matchItem != null)
+                {
+                    parenExpr.SubExpressions.Add(matchItem);
                     hasContent = true;
+                    continue;
                 }
 
-                if (word.Text == ",")
+                // Otherwise, parse as another sequence expression
+                SequenceExpr? additionalExpr = ParseCreate(word, nameSpace);
+                if (additionalExpr != null)
                 {
-                    word.MoveNext();
-                    // sequence_match_item (operator_assignment, inc_or_dec_expression, subroutine_call)
-                    // Simplified: just try to parse an expression
-                    Expression? matchItem = Expression.ParseCreate(word, nameSpace);
-                    if (matchItem != null)
+                    foreach (var item in additionalExpr.SubExpressions)
                     {
-                        parenExpr.SubExpressions.Add(matchItem);
-                        hasContent = true;
+                        parenExpr.SubExpressions.Add(item);
                     }
+                    hasContent = true;
                 }
                 else
                 {
