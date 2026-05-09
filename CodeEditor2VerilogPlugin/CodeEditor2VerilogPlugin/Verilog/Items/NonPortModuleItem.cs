@@ -38,6 +38,7 @@ namespace pluginVerilog.Verilog.Items
                     return true;
                 // interface_declaration
                 case "interface":
+                    if (word.NextText == "class") break;
                     await BuildingBlocks.Interface.Create(word, nameSpace, null, nameSpace.BuildingBlock, word.RootParsedDocument.File, word.Prototype);
                     return true;
 

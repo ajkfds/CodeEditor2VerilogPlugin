@@ -101,6 +101,17 @@ namespace pluginVerilog.Verilog.Items
                     await BuildingBlocks.Class.ParseDeclaration(word, nameSpace);
                     break;
 
+                // interface_class_declaration
+                case "interface":
+                    // Check if it's interface class
+                    if (word.NextText == "class")
+                    {
+                        await BuildingBlocks.InterfaceClass.ParseDeclaration(word, nameSpace);
+                        break;
+                    }
+                    // Fall through to module/interface handling if needed
+                    return false;
+
                 // class_constructor_declaration
 
                 // local_parameter_declaration;
