@@ -53,6 +53,41 @@ namespace pluginVerilog.Verilog.BuildingBlocks
     module_keyword ::= module | macromodule
 
     */
+
+    /*
+    description ::=
+          module_declaration
+        | udp_declaration
+        | interface_declaration
+        | program_declaration 
+        | package_declaration
+        | { attribute_instance } package_item
+        | { attribute_instance } bind_directive
+        | config_declaration
+
+    package_item ::=
+          package_or_generate_item_declaration
+        | anonymous_program
+        | package_export_declaration
+        | timeunits_declaration
+
+    package_or_generate_item_declaration ::=
+          net_declaration
+        | data_declaration
+        | task_declaration
+        | function_declaration
+        | checker_declaration
+        | dpi_import_export
+        | extern_constraint_declaration
+        | class_declaration
+        | class_constructor_declaration
+        | local_parameter_declaration ;
+        | parameter_declaration ;
+        | covergroup_declaration
+        | assertion_item_declaration
+        | ;
+
+     */
     public class Root : BuildingBlocks.BuildingBlock
     {
         protected Root() : base(null, null)
