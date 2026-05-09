@@ -135,6 +135,21 @@ namespace pluginVerilog.Verilog.Sequence
                     continue;
                 }
 
+                // Check for sequence_instance (identifier reference) when expression fails
+                // sequence_instance ::= ps_or_hierarchical_sequence_identifier [ ( [ sequence_list_of_arguments ] ) ]
+                var sequenceInstance = SequenceInstance.ParseCreate(word, nameSpace);
+                if (sequenceInstance != null)
+                {
+                    sequenceExpr.SubExpressions.Add(sequenceInstance);
+                    // Check for sequence abbreviation after sequence instance
+                    var seqAbbrev = ParseSequenceAbbreviation(word, nameSpace);
+                    if (seqAbbrev != null)
+                    {
+                        sequenceExpr.SubExpressions.Add(seqAbbrev);
+                    }
+                    continue;
+                }
+
                 // No more valid sequence expression elements
                 break;
             }
@@ -339,6 +354,54 @@ namespace pluginVerilog.Verilog.Sequence
 
             if (!hasContent) return null;
             return parenExpr;
+        }
+
+        /// <summary>
+        /// Parse sequence abbreviation: [* const_or_range_expression]
+        /// sequence_abbrev ::= consecutive_repetition
+        /// </summary>
+        private static SequenceRepetition? ParseSequenceAbbreviation(WordScanner word, NameSpace nameSpace)
+        {
+            if (word.Text != "[") return null;
+            word.MoveNext();
+
+            if (word.Text == "*")
+            {
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext();
+                if (word.Text == "]")
+                {
+                    word.MoveNext();
+                    return new SequenceRepetition(RepetitionType.Consecutive, null);
+                }
+            }
+            else if (word.Text == "+")
+            {
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext();
+                if (word.Text == "]")
+                {
+                    word.MoveNext();
+                    return new SequenceRepetition(RepetitionType.ConsecutiveAtLeastOne, null);
+                }
+            }
+            else
+            {
+                // Could be a range expression like [1:5]
+                Expression? startExpr = Expression.ParseCreate(word, nameSpace);
+                if (startExpr != null && word.Text == ":")
+                {
+                    word.MoveNext();
+                    Expression? endExpr = Expression.ParseCreate(word, nameSpace);
+                    if (word.Text == "]")
+                    {
+                        word.MoveNext();
+                        return new SequenceRepetition(RepetitionType.Consecutive, startExpr, endExpr);
+                    }
+                }
+            }
+
+            return null;
         }
 
         /// <summary>
