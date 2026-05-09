@@ -21,8 +21,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         private List<DataObjects.Port> portsList = new List<DataObjects.Port>();
         public List<DataObjects.Port> PortsList { get { return portsList; } }
         //public new WordReference NameReference;
-        private List<string> portParameterNameList = new List<string>();
-        //public List<string> PortParameterNameList { get { return portParameterNameList; } }
+        // Note: PortParameterNameList is inherited from BuildingBlock
 
         public bool AnsiPortStyle = false;
         public bool Static = true;

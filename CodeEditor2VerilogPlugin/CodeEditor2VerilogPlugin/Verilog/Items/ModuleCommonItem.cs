@@ -75,6 +75,7 @@ namespace pluginVerilog.Verilog.Items
             if (InterfaceInstance.Parse(word, nameSpace)) return true;
 
             // program_instantiation
+            if (await ModuleItems.ProgramInstantiation.Parse(word, nameSpace)) return true;
 
             //assertion_item ::=
             //        [block_identifier: ] concurrent_assertion_statement
