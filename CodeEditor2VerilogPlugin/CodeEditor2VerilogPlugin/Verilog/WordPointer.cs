@@ -609,8 +609,8 @@ namespace pluginVerilog.Verilog
             {
                 ch = document.GetCharAt(nextIndex);
                 if ((ch & 0xff80) != 0) break;
-                if (charClass[ch] == 1) { nextIndex++; continue; }
-                if (ch == '_') { nextIndex++; continue; }
+                if (charClass[ch] == 1) { nextIndex++; continue; }  // number
+                if (ch == '_') { nextIndex++; continue; }   // under score
                 break;
             }
 
@@ -619,7 +619,7 @@ namespace pluginVerilog.Verilog
             ch = document.GetCharAt(nextIndex);
             if (ch == '.' | ch == 'e' || ch == 'E')
             { // real
-                if (ch == '.')
+                if (ch == '.')  // floating point
                 {
                     nextIndex++;
                     if (document.Length <= nextIndex) return;
@@ -628,8 +628,8 @@ namespace pluginVerilog.Verilog
                     {
                         ch = document.GetCharAt(nextIndex);
                         if ((ch & 0xff80) != 0) break;
-                        if (charClass[ch] == 1) { nextIndex++; continue; }
-                        if (ch == '_') { nextIndex++; continue; }
+                        if (charClass[ch] == 1) { nextIndex++; continue; }  // number
+                        if (ch == '_') { nextIndex++; continue; }   // under score
                         break;
                     }
                     if (document.Length <= nextIndex) return;
@@ -637,7 +637,7 @@ namespace pluginVerilog.Verilog
 
                 if (docLength <= nextIndex) return;
                 ch = document.GetCharAt(nextIndex);
-                if (ch == 'e' || ch == 'E')
+                if (ch == 'e' || ch == 'E') // exponectial
                 {
                     nextIndex++;
                     if (document.Length <= nextIndex) return;
@@ -657,8 +657,20 @@ namespace pluginVerilog.Verilog
                         break;
                     }
                 }
+                else
+                { // time_literal
+                    ch = document.GetCharAt(nextIndex);
+                    while (docLength > nextIndex)
+                    {
+                        ch = document.GetCharAt(nextIndex);
+                        if ((ch & 0xff80) != 0) break;
+                        if (charClass[ch] == 2) { nextIndex++; continue; } // alphabet
+                        break;
+                    }
+                }
+
             }
-            else if (ch == '\'')
+            else if (ch == '\'') // prime
             {
                 nextIndex++;
                 if (docLength <= nextIndex) return;

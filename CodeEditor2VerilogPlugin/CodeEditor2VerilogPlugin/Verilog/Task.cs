@@ -322,6 +322,8 @@ namespace pluginVerilog.Verilog
             word.Color(CodeDrawStyle.ColorType.Identifier);
             word.MoveNext();
 
+            if (word.Text != "(") return;
+
             await parse_task_items_ansi(word, nameSpace, task);
         }
 

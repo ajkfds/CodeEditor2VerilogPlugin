@@ -196,9 +196,35 @@ namespace pluginVerilog.Verilog.Expressions
                 { // real
                     if (!parseRealValueAfterInteger(number, word, ref index, sb))
                     {
+                        if(sb.Length != 0)
+                        {
+                            switch (word.GetCharAt(index))
+                            {
+                                case 'm':
+                                    word.MoveNext();
+                                    return new Time() { Number = number, Unit = Time.UnitEnum.ms };
+                                case 'u':
+                                    word.MoveNext();
+                                    return new Time() { Number = number, Unit = Time.UnitEnum.us };
+                                case 'n':
+                                    word.MoveNext();
+                                    return new Time() { Number = number, Unit = Time.UnitEnum.ns };
+                                case 'p':
+                                    word.MoveNext();
+                                    return new Time() { Number = number, Unit = Time.UnitEnum.ps };
+                                case 'f':
+                                    word.MoveNext();
+                                    return new Time() { Number = number, Unit = Time.UnitEnum.fs };
+                                default:
+                                    break;
+                            }
+                        }
+
                         word.AddError("illegal real value");
                         return null;
                     }
+
+
                     word.MoveNext();
                     return number;
                 }
@@ -441,6 +467,7 @@ namespace pluginVerilog.Verilog.Expressions
                     index++;
                 }
                 if (index >= word.Length) return true;
+
             }
 
             // parse exponent

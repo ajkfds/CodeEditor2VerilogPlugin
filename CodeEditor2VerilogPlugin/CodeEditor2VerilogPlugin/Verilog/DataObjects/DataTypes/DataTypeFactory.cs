@@ -62,6 +62,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         Virtual,
         Class,
         Interface,
+        InterfaceClass,
         Event,
         CoverGroup,
         Struct,
@@ -199,6 +200,15 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                         word.MoveNext();
                         return classType;
                     }
+
+                    // interface class
+                    if (namedElement is BuildingBlocks.InterfaceClass)
+                    {
+                        IDataType interfaceClassType = (BuildingBlocks.InterfaceClass)namedElement;
+                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.MoveNext();
+                        return interfaceClassType;
+                    }
                     // [class_scope | package_scope] type_identifier { packed_dimension }
 
 
@@ -244,6 +254,15 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 word.Color(CodeDrawStyle.ColorType.Identifier);
                 word.MoveNext();
                 return class_;
+            }
+
+            // interface_class_type
+            if (buildingBlock is InterfaceClass)
+            {
+                InterfaceClass interfaceClass = (InterfaceClass)buildingBlock;
+                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.MoveNext();
+                return interfaceClass;
             }
 
             //if (nameSpace.NamedElements.ContainsKey(word.Text))

@@ -22,6 +22,63 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 NamedElements.Add(builtInMethod.Name, builtInMethod);
             }
 
+            { //function void pre_randomize();
+                List<Port> ports = new List<Port>();
+                BuiltInMethod builtInMethod = BuiltInMethod.Create("pre_randomize", null, ports);
+                NamedElements.Add(builtInMethod.Name, builtInMethod);
+            }
+
+            { //function void post_randomize();
+                List<Port> ports = new List<Port>();
+                BuiltInMethod builtInMethod = BuiltInMethod.Create("post_randomize", null, ports);
+                NamedElements.Add(builtInMethod.Name, builtInMethod);
+            }
+
+            { //function void srandom(int seed);
+                List<Port> ports = new List<Port>();
+                Port? port = Port.Create("seed", null, Port.DirectionEnum.Input, DataObjects.Variables.Int.Create("seed", Verilog.DataObjects.DataTypes.IntType.Create(false)));
+                if (port != null) ports.Add(port);
+                BuiltInMethod builtInMethod = BuiltInMethod.Create("srandom", null, ports);
+                NamedElements.Add(builtInMethod.Name, builtInMethod);
+            }
+
+            { //function string get_randstate();
+                List<Port> ports = new List<Port>();
+                Variable returnVal = DataObjects.Variables.String.Create("get_randstate", Verilog.DataObjects.DataTypes.StringType.Create(null));
+                BuiltInMethod builtInMethod = BuiltInMethod.Create("get_randstate", returnVal, ports);
+                NamedElements.Add(builtInMethod.Name, builtInMethod);
+            }
+
+            { //function int rand_mode();
+                List<Port> ports = new List<Port>();
+                Variable returnVal = DataObjects.Variables.Int.Create("rand_mode", Verilog.DataObjects.DataTypes.IntType.Create(false));
+                BuiltInMethod builtInMethod = BuiltInMethod.Create("rand_mode", returnVal, ports);
+                NamedElements.Add(builtInMethod.Name, builtInMethod);
+            }
+
+            { //task rand_mode(bit on_off);
+                List<Port> ports = new List<Port>();
+                Port? port = Port.Create("on_off", null, Port.DirectionEnum.Input, DataObjects.Variables.Bit.Create("on_off", Verilog.DataObjects.DataTypes.BitType.Create(false, null)));
+                if (port != null) ports.Add(port);
+                BuiltInMethod builtInMethod = BuiltInMethod.Create("rand_mode", null, ports);
+                NamedElements.Add(builtInMethod.Name, builtInMethod);
+            }
+
+            { //function int constraint_mode();
+                List<Port> ports = new List<Port>();
+                Variable returnVal = DataObjects.Variables.Int.Create("constraint_mode", Verilog.DataObjects.DataTypes.IntType.Create(false));
+                BuiltInMethod builtInMethod = BuiltInMethod.Create("constraint_mode", returnVal, ports);
+                NamedElements.Add(builtInMethod.Name, builtInMethod);
+            }
+
+            { //task constraint_mode(bit on_off);
+                List<Port> ports = new List<Port>();
+                Port? port = Port.Create("on_off", null, Port.DirectionEnum.Input, DataObjects.Variables.Bit.Create("on_off", Verilog.DataObjects.DataTypes.BitType.Create(false, null)));
+                if (port != null) ports.Add(port);
+                BuiltInMethod builtInMethod = BuiltInMethod.Create("constraint_mode", null, ports);
+                NamedElements.Add(builtInMethod.Name, builtInMethod);
+            }
+
         }
         public bool Packable
         {

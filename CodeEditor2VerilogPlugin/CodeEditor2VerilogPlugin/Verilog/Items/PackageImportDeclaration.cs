@@ -70,7 +70,7 @@ namespace pluginVerilog.Verilog.Items
                     {
                         if (nameSpace.BuildingBlock.NamedElements.ContainsKey(namedElement.Name))
                         {
-                            if (!word.Prototype) word.AddError("Name conflict: " + namedElement.Name);
+                            if (word.Prototype) word.AddError("Name conflict: " + namedElement.Name);
                             nameSpace.BuildingBlock.NamedElements.Replace(namedElement.Name, namedElement);
                         }
                         else
