@@ -1,5 +1,6 @@
 using CodeEditor2.CodeEditor.CodeComplete;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Statements
@@ -8,11 +9,16 @@ namespace pluginVerilog.Verilog.Statements
     {
         public void DisposeSubReference()
         {
+            Expression?.DisposeSubReference(true);
+            Statement?.DisposeSubReference();
+            ElseStatement?.DisposeSubReference();
         }
         public string Name { get; protected set; }
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public IStatement? Statement { get; protected set; }
+        public IStatement? ElseStatement { get; protected set; }
         public Expressions.Expression? Expression { get; protected set; }
+        public List<string>? Identifiers { get; protected set; }
         public NamedElements NamedElements => new NamedElements();
         public AutocompleteItem CreateAutoCompleteItem()
         {
@@ -36,7 +42,7 @@ namespace pluginVerilog.Verilog.Statements
          */
         public static async Task<WaitStatement?> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
-            if (word.Text == "wait_order") return parseCreate_wait_fork(word, nameSpace);
+            if (word.Text == "wait_order") return await parseCreate_wait_order(word, nameSpace);
 
             if (word.Text != "wait") throw new Exception();
 
@@ -109,5 +115,71 @@ namespace pluginVerilog.Verilog.Statements
             return new WaitStatement();
         }
 
+        // wait_order "(" hierarchical_identifier { "," hierarchical_identifier } ")" action_block
+        public static async Task<WaitStatement?> parseCreate_wait_order(WordScanner word, NameSpace nameSpace)
+        {
+            // | "wait_order" "(" hierarchical_identifier { "," hierarchical_identifier } ")" action_block
+            if (word.Text != "wait_order") throw new Exception();
+            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.MoveNext();
+
+            if (word.Text != "(")
+            {
+                word.AddError("expecting (");
+                return null;
+            }
+            word.MoveNext();
+
+            WaitStatement waitOrderStatement = new WaitStatement();
+            waitOrderStatement.Identifiers = new List<string>();
+
+            // Parse first hierarchical_identifier
+            if (word.Text.Length == 0 || (!General.IsIdentifier(word.Text) && !General.IsEscapedIdentifier(word.Text)))
+            {
+                word.AddError("expecting hierarchical_identifier");
+                return null;
+            }
+            waitOrderStatement.Identifiers.Add(word.Text);
+            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.MoveNext();
+
+            // Parse remaining hierarchical_identifiers (comma separated)
+            while (word.Text == ",")
+            {
+                word.MoveNext();
+
+                if (word.Text.Length == 0 || (!General.IsIdentifier(word.Text) && !General.IsEscapedIdentifier(word.Text)))
+                {
+                    word.AddError("expecting hierarchical_identifier");
+                    return null;
+                }
+                waitOrderStatement.Identifiers.Add(word.Text);
+                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.MoveNext();
+            }
+
+            if (word.Text != ")")
+            {
+                word.AddError("expecting )");
+                return null;
+            }
+            word.MoveNext();
+
+            // action_block ::= [ statement ] [ else statement ]
+            IStatement? statement = await Statements.ParseCreateStatementOrNull(word, nameSpace);
+            waitOrderStatement.Statement = statement;
+
+            // Handle else clause
+            if (word.Text == "else")
+            {
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext(); // else
+
+                IStatement? elseStatement = await Statements.ParseCreateStatementOrNull(word, nameSpace);
+                waitOrderStatement.ElseStatement = elseStatement;
+            }
+
+            return waitOrderStatement;
+        }
     }
 }
