@@ -531,6 +531,25 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     word.AddError("; expected");
                 }
 
+                // ["implements" interface_class_type { , interface_class_type } ] ;
+
+                if (word.Text == "implements")
+                {
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+
+                    while (!word.Eof)
+                    {
+                        string interface_class_type = word.Text;
+                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.MoveNext();
+
+                        if (word.Text != ",") break;
+                        word.MoveNext();
+                    }
+                }
+
+
                 while (!word.Eof)
                 {
                     if (!await Items.ClassItem.Parse(word, class_))
