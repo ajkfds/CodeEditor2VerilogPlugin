@@ -57,7 +57,7 @@ namespace pluginVerilog.Verilog.Property
             }
             return null;
         }
-        protected PropertyOperator(string text, byte precedence)
+        public PropertyOperator(string text, byte precedence)
         {
             Text = text;
             Precedence = precedence;

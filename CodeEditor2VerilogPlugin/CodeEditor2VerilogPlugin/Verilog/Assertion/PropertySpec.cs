@@ -25,23 +25,20 @@ namespace pluginVerilog.Verilog.Assertion
             EventControl? eventControl = null;
             if (word.Text == "@") eventControl = EventControl.ParseCreate(word, nameSpace);
             Expressions.Expression? disableIffExpression = null;
+            Property.PropertyExpr? propertyExpr = null;
 
             if (word.Text == "disable")
             {
-                do
+                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.MoveNext();
+                if (word.Text != "iff")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.AddError("iff missing");
+                }
+                else
+                {
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
                     word.MoveNext();
-                    if (word.Text == "iff")
-                    {
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
-                        word.MoveNext();
-                    }
-                    else
-                    {
-                        word.AddError("iff missing");
-                        break;
-                    }
                     if (word.Text == "(")
                     {
                         word.MoveNext();
@@ -49,7 +46,6 @@ namespace pluginVerilog.Verilog.Assertion
                     else
                     {
                         word.AddError("illegal property spec");
-                        break;
                     }
 
                     disableIffExpression = Expressions.Expression.ParseCreate(word, nameSpace);
@@ -60,30 +56,24 @@ namespace pluginVerilog.Verilog.Assertion
                     else
                     {
                         word.AddError("illegal property spec");
-                        break;
                     }
-
-                    Property.PropertyExpr? propertyExpr = Property.PropertyExpr.ParseCreate(word, nameSpace);
-
-                } while (false);
+                }
             }
 
+            // Parse property expression
+            propertyExpr = Property.PropertyExpr.ParseCreate(word, nameSpace);
 
             PropertySpec propertySpec = new PropertySpec()
             {
                 EventControl = eventControl,
                 DisableIffExpression = disableIffExpression,
+                PropertyExpr = propertyExpr,
             };
-
-            // must implement
-            Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
-
-
 
             return propertySpec;
         }
 
-        Property.PropertyExpr? PropertyExpr { get; set; }
+        public Property.PropertyExpr? PropertyExpr { get; set; }
         public EventControl? EventControl { get; set; }
         public Expressions.Expression? DisableIffExpression { get; set; }
     }

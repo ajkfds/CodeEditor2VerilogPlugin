@@ -48,10 +48,20 @@ namespace pluginVerilog.Verilog.Assertion
 
         deferred_immediate_cover_statement ::=
               cover #0 ( expression ) statement_or_null
-            | cover final ( expression ) statement_or_null         
+            | cover final ( expression ) statement_or_null
+
+        action_block ::=
+            [ statement ] [ else statement ]
          */
 
-
-
+        // 実装ステータス:
+        // - ImmidiateAssertionStatement.ParseCreate() で対応:
+        //   ✅ simple_immediate_assert_statement (assert (expr) action_block)
+        //   ✅ simple_immediate_assume_statement (assume (expr) action_block)
+        //   ✅ simple_immediate_cover_statement (cover (expr) statement_or_null)
+        //   ✅ deferred_immediate_assert_statement (assert #0 / final)
+        //   ✅ deferred_immediate_assume_statement (assume #0 / final)
+        //   ✅ deferred_immediate_cover_statement (cover #0 / final)
+        //   ✅ action_block の else 句対応
     }
 }

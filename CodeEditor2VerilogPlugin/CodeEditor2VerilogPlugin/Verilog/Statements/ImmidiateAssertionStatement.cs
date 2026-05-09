@@ -3,15 +3,65 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Statements
 {
+    public enum ImmediateAssertionKind
+    {
+        Simple,       // assert (expr) action_block
+        DeferredZero, // assert #0 (expr) action_block
+        Final,        // assert final (expr) action_block
+    }
+
     public class ImmidiateAssertionStatement : IStatement
     {
+        /*
+        IEEE 1800-2017 SystemVerilog
+
+        immediate_assertion_statement ::=
+              simple_immediate_assert_statement
+            | simple_immediate_assume_statement
+            | simple_immediate_cover_statement
+            | deferred_immediate_assert_statement
+            | deferred_immediate_assume_statement
+            | deferred_immediate_cover_statement
+
+        simple_immediate_assert_statement ::=
+            assert ( expression ) action_block
+
+        simple_immediate_assume_statement ::=
+            assume ( expression ) action_block
+
+        simple_immediate_cover_statement ::=
+            cover ( expression ) statement_or_null
+
+        deferred_immediate_assert_statement ::=
+              assert #0 ( expression ) action_block
+            | assert final ( expression ) action_block
+
+        deferred_immediate_assume_statement ::=
+              assume #0 ( expression ) action_block
+            | assume final ( expression ) action_block
+
+        deferred_immediate_cover_statement ::=
+              cover #0 ( expression ) statement_or_null
+            | cover final ( expression ) statement_or_null
+
+        action_block ::=
+            [ statement ] [ else statement ]
+        */
+
         public string Name { get; protected set; }
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
+
+        /// <summary>
+        /// Assertion kind: Simple, DeferredZero (#0), or Final
+        /// </summary>
+        public ImmediateAssertionKind Kind { get; protected set; } = ImmediateAssertionKind.Simple;
+
         public void DisposeSubReference()
         {
-            ConditionalExpression.DisposeSubReference(true);
-            Statement.DisposeSubReference();
+            ConditionalExpression?.DisposeSubReference(true);
+            Statement?.DisposeSubReference();
+            ElseStatement?.DisposeSubReference();
         }
 
         public AutocompleteItem CreateAutoCompleteItem()
@@ -29,48 +79,74 @@ namespace pluginVerilog.Verilog.Statements
         public IStatement? ElseStatement;
         public static async Task<ImmidiateAssertionStatement> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
-            System.Diagnostics.Debug.Assert(word.Text == "assert" | word.Text == "assume" | word.Text == "cover");
+            System.Diagnostics.Debug.Assert(word.Text == "assert" || word.Text == "assume" || word.Text == "cover");
             word.Color(CodeDrawStyle.ColorType.Keyword);
-            word.MoveNext(); // if
+            word.MoveNext();
 
-            ImmidiateAssertionStatement conditionalStatement = new ImmidiateAssertionStatement() { Name = "" };
-            if (statement_label != null) { conditionalStatement.Name = statement_label; }
+            ImmidiateAssertionStatement assertion = new ImmidiateAssertionStatement() { Name = "" };
+            if (statement_label != null) { assertion.Name = statement_label; }
+
+            // Check for deferred immediate assertion: #0 or final
+            if (word.Text == "#")
+            {
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext(); // #
+                if (word.Text == "0")
+                {
+                    word.Color(CodeDrawStyle.ColorType.Number);
+                    word.MoveNext(); // 0
+                    assertion.Kind = ImmediateAssertionKind.DeferredZero;
+                }
+                else
+                {
+                    word.AddError("#0 expected");
+                    return assertion;
+                }
+            }
+            else if (word.Text == "final")
+            {
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext(); // final
+                assertion.Kind = ImmediateAssertionKind.Final;
+            }
 
             if (word.GetCharAt(0) != '(')
             {
                 word.AddError("( expected");
-                return null;
+                return assertion;
             }
             word.MoveNext(); // (
 
-            Expressions.Expression conditionExpression = Expressions.Expression.ParseCreate(word, nameSpace);
+            Expressions.Expression? conditionExpression = Expressions.Expression.ParseCreate(word, nameSpace);
             if (conditionExpression == null)
             {
                 word.AddError("illegal conditional expression");
-                return null;
+                return assertion;
             }
-            conditionalStatement.ConditionalExpression = conditionExpression;
+            assertion.ConditionalExpression = conditionExpression;
 
             if (word.GetCharAt(0) != ')')
             {
-                word.AddError("( expected");
-                return null;
+                word.AddError(") expected");
+                return assertion;
             }
             word.MoveNext(); // )
 
+            // action_block ::= [ statement ] [ else statement ]
             IStatement? statement = await Statements.ParseCreateStatementOrNull(word, nameSpace);
-            conditionalStatement.Statement = statement;
+            assertion.Statement = statement;
 
-            while (word.Text == "else")
+            // Handle else clause (only for assert and assume)
+            if (word.Text == "else")
             {
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 word.MoveNext(); // else
 
-                statement = await Statements.ParseCreateStatementOrNull(word, nameSpace);
-                conditionalStatement.ElseStatement = statement;
-                break;
+                IStatement? elseStatement = await Statements.ParseCreateStatementOrNull(word, nameSpace);
+                assertion.ElseStatement = elseStatement;
             }
-            return conditionalStatement;
+
+            return assertion;
         }
     }
 }
