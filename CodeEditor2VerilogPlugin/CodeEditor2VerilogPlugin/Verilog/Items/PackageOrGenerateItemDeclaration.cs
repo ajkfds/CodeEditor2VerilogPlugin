@@ -135,12 +135,20 @@ namespace pluginVerilog.Verilog.Items
                 // assertion_item_declaration
                 case "property":
                     // property_declaration ::= property property_identifier [ ( [ property_port_list ] ) ] ; { assertion_variable_declaration } property_spec [ ; ] endproperty [ : property_identifier ]
-                    await ParsePropertyDeclaration(word, nameSpace);
+                    var propertyDecl = await Property.PropertyDeclaration.ParseCreate(word, nameSpace);
+                    if (propertyDecl != null)
+                    {
+                        nameSpace.NamedElements.Add(propertyDecl.Name, propertyDecl);
+                    }
                     return true;
 
                 case "sequence":
                     // sequence_declaration ::= sequence sequence_identifier [ ( [ sequence_port_list ] ) ] ; { assertion_variable_declaration } sequence_expr [ ; ] endsequence [ : sequence_identifier ]
-                    await ParseSequenceDeclaration(word, nameSpace);
+                    var sequenceDecl = await Sequence.SequenceDeclaration.ParseCreate(word, nameSpace);
+                    if (sequenceDecl != null)
+                    {
+                        nameSpace.NamedElements.Add(sequenceDecl.Name, sequenceDecl);
+                    }
                     return true;
 
                 // ;
@@ -166,163 +174,6 @@ namespace pluginVerilog.Verilog.Items
             }
 
             return true;
-        }
-
-        /// <summary>
-        /// Parse property declaration
-        /// property_declaration ::=
-        ///     "property" property_identifier [ "(" [ property_port_list ] ")" ] ";"
-        ///     { assertion_variable_declaration }
-        ///     property_spec [ ";" ]
-        ///     "endproperty" [ ":" property_identifier ]
-        /// </summary>
-        private static async System.Threading.Tasks.Task ParsePropertyDeclaration(WordScanner word, NameSpace nameSpace)
-        {
-            word.Color(CodeDrawStyle.ColorType.Keyword);
-            word.MoveNext(); // property
-
-            if (!General.IsIdentifier(word.Text))
-            {
-                word.AddError("property identifier expected");
-                word.SkipToKeyword("endproperty");
-                if (word.Text == "endproperty") word.MoveNext();
-                return;
-            }
-
-            string propertyName = word.Text;
-            word.Color(CodeDrawStyle.ColorType.Identifier);
-            word.MoveNext();
-
-            // Parse optional port list
-            if (word.Text == "(")
-            {
-                word.MoveNext();
-                // TODO: Parse property_port_list
-                // property_port_item ::= { attribute_instance } [ "local" [ property_lvar_port_direction ] ] property_formal_type formal_port_identifier {variable_dimension} [ "=" property_actual_arg ]
-                while (!word.Eof && word.Text != ")")
-                {
-                    if (word.Text == ")")
-                    {
-                        break;
-                    }
-                    word.MoveNext();
-                }
-                if (word.Text == ")")
-                {
-                    word.MoveNext();
-                }
-            }
-
-            if (word.Text == ";")
-            {
-                word.MoveNext();
-            }
-
-            // Parse assertion_variable_declarations
-            // assertion_variable_declaration ::= var_data_type list_of_variable_decl_assignments ;
-            while (!word.Eof && word.Text != "endproperty")
-            {
-                // Skip assertion variable declarations
-                // This is a simplified implementation - a full implementation would parse the actual declarations
-                word.MoveNext();
-            }
-
-            // Skip to endproperty
-            if (word.Text == "endproperty")
-            {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
-                word.MoveNext();
-
-                // Check for optional : property_identifier
-                if (word.Text == ":")
-                {
-                    word.MoveNext();
-                    if (word.Text == propertyName)
-                    {
-                        word.Color(CodeDrawStyle.ColorType.Identifier);
-                        word.MoveNext();
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Parse sequence declaration
-        /// sequence_declaration ::=
-        ///     "sequence" sequence_identifier [ "(" [ sequence_port_list ] ")" ] ";"
-        ///     { assertion_variable_declaration }
-        ///     sequence_expr [ ";" ]
-        ///     "endsequence" [ ":" sequence_identifier ]
-        /// </summary>
-        private static async System.Threading.Tasks.Task ParseSequenceDeclaration(WordScanner word, NameSpace nameSpace)
-        {
-            word.Color(CodeDrawStyle.ColorType.Keyword);
-            word.MoveNext(); // sequence
-
-            if (!General.IsIdentifier(word.Text))
-            {
-                word.AddError("sequence identifier expected");
-                word.SkipToKeyword("endsequence");
-                if (word.Text == "endsequence") word.MoveNext();
-                return;
-            }
-
-            string sequenceName = word.Text;
-            word.Color(CodeDrawStyle.ColorType.Identifier);
-            word.MoveNext();
-
-            // Parse optional port list
-            if (word.Text == "(")
-            {
-                word.MoveNext();
-                // TODO: Parse sequence_port_list
-                // sequence_port_item ::= { attribute_instance } [ "local" [ sequence_lvar_port_direction ] ] sequence_formal_type formal_port_identifier {variable_dimension} [ = sequence_actual_arg ]
-                // sequence_lvar_port_direction ::= input | inout | output
-                while (!word.Eof && word.Text != ")")
-                {
-                    if (word.Text == ")")
-                    {
-                        break;
-                    }
-                    word.MoveNext();
-                }
-                if (word.Text == ")")
-                {
-                    word.MoveNext();
-                }
-            }
-
-            if (word.Text == ";")
-            {
-                word.MoveNext();
-            }
-
-            // Parse assertion_variable_declarations
-            // assertion_variable_declaration ::= var_data_type list_of_variable_decl_assignments ;
-            while (!word.Eof && word.Text != "endsequence")
-            {
-                // Skip assertion variable declarations
-                // This is a simplified implementation - a full implementation would parse the actual declarations
-                word.MoveNext();
-            }
-
-            // Skip to endsequence
-            if (word.Text == "endsequence")
-            {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
-                word.MoveNext();
-
-                // Check for optional : sequence_identifier
-                if (word.Text == ":")
-                {
-                    word.MoveNext();
-                    if (word.Text == sequenceName)
-                    {
-                        word.Color(CodeDrawStyle.ColorType.Identifier);
-                        word.MoveNext();
-                    }
-                }
-            }
         }
     }
 }

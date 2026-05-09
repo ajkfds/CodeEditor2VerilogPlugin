@@ -131,6 +131,10 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public static bool ParseDeclaration(WordScanner word, NameSpace nameSpace)
         {
+            return ParseDeclaration(word, nameSpace, null);
+        }
+        public static bool ParseDeclaration(WordScanner word, NameSpace nameSpace,Action<DataObject>? declared)
+        {
             // data_declaration::=    [ "const" ] ["var"] [lifetime] data_type_or_implicit list_of_variable_decl_assignments;
             //                      | type_declaration
             //                      | package_import_declaration11
@@ -410,6 +414,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 }
                 variable.AssignedMap = new ArraysBoolMap(dataType, unpackedArrays);
                 if (assigned) variable.AssignedMap.AssertAll();
+                if (declared != null) declared(variable);
 
                 vars.Add(variable);
 

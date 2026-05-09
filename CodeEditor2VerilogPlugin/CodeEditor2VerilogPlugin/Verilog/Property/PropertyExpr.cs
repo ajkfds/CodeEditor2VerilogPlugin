@@ -152,6 +152,14 @@ namespace pluginVerilog.Verilog.Property
                     }
                 }
 
+                // Check for property_instance (ps_or_hierarchical_property_identifier followed by optional arguments)
+                var propertyInstance = PropertyInstance.ParseCreate(word, nameSpace);
+                if (propertyInstance != null)
+                {
+                    propertyExpr.SubExpressions.Add(propertyInstance);
+                    continue;
+                }
+
                 // Parse sequence expression (base case)
                 var sequenceExpr = SequenceExpr.ParseCreate(word, nameSpace);
                 if (sequenceExpr != null)
