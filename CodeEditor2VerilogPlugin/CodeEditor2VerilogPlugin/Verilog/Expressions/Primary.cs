@@ -161,6 +161,14 @@ number
                     {
                         return Bracket.ParseCreateBracketOrMinTypMax(word, nameSpace);
                     }
+                    else if (word.GetCharAt(0) == '\'')
+                    {
+                        // assignment pattern '{
+                        if (word.NextText == "{")
+                        {
+                            return AssignmentPattern.ParseCreate(word, nameSpace, lValue);
+                        }
+                    }
                     return null;
                 case WordPointer.WordTypeEnum.String:
                     return ConstantString.ParseCreate(word, nameSpace);
