@@ -286,27 +286,34 @@ namespace pluginVerilog.Verilog.Statements
             // class_new ::= [ class_scope ] "new" [ ( list_of_arguments ) ] | "new" expression
             // dynamic_array_new ::= "new" [ expression ] [ ( expression ) ]
 
-            BuildingBlocks.Class? class_ = word.ProjectProperty.GetBuildingBlock(word.Text) as BuildingBlocks.Class;
-            if (class_ != null)
+            // Check if this is a dynamic array allocation (new followed by [size])
+            bool isDynamicArrayNew = word.Text == "new" && word.NextText == "[";
+
+            // If not dynamic array new, try to resolve class reference
+            if (!isDynamicArrayNew)
             {
-                word.Color(CodeDrawStyle.ColorType.Identifier);
-                word.MoveNext();
-                if (word.Text != "::")
+                BuildingBlocks.Class? class_ = word.ProjectProperty.GetBuildingBlock(word.Text) as BuildingBlocks.Class;
+                if (class_ != null)
                 {
-                    word.AddError(":: required");
-                    return null;
-                }
-                word.MoveNext();
-            }
-            else
-            {
-                if (lExpression is Expressions.DataObjectReference)
-                {
-                    Expressions.DataObjectReference dref = (Expressions.DataObjectReference)lExpression;
-                    if (dref.TargetDataObject is DataObjects.Variables.Object)
+                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.MoveNext();
+                    if (word.Text != "::")
                     {
-                        DataObjects.Variables.Object? obj = (DataObjects.Variables.Object)dref.TargetDataObject;
-                        class_ = obj.Class;
+                        word.AddError(":: required");
+                        return null;
+                    }
+                    word.MoveNext();
+                }
+                else
+                {
+                    if (lExpression is Expressions.DataObjectReference)
+                    {
+                        Expressions.DataObjectReference dref = (Expressions.DataObjectReference)lExpression;
+                        if (dref.TargetDataObject is DataObjects.Variables.Object)
+                        {
+                            DataObjects.Variables.Object? obj = (DataObjects.Variables.Object)dref.TargetDataObject;
+                            class_ = obj.Class;
+                        }
                     }
                 }
             }
@@ -315,6 +322,56 @@ namespace pluginVerilog.Verilog.Statements
 
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
+
+            // Handle dynamic array new: new [expression] [(expression)]
+            if (word.Text == "[")
+            {
+                word.MoveNext(); // [
+                Expressions.Expression? sizeExpression = Expressions.Expression.ParseCreate(word, nameSpace);
+                if (sizeExpression == null)
+                {
+                    word.AddError("size expression expected");
+                    return null;
+                }
+                if (word.Text != "]")
+                {
+                    word.AddError("] expected");
+                    return null;
+                }
+                word.MoveNext(); // ]
+
+                // Optional constructor arguments
+                if (word.Text == "(")
+                {
+                    word.MoveNext();
+                    while (word.Text != ")" && !word.Eof)
+                    {
+                        Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
+                        if (expression == null) break;
+                        if (word.Text != ",") break;
+                        word.MoveNext();
+                    }
+                    if (word.Text != ")")
+                    {
+                        word.AddError(") expected");
+                        return null;
+                    }
+                    word.MoveNext();
+                }
+
+                if (word.Text != ";")
+                {
+                    word.AddError("; expected");
+                    return null;
+                }
+                BlockingAssignment assignment = new BlockingAssignment();
+                assignment.LValue = lExpression;
+                assignment.Expression = null; // new
+                if (Assigned != null) Assigned(word, nameSpace, assignment);
+                return assignment;
+            }
+
+            // Handle class new: new [(arguments)] or new expression
             if (word.Text == "(")
             {
                 word.MoveNext();
@@ -346,11 +403,11 @@ namespace pluginVerilog.Verilog.Statements
                 word.AddError("; expected");
                 return null;
             }
-            BlockingAssignment assignment = new BlockingAssignment();
-            assignment.LValue = lExpression;
-            assignment.Expression = null; // new
-            if (Assigned != null) Assigned(word, nameSpace, assignment);
-            return assignment;
+            BlockingAssignment blockingAssignment = new BlockingAssignment();
+            blockingAssignment.LValue = lExpression;
+            blockingAssignment.Expression = null; // new
+            if (Assigned != null) Assigned(word, nameSpace, blockingAssignment);
+            return blockingAssignment;
 
         }
     }

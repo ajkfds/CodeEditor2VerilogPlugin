@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace pluginVerilog.Verilog.DataObjects.Arrays
 {
     public class DynamicArray : DataObject, IArray
@@ -18,22 +20,42 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
             }
         }
 
+        NamedElements NamedElements { get; } = new NamedElements();
         public static DynamicArray Create(DataObject dataObject)
         {
-            return new DynamicArray() { DataObject = dataObject, Name = dataObject.Name };
+            return Create(dataObject, dataObject.Name);
         }
+
+        public static DynamicArray Create(DataObject dataObject,string name)
+        {
+            DynamicArray dynamicArray = new DynamicArray() { DataObject = dataObject, Name = name };
+
+            { // function int size();
+                List<Port> ports = new List<Port>();
+                Variables.Variable returnVal = DataObjects.Variables.Int.Create("size", DataTypes.IntType.Create(false));
+                BuiltInMethod builtInMethod = BuiltInMethod.Create("size", returnVal, ports);
+                dynamicArray.NamedElements.Add(builtInMethod.Name, builtInMethod);
+            }
+
+            { // function void delete();
+                List<Port> ports = new List<Port>();
+                BuiltInMethod builtInMethod = BuiltInMethod.Create("delete", null, ports);
+                dynamicArray.NamedElements.Add(builtInMethod.Name, builtInMethod);
+            }
+
+            return dynamicArray;
+        }
+
         public override DataObject Clone()
         {
-            return new DynamicArray() { DataObject = DataObject, Name = DataObject.Name };
+            DynamicArray clone = Create(DataObject.Clone());
+            return clone;
         }
 
         public override DataObject Clone(string name)
         {
-            return new DynamicArray() { DataObject = DataObject.Clone(name), Name = name };
+            DynamicArray clone = DynamicArray.Create(DataObject.Clone(name),name);
+            return clone;
         }
-
-        /*
-         size()、delete()
-         */
     }
 }
