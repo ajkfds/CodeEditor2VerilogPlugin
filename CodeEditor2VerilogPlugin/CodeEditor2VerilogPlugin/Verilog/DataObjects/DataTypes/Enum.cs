@@ -233,6 +233,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             { // function enum next( int unsigned N = 1 )
                 List<Port> ports = new List<Port>();
                 Port? port = Port.Create("N", null, Port.DirectionEnum.Input, DataObjects.Variables.Int.Create("N", DataTypes.IntType.Create(false)));
+                if(port != null) port.DefaultArgument = Expressions.Expression.CreateTempExpression("1");
                 if (port != null) ports.Add(port);
                 Variables.Variable returnVal = DataObjects.Variables.Enum.Create("next", this);
                 BuiltInMethod builtInMethod = BuiltInMethod.Create("next", returnVal, ports);
@@ -242,6 +243,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             { // function enum prev( int unsigned N = 1 )
                 List<Port> ports = new List<Port>();
                 Port? port = Port.Create("N", null, Port.DirectionEnum.Input, DataObjects.Variables.Int.Create("N", DataTypes.IntType.Create(false)));
+                if (port != null) port.DefaultArgument = Expressions.Expression.CreateTempExpression("1");
                 if (port != null) ports.Add(port);
                 Variables.Variable returnVal = DataObjects.Variables.Enum.Create("prev", this);
                 BuiltInMethod builtInMethod = BuiltInMethod.Create("prev", returnVal, ports);
