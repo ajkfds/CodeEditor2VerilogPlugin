@@ -131,10 +131,49 @@ namespace pluginVerilog.Verilog.Items
                 //      | "extern" { method_qualifier } class_constructor_prototype
 
 
-                // TODO
                 // { attribute_instance } class_constraint
+                case "constraint":
+                    {
+                        var constraint = Coverage.ConstraintDeclaration.ParseCreate(word, nameSpace);
+                        if (constraint != null)
+                        {
+                            // Register constraint in namespace
+                            if (!word.Prototype && !string.IsNullOrEmpty(constraint.Name))
+                            {
+                                if (!nameSpace.NamedElements.ContainsKey(constraint.Name))
+                                {
+                                    nameSpace.NamedElements.Add(constraint.Name, constraint);
+                                }
+                            }
+                            return true;
+                        }
+                        return false;
+                    }
+
                 // { attribute_instance } class_declaration
+                case "class":
+                    await BuildingBlocks.Class.ParseCreate(word, nameSpace, attribute, nameSpace.BuildingBlock, nameSpace.BuildingBlock.File);
+                    return true;
+
                 // { attribute_instance } covergroup_declaration
+                case "covergroup":
+                    {
+                        var covergroup = await Coverage.CovergroupDeclaration.ParseCreate(word, nameSpace);
+                        if (covergroup != null)
+                        {
+                            // Register covergroup in namespace
+                            if (!word.Prototype && !string.IsNullOrEmpty(covergroup.Name))
+                            {
+                                if (!nameSpace.NamedElements.ContainsKey(covergroup.Name))
+                                {
+                                    nameSpace.NamedElements.Add(covergroup.Name, covergroup);
+                                }
+                            }
+                            return true;
+                        }
+                        return false;
+                    }
+
                 case "virtual":
                 case "rand":
                 case "randc":
