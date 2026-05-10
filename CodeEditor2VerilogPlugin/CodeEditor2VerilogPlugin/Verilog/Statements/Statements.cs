@@ -191,6 +191,11 @@ namespace pluginVerilog.Verilog.Statements
 
                 // disable_statement 
                 case "disable":
+                    // Check for disable fork
+                    if (word.NextText == "fork")
+                    {
+                        return DisableForkStatement.ParseCreate(word, nameSpace, statement_label);
+                    }
                     return DisableStatement.ParseCreate(word, nameSpace, statement_label);
 
                 case "force":
@@ -258,6 +263,14 @@ namespace pluginVerilog.Verilog.Statements
                 // expect_property_statement
                 case "expect":
                     return await ExpectPropertyStatement.ParseCreate(word, nameSpace, statement_label);
+
+                // randsequence_statement
+                case "randsequence":
+                    return await RandsequenceStatement.ParseCreate(word, nameSpace, statement_label);
+
+                // randcase_statement
+                case "randcase":
+                    return await RandcaseStatement.ParseCreate(word, nameSpace, statement_label);
 
                 default:
 
