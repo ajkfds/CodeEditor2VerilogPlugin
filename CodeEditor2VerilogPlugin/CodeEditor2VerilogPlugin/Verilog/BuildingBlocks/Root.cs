@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using pluginVerilog.Verilog.ModuleItems;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
@@ -145,6 +146,9 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         await parseProgram(word, parsedDocument, file);
                         break;
                     // bind_directive
+                    case "bind":
+                        await parseBindDirective(word, parsedDocument, file);
+                        break;
                     // config_declaration
                     // package_declaration
                     case "package":
@@ -345,6 +349,19 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 // If not prototype, the update is already done by AddOrUpdateBuildingBlock
             }
             // Note: ReparseRequested for ParseMode is now set only once at the end of ParseCreate based on ParseMode
+        }
+
+        private static async System.Threading.Tasks.Task parseBindDirective(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
+        {
+            if (word.Text != "bind") throw new Exception();
+
+            BindDirective? bindDirective;
+            if (ModuleItems.BindDirective.Parse(word, null, out bindDirective))
+            {
+                // Bind directive parsed successfully
+                // Note: Bind directive is a compiler directive-like construct that doesn't create a building block
+                // It binds instances to modules/interfaces/checkers that need to be referenced elsewhere
+            }
         }
 
     }
