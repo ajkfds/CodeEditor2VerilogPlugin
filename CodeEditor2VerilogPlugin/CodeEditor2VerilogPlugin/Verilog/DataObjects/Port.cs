@@ -881,185 +881,6 @@ namespace pluginVerilog.Verilog.DataObjects
         */
 
 
-        /*
-         
-        tf_port_declaration ::=
-            { attribute_instance } tf_port_direction [ var ] data_type_or_implicit list_of_tf_variable_identifiers ; 
-
-         */
-        public static bool ParseTfPortDeclaration(WordScanner word, NameSpace nameSpace)
-        {
-            // tf_port_direction[var] data_type_or_implicit list_of_tf_variable_identifiers;
-
-            // SystemVerilog
-            // tf_port_item         ::= { attribute_instance } [tf_port_direction] [var] data_type_or_implicit [port_identifier { variable_dimension } [ = expression] ] 
-
-
-            BuildingBlock buildingBlock = nameSpace.BuildingBlock;
-
-            // [tf_port_direction]
-            //      tf_port_direction::= port_direction | "const" "ref"
-            DirectionEnum? direction = null;
-            switch (word.Text)
-            {
-                case "input":
-                    direction = DirectionEnum.Input;
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
-                    word.MoveNext();
-                    break;
-                case "output":
-                    direction = DirectionEnum.Output;
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
-                    word.MoveNext();
-                    break;
-                case "inout":
-                    direction = DirectionEnum.Inout;
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
-                    word.MoveNext();
-                    break;
-                case "const":
-                    direction = DirectionEnum.Ref;
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
-                    word.MoveNext();
-                    if (word.Text == "ref")
-                    {
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
-                        word.MoveNext();
-                    }
-                    else
-                    {
-                        word.AddError("ref required");
-                    }
-                    break;
-                default:
-                    return false;
-            }
-
-            // ["var"]
-            if (word.Text == "var")
-            {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
-                word.MoveNext();
-            }
-
-            // data_type_or_implicit [port_identifier { variable_dimension } [ = expression] ] 
-            IDataType? dataType = DataTypeFactory.ParseCreate(word, nameSpace, null);
-
-            // Each formal argument has a data type that can be explicitly declared or inherited from the previous argument.
-            // If the data type is not explicitly declared, then the default data type is logic
-            //    if it is the first argument
-            // or if the argument direction is explicitly specified.
-            // Otherwise, the data type is inherited from the previous argument.
-
-            if (dataType == null)
-            {
-                DataTypes.IntegerVectorType vectorType = LogicType.Create(false, null);
-                if (word.Text == "[")
-                {
-                    DataObjects.Arrays.PackedArray? range = DataObjects.Arrays.PackedArray.ParseCreate(word, nameSpace);
-                    if (range != null) vectorType.PackedDimensions.Add(range);
-
-                }
-
-                dataType = vectorType;
-            }
-
-            if (!General.IsIdentifier(word.Text))
-            {
-                word.AddError("illegal port name");
-                return true;
-            }
-
-            while (!word.Eof)
-            {
-                // port_identifier
-                if (!General.IsIdentifier(word.Text)) break;
-
-                Port port = new Port() { DefinitionReference = word.CrateWordReference(), Name = word.Text, Project = word.Project };
-                port.Direction = (DirectionEnum)direction;
-                port.DataObject = Variables.Variable.Create(port.Name, dataType);
-
-                if (nameSpace is Function)
-                {
-                    Function? function = nameSpace as Function;
-                    if (function == null) throw new Exception();
-                    if (!function.Ports.ContainsKey(port.Name))
-                    {
-                        function.Ports.Add(port.Name, port);
-                        function.PortsList.Add(port);
-                    }
-                    else
-                    {
-                        if (word.Prototype) port.DefinitionReference.AddError("duplicated");
-                    }
-                }
-                else if (nameSpace is Task)
-                {
-                    Task? task = nameSpace as Task;
-                    if (task == null) throw new Exception();
-                    if (!task.Ports.ContainsKey(port.Name))
-                    {
-                        task.Ports.Add(port.Name, port);
-                        task.PortsList.Add(port);
-                    }
-                    else
-                    {
-                        if (word.Prototype) port.DefinitionReference.AddError("duplicated");
-                    }
-                }
-
-                if (!nameSpace.NamedElements.ContainsKey(port.DataObject.Name))
-                {
-                    nameSpace.NamedElements.Add(port.DataObject.Name, port.DataObject);
-                }
-
-                if (!word.Prototype) port.DataObject.Defined = true;
-
-                word.Color(CodeDrawStyle.ColorType.Variable);
-                word.MoveNext();
-
-                // { variable_dimension } [ = expression] ] 
-                // { variable_dimension }
-                while (!word.Eof && word.Text == "[")
-                {
-                    IArray? array = null;
-                    if (port.DataObject != null) array = VariableArray.ParseCreate(port.DataObject, word, nameSpace);
-
-                    if (array is UnPackedArray)
-                    {
-                        UnPackedArray unPackedArray = (UnPackedArray)array;
-                        if (port.DataObject != null)
-                        {
-                            port.DataObject.UnpackedArrays.Add(unPackedArray);
-                        }
-                    }
-                    else if (array is Queue)
-                    {
-                        port.DataObject = (Queue)array;
-                    }
-                    else if (array is AssociativeArray)
-                    {
-                        port.DataObject = (AssociativeArray)array;
-                    }
-                    else if (array is DynamicArray)
-                    {
-                        port.DataObject = (DynamicArray)array;
-                    }
-                }
-
-                if (word.Text == "=")
-                {
-                    word.AddSystemVerilogError();
-                    word.MoveNext();
-                    Expressions.Expression? exp = Expressions.Expression.ParseCreate(word, nameSpace);
-                }
-
-                if (word.Text != ",") return true;
-                word.MoveNext();    // skip ,
-            }
-            return true;
-        }
-
         public static void ParseTfPortItems(WordScanner word, NameSpace nameSpace, IPortNameSpace portNameSpace)
         {
             DirectionEnum? prevDirection = null;
@@ -1256,9 +1077,23 @@ namespace pluginVerilog.Verilog.DataObjects
 
             if (word.Text == "=")
             {
-                word.AddSystemVerilogError();
                 word.MoveNext();
                 Expressions.Expression? exp = Expressions.Expression.ParseCreate(word, nameSpace);
+                if (exp == null)
+                {
+                    word.AddError("illegal default expression");
+                }
+                else
+                {
+                    if (!exp.Constant)
+                    {
+                        exp.Reference.AddError("default value should be constant");
+                    }
+                    else
+                    {
+                        port.DefaultArgument = exp;
+                    }
+                }
             }
 
             prevDirection = port.Direction;
@@ -1266,7 +1101,181 @@ namespace pluginVerilog.Verilog.DataObjects
             return true;
         }
 
+        /// <summary>
+        /// Parse task/function port declaration (old style: direction data_type list_of_identifiers;)
+        /// </summary>
+        public static bool ParseTfPortDeclaration(WordScanner word, NameSpace nameSpace)
+        {
+            // tf_port_declaration ::=
+            //     { attribute_instance } tf_port_direction [ var ] data_type_or_implicit list_of_tf_variable_identifiers ;
 
+            BuildingBlock buildingBlock = nameSpace.BuildingBlock;
+
+            // [tf_port_direction]
+            DirectionEnum? direction = null;
+            switch (word.Text)
+            {
+                case "input":
+                    direction = DirectionEnum.Input;
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+                    break;
+                case "output":
+                    direction = DirectionEnum.Output;
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+                    break;
+                case "inout":
+                    direction = DirectionEnum.Inout;
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+                    break;
+                case "const":
+                    direction = DirectionEnum.Ref;
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+                    if (word.Text == "ref")
+                    {
+                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.MoveNext();
+                    }
+                    else
+                    {
+                        word.AddError("ref required");
+                    }
+                    break;
+                default:
+                    return false;
+            }
+
+            // ["var"]
+            if (word.Text == "var")
+            {
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext();
+            }
+
+            // data_type_or_implicit
+            IDataType? dataType = DataTypeFactory.ParseCreate(word, nameSpace, null);
+
+            if (dataType == null)
+            {
+                DataTypes.IntegerVectorType vectorType = LogicType.Create(false, null);
+                if (word.Text == "[")
+                {
+                    DataObjects.Arrays.PackedArray? range = DataObjects.Arrays.PackedArray.ParseCreate(word, nameSpace);
+                    if (range != null) vectorType.PackedDimensions.Add(range);
+                }
+                dataType = vectorType;
+            }
+
+            if (!General.IsIdentifier(word.Text))
+            {
+                word.AddError("illegal port name");
+                return true;
+            }
+
+            while (!word.Eof)
+            {
+                if (!General.IsIdentifier(word.Text)) break;
+
+                Port port = new Port() { DefinitionReference = word.CrateWordReference(), Name = word.Text, Project = word.Project };
+                port.Direction = (DirectionEnum)direction;
+                port.DataObject = Variables.Variable.Create(port.Name, dataType);
+
+                if (nameSpace is Function)
+                {
+                    Function? function = nameSpace as Function;
+                    if (function == null) throw new Exception();
+                    if (!function.Ports.ContainsKey(port.Name))
+                    {
+                        function.Ports.Add(port.Name, port);
+                        function.PortsList.Add(port);
+                    }
+                    else
+                    {
+                        if (word.Prototype) port.DefinitionReference.AddError("duplicated");
+                    }
+                }
+                else if (nameSpace is Task)
+                {
+                    Task? task = nameSpace as Task;
+                    if (task == null) throw new Exception();
+                    if (!task.Ports.ContainsKey(port.Name))
+                    {
+                        task.Ports.Add(port.Name, port);
+                        task.PortsList.Add(port);
+                    }
+                    else
+                    {
+                        if (word.Prototype) port.DefinitionReference.AddError("duplicated");
+                    }
+                }
+
+                if (!nameSpace.NamedElements.ContainsKey(port.DataObject.Name))
+                {
+                    nameSpace.NamedElements.Add(port.DataObject.Name, port.DataObject);
+                }
+
+                if (!word.Prototype) port.DataObject.Defined = true;
+
+                word.Color(CodeDrawStyle.ColorType.Variable);
+                word.MoveNext();
+
+                // { variable_dimension } [ = expression]
+                while (!word.Eof && word.Text == "[")
+                {
+                    IArray? array = null;
+                    if (port.DataObject != null) array = VariableArray.ParseCreate(port.DataObject, word, nameSpace);
+
+                    if (array is UnPackedArray)
+                    {
+                        UnPackedArray unPackedArray = (UnPackedArray)array;
+                        if (port.DataObject != null)
+                        {
+                            port.DataObject.UnpackedArrays.Add(unPackedArray);
+                        }
+                    }
+                    else if (array is Queue)
+                    {
+                        port.DataObject = (Queue)array;
+                    }
+                    else if (array is AssociativeArray)
+                    {
+                        port.DataObject = (AssociativeArray)array;
+                    }
+                    else if (array is DynamicArray)
+                    {
+                        port.DataObject = (DynamicArray)array;
+                    }
+                }
+
+                if (word.Text == "=")
+                {
+                    word.MoveNext();
+                    Expressions.Expression? exp = Expressions.Expression.ParseCreate(word, nameSpace);
+                    if (exp == null)
+                    {
+                        word.AddError("illegal default expression");
+                    }
+                    else
+                    {
+                        if (!exp.Constant)
+                        {
+                            exp.Reference.AddError("default value should be constant");
+                        }
+                        else
+                        {
+                            port.DefaultArgument = exp;
+                        }
+                    }
+                }
+
+                if (word.Text != ",") break;
+                word.MoveNext();
+            }
+            return true;
+        }
 
     }
 }

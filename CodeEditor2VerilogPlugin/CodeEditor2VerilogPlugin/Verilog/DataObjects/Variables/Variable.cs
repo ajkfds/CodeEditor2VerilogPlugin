@@ -98,6 +98,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 case DataTypeEnum.UserDefined:
                     return UserDefinedVariable.Create(name, dataType);
                 default:
+                    if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
                     throw new Exception();
             }
         }

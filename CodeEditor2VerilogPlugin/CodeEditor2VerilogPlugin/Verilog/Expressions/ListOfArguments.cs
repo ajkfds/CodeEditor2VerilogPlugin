@@ -45,15 +45,25 @@ namespace pluginVerilog.Verilog.Expressions
 
             if (word.Text == ")")
             {
+                // 空の括弧の場合：すべてのポートにデフォルト値があるかチェック
                 if (portNameSpace != null && portNameSpace.Ports.Count != 0)
                 {
-                    word.AddError("too few arguments");
+                    foreach (var port in portNameSpace.PortsList)
+                    {
+                        if (port.DefaultArgument == null)
+                        {
+                            word.AddError("too few arguments");
+                            break;
+                        }
+                    }
                 }
                 word.MoveNext();
                 return;
             }
 
             int i = 0;
+            HashSet<string> connectedPorts = new HashSet<string>();
+
             while (!word.Eof)
             {
                 if (word.Text == ")" || word.Text == "." || word.Text == ";") break;
@@ -84,7 +94,7 @@ namespace pluginVerilog.Verilog.Expressions
                         continue;
                     }
 
-                    word.AddError("must have defult argument");
+                    word.AddError("must have default argument");
                     i++;
                     word.MoveNext();
                     continue;
@@ -103,6 +113,7 @@ namespace pluginVerilog.Verilog.Expressions
                 {
                     portConnection.Add(port.Name, expression);
                 }
+                connectedPorts.Add(port.Name);
 
                 if (port.BitWidth != expression.BitWidth)
                 {
@@ -123,6 +134,7 @@ namespace pluginVerilog.Verilog.Expressions
                 return;
             }
 
+            // Named port connections (after positional arguments)
             while (!word.Eof & word.Text == ".")
             {
                 if (word.Text == ")") break;
@@ -136,7 +148,7 @@ namespace pluginVerilog.Verilog.Expressions
                 word.MoveNext();
                 if (!portNameSpace.Ports.ContainsKey(word.Text))
                 {
-                    word.AddError("unudefined port");
+                    word.AddError("undefined port");
                     word.SkipToKeyword(";");
                     return;
                 }
@@ -144,7 +156,7 @@ namespace pluginVerilog.Verilog.Expressions
                 DataObjects.Port port = portNameSpace.Ports[word.Text];
                 word.Color(CodeDrawStyle.ColorType.Identifier);
 
-                if (portConnection.ContainsKey(port.Name))
+                if (connectedPorts.Contains(port.Name))
                 {
                     word.AddError("duplicated port");
                 }
@@ -158,18 +170,43 @@ namespace pluginVerilog.Verilog.Expressions
                     return;
                 }
                 word.MoveNext();
-                Expression? expression = Expression.ParseCreate(word, (NameSpace)portNameSpace);
-                if (expression == null)
+
+                // Check for empty expression (use default)
+                Expression? expression = null;
+                if (word.Text != ")")
                 {
-                    word.AddError("illegal port expression");
-                    word.SkipToKeyword(";");
-                    return;
+                    expression = Expression.ParseCreate(word, (NameSpace)portNameSpace);
+                    if (expression == null)
+                    {
+                        word.AddError("illegal port expression");
+                        word.SkipToKeyword(";");
+                        return;
+                    }
+                    if (!expression.Constant) constantConnected = false;
+                }
+                else
+                {
+                    // Empty expression: check if port has default
+                    if (port.DefaultArgument == null)
+                    {
+                        word.AddError("argument required for port " + port.Name);
+                    }
+                    // else: use default argument (expression remains null)
                 }
 
                 if (!portConnection.ContainsKey(port.Name))
                 {
-                    portConnection.Add(port.Name, expression);
+                    if (expression != null)
+                    {
+                        portConnection.Add(port.Name, expression);
+                    }
+                    else if (port.DefaultArgument != null)
+                    {
+                        portConnection.Add(port.Name, port.DefaultArgument);
+                        if (!port.DefaultArgument.Constant) constantConnected = false;
+                    }
                 }
+                connectedPorts.Add(port.Name);
 
                 if (word.Text != ")")
                 {
@@ -189,12 +226,18 @@ namespace pluginVerilog.Verilog.Expressions
 
             if (word.Text == ")")
             {
-                if (portNameSpace != null && i < portNameSpace.Ports.Count)
+                // Check for missing required arguments (those without defaults)
+                if (portNameSpace != null)
                 {
-                    word.AddError("too few arguments");
+                    foreach (var port in portNameSpace.PortsList)
+                    {
+                        if (!connectedPorts.Contains(port.Name) && port.DefaultArgument == null)
+                        {
+                            word.AddError("too few arguments");
+                            break;
+                        }
+                    }
                 }
-                //                functionCall.Reference = WordReference.CreateReferenceRange(functionCall.Reference, word.GetReference());
-                //                functionCall.Constant = returnConstant;
                 word.MoveNext();
             }
             else

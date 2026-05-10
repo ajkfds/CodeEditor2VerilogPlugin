@@ -27,6 +27,9 @@ namespace pluginVerilog.Verilog.Items
                 case "specify":
                     return SpecifyBlock.Parse(word, nameSpace);
                 // { attribute_instance }specparam_declaration
+                case "specparam":
+                    DataObjects.Constants.Constants.ParseCreateDeclaration(word, nameSpace,null);
+                    return true;
                 // program_declaration
                 case "program":
                     await BuildingBlocks.Program.Parse(word, null, nameSpace.BuildingBlock, word.RootParsedDocument.File, word.Prototype);

@@ -81,13 +81,23 @@ namespace pluginVerilog.Verilog.Expressions
             {
                 if (function != null && function.Ports.Count != 0)
                 {
-                    word.AddError("illegal function call");
-                    return null;
+                    // Check if all ports have default arguments
+                    bool allHaveDefaults = true;
+                    foreach (var port in function.PortsList)
+                    {
+                        if (port.DefaultArgument == null)
+                        {
+                            allHaveDefaults = false;
+                            break;
+                        }
+                    }
+                    if (!allHaveDefaults)
+                    {
+                        word.AddError("illegal function call");
+                        return null;
+                    }
                 }
-                else
-                {
-                    return functionCall;
-                }
+                return functionCall;
             }
 
             // Use common ListOfArguments parser
