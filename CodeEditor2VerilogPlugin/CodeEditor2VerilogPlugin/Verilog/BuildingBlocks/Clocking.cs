@@ -29,9 +29,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         public IndexReference BeginIndexReference { get; set; }
         public IndexReference? BlockBeginIndexReference { get; set; }
         public IndexReference? LastIndexReference { get; set; }
-        public WordReference? DefinitionReference { get; set; }
 
-        public string Name { get; set; } = "";
         public bool IsDefault { get; set; } = false;
         public bool IsGlobal { get; set; } = false;
 
@@ -66,21 +64,20 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
         public static Clocking? ParseCreate(WordScanner word, NameSpace nameSpace, Attribute? attribute)
         {
-            Clocking clocking = new Clocking(nameSpace.BuildingBlock, nameSpace)
-            {
-                BeginIndexReference = word.CreateIndexReference()
-            };
+            IndexReference beginReference = word.CreateIndexReference();
 
+            bool isDefault = false;
+            bool isGlobal = false;
             // Check for default or global
             if (word.Text == "default")
             {
-                clocking.IsDefault = true;
+                isDefault = true;
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 word.MoveNext();
             }
             else if (word.Text == "global")
             {
-                clocking.IsGlobal = true;
+                isGlobal = true;
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 word.MoveNext();
             }
@@ -93,19 +90,33 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
+
+            Clocking clocking;
             // Optional clocking_identifier
             if (General.IsIdentifier(word.Text))
             {
-                clocking.Name = word.Text;
-                clocking.DefinitionReference = word.CrateWordReference();
+                clocking = new Clocking(nameSpace.BuildingBlock, nameSpace)
+                {
+                    Name = word.Text,
+                    BeginIndexReference = beginReference,
+                    DefinitionReference = word.CrateWordReference(),
+                    IsDefault = isDefault,
+                    IsGlobal = isGlobal,
+                };
                 word.Color(CodeDrawStyle.ColorType.Identifier);
                 word.MoveNext();
             }
             else
             {
                 // Anonymous clocking block
-                clocking.Name = "";
-                clocking.DefinitionReference = word.CrateWordReference();
+                clocking = new Clocking(nameSpace.BuildingBlock, nameSpace)
+                {
+                    Name = "",
+                    BeginIndexReference = beginReference,
+                    DefinitionReference = word.CrateWordReference(),
+                    IsDefault = isDefault,
+                    IsGlobal = isGlobal,
+                };
             }
 
             // Clocking event: @( ...)
@@ -290,13 +301,13 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         switch (direction)
                         {
                             case ClockingSignal.DirectionEnum.Input:
-                                var = Variables.Input.Create(signal.Name, DataObjects.DataTypes.LogicType.Create(false, null));
+                                var = DataObjects.Variables.Variable.Create(signal.Name, DataObjects.DataTypes.LogicType.Create(false, null));
                                 break;
                             case ClockingSignal.DirectionEnum.Output:
-                                var = Variables.Output.Create(signal.Name, DataObjects.DataTypes.LogicType.Create(false, null));
+                                var = DataObjects.Variables.Variable.Create(signal.Name, DataObjects.DataTypes.LogicType.Create(false, null));
                                 break;
                             case ClockingSignal.DirectionEnum.Inout:
-                                var = Variables.Inout.Create(signal.Name, DataObjects.DataTypes.LogicType.Create(false, null));
+                                var = DataObjects.Variables.Variable.Create(signal.Name, DataObjects.DataTypes.LogicType.Create(false, null));
                                 break;
                         }
                         if (var != null && !clocking.NamedElements.ContainsKey(signal.Name))
