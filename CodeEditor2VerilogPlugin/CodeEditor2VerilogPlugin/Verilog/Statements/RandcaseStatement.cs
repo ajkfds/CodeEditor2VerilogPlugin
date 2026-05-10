@@ -93,10 +93,10 @@ namespace pluginVerilog.Verilog.Statements
 
         public void DisposeSubReference()
         {
-            if (Statement != null)
-            {
-                Statement.DisposeSubReference();
-            }
+            //if (Statement != null)
+            //{
+            //    Statement.DisposeSubReference();
+            //}
         }
 
         public AutocompleteItem CreateAutoCompleteItem()

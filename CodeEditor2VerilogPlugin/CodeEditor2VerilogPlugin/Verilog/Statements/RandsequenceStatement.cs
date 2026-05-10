@@ -168,10 +168,7 @@ namespace pluginVerilog.Verilog.Statements
                     RandSelector selector = new RandSelector();
 
                     // Check for optional data type
-                    if (DataObjects.DataTypes.IDataType.IsDataType(word.Text))
-                    {
-                        selector.DataType = DataObjects.DataTypes.IDataType.ParseCreateDataType(word, nameSpace);
-                    }
+                    selector.DataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, nameSpace,null);
 
                     // tf_identifier
                     if (General.IsIdentifier(word.Text))
