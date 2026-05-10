@@ -33,12 +33,21 @@ namespace pluginVerilog.Verilog.Assertion
             if (word.Eof || word.Text != ")") return await exitTask(word, nameSpace, assertPropertyStatement);
             word.MoveNext();
 
+            if(word.Text == ";") //  null statement
+            {
+                word.MoveNext();
+                return assertPropertyStatement;
+            }
+
             if (word.Text != "else")
             {
                 assertPropertyStatement.PassStatement = await Statements.Statements.ParseCreateStatement(word, nameSpace);
             }
 
-            if (word.Text != "else") return assertPropertyStatement;
+            if (word.Text != "else")
+            {
+                return assertPropertyStatement;
+            }
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 

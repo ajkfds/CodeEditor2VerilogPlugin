@@ -326,6 +326,8 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     word.AddError("; expected");
                 }
 
+                if (word.Text == "endinterface") break;
+
                 while (!word.Eof)
                 {
                     if (!await Items.InterfaceItem.Parse(word, interface_))

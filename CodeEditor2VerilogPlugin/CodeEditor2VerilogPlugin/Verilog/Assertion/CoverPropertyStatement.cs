@@ -11,9 +11,6 @@ namespace pluginVerilog.Verilog.Assertion
         /*
         cover_property_statement ::=
             "cover" "property" "(" property_spec ")" statement_or_null
-
-        property_spec ::=
-            [clocking_event ] [ "disable" "iff" "(" expression_or_dist ")" ] property_expr
         */
 
         public static async Task<CoverPropertyStatement> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)

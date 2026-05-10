@@ -65,6 +65,14 @@ namespace pluginVerilog.Verilog.Property
             
             while (!word.Eof)
             {
+                // Parse sequence expression (base case)
+                var sequenceExpr = SequenceExpr.ParseCreate(word, nameSpace);
+                if (sequenceExpr != null)
+                {
+                    propertyExpr.SubExpressions.Add(sequenceExpr);
+                    continue;
+                }
+
                 // Check for strong/weak wrappers
                 if (word.Text == "strong" || word.Text == "weak")
                 {
@@ -160,13 +168,6 @@ namespace pluginVerilog.Verilog.Property
                     continue;
                 }
 
-                // Parse sequence expression (base case)
-                var sequenceExpr = SequenceExpr.ParseCreate(word, nameSpace);
-                if (sequenceExpr != null)
-                {
-                    propertyExpr.SubExpressions.Add(sequenceExpr);
-                    continue;
-                }
 
                 // No more valid property expression elements
                 break;

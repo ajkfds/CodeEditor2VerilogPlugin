@@ -7,7 +7,8 @@ namespace pluginVerilog.Verilog.Assertion
     {
         /*
         property_spec ::=
-            [clocking_event ] [ "disable" "iff" "(" expression_or_dist ")" ] property_expr         
+            [clocking_event ] [ "disable" "iff" "(" expression_or_dist ")" ] 
+        
         
         clocking_event ::=
               @ identifier

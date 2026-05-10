@@ -1,6 +1,6 @@
 namespace pluginVerilog.Verilog.Assertion
 {
-    internal class SequenceExpression
+    internal class SequenceExpressionXX
     {
         /*
         sequence_expr ::=
