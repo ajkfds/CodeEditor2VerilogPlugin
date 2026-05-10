@@ -123,12 +123,12 @@ namespace pluginVerilog.Verilog.Items
 
                 // covergroup_declaration
                 case "covergroup":
-                    // TODO: implement covergroup declaration
-                    word.AddError("covergroup declaration not implemented");
-                    word.SkipToKeyword("endgroup");
-                    if (word.Text == "endgroup") word.MoveNext();
-                    if (word.Text == ";") word.MoveNext();
-                    break;
+                    var covergroup = await Coverage.CovergroupDeclaration.ParseCreate(word, nameSpace);
+                    if (covergroup != null)
+                    {
+                        nameSpace.NamedElements.Add(covergroup.Name, covergroup);
+                    }
+                    return true;
 
                 // overload_declaration
 
