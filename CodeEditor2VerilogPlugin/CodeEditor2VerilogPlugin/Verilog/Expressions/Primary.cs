@@ -420,7 +420,7 @@ number
                     }
                     return searchNameSpace(word, newNameSpace, ref nameSpaceText);
                 }
-                return nameSpace;
+                return newNameSpace;
             }
 
             if (element is IBuildingBlockInstantiation)
