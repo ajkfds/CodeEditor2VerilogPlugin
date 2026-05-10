@@ -99,7 +99,8 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                     return UserDefinedVariable.Create(name, dataType);
                 default:
                     if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
-                    throw new Exception();
+                    return null;
+//                    throw new Exception();
             }
         }
 
