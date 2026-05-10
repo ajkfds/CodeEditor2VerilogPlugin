@@ -152,7 +152,7 @@ namespace pluginVerilog.Verilog.Items
 
                 // { attribute_instance } class_declaration
                 case "class":
-                    await BuildingBlocks.Class.ParseCreate(word, nameSpace, attribute, nameSpace.BuildingBlock, nameSpace.BuildingBlock.File);
+                    await BuildingBlocks.Class.ParseCreate(word, nameSpace);//, attribute, nameSpace.BuildingBlock, nameSpace.BuildingBlock.File);
                     return true;
 
                 // { attribute_instance } covergroup_declaration
