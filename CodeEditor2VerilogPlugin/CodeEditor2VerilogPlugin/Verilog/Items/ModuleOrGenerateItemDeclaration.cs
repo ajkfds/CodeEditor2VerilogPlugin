@@ -1,3 +1,5 @@
+using pluginVerilog.Verilog.BuildingBlocks;
+
 namespace pluginVerilog.Verilog.Items
 {
     public class ModuleOrGenerateItemDeclaration
@@ -23,44 +25,46 @@ namespace pluginVerilog.Verilog.Items
                 case "genvar":
                     DataObjects.Variables.Genvar.ParseCreateFromDeclaration(word, buildingBlock);
                     return true;
-                // clocking_declaration ::= [ default ] clocking [ clocking_identifier ] clocking_event ; { clocking_item } endclocking  [ : clocking_identifier]  | global clocking[clocking_identifier] clocking_event; endclocking[ : clocking_identifier]
-                // "default clocking" clocking_identifier;
+
+                // clocking_declaration ::= [ default ] clocking [ clocking_identifier ] clocking_event ; { clocking_item } endclocking  [ : clocking_identifier]
+                //                        | global clocking [ clocking_identifier ] clocking_event ; endclocking [ : clocking_identifier]
                 case "clocking":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
-                    word.MoveNext();
-                    word.AddError("not implemented");
-                    word.SkipToKeyword(";");
-                    return true;
+                case "global":
+                    Clocking? clocking = Clocking.ParseCreate(word, buildingBlock, null);
+                    if (clocking != null)
+                    {
+                        // Register the clocking block in the namespace if it has a name
+                        if (!string.IsNullOrEmpty(clocking.Name) && !word.Prototype)
+                        {
+                            if (!buildingBlock.NamedElements.ContainsKey(clocking.Name))
+                            {
+                                buildingBlock.NamedElements.Add(clocking.Name, clocking);
+                            }
+                        }
+                        return true;
+                    }
+                    return false;
+
+                // "default clocking" clocking_identifier;
                 case "default":
                     word.Color(CodeDrawStyle.ColorType.Keyword);
                     word.MoveNext();
                     if (word.Text == "clocking")
                     {
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
-                        word.MoveNext();
-                        if (General.IsIdentifier(word.Text))
-                        {
-                            word.Color(CodeDrawStyle.ColorType.Identifier);
-                            word.MoveNext();
-                        }
-                        else
-                        {
-                            word.AddError("illegal identifier");
-                            word.SkipToKeyword(";");
-                        }
+                        // Parse default clocking statement
+                        Clocking.ParseDefaultClocking(word, buildingBlock);
                     }
                     else
                     {
                         word.AddError("clocking expected");
+                        word.SkipToKeyword(";");
+                        if (word.Text == ";") word.MoveNext();
                     }
                     return true;
+
                 default:
                     return false;
             }
-
-
-
         }
-
     }
 }
