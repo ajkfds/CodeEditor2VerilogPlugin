@@ -152,6 +152,8 @@ namespace pluginVerilog.Verilog.ModuleItems
             Program? instancedProgram = word.ProjectProperty.GetBuildingBlock(programName) as Program;
             if (instancedProgram == null)
             {
+                // module instanceである可能性がある。
+                return false;
                 word.AddError("unfound program");
                 word.RootParsedDocument.ReparseRequested = true;
                 if (!word.RootParsedDocument.UnfoundModules.Contains(programName)) word.RootParsedDocument.UnfoundModules.Add(programName);
