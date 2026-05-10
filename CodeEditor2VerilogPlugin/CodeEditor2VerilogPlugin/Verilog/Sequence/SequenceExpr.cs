@@ -164,19 +164,29 @@ namespace pluginVerilog.Verilog.Sequence
         private static object? ParseClockingEvent(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "@") return null;
+            var eventControl = Statements.EventControl.ParseCreate(word, nameSpace);
+            return eventControl;
+
+
+/*
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
             if (word.Text == "(")
             {
                 word.MoveNext();
+
+                var eventControl = Statements.EventControl.ParseCreate(word, nameSpace);
+                if (eventControl != null) 
+
                 // Parse event_expression (simplified - just parse until closing paren)
-                Expression? expr = Expression.ParseCreate(word, nameSpace);
+ //               Expression? expr = Expression.ParseCreate(word, nameSpace);
                 if (word.Text == ")")
                 {
                     word.MoveNext();
                 }
-                return expr;
+                return eventControl;
+//                return expr;
             }
             else
             {
@@ -186,6 +196,7 @@ namespace pluginVerilog.Verilog.Sequence
                 word.MoveNext();
                 return identifier;
             }
+*/
         }
 
         /// <summary>
