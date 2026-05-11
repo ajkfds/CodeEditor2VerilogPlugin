@@ -110,7 +110,71 @@ namespace pluginVerilog.Verilog
 
         public static void parseExport(WordScanner word, NameSpace nameSpace)
         {
+            // export dpi_spec_string [ c_identifier = ] "function" function_identifier;
+            // export dpi_spec_string [ c_identifier = ] "task" task_identifier;
 
+            // Optional c_identifier =
+            if (General.IsIdentifier(word.Text))
+            {
+                string cIdentifier = word.Text;
+                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.MoveNext();
+
+                if (word.Text == "=")
+                {
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+                }
+                else
+                {
+                    // If no =, the identifier was actually the exported item type keyword
+                    // Reset and handle properly
+                    word.AddError("= expected after c_identifier");
+                    word.SkipToKeyword(";");
+                    if (word.Text == ";") word.MoveNext();
+                    return;
+                }
+            }
+
+            // Check for function or task
+            if (word.Text != "function" && word.Text != "task")
+            {
+                word.AddError("function or task expected");
+                word.SkipToKeyword(";");
+                if (word.Text == ";") word.MoveNext();
+                return;
+            }
+
+            bool isFunction = (word.Text == "function");
+            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.MoveNext();
+
+            // function_identifier or task_identifier
+            if (!General.IsIdentifier(word.Text))
+            {
+                word.AddError("identifier expected");
+                word.SkipToKeyword(";");
+                if (word.Text == ";") word.MoveNext();
+                return;
+            }
+
+            string identifier = word.Text;
+            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.MoveNext();
+
+            // Semicolon
+            if (word.Text != ";")
+            {
+                word.AddError("; expected");
+                word.SkipToKeyword(";");
+                if (word.Text == ";") word.MoveNext();
+                return;
+            }
+            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.MoveNext();
+
+            // Note: The export declaration registers the identifier in the namespace
+            // so that the C function/task can be called from SystemVerilog
         }
 
     }
