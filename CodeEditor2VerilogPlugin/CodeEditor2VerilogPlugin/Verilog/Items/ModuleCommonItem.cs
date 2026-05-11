@@ -73,6 +73,11 @@ namespace pluginVerilog.Verilog.Items
                 // conditional_generate_construct
                 case "if":
                     return await Generate.IfGenerateConstruct.Parse(word, nameSpace);
+                // timeunits_declaration
+                case "timeunit":
+                case "timeprecision":
+                    var timeunits = DataObjects.TimeunitsDeclaration.ParseCreate(word, nameSpace);
+                    return timeunits != null;
             }
 
 
