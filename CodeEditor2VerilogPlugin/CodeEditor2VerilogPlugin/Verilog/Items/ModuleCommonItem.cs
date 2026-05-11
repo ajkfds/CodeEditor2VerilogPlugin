@@ -43,7 +43,12 @@ namespace pluginVerilog.Verilog.Items
                     //      | deferred_immediate_assertion_item
                     return await ConcurrentAssertionItemExceptCheckerInstantiation.Parse(word, nameSpace);
                 // bind_directive
+                case "bind":
+                    ModuleItems.BindDirective? bindDirective;
+                    return ModuleItems.BindDirective.Parse(word, nameSpace, out bindDirective);
                 // net_alias
+                case "alias":
+                    return ModuleItems.NetAlias.Parse(word, nameSpace);
                 // final_construct
                 case "final":
                     return await ModuleItems.FinalConstruct.Parse(word, nameSpace);
