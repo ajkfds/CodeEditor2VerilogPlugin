@@ -151,6 +151,15 @@ namespace pluginVerilog.Verilog.Items
                     }
                     return true;
 
+                // let_declaration
+                case "let":
+                    var letDecl = LetDeclaration.ParseCreate(word, nameSpace);
+                    if (letDecl != null)
+                    {
+                        nameSpace.NamedElements.Add(letDecl.Name, letDecl);
+                    }
+                    return true;
+
                 // ;
                 case ";":
                     word.AddSystemVerilogError();
