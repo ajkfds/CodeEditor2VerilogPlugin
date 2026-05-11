@@ -26,6 +26,10 @@ namespace pluginVerilog.Verilog.Items
                 case "modport":
                     return ModPort.Parse(word, nameSpace);
                 // timeunits_declaration3
+                case "timeunit":
+                case "timeprecision":
+                    var timeunits = DataObjects.TimeunitsDeclaration.ParseCreate(word, nameSpace);
+                    return timeunits != null;
                 // interface_declaration 
                 case "interface":
                     await BuildingBlocks.Interface.Create(word, nameSpace, null, nameSpace.BuildingBlock, word.RootParsedDocument.File, word.Prototype);

@@ -46,6 +46,11 @@ namespace pluginVerilog.Verilog.Items
                 //{ attribute_instance } initial_construct 
                 case "initial":
                     return await ModuleItems.InitialConstruct.Parse(word, nameSpace);
+                // timeunits_declaration
+                case "timeunit":
+                case "timeprecision":
+                    var timeunits = DataObjects.TimeunitsDeclaration.ParseCreate(word, nameSpace);
+                    return timeunits != null;
                 default:
                     break;
 

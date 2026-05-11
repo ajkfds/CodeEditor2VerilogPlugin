@@ -47,6 +47,10 @@ namespace pluginVerilog.Verilog.Items
 
 
                 // timeunits_declaration
+                case "timeunit":
+                case "timeprecision":
+                    var timeunits = DataObjects.TimeunitsDeclaration.ParseCreate(word, nameSpace);
+                    return timeunits != null;
                 // module_or_generate_item
                 default:
                     break;
