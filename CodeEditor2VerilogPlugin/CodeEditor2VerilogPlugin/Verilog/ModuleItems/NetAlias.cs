@@ -9,16 +9,16 @@ namespace pluginVerilog.Verilog.ModuleItems
     /// Represents a Net Alias declaration
     /// IEEE 1800-2017 SystemVerilog
     /// 
-    /// net_alias ::= alias ( list_of_net_aliases ) = expression ;
+    /// net_alias ::= "alias" net_lvalue "=" net_lvalue { "=" net_lvalue } ;
     /// 
     /// list_of_net_aliases ::= net_alias_item { , net_alias_item }
     /// net_alias_item ::= net_lvalue
     /// </summary>
-    public class NetAlias : Item
+    public class NetAlias
     {
         protected NetAlias() { }
 
-        public string Name { get; protected set; } = "";
+//        public string Name { get; set; } = "";
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
 
@@ -46,95 +46,46 @@ namespace pluginVerilog.Verilog.ModuleItems
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext(); // alias
 
-            NetAlias netAlias = new NetAlias
-            {
-                BeginIndexReference = beginReference
-            };
-
-            // Expect opening parenthesis
-            if (word.Text != "(")
-            {
-                word.AddError("( expected");
-                word.SkipToKeyword(";");
-                if (word.Text == ";") word.MoveNext();
-                return true;
-            }
-            word.MoveNext(); // (
 
             // Parse list_of_net_aliases
             // net_alias_item ::= net_lvalue
-            bool first = true;
-            while (!word.Eof && word.Text != ")")
-            {
-                if (first)
-                {
-                    first = false;
-                }
-                else if (word.Text == ",")
-                {
-                    word.MoveNext();
-                    continue;
-                }
-                else if (word.Text == ")")
-                {
-                    break;
-                }
-                else
-                {
-                    word.AddError(") or , expected");
-                    word.SkipToKeyword(";");
-                    if (word.Text == ";") word.MoveNext();
-                    return true;
-                }
 
-                // Parse net_lvalue
-                Expression? lvalue = Expression.ParseCreateNetLvalue(word, nameSpace);
-                if (lvalue != null)
-                {
-                    netAlias.NetLvalues.Add(lvalue);
-                }
-                else
-                {
-                    word.AddError("illegal net lvalue");
-                    word.SkipToKeyword(";");
-                    if (word.Text == ";") word.MoveNext();
-                    return true;
-                }
-            }
 
-            // Closing parenthesis
-            if (word.Text == ")")
+            // Parse net_lvalue
+            Expression? lvalue = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace, true);
+            if (lvalue != null)
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
-                word.MoveNext();
             }
             else
             {
-                word.AddError(") expected");
+                word.AddError("illegal net lvalue");
                 word.SkipToKeyword(";");
                 if (word.Text == ";") word.MoveNext();
                 return true;
             }
 
-            // Expect = 
-            if (word.Text != "=")
+            while(!word.Eof && word.Text == "=")
             {
-                word.AddError("= expected");
-                word.SkipToKeyword(";");
-                if (word.Text == ";") word.MoveNext();
-                return true;
-            }
-            word.Color(CodeDrawStyle.ColorType.Keyword);
-            word.MoveNext();
+                // Expect = 
+                if (word.Text != "=")
+                {
+                    word.AddError("= expected");
+                    word.SkipToKeyword(";");
+                    if (word.Text == ";") word.MoveNext();
+                    return true;
+                }
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext();
 
-            // Parse expression
-            netAlias.Expression = Expression.ParseCreate(word, nameSpace);
-            if (netAlias.Expression == null)
-            {
-                word.AddError("illegal expression");
-                word.SkipToKeyword(";");
-                if (word.Text == ";") word.MoveNext();
-                return true;
+                // Parse expression
+                Expressions.Expression? aliasExpression = Expression.ParseCreate(word, nameSpace);
+                if (aliasExpression == null)
+                {
+                    word.AddError("illegal expression");
+                    word.SkipToKeyword(";");
+                    if (word.Text == ";") word.MoveNext();
+                    return true;
+                }
             }
 
             // Semicolon
@@ -148,19 +99,12 @@ namespace pluginVerilog.Verilog.ModuleItems
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
-            netAlias.LastIndexReference = word.CreateIndexReference();
-
             return true;
         }
 
         public CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem CreateAutoCompleteItem()
         {
-            return new AutocompleteItem(
-                Name,
-                CodeDrawStyle.ColorIndex(ColorType),
-                Global.CodeDrawStyle.Color(ColorType),
-                "CodeEditor2/Assets/Icons/tag.svg"
-            );
+            return null;
         }
 
         public void DisposeSubReference()

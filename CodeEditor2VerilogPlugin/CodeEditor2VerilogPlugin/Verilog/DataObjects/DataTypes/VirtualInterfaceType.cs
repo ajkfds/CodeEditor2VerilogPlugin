@@ -1,4 +1,6 @@
+using AjkAvaloniaLibs.Controls;
 using pluginVerilog.Verilog.DataObjects;
+using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.Expressions;
 using System.Collections.Generic;
 
@@ -38,7 +40,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         /// <summary>
         /// Packed dimensions (not typically used with virtual interface)
         /// </summary>
-        public List<PackedArray> PackedDimensions { get; set; } = new List<PackedArray>();
+        public List<DataObjects.Arrays.PackedArray> PackedDimensions { get; set; } = new List<DataObjects.Arrays.PackedArray>();
 
         /// <summary>
         /// Bit width (typically null for virtual interface as it's a handle)
@@ -50,6 +52,22 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         /// </summary>
         public bool State4 => false;
 
+        DataTypeEnum IDataType.Type => DataObjects.DataTypes.DataTypeEnum.Virtual;
+
+        bool IDataType.Packable => false;
+
+        bool IDataType.PartSelectable => false;
+
+        bool IDataType.IsVector => false;
+
+        int? IDataType.BitWidth => null;
+
+        CodeDrawStyle.ColorType IDataType.ColorType => CodeDrawStyle.ColorType.Variable;
+
+        List<PackedArray> packedArrays = new List<PackedArray>();
+        List<PackedArray> IDataType.PackedDimensions => packedArrays;
+
+        bool IDataType.IsValidForNet => false;
         public static VirtualInterfaceType? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "virtual")
@@ -152,6 +170,21 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             }
 
             return vit;
+        }
+
+        void IDataType.AppendTypeLabel(ColorLabel label)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        IDataType IDataType.Clone()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        string IDataType.CreateString()
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

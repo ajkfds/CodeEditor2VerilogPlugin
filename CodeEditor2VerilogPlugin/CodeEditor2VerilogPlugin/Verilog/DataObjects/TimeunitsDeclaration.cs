@@ -85,9 +85,13 @@ namespace pluginVerilog.Verilog.DataObjects
                 BeginIndexReference = beginReference
             };
 
+            Expression? exp;
+            string unit;
             // Parse time unit value and unit
-            if (!ParseTimeValueAndUnit(word, nameSpace, out decl.TimeUnitValue, out decl.TimeUnit))
+            if (!ParseTimeValueAndUnit(word, nameSpace, out exp, out unit))
             {
+                decl.TimeUnitValue = exp;
+                decl.TimeUnit = unit;
                 word.AddError("illegal timeunit");
                 word.SkipToKeyword(";");
                 if (word.Text == ";") word.MoveNext();
@@ -100,8 +104,10 @@ namespace pluginVerilog.Verilog.DataObjects
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 word.MoveNext();
 
-                if (!ParseTimeValueAndUnit(word, nameSpace, out decl.TimePrecisionValue, out decl.TimePrecisionUnit))
+                if (!ParseTimeValueAndUnit(word, nameSpace, out exp, out unit))
                 {
+                    decl.TimeUnitValue = exp;
+                    decl.TimeUnit = unit;
                     word.AddError("illegal timeprecision");
                     word.SkipToKeyword(";");
                     if (word.Text == ";") word.MoveNext();
@@ -137,8 +143,12 @@ namespace pluginVerilog.Verilog.DataObjects
             };
 
             // Parse time precision value and unit
-            if (!ParseTimeValueAndUnit(word, nameSpace, out decl.TimePrecisionValue, out decl.TimePrecisionUnit))
+            Expression? exp;
+            string unit;
+            if (!ParseTimeValueAndUnit(word, nameSpace, out exp, out unit))
             {
+                decl.TimeUnitValue = exp;
+                decl.TimeUnit = unit;
                 word.AddError("illegal timeprecision");
                 word.SkipToKeyword(";");
                 if (word.Text == ";") word.MoveNext();

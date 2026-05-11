@@ -153,7 +153,7 @@ namespace pluginVerilog.Verilog.Items
 
                 // let_declaration
                 case "let":
-                    var letDecl = LetDeclaration.ParseCreate(word, nameSpace);
+                    var letDecl = DataObjects.LetDeclaration.ParseCreate(word, nameSpace);
                     if (letDecl != null)
                     {
                         nameSpace.NamedElements.Add(letDecl.Name, letDecl);
