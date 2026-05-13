@@ -137,6 +137,9 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         await parseModule(word, parsedDocument, file);
                         break;
                     // udp_declaration
+                    case "primitive":
+                        await parsePrimitive(word, parsedDocument, file);
+                        break;
                     // interface_declaration
                     case "interface":
                         await parseInterface(word, parsedDocument, file);
@@ -362,6 +365,35 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 // Note: Bind directive is a compiler directive-like construct that doesn't create a building block
                 // It binds instances to modules/interfaces/checkers that need to be referenced elsewhere
             }
+        }
+
+        private static async System.Threading.Tasks.Task parsePrimitive(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
+        {
+            if (word.Text != "primitive") throw new Exception();
+
+            if (parsedDocument.TargetBuildingBlockName != null)
+            {
+                if (word.NextText != parsedDocument.TargetBuildingBlockName)
+                {
+                    skipBlock(word, "primitive", "endprimitive");
+                    return;
+                }
+            }
+
+            Primitive? primitive;
+            //IndexReference iref = IndexReference.Create(parsedDocument);
+
+            // Parse mode is now handled at the end of ParseCreate, not per-block
+            // This prevents cascading re-parses that cause instability
+            if (parsedDocument.ParameterOverrides == null)
+            {
+                primitive = await Primitive.ParseCreate(word, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
+            }
+            else
+            {
+                primitive = await Primitive.ParseCreate(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
+            }
+            // Note: ReparseRequested is now set only once at the end of ParseCreate based on ParseMode
         }
 
     }
