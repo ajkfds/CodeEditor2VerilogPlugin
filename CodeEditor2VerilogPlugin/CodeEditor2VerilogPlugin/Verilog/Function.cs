@@ -11,7 +11,7 @@ namespace pluginVerilog.Verilog
     public class Function : NameSpace, IPortNameSpace
     {
         [SetsRequiredMembers]
-        protected Function(NameSpace parent) : base(parent.BuildingBlock, parent)
+        internal Function(NameSpace parent) : base(parent.BuildingBlock, parent)
         {
         }
 
@@ -30,6 +30,12 @@ namespace pluginVerilog.Verilog
             )
         {
             Function function = new Function(parent) { Name = name };
+            return function;
+        }
+
+        public static Function Create(NameSpace parent)
+        {
+            Function function = new Function(parent);
             return function;
         }
 
