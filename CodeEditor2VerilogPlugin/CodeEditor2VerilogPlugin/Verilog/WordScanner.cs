@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog
 {
@@ -113,6 +114,9 @@ namespace pluginVerilog.Verilog
                 return prototype;
             }
         }
+
+
+        public bool Moved { get; set; } = false;
 
         private bool cellDefine;
         public bool CellDefine
@@ -365,8 +369,8 @@ namespace pluginVerilog.Verilog
         }
         public void MoveNext()
         {
+            Moved = true;
             moveNext();
-
         }
 
         private void moveNext()

@@ -95,7 +95,6 @@ namespace pluginVerilog.Data
 
             if (vhFile == null) return null;
 
-
             //string name;
             //if (relativePath.Contains(System.IO.Path.DirectorySeparatorChar))
             //{
@@ -109,8 +108,9 @@ namespace pluginVerilog.Data
             {
                 Name = name,
                 Project = project,
-                RelativePath = relativePath
+                RelativePath = relativePath,
             };
+            instance.CopyCodeDocumentFrom(vhFile);
 
             instance.ID = id;
             instance.RootFile = parentFile;
