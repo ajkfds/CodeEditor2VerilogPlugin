@@ -9,6 +9,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         source_text ::= { description }
         description ::= module_declaration
                         | udp_declaration
+                        | checker_declaration
         module_declaration ::=      { attribute_instance } module_keyword module_identifier [ module_parameter_port_list ]
                                     [ list_of_ports ] ; { module_item }
                                     endmodule
@@ -62,6 +63,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         | interface_declaration
         | program_declaration 
         | package_declaration
+        | checker_declaration
         | { attribute_instance } package_item
         | { attribute_instance } bind_directive
         | config_declaration
@@ -151,6 +153,10 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     // bind_directive
                     case "bind":
                         await parseBindDirective(word, parsedDocument, file);
+                        break;
+                    // checker_declaration
+                    case "checker":
+                        await parseChecker(word, parsedDocument, file);
                         break;
                     // config_declaration
                     // package_declaration
@@ -394,6 +400,49 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 primitive = await Primitive.ParseCreate(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
             }
             // Note: ReparseRequested is now set only once at the end of ParseCreate based on ParseMode
+        }
+
+        private static async System.Threading.Tasks.Task parseChecker(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
+        {
+            if (word.Text != "checker") throw new Exception();
+
+            if (parsedDocument.TargetBuildingBlockName != null)
+            {
+                if (word.NextText != parsedDocument.TargetBuildingBlockName)
+                {
+                    skipBlock(word, "checker", "endchecker");
+                    return;
+                }
+            }
+
+            Checker? checker;
+            // Parse mode is now handled at the end of ParseCreate, not per-block
+            // This prevents cascading re-parses that cause instability
+            if (parsedDocument.ParameterOverrides == null)
+            {
+                checker = await Checker.ParseCreate(word, parsedDocument.Root, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
+            }
+            else
+            {   // TODO :  parameter override parse implementation for checker, currently just pass null
+                checker = await Checker.ParseCreate(word, parsedDocument.Root, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
+            }
+
+            if (checker != null)
+            {
+                bool added = parsedDocument.Root.AddOrUpdateBuildingBlock(checker.Name, checker);
+                if (added)
+                {
+                    // Only set ReparseRequested if building block was actually added for the first time
+                    parsedDocument.ReparseRequested = true;
+                }
+                else
+                {
+                    if (word.Prototype)
+                    {
+                        word.AddPrototypeError("duplicated checker name");
+                    }
+                }
+            }
         }
 
     }

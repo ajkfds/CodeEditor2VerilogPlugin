@@ -15,6 +15,15 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             return Clone(Name);
         }
 
+        public static new Variable Create(string name, DataTypes.IDataType dataType)
+        {
+            DataTypes.EventType? dType = dataType as DataTypes.EventType;
+            if (dType == null) throw new System.Exception();
+
+            Event val = new Event() { Name = name };
+            val.DataType = dType;
+            return val;
+        }
         public override Event Clone(string name)
         {
             Event val = new Event() { Name = name, Defined = Defined };

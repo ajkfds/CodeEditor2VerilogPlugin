@@ -22,7 +22,6 @@ namespace pluginVerilog.Data.VerilogCommon
 
         public static async System.Threading.Tasks.Task UpdateAsync(IVerilogRelatedFile item, SemaphoreSlim _semaphore)
         {
-            if (!Dispatcher.UIThread.CheckAccess()) System.Diagnostics.Debugger.Break();
 
             // Update the Items member of this object according to the rootItem.ParsedDocument.
             Project project = item.Project;

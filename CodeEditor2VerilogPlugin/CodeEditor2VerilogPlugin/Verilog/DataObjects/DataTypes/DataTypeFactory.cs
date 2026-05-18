@@ -66,7 +66,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         Event,
         CoverGroup,
         Struct,
-        //        TypeReference
+        TypeReference,
         UserDefined
     }
 
@@ -180,6 +180,10 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 // "virtual" ["interface"] interface_identifier[parameter_value_assignment][ . modport_identifier] 
 
                 // "event"
+                case "event":
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+                    return EventType.Create();
 
                 // ps_covergroup_identifier 
 
@@ -371,11 +375,14 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             if (word.Text != "type") System.Diagnostics.Debugger.Break();
 
             word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.MoveNext(); // type
+
             if (word.Text != "(")
             {
                 word.AddError("( required");
                 return null;
             }
+            word.MoveNext(); // (
 
             IDataType? dtype = ParseCreate(word, nameSpace, null);
             if (dtype == null)
@@ -388,16 +395,15 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 }
                 else
                 {
-                    word.AddError("type(expression) is not supported");
+                    // Create TypeReference for expression-based type reference
+                    return TypeReference.CreateForExpression(ex);
                 }
             }
-
-            if (word.Text != ")")
+            else
             {
-                word.AddError(") required");
-                return null;
+                // Create TypeReference for data type
+                return TypeReference.CreateForDataType(dtype);
             }
-            return dtype;
         }
     }
 }

@@ -177,7 +177,8 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     Port outputPort = new Port()
                     {
                         Name = word.Text,
-                        Direction = Port.DirectionEnum.Output
+                        Direction = Port.DirectionEnum.Output,
+                        DefinitionReference = word.GetReference()
                     };
                     word.Color(CodeDrawStyle.ColorType.Variable);
                     word.MoveNext();
@@ -192,7 +193,8 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         Port inputPort = new Port()
                         {
                             Name = word.Text,
-                            Direction = Port.DirectionEnum.Input
+                            Direction = Port.DirectionEnum.Input,
+                            DefinitionReference = word.GetReference()
                         };
                         word.Color(CodeDrawStyle.ColorType.Variable);
                         word.MoveNext();
@@ -274,7 +276,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             return primitive;
         }
 
-        private static async Task parsePrimitiveBody(WordScanner word, Primitive primitive)
+        private static async System.Threading.Tasks.Task parsePrimitiveBody(WordScanner word, Primitive primitive)
         {
             /*
             primitive_port_list_or_body ::=

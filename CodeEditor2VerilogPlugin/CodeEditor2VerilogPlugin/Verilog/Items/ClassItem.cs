@@ -122,9 +122,19 @@ namespace pluginVerilog.Verilog.Items
                 case "pure":
                     return await MethodPrototype.ParseCreateWithPureVirtual(word, nameSpace);
                 //      | "extern" { method_qualifier } method_prototype ;
+                //      | "extern" { method_qualifier } class_constructor_prototype
                 case "extern":
                     word.Color(CodeDrawStyle.ColorType.Keyword);
                     word.MoveNext();
+
+                    // Handle "extern new (...)" - class constructor prototype
+                    if (word.Text == "new")
+                    {
+                        await MethodPrototype.ParseConstructorPrototype(word, nameSpace);
+                        return true;
+                    }
+
+                    // Handle other extern method prototypes
                     return await MethodPrototype.ParseCreate(word, nameSpace);
 
                 //      | { method_qualifier } class_constructor_declaration  

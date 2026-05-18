@@ -95,13 +95,44 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
                 case DataTypeEnum.Chandle:
                     return Chandle.Create(name, dataType);
+
+                // "event" - event variables are simple data objects
+                case DataTypeEnum.Event:
+                    return DataObjects.Variables.Event.Create(name, dataType);
+
                 case DataTypeEnum.UserDefined:
                     return UserDefinedVariable.Create(name, dataType);
+                case DataTypeEnum.TypeReference:
+                    return CreateFromTypeReference(name, dataType);
                 default:
                     if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
                     return null;
 //                    throw new Exception();
             }
+        }
+
+        /// <summary>
+        /// Create variable from type_reference
+        /// IEEE 1800-2017
+        /// 
+        /// type_reference ::= type ( expression )
+        ///                   | type ( expression {, expression } )
+        /// 
+        /// For variable declarations:
+        /// [class_scope | package_scope] type_identifier { packed_dimension }
+        /// </summary>
+        private static Variable CreateFromTypeReference(string name, IDataType dataType)
+        {
+            if (dataType is DataTypes.TypeReference typeRef)
+            {
+                // Get the actual referenced type
+                IDataType? referencedType = typeRef.GetReferencedType();
+                if (referencedType != null)
+                {
+                    return Create(name, referencedType);
+                }
+            }
+            return UserDefinedVariable.Create(name, dataType);
         }
 
 
@@ -474,5 +505,4 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         }
 
     }
-
 }

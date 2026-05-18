@@ -204,6 +204,10 @@ namespace pluginVerilog.Verilog.Statements
                     word.Color(CodeDrawStyle.ColorType.Identifier);
                     word.MoveNext();
                 }
+                else
+                {
+                    break;
+                }
 
                 // Parse production items
                 while (!word.Eof && word.Text != "endsequence" && word.Text != ":")
@@ -323,6 +327,10 @@ namespace pluginVerilog.Verilog.Statements
 
                 RandSelectItem selectItem = new RandSelectItem();
                 selectItem.Expression = Expression.ParseCreate(word, nameSpace);
+                if(selectItem.Expression == null)
+                {
+                    return null;
+                }
 
                 // Optional weight
                 if (word.Text == ":")

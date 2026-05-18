@@ -505,14 +505,6 @@ namespace pluginVerilog.Data
         public override async Task UpdateAsync()
         {
             await base.UpdateAsync();
-
-            if (!Dispatcher.UIThread.CheckAccess())
-            {
-                await Dispatcher.UIThread.InvokeAsync(() => UpdateAsync());
-                return;
-            }
-
-            await base.UpdateAsync();
             await VerilogCommon.Updater.UpdateAsync(this, itemUpdateSemaphore);
             
             //CodeEditor2.CodeEditor.ParsedDocument? parsedDoc;

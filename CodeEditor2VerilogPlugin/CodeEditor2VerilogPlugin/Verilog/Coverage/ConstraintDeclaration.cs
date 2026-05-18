@@ -278,6 +278,7 @@ namespace pluginVerilog.Verilog.Coverage
             item.Type = ConstraintItem.ItemType.Expression;
             item.Expression = Expression.ParseCreate(word, nameSpace);
 
+            if (item.Expression == null) return null;
             // Optional semicolon
             if (word.Text == ";")
             {

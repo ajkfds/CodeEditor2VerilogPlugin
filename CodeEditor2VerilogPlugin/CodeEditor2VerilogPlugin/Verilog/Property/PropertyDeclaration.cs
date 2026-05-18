@@ -67,7 +67,7 @@ namespace pluginVerilog.Verilog.Property
         /// <summary>
         /// Parse a property declaration
         /// </summary>
-        public static async Task<PropertyDeclaration?> ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static async System.Threading.Tasks.Task<PropertyDeclaration?> ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "property")
             {
