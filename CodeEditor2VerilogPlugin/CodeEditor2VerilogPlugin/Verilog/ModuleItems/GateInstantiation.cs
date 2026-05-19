@@ -185,7 +185,7 @@ namespace pluginVerilog.Verilog.ModuleItems
             string name = "";
             if (!General.IsSimpleIdentifier(word.Text))
             {
-                word.AddError("need instance name");
+//                word.AddError("need instance name");
             }
             else
             {
