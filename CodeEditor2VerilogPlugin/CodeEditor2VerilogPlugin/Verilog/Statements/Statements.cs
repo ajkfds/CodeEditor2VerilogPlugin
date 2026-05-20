@@ -274,6 +274,17 @@ namespace pluginVerilog.Verilog.Statements
 
                 default:
 
+                    // statement::= [block_identifier :] { attribute_instance } statement_item
+                    if(General.IsSimpleIdentifier(word.Text) && word.NextText == ":")
+                    {
+                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.MoveNext();
+                        // ;
+                        word.MoveNext();
+                        return await Statements.ParseCreateStatement(word, nameSpace, null);
+                    }
+
+
                     // subroutine_call_statement 
                     /*
                         SystemVerilog IEEE1800-2017
