@@ -558,14 +558,6 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                 if (word.Eof || word.Text == "endclass") break;
 
-                if (word.GetCharAt(0) == ';')
-                {
-                    word.MoveNext();
-                }
-                else
-                {
-                    word.AddError("; expected");
-                }
 
                 // ["implements" interface_class_type { , interface_class_type } ] ;
                 if (word.Text == "implements")
@@ -627,6 +619,14 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         }
                         break;
                     }
+                }
+                if (word.GetCharAt(0) == ';')
+                {
+                    word.MoveNext();
+                }
+                else
+                {
+                    word.AddError("; expected");
                 }
 
 
