@@ -22,6 +22,12 @@ namespace pluginVerilog.Data.VerilogCommon
 
         public static async System.Threading.Tasks.Task UpdateAsync(IVerilogRelatedFile item, SemaphoreSlim _semaphore)
         {
+            // run on background thread to avoid blocking UI
+            if (Dispatcher.UIThread.CheckAccess())
+            {
+                await System.Threading.Tasks.Task.Run(async ()=>await UpdateAsync(item, _semaphore));
+                return;
+            }
 
             // Update the Items member of this object according to the rootItem.ParsedDocument.
             Project project = item.Project;
@@ -40,14 +46,11 @@ namespace pluginVerilog.Data.VerilogCommon
                 {
                     // Take a snapshot and dispose outside the main items lock if needed
                     var itemsToDispose = new List<CodeEditor2.Data.Item>();
-                    lock (item.Items)
+                    foreach (CodeEditor2.Data.Item subItem in item.Items)
                     {
-                        foreach (CodeEditor2.Data.Item subItem in item.Items)
-                        {
-                            itemsToDispose.Add(subItem);
-                        }
-                        item.Items.Clear();
+                        itemsToDispose.Add(subItem);
                     }
+                    item.Items.Clear();
                     // Dispose after clearing to avoid deadlock
                     foreach (var subItem in itemsToDispose)
                     {
@@ -100,20 +103,17 @@ namespace pluginVerilog.Data.VerilogCommon
                 var oldItems = new List<CodeEditor2.Data.Item>();
                 
                 // Atomically swap items: clear old and add new in one locked operation
-                lock (item.Items)
+                // Capture old items for disposal
+                foreach (var oldItem in item.Items)
                 {
-                    // Capture old items for disposal
-                    foreach (var oldItem in item.Items)
-                    {
-                        oldItems.Add(oldItem);
-                    }
+                    oldItems.Add(oldItem);
+                }
                     
-                    // Clear and populate in a single atomic operation
-                    item.Items.Clear();
-                    foreach (CodeEditor2.Data.Item i in newSubItems.Values)
-                    {
-                        item.Items.AddOrUpdate(i.Name, i);
-                    }
+                // Clear and populate in a single atomic operation
+                item.Items.Clear();
+                foreach (CodeEditor2.Data.Item i in newSubItems.Values)
+                {
+                    item.Items.AddOrUpdate(i.Name, i);
                 }
                 
                 // Dispose old items after the atomic swap is complete

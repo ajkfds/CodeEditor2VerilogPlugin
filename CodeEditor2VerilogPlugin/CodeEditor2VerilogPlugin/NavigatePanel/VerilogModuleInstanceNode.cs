@@ -113,6 +113,8 @@ namespace pluginVerilog.NavigatePanel
             {
                 return;
             }
+
+
             if (!Dispatcher.UIThread.CheckAccess())
             {
                 Dispatcher.UIThread.Post(
