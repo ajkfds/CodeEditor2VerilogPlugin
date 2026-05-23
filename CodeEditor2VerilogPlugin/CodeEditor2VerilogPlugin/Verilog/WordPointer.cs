@@ -866,7 +866,9 @@ namespace pluginVerilog.Verilog
                 op2 == "--" ||
                 op2 == "::" ||
                 // aequence operator
-                op2 == "##"
+                op2 == "##"||
+                // wildcard
+                op2 == ".*"
             )
             {
                 nextIndex = nextIndex + 2;
