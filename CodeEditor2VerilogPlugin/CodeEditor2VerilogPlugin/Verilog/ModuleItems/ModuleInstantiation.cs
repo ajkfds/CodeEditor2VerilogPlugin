@@ -169,10 +169,6 @@ namespace pluginVerilog.Verilog.ModuleItems
 
             // instance対象となるmoduleを取得する
             Module? instancedModule = word.ProjectProperty.GetBuildingBlock(moduleName) as Module;
-            if(moduleName == "scr1_tcm" && instancedModule == null)
-            {
-                System.Diagnostics.Debugger.Break();
-            }
             string moduleComment = word.GetNextComment();
             {
                 if (word.GetNextComment().Contains("@project")) // 他project moduleのinstance取得
@@ -198,10 +194,6 @@ namespace pluginVerilog.Verilog.ModuleItems
                     }
                 }
             }
-            if (moduleName == "scr1_tcm" && instancedModule == null)
-            {
-                System.Diagnostics.Debugger.Break();
-            }
             if (instancedModule == null)
             {
                 if (word.ProjectProperty.ExtenralLibraryPath.ContainsKey(moduleName))
@@ -217,10 +209,6 @@ namespace pluginVerilog.Verilog.ModuleItems
                     CodeEditor2.Controller.AppendLog("## unfound " + moduleName + " at " + buildingBlock.Name, Avalonia.Media.Colors.Orange);
                     if (moduleName == "scr1_tcm") System.Diagnostics.Debugger.Break();
                 }
-            }
-            if (moduleName == "scr1_tcm" && instancedModule == null)
-            {
-                System.Diagnostics.Debugger.Break();
             }
 
             //Data.VerilogFile? baseFile = instancedModule?.File as Data.VerilogFile;
