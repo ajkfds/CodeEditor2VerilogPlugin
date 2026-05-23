@@ -33,7 +33,7 @@ namespace pluginVerilog.Data
                 Name = name
             };
             //            fileItem.readFromFile();
-            await fileItem.FileCheck();
+            await fileItem.FileCheckAsync();
 
             //            return System.Threading.Tasks.Task.FromResult(fileItem);
             return fileItem;

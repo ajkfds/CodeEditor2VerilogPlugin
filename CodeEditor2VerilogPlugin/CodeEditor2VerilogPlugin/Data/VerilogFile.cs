@@ -37,7 +37,7 @@ namespace pluginVerilog.Data
             System.Diagnostics.Debug.Print(relativePath);
             CodeEditor2.FileTypes.FileType fileType = CodeEditor2.Global.FileTypes[FileTypes.VerilogFile.TypeID];
             VerilogFile fileItem = new VerilogFile() { Name = name, Project = project, RelativePath = relativePath };
-            await fileItem.FileCheck();
+            await fileItem.FileCheckAsync();
 
             return fileItem;
         }
@@ -84,7 +84,7 @@ namespace pluginVerilog.Data
             VerilogFile fileItem = new VerilogFile() { Name = name, Project = project, RelativePath = relativePath };
             fileItem.SystemVerilog = true;
 
-            await fileItem.FileCheck();
+            await fileItem.FileCheckAsync();
             return fileItem;
         }
 
