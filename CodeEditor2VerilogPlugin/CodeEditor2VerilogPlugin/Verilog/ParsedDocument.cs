@@ -366,6 +366,39 @@ namespace pluginVerilog.Verilog
                 }
             }
 
+            if (File == null || !getPopupTarget(index, out NameSpace? nameSpace, out INamedElement? element))
+            {
+                return null;
+            }
+
+            if (element != null)
+            {
+                if (element is DataObject)
+                {
+                    ((DataObject)element).AppendLabel(ret);
+                }
+                else if (element is Function)
+                {
+                    ((Function)element).AppendLabel(ret);
+                }
+                else if (element is Task)
+                {
+                    ((Task)element).AppendLabel(ret);
+                }
+                else if (element is DataObjects.Typedef)
+                {
+                    ((DataObjects.Typedef)element).AppendLabel(ret);
+                }
+            }
+
+            if (Macros.ContainsKey(text))
+            {
+                Macros[text].AppendLabel(ret, Macros);
+            }
+            return ret;
+
+
+
             Root? root = iref.RootParsedDocument.Root;
             if (root == null) return null;
 
@@ -433,15 +466,6 @@ namespace pluginVerilog.Verilog
                     }
                 }
 
-                //if (space.NamedElements.ContainsKey(text))
-                //{
-                //    DataObject? dataObject = space.NamedElements.GetDataObject(text);
-                //    if (dataObject != null) dataObject.AppendLabel(ret);
-                //}
-                //else if (space.Parent != null)
-                //{
-                //    DataObject? dataObject = space.Parent.NamedElements.GetDataObject(text);
-                //    if (dataObject != null) dataObject.AppendLabel(ret);
                 if (Macros.ContainsKey(text))
                 {
                     Macros[text].AppendLabel(ret, Macros);
@@ -449,19 +473,152 @@ namespace pluginVerilog.Verilog
             }
 
 
-            //            if (space.BuildingBlock.Functions.ContainsKey(text))
-            //            {
-            ////                ret.Add(new Popup.FunctionPopup(space.BuildingBlock.Functions[text]));
-            //            }
-
-            //            if (space.BuildingBlock.Tasks.ContainsKey(text))
-            //            {
-            ////                ret.Add(new Popup.TaskPopup(space.BuildingBlock.Tasks[text]));
-            //            }
-
             return ret;
         }
 
+        private bool getPopupTarget(int index, out NameSpace? nameSpace, out INamedElement? element)
+        {
+            nameSpace = null;
+            element = null;
+
+            int line = CodeDocument.GetLineAt(index);
+            int lineStartIndex = CodeDocument.GetLineStartIndex(line);
+            CodeDocument.GetWord(index, out int wordHeadIndex, out int wordLength);
+
+            string lineText = CodeDocument.CreateLineString(line);
+            int lineLength = wordHeadIndex + wordLength - lineStartIndex;
+            if (lineLength > lineText.Length) lineLength = lineText.Length;
+            lineText = lineText.Substring(0, lineLength);
+
+            { // pre carlet char check
+                if (index != 0)
+                {
+                    char preChar = CodeDocument.GetCharAt(index - 1);
+                    if (preChar == ' ') return false;
+                    if (preChar == '\t') return false;
+                }
+            }
+
+            //{ // remove comment start to activate auto complete in comments
+            //    int commentIndex = lineText.LastIndexOf("/*");
+            //    if (commentIndex > 0)
+            //    {
+            //        commentIndex = commentIndex + 2;
+            //        lineText = lineText.Substring(commentIndex);
+            //        candidateStartIndex += commentIndex;
+            //    }
+            //}
+            //{ // remove comment start to activate auto complete in comments
+            //    int commentIndex = lineText.LastIndexOf("//");
+            //    if (commentIndex > 0)
+            //    {
+            //        commentIndex = commentIndex + 2;
+            //        lineText = lineText.Substring(commentIndex);
+            //        candidateStartIndex += commentIndex;
+            //    }
+            //}
+
+
+            int blockStartIndex = 0;
+            int blockEndIndex = 0;
+            {
+                // create short document to parse current pretext
+                pluginVerilog.CodeEditor.CodeDocument document = new pluginVerilog.CodeEditor.CodeDocument(lineText);
+                WordScanner word = new WordScanner(document, this, SystemVerilog);
+
+                List<(string, int)> words = new List<(string, int)>();
+                while (!word.Eof)
+                {
+                    if (General.IsIdentifier(word.Text))
+                    {
+                        words.Add((word.Text, word.RootIndex));
+                        word.MoveNext();
+                        if (word.Text == "::" || word.Text == "->" || word.Text == ".")
+                        {
+                            words.Add((word.Text, word.RootIndex));
+                            word.MoveNext();
+                        }
+                        else
+                        {
+                            if (word.Eof) break;
+                            words.Clear();
+                        }
+                    }
+                    else
+                    {   // illegal text
+                        words.Add((word.Text, word.RootIndex));
+                        word.MoveNext();
+                        if (word.Eof) break;
+                        words.Clear();
+                    }
+                }
+
+                if (words.Count == 0) return false;
+
+                blockStartIndex = words[0].Item2;
+                blockEndIndex = words.Last().Item2 + words.Last().Item1.Length;
+
+            //    (string, int) lastWord = ("", 0);
+            //    if (words.Count == 0)
+            //    {
+            //        lastWord = ("", 0);
+            //    }
+            //    else if (words.Last().Item1 == "." || words.Last().Item1 == "::" || words.Last().Item1 == "->")
+            //    {
+            //        lastWord = ("", words.Last().Item2 + words.Last().Item1.Length);
+            //        blockEndIndex = words.Last().Item2;
+            //        blockStartIndex = words[0].Item2;
+            //    }
+            //    else
+            //    {
+            //        // word . lastword
+            //        lastWord = words.Last();
+            //        blockStartIndex = words[0].Item2;
+            //        if (words.Count > 1)
+            //        {
+            //            (string, int) prevLast = words[words.Count - 1];
+            //            blockEndIndex = prevLast.Item2;
+            //        }
+            //        else
+            //        {
+            //            blockEndIndex = blockStartIndex + lastWord.Item1.Length;
+            //        }
+            //    }
+            }
+
+            // get namespace
+            {
+                // namespace must get from linestart index, because current index cann't match last parsed document
+                IndexReference iref = IndexReference.Create(IndexReference, lineStartIndex);
+                nameSpace = GetNameSpace(iref);
+            }
+
+            string elementText = lineText.Substring(blockStartIndex, blockEndIndex - blockStartIndex);
+            element = null;
+            {
+                // create short document to parse current pretext
+                pluginVerilog.CodeEditor.CodeDocument document = new pluginVerilog.CodeEditor.CodeDocument(elementText);
+                WordScanner word = new WordScanner(document, this, SystemVerilog);
+
+                Verilog.Expressions.Expression? expression = null;
+                while (!word.Eof)
+                {
+                    if (nameSpace != null) expression = Verilog.Expressions.Expression.ParseCreate(word, nameSpace);
+                    if (expression == null) word.MoveNext();
+                }
+                if (expression is Verilog.Expressions.DataObjectReference)
+                {
+                    Verilog.Expressions.DataObjectReference dataObjectReference = (Verilog.Expressions.DataObjectReference)expression;
+                    element = dataObjectReference.TargetDataObject;
+                }
+                else if (expression is Verilog.Expressions.NameSpaceReference)
+                {
+                    NameSpace targetNameSpace = ((Verilog.Expressions.NameSpaceReference)expression).NameSpace;
+                    element = targetNameSpace;
+                }
+            }
+            return true;
+        }
 
 
 
@@ -516,18 +673,6 @@ namespace pluginVerilog.Verilog
                 {
                     InterfaceInstance? interfaceInstantiation = instantiation as InterfaceInstance;
                     if (interfaceInstantiation == null) throw new Exception();
-                    //if(interfaceInstantiation.ModPortName != null)
-                    //{
-                    //    Interface? instance = bBlock as Interface;
-                    //    if (instance == null) throw new Exception();
-                    //    if (
-                    //        instance.NamedElements.ContainsKey(interfaceInstantiation.ModPortName) &&
-                    //        instance.NamedElements[interfaceInstantiation.ModPortName] is ModPort
-                    //        )
-                    //    {
-                    //        bBlock = (ModPort)instance.NamedElements[interfaceInstantiation.ModPortName];
-                    //    }
-                    //}
                 }
 
                 hier.RemoveAt(0);
@@ -542,67 +687,6 @@ namespace pluginVerilog.Verilog
             return nameSpace;
         }
 
-        //public void appendHierElement(List<string> hierWords, List<AutocompleteItem> items, INamedElement element, string candidate, bool first)
-        //{
-        //    if (hierWords.Count == 0)
-        //    {
-        //        foreach (INamedElement subElement in element.NamedElements.Values)
-        //        {
-        //            if (!subElement.Name.StartsWith(candidate)) continue;
-        //            items.Add(
-        //                new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
-        //                    subElement.Name,
-        //                    CodeDrawStyle.ColorIndex(subElement.ColorType),
-        //                    Global.CodeDrawStyle.Color(subElement.ColorType),
-        //                    "CodeEditor2/Assets/Icons/tag.svg"
-        //                    )
-        //            );
-        //        }
-        //        return;
-        //    }
-        //    else
-        //    {
-        //        INamedElement? subElement = null;
-        //        if (element.NamedElements.ContainsKey(hierWords[0]))
-        //        {
-        //            subElement = element.NamedElements[hierWords[0]];
-        //        } else if(element is NameSpace && first)
-        //        {
-        //            subElement = ((NameSpace)element).GetNamedElementUpward(hierWords[0]);
-        //        }
-
-        //        if (subElement != null)
-        //        {
-        //            hierWords.RemoveAt(0);
-        //            if (subElement is IBuildingBlockInstantiation)
-        //            {
-        //                IBuildingBlockInstantiation inst = (IBuildingBlockInstantiation)subElement;
-        //                BuildingBlock? buildingBlock = inst.GetInstancedBuildingBlock();
-        //                if (buildingBlock != null)
-        //                {
-        //                    appendHierElement(hierWords, items, buildingBlock, candidate, false);
-        //                    return;
-        //                }
-        //                else
-        //                {
-        //                    return;
-        //                }
-        //            } else if(subElement is Variable)
-        //            {
-        //                Variable variable = (Variable)subElement;
-        //                if (variable.UnpackedArrays.Count != 0) return; // unpackedarray is not target of autocomplete
-        //            }
-
-
-        //            appendHierElement(hierWords, items, subElement, candidate, false);
-        //            return;
-        //        }
-        //        else
-        //        {
-        //            return;
-        //        }
-        //    }
-        //}
 
         public void appendAutoCompleteINamedElements(List<AutocompleteItem> items, NameSpace nameSpace, string candidate)
         {
