@@ -223,7 +223,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             Module module
             )
         {
-            if (word.Text == "import")
+            while (word.Text == "import")
             {
                 PackageImportDeclaration.Parse(word, module);
             }
