@@ -96,8 +96,6 @@ namespace pluginVerilog.Verilog
         public Statements.IStatement Statement;
         public virtual void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
-            //            if(ReturnVariable != null && ReturnVariable.DataType != null) ReturnVariable.DataType.
-
             label.AppendText(Name);
         }
 
