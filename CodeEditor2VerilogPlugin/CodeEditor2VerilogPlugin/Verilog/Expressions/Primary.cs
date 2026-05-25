@@ -440,6 +440,7 @@ number
                     {
                         nameSpaceText += word.Text;
                         word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.MoveNext();
                         return new UnfoundNameSpace() { DefinitionReference = word.GetReference(), Name = nameSpaceText, Reference = word.GetReference() };
                     }
                 }
