@@ -71,7 +71,8 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             Uwire,
             Wire,
             Wand,
-            Wor
+            Wor,
+            Interconnect
         }
 
         public override void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
@@ -113,6 +114,9 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                     break;
                 case NetTypeEnum.Wor:
                     label.AppendText("wor", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    break;
+                case NetTypeEnum.Interconnect:
+                    label.AppendText("interconnect", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
                     break;
             }
 
@@ -215,6 +219,8 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                     return "wand";
                 case NetTypeEnum.Wor:
                     return "wor";
+                case NetTypeEnum.Interconnect:
+                    return "interconnect";
             }
             return "";
         }
@@ -290,6 +296,9 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                 case "wor":
                     ret = NetTypeEnum.Wor;
                     break;
+                case "interconnect":
+                    ret = NetTypeEnum.Interconnect;
+                    break;
                 default:
                     return null;
             }
@@ -313,6 +322,12 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
         }
         public static bool ParseDeclaration(WordScanner word, NameSpace nameSpace)
         {
+            // Check for interconnect declaration first
+            if (word.Text == "interconnect")
+            {
+                return ParseInterconnectDeclaration(word, nameSpace);
+            }
+
             /* systemverilog 1800-2017
             
             net_declaration::=  
@@ -587,6 +602,151 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             return true;
         }
 
+        /// <summary>
+        /// Parse interconnect declaration
+        /// IEEE 1800-2017
+        /// 
+        /// interconnect_declaration ::=
+        ///     "interconnect" implicit_data_type [ "#" delay_value ] net_identifier { unpacked_dimension }
+        ///     [ "," net_identifier { unpacked_dimension } ] ;
+        /// 
+        /// implicit_data_type ::= [ signing ] { packed_dimension }
+        /// 
+        /// Note: Interconnect is a special type of net that represents a bundle of signals
+        /// connecting multiple ports. Unlike regular nets, interconnects don't have a data type
+        /// in the traditional sense - they are resolved when connected to interface ports.
+        /// </summary>
+        public static bool ParseInterconnectDeclaration(WordScanner word, NameSpace nameSpace)
+        {
+            /*
+            interconnect_declaration ::=
+                "interconnect" implicit_data_type [ "#" delay_value ] net_identifier { unpacked_dimension }
+                [ "," net_identifier { unpacked_dimension } ] ;
+
+            implicit_data_type ::= [ signing ] { packed_dimension }
+            */
+
+            if (word.Text != "interconnect") return false;
+
+            IndexReference beginReference = word.CreateIndexReference();
+            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.MoveNext();
+
+            // Parse implicit_data_type: [ signing ] { packed_dimension }
+            bool isSigned = false;
+            if (word.Text == "signed")
+            {
+                isSigned = true;
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext();
+            }
+            else if (word.Text == "unsigned")
+            {
+                isSigned = false;
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext();
+            }
+
+            // Parse packed dimensions (implicit data type has no base type, just packed dimensions)
+            List<PackedArray> packedDimensions = new List<PackedArray>();
+            while (word.Text == "[")
+            {
+                DataObjects.Arrays.PackedArray? packedArray = DataObjects.Arrays.PackedArray.ParseCreate(word, nameSpace);
+                if (packedArray != null)
+                {
+                    packedDimensions.Add(packedArray);
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            // Parse optional delay: # delay_value
+            if (word.Text == "#")
+            {
+                word.MoveNext();
+                // delay_value can be a number or expression
+                word.Color(CodeDrawStyle.ColorType.Number);
+                word.MoveNext();
+            }
+
+            // Parse net identifiers with optional unpacked dimensions
+            List<Interconnect> interconnects = new List<Interconnect>();
+            while (!word.Eof && word.Text != ";")
+            {
+                if (!General.IsIdentifier(word.Text))
+                {
+                    word.AddError("illegal net identifier");
+                    break;
+                }
+
+                Interconnect net = new Interconnect
+                {
+                    BeginIndexReference = word.CreateIndexReference(),
+                    Project = word.Project,
+                    Name = word.Text
+                };
+
+                // Copy packed dimensions
+                foreach (var dim in packedDimensions)
+                {
+                    net.PackedDimensions.Add(dim.Clone());
+                }
+                net.DefinedReference = word.GetReference();
+
+                word.Color(CodeDrawStyle.ColorType.Net);
+                word.MoveNext();
+
+                // Parse unpacked dimensions
+                while (word.Text == "[")
+                {
+                    DataObjects.Arrays.UnPackedArray? unpackedArray = DataObjects.Arrays.UnPackedArray.ParseCreate(word, nameSpace);
+                    if (unpackedArray != null)
+                    {
+                        net.UnpackedArrays.Add(unpackedArray);
+                    }
+                }
+
+                interconnects.Add(net);
+
+                if (word.GetCharAt(0) == ',')
+                {
+                    word.MoveNext();
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            // Semicolon
+            if (word.Text == ";")
+            {
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext();
+            }
+            else
+            {
+                word.AddError("; expected");
+            }
+
+            // Add all interconnects to namespace
+            foreach (var ic in interconnects)
+            {
+                if (!nameSpace.NamedElements.ContainsKey(ic.Name))
+                {
+                    nameSpace.NamedElements.Add(ic.Name, ic);
+                }
+                else
+                {
+                    ic.DefinedReference?.AddError("duplicated net name");
+                }
+            }
+
+            return true;
+        }
+
         public override DataObject Clone()
         {
             return Clone(Name);
@@ -601,5 +761,36 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             }
             return net;
         }
+    }
+
+    /// <summary>
+    /// Interconnect represents a special net type used for connecting multiple ports
+    /// IEEE 1800-2017
+    /// 
+    /// Interconnects are implicitly sized based on the ports they connect to.
+    /// Unlike regular nets, they don't have an explicit data type.
+    /// </summary>
+    public class Interconnect : Net
+    {
+        public Interconnect()
+        {
+            NetType = NetTypeEnum.Interconnect;
+            DataType = DataTypes.LogicType.Create(false, null);
+        }
+
+        /// <summary>
+        /// Optional delay value for the interconnect
+        /// </summary>
+        public string? DelayValue { get; set; }
+
+        /// <summary>
+        /// Project reference for this interconnect
+        /// </summary>
+        public CodeEditor2.Data.Project? Project { get; set; }
+
+        /// <summary>
+        /// Index reference for the beginning of this interconnect
+        /// </summary>
+        public IndexReference? BeginIndexReference { get; set; }
     }
 }
