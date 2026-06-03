@@ -52,7 +52,7 @@ namespace pluginVerilog.Verilog.Statements
         list_of_block_variable_identifiers ::=  block_variable_type { , block_variable_type } 
         block_variable_type ::=  variable_identifier        | variable_identifier dimension { dimension }  
         */
-        public static async Task<IStatement?> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label, List<string>? clockDomains = null)
+        public static async Task<IStatement?> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label,string? blockIdentifier = null, List<string>? clockDomains = null)
         {
             if (word.Text != "begin") throw new Exception();
 
@@ -70,12 +70,22 @@ namespace pluginVerilog.Verilog.Statements
                 }
                 else
                 {
-                    return await parseCreateNamedSequentialBlock(word, nameSpace, beginIndex, clockDomains);
+                    string name = word.Text;
+                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.MoveNext();
+                    return await parseCreateNamedSequentialBlock(word, nameSpace, beginIndex, name, clockDomains);
                 }
             }
             else
             {
-                return await parseCreateUnnamedSequentialBlock(word, nameSpace, beginIndex, clockDomains);
+                if(blockIdentifier != null)
+                {
+                    return await parseCreateNamedSequentialBlock(word, nameSpace, beginIndex, blockIdentifier, clockDomains);
+                }
+                else
+                {
+                    return await parseCreateUnnamedSequentialBlock(word, nameSpace, beginIndex, clockDomains);
+                }
             }
         }
 
@@ -103,7 +113,7 @@ namespace pluginVerilog.Verilog.Statements
                     // parse statements
                     while (!word.Eof && word.Text != "end")
                     {
-                        IStatement? statement = await Verilog.Statements.Statements.ParseCreateStatement(word, namedBlock, clockDomains);
+                        IStatement? statement = await Verilog.Statements.Statements.ParseCreateStatement(word, namedBlock,null, clockDomains);
                         if (statement != null)
                         {
                             namedBlock.Statements.Add(statement);
@@ -143,7 +153,7 @@ namespace pluginVerilog.Verilog.Statements
 
             while (!word.Eof && word.Text != "end")
             {
-                IStatement? statement = await Verilog.Statements.Statements.ParseCreateStatement(word, nameSpace, clockDomains);
+                IStatement? statement = await Verilog.Statements.Statements.ParseCreateStatement(word, nameSpace, null, clockDomains);
                 if (statement != null)
                 {
                     sequentialBlock.Statements.Add(statement);
@@ -226,12 +236,9 @@ namespace pluginVerilog.Verilog.Statements
             }
             return namedBlock;
         }
-        private static async Task<IStatement?> parseCreateNamedSequentialBlock(WordScanner word, NameSpace nameSpace, IndexReference beginIndex, List<string>? clockDomains = null)
+        private static async Task<IStatement?> parseCreateNamedSequentialBlock(WordScanner word, NameSpace nameSpace, IndexReference beginIndex, string name, List<string>? clockDomains = null)
         {
             // start at identifier
-            string name = word.Text;
-            word.Color(CodeDrawStyle.ColorType.Identifier);
-            word.MoveNext();
 
             //// create namedBlock
             NamedSequentialBlock namedBlock = createNamedSequentialBlock(word, nameSpace, beginIndex, name);
@@ -245,7 +252,7 @@ namespace pluginVerilog.Verilog.Statements
             // parse statements
             while (!word.Eof && word.Text != "end")
             {
-                IStatement? statement = await Verilog.Statements.Statements.ParseCreateStatement(word, namedBlock, clockDomains);
+                IStatement? statement = await Verilog.Statements.Statements.ParseCreateStatement(word, namedBlock,null, clockDomains);
                 if (statement != null)
                 {
                     namedBlock.Statements.Add(statement);

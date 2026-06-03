@@ -64,7 +64,7 @@ namespace pluginVerilog.Verilog.Statements
                                 | { attribute_instance } disable_statement
                                 | { attribute_instance } system_task_enable  
         */
-        public static async Task<IStatement?> ParseCreateStatement(WordScanner word, NameSpace nameSpace, List<string>? clockDomains = null)
+        public static async Task<IStatement?> ParseCreateStatement(WordScanner word, NameSpace nameSpace, string? blockIdentifier = null, List<string>? clockDomains = null)
         {
             /*
             A.6.4 Statements
@@ -138,7 +138,7 @@ namespace pluginVerilog.Verilog.Statements
             {
                 case "(*":
                     Attribute attribute = Attribute.ParseCreate(word, nameSpace);
-                    return await Statements.ParseCreateStatement(word, nameSpace, clockDomains);
+                    return await Statements.ParseCreateStatement(word, nameSpace,blockIdentifier, clockDomains);
 
                 // unique_priority
                 case "unique":
@@ -157,7 +157,7 @@ namespace pluginVerilog.Verilog.Statements
 
                 // seq_block 
                 case "begin":
-                    return await SequentialBlock.ParseCreate(word, nameSpace, statement_label, clockDomains);
+                    return await SequentialBlock.ParseCreate(word, nameSpace, statement_label, blockIdentifier, clockDomains);
 
                 // par_block 
                 case "fork":
@@ -275,13 +275,14 @@ namespace pluginVerilog.Verilog.Statements
                 default:
 
                     // statement::= [block_identifier :] { attribute_instance } statement_item
-                    if(General.IsSimpleIdentifier(word.Text) && word.NextText == ":")
+                    if(General.IsSimpleIdentifier(word.Text) && word.NextText == ":" && blockIdentifier == null)
                     {
+                        blockIdentifier = word.Text;
                         word.Color(CodeDrawStyle.ColorType.Identifier);
                         word.MoveNext();
                         // ;
                         word.MoveNext();
-                        return await Statements.ParseCreateStatement(word, nameSpace, null);
+                        return await Statements.ParseCreateStatement(word, nameSpace, blockIdentifier, null);
                     }
 
 
@@ -501,7 +502,7 @@ namespace pluginVerilog.Verilog.Statements
                 word.MoveNext();
                 return null;
             }
-            return await ParseCreateStatement(word, nameSpace, clockDomains);
+            return await ParseCreateStatement(word, nameSpace, null, clockDomains);
         }
 
 
