@@ -108,14 +108,24 @@ namespace pluginVerilog.Data.VerilogCommon
                 {
                     oldItems.Add(oldItem);
                 }
-                    
+
                 // Clear and populate in a single atomic operation
-                item.Items.Clear();
-                foreach (CodeEditor2.Data.Item i in newSubItems.Values)
+                item.Items.ReplaceTo(newSubItems);
+                //foreach (CodeEditor2.Data.Item i in newSubItems.Values)
+                //{
+                //    item.Items.AddOrUpdate(i.Name, i);
+                //}
+                if(item.Name== "scr1_top_tb_ahb.sv")
                 {
-                    item.Items.AddOrUpdate(i.Name, i);
+                    System.Diagnostics.Debug.Print("scr1_top_tb_ahb " + newSubItems.Count);
+                    string a = "";
                 }
-                
+
+                if (item.Name == "i_top")
+                {
+                    //    string a = "";
+                    System.Diagnostics.Debug.Print("i_top "+newSubItems.Count);
+                }
                 // Dispose old items after the atomic swap is complete
                 foreach (var oldItem in oldItems)
                 {

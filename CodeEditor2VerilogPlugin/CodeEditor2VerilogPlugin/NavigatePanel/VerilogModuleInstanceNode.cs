@@ -144,54 +144,23 @@ namespace pluginVerilog.NavigatePanel
                 if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
             }
 
-            List<CodeEditor2.Data.Item> targetDataItems = new List<CodeEditor2.Data.Item>();
-            List<CodeEditor2.Data.Item> addDataItems = new List<CodeEditor2.Data.Item>();
-            if (VerilogModuleInstance != null)
+            List<CodeEditor2.NavigatePanel.NavigatePanelNode> newNodes = new List<CodeEditor2.NavigatePanel.NavigatePanelNode>();
+
+            if (VerilogFile != null)
             {
                 foreach (CodeEditor2.Data.Item item in VerilogModuleInstance.Items)
                 {
-                    targetDataItems.Add(item);
-                    addDataItems.Add(item);
+                    newNodes.Add(item.NavigatePanelNode);
                 }
             }
 
-            List<CodeEditor2.NavigatePanel.NavigatePanelNode> removeNodes = new List<CodeEditor2.NavigatePanel.NavigatePanelNode>();
-            lock (Nodes)
+            System.Collections.ObjectModel.ObservableCollection<AjkAvaloniaLibs.Controls.TreeControls.TreeNode> nodes = new System.Collections.ObjectModel.ObservableCollection<AjkAvaloniaLibs.Controls.TreeControls.TreeNode>();
+            foreach (CodeEditor2.NavigatePanel.NavigatePanelNode node in newNodes)
             {
-                foreach (CodeEditor2.NavigatePanel.NavigatePanelNode node in Nodes)
-                {
-                    if (node.Item != null && targetDataItems.Contains(node.Item))
-                    {
-                        addDataItems.Remove(node.Item);
-                    }
-                    else
-                    {
-                        removeNodes.Add(node);
-                    }
-                }
-
-                foreach (CodeEditor2.NavigatePanel.NavigatePanelNode node in removeNodes)
-                {
-                    if (!Nodes.Contains(node))
-                    {
-                        System.Diagnostics.Debugger.Break();
-                    }
-                    Nodes.Remove(node);
-                    node.Dispose();
-                }
-
-                int treeIndex = 0;
-                foreach (CodeEditor2.Data.Item item in targetDataItems)
-                {
-                    if (item == null) continue;
-                    if (addDataItems.Contains(item))
-                    {
-                        Nodes.Insert(treeIndex, item.NavigatePanelNode);
-                        item.NavigatePanelNode.UpdateVisual();
-                    }
-                    treeIndex++;
-                }
+                nodes.Add(node);
             }
+
+            Nodes = nodes;
         }
         public override void UpdateVisual()
         {

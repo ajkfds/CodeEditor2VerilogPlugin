@@ -130,35 +130,13 @@ namespace pluginVerilog.NavigatePanel
                 }
             }
 
-            List<CodeEditor2.NavigatePanel.NavigatePanelNode> removeNodes = new List<CodeEditor2.NavigatePanel.NavigatePanelNode>();
-            lock (Nodes)
+            System.Collections.ObjectModel.ObservableCollection<AjkAvaloniaLibs.Controls.TreeControls.TreeNode> nodes = new System.Collections.ObjectModel.ObservableCollection<AjkAvaloniaLibs.Controls.TreeControls.TreeNode>();
+            foreach (CodeEditor2.NavigatePanel.NavigatePanelNode node in newNodes)
             {
-                foreach (CodeEditor2.NavigatePanel.NavigatePanelNode node in Nodes)
-                {
-                    if (!newNodes.Contains(node))
-                    {
-                        removeNodes.Add(node);
-                    }
-                }
-                foreach (CodeEditor2.NavigatePanel.NavigatePanelNode node in removeNodes)
-                {
-                    if (!Nodes.Contains(node))
-                    {
-                        System.Diagnostics.Debugger.Break();
-                    }
-                    Nodes.Remove(node);
-                    node.Dispose();
-                }
-
-                foreach (CodeEditor2.NavigatePanel.NavigatePanelNode node in newNodes)
-                {
-                    if (Nodes.Contains(node)) continue;
-
-                    int index = newNodes.IndexOf(node);
-                    Nodes.Insert(index, node);
-                    node.UpdateVisual();
-                }
+                nodes.Add(node);
             }
+
+            Nodes = nodes;
         }
 
 
