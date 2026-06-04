@@ -458,7 +458,7 @@ namespace pluginVerilog.Data
 
 
 
-        public ProjectProperty ProjectProperty
+        public override ProjectProperty ProjectProperty
         {
             get
             {

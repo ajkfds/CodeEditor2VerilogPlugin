@@ -41,25 +41,11 @@ namespace pluginVerilog.Data.VerilogCommon
                 )
             {
                 // dispose all sub items - use atomic update to prevent partial state
-                await _semaphore.WaitAsync();
-                try
+                item.Items.Clear(out List<Item> clearedItems);
+                // Dispose after clearing to avoid deadlock
+                foreach (var subItem in clearedItems)
                 {
-                    // Take a snapshot and dispose outside the main items lock if needed
-                    var itemsToDispose = new List<CodeEditor2.Data.Item>();
-                    foreach (CodeEditor2.Data.Item subItem in item.Items)
-                    {
-                        itemsToDispose.Add(subItem);
-                    }
-                    item.Items.Clear();
-                    // Dispose after clearing to avoid deadlock
-                    foreach (var subItem in itemsToDispose)
-                    {
-                        subItem.Dispose();
-                    }
-                }
-                finally
-                {
-                    _semaphore.Release();
+                    subItem.Dispose();
                 }
                 return;
             }
@@ -101,20 +87,13 @@ namespace pluginVerilog.Data.VerilogCommon
             try
             {
                 var oldItems = new List<CodeEditor2.Data.Item>();
-                
+
                 // Atomically swap items: clear old and add new in one locked operation
                 // Capture old items for disposal
-                foreach (var oldItem in item.Items)
-                {
-                    oldItems.Add(oldItem);
-                }
+                oldItems = item.Items.GetSnapShot();
 
                 // Clear and populate in a single atomic operation
                 item.Items.ReplaceTo(newSubItems);
-                //foreach (CodeEditor2.Data.Item i in newSubItems.Values)
-                //{
-                //    item.Items.AddOrUpdate(i.Name, i);
-                //}
                 if(item.Name== "scr1_top_tb_ahb.sv")
                 {
                     System.Diagnostics.Debug.Print("scr1_top_tb_ahb " + newSubItems.Count);

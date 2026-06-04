@@ -73,6 +73,8 @@ namespace pluginVerilog.NavigatePanel
 
 
         private volatile bool onSelecting = false;
+
+        #pragma warning disable VSTHRD100 // 理由: UIイベントの起点であり、内部で完全にtry-catchしているため安全
         public override async void OnSelected()
         {
             if (onSelecting) return;
@@ -117,6 +119,7 @@ namespace pluginVerilog.NavigatePanel
 
             if (!Dispatcher.UIThread.CheckAccess())
             {
+                #pragma warning disable VSTHRD101 //try-catched
                 Dispatcher.UIThread.Post(
                         new Action(async () =>
                         {

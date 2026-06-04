@@ -66,6 +66,8 @@ namespace pluginVerilog.NavigatePanel
             if (verilogRelatedFile == null) return;
             Image = GetIcon(verilogRelatedFile);
         }
+
+        #pragma warning disable VSTHRD100 // 理由: UIイベントの起点であり、内部で完全にtry-catchしているため安全
         public override async void OnSelected()
         {
             try
