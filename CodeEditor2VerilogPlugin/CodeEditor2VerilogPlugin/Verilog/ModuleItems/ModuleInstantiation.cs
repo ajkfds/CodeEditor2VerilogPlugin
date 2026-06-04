@@ -499,6 +499,23 @@ namespace pluginVerilog.Verilog.ModuleItems
             int i = 0;
             while (!word.Eof && word.Text != ")")
             {
+                // Check for wildcard port connection .*
+                if (word.Text == ".*")
+                {
+                    // Wildcard connection - all remaining ports are implicitly connected
+                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.MoveNext();
+                    if (word.Text != ",")
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        word.MoveNext();
+                    }
+                    continue;
+                }
+
                 string pinName = "";
                 if (instancedModule != null && i < instancedModule.PortsList.Count)
                 {

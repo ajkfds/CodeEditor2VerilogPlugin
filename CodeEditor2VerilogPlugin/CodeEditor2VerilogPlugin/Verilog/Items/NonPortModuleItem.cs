@@ -15,6 +15,7 @@ namespace pluginVerilog.Verilog.Items
             | module_declaration 
             | interface_declaration 
             | timeunits_declaration
+            | clocking_declaration
        */
         public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
         {
@@ -45,6 +46,37 @@ namespace pluginVerilog.Verilog.Items
                     await BuildingBlocks.Interface.Create(word, nameSpace, null, nameSpace.BuildingBlock, word.RootParsedDocument.File, word.Prototype);
                     return true;
 
+                // clocking_declaration
+                case "clocking":
+                    BuildingBlocks.Clocking.ParseCreate(word, nameSpace, null);
+                    return true;
+
+                // default clocking clocking_identifier ;
+                // or default disable iff expression_or_dist ;
+                case "default":
+                    if (word.NextText == "clocking")
+                    {
+                        BuildingBlocks.Clocking.ParseDefaultClocking(word, nameSpace);
+                        return true;
+                    }
+                    if (word.NextText == "disable")
+                    {
+                        // default disable iff expression_or_dist ;
+                        // For now, just skip past it
+                        word.MoveNext(); // default
+                        word.MoveNext(); // disable
+                        if (word.Text == "iff")
+                        {
+                            word.MoveNext(); // iff
+                            // Skip the expression
+                            Expressions.Expression.ParseCreate(word, nameSpace);
+                        }
+                        // Skip to semicolon
+                        word.SkipToKeyword(";");
+                        if (word.Text == ";") word.MoveNext();
+                        return true;
+                    }
+                    break;
 
                 // timeunits_declaration
                 case "timeunit":

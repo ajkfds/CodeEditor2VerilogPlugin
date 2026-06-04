@@ -9,6 +9,8 @@ namespace pluginVerilog.Verilog.Statements
         protected CaseStatement() { }
         public Expressions.Expression Expression;
         public List<CaseItem> CaseItems = new List<CaseItem>();
+        public bool IsInsideMode { get; set; } = false;
+        public bool IsMatchesMode { get; set; } = false;
 
         public string Name { get; protected set; }
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
@@ -60,14 +62,15 @@ namespace pluginVerilog.Verilog.Statements
             case_inside_item  ::= open_range_list : statement_or_null 
                                 | "default" [ : ] statement_or_null 
             case_item_expression ::= expression  
+            open_range_list ::= open_value_range { , open_value_range }
+            open_value_range ::= value_range | expression
+            value_range ::= expression | expression : expression
              
              */
             switch (word.Text)
             {
                 case "case":
-                    break;
                 case "casez":
-                    break;
                 case "casex":
                     break;
                 default:
@@ -96,17 +99,24 @@ namespace pluginVerilog.Verilog.Statements
                 word.AddError(") expected");
             }
 
-            if (word.Text == "matches" || word.Text == "inside")
+            if (word.Text == "matches")
             {
+                caseStatement.IsMatchesMode = true;
+                word.AddSystemVerilogError();
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext();
+            }
+            else if (word.Text == "inside")
+            {
+                caseStatement.IsInsideMode = true;
                 word.AddSystemVerilogError();
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 word.MoveNext();
             }
 
-
             while (!word.Eof && word.Text != "endcase" && word.Text != "endmodule" && word.Text != "endfunction")
             {
-                CaseItem caseItem = await CaseItem.ParseCreate(word, nameSpace);
+                CaseItem caseItem = await CaseItem.ParseCreate(word, nameSpace, caseStatement.IsInsideMode);
                 if (caseItem == null)
                 {
                     break;
@@ -139,10 +149,19 @@ namespace pluginVerilog.Verilog.Statements
                 }
                 Statement.DisposeSubReference();
             }
-            public static async Task<CaseItem> ParseCreate(WordScanner word, NameSpace nameSpace)
+
+            /// <summary>
+            /// Parse a case item. In inside mode, supports open_range_list which can include range expressions like [5:6].
+            /// </summary>
+            public static async Task<CaseItem> ParseCreate(WordScanner word, NameSpace nameSpace, bool isInsideMode = false)
             {
                 //            case_item ::=       expression { , expression } : statement_or_null 
                 //                                | default[ : ] statement_or_null
+                //            case_inside_item ::= open_range_list : statement_or_null
+                //                                | "default" [ : ] statement_or_null
+                //            open_range_list ::= open_value_range { , open_value_range }
+                //            open_value_range ::= value_range | expression
+                //            value_range ::= expression | expression : expression
                 CaseItem caseItem = new CaseItem();
 
                 if (word.Text == "default")
@@ -157,24 +176,39 @@ namespace pluginVerilog.Verilog.Statements
                     return caseItem;
                 }
 
-                Expressions.Expression expression = Verilog.Expressions.Expression.ParseCreate(word, nameSpace);
-                if (expression == null)
+                if (isInsideMode)
                 {
-                    word.AddError("illegal expression item");
-                    return null;
+                    // Parse open_range_list for inside mode
+                    // open_value_range can be: expression, or expression:expression (range)
+                    caseItem.Expressions = await ParseOpenRangeList(word, nameSpace);
+                    if (caseItem.Expressions.Count == 0)
+                    {
+                        word.AddError("illegal open range item");
+                        return null;
+                    }
                 }
-                caseItem.Expressions.Add(expression);
-
-                while (!word.Eof && word.GetCharAt(0) == ',')
+                else
                 {
-                    word.MoveNext();
-                    expression = Verilog.Expressions.Expression.ParseCreate(word, nameSpace);
+                    // Parse regular case item (expression list)
+                    Expressions.Expression expression = Verilog.Expressions.Expression.ParseCreate(word, nameSpace);
                     if (expression == null)
                     {
                         word.AddError("illegal expression item");
                         return null;
                     }
                     caseItem.Expressions.Add(expression);
+
+                    while (!word.Eof && word.GetCharAt(0) == ',')
+                    {
+                        word.MoveNext();
+                        expression = Verilog.Expressions.Expression.ParseCreate(word, nameSpace);
+                        if (expression == null)
+                        {
+                            word.AddError("illegal expression item");
+                            return null;
+                        }
+                        caseItem.Expressions.Add(expression);
+                    }
                 }
 
                 if (word.GetCharAt(0) == ':')
@@ -189,6 +223,131 @@ namespace pluginVerilog.Verilog.Statements
 
                 caseItem.Statement = await Statements.ParseCreateStatementOrNull(word, nameSpace);
                 return caseItem;
+            }
+
+            /// <summary>
+            /// Parse open_range_list for case inside mode.
+            /// open_range_list ::= open_value_range { , open_value_range }
+            /// open_value_range ::= value_range | expression
+            /// value_range ::= expression | expression : expression
+            /// </summary>
+            private static async Task<List<Expressions.Expression>> ParseOpenRangeList(WordScanner word, NameSpace nameSpace)
+            {
+                List<Expressions.Expression> expressions = new List<Expressions.Expression>();
+
+                while (!word.Eof && word.Text != ":" && word.Text != "endcase" && word.Text != "endmodule" && word.Text != "endfunction")
+                {
+                    if (word.GetCharAt(0) == ',')
+                    {
+                        word.MoveNext();
+                        continue;
+                    }
+
+                    // Check for range expression [expr:expr]
+                    if (word.GetCharAt(0) == '[')
+                    {
+                        word.MoveNext();
+                        Expressions.Expression? rangeStart = Verilog.Expressions.Expression.ParseCreate(word, nameSpace);
+                        if (rangeStart == null)
+                        {
+                            word.AddError("illegal range expression");
+                            word.SkipToKeyword("]");
+                            if (word.Text == "]") word.MoveNext();
+                            continue;
+                        }
+
+                        // Create a range expression wrapper
+                        // For now, store both expressions and indicate they form a range
+                        if (word.Text == ":")
+                        {
+                            word.MoveNext();
+                            Expressions.Expression? rangeEnd = Verilog.Expressions.Expression.ParseCreate(word, nameSpace);
+                            if (rangeEnd == null)
+                            {
+                                word.AddError("illegal range expression");
+                                word.SkipToKeyword("]");
+                                if (word.Text == "]") word.MoveNext();
+                                continue;
+                            }
+
+                            // Create a pseudo-range expression using concatenation or special handling
+                            // We store it as a RangeExpression wrapper
+                            RangeExpression rangeExpr = new RangeExpression(rangeStart, rangeEnd);
+                            expressions.Add(rangeExpr);
+
+                            if (word.Text == "]")
+                            {
+                                word.MoveNext();
+                            }
+                            else
+                            {
+                                word.AddError("] expected");
+                            }
+                        }
+                        else
+                        {
+                            // Single index in brackets [expr]
+                            // This is treated as [expr:expr] for inside matching
+                            RangeExpression rangeExpr = new RangeExpression(rangeStart, rangeStart);
+                            expressions.Add(rangeExpr);
+
+                            if (word.Text == "]")
+                            {
+                                word.MoveNext();
+                            }
+                            else
+                            {
+                                word.AddError("] expected");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Regular expression
+                        Expressions.Expression? expr = Verilog.Expressions.Expression.ParseCreate(word, nameSpace);
+                        if (expr == null)
+                        {
+                            break;
+                        }
+                        expressions.Add(expr);
+                    }
+
+                    // Exit if we hit a colon (statement separator) or comma followed by colon
+                    if (word.GetCharAt(0) == ':')
+                    {
+                        break;
+                    }
+                }
+
+                return expressions;
+            }
+        }
+
+        /// <summary>
+        /// Represents a range expression like [5:6] for case inside matching.
+        /// This is used internally to represent range values in case inside items.
+        /// </summary>
+        public class RangeExpression : Expressions.Expression
+        {
+            public Expressions.Expression RangeStart { get; set; }
+            public Expressions.Expression RangeEnd { get; set; }
+
+            public RangeExpression(Expressions.Expression start, Expressions.Expression end)
+            {
+                RangeStart = start;
+                RangeEnd = end;
+                Reference = start.Reference;
+            }
+
+            public override string CreateString()
+            {
+                return "[" + RangeStart.CreateString() + ":" + RangeEnd.CreateString() + "]";
+            }
+
+            public override void AppendRefrencedDataObjects(List<Verilog.DataObjects.DataObject> referencedObjects)
+            {
+                RangeStart.AppendRefrencedDataObjects(referencedObjects);
+                RangeEnd.AppendRefrencedDataObjects(referencedObjects);
             }
         }
     }

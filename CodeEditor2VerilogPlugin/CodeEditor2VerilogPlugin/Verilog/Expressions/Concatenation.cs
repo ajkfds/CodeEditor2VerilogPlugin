@@ -40,6 +40,13 @@ namespace pluginVerilog.Verilog.Expressions
                 return empty;
             }
 
+            // Check for streaming concatenation BEFORE trying to parse an expression
+            // This handles cases like {>> 8 {a, b}} where >> is the stream operator
+            if (word.Text == ">>" || word.Text == "<<")
+            {
+                return StreamingConcatenation.ParseCreate(word, nameSpace, reference, lValue, acceptImplicitNet);
+            }
+
             Expression? exp1;
             if (lValue)
             {
@@ -58,15 +65,21 @@ namespace pluginVerilog.Verilog.Expressions
             }
             if (exp1 == null)
             {
+                // Check again for streaming concatenation in case the first expression parse consumed something
+                if (word.Text == ">>" || word.Text == "<<")
+                {
+                    return StreamingConcatenation.ParseCreate(word, nameSpace, reference, lValue, acceptImplicitNet);
+                }
+
                 word.AddError("illegal concatenation");
                 word.SkipToKeyword(";");
                 return null;
             }
 
-            // Check for streaming concatenation: { >> or << ... }
+            // Check for streaming concatenation after expression: { expr >> or << ... }
             if (word.Text == ">>" || word.Text == "<<")
             {
-                return StreamingConcatenation.ParseCreate(word, nameSpace, reference, lValue, acceptImplicitNet);
+                return StreamingConcatenation.ParseCreateWithFirstExpression(word, nameSpace, reference, exp1);
             }
 
             if (word.GetCharAt(0) == '{')
@@ -325,6 +338,113 @@ namespace pluginVerilog.Verilog.Expressions
 
             return streaming;
         }
+
+        /// <summary>
+        /// Parse streaming concatenation when first expression has already been parsed.
+        /// Handles cases like { expr >> slice_size { stream_concat } }
+        /// </summary>
+        public static Primary? ParseCreateWithFirstExpression(WordScanner word, NameSpace nameSpace, WordReference reference, Expression firstExpression)
+        {
+            if (word.Text != ">>" && word.Text != "<<")
+            {
+                return null;
+            }
+
+            StreamingConcatenation streaming = new StreamingConcatenation();
+            streaming.StreamOperator = word.Text;
+            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.MoveNext();
+
+            // The first expression becomes the slice_size or first stream expression
+            // based on what follows
+            if (word.Text == ">>" || word.Text == "<<")
+            {
+                // Two stream operators: firstExpression is part of stream concatenation
+                // This is an unusual case, treat firstExpression as a stream expression
+                StreamExpression firstStreamExpr = new StreamExpression();
+                firstStreamExpr.Expression = firstExpression;
+                streaming.StreamExpressions.Add(firstStreamExpr);
+            }
+            else
+            {
+                // Check if firstExpression is a slice_size or stream expression
+                // slice_size is typically a constant, stream expression can be anything
+                if (firstExpression.Constant && word.Text == "{")
+                {
+                    // Looks like slice_size
+                    streaming.SliceSize = firstExpression;
+                }
+                else
+                {
+                    // Treat as stream expression
+                    StreamExpression firstStreamExpr = new StreamExpression();
+                    firstStreamExpr.Expression = firstExpression;
+                    streaming.StreamExpressions.Add(firstStreamExpr);
+                }
+            }
+
+            // Parse optional slice_size (if firstExpression wasn't the slice_size)
+            if (streaming.SliceSize == null && word.Text != "{")
+            {
+                var dataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, null);
+                if (dataType != null)
+                {
+                    var sliceExpr = new Expression();
+                    sliceExpr.Reference = word.GetReference();
+                    sliceExpr.Primary = new DataTypeReference() { IDataType = dataType };
+                    streaming.SliceSize = sliceExpr;
+                }
+                else
+                {
+                    var sliceExp = Expression.ParseCreate(word, nameSpace);
+                    if (sliceExp != null)
+                    {
+                        streaming.SliceSize = sliceExp;
+                    }
+                }
+            }
+
+            // Parse stream_concatenation: { stream_expression { , stream_expression } }
+            if (word.GetCharAt(0) != '{')
+            {
+                word.AddError("illegal streaming concatenation");
+                return null;
+            }
+            word.MoveNext(); // {
+
+            // Parse stream_expressions
+            while (word.GetCharAt(0) != '}' && !word.Eof)
+            {
+                var streamExpr = StreamExpression.ParseCreate(word, nameSpace);
+                if (streamExpr == null)
+                {
+                    word.AddError("illegal stream expression");
+                    break;
+                }
+                streaming.StreamExpressions.Add(streamExpr);
+
+                if (word.GetCharAt(0) == ',')
+                {
+                    word.MoveNext();
+                }
+                else if (word.GetCharAt(0) != '}')
+                {
+                    break;
+                }
+            }
+
+            if (word.GetCharAt(0) != '}')
+            {
+                word.AddError("illegal streaming concatenation");
+                word.SkipToKeyword("}");
+                return null;
+            }
+
+            streaming.Reference = WordReference.CreateReferenceRange(reference, word.GetReference());
+            word.MoveNext(); // }
+
+            return streaming;
+        }
     }
 
     /// <summary>
@@ -334,7 +454,7 @@ namespace pluginVerilog.Verilog.Expressions
     {
         internal StreamExpression() { }
 
-        public Expression? Expression { get; protected set; }
+        public Expression? Expression { get; set; }
 
         /// <summary>
         /// Optional "with" clause with array range expression
