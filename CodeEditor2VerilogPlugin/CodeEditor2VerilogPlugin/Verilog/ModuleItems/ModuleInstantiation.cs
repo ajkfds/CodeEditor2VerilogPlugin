@@ -129,6 +129,12 @@ namespace pluginVerilog.Verilog.ModuleItems
             string instanceKey = Verilog.ParsedDocument.KeyGenerator(file, SourceName, ParameterOverrides);
 
             CodeEditor2.CodeEditor.ParsedDocument? codeEditorParsedDocument = source.GetInstancedParsedDocument(instanceKey);
+            if(codeEditorParsedDocument == null) // don't have module parse result
+            {
+                codeEditorParsedDocument = source.ParsedDocument;
+            }
+
+
             if (codeEditorParsedDocument is not ParsedDocument) return null;
             ParsedDocument? parsedDocument = (ParsedDocument)codeEditorParsedDocument;
             if (parsedDocument == null) return null;
