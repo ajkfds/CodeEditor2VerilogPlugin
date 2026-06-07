@@ -113,6 +113,17 @@ namespace pluginVerilog.NavigatePanel
             }
 
             await CodeEditor2.Controller.NavigatePanel.UpdateFolderAsync(node);
+
+            // Find the newly created file and trigger parse
+            CodeEditor2.Data.Folder? folder = node.Item as CodeEditor2.Data.Folder;
+            if (folder != null && folder.Items.TryGetValue(fileName, out var item))
+            {
+                Data.VerilogFile? verilogFile = item as Data.VerilogFile;
+                if (verilogFile != null)
+                {
+                    Tool.ParseHierarchy.PostParseAsync(verilogFile, Tool.ParseHierarchy.ParseMode.SearchReparseReqestedTree);
+                }
+            }
         }
 
         private static async void menuItem_AddVerilogModule_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
