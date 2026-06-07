@@ -83,10 +83,11 @@ namespace pluginVerilog.Data.VerilogCommon
 
             // Atomic swap: dispose old items and replace with new ones in a single operation
 
+            var oldItems = new List<CodeEditor2.Data.Item>();
+
             await _semaphore.WaitAsync();
             try
             {
-                var oldItems = new List<CodeEditor2.Data.Item>();
 
                 // Atomically swap items: clear old and add new in one locked operation
                 // Capture old items for disposal
@@ -94,26 +95,16 @@ namespace pluginVerilog.Data.VerilogCommon
 
                 // Clear and populate in a single atomic operation
                 item.Items.ReplaceTo(newSubItems);
-                if(item.Name== "scr1_top_tb_ahb.sv")
-                {
-                    System.Diagnostics.Debug.Print("scr1_top_tb_ahb " + newSubItems.Count);
-                    string a = "";
-                }
-
-                if (item.Name == "i_top")
-                {
-                    //    string a = "";
-                    System.Diagnostics.Debug.Print("i_top "+newSubItems.Count);
-                }
                 // Dispose old items after the atomic swap is complete
-                foreach (var oldItem in oldItems)
-                {
-                    oldItem.Dispose();
-                }
             }
             finally
             {
                 _semaphore.Release();
+            }
+
+            foreach (var oldItem in oldItems)
+            {
+                oldItem.Dispose();
             }
         }
 
