@@ -476,7 +476,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                 | named_port_connection { "," named_port_connection }
              */
 
-            if (word.GetCharAt(0) == '.')
+            if (word.Text ==".")// GetCharAt(0) == '.')
             { // named port assignment
                 parseNamedPortConnections(word, nameSpace, instancedModule, moduleInstantiation, moduleIdentifier);
             }
