@@ -120,6 +120,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
 
             // Clocking event: @( ...)
+            // Handles: @(posedge clk), @(negedge clk), @(clk), etc.
             if (word.Text == "@")
             {
                 word.Color(CodeDrawStyle.ColorType.Keyword);
@@ -128,7 +129,29 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 if (word.Text == "(")
                 {
                     word.MoveNext();
-                    clocking.ClockingEvent = Expression.ParseCreate(word, nameSpace);
+                    
+                    // Check for edge keywords: posedge, negedge, edge
+                    string edgeKeyword = "";
+                    if (word.Text == "posedge" || word.Text == "negedge" || word.Text == "edge")
+                    {
+                        edgeKeyword = word.Text;
+                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.MoveNext();
+                    }
+                    
+                    // Parse the clocking expression (e.g., signal name)
+                    Expression? clockingExpr = Expression.ParseCreate(word, nameSpace);
+                    
+                    if (clockingExpr != null && !string.IsNullOrEmpty(edgeKeyword))
+                    {
+                        // Wrap the expression with edge indicator
+                        clocking.ClockingEvent = clockingExpr;
+                    }
+                    else
+                    {
+                        clocking.ClockingEvent = clockingExpr;
+                    }
+                    
                     if (word.Text == ")")
                     {
                         word.MoveNext();
@@ -140,12 +163,13 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 }
                 else
                 {
+                    // @ without parens (less common, but valid in some contexts)
                     word.AddError("( expected");
                 }
             }
             else
             {
-                word.AddError("@expected");
+                word.AddError("@ expected");
             }
 
             // Semicolon

@@ -235,7 +235,7 @@ namespace pluginVerilog.Verilog.Statements
             {
                 List<Expressions.Expression> expressions = new List<Expressions.Expression>();
 
-                while (!word.Eof && word.Text != ":" && word.Text != "endcase" && word.Text != "endmodule" && word.Text != "endfunction")
+                while (!word.Eof && word.Text != "endcase" && word.Text != "endmodule" && word.Text != "endfunction")
                 {
                     if (word.GetCharAt(0) == ',')
                     {
@@ -243,10 +243,16 @@ namespace pluginVerilog.Verilog.Statements
                         continue;
                     }
 
-                    // Check for range expression [expr:expr]
-                    if (word.GetCharAt(0) == '[')
+                    // Check for colon first (this is the statement separator, not part of range)
+                    if (word.GetCharAt(0) == ':')
                     {
-                        word.MoveNext();
+                        break;
+                    }
+
+                    // Regular expression - check if it's a range [expr:expr]
+                    if (word.Text == "[")
+                    {
+                        word.MoveNext(); // Move past '['
                         Expressions.Expression? rangeStart = Verilog.Expressions.Expression.ParseCreate(word, nameSpace);
                         if (rangeStart == null)
                         {
@@ -256,11 +262,9 @@ namespace pluginVerilog.Verilog.Statements
                             continue;
                         }
 
-                        // Create a range expression wrapper
-                        // For now, store both expressions and indicate they form a range
                         if (word.Text == ":")
                         {
-                            word.MoveNext();
+                            word.MoveNext(); // Move past ':'
                             Expressions.Expression? rangeEnd = Verilog.Expressions.Expression.ParseCreate(word, nameSpace);
                             if (rangeEnd == null)
                             {
@@ -270,14 +274,13 @@ namespace pluginVerilog.Verilog.Statements
                                 continue;
                             }
 
-                            // Create a pseudo-range expression using concatenation or special handling
-                            // We store it as a RangeExpression wrapper
-                            RangeExpression rangeExpr = new RangeExpression(rangeStart, rangeEnd);
+                            // Create AbsoluteRangeExpression from Verilog/Expressions/RangeExpression.cs
+                            Verilog.Expressions.RangeExpression rangeExpr = new Verilog.Expressions.AbsoluteRangeExpression(rangeStart, rangeEnd);
                             expressions.Add(rangeExpr);
 
                             if (word.Text == "]")
                             {
-                                word.MoveNext();
+                                word.MoveNext(); // Move past ']'
                             }
                             else
                             {
@@ -288,12 +291,12 @@ namespace pluginVerilog.Verilog.Statements
                         {
                             // Single index in brackets [expr]
                             // This is treated as [expr:expr] for inside matching
-                            RangeExpression rangeExpr = new RangeExpression(rangeStart, rangeStart);
+                            Verilog.Expressions.RangeExpression rangeExpr = new Verilog.Expressions.AbsoluteRangeExpression(rangeStart, rangeStart);
                             expressions.Add(rangeExpr);
 
                             if (word.Text == "]")
                             {
-                                word.MoveNext();
+                                word.MoveNext(); // Move past ']'
                             }
                             else
                             {
@@ -303,7 +306,7 @@ namespace pluginVerilog.Verilog.Statements
                     }
                     else
                     {
-                        // Regular expression
+                        // Regular expression (not starting with '[')
                         Expressions.Expression? expr = Verilog.Expressions.Expression.ParseCreate(word, nameSpace);
                         if (expr == null)
                         {
@@ -312,7 +315,7 @@ namespace pluginVerilog.Verilog.Statements
                         expressions.Add(expr);
                     }
 
-                    // Exit if we hit a colon (statement separator) or comma followed by colon
+                    // Exit if we hit a colon (statement separator)
                     if (word.GetCharAt(0) == ':')
                     {
                         break;
@@ -320,34 +323,6 @@ namespace pluginVerilog.Verilog.Statements
                 }
 
                 return expressions;
-            }
-        }
-
-        /// <summary>
-        /// Represents a range expression like [5:6] for case inside matching.
-        /// This is used internally to represent range values in case inside items.
-        /// </summary>
-        public class RangeExpression : Expressions.Expression
-        {
-            public Expressions.Expression RangeStart { get; set; }
-            public Expressions.Expression RangeEnd { get; set; }
-
-            public RangeExpression(Expressions.Expression start, Expressions.Expression end)
-            {
-                RangeStart = start;
-                RangeEnd = end;
-                Reference = start.Reference;
-            }
-
-            public override string CreateString()
-            {
-                return "[" + RangeStart.CreateString() + ":" + RangeEnd.CreateString() + "]";
-            }
-
-            public override void AppendRefrencedDataObjects(List<Verilog.DataObjects.DataObject> referencedObjects)
-            {
-                RangeStart.AppendRefrencedDataObjects(referencedObjects);
-                RangeEnd.AppendRefrencedDataObjects(referencedObjects);
             }
         }
     }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace pluginVerilog.Verilog.Expressions
 {
@@ -7,22 +8,28 @@ namespace pluginVerilog.Verilog.Expressions
     //                          | base_expression +: width_constant_expression
     //                          | base_expression -: width_constant_expression 
     //         | hierarchical_identifier          | hierarchical_identifier [ expression ] { [ expression ] }          | hierarchical_identifier [ expression ] { [ expression ] }  [ range_expression ]          | hierarchical_identifier [ range_expression ]  
-    public class RangeExpression
+    public class RangeExpression : Expression
     {
-        public int BitWidth;
-        public virtual AjkAvaloniaLibs.Controls.ColorLabel GetLabel()
+        public new int BitWidth;
+        public override bool Constant { get; protected set; }
+        public override double? Value { get; protected set; }
+        public override AjkAvaloniaLibs.Controls.ColorLabel GetLabel()
         {
             AjkAvaloniaLibs.Controls.ColorLabel label = new AjkAvaloniaLibs.Controls.ColorLabel();
             AppendLabel(label);
             return label;
         }
 
-        public virtual void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
         }
-        public virtual string CreateString()
+        public override string CreateString()
         {
             return "";
+        }
+
+        public override void AppendRefrencedDataObjects(List<Verilog.DataObjects.DataObject> referencedObjects)
+        {
         }
 
         public WordReference WordReference;
