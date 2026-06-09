@@ -27,6 +27,11 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
         {
             initialize(bits, packedArrays, unpackedArrays);
         }
+        protected ArraysBoolMap()
+        {
+
+        }
+
         private void initialize(int bits, List<PackedArray> packedArrays, List<UnPackedArray>? unpackedArrays)
         {
             mapRanges = null;
@@ -52,10 +57,20 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
             mapRanges = new List<mapRange>(size);
         }
 
+        public ArraysBoolMap Clone()
+        {
+            ArraysBoolMap map = new ArraysBoolMap() { dimensions = dimensions, mapRanges = new List<mapRange>(size), size = size };
+            return map; 
+        }
+
         List<int> dimensions = new List<int>();
         private List<mapRange>? mapRanges = null;
         int size = 1;
 
+        public void Assert(long startBit,long lastBit)
+        {
+            addRange(startBit, lastBit);
+        }
         public void Assert(List<RangeExpression> rangeExpressions)
         {
             if (mapRanges == null) return;

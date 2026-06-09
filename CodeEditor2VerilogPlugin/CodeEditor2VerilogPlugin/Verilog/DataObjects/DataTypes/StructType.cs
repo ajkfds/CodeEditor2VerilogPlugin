@@ -299,6 +299,30 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             public required IDataType DatType { get; init; }
             public Expressions.Expression? Value;
 
+            /// <summary>
+            /// Get the bit offset and width of this member within the packed struct.
+            /// </summary>
+            /// <param name="structType">The parent StructType</param>
+            /// <returns>Tuple of (offset, width) or null if struct is not packed or member not found</returns>
+            public (long offset, int width)? GetMemberBitInfo(StructType structType)
+            {
+                if (!structType.Packed) return null;
+
+                long offset = 0;
+                foreach (var member in structType.Members.Values)
+                {
+                    if (member.Identifier == Identifier)
+                    {
+                        int width = member.DatType.BitWidth ?? 1;
+                        return (offset, width);
+                    }
+                    // Add member width to offset
+                    int memberWidth = member.DatType.BitWidth ?? 1;
+                    offset += memberWidth;
+                }
+                return null;
+            }
+
             public Member Clone()
             {
                 Member member = new Member() { Identifier = Identifier, DatType = DatType, Value = Value };

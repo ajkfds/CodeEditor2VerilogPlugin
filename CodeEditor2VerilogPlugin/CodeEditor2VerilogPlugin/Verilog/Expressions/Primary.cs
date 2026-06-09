@@ -538,9 +538,26 @@ number
             // Since ModPort are also namespaces, they need to be processed before namespaces.
             if (element is DataObject)
             {
+                // Struct member access (aaa.AA) の場合、親Structへの参照を設定
+
+                DataObjects.DataObject? structParentObject = null;
+                string? structMemberName = null;
+
+                if(dataObjectReference.TargetDataObject.DataType is UserDefinedType)
+                {
+                    structParentObject = dataObjectReference.TargetDataObject;
+                    structMemberName = word.Text;
+                }
+
                 if (nameSpaceText != "") nameSpaceText = nameSpaceText + ".";
                 nameSpaceText = nameSpaceText + dataObjectReference.DatObjectName + ".";
-                return parseDataObject(word, nameSpace, dataObjectReference.TargetDataObject, lValue, acceptRange, nameSpaceText);
+                Primary? primary = parseDataObject(word, nameSpace, dataObjectReference.TargetDataObject, lValue, acceptRange, nameSpaceText);
+                if(primary is DataObjectReference r_dataObjectReference)
+                {
+                    r_dataObjectReference.StructParentObject = structParentObject;
+                    r_dataObjectReference.StructMemberName = structMemberName;
+                }
+                return primary;
             }
 
             // Since Task and Function are also namespaces, they need to be processed before namespaces.

@@ -26,6 +26,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
             UserDefinedVariable val = new UserDefinedVariable() { Name = name, UserDefinedType = userDefinedType };
             IDataType originalType = userDefinedType.OriginalDataType;
+            val.AssignedMap = new ArraysBoolMap(dataType, null);
 
             val.DataType = dataType;
             return val;
@@ -44,6 +45,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             {
                 val.UnpackedArrays.Add(unpackedArray.Clone());
             }
+            if(AssignedMap != null) val.AssignedMap = AssignedMap;
 
             return val;
         }

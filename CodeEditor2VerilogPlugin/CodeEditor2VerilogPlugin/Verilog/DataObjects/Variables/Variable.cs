@@ -294,6 +294,12 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                     {
                         variable.AssignedMap = new ArraysBoolMap(dataType.PackedDimensions, unpackedArrays);
                     }
+                    else if (dataType is DataTypes.StructType structType && structType.Packed)
+                    {
+                        if (dataType.BitWidth == null) throw new Exception();
+                        int bitWidth = (int)dataType.BitWidth;
+                        variable.AssignedMap = new ArraysBoolMap(bitWidth, structType.PackedDimensions, unpackedArrays);
+                    }
                 }
 
                 bool assigned = false;

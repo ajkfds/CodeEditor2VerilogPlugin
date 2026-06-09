@@ -47,6 +47,7 @@ namespace pluginVerilog.Verilog.DataObjects
             get
             {
                 int bitWidth = 1;
+                if (DataObject != null && DataObject.BitWidth != null) bitWidth = (int) DataObject.BitWidth;
                 if (PackedDimensions != null)
                 {
                     foreach (PackedArray packedArray in PackedDimensions)

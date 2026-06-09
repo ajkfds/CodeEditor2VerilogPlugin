@@ -53,6 +53,12 @@ namespace pluginVerilog.Tool
         /// </summary>
         private static readonly object _ctsLock = new object();
 
+        /// <summary>
+        /// Current parse mode of the running parse operation.
+        /// Used to determine which parse modes can cancel each other.
+        /// </summary>
+        private static ParseMode _currentParseMode = ParseMode.ThisFileOnly;
+
         public enum ParseMode
         {
             SearchReparseReqestedTree,
@@ -124,28 +130,47 @@ namespace pluginVerilog.Tool
                     await _parseLock.WaitAsync();
                     try
                     {
-                        _currentParseTimestamp = request.Timestamp;
-
                         // Check if this is a ForceAllFiles request
                         if (request.Mode == ParseMode.ForceAllFiles)
                         {
-                            // Cancel any currently running parse
-                            CancelCurrentParse();
+                            // ForceAllFiles can only be cancelled by another ForceAllFiles
+                            // If a non-ForceAll parse is running, cancel it
+                            CancelCurrentParseIfNotForceAll();
 
                             // Clear the queue of any pending non-ForceAll requests
                             ClearNonForceAllFromQueue();
 
-                            CodeEditor2.Controller.AppendLog("ForceAllFiles requested - cancelled running parse and cleared queue", Avalonia.Media.Colors.Yellow);
+                            _currentParseTimestamp = request.Timestamp;
+
+                            CodeEditor2.Controller.AppendLog("ForceAllFiles requested - processing now", Avalonia.Media.Colors.Yellow);
+
+                            // Call ParseInternalAsync directly to avoid deadlock
+                            await ParseInternalAsync(request.TextFile, request.Mode);
                         }
                         else
                         {
-                            // Cancel any currently running parse
-                            CancelCurrentParse();
-                        }
+                            // SearchReparseRequestedTree cancels any non-ForceAll parse
+                            // but waits for ForceAllFiles to complete
+                            lock (_ctsLock)
+                            {
+                                if (_currentParseMode == ParseMode.ForceAllFiles)
+                                {
+                                    // ForceAllFiles is running, re-queue this request and return
+                                    // It will be processed after ForceAllFiles completes
+                                    _parseQueue.Enqueue(request);
+                                    CodeEditor2.Controller.AppendLog("ForceAllFiles is running, re-queuing SearchReparseRequestedTree request", Avalonia.Media.Colors.Yellow);
+                                    return;
+                                }
+                            }
 
-                        // Call ParseInternalAsync directly to avoid deadlock
-                        // (ParseAsync also tries to acquire _parseLock)
-                        await ParseInternalAsync(request.TextFile, request.Mode);
+                            // No ForceAllFiles running, cancel any current parse and proceed
+                            CancelCurrentParse();
+
+                            _currentParseTimestamp = request.Timestamp;
+
+                            // Call ParseInternalAsync directly to avoid deadlock
+                            await ParseInternalAsync(request.TextFile, request.Mode);
+                        }
                     }
                     finally
                     {
@@ -175,6 +200,24 @@ namespace pluginVerilog.Tool
                         CodeEditor2.Controller.AppendLog("Cancelled running parse operation", Avalonia.Media.Colors.Orange);
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Cancels the currently running parse operation only if it's not a ForceAllFiles parse.
+        /// ForceAllFiles parses are never cancelled by other parse modes.
+        /// </summary>
+        private static void CancelCurrentParseIfNotForceAll()
+        {
+            lock (_ctsLock)
+            {
+                if (_currentParseMode == ParseMode.ForceAllFiles)
+                {
+                    // Don't cancel ForceAllFiles parse
+                    CodeEditor2.Controller.AppendLog("ForceAllFiles is running, not cancelling", Avalonia.Media.Colors.Yellow);
+                    return;
+                }
+                CancelCurrentParse();
             }
         }
 
@@ -213,10 +256,11 @@ namespace pluginVerilog.Tool
             // Create a new CancellationTokenSource for this parse operation
             CancellationTokenSource cts = new CancellationTokenSource();
 
-            // Store the CTS so it can be cancelled by a subsequent ForceAllFiles request
+            // Store the CTS and current parse mode so it can be cancelled by a subsequent request
             lock (_ctsLock)
             {
                 _currentParseCts = cts;
+                _currentParseMode = parseMode;
             }
 
             try
@@ -238,6 +282,7 @@ namespace pluginVerilog.Tool
                 lock (_ctsLock)
                 {
                     _currentParseCts = null;
+                    _currentParseMode = ParseMode.ThisFileOnly;
                 }
                 cts.Dispose();
             }

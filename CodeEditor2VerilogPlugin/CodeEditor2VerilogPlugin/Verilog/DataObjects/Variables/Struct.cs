@@ -21,7 +21,10 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         {
             StructType structType = (StructType)dataType;
 
-            Struct ret = new Struct() { StructType = structType, Name = name };
+            // Set DataType to the underlying StructType so that checks like
+            // "DataType is StructType" work correctly when the variable is
+            // declared with a typedef (UserDefinedType wrapping StructType)
+            Struct ret = new Struct() { StructType = structType, Name = name, DataType = structType };
             return ret;
         }
 

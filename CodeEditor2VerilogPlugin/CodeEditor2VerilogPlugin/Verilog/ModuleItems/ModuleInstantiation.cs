@@ -732,7 +732,7 @@ namespace pluginVerilog.Verilog.ModuleItems
 
             if (word.Text == ")")
             {
-                if (!outPort)
+                if (!outPort & !word.Prototype)
                 {
                     WordReference.CreateReferenceRange(startRef, word.GetReference()).AddWarning("floating input");
                     //word.AddWarning("floating input");

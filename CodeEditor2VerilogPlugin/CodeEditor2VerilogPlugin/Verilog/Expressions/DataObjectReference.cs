@@ -34,6 +34,11 @@ namespace pluginVerilog.Verilog.Expressions
         // 参照先DataObject.DefinedDataObjectの部分Clone
         public DataObjects.DataObject? TargetDataObject = null;
 
+        // Structメンバーアクセス時の親Struct変数参照
+        // 例: aaa.AA の場合、aaa の AssignedMap を更新する必要がある
+        public DataObjects.DataObject? StructParentObject { get; set; } = null;
+        public string? StructMemberName { get; set; } = null;
+
 
         public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
@@ -81,6 +86,114 @@ namespace pluginVerilog.Verilog.Expressions
         public override void AssertAssigned()
         {
             if (OrigainalDataObject == null) return;
+
+
+            /*
+             
+             */
+            // Structメンバーアクセス (aaa.AA) の場合
+            if (StructParentObject != null && StructMemberName != null)
+            {
+                if (StructParentObject.AssignedMap == null) return;
+
+                if( StructParentObject.DataType is UserDefinedType userDefinedType)
+                {
+                    if (userDefinedType.OriginalDataType is StructType structType && structType.Members.TryGetValue(StructMemberName, out var member))
+                    {
+                        long structOffset = 0;
+                        foreach (var m in structType.Members.Values)
+                        {
+                            if (m.Identifier == StructMemberName) break;
+                            structOffset += m.DatType.BitWidth ?? 1;
+                        }
+                        int memberWidth = member.DatType.BitWidth ?? 1;
+
+                        // メンバーのビット範囲をStructのAssignedMapに追加
+                        // RangesFromOriginalの内容が空の場合（全メンバーにアクセス）
+                        if (RangesFromOriginal.Count == 0)
+                        {
+                            // メンバーの全ビットがassignされたとみなす
+                            StructParentObject.AssignedMap.Assert(structOffset, structOffset + memberWidth - 1);
+                        }
+                        else
+                        {
+                            // メンバーのビット範囲を加算
+                            foreach (var range in RangesFromOriginal)
+                            {
+                                if (range is SingleBitRangeExpression singleBit && singleBit.BitIndex != null)
+                                {
+                                    int bitPos = (int)(structOffset + singleBit.BitIndex);
+                                    StructParentObject.AssignedMap.Assert(bitPos, bitPos);
+                                }
+                                else if (range is AbsoluteRangeExpression absRange)
+                                {
+                                    if (absRange.MinBitIndex != null && absRange.MaxBitIndex != null)
+                                    {
+                                        int minPos = (int)(structOffset + absRange.MinBitIndex);
+                                        int maxPos = (int)(structOffset + absRange.MaxBitIndex);
+                                        StructParentObject.AssignedMap.Assert(minPos,maxPos);
+                                    }
+                                }
+                            }
+                        }
+                        return;
+
+                    }
+                } else if (StructParentObject.DataType is StructType structType && structType.Members.TryGetValue(StructMemberName, out var member))
+                { // StructTypeからメンバーのビット位置を取得
+                    long structOffset = 0;
+                    foreach (var m in structType.Members.Values)
+                    {
+                        if (m.Identifier == StructMemberName) break;
+                        structOffset += m.DatType.BitWidth ?? 1;
+                    }
+                    int memberWidth = member.DatType.BitWidth ?? 1;
+
+                    // メンバーのビット範囲をStructのAssignedMapに追加
+                    // RangesFromOriginalの内容が空の場合（全メンバーにアクセス）
+                    if (RangesFromOriginal.Count == 0)
+                    {
+                        // メンバーの全ビットがassignされたとみなす
+                        // AbsoluteRangeExpressionを作成して追加
+                        var msbExpr = Expression.CreateTempExpression(structOffset.ToString());
+                        var lsbExpr = Expression.CreateTempExpression((structOffset + memberWidth - 1).ToString());
+                        var rangeExpr = new AbsoluteRangeExpression(msbExpr, lsbExpr);
+                        rangeExpr.WordReference = StructParentObject.DefinedReference;
+                        StructParentObject.AssignedMap.Assert(new List<RangeExpression> { rangeExpr });
+                    }
+                    else
+                    {
+                        // メンバーのビット範囲を加算
+                        foreach (var range in RangesFromOriginal)
+                        {
+                            if (range is SingleBitRangeExpression singleBit && singleBit.BitIndex != null)
+                            {
+                                int bitPos = (int)(structOffset + singleBit.BitIndex);
+                                var expr = Expression.CreateTempExpression(bitPos.ToString());
+                                var rangeExpr = new SingleBitRangeExpression(expr);
+                                rangeExpr.WordReference = singleBit.WordReference;
+                                StructParentObject.AssignedMap.Assert(new List<RangeExpression> { rangeExpr });
+                            }
+                            else if (range is AbsoluteRangeExpression absRange)
+                            {
+                                if (absRange.MinBitIndex != null && absRange.MaxBitIndex != null)
+                                {
+                                    int minPos = (int)(structOffset + absRange.MinBitIndex);
+                                    int maxPos = (int)(structOffset + absRange.MaxBitIndex);
+                                    var msbExpr = Expression.CreateTempExpression(maxPos.ToString());
+                                    var lsbExpr = Expression.CreateTempExpression(minPos.ToString());
+                                    var rangeExpr = new AbsoluteRangeExpression(msbExpr, lsbExpr);
+                                    rangeExpr.WordReference = absRange.WordReference;
+                                    StructParentObject.AssignedMap.Assert(new List<RangeExpression> { rangeExpr });
+                                }
+                            }
+                        }
+                    }
+                    return;
+                }
+            }
+
+            // 通常のケース
             if (OrigainalDataObject.AssignedMap == null) return;
             OrigainalDataObject.AssignedMap.Assert(RangesFromOriginal);
         }
@@ -365,6 +478,10 @@ namespace pluginVerilog.Verilog.Expressions
                 else if (originalDataObject is DataObjects.Variables.Genvar)
                 {
                     val.Constant = true;
+                }
+                else if(originalDataObject is UserDefinedVariable userDefinedVariable)
+                {
+                    val.BitWidth = userDefinedVariable.BitWidth;
                 }
             }
 
