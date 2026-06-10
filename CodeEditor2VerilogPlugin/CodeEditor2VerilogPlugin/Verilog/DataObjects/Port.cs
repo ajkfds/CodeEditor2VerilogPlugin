@@ -48,13 +48,9 @@ namespace pluginVerilog.Verilog.DataObjects
             {
                 int bitWidth = 1;
                 if (DataObject != null && DataObject.BitWidth != null) bitWidth = (int) DataObject.BitWidth;
-                if (PackedDimensions != null)
-                {
-                    foreach (PackedArray packedArray in PackedDimensions)
-                    {
-                        if (packedArray.Size != null) bitWidth *= (int)packedArray.Size;
-                    }
-                }
+                // Note: PackedDimensions is inherited from DataObject (Net or Variable) via the PackedDimensions property accessor.
+                // DataObject.BitWidth already includes the bit width from the data type's packed dimensions,
+                // so we don't include PackedDimensions here to avoid double-counting.
                 if (UnPackedDimensions != null)
                 {
                     foreach (UnPackedArray unpackedArray in UnPackedDimensions)
