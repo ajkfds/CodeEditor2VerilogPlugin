@@ -125,11 +125,29 @@ namespace pluginVerilog.Verilog.ModuleItems
                 case "tranif1":
                 case "rtranif0":
                 case "rtranif1":
-                    break;
+                    PassEnableSwitch? enableSwitch = PassEnableSwitch.ParseCreate(word, nameSpace);
+                    if (word.Text == ";")
+                    {
+                        word.MoveNext();
+                    }
+                    else
+                    {
+                        word.AddError("; expected");
+                    }
+                    return enableSwitch;
                 // pass_switchtype
                 case "tran":
                 case "rtran":
-                    break;
+                    PassSwitch? passSwitch = PassSwitch.ParseCreate(word, nameSpace);
+                    if (word.Text == ";")
+                    {
+                        word.MoveNext();
+                    }
+                    else
+                    {
+                        word.AddError("; expected");
+                    }
+                    return passSwitch;
                 case "pullup":
                 case "pulldown":
                     PullUpPullDown? pull = PullUpPullDown.ParseCreate(word, nameSpace);
@@ -500,5 +518,196 @@ namespace pluginVerilog.Verilog.ModuleItems
 
             return ret;
         }
+    }
+
+    /// <summary>
+    /// Pass switch instantiation (tran, rtran)
+    /// IEEE 1800-2017
+    /// 
+    /// pass_switchtype   ::= tran | rtran
+    /// pass_switch_instance ::= [name_of_gate_instance] (inout_terminal, inout_terminal)
+    /// inout_terminal    ::= net_lvalue
+    /// </summary>
+    public class PassSwitch : GateInstantiation
+    {
+        protected PassSwitch() { }
+
+        Delay2? Delay2;
+
+        // gate_instantiation::= pass_switchtype [delay2] pass_switch_instance { , pass_switch_instance };
+        // pass_switch_instance ::= [name_of_gate_instance] (inout_terminal, inout_terminal)
+        // inout_terminal ::= net_lvalue
+        public static new PassSwitch? ParseCreate(WordScanner word, NameSpace nameSpace)
+        {
+            string switchType = word.Text;
+            bool isReversible = switchType == "rtran";
+
+            WordReference beginRef = word.CrateWordReference();
+            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.MoveNext();
+
+            PassSwitch ret = new PassSwitch() { DefinitionReference = beginRef, Name = "", Project = word.Project, IsReversible = isReversible };
+
+            ret.Delay2 = Delay2.ParseCreate(word, nameSpace as NameSpace);
+
+            // Parse one or more pass_switch_instance
+            while (!word.Eof && word.Text != ";")
+            {
+                string instanceName = "";
+                if (General.IsIdentifier(word.Text))
+                {
+                    instanceName = word.Text;
+                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.MoveNext();
+                }
+
+                if (word.Text != "(")
+                {
+                    word.AddError("( required");
+                    word.SkipToKeyword(";");
+                    return ret;
+                }
+                word.MoveNext();
+
+                // First inout terminal (net_lvalue)
+                Expressions.Expression? terminal1 = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace as NameSpace, true);
+                if (word.Text != ",")
+                {
+                    word.AddError(", required");
+                    word.SkipToKeyword(";");
+                    break;
+                }
+                word.MoveNext();
+
+                // Second inout terminal (net_lvalue)
+                Expressions.Expression? terminal2 = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace as NameSpace, true);
+                if (word.Text != ")")
+                {
+                    word.AddError(") required");
+                    word.SkipToKeyword(";");
+                    break;
+                }
+                word.MoveNext();
+
+                // Check for more instances
+                if (word.Text != ",") break;
+                word.MoveNext();
+            }
+
+            return ret;
+        }
+
+        /// <summary>
+        /// Indicates if this is a reversible switch (rtran) or not (tran)
+        /// </summary>
+        public bool IsReversible { get; protected set; } = false;
+    }
+
+    /// <summary>
+    /// Pass enable switch instantiation (tranif0, tranif1, rtranif0, rtranif1)
+    /// IEEE 1800-2017
+    /// 
+    /// pass_en_switchtype   ::= tranif0 | tranif1 | rtranif0 | rtranif1
+    /// pass_enable_switch_instance ::= [name_of_gate_instance] (inout_terminal, inout_terminal, enable_terminal)
+    /// inout_terminal       ::= net_lvalue
+    /// enable_terminal      ::= expression
+    /// </summary>
+    public class PassEnableSwitch : GateInstantiation
+    {
+        protected PassEnableSwitch() { }
+
+        Delay2? Delay2;
+
+        // gate_instantiation::= pass_en_switchtype [delay2] pass_enable_switch_instance { , pass_enable_switch_instance };
+        // pass_enable_switch_instance ::= [name_of_gate_instance] (inout_terminal, inout_terminal, enable_terminal)
+        // inout_terminal ::= net_lvalue
+        // enable_terminal ::= expression
+        public static new PassEnableSwitch? ParseCreate(WordScanner word, NameSpace nameSpace)
+        {
+            string switchType = word.Text;
+            bool isInverting = switchType == "tranif1" || switchType == "notif1";
+            bool isReversible = switchType == "rtranif0" || switchType == "rtranif1";
+
+            WordReference beginRef = word.CrateWordReference();
+            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.MoveNext();
+
+            PassEnableSwitch ret = new PassEnableSwitch() 
+            { 
+                DefinitionReference = beginRef, 
+                Name = "", 
+                Project = word.Project, 
+                IsInverting = isInverting,
+                IsReversible = isReversible
+            };
+
+            ret.Delay2 = Delay2.ParseCreate(word, nameSpace as NameSpace);
+
+            // Parse one or more pass_enable_switch_instance
+            while (!word.Eof && word.Text != ";")
+            {
+                string instanceName = "";
+                if (General.IsIdentifier(word.Text))
+                {
+                    instanceName = word.Text;
+                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.MoveNext();
+                }
+
+                if (word.Text != "(")
+                {
+                    word.AddError("( required");
+                    word.SkipToKeyword(";");
+                    return ret;
+                }
+                word.MoveNext();
+
+                // First inout terminal (net_lvalue)
+                Expressions.Expression? inout1 = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace as NameSpace, true);
+                if (word.Text != ",")
+                {
+                    word.AddError(", required");
+                    word.SkipToKeyword(";");
+                    break;
+                }
+                word.MoveNext();
+
+                // Second inout terminal (net_lvalue)
+                Expressions.Expression? inout2 = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace as NameSpace, true);
+                if (word.Text != ",")
+                {
+                    word.AddError(", required");
+                    word.SkipToKeyword(";");
+                    break;
+                }
+                word.MoveNext();
+
+                // Enable terminal (expression)
+                Expressions.Expression? enable = Expressions.Expression.ParseCreate(word, nameSpace as NameSpace);
+                if (word.Text != ")")
+                {
+                    word.AddError(") required");
+                    word.SkipToKeyword(";");
+                    break;
+                }
+                word.MoveNext();
+
+                // Check for more instances
+                if (word.Text != ",") break;
+                word.MoveNext();
+            }
+
+            return ret;
+        }
+
+        /// <summary>
+        /// Indicates if this switch inverts the enable signal (tranif1, notif1)
+        /// </summary>
+        public bool IsInverting { get; protected set; } = false;
+
+        /// <summary>
+        /// Indicates if this is a reversible switch (rtranif0, rtranif1) or not (tranif0, tranif1)
+        /// </summary>
+        public bool IsReversible { get; protected set; } = false;
     }
 }
