@@ -92,6 +92,10 @@ namespace pluginVerilog.Data.VerilogCommon
                 // Atomically swap items: clear old and add new in one locked operation
                 // Capture old items for disposal
                 oldItems = item.Items.GetSnapShot();
+                foreach (Item newItem in newSubItems.Values)
+                {
+                    if (oldItems.Contains(newItem)) oldItems.Remove(newItem);
+                }
 
                 // Clear and populate in a single atomic operation
                 item.Items.ReplaceTo(newSubItems);
