@@ -126,7 +126,7 @@ namespace pluginVerilog.Verilog.Snippets
                     Avalonia.Controls.Window window = CodeEditor2.Controller.GetMainWindow();
                     if (autoConnectWindow.Ready)
                     {
-                        await autoConnectWindow.ShowDialog(window);
+                        await CodeEditor2.Controller.ShowDialog(window);
                     }
                     if (!autoConnectWindow.Accept) return;
                 });
