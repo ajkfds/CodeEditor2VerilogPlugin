@@ -17,7 +17,13 @@ namespace pluginVerilog.Verilog.Snippets
         }
 
         private static readonly Regex PortPattern = new Regex(
-            @"^(?<direction>input|output)\s*(?<qualifiers>(?:signed|wire|reg|automatic|\s)*)?\s*(?<bitwidth>(?:\[.*?\])?\s*)\s*(?<name>\w+)\s*[;,]?\s*$",
+            @"^(?<direction>input|output)\s+" +
+            @"(?:(?<qualifiers>signed|wire|reg|automatic)\s+)*" +
+            @"(?:(?<type>\w+)\s+)?" +
+            @"(?<bitwidth>\[[^\[\]]*\])?\s*" +
+            @"(?<name>\w+)" +
+            @"\s*[;,]?\s*" +
+            @"(?://[^\r\n]*)?$",
             RegexOptions.Compiled
         );
 
@@ -98,10 +104,15 @@ namespace pluginVerilog.Verilog.Snippets
 
                     newLine += bitwidth.Trim() + " " + newName;
 
-                    // Preserve semicolon if present
-                    if (trimmedContent.TrimEnd(' ', '\t').EndsWith(";"))
+                    // Preserve trailing separator (semicolon or comma)
+                    string trimmedEnd = trimmedContent.TrimEnd(' ', '\t');
+                    if (trimmedEnd.EndsWith(";"))
                     {
                         newLine += ";";
+                    }
+                    else if (trimmedEnd.EndsWith(","))
+                    {
+                        newLine += ",";
                     }
 
                     processedLines.Add(newLine);
