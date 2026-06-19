@@ -23,7 +23,7 @@ namespace pluginVerilog.Verilog.Snippets
             @"(?<bitwidth>\[[^\[\]]*\])?\s*" +
             @"(?<name>\w+)" +
             @"\s*[;,]?\s*" +
-            @"(?://[^\r\n]*)?$",
+            @"(?<comment>//[^\r\n]*)?$",
             RegexOptions.Compiled
         );
 
@@ -78,6 +78,7 @@ namespace pluginVerilog.Verilog.Snippets
                     string qualifiers = match.Groups["qualifiers"].Value.Trim();
                     string bitwidth = match.Groups["bitwidth"].Value;
                     string name = match.Groups["name"].Value;
+                    string comment = match.Groups["comment"].Value;
 
                     // Invert direction
                     string newDirection = (direction == "input") ? "output" : "input";
@@ -113,6 +114,12 @@ namespace pluginVerilog.Verilog.Snippets
                     else if (trimmedEnd.EndsWith(","))
                     {
                         newLine += ",";
+                    }
+
+                    // Preserve comment
+                    if (!string.IsNullOrEmpty(comment))
+                    {
+                        newLine += " " + comment;
                     }
 
                     processedLines.Add(newLine);
