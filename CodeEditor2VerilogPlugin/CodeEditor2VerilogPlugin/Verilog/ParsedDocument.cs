@@ -134,6 +134,7 @@ namespace pluginVerilog.Verilog
         public Dictionary<string, Data.VerilogHeaderInstance> IncludeFiles = new Dictionary<string, Data.VerilogHeaderInstance>();
         [JsonIgnore]
         public Dictionary<string, Macro> Macros = new Dictionary<string, Macro>();
+public List<string> ImportedPackages = new List<string>();
 
         [JsonIgnore]
         public Dictionary<string, Verilog.Expressions.Expression> ParameterOverrides = new Dictionary<string, Expressions.Expression>();

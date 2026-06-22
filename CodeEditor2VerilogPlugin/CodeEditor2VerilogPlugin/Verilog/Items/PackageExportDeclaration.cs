@@ -61,6 +61,7 @@ namespace pluginVerilog.Verilog.Items
                     word.SkipToKeyword(";");
                     break;
                 }
+                string packageName = word.Text;
                 word.Color(CodeDrawStyle.ColorType.Identifier);
                 word.MoveNext();
 
@@ -79,6 +80,9 @@ namespace pluginVerilog.Verilog.Items
                     // Wildcard import - import all items from the package
                     word.Color(CodeDrawStyle.ColorType.Identifier);
                     word.MoveNext();
+
+                    // Add to imported packages list
+                    word.RootParsedDocument.ImportedPackages.Add(packageName);
                 }
                 else
                 {
@@ -91,6 +95,9 @@ namespace pluginVerilog.Verilog.Items
                     }
                     word.Color(CodeDrawStyle.ColorType.Identifier);
                     word.MoveNext();
+
+                    // Add to imported packages list (for specific item imports)
+                    word.RootParsedDocument.ImportedPackages.Add(packageName);
                 }
 
                 if (word.Text != ",")
