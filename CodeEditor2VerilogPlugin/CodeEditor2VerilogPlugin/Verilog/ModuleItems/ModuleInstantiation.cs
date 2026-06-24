@@ -156,6 +156,31 @@ namespace pluginVerilog.Verilog.ModuleItems
         public IndexReference? BlockBeginIndexReference { get; set; } = null;
         public IndexReference? LastIndexReference { get; set; }
 
+        // Instance array support
+        public RangeExpression? InstanceRange { get; set; }
+
+        public int InstanceCount
+        {
+            get
+            {
+                if (InstanceRange is AbsoluteRangeExpression are)
+                {
+                    int msb = are.MsbBitIndex ?? 0;
+                    int lsb = are.LsbBitIndex ?? 0;
+                    return Math.Abs(msb - lsb) + 1;
+                }
+                if (InstanceRange is RelativePlusRangeExpression rpre)
+                {
+                    return rpre.BitWidth;
+                }
+                if (InstanceRange is RelativeMinusRangeExpression rmre)
+                {
+                    return rmre.BitWidth;
+                }
+                return 1;
+            }
+        }
+
 
         public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
         {
@@ -213,7 +238,6 @@ namespace pluginVerilog.Verilog.ModuleItems
                     word.RootParsedDocument.ReparseRequested = true;
                     if (!word.RootParsedDocument.UnfoundModules.Contains(moduleName)) word.RootParsedDocument.UnfoundModules.Add(moduleName);
                     CodeEditor2.Controller.AppendLog("## unfound " + moduleName + " at " + buildingBlock.Name, Avalonia.Media.Colors.Orange);
-                    if (moduleName == "scr1_tcm") System.Diagnostics.Debugger.Break();
                 }
             }
 
@@ -252,7 +276,7 @@ namespace pluginVerilog.Verilog.ModuleItems
 
 
             string next = word.NextText;
-            if (word.Text != "#" && next != "(" && next != ";" && General.IsIdentifier(word.Text))
+            if (word.Text != "#" && next != "(" && next != ";" && next != "[" && General.IsIdentifier(word.Text))
             {
                 moduleIdentifier.AddError("illegal module item");
                 word.SkipToKeyword(";");
@@ -399,6 +423,13 @@ namespace pluginVerilog.Verilog.ModuleItems
                 }
 
                 word.MoveNext();
+
+                // Check for instance array range [left:right] after instance name
+                if (word.Text == "[")
+                {
+                    moduleInstantiation.InstanceRange = RangeExpression.ParseCreate(word, nameSpace);
+                }
+
 
                 if (word.Text != "(")
                 {
@@ -1118,6 +1149,12 @@ namespace pluginVerilog.Verilog.ModuleItems
             else
             {
                 sb.Append(" ");
+            }
+
+            // Append instance array range if present
+            if (InstanceRange != null)
+            {
+                sb.Append(InstanceRange.CreateString());
             }
 
             if (instancedModule.PortParameterNameList.Count != 0)
