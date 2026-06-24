@@ -216,6 +216,11 @@ public List<string> ImportedPackages = new List<string>();
             CodeDocument? document = CodeDocument;
             if (document == null) return;
 
+            if(message =="[1]illegal bracket")
+            {
+                string a = "";
+            }
+
             Data.IVerilogRelatedFile? vFile = document.TextFile as Data.IVerilogRelatedFile;
             if (vFile == null) return;
 
@@ -593,6 +598,9 @@ public List<string> ImportedPackages = new List<string>();
                 IndexReference iref = IndexReference.Create(IndexReference, lineStartIndex);
                 nameSpace = GetNameSpace(iref);
             }
+
+            if(lineText.Length<blockStartIndex) return false;
+            if(lineText.Length<blockEndIndex) return false;
 
             string elementText = lineText.Substring(blockStartIndex, blockEndIndex - blockStartIndex);
             element = null;
