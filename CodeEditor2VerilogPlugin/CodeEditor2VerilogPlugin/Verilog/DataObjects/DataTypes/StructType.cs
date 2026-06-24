@@ -154,7 +154,10 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 if (word.Text == ";")
                 {
                     word.MoveNext();
-                    //                    if (word.Text == "}") word.AddError("illegal ;");
+                }
+                else
+                {
+                    word.AddError("illegal ;");
                 }
             }
 
