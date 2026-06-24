@@ -3,6 +3,9 @@ using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.Variables;
 using pluginVerilog.Verilog.Expressions;
 using System.Collections.Generic;
+using DataObjects = pluginVerilog.Verilog.DataObjects;
+using DataTypes = pluginVerilog.Verilog.DataObjects.DataTypes;
+using Variables = pluginVerilog.Verilog.DataObjects.Variables;
 
 namespace pluginVerilog.Verilog.DataObjects
 {
@@ -21,11 +24,9 @@ namespace pluginVerilog.Verilog.DataObjects
     /// 
     /// Let declarations allow defining reusable expressions with formal arguments.
     /// </summary>
-    public class LetDeclaration : INamedElement
+    public class LetDeclaration : NameSpace,INamedElement
     {
-        public string Name { get; set; } = "";
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
-        public NamedElements NamedElements => new NamedElements();
 
         /// <summary>
         /// Port list for let declaration arguments
@@ -36,16 +37,6 @@ namespace pluginVerilog.Verilog.DataObjects
         /// The expression this let declaration defines
         /// </summary>
         public Expression? Expression { get; set; }
-
-        /// <summary>
-        /// Index reference for begin
-        /// </summary>
-        public IndexReference BeginIndexReference { get; set; }
-
-        /// <summary>
-        /// Index reference for end
-        /// </summary>
-        public IndexReference? LastIndexReference { get; set; }
 
         public class LetPortItem
         {
@@ -86,10 +77,6 @@ namespace pluginVerilog.Verilog.DataObjects
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext(); // let
 
-            LetDeclaration letDecl = new LetDeclaration
-            {
-                BeginIndexReference = beginReference
-            };
 
             // let_identifier
             if (!General.IsIdentifier(word.Text))
@@ -100,7 +87,14 @@ namespace pluginVerilog.Verilog.DataObjects
                 return null;
             }
 
-            letDecl.Name = word.Text;
+            LetDeclaration letDecl = new LetDeclaration
+            {
+                DefinitionReference = word.GetReference(),
+                BeginIndexReference = beginReference,
+                Name = word.Text,
+                BuildingBlock = nameSpace.BuildingBlock,
+                Parent = nameSpace
+            };
             word.Color(CodeDrawStyle.ColorType.Identifier);
             word.MoveNext();
 
@@ -142,6 +136,29 @@ namespace pluginVerilog.Verilog.DataObjects
                     {
                         portItem.Identifier = word.Text;
                         word.Color(CodeDrawStyle.ColorType.Variable);
+
+                        // Create a data object for this port and add to letDecl's namespace
+                        // This allows the expression parser to recognize x, y as valid identifiers
+                        // If no data type specified, use default 1-bit logic
+                        DataTypes.IDataType dataType;
+                        if (portItem.DataType != null)
+                        {
+                            dataType = portItem.DataType;
+                        }
+                        else
+                        {
+                            // Default to 1-bit logic (implicit)
+                            dataType = DataTypes.LogicType.Create(false, null)!;
+                        }
+                        Variables.Variable? portVar = Variables.Variable.Create(
+                            portItem.Identifier,
+                            dataType
+                        );
+                        if (portVar != null)
+                        {
+                            letDecl.NamedElements.Add(portItem.Identifier, portVar);
+                        }
+
                         word.MoveNext();
                     }
                     else
@@ -158,7 +175,7 @@ namespace pluginVerilog.Verilog.DataObjects
                     while (word.Text == "[")
                     {
                         word.MoveNext();
-                        Expressions.Expression? dim = Expressions.Expression.ParseCreate(word, nameSpace);
+                        Expressions.Expression? dim = Expressions.Expression.ParseCreate(word, letDecl);
                         if (dim != null)
                         {
                             portItem.Dimensions.Add(dim);
@@ -179,7 +196,7 @@ namespace pluginVerilog.Verilog.DataObjects
                     {
                         word.Color(CodeDrawStyle.ColorType.Keyword);
                         word.MoveNext();
-                        portItem.DefaultValue = Expressions.Expression.ParseCreate(word, nameSpace);
+                        portItem.DefaultValue = Expressions.Expression.ParseCreate(word, letDecl);
                     }
 
                     letDecl.PortList.Add(portItem);
@@ -194,7 +211,7 @@ namespace pluginVerilog.Verilog.DataObjects
                 // Closing paren
                 if (word.Text == ")")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                //    word.Color(CodeDrawStyle.ColorType.Keyword);
                     word.MoveNext();
                 }
                 else
@@ -214,11 +231,11 @@ namespace pluginVerilog.Verilog.DataObjects
                 if (word.Text == ";") word.MoveNext();
                 return null;
             }
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            //word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
-            // Parse expression
-            letDecl.Expression = Expressions.Expression.ParseCreate(word, nameSpace);
+            // Parse expression using letDecl's namespace (which now contains the port variables)
+            letDecl.Expression = Expressions.Expression.ParseCreate(word, letDecl);
             if (letDecl.Expression == null)
             {
                 word.AddError("expression expected");
