@@ -317,7 +317,7 @@ number
                     }
 
                     // function call : for right side only
-                    if (!lValue && element is Function)
+                    if (!lValue && (element is Function || element is LetDeclaration))
                     {
                         return FunctionCall.ParseCreate(word, nameSpace,targetNameSpace);
                     }

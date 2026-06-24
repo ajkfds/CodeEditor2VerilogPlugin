@@ -157,6 +157,7 @@ namespace pluginVerilog.Verilog.DataObjects
                         if (portVar != null)
                         {
                             letDecl.NamedElements.Add(portItem.Identifier, portVar);
+                            portVar.Defined = true;
                         }
 
                         word.MoveNext();
