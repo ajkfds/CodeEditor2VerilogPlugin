@@ -192,6 +192,20 @@ namespace pluginVerilog.Data.VerilogCommon
                         VerilogModuleInstance? instance = VerilogModuleInstance.Create(moduleInstantiation);
                         if (instance == null) throw new Exception();
                         instance.ModuleName = module.Name;
+
+                        // Handle instance arrays
+                        if (moduleInstantiation.InstanceRange != null)
+                        {
+                            var arrayInstances = VerilogModuleInstance.CreateArray(moduleInstantiation);
+                            if (arrayInstances != null)
+                            {
+                                foreach (var arrInstance in arrayInstances)
+                                {
+                                    arrInstance.Parent = parent;
+                                    newSubItems.Add(arrInstance.Name, arrInstance);
+                                }
+                            }
+                        }
                         //                        instance.SourceTextFile = module.File;
                         newSubItems.Add(instance.Name, instance);
 
@@ -282,14 +296,36 @@ namespace pluginVerilog.Data.VerilogCommon
                     {
                         if (instantiation is ModuleInstantiation)
                         {
-                            VerilogModuleInstance? newVerilogModuleInstance = VerilogModuleInstance.Create((ModuleInstantiation)instantiation);
-                            if (newSubItems.ContainsKey(instantiation.Name) || newVerilogModuleInstance == null) continue;
-                            newVerilogModuleInstance.Parent = parent;
-                            if (parent is VerilogModuleInstance && ((VerilogModuleInstance)parent).ExternalProject)
+                            ModuleInstantiation moduleInstantiation = (ModuleInstantiation)instantiation;
+
+                            // Handle instance arrays
+                            if (moduleInstantiation.InstanceRange != null)
                             {
-                                newVerilogModuleInstance.ExternalProject = true;
+                                var arrayInstances = VerilogModuleInstance.CreateArray(moduleInstantiation);
+                                if (arrayInstances != null)
+                                {
+                                    foreach (var arrInstance in arrayInstances)
+                                    {
+                                        arrInstance.Parent = parent;
+                                        if (parent is VerilogModuleInstance && ((VerilogModuleInstance)parent).ExternalProject)
+                                        {
+                                            arrInstance.ExternalProject = true;
+                                        }
+                                        newSubItems.Add(arrInstance.Name, arrInstance);
+                                    }
+                                }
                             }
-                            newSubItems.Add(instantiation.Name, newVerilogModuleInstance);
+                            else
+                            {
+                                VerilogModuleInstance? newVerilogModuleInstance = VerilogModuleInstance.Create(moduleInstantiation);
+                                if (newSubItems.ContainsKey(instantiation.Name) || newVerilogModuleInstance == null) continue;
+                                newVerilogModuleInstance.Parent = parent;
+                                if (parent is VerilogModuleInstance && ((VerilogModuleInstance)parent).ExternalProject)
+                                {
+                                    newVerilogModuleInstance.ExternalProject = true;
+                                }
+                                newSubItems.Add(instantiation.Name, newVerilogModuleInstance);
+                            }
                         }
                         else if (instantiation is IBuildingBlockInstantiation)
                         {

@@ -77,6 +77,65 @@ namespace pluginVerilog.Data
             }
         }
 
+        // Instance array support
+        private int _instanceIndex = 0;
+        public int InstanceIndex
+        {
+            get
+            {
+                textFileLock.EnterReadLock();
+                try
+                {
+                    return _instanceIndex;
+                }
+                finally
+                {
+                    textFileLock.ExitReadLock();
+                }
+            }
+            set
+            {
+                textFileLock.EnterWriteLock();
+                try
+                {
+                    _instanceIndex = value;
+                }
+                finally
+                {
+                    textFileLock.ExitWriteLock();
+                }
+            }
+        }
+
+        private bool _isArrayInstance = false;
+        public bool IsArrayInstance
+        {
+            get
+            {
+                textFileLock.EnterReadLock();
+                try
+                {
+                    return _isArrayInstance;
+                }
+                finally
+                {
+                    textFileLock.ExitReadLock();
+                }
+            }
+            set
+            {
+                textFileLock.EnterWriteLock();
+                try
+                {
+                    _isArrayInstance = value;
+                }
+                finally
+                {
+                    textFileLock.ExitWriteLock();
+                }
+            }
+        }
+
         // ModuleInstaceでparsedDocumentを保持しないとSourceFile側で保持するのはWeakReferenceだけなので消えてしまう。
         private CodeEditor2.CodeEditor.ParsedDocument? _parsedDocument;
         public override CodeEditor2.CodeEditor.ParsedDocument? ParsedDocument
@@ -132,8 +191,18 @@ namespace pluginVerilog.Data
         {
 
         }
+        
+        /// <summary>
+        /// Create a VerilogModuleInstance from a ModuleInstantiation
+        /// </summary>
+        /// <param name="moduleInstantiation">The module instantiation</param>
+        /// <param name="instanceIndex">Instance index for array instances (0 for non-array)</param>
+        /// <param name="isArrayInstance">True if this is part of an instance array</param>
+        /// <returns>The created VerilogModuleInstance</returns>
         public static VerilogModuleInstance? Create(
-            Verilog.ModuleItems.ModuleInstantiation moduleInstantiation
+            Verilog.ModuleItems.ModuleInstantiation moduleInstantiation,
+            int instanceIndex = 0,
+            bool isArrayInstance = false
             )
         {
             CodeEditor2.Data.Project project = moduleInstantiation.GetInstancedBuildingBlockProject();
@@ -144,13 +213,23 @@ namespace pluginVerilog.Data
 
             CodeEditor2.Data.TextFile? textFile = file as CodeEditor2.Data.TextFile;
             if (textFile == null) throw new Exception();
+
+            // Generate instance name with array index if part of array
+            string instanceName = moduleInstantiation.Name;
+            if (isArrayInstance)
+            {
+                instanceName = $"{moduleInstantiation.Name}[{instanceIndex}]";
+            }
+
             VerilogModuleInstance fileItem = new VerilogModuleInstance(textFile)
             {
                 ModuleName = moduleInstantiation.SourceName,
                 ParameterOverrides = moduleInstantiation.ParameterOverrides,
                 Project = project,
                 RelativePath = file.RelativePath,
-                Name = moduleInstantiation.Name
+                Name = instanceName,
+                InstanceIndex = instanceIndex,
+                IsArrayInstance = isArrayInstance
             };
             if (moduleInstantiation.Project != project)
             {
@@ -169,6 +248,28 @@ namespace pluginVerilog.Data
 
             fileItem.weakInstantiating = new WeakReference<ModuleInstantiation>(moduleInstantiation);
             return fileItem;
+        }
+
+        /// <summary>
+        /// Create multiple VerilogModuleInstance objects for an instance array
+        /// </summary>
+        /// <param name="moduleInstantiation">The module instantiation with array range</param>
+        /// <returns>List of created VerilogModuleInstances</returns>
+        public static List<VerilogModuleInstance>? CreateArray(
+            Verilog.ModuleItems.ModuleInstantiation moduleInstantiation
+            )
+        {
+            int instanceCount = moduleInstantiation.InstanceCount;
+            List<VerilogModuleInstance> instances = new List<VerilogModuleInstance>();
+
+            for (int i = 0; i < instanceCount; i++)
+            {
+                VerilogModuleInstance? instance = Create(moduleInstantiation, i, true);
+                if (instance == null) return null;
+                instances.Add(instance);
+            }
+
+            return instances;
         }
         static VerilogModuleInstance()
         {
