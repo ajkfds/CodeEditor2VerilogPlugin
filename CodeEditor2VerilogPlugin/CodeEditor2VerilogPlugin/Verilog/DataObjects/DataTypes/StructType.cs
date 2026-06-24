@@ -245,25 +245,8 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     struct_.Members.Add(identifier, member);
                 }
 
-                if (word.Text == ";")
-                {
-                    word.MoveNext();
-                    // semicolon separates members, continue to next member
-                }
-                else if (word.Text == ",")
-                {
-                    word.MoveNext();
-                    // comma separates members, continue to next member
-                }
-                else
-                {
-                    // No separator - check if there's another member or end of struct
-                    if (!word.Eof && word.Text != "}" && General.IsSimpleIdentifier(word.Text))
-                    {
-                        word.AddError("; or , expected between struct members");
-                    }
-                    return true;
-                }
+                if (word.Text != ",") return true;
+                word.MoveNext();
             }
             return true;
         }
