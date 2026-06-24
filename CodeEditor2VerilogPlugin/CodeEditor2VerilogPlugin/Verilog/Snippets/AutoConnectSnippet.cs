@@ -123,10 +123,9 @@ namespace pluginVerilog.Verilog.Snippets
                 {
                     Views.AutoConnectWindow autoConnectWindow = new Views.AutoConnectWindow(moduleInstantiation, buildingBlock);
                     autoConnectWindow.WindowStartupLocation = Avalonia.Controls.WindowStartupLocation.CenterOwner;
-                    Avalonia.Controls.Window window = CodeEditor2.Controller.GetMainWindow();
                     if (autoConnectWindow.Ready)
                     {
-                        await CodeEditor2.Controller.ShowDialog(window);
+                        await CodeEditor2.Controller.ShowDialog(autoConnectWindow);
                     }
                     if (!autoConnectWindow.Accept) return;
                 });
