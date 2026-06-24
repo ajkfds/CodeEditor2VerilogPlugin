@@ -254,38 +254,12 @@ namespace pluginVerilog. Data
 
         private static IVerilogRelatedFile? findPackageFile(string packageName, CodeEditor2. Data. Project project, SimulationSetup setup)
         {
-            // Search through the project's files to find a package definition
-            foreach (var file in project.Items)
-            {
-                IVerilogRelatedFile? vFile = file as IVerilogRelatedFile;
-                if (vFile == null) continue;
+            ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+            if (projectProperty == null) return null;
 
-                ParsedDocument? parsedDoc = vFile. VerilogParsedDocument;
-                if (parsedDoc == null) continue;
-                if (parsedDoc. Root == null) continue;
-
-                // Check if this file contains the package definition
-                foreach (var bb in parsedDoc. Root. BuildingBlocks. Values)
-                {
-                    if (bb is Package)
-                    {
-                        Package pkg = (Package) bb;
-                        if (pkg. Name == packageName)
-                        {
-                            return vFile;
-                        }
-                    }
-                }
-            }
-
-            // Also search in external project references
-            foreach (var extSetup in setup. ExternalProjectReferences. Values)
-            {
-                var result = findPackageFileInProject(packageName, extSetup. Project);
-                if (result != null) return result;
-            }
-
-            return null;
+            Package? package = projectProperty.GetBuildingBlock(packageName) as Package;
+            IVerilogRelatedFile? verilogRelatedFile = projectProperty.GetFileOfBuildingBlock(packageName);
+            return verilogRelatedFile;
         }
 
         private static IVerilogRelatedFile? findPackageFileInProject(string packageName, CodeEditor2. Data. Project project)
