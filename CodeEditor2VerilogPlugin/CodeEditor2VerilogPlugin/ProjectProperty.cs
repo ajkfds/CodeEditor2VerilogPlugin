@@ -7,6 +7,7 @@ using pluginVerilog.Verilog.ModuleItems;
 using System;
 using System.Collections.Generic;
 using System.Text.Json;
+using System.Threading;
 
 namespace pluginVerilog
 {
@@ -191,21 +192,33 @@ namespace pluginVerilog
         private WeakReferenceDictionary<string, Data.IVerilogRelatedFile> buildingBlockFileTable = new WeakReferenceDictionary<string, Data.IVerilogRelatedFile>();
         private WeakReferenceDictionary<string, BuildingBlock> buildingBlockTable = new WeakReferenceDictionary<string, BuildingBlock>();
 
+        // Thread-safe access using ReaderWriterLockSlim
+        private readonly ReaderWriterLockSlim buildingBlockTableLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
+
         public void RegisterBuildingBlock(string buildingBlockName, BuildingBlock buildingBlock, VerilogFile file)
         {
             if (file == null)
             {
                 if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
             }
-            if (System.Diagnostics.Debugger.IsAttached && buildingBlockTable.Count != buildingBlockFileTable.Count)
+
+            buildingBlockTableLock.EnterWriteLock();
+            try
             {
-                System.Diagnostics.Debugger.Break();
+                if (System.Diagnostics.Debugger.IsAttached && buildingBlockTable.Count != buildingBlockFileTable.Count)
+                {
+                    System.Diagnostics.Debugger.Break();
+                }
+                buildingBlockTable.Register(buildingBlockName, buildingBlock);
+                buildingBlockFileTable.Register(buildingBlockName, file);
+                if (System.Diagnostics.Debugger.IsAttached && buildingBlockTable.Count != buildingBlockFileTable.Count)
+                {
+                    System.Diagnostics.Debugger.Break();
+                }
             }
-            buildingBlockTable.Register(buildingBlockName, buildingBlock);
-            buildingBlockFileTable.Register(buildingBlockName, file);
-            if (System.Diagnostics.Debugger.IsAttached && buildingBlockTable.Count != buildingBlockFileTable.Count)
+            finally
             {
-                System.Diagnostics.Debugger.Break();
+                buildingBlockTableLock.ExitWriteLock();
             }
         }
 
@@ -217,62 +230,102 @@ namespace pluginVerilog
 
         public bool HasRegisteredBuildingBlock(string moduleName)
         {
-            if (System.Diagnostics.Debugger.IsAttached && buildingBlockTable.Count != buildingBlockFileTable.Count)
+            buildingBlockTableLock.EnterReadLock();
+            try
             {
-                System.Diagnostics.Debugger.Break();
+                if (System.Diagnostics.Debugger.IsAttached && buildingBlockTable.Count != buildingBlockFileTable.Count)
+                {
+                    System.Diagnostics.Debugger.Break();
+                }
+                bool ret1 = false;
+                bool ret2 = false;
+                ret1 = buildingBlockTable.HasItem(moduleName);
+                ret2 = buildingBlockFileTable.HasItem(moduleName);
+                if (ret1 != ret2)
+                {
+                    System.Diagnostics.Debugger.Break();
+                }
+                if (System.Diagnostics.Debugger.IsAttached && buildingBlockTable.Count != buildingBlockFileTable.Count)
+                {
+                    System.Diagnostics.Debugger.Break();
+                }
+                return ret2;
             }
-            bool ret1 = false;
-            bool ret2 = false;
-            ret1 = buildingBlockTable.HasItem(moduleName);
-            ret2 = buildingBlockFileTable.HasItem(moduleName);
-            if (ret1 != ret2)
+            finally
             {
-                System.Diagnostics.Debugger.Break();
+                buildingBlockTableLock.ExitReadLock();
             }
-            if (System.Diagnostics.Debugger.IsAttached && buildingBlockTable.Count != buildingBlockFileTable.Count)
-            {
-                System.Diagnostics.Debugger.Break();
-            }
-            return ret2;
         }
 
         public Data.IVerilogRelatedFile? GetFileOfBuildingBlock(string buildingBlockName)
         {
-            return buildingBlockFileTable.GetItem(buildingBlockName);
+            buildingBlockTableLock.EnterReadLock();
+            try
+            {
+                return buildingBlockFileTable.GetItem(buildingBlockName);
+            }
+            finally
+            {
+                buildingBlockTableLock.ExitReadLock();
+            }
         }
 
         public List<string> GetBuildingBlockNameList()
         {
-            if (System.Diagnostics.Debugger.IsAttached && buildingBlockTable.Count != buildingBlockFileTable.Count)
+            buildingBlockTableLock.EnterWriteLock();
+            try
             {
-                System.Diagnostics.Debugger.Break();
-            }
+                if (System.Diagnostics.Debugger.IsAttached && buildingBlockTable.Count != buildingBlockFileTable.Count)
+                {
+                    System.Diagnostics.Debugger.Break();
+                }
 
-            buildingBlockTable.CleanDictionary();
-            if (System.Diagnostics.Debugger.IsAttached && buildingBlockTable.Count != buildingBlockFileTable.Count)
-            {
-                System.Diagnostics.Debugger.Break();
+                buildingBlockTable.CleanDictionary();
+                if (System.Diagnostics.Debugger.IsAttached && buildingBlockTable.Count != buildingBlockFileTable.Count)
+                {
+                    System.Diagnostics.Debugger.Break();
+                }
+                List<string> ret = buildingBlockTable.KeyList();
+                if (System.Diagnostics.Debugger.IsAttached && buildingBlockTable.Count != buildingBlockFileTable.Count)
+                {
+                    System.Diagnostics.Debugger.Break();
+                }
+                return ret;
             }
-            List<string> ret = buildingBlockTable.KeyList();
-            if (System.Diagnostics.Debugger.IsAttached && buildingBlockTable.Count != buildingBlockFileTable.Count)
+            finally
             {
-                System.Diagnostics.Debugger.Break();
+                buildingBlockTableLock.ExitWriteLock();
             }
-            return ret;
         }
 
         public List<string> GetModuleNameList()
         {
-            return buildingBlockTable.GetMatchedKeyList((x) => { return (x is Module); });
+            buildingBlockTableLock.EnterReadLock();
+            try
+            {
+                return buildingBlockTable.GetMatchedKeyList((x) => { return (x is Module); });
+            }
+            finally
+            {
+                buildingBlockTableLock.ExitReadLock();
+            }
         }
 
         public List<string> GetObjectsNameList()
         {
-            return buildingBlockTable.GetMatchedKeyList(
-                (x) =>
-                {
-                    return (x is Object) || (x is Interface) || (x is Program);
-                });
+            buildingBlockTableLock.EnterReadLock();
+            try
+            {
+                return buildingBlockTable.GetMatchedKeyList(
+                    (x) =>
+                    {
+                        return (x is Object) || (x is Interface) || (x is Program);
+                    });
+            }
+            finally
+            {
+                buildingBlockTableLock.ExitReadLock();
+            }
         }
 
         public BuildingBlock? GetBuildingBlock(string buildingBlockName)
