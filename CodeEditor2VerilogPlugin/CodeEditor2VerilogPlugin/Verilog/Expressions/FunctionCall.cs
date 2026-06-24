@@ -15,20 +15,37 @@ namespace pluginVerilog.Verilog.Expressions
         public required NameSpace DefinedNameSpace { init; get; }
         [JsonIgnore]
         public required ProjectProperty ProjectProperty { init; get; }
+
+        /// <summary>
+        /// Get the Function if this call refers to a function
+        /// </summary>
         public Function? Function
         {
             get
             {
-                Function? function = null;
                 if (DefinedNameSpace.BuildingBlock.NamedElements.ContainsFunction(FunctionName))
                 {
-                    function = (Function)DefinedNameSpace.BuildingBlock.NamedElements[FunctionName];
+                    return (Function)DefinedNameSpace.BuildingBlock.NamedElements[FunctionName];
                 }
-                //else if (ProjectProperty.SystemFunctions.ContainsKey(FunctionName))
-                //{
-                //    function = ProjectProperty.SystemFunctions[FunctionName];
-                //}
-                return function;
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Get the LetDeclaration if this call refers to a let declaration
+        /// </summary>
+        public DataObjects.LetDeclaration? LetDeclaration
+        {
+            get
+            {
+                // First check in current namespace
+                if (DefinedNameSpace.BuildingBlock.NamedElements.TryGetValue(FunctionName, out var element))
+                {
+                    return element as DataObjects.LetDeclaration;
+                }
+                // Then search upward through namespaces
+                INamedElement? namedElement = DefinedNameSpace.GetNamedElementUpward(FunctionName);
+                return namedElement as DataObjects.LetDeclaration;
             }
         }
         public static new FunctionCall? ParseCreate(WordScanner word, NameSpace nameSpace)
@@ -44,27 +61,65 @@ namespace pluginVerilog.Verilog.Expressions
             functionCall.Reference = word.GetReference();
 
             Function? function = null;
-            if (functionDefinedNameSpace.BuildingBlock.NamedElements.ContainsFunction(functionCall.FunctionName))
+            DataObjects.LetDeclaration? letDecl = null;
+            bool found = false;
+
+            // First, check in the current namespace (check both Functions and LetDeclarations)
+            if (functionDefinedNameSpace.BuildingBlock.NamedElements.TryGetValue(functionCall.FunctionName, out var element))
             {
-                function = (Function)functionDefinedNameSpace.BuildingBlock.NamedElements[functionCall.FunctionName];
+                function = element as Function;
+                if (function != null)
+                {
+                    found = true;
+                }
+                else
+                {
+                    // Check for LetDeclaration
+                    letDecl = element as DataObjects.LetDeclaration;
+                    if (letDecl != null)
+                    {
+                        found = true;
+                    }
+                }
             }
-            else if (word.RootParsedDocument.ProjectProperty.SystemFunctions.ContainsKey(word.Text))
-            {
-                //
-            }
-            else
+
+            // If not found, search upward through namespaces
+            if (!found)
             {
                 INamedElement? namedElement = functionDefinedNameSpace.GetNamedElementUpward(functionCall.FunctionName);
                 if (namedElement is Function)
                 {
                     function = (Function)namedElement;
+                    found = true;
                 }
-                else
+                else if (namedElement is DataObjects.LetDeclaration)
                 {
-                    word.AddError("undefined");
+                    letDecl = (DataObjects.LetDeclaration)namedElement;
+                    found = true;
                 }
             }
-            functionCall.BitWidth = function?.ReturnVariable?.BitWidth;
+
+            // Check system functions
+            if (!found && word.RootParsedDocument.ProjectProperty.SystemFunctions.ContainsKey(word.Text))
+            {
+                // System functions are allowed
+                found = true;
+            }
+
+            if (!found)
+            {
+                word.AddError("undefined");
+            }
+
+            // Set BitWidth based on function or let declaration
+            if (function != null)
+            {
+                functionCall.BitWidth = function.ReturnVariable?.BitWidth;
+            }
+            else if (letDecl != null && letDecl.Expression != null)
+            {
+                functionCall.BitWidth = letDecl.Expression.BitWidth;
+            }
 
             word.Color(CodeDrawStyle.ColorType.Identifier);
             word.MoveNext();
