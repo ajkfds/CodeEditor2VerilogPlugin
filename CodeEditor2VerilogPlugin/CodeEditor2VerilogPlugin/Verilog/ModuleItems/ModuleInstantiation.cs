@@ -895,7 +895,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                         moduleInstantiation.PortConnection[pinName] = expression;
                     }
                     if (expression != null) expression.AssertAssigned();
-                    checkPortConnection(word.ProjectProperty, instancedModule, expression, pinName, true);
+                    checkPortConnection(word.ProjectProperty, instancedModule, moduleInstantiation, expression, pinName, true);
                 }
 
             }
@@ -914,7 +914,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                     {
                         moduleInstantiation.PortConnection[pinName] = expression;
                     }
-                    checkPortConnection(word.ProjectProperty, instancedModule, expression, pinName, false);
+                    checkPortConnection(word.ProjectProperty, instancedModule, moduleInstantiation, expression, pinName, false);
                 }
 
             }
@@ -940,7 +940,7 @@ namespace pluginVerilog.Verilog.ModuleItems
         //    }
         //}
 
-        private static void checkPortConnection(ProjectProperty projectProperty, Module? instancedModule, Expressions.Expression? expression, string pinName, bool output)
+        private static void checkPortConnection(ProjectProperty projectProperty, Module? instancedModule, ModuleInstantiation moduleInstantiation, Expressions.Expression? expression, string pinName, bool output)
         {
             if (instancedModule == null) return;
             if (expression == null) return;
@@ -985,14 +985,14 @@ namespace pluginVerilog.Verilog.ModuleItems
                 Variable? variable = portDataObject as Variable;
                 if (variable == null) throw new Exception();
 
-                checkVariablePortConnection(projectProperty, expression, port, variable, pinName, output);
+                checkVariablePortConnection(projectProperty, expression, port, variable, pinName, output, moduleInstantiation);
             }
             else if (portDataObject is DataObjects.Nets.Net)
             {
                 DataObjects.Nets.Net? net = portDataObject as DataObjects.Nets.Net;
                 if (net == null) throw new Exception();
 
-                checkNetPortConnection(projectProperty, expression, port, net, pinName, output);
+                checkNetPortConnection(projectProperty, expression, port, net, pinName, output, moduleInstantiation);
             }
 
         }
@@ -1002,19 +1002,43 @@ namespace pluginVerilog.Verilog.ModuleItems
             Port port,
             DataObjects.Nets.Net net,
             string pinName,
-            bool output
+            bool output,
+            ModuleInstantiation moduleInstantiation
             )
         {
-            //if (port.Range == null)
-            //{
-            //    if (expression.BitWidth != null && expression.Reference != null && expression.BitWidth != 1)
-            //    {
-            //        expression.Reference.AddWarning("bit width mismatch 1 <- " + expression.BitWidth);
-            //    }
-            //}
-            //else 
-            if (port.BitWidth != expression.BitWidth && expression.BitWidth != null && expression.Reference != null)
+            // Check for instance array
+            int instanceCount = moduleInstantiation.InstanceCount;
+            
+            if (instanceCount > 1 && expression.BitWidth != null && expression.Reference != null)
             {
+                // Instance array case
+                int portBitWidth = port.BitWidth;
+                int expectedTotalBits = instanceCount * portBitWidth;
+                
+                if (expression.BitWidth == expectedTotalBits)
+                {
+                    // Broadcast: all instances connected to same signal
+                    // This is valid, no warning
+                }
+                else if (expression.BitWidth == portBitWidth)
+                {
+                    // Single port connected to array instance - this is also valid (broadcast)
+                    // No warning needed
+                }
+                else if (expression.BitWidth < expectedTotalBits)
+                {
+                    // Error: insufficient bits for all instances
+                    expression.Reference.AddError("insufficient bits for instance array: need " + expectedTotalBits + " bits for " + instanceCount + " instances, got " + expression.BitWidth);
+                }
+                else // expression.BitWidth > expectedTotalBits
+                {
+                    // Warning: excess bits for instance array
+                    expression.Reference.AddWarning("excess bits for instance array: " + expression.BitWidth + " bits for " + instanceCount + " instances (expected " + expectedTotalBits + ")");
+                }
+            }
+            else if (expression.BitWidth != port.BitWidth && expression.BitWidth != null && expression.Reference != null)
+            {
+                // Single instance case
                 expression.Reference.AddWarning("bit width mismatch " + port.BitWidth + " <- " + expression.BitWidth);
             }
         }
@@ -1024,20 +1048,43 @@ namespace pluginVerilog.Verilog.ModuleItems
             Port port,
             Variable variable,
             string pinName,
-            bool output
+            bool output,
+            ModuleInstantiation moduleInstantiation
             )
         {
-            //if (port.Range == null)
-            //{
-            //    if (expression.BitWidth != null && expression.Reference != null && expression.BitWidth != 1)
-            //    {
-            //        expression.Reference.AddWarning("bit width mismatch 1 <- " + expression.BitWidth);
-            //    }
+            // Check for instance array
+            int instanceCount = moduleInstantiation.InstanceCount;
 
-            //}
-            //else 
-            if (port.BitWidth != expression.BitWidth && expression.Reference != null)
+            if (instanceCount > 1 && expression.BitWidth != null && expression.Reference != null)
             {
+                // Instance array case
+                int portBitWidth = port.BitWidth;
+                int expectedTotalBits = instanceCount * portBitWidth;
+
+                if (expression.BitWidth == expectedTotalBits)
+                {
+                    // Broadcast: all instances connected to same signal
+                    // This is valid, no warning
+                }
+                else if (expression.BitWidth == portBitWidth)
+                {
+                    // Single port connected to array instance - this is also valid (broadcast)
+                    // No warning needed
+                }
+                else if (expression.BitWidth < expectedTotalBits)
+                {
+                    // Error: insufficient bits for all instances
+                    expression.Reference.AddError("insufficient bits for instance array: need " + expectedTotalBits + " bits for " + instanceCount + " instances, got " + expression.BitWidth);
+                }
+                else // expression.BitWidth > expectedTotalBits
+                {
+                    // Warning: excess bits for instance array
+                    expression.Reference.AddWarning("excess bits for instance array: " + expression.BitWidth + " bits for " + instanceCount + " instances (expected " + expectedTotalBits + ")");
+                }
+            }
+            else if (port.BitWidth != expression.BitWidth && expression.Reference != null)
+            {
+                // Single instance case
                 expression.Reference.AddWarning("bit width mismatch " + port.BitWidth + " <- " + expression.BitWidth);
             }
         }
