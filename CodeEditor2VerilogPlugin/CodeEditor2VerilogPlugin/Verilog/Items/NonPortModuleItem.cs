@@ -83,6 +83,14 @@ namespace pluginVerilog.Verilog.Items
                 case "timeprecision":
                     var timeunits = DataObjects.TimeunitsDeclaration.ParseCreate(word, nameSpace);
                     return timeunits != null;
+                // let_declaration
+                case "let":
+                    var letDecl = DataObjects.LetDeclaration.ParseCreate(word, nameSpace);
+                    if (letDecl != null)
+                    {
+                        nameSpace.NamedElements.Add(letDecl.Name, letDecl);
+                    }
+                    return true;
                 // module_or_generate_item
                 default:
                     break;
