@@ -54,6 +54,11 @@ namespace pluginVerilog.Tool
         private static readonly object _ctsLock = new object();
 
         /// <summary>
+        /// Lock object for synchronizing access to the parse queue
+        /// </summary>
+        private static readonly object _queueLock = new object();
+
+        /// <summary>
         /// Current parse mode of the running parse operation.
         /// Used to determine which parse modes can cancel each other.
         /// </summary>
@@ -121,6 +126,9 @@ namespace pluginVerilog.Tool
                 return;
             }
 
+            bool hasForceAllRunning = false;
+            bool shouldReturn = false;
+
             try
             {
                 _isProcessingQueue = true;
@@ -157,8 +165,13 @@ namespace pluginVerilog.Tool
                                 {
                                     // ForceAllFiles is running, re-queue this request and return
                                     // It will be processed after ForceAllFiles completes
-                                    _parseQueue.Enqueue(request);
+                                    // Use queue lock to prevent race condition
+                                    lock (_queueLock)
+                                    {
+                                        _parseQueue.Enqueue(request);
+                                    }
                                     CodeEditor2.Controller.AppendLog("ForceAllFiles is running, re-queuing SearchReparseRequestedTree request", Avalonia.Media.Colors.Yellow);
+                                    shouldReturn = true;
                                     return;
                                 }
                             }
@@ -259,6 +272,12 @@ namespace pluginVerilog.Tool
             // Store the CTS and current parse mode so it can be cancelled by a subsequent request
             lock (_ctsLock)
             {
+                // Dispose previous CTS if it was cancelled and not yet disposed
+                if (_currentParseCts != null && _currentParseCts.IsCancellationRequested)
+                {
+                    _currentParseCts.Dispose();
+                    _currentParseCts = null;
+                }
                 _currentParseCts = cts;
                 _currentParseMode = parseMode;
             }
@@ -279,10 +298,14 @@ namespace pluginVerilog.Tool
             finally
             {
                 // Clear the CTS reference after the parse completes
+                // Only clear if this is still the current CTS (hasn't been replaced by a new parse)
                 lock (_ctsLock)
                 {
-                    _currentParseCts = null;
-                    _currentParseMode = ParseMode.ThisFileOnly;
+                    if (_currentParseCts == cts)
+                    {
+                        _currentParseCts = null;
+                        _currentParseMode = ParseMode.ThisFileOnly;
+                    }
                 }
                 cts.Dispose();
             }

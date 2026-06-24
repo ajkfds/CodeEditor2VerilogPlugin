@@ -370,11 +370,14 @@ namespace pluginVerilog.Verilog
         public void MoveNext()
         {
             Moved = true;
+            CheckCancelToken();
             moveNext();
         }
 
         private void moveNext()
         {
+            CancellationToken?.ThrowIfCancellationRequested();
+
             if (wordPointer.Eof)
             {
                 while (wordPointer.Eof && stock.Count != 0)
@@ -393,6 +396,9 @@ namespace pluginVerilog.Verilog
 
         private void recheckWord()
         {
+            // Check cancellation at the start of recheckWord
+            CancellationToken?.ThrowIfCancellationRequested();
+
             // skip comments on the end of file
             while (!wordPointer.Eof)
             {
