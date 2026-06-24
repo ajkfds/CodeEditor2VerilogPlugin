@@ -260,7 +260,7 @@ namespace pluginVerilog.Verilog
 
             if (word.Text == ";")
             {
-                parse_function_items_non_ansi(word, nameSpace, function);
+                await parse_function_items_non_ansi(word, nameSpace, function);
             }
             else if (word.Text == "(")
             {
@@ -471,13 +471,19 @@ namespace pluginVerilog.Verilog
 
 
         //  ; { tf_item_declaration }
-        private static void parse_function_items_non_ansi(WordScanner word, NameSpace nameSpace, Function function)
+        private static async System.Threading.Tasks.Task parse_function_items_non_ansi(WordScanner word, NameSpace nameSpace, Function function)
         {
             if (word.Text != ";") throw new System.Exception();
             word.MoveNext();
 
             while (!word.Eof)
             {
+                // Try BlockItemDeclaration.Parse first for comprehensive data type handling
+                if (await BlockItemDeclaration.Parse(word, function))
+                {
+                    continue;
+                }
+
                 switch (word.Text)
                 {
                     case "input": // tf_input_declaration
