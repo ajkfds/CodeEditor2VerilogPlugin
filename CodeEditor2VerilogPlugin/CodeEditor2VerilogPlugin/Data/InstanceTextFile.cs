@@ -1,4 +1,6 @@
 using System;
+using System.Threading.Tasks;
+
 
 namespace pluginVerilog.Data
 {
@@ -54,6 +56,17 @@ namespace pluginVerilog.Data
             }
         }
 
+        public override void PostStatusCheck()
+        {
+            CodeEditor2.Data.TextFile? source = SourceTextFile;
+            if (source != null) source.PostStatusCheck();
+        }
+
+        protected override async Task FileCheckAsync()
+        {
+            await Task.CompletedTask;
+        }
+        
         public virtual string AbsolutePath { get; }
 
         public virtual void CheckDirty() { }
