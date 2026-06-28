@@ -173,7 +173,12 @@ namespace pluginVerilog.Data
             {
                 if (codeDoc.Version == fileCodeDoc.Version)
                 {
-                    codeDoc.CopyColorMarkFrom(fileCodeDoc);
+                    // Check if they are the same object to avoid LockRecursionException
+                    // (cannot acquire read lock when already holding write lock on same lock)
+                    if (!object.ReferenceEquals(codeDoc, fileCodeDoc))
+                    {
+                        codeDoc.CopyColorMarkFrom(fileCodeDoc);
+                    }
                 }
             }
 
