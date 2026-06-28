@@ -2,6 +2,9 @@ using CodeEditor2.Data;
 using pluginVerilog.FileTypes;
 using pluginVerilog.Verilog;
 using pluginVerilog.Verilog.BuildingBlocks;
+using pluginVerilog.Verilog.DataObjects;
+using pluginVerilog.Verilog.DataObjects.DataTypes;
+using pluginVerilog.Verilog.DataObjects.Variables;
 using pluginVerilog.Verilog.ModuleItems;
 using System. Collections. Generic;
 using System. Linq;
@@ -135,6 +138,25 @@ namespace pluginVerilog. Data
                         if (subfile != null) searchHier(subfile, moduleInstantiation. SourceName, ids, setup, newPath);
                     }
                 }
+                else if (element is pluginVerilog.Verilog.DataObjects.InterfaceInstance)
+                {
+                    // Handle InterfaceInstance - add the source Interface file to Files
+                    pluginVerilog.Verilog.DataObjects.InterfaceInstance interfaceInstance = (pluginVerilog.Verilog.DataObjects.InterfaceInstance)element;
+                    appendInterfaceInstance(file, interfaceInstance, setup);
+                }
+                else if (element is DataObject)
+                {
+                    // Handle DataObject - check if it's a Class or InterfaceClass instance
+                    DataObject dataObject = (DataObject)element;
+                    if (dataObject.DataType is ClassType)
+                    {
+                        appendClassInstance(file, dataObject, setup);
+                    }
+                    else if (dataObject.DataType is InterfaceClass)
+                    {
+                        appendInterfaceClassInstance(file, dataObject, setup);
+                    }
+                }
             }
         }
 
@@ -178,6 +200,89 @@ namespace pluginVerilog. Data
                     pSetup. Files. Add(sourceFile);
                 }
                 return;
+            }
+        }
+
+        private static void appendInterfaceInstance(IVerilogRelatedFile file, pluginVerilog.Verilog.DataObjects.InterfaceInstance interfaceInstance, SimulationSetup setup)
+        {
+            // Get the source Interface file from ProjectProperty
+            ProjectProperty? projectProperty = file.ProjectProperty;
+            if (projectProperty == null) return;
+
+            // Use SourceName directly from InterfaceInstance
+            IVerilogRelatedFile? sourceFile = projectProperty.GetFileOfBuildingBlock(interfaceInstance.SourceName);
+            if (sourceFile == null) return;
+
+            // Add to Files (same logic as appendFile for VerilogFile)
+            if (sourceFile is pluginVerilog.Data.VerilogFile || sourceFile is SystemVerilogFile)
+            {
+                if (setup.Files.Contains(sourceFile)) return;
+                setup.Files.Add(sourceFile);
+                return;
+            }
+        }
+
+        private static void appendClassInstance(IVerilogRelatedFile file, DataObject dataObject, SimulationSetup setup)
+        {
+            ProjectProperty? projectProperty = file.ProjectProperty;
+            if (projectProperty == null) return;
+
+            // Handle Object (class instance) - has Class property
+            if (dataObject is Object objectInstance)
+            {
+                Class class_ = objectInstance.Class;
+                if (class_ == null) return;
+
+                IVerilogRelatedFile? sourceFile = projectProperty.GetFileOfBuildingBlock(class_.Name);
+                if (sourceFile == null) return;
+
+                if (sourceFile is pluginVerilog.Data.VerilogFile || sourceFile is SystemVerilogFile)
+                {
+                    if (setup.Files.Contains(sourceFile)) return;
+                    setup.Files.Add(sourceFile);
+                    return;
+                }
+            }
+
+            // Handle UserDefinedVariable with UserDefinedType
+            if (dataObject is UserDefinedVariable userDefinedVariable)
+            {
+                if (userDefinedVariable.DataType is UserDefinedType userDefinedType)
+                {
+                    IVerilogRelatedFile? sourceFile = projectProperty.GetFileOfBuildingBlock(userDefinedType.Typedef.Name);
+                    if (sourceFile == null) return;
+
+                    if (sourceFile is pluginVerilog.Data.VerilogFile || sourceFile is SystemVerilogFile)
+                    {
+                        if (setup.Files.Contains(sourceFile)) return;
+                        setup.Files.Add(sourceFile);
+                        return;
+                    }
+                }
+            }
+        }
+
+        private static void appendInterfaceClassInstance(IVerilogRelatedFile file, DataObject dataObject, SimulationSetup setup)
+        {
+            // Handle InterfaceClass similarly - use UserDefinedType approach
+            ProjectProperty? projectProperty = file.ProjectProperty;
+            if (projectProperty == null) return;
+
+            // Handle UserDefinedVariable with UserDefinedType that references InterfaceClass
+            if (dataObject is UserDefinedVariable userDefinedVariable)
+            {
+                if (userDefinedVariable.DataType is UserDefinedType userDefinedType)
+                {
+                    IVerilogRelatedFile? sourceFile = projectProperty.GetFileOfBuildingBlock(userDefinedType.Typedef.Name);
+                    if (sourceFile == null) return;
+
+                    if (sourceFile is pluginVerilog.Data.VerilogFile || sourceFile is SystemVerilogFile)
+                    {
+                        if (setup.Files.Contains(sourceFile)) return;
+                        setup.Files.Add(sourceFile);
+                        return;
+                    }
+                }
             }
         }
 
