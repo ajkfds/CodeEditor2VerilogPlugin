@@ -31,6 +31,12 @@ namespace pluginVerilog.Verilog
 
         public NamedElements NamedElements { get; } = new NamedElements();
 
+        /// <summary>
+        /// Comment-based scope references (from @scope annotation)
+        /// Allows accessing elements from other building blocks without explicit instance connection.
+        /// </summary>
+        public List<CommentScopeReference> CommentScopeReferences { get; } = new List<CommentScopeReference>();
+
         [JsonIgnore]
         public IndexReference BeginIndexReference { get; init; }
         [JsonIgnore]
@@ -47,6 +53,11 @@ namespace pluginVerilog.Verilog
         public INamedElement? GetNamedElementUpward(string name)
         {
             if (NamedElements.ContainsKey(name)) return NamedElements[name];
+            
+            // Search in comment scope references
+            var fromScope = GetNamedElementFromCommentScopes(name, out _);
+            if (fromScope != null) return fromScope;
+            
             if (Parent == null) return null;
             return Parent.GetNamedElementUpward(name);
         }
@@ -59,6 +70,15 @@ namespace pluginVerilog.Verilog
                 nameSpace = this;
                 return NamedElements[name];
             }
+            
+            // Search in comment scope references
+            var fromScope = GetNamedElementFromCommentScopes(name, out NameSpace? scopeNameSpace);
+            if (fromScope != null)
+            {
+                nameSpace = scopeNameSpace;
+                return fromScope;
+            }
+            
             if (Parent == null) return null;
             return Parent.GetNamedElementUpward(name, out nameSpace);
         }
@@ -187,6 +207,9 @@ namespace pluginVerilog.Verilog
             {
                 Parent.AppendAutoCompleteItem(items);
             }
+
+            // Also add items from comment scope references
+            AppendAutoCompleteItemFromCommentScopes(items);
         }
 
         public DataObjects.Constants.Constants? GetConstants(string identifier)
@@ -224,6 +247,164 @@ namespace pluginVerilog.Verilog
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Searches for an element in comment scope references.
+        /// This allows accessing elements from other building blocks declared via @scope annotation.
+        /// </summary>
+        /// <param name="name">Element name to search for</param>
+        /// <param name="nameSpace">Output: NameSpace where the element was found</param>
+        /// <returns>The element if found, null otherwise</returns>
+        public INamedElement? GetNamedElementFromCommentScopes(string name, out NameSpace? nameSpace)
+        {
+            nameSpace = null;
+
+            foreach (var scopeRef in CommentScopeReferences)
+            {
+                // Try to resolve the scope reference if not already resolved
+                if (scopeRef.ResolvedBuildingBlock == null)
+                {
+                    resolveScopeReference(scopeRef);
+                }
+
+                if (scopeRef.ResolvedBuildingBlock != null)
+                {
+                    // If instance name is specified, look for the instance first
+                    if (!string.IsNullOrEmpty(scopeRef.InstanceName))
+                    {
+                        // Search for instance in the building block
+                        foreach (var elem in scopeRef.ResolvedBuildingBlock.NamedElements.Values)
+                        {
+                            if (elem is Data.VerilogModuleInstance instance && instance.Name == scopeRef.InstanceName)
+                            {
+                                // Found the instance, now search inside it using ParsedDocument
+                                var found = GetElementFromModuleInstance(instance, name, out NameSpace? foundSpace);
+                                if (found != null)
+                                {
+                                    nameSpace = foundSpace;
+                                    return found;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // No instance name - direct access to building block's namespace
+                        var found = scopeRef.ResolvedBuildingBlock.GetNamedElementUpward(name, out NameSpace? foundSpace);
+                        if (found != null)
+                        {
+                            nameSpace = foundSpace;
+                            return found;
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Resolves a scope reference to get the actual building block.
+        /// </summary>
+        private void resolveScopeReference(CommentScopeReference scopeRef)
+        {
+            if (BuildingBlock?.File?.ProjectProperty == null) return;
+
+            var projectProperty = BuildingBlock.File.ProjectProperty;
+            
+            // Try to get the building block
+            BuildingBlock? buildingBlock = null;
+            
+            if (scopeRef.ParameterOverrides != null && scopeRef.ParameterOverrides.Count > 0)
+            {
+                // Need to find the parameterized instance
+                // For now, get the base building block
+                buildingBlock = projectProperty.GetBuildingBlock(scopeRef.BuildingBlockName);
+                
+                // Store the parameter overrides for later instantiation
+                if (buildingBlock != null)
+                {
+                    scopeRef.ResolvedBuildingBlock = buildingBlock;
+                }
+            }
+            else
+            {
+                buildingBlock = projectProperty.GetBuildingBlock(scopeRef.BuildingBlockName);
+                scopeRef.ResolvedBuildingBlock = buildingBlock;
+            }
+        }
+
+        /// <summary>
+        /// Gets an element from a VerilogModuleInstance by searching its parsed document.
+        /// </summary>
+        private INamedElement? GetElementFromModuleInstance(Data.VerilogModuleInstance instance, string name, out NameSpace? foundNameSpace)
+        {
+            foundNameSpace = null;
+            var vParsedDoc = instance.VerilogParsedDocument;
+            if (vParsedDoc?.Root == null) return null;
+            
+            // Get the module's namespace
+            var moduleName = instance.ModuleName;
+            if (vParsedDoc.Root.BuildingBlocks.TryGetValue(moduleName, out var module))
+            {
+                return module.GetNamedElementUpward(name, out foundNameSpace);
+            }
+            
+            return null;
+        }
+
+        /// <summary>
+        /// Adds autocomplete items from comment scope references.
+        /// </summary>
+        public void AppendAutoCompleteItemFromCommentScopes(List<AutocompleteItem> items)
+        {
+            foreach (var scopeRef in CommentScopeReferences)
+            {
+                // Try to resolve the scope reference if not already resolved
+                if (scopeRef.ResolvedBuildingBlock == null)
+                {
+                    resolveScopeReference(scopeRef);
+                }
+
+                if (scopeRef.ResolvedBuildingBlock != null)
+                {
+                    // If instance name is specified, add items from the instance
+                    if (!string.IsNullOrEmpty(scopeRef.InstanceName))
+                    {
+                        // Search for instance in the building block
+                        foreach (var elem in scopeRef.ResolvedBuildingBlock.NamedElements.Values)
+                        {
+                            if (elem is Data.VerilogModuleInstance instance && instance.Name == scopeRef.InstanceName)
+                            {
+                                // Get elements from the instance's parsed document
+                                AppendAutoCompleteItemsFromModuleInstance(instance, items);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // No instance name - add items directly from building block's namespace
+                        scopeRef.ResolvedBuildingBlock.AppendAutoCompleteItem(items);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Appends autocomplete items from a VerilogModuleInstance.
+        /// </summary>
+        private void AppendAutoCompleteItemsFromModuleInstance(Data.VerilogModuleInstance instance, List<AutocompleteItem> items)
+        {
+            var vParsedDoc = instance.VerilogParsedDocument;
+            if (vParsedDoc?.Root == null) return;
+            
+            // Get the module's namespace
+            var moduleName = instance.ModuleName;
+            if (vParsedDoc.Root.BuildingBlocks.TryGetValue(moduleName, out var module))
+            {
+                module.AppendAutoCompleteItem(items);
+            }
         }
     }
 }
