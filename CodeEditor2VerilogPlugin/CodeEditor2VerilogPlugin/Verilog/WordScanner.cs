@@ -23,7 +23,7 @@ namespace pluginVerilog.Verilog
             recheckWord();
             this.systemVerilog = systemVerilog;
         }
-
+        public bool SupressMessage { get; set; } = false;
         public bool SupressCompilerDerectiveError { get; set; } = false;
 
         public DefaultNetTypeEnum DefaultNetType = WordScanner.DefaultNetTypeEnum.none;
@@ -234,54 +234,64 @@ namespace pluginVerilog.Verilog
 
         public void AddError(string message)
         {
+            if (SupressMessage) return;
             if (prototype) return;
             wordPointer.AddError(message);
         }
 
         public void AddWarning(string message)
         {
+            if (SupressMessage) return;
             if (prototype) return;
             wordPointer.AddWarning(message);
         }
 
         public void AddPrototypeError(string message)
         {
+            if (SupressMessage) return;
             //            if (prototype) return;
             wordPointer.AddError(message);
         }
 
         public void AddPrototypeWarning(string message)
         {
+            if (SupressMessage) return;
             //            if (prototype) return;
             wordPointer.AddWarning(message);
         }
 
         public void AddNotice(string message)
         {
+            if (SupressMessage) return;
             if (prototype) return;
             wordPointer.AddNotice(message);
         }
         public void AddHint(string message)
         {
+            if (SupressMessage) return;
             if (prototype) return;
             wordPointer.AddHint(message);
         }
 
         public void ApplyPrototypeRule(Rule rule)
         {
+            if (SupressMessage) return;
             ApplyPrototypeRule(rule, "");
         }
         public void ApplyPrototypeRule(Rule rule, string message)
         {
+            if (SupressMessage) return;
             //            if (!prototype) System.Diagnostics.Debugger.Break();
             applyRule(rule, message);
         }
         public void ApplyRule(Rule rule)
         {
+            if (SupressMessage) return;
             ApplyRule(rule, "");
         }
         public void ApplyRule(Rule rule, string message)
         {
+            if (SupressMessage) return;
             if (prototype) return;
             applyRule(rule, message);
         }

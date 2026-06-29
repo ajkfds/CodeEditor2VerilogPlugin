@@ -187,7 +187,6 @@ namespace pluginVerilog
             }
         }
 
-
         // BuildingBlock -> File Table
         private WeakReferenceDictionary<string, Data.IVerilogRelatedFile> buildingBlockFileTable = new WeakReferenceDictionary<string, Data.IVerilogRelatedFile>();
         private WeakReferenceDictionary<string, BuildingBlock> buildingBlockTable = new WeakReferenceDictionary<string, BuildingBlock>();
@@ -222,11 +221,6 @@ namespace pluginVerilog
             }
         }
 
-        //public bool RemoveBuildingBlock(string moduleName)
-        //{
-        //    buildingBlockTable.Remove(moduleName);
-        //    return buildingBlockFileTable.Remove(moduleName);
-        //}
 
         public bool HasRegisteredBuildingBlock(string moduleName)
         {

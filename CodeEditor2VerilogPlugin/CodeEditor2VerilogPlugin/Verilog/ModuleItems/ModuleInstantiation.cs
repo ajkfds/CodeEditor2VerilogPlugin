@@ -329,14 +329,14 @@ namespace pluginVerilog.Verilog.ModuleItems
                     }
 
                     VerilogFile? baseFile = word.ProjectProperty.GetFileOfBuildingBlock(moduleName) as VerilogFile;
-/*
+
                     if (word.RootParsedDocument.ParseMode == CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.EditParse)
                     { // editparse時処理
 
                         if (instancedModule == null && baseFile != null)
                         {
                             VerilogModuleInstance? instance = VerilogModuleInstance.Create(moduleInstantiation);
-                            var baseParser = instance?.CreateDocumentParser(CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.LoadParse, word.CancellationToken);
+                            var baseParser = instance?.CreateDocumentParser(CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.SingleHierParse, word.CancellationToken);
                             if (instance != null && baseParser != null)
                             {
                                 await baseParser.ParseAsync();
@@ -344,17 +344,7 @@ namespace pluginVerilog.Verilog.ModuleItems
                                 {
                                     if (word.RootParsedDocument.File != null) word.RootParsedDocument.File.Items.AddOrUpdate(instance.Name, instance);
                                     Verilog.ParsedDocument vParsedDocument = (Verilog.ParsedDocument)baseParser.ParsedDocument;
-                                    vParsedDocument.ReparseRequested = true;
-                                    await instance.AcceptParsedDocumentAsync(baseParser.ParsedDocument);
-                                    //await Dispatcher.UIThread.InvokeAsync(
-                                    //    async () =>
-                                    //    {
-                                    //        if (word.RootParsedDocument.File != null) word.RootParsedDocument.File.Items.AddOrUpdate(instance.Name, instance);
-                                    //        Verilog.ParsedDocument vParsedDocument = (Verilog.ParsedDocument)baseParser.ParsedDocument;
-                                    //        vParsedDocument.ReparseRequested = true;
-                                    //        await instance.AcceptParsedDocumentAsync(baseParser.ParsedDocument);
-                                    //    }
-                                    //);
+                                    await instance.AcceptParsedDocumentAsync(baseParser);
                                 }
                             }
 
@@ -365,11 +355,10 @@ namespace pluginVerilog.Verilog.ModuleItems
                             System.Diagnostics.Debugger.Break();
                         }
                     }
-*/
 
 
 
-                    if (instancedModule == null)
+                        if (instancedModule == null)
                     {
                         //                        nameSpace.BuildingBlock.ReparseRequested = true;
                         //                        word.RootParsedDocument.ReparseRequested = true;

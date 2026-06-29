@@ -216,11 +216,6 @@ public List<string> ImportedPackages = new List<string>();
             CodeDocument? document = CodeDocument;
             if (document == null) return;
 
-            if(message =="[1]illegal bracket")
-            {
-                string a = "";
-            }
-
             Data.IVerilogRelatedFile? vFile = document.TextFile as Data.IVerilogRelatedFile;
             if (vFile == null) return;
 
@@ -531,6 +526,7 @@ public List<string> ImportedPackages = new List<string>();
                 // create short document to parse current pretext
                 pluginVerilog.CodeEditor.CodeDocument document = new pluginVerilog.CodeEditor.CodeDocument(lineText);
                 WordScanner word = new WordScanner(document, this, SystemVerilog);
+                word.SupressMessage = true;
 
                 List<(string, int)> words = new List<(string, int)>();
                 while (!word.Eof)
@@ -608,6 +604,7 @@ public List<string> ImportedPackages = new List<string>();
                 // create short document to parse current pretext
                 pluginVerilog.CodeEditor.CodeDocument document = new pluginVerilog.CodeEditor.CodeDocument(elementText);
                 WordScanner word = new WordScanner(document, this, SystemVerilog);
+                word.SupressMessage = true;
 
                 Verilog.Expressions.Expression? expression = null;
                 while (!word.Eof)
@@ -697,7 +694,7 @@ public List<string> ImportedPackages = new List<string>();
         }
 
 
-        public void appendAutoCompleteINamedElements(List<AutocompleteItem> items, NameSpace nameSpace, string candidate)
+        private void appendAutoCompleteINamedElements(List<AutocompleteItem> items, NameSpace nameSpace, string candidate)
         {
             bool add = false;
             foreach (INamedElement element in nameSpace.NamedElements.Values)
@@ -732,6 +729,9 @@ public List<string> ImportedPackages = new List<string>();
             appendItems(items, candidate, new AutoComplete.ModuleAutocompleteItem());
             appendItems(items, candidate, new AutoComplete.TaskAutocompleteItem());
             if (candidate == "<=") items.Add(new AutoComplete.NonBlockingAssignmentAutoCompleteItem());
+
+            appendKeywordItems(items, candidate, "@sync"); // annotation
+            appendKeywordItems(items, candidate, "async"); // annotation
 
             appendKeywordItems(items, candidate, "always"); // verilog
             appendKeywordItems(items, candidate, "integer"); // verilog

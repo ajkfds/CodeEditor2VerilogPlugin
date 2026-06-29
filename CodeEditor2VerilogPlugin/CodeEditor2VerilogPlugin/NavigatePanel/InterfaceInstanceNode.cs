@@ -9,9 +9,9 @@ namespace pluginVerilog.NavigatePanel
 {
     public class InterfaceInstanceNode : CodeEditor2.NavigatePanel.FileNode, IVerilogNavigateNode
     {
-        public InterfaceInstanceNode(Data.InterfaceInstance verilogModuleInstance) : base(verilogModuleInstance)
+        public InterfaceInstanceNode(Data.InterfaceInstance interfaceInstance) : base(interfaceInstance)
         {
-            moduleInstanceRef = new WeakReference<Data.InterfaceInstance>(verilogModuleInstance);
+            interfaceInstanceRef = new WeakReference<Data.InterfaceInstance>(interfaceInstance);
         }
 
         public bool NeedUpdate
@@ -21,14 +21,14 @@ namespace pluginVerilog.NavigatePanel
                 return false;
             }
         }
-        private System.WeakReference<Data.InterfaceInstance> moduleInstanceRef;
-        public Data.InterfaceInstance ModuleInstance
+        private System.WeakReference<Data.InterfaceInstance> interfaceInstanceRef;
+        public Data.InterfaceInstance InterfaceInstance
         {
             get
             {
                 Data.InterfaceInstance ret;
-                if (moduleInstanceRef == null) return null;
-                if (!moduleInstanceRef.TryGetTarget(out ret)) return null;
+                if (interfaceInstanceRef == null) return null;
+                if (!interfaceInstanceRef.TryGetTarget(out ret)) return null;
                 return ret;
             }
         }
@@ -37,7 +37,7 @@ namespace pluginVerilog.NavigatePanel
         {
             get
             {
-                Data.InterfaceInstance instance = ModuleInstance;
+                Data.InterfaceInstance instance = InterfaceInstance;
                 return instance;
             }
         }
@@ -55,19 +55,19 @@ namespace pluginVerilog.NavigatePanel
         {
             get
             {
-                if (ModuleInstance == null) return null;
-                return ModuleInstance.SourceTextFile as Data.VerilogFile;
+                if (InterfaceInstance == null) return null;
+                return InterfaceInstance.SourceTextFile as Data.VerilogFile;
                 //                Data.VerilogModuleInstance instance = Project.GetRegisterdItem(ID) as Data.VerilogModuleInstance;
                 //                return Project.GetRegisterdItem(Data.VerilogFile.GetID(instance.RelativePath, Project)) as Data.VerilogFile;
                 //                return null;
             }
         }
 
-        public Data.VerilogModuleInstance VerilogModuleInstance
+        public Data.InterfaceInstance VerilogModuleInstance
         {
             get
             {
-                return Item as Data.VerilogModuleInstance;
+                return Item as Data.InterfaceInstance;
             }
         }
 
@@ -78,28 +78,28 @@ namespace pluginVerilog.NavigatePanel
             try
             {
                 base.OnSelected(); // update context menu
-                if (ModuleInstance == null)
+                if (InterfaceInstance == null)
                 {
                     await UpdateAsync();
                     return;
                 }
 
 
-                await CodeEditor2.Controller.CodeEditor.SetTextFileAsync(ModuleInstance, true);
+                await CodeEditor2.Controller.CodeEditor.SetTextFileAsync(InterfaceInstance, true);
 
                 UpdateVisual();
 
-                if (!ModuleInstance.ReparseRequested)
+                if (!InterfaceInstance.ReparseRequested)
                 {
                     // skip parse
                 }
                 else
                 {
-                    if (ModuleInstance == null) return;
+                    if (InterfaceInstance == null) return;
 
                     try
                     {
-                        Tool.ParseHierarchy.PostParseAsync(ModuleInstance, Tool.ParseHierarchy.ParseMode.SearchReparseReqestedTree);
+                        Tool.ParseHierarchy.PostParseAsync(InterfaceInstance, Tool.ParseHierarchy.ParseMode.SearchReparseReqestedTree);
                     }
                     catch (Exception ex)
                     {
@@ -151,7 +151,7 @@ namespace pluginVerilog.NavigatePanel
                 return;
             }
 
-            Data.VerilogModuleInstance instance = Item as Data.VerilogModuleInstance;
+            Data.InterfaceInstance instance = Item as Data.InterfaceInstance;
             Text = instance.Name + " - " + instance.ModuleName;
 
 

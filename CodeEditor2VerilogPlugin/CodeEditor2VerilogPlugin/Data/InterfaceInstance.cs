@@ -55,7 +55,6 @@ namespace pluginVerilog.Data
             }
             return fileItem;
         }
-        public bool SystemVerilog { get; set; } = false;
 
         public override string ID
         {

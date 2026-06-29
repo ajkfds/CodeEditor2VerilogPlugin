@@ -1,3 +1,4 @@
+using Avalonia.Input;
 using Avalonia.Threading;
 using CodeEditor2.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
@@ -326,6 +327,19 @@ namespace pluginVerilog.Data.VerilogCommon
                                 }
                                 newSubItems.Add(instantiation.Name, newVerilogModuleInstance);
                             }
+                        }
+                        else if(instantiation is Verilog.DataObjects.InterfaceInstance)
+                        {
+                            Verilog.DataObjects.InterfaceInstance moduleInstantiation = (Verilog.DataObjects.InterfaceInstance)instantiation;
+
+                            InterfaceInstance? newVerilogModuleInstance = InterfaceInstance.Create(moduleInstantiation,project);
+                            if (newSubItems.ContainsKey(instantiation.Name) || newVerilogModuleInstance == null) continue;
+                            newVerilogModuleInstance.Parent = parent;
+                            if (parent is InterfaceInstance && ((InterfaceInstance)parent).ExternalProject)
+                            {
+                                newVerilogModuleInstance.ExternalProject = true;
+                            }
+                            newSubItems.Add(instantiation.Name, newVerilogModuleInstance);
                         }
                         else if (instantiation is IBuildingBlockInstantiation)
                         {
