@@ -157,7 +157,7 @@ namespace pluginVerilog.Data
                 }
             }
 
-            ParsedDocument = null;
+            //ParsedDocument = null;
             //            SourceVerilogFile.RemoveModuleInstance(this);
         }
 

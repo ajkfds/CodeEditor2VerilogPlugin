@@ -11,7 +11,8 @@ namespace pluginVerilog.FileTypes
         public override bool IsThisFileType(string relativeFilePath, CodeEditor2.Data.Project project)
         {
             if (
-                relativeFilePath.ToLower().EndsWith(".verilog.result")
+                relativeFilePath.ToLower().EndsWith(".v.result")||
+                relativeFilePath.ToLower().EndsWith(".sv.result")
             )
             {
                 return true;

@@ -284,8 +284,7 @@ namespace pluginVerilog.Verilog.Expressions
                 word.Color(CodeDrawStyle.ColorType.Number);
                 number.Text = number.Text + word.Text;
                 apostropheIndex = 0;
-                parseAfterApostrophe(word, nameSpace, index, apostropheIndex, number, sb);
-                return number;
+                return parseAfterApostrophe(word, nameSpace, index, apostropheIndex, number, sb);
             }
             else
             {
@@ -304,8 +303,7 @@ namespace pluginVerilog.Verilog.Expressions
                     return Cast.ParseCreate(word, nameSpace, number);
                 }
 
-                parseAfterApostrophe(word, nameSpace, index, apostropheIndex, number, sb);
-                return number;
+                return parseAfterApostrophe(word, nameSpace, index, apostropheIndex, number, sb);
             }
         }
 

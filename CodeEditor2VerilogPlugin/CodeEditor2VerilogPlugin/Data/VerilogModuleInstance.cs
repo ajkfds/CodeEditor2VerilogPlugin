@@ -433,7 +433,7 @@ namespace pluginVerilog.Data
                 }
             }
 
-            ParsedDocument = null;
+            //ParsedDocument = null;
         }
 
         public Data.VerilogFile SourceVerilogFile
