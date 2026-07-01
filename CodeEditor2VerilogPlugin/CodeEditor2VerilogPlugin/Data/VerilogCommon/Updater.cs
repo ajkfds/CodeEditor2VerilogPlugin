@@ -170,6 +170,17 @@ namespace pluginVerilog.Data.VerilogCommon
                             newSubItems.Add(oldItem.Name, oldItem);
                         }
                     }
+                    else if (buldingBlockKvp.Value is Interface)
+                    {
+                        InterfaceInstance? oldItem = subItem as InterfaceInstance;
+                        Interface iface = (Interface)buldingBlockKvp.Value;
+
+                        if (oldItem != null && iface != null && oldItem.Name == iface.Name && oldItem.ModuleName == iface.Name)
+                        {
+                            alreadyExist = true;
+                            newSubItems.Add(oldItem.Name, oldItem);
+                        }
+                    }
 
                 }
 
@@ -213,7 +224,25 @@ namespace pluginVerilog.Data.VerilogCommon
                     }
                     else if (buldingBlockKvp.Value is Interface)
                     {
+                        Interface iface = (Interface)buldingBlockKvp.Value;
 
+                        // Use the Interface as the source directly (same pattern as Module)
+                        Verilog.DataObjects.InterfaceInstance interfaceInstantiation = new Verilog.DataObjects.InterfaceInstance()
+                        {
+                            BeginIndexReference = iface.BeginIndexReference,
+                            DefinitionReference = iface.DefinitionReference,
+                            Name = iface.Name,
+                            ParameterOverrides = new Dictionary<string, Verilog.Expressions.Expression>(),
+                            Project = project,
+                            SourceName = iface.Name,
+                            InstancedNameSpace = iface,
+                            BlockBeginIndexReference = iface.BeginIndexReference
+                        };
+
+                        InterfaceInstance? instance = InterfaceInstance.Create(interfaceInstantiation, project);
+                        if (instance == null) throw new Exception();
+
+                        newSubItems.Add(instance.Name, instance);
                     }
                 }
 
@@ -274,26 +303,37 @@ namespace pluginVerilog.Data.VerilogCommon
                                     {
                                         newSubItems.Add(subItem.Name, subItem);
                                     }
-                                    else
-                                    {
-                                        //System.Diagnostics.Debugger.Break();
-                                    }
                                     continue;
                                 }
                             }
-
                         }
-                        else if (instantiation is IBuildingBlockInstantiation)
+                        else if (instantiation is Verilog.DataObjects.InterfaceInstance)
                         {
+                            Verilog.DataObjects.InterfaceInstance interfaceInstantiation = (Verilog.DataObjects.InterfaceInstance)instantiation;
+                            InterfaceInstance? interfaceInstance = subItem as InterfaceInstance;
 
+                            // Compare using source name and parameter overrides
+                            string instanceKey = interfaceInstantiation.OverrideParameterID;
+
+                            if (
+                                interfaceInstantiation != null &&
+                                interfaceInstance != null &&
+                                interfaceInstantiation.SourceName == interfaceInstance.ModuleName &&
+                                instanceKey == interfaceInstance.ParameterId
+                                )
+                            {
+                                alreadyExist = true;
+
+                                if (!newSubItems.ContainsKey(subItem.Name))
+                                {
+                                    newSubItems.Add(subItem.Name, subItem);
+                                }
+                                continue;
+                            }
                         }
                     }
 
-                    if (alreadyExist)
-                    {
-                        newSubItems.Add(instantiation.Name, (CodeEditor2.Data.Item)instantiation);
-                    }
-                    else
+                    if (!alreadyExist)
                     {
                         if (instantiation is ModuleInstantiation)
                         {

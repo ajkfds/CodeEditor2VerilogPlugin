@@ -11,7 +11,7 @@ namespace pluginVerilog.Verilog.DataObjects
 {
     public class InterfaceInstance : DataObject, IBuildingBlockInstantiation, INamedElement
     {
-        protected InterfaceInstance() { }
+        internal InterfaceInstance() { }
         public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
         public Attribute? Attribute { get; set; }
 

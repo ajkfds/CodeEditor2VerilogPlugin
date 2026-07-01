@@ -19,7 +19,7 @@ namespace pluginVerilog.Data
 
         public required Dictionary<string, Verilog.Expressions.Expression> ParameterOverrides;
 
-        protected InterfaceInstance(CodeEditor2.Data.TextFile sourceTextFile) : base(sourceTextFile)
+        public InterfaceInstance(CodeEditor2.Data.TextFile sourceTextFile) : base(sourceTextFile)
         {
 
         }
