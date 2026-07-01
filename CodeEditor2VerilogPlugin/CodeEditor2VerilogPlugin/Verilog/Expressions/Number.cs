@@ -271,12 +271,20 @@ namespace pluginVerilog.Verilog.Expressions
                 index++;
             }
 
+
             if (apostropheIndex == -1) // no proceeding  apostrophe
             { // decimal
                 number.NumberType = NumberTypeEnum.Decimal;
                 number.Value = long.Parse(sb.ToString());
                 number.Constant = true;
                 word.MoveNext();
+
+                if (word.Text == "\'") // space separated cast
+                {
+                    sb.Append('\'');
+
+                    return Cast.ParseCreate(word, nameSpace, number);
+                }
 
                 index = 0;
                 if (word.GetCharAt(index) != '\'') return number;
@@ -286,8 +294,7 @@ namespace pluginVerilog.Verilog.Expressions
                 apostropheIndex = 0;
                 return parseAfterApostrophe(word, nameSpace, index, apostropheIndex, number, sb);
             }
-            else
-            {
+            else {
                 if (apostropheIndex + 1 == word.Length)
                 {
                     // cast
