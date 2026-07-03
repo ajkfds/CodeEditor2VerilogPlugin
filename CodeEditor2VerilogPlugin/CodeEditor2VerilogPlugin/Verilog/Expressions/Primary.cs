@@ -501,7 +501,7 @@ number
 
         public static Primary? parseDataObject(WordScanner word, NameSpace nameSpace, INamedElement owner, bool lValue, bool acceptRange, string nameSpaceText)
         {
-            DataObjectReference? dataObjectReference = DataObjectReference.ParseCreate(word, nameSpace, owner, lValue, acceptRange);
+            DataObjectReference? dataObjectReference = DataObjectReference.ParseCreate(word, nameSpace, owner, lValue, acceptRange, nameSpaceText);
 
             if (dataObjectReference == null) return null;
             if (dataObjectReference.TargetDataObject == null) return null;

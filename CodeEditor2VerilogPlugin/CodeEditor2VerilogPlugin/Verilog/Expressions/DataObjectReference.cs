@@ -26,6 +26,9 @@ namespace pluginVerilog.Verilog.Expressions
         // DataObject名称
         public required string DatObjectName { get; init; }
 
+        // namespaceパス (例: "parent.child.")
+        public string? NameSpacePath { get; set; } = null;
+
 
         // DataObject定義への参照
         public DataObjects.DataObject? OrigainalDataObject = null;
@@ -70,8 +73,12 @@ namespace pluginVerilog.Verilog.Expressions
             AjkAvaloniaLibs.Controls.ColorLabel label = new AjkAvaloniaLibs.Controls.ColorLabel();
             AppendLabel(label);
             StringBuilder sb = new StringBuilder();
+            if (!string.IsNullOrEmpty(NameSpacePath))
+            {
+                sb.Append(NameSpacePath);
+            }
             sb.Append(DatObjectName);
-            return label.CreateString();
+            return sb.ToString();
         }
 
         public override void AppendRefrencedDataObjects(List<DataObjects.DataObject> referencedObjects)
@@ -246,16 +253,19 @@ namespace pluginVerilog.Verilog.Expressions
         /// <param name="nameSpace">nameSpace is reqired for range expression parse</param>
         /// <param name="owner"></param>
         /// <param name="assigned"></param>
+        /// <param name="acceptRange"></param>
+        /// <param name="nameSpacePath">Optional namespace path (e.g., "parent.child.")</param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public static DataObjectReference? ParseCreate(WordScanner word, NameSpace nameSpace, INamedElement owner, bool assigned, bool acceptRange = true)
+        public static DataObjectReference? ParseCreate(WordScanner word, NameSpace nameSpace, INamedElement owner, bool assigned, bool acceptRange = true, string? nameSpacePath = null)
         {
             if (!owner.NamedElements.ContainsDataObject(word.Text)) return null;
             DataObjects.DataObject originalDataObject = (DataObjects.DataObject)owner.NamedElements[word.Text];
 
             DataObjectReference val = new DataObjectReference()
             {
-                DatObjectName = originalDataObject.Name
+                DatObjectName = originalDataObject.Name,
+                NameSpacePath = nameSpacePath
             };
             DataObjects.DataObject originalObject = originalDataObject;
             bool partial = false;

@@ -42,10 +42,11 @@ namespace pluginVerilog.Data
             return fileItem;
         }
 
+
         ~VerilogFile()
         {
             //if(System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
-
+            string a = "";
         }
         public override string Key
         {

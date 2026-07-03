@@ -272,6 +272,12 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                         variable = queue;
                         unpackedArrays = null;
                     }
+                    else if (array is DynamicArray)
+                    {
+                        DynamicArray dynamicArray = (DynamicArray)array;
+                        variable = dynamicArray;
+                        unpackedArrays = null;
+                    }
                     else if (array is AssociativeArray)
                     {
                         AssociativeArray associativeArray = (AssociativeArray)array;

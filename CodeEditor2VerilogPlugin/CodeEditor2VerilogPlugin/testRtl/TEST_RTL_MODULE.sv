@@ -1,14 +1,21 @@
 `timescale 1ns / 1ps
 
-module TEST_RTL_MODULE#(
-	parameter BITWIDTH = 8
-)
-(
-output wire [BITWIDTH-1:0]	DATA_O,
-output wire [1:0]	DATA2_O,
-input wire	CLK_I,
-input wire	RST_X_I
-);
+module TEST_RTL_MODULE;
+wire [31:0] data;
+
+assign data =	32'(2'b00);
+
+`define SCR1_XLEN               32
+wire [31:0]	data0 =	`SCR1_XLEN'(2'b00);
+
+
+
+
+
+
+
+
+
 
 
 
