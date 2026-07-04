@@ -410,28 +410,28 @@ namespace pluginVerilog.Data
             vParsedDoc = VerilogParsedDocument;
             parsedDoc = ParsedDocument;
 
-            if (vParsedDoc != null)
-            {
-                // Atomically read parameter overrides while holding read lock
-                Dictionary<string, Verilog.Expressions.Expression> parameterOverrides;
-                textFileLock.EnterReadLock();
-                try
-                {
-                    parameterOverrides = _parameterOverrides;
-                }
-                finally
-                {
-                    textFileLock.ExitReadLock();
-                }
+            //if (vParsedDoc != null)
+            //{
+            //    // Atomically read parameter overrides while holding read lock
+            //    Dictionary<string, Verilog.Expressions.Expression> parameterOverrides;
+            //    textFileLock.EnterReadLock();
+            //    try
+            //    {
+            //        parameterOverrides = _parameterOverrides;
+            //    }
+            //    finally
+            //    {
+            //        textFileLock.ExitReadLock();
+            //    }
 
-                if (parsedDoc != null && parameterOverrides.Count != 0)
-                {
-                    foreach (var incFile in vParsedDoc.IncludeFiles.Values)
-                    {
-                        incFile.Dispose();
-                    }
-                }
-            }
+            //    if (parsedDoc != null && parameterOverrides.Count != 0)
+            //    {
+            //        foreach (var incFile in vParsedDoc.IncludeFiles.Values)
+            //        {
+            //            incFile.Dispose();
+            //        }
+            //    }
+            //}
 
             //ParsedDocument = null;
         }
