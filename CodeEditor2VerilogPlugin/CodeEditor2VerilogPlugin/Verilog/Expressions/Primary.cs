@@ -525,6 +525,9 @@ number
                 {
                     return parseUndefinedFunction(word);
                 }
+                word.AddError("unfound object");
+                word.MoveNext();
+                return null;
                 return dataObjectReference;
             }
 
