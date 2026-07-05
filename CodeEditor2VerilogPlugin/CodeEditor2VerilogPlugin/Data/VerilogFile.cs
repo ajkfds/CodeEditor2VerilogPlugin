@@ -198,14 +198,17 @@ namespace pluginVerilog.Data
                 textFileLock.ExitWriteLock();
             }
 
-            TextFile? textFile = await Controller.CodeEditor.GetTextFileAsync();
-            if (textFile == this)
-            {
-                textFile.CodeDocument?.CopyColorMarkFrom(parser.Document);
-                CodeEditor2.Controller.CodeEditor.PostRefresh();
-            }
+            //TextFile? textFile = await Controller.CodeEditor.GetTextFileAsync();
+            //if (textFile == this)
+            //{
+            //    textFile.CodeDocument?.CopyColorMarkFrom(parser.Document);
+            //    CodeEditor2.Controller.CodeEditor.PostRefresh();
+            //}
+
 
             await updateIncludeFilesAsync(vParsedDocument, Items);
+            
+            // CodeEditor & NavigateNode & Messgae update will done in UpdateAsync
             await UpdateAsync();
         }
 
@@ -224,9 +227,7 @@ namespace pluginVerilog.Data
             // get file selected in text editor
             CodeEditor2.NavigatePanel.NavigatePanelNode? node = await CodeEditor2.Controller.NavigatePanel.GetSelectedNodeAsync();
             CodeEditor2.Data.Item? currentItem = node?.Item;
-            CodeEditor2.Data.ITextFile? currentTextFile = await Controller.CodeEditor.GetTextFileAsync
-               ();
-
+            CodeEditor2.Data.ITextFile? currentTextFile = await Controller.CodeEditor.GetTextFileAsync();
 
             foreach (var includeFile in parsedDocument.IncludeFiles.Values)
             {
