@@ -178,6 +178,10 @@ namespace pluginVerilog.Data
                 vParsedDocument.ReparseRequested = true;
                 return;
             }
+            else
+            {
+                codeDoc?.CopyColorMarkFrom(parser.Document);
+            }
 
             textFileLock.EnterWriteLock();
             try
