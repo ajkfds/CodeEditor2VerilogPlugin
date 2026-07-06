@@ -87,8 +87,8 @@ namespace pluginVerilog.Views
             Ready = true;
 
             ListBox0.AddHandler(KeyDownEvent, ListBox0_KeyDown,
-               RoutingStrategies.Tunnel | RoutingStrategies.Bubble,
-               handledEventsToo: true);
+               RoutingStrategies.Tunnel);//l | RoutingStrategies.Bubble,
+               //handledEventsToo: true);
 
             if (ListBox0.Items.Count > 0)
             {
@@ -154,6 +154,8 @@ namespace pluginVerilog.Views
             if (connection == null)
             {
                 if (e.Key == Avalonia.Input.Key.Space) moveDownWard();
+                if (e.Key == Avalonia.Input.Key.Left) moveDownWard();
+                e.Handled = true;
                 return;
             }
 
@@ -170,6 +172,7 @@ namespace pluginVerilog.Views
                 return;
             }
             moveDownWard();
+            e.Handled = true;
         }
 
         private void moveDownWard()

@@ -45,6 +45,11 @@ namespace pluginVerilog.Verilog.Expressions
 
         public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
+            if (!string.IsNullOrEmpty(NameSpacePath))
+            {
+                label.AppendText(NameSpacePath, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Normal));
+            }
+
             if (TargetDataObject is Reg || TargetDataObject is Bit || TargetDataObject is Logic)
             {
                 label.AppendText(DatObjectName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Register));
