@@ -483,8 +483,44 @@ namespace pluginVerilog.Data
 
         public override DocumentParser CreateDocumentParser(DocumentParser.ParseModeEnum parseMode, System.Threading.CancellationToken? token)
         {
+            return CreateDocumentParser(parseMode, token, null);
+        }
+
+        public override DocumentParser CreateDocumentParser(DocumentParser.ParseModeEnum parseMode, System.Threading.CancellationToken? token, CodeEditor2.Data.ParseRuleDefinition.Rule? parseRuleOverride)
+        {
             CheckDirty();
-            return new Parser.VerilogParser(this, parseMode, token);
+
+            // Get ParseRule from project settings
+            CodeEditor2.Data.ParseRuleDefinition.Rule? rule = parseRuleOverride;
+            if (rule == null)
+            {
+                rule = Project.GetParseRule(RelativePath);
+            }
+
+            // Apply ParseRule options before creating parser
+            if (rule != null && rule.Options != null)
+            {
+                // Apply Disabled option (return null parser to disable parsing)
+                if (rule.Options.Disabled)
+                {
+                    return null;
+                }
+            }
+
+            // Create parser
+            Parser.VerilogParser parser = new Parser.VerilogParser(this, parseMode, token);
+
+            // Apply ParseRule options after creating parser
+            if (rule != null && rule.Options != null)
+            {
+                // Apply SystemVerilog option
+                if (rule.Options.SystemVerilog)
+                {
+                    parser.VerilogParsedDocument.SystemVerilog = true;
+                }
+            }
+
+            return parser;
         }
 
         // update sub-items from ParsedDocument
