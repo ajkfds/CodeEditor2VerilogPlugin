@@ -112,6 +112,13 @@ namespace pluginVerilog. Data
         {
             foreach (INamedElement element in nameSpace. NamedElements. Values)
             {
+                if (element is NameSpace ns && ns.IsVirtualScope)
+                {
+                    // @scope comment references are NOT real instances and must
+                    // not be collected for simulation. The target file is already
+                    // collected via its own ModuleInstantiation chain.
+                    continue;
+                }
                 if (element is NameSpace)
                 {
                     NameSpace subNameSpace = (NameSpace) element;

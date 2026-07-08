@@ -326,6 +326,15 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                 while (!word.Eof)
                 {
+                    // Parse comment annotations (@scope, etc.) before the
+                    // following module item so that a wire/assign whose RHS
+                    // references a name introduced by @scope (e.g.
+                    //   // @scope MY_MOD inst0
+                    //   wire [7:0] aa = inst0.SIG;
+                    // ) can resolve to the VirtualScopeNameSpace created
+                    // for the annotation.
+                    CommentAnnotationItem.Parse(word, module);
+
                     if (module.AnsiStylePortDefinition)
                     {
                         if (!await Items.NonPortModuleItem.Parse(word, module))
@@ -356,7 +365,6 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                             }
                         }
                     }
-                    CommentAnnotationItem.Parse(word, module);
                     word.CheckCancelToken();
                 }
                 //parseModuleItems(word, module);

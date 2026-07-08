@@ -50,6 +50,14 @@ namespace pluginVerilog.Verilog
         /// </summary>
         public bool IsResolved => ResolvedBuildingBlock != null;
 
+        /// <summary>
+        /// The name under which this scope reference's VirtualScopeNameSpace is
+        /// (or will be) registered in the containing NameSpace. By default this
+        /// is the InstanceName if present, otherwise the BuildingBlockName. Used
+        /// to deduplicate repeated @scope annotations targeting the same entry.
+        /// </summary>
+        public string VirtualScopeEntryName { get; set; } = "";
+
         public override string ToString()
         {
             string result = BuildingBlockName;

@@ -29,7 +29,8 @@ namespace pluginVerilog.Verilog
         }
         public virtual CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
 
-        public NamedElements NamedElements { get; } = new NamedElements();
+        [JsonIgnore]
+        public virtual NamedElements NamedElements { get; } = new NamedElements();
 
         /// <summary>
         /// Comment-based scope references (from @scope annotation)
@@ -50,14 +51,48 @@ namespace pluginVerilog.Verilog
         [JsonIgnore]
         public BuildingBlocks.BuildingBlock BuildingBlock { get; protected set; }
 
+        // ====== VirtualScope support (for @scope annotation) ======
+
+        /// <summary>
+        /// True if this NameSpace is a virtual wrapper for another building block,
+        /// injected via @scope comment annotation. Virtual scopes have no
+        /// associated file and are skipped by SimSetup file collection.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsVirtualScope { get; init; } = false;
+
+        /// <summary>
+        /// The target BuildingBlock this virtual scope wraps. Set only when
+        /// <see cref="IsVirtualScope"/> is true.
+        /// </summary>
+        [JsonIgnore]
+        public BuildingBlocks.BuildingBlock? VirtualScopeTarget { get; init; } = null;
+
+        /// <summary>
+        /// The originating <see cref="CommentScopeReference"/> if this NameSpace
+        /// was created from an @scope annotation.
+        /// </summary>
+        [JsonIgnore]
+        public CommentScopeReference? SourceCommentScopeReference { get; init; } = null;
+
+        /// <summary>
+        /// The name to use when registering this scope in the parent
+        /// <see cref="NamedElements"/>. For @scope buildingBlock [instanceName],
+        /// this is the instanceName (if specified) or the buildingBlockName.
+        /// </summary>
+        [JsonIgnore]
+        public string VirtualScopeEntryName { get; init; } = "";
+
+        // ====== end VirtualScope support ======
+
         public INamedElement? GetNamedElementUpward(string name)
         {
             if (NamedElements.ContainsKey(name)) return NamedElements[name];
-            
+
             // Search in comment scope references
             var fromScope = GetNamedElementFromCommentScopes(name, out _);
             if (fromScope != null) return fromScope;
-            
+
             if (Parent == null) return null;
             return Parent.GetNamedElementUpward(name);
         }
@@ -70,7 +105,7 @@ namespace pluginVerilog.Verilog
                 nameSpace = this;
                 return NamedElements[name];
             }
-            
+
             // Search in comment scope references
             var fromScope = GetNamedElementFromCommentScopes(name, out NameSpace? scopeNameSpace);
             if (fromScope != null)
@@ -78,7 +113,7 @@ namespace pluginVerilog.Verilog
                 nameSpace = scopeNameSpace;
                 return fromScope;
             }
-            
+
             if (Parent == null) return null;
             return Parent.GetNamedElementUpward(name, out nameSpace);
         }
@@ -141,8 +176,9 @@ namespace pluginVerilog.Verilog
                 {
                     list.Add((ModuleItems.IBuildingBlockInstantiation)namedElement);
                 }
-                else if (namedElement is NameSpace)
+                else if (namedElement is NameSpace && !(namedElement is VirtualScopeNameSpace))
                 {
+                    // Virtual scopes must not be traversed for instantiations.
                     getBuildingBlockInstantiations((NameSpace)namedElement, list);
                 }
             }
@@ -208,7 +244,7 @@ namespace pluginVerilog.Verilog
                 Parent.AppendAutoCompleteItem(items);
             }
 
-            // Also add items from comment scope references
+            // Also add items from comment scope references (legacy fallback)
             AppendAutoCompleteItemFromCommentScopes(items);
         }
 
@@ -306,23 +342,26 @@ namespace pluginVerilog.Verilog
 
         /// <summary>
         /// Resolves a scope reference to get the actual building block.
+        /// Public so it can be called from VerilogFile.AcceptParsedDocumentAsync
+        /// after all building blocks are registered.
         /// </summary>
-        private void resolveScopeReference(CommentScopeReference scopeRef)
+        public void resolveScopeReference(CommentScopeReference scopeRef)
         {
             if (BuildingBlock?.File?.ProjectProperty == null) return;
 
             var projectProperty = BuildingBlock.File.ProjectProperty;
-            
-            // Try to get the building block
+
             BuildingBlock? buildingBlock = null;
-            
+
             if (scopeRef.ParameterOverrides != null && scopeRef.ParameterOverrides.Count > 0)
             {
-                // Need to find the parameterized instance
-                // For now, get the base building block
+                // Build a synthetic IBuildingBlockInstantiation-like structure to use
+                // the parameterized lookup logic in ProjectProperty.GetInstancedBuildingBlock.
+                // For now, GetInstancedBuildingBlock requires an IBuildingBlockInstantiation.
+                // Fall back to the base block; parameter overrides for @scope are
+                // applied lazily by the VirtualScopeNameSpace wrapper.
                 buildingBlock = projectProperty.GetBuildingBlock(scopeRef.BuildingBlockName);
-                
-                // Store the parameter overrides for later instantiation
+
                 if (buildingBlock != null)
                 {
                     scopeRef.ResolvedBuildingBlock = buildingBlock;
@@ -343,14 +382,14 @@ namespace pluginVerilog.Verilog
             foundNameSpace = null;
             var vParsedDoc = instance.VerilogParsedDocument;
             if (vParsedDoc?.Root == null) return null;
-            
+
             // Get the module's namespace
             var moduleName = instance.ModuleName;
             if (vParsedDoc.Root.BuildingBlocks.TryGetValue(moduleName, out var module))
             {
                 return module.GetNamedElementUpward(name, out foundNameSpace);
             }
-            
+
             return null;
         }
 
@@ -398,12 +437,69 @@ namespace pluginVerilog.Verilog
         {
             var vParsedDoc = instance.VerilogParsedDocument;
             if (vParsedDoc?.Root == null) return;
-            
+
             // Get the module's namespace
             var moduleName = instance.ModuleName;
             if (vParsedDoc.Root.BuildingBlocks.TryGetValue(moduleName, out var module))
             {
                 module.AppendAutoCompleteItem(items);
+            }
+        }
+
+        /// <summary>
+        /// Resolves and registers all @scope comment references in this NameSpace.
+        /// For each reference, a <see cref="VirtualScopeNameSpace"/> is created and
+        /// added to <see cref="NamedElements"/> so that it is reachable from
+        /// expression parse and autocomplete as if it were a normal sub-namespace.
+        /// This should be called AFTER all building blocks in the project have been
+        /// registered (i.e., after VerilogFile.AcceptParsedDocumentAsync).
+        /// </summary>
+        public void ApplyCommentScopeReferences()
+        {
+            foreach (var scopeRef in CommentScopeReferences)
+            {
+                if (scopeRef.ResolvedBuildingBlock == null)
+                {
+                    resolveScopeReference(scopeRef);
+                }
+
+                if (scopeRef.ResolvedBuildingBlock == null) continue;
+
+                // Determine the name to register under.
+                string entryName = !string.IsNullOrEmpty(scopeRef.InstanceName)
+                    ? scopeRef.InstanceName
+                    : scopeRef.BuildingBlockName;
+
+                if (string.IsNullOrEmpty(entryName)) continue;
+
+                // Skip if already registered (idempotent)
+                if (NamedElements.ContainsKey(entryName))
+                {
+                    INamedElement? existing = NamedElements[entryName];
+                    if (existing is VirtualScopeNameSpace v && v.SourceCommentScopeReference == scopeRef)
+                    {
+                        continue;
+                    }
+                }
+
+                var virtualNs = VirtualScopeNameSpace.Create(
+                    sourceScopeRef: scopeRef,
+                    target: scopeRef.ResolvedBuildingBlock,
+                    entryName: entryName,
+                    parent: this);
+
+                try
+                {
+                    if (NamedElements.ContainsKey(entryName))
+                    {
+                        NamedElements.RemoveKey(entryName);
+                    }
+                    NamedElements.Add(entryName, virtualNs);
+                }
+                catch
+                {
+                    // duplicate-safe ignore
+                }
             }
         }
     }

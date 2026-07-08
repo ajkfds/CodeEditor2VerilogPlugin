@@ -202,6 +202,19 @@ namespace pluginVerilog.Data
                 textFileLock.ExitWriteLock();
             }
 
+            // Now that all building blocks in this file are registered, resolve
+            // and apply @scope comment annotations. This must happen after
+            // RegisterBuildingBlock so that @scope targets are findable via
+            // ProjectProperty.GetBuildingBlock().
+            if (vParsedDocument.Root != null)
+            {
+                vParsedDocument.Root.ApplyCommentScopeReferences();
+                foreach (var bbKvp in vParsedDocument.Root.BuildingBlocks)
+                {
+                    bbKvp.Value.ApplyCommentScopeReferences();
+                }
+            }
+
             //TextFile? textFile = await Controller.CodeEditor.GetTextFileAsync();
             //if (textFile == this)
             //{

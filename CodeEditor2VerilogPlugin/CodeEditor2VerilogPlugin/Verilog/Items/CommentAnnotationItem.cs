@@ -212,8 +212,88 @@ namespace pluginVerilog.Verilog.Items
                 comment.MoveNext();
             }
 
-            // Add to nameSpace
-            nameSpace.CommentScopeReferences.Add(scopeRef);
+            // Skip if an equivalent @scope reference has already been registered
+            // for this nameSpace in this parse pass. This makes the annotation
+            // idempotent so that re-invocation (which can happen when the same
+            // @scope comment precedes multiple module items) does not produce
+            // duplicate VirtualScopeNameSpace entries.
+            string newEntryName = !string.IsNullOrEmpty(scopeRef.InstanceName)
+                ? scopeRef.InstanceName
+                : scopeRef.BuildingBlockName;
+            bool alreadyRegistered = false;
+            foreach (var existingRef in nameSpace.CommentScopeReferences)
+            {
+                if (existingRef.BuildingBlockName == scopeRef.BuildingBlockName
+                    && existingRef.InstanceName == scopeRef.InstanceName
+                    && string.Equals(existingRef.VirtualScopeEntryName, newEntryName, System.StringComparison.Ordinal))
+                {
+                    alreadyRegistered = true;
+                    break;
+                }
+            }
+            if (!alreadyRegistered)
+            {
+                scopeRef.VirtualScopeEntryName = newEntryName;
+                nameSpace.CommentScopeReferences.Add(scopeRef);
+            }
+
+            // Immediately apply the scope reference so that subsequent expressions
+            // in the same parse pass can resolve identifiers that go through the
+            // virtual scope (e.g. `wire aa = TEST_RTL_MODULE_0.DATA_I;` after
+            // `// @scope TEST_RTL_MODULE TEST_RTL_MODULE_0`). Without this,
+            // the VirtualScopeNameSpace would only be registered later in
+            // VerilogFile.AcceptParsedDocumentAsync via ApplyCommentScopeReferences,
+            // and the in-flight parse would emit "unbound object" errors.
+            if (!word.Prototype && !alreadyRegistered && !string.IsNullOrEmpty(newEntryName))
+            {
+                scopeRef.ResolvedBuildingBlock = word.ProjectProperty.GetBuildingBlock(scopeRef.BuildingBlockName);
+
+                // Even when the target BuildingBlock is not yet registered (it
+                // may live in a different file whose parse hasn't completed),
+                // we still register a VirtualScopeNameSpace with a null target.
+                // The subsequent sub-identifier lookup (e.g. DATA_I in
+                // TEST_RTL_MODULE_0.DATA_I) will fail to resolve, but the
+                // first identifier TEST_RTL_MODULE_0 itself will be found,
+                // avoiding the spurious "unbound object" error on the
+                // virtual-scope identifier. The missing target will cause a
+                // different, more accurate error (and triggers a reparse).
+                BuildingBlocks.BuildingBlock? effectiveTarget = scopeRef.ResolvedBuildingBlock;
+                bool needReparse = false;
+                if (effectiveTarget == null)
+                {
+                    needReparse = true;
+                }
+
+                if (nameSpace.NamedElements.ContainsKey(newEntryName))
+                {
+                    INamedElement? existing = nameSpace.NamedElements[newEntryName];
+                    if (existing is VirtualScopeNameSpace v && v.SourceCommentScopeReference == scopeRef)
+                    {
+                        // Already registered by an earlier @scope in this parse pass.
+                    }
+                    else
+                    {
+                        // Don't overwrite an existing real instance/identifier
+                        // (e.g. a real module instance) with a virtual scope;
+                        // the real binding should take priority.
+                    }
+                }
+                else
+                {
+                    var virtualNs = VirtualScopeNameSpace.Create(
+                        sourceScopeRef: scopeRef,
+                        target: effectiveTarget, // may be null; resolved later
+                        entryName: newEntryName,
+                        parent: nameSpace);
+
+                    nameSpace.NamedElements.Add(newEntryName, virtualNs);
+                }
+
+                if (needReparse)
+                {
+                    word.RootParsedDocument.ReparseRequested = true;
+                }
+            }
         }
     }
 }

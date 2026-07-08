@@ -1,20 +1,16 @@
 `timescale 1ns / 1ps
 
-module TEST_RTL_MODULE;
-wire [31:0] data;
-
-assign data =	32'(2'b00);
-
-`define SCR1_XLEN               32
-wire [31:0]	data0 =	`SCR1_XLEN'(2'b00);
+module TEST_RTL_MODULE(
+input [7:0]	DATA_I,	// @sync:CLK_I
+input	CLK_I,		// @sync:clock
+input	RST_X_I		// @sync:reset
+);
 
 
 
 
 
-
-
-
+wire aaaa;
 
 
 
