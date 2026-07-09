@@ -333,7 +333,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     //   wire [7:0] aa = inst0.SIG;
                     // ) can resolve to the VirtualScopeNameSpace created
                     // for the annotation.
-                    CommentAnnotationItem.Parse(word, module);
+                    await CommentAnnotationItem.ParseAsync(word, module);
 
                     if (module.AnsiStylePortDefinition)
                     {

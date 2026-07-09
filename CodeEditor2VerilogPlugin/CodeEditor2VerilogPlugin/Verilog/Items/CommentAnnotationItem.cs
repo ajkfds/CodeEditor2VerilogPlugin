@@ -4,7 +4,7 @@ namespace pluginVerilog.Verilog.Items
 {
     public static class CommentAnnotationItem
     {
-        public static void Parse(WordScanner word, NameSpace nameSpace)
+        public static async System.Threading.Tasks.Task ParseAsync(WordScanner word, NameSpace nameSpace)
         {
             if (!word.GetPreviousComment().Contains("@")) return;
 
@@ -76,7 +76,7 @@ namespace pluginVerilog.Verilog.Items
                     {
                         // Parse @scope annotation
                         // Format: @scope buildingBlockName [#(.paramName(paramValue),...)] [instanceName]
-                        parseScopeAnnotation(comment, word, nameSpace);
+                        await parseScopeAnnotationAsync(comment, word, nameSpace);
                     }
                     else
                     {
@@ -90,7 +90,7 @@ namespace pluginVerilog.Verilog.Items
             }
         }
 
-        private static void parseScopeAnnotation(CommentScanner comment, WordScanner word, NameSpace nameSpace)
+        private static async System.Threading.Tasks.Task parseScopeAnnotationAsync(CommentScanner comment, WordScanner word, NameSpace nameSpace)
         {
             comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
             comment.MoveNext();
@@ -252,6 +252,36 @@ namespace pluginVerilog.Verilog.Items
                 // in case the referenced building block has since been
                 // registered (its file finally parsed, or it was re-parsed and
                 // a new BuildingBlock instance is now in the registry).
+                // In EditParse mode, if the target has not yet been parsed,
+                // eagerly parse the file that owns the @scope target. This
+                // mirrors the behavior of ModuleInstantiation.Parse's
+                // EditParse branch (which creates a VerilogModuleInstance and
+                // runs SingleHierParse on it) but for the @scope case the
+                // only thing that needs parsing is the referenced
+                // BuildingBlock's owning file -- no synthetic instance is
+                // created.
+                if (word.RootParsedDocument.ParseMode == CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.EditParse
+                    && word.ProjectProperty.GetBuildingBlock(scopeRef.BuildingBlockName) == null)
+                {
+                    Data.IVerilogRelatedFile? targetFile =
+                        word.ProjectProperty.GetFileOfBuildingBlock(scopeRef.BuildingBlockName);
+                    if (targetFile is Data.VerilogFile targetVerilogFile
+                        && targetVerilogFile.VerilogParsedDocument == null)
+                    {
+                        var baseParser = targetVerilogFile.CreateDocumentParser(
+                            CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.SingleHierParse,
+                            word.CancellationToken);
+                        if (baseParser != null)
+                        {
+                            await baseParser.ParseAsync();
+                            if (baseParser.ParsedDocument != null)
+                            {
+                                await targetVerilogFile.AcceptParsedDocumentAsync(baseParser);
+                            }
+                        }
+                    }
+                }
+
                 scopeRef.ResolvedBuildingBlock = word.ProjectProperty.GetBuildingBlock(scopeRef.BuildingBlockName);
 
                 // Even when the target BuildingBlock is not yet registered (it
