@@ -143,11 +143,30 @@ namespace pluginVerilog.Views
             if (e.Key == Avalonia.Input.Key.Enter)
             {
                 Complete();
+                e.Handled = true;
+                return;
             }
             else if (e.Key == Avalonia.Input.Key.Escape)
             {
                 Cancel();
+                e.Handled = true;
+                return; 
             }
+
+            if (e.Key == Avalonia.Input.Key.Down)
+            {
+                moveDownWard();
+                e.Handled = true;
+                return;
+            }
+            if (e.Key == Avalonia.Input.Key.Up)
+            {
+                moveUpWard();
+                e.Handled = true;
+                return;
+            }
+
+
 
             object? item = ListBox0.SelectedItem;
             ConnectionItem? connection = item as ConnectionItem;
@@ -179,6 +198,11 @@ namespace pluginVerilog.Views
         {
             if (ListBox0.SelectedIndex < ListBox0.Items.Count - 1)
                 ListBox0.SelectedIndex++;
+        }
+        private void moveUpWard()
+        {
+            if (ListBox0.SelectedIndex > 0)
+                ListBox0.SelectedIndex--;
         }
 
 

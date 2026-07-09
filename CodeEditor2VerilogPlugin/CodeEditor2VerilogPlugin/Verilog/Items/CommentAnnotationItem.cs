@@ -244,8 +244,14 @@ namespace pluginVerilog.Verilog.Items
             // the VirtualScopeNameSpace would only be registered later in
             // VerilogFile.AcceptParsedDocumentAsync via ApplyCommentScopeReferences,
             // and the in-flight parse would emit "unbound object" errors.
-            if (!word.Prototype && !alreadyRegistered && !string.IsNullOrEmpty(newEntryName))
+            if (!word.Prototype && !string.IsNullOrEmpty(newEntryName))
             {
+                // Always re-resolve the target. On the first parse this sets
+                // scopeRef.ResolvedBuildingBlock; on subsequent reparses (the
+                // annotation may be re-encountered) it refreshes the binding
+                // in case the referenced building block has since been
+                // registered (its file finally parsed, or it was re-parsed and
+                // a new BuildingBlock instance is now in the registry).
                 scopeRef.ResolvedBuildingBlock = word.ProjectProperty.GetBuildingBlock(scopeRef.BuildingBlockName);
 
                 // Even when the target BuildingBlock is not yet registered (it
@@ -269,7 +275,12 @@ namespace pluginVerilog.Verilog.Items
                     INamedElement? existing = nameSpace.NamedElements[newEntryName];
                     if (existing is VirtualScopeNameSpace v && v.SourceCommentScopeReference == scopeRef)
                     {
-                        // Already registered by an earlier @scope in this parse pass.
+                        // Already registered by an earlier @scope in this parse
+                        // pass. Update its target so that the now-resolved
+                        // building block becomes visible to subsequent
+                        // expression parses via the NamedElements override
+                        // even if no re-registration happens.
+                        v.UpdateTarget(effectiveTarget);
                     }
                     else
                     {
