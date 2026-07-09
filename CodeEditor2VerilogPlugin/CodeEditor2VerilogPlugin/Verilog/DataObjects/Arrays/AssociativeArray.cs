@@ -108,6 +108,11 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
         public override DataObject Clone()
         {
             AssociativeArray associativeArray = AssociativeArray.Create( DataObject, IndexDataType );
+            // Defined フラグをコピーする。
+            // Defined は prototype parse 時には false、非 prototype parse 時に true に設定されるが、
+            // Clone() 後は別インスタンスとなるため、originalDataObject の状態を引き継ぐ必要がある。
+            // これを忘れると DataObjectReference.ParseCreate 内で「not defined here」エラーが出る。
+            associativeArray.Defined = this.Defined;
             return associativeArray;
 
 //            throw new NotImplementedException();
@@ -115,6 +120,8 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
 
         public override DataObject Clone(string name)
         {
+            // Name が init-only なため、Create() を使って別の名前で生成することはできない。
+            // (この Clone(string) は現状の呼び出し経路では使われていない)
             throw new NotImplementedException();
         }
     }

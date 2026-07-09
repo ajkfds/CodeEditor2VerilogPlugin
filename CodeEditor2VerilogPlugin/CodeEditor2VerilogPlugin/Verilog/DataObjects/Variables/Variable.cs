@@ -453,7 +453,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                     }
                     else
                     {
-                        Variable? preDefined = nameSpace.NamedElements[variable.Name] as Variable;
+                        DataObject? preDefined = nameSpace.NamedElements[variable.Name] as DataObject;
                         if (preDefined != null) preDefined.Defined = true;
                     }
                 }

@@ -136,12 +136,15 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
         public override DataObject Clone()
         {
             Queue queue = Queue.Create(DataObject.Clone(), MaxSizeExpression);
+            // Defined フラグをコピーする (AssociativeArray と同じ理由で必要)
+            queue.Defined = this.Defined;
             return queue;
         }
 
         public override DataObject Clone(string name)
         {
             Queue queue = Create(DataObject.Clone(name), MaxSizeExpression);
+            queue.Defined = this.Defined;
             return queue;
         }
     }

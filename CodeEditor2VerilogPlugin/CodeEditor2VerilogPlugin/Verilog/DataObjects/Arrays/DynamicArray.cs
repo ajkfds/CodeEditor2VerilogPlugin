@@ -49,12 +49,15 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
         public override DataObject Clone()
         {
             DynamicArray clone = Create(DataObject.Clone());
+            // Defined フラグをコピーする (AssociativeArray と同じ理由で必要)
+            clone.Defined = this.Defined;
             return clone;
         }
 
         public override DataObject Clone(string name)
         {
             DynamicArray clone = DynamicArray.Create(DataObject.Clone(name),name);
+            clone.Defined = this.Defined;
             return clone;
         }
     }
