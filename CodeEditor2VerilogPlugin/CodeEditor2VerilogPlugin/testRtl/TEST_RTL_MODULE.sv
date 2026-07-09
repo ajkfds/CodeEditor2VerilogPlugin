@@ -10,7 +10,7 @@ input	RST_X_I		// @sync:reset
 
 
 
-wire aaaa;
+wire [7:0] aaaa;
 
 
 

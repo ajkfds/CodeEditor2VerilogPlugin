@@ -2,8 +2,8 @@
 // Bug 10.6.2 - module instance .* parse error
 
 module flop (
-    input clk,
-    input rst_n,
+    input clk,		// @sync:clock
+    input rst_n,	// @sync:reset
     input [7:0] data_in,
     output reg [7:0] data_out
 );

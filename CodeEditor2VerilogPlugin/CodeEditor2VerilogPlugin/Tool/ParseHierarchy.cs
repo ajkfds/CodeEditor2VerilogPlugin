@@ -546,6 +546,85 @@ namespace pluginVerilog.Tool
                     EnqueueWork(newTask, workQueue, completeIds);
                 }
             }
+
+            // For @scope comment annotations, the referenced BuildingBlock may
+            // live in a different file. That file is not reachable via the
+            // `verilogFile.Items` chain above (which only descends into module
+            // instances defined in this file), so we explicitly enqueue the
+            // file that owns the @scope target. This makes the referenced
+            // BuildingBlock get parsed, so that VirtualScopeNameSpace can
+            // resolve identifiers from it.
+            //
+            // Skipped in ThisFileOnly mode because @scope references are
+            // inherently cross-file and would need a separate parse pass.
+            if (parseMode != ParseMode.ThisFileOnly
+                && verilogFile is Data.VerilogFile scopeOwnerFile
+                && scopeOwnerFile.VerilogParsedDocument?.Root != null)
+            {
+                EnqueueScopeReferencedFiles(
+                    scopeOwnerFile.VerilogParsedDocument.Root.BuildingBlocks.Values,
+                    scopeOwnerFile.ProjectProperty,
+                    workQueue,
+                    completeIds);
+            }
+        }
+
+        /// <summary>
+        /// Walks the CommentScopeReferences declared on each supplied
+        /// BuildingBlock and enqueues the file that owns the referenced
+        /// BuildingBlock into the parse work queue. Used by
+        /// parseDownwardAsync to make sure that `// @scope` targets
+        /// (which are normally in a different file and therefore not
+        /// reachable from the current file's instance hierarchy) are
+        /// also parsed.
+        /// </summary>
+        private static void EnqueueScopeReferencedFiles(
+            IEnumerable<pluginVerilog.Verilog.BuildingBlocks.BuildingBlock> buildingBlocks,
+            ProjectProperty projectProperty,
+            ConcurrentQueue<ParseTask> workQueue,
+            ConcurrentDictionary<string, bool> completeIds)
+        {
+            if (projectProperty == null) return;
+
+            // Track files we have already enqueued in this call so we don't
+            // re-enqueue the same file repeatedly when several scope
+            // references point at the same target.
+            HashSet<CodeEditor2.Data.TextFile> enqueuedFiles = new HashSet<CodeEditor2.Data.TextFile>();
+
+            foreach (var buildingBlock in buildingBlocks)
+            {
+                if (buildingBlock == null) continue;
+                foreach (var scopeRef in buildingBlock.CommentScopeReferences)
+                {
+                    if (scopeRef == null) continue;
+                    if (string.IsNullOrEmpty(scopeRef.BuildingBlockName)) continue;
+
+                    // Look up the target file. We use GetFileOfBuildingBlock
+                    // (rather than GetBuildingBlock) so that we enqueue the
+                    // file even if the target BuildingBlock has not yet been
+                    // parsed in this run -- the file parse is what causes
+                    // the target to be registered. The File-side parse
+                    // (VerilogFile.AcceptParsedDocumentAsync) will then
+                    // RegisterBuildingBlock, after which the
+                    // VirtualScopeNameSpace's late-binding lookup can find it.
+                    Data.IVerilogRelatedFile? targetFile =
+                        projectProperty.GetFileOfBuildingBlock(scopeRef.BuildingBlockName);
+                    if (targetFile == null) continue;
+
+                    // The target file must be a TextFile for the parse queue
+                    // (workers call verilogFile.Items etc. on it). VerilogFile
+                    // is the only such implementation in the Verilog plugin;
+                    // skip other types defensively.
+                    if (!(targetFile is CodeEditor2.Data.TextFile targetTextFile)) continue;
+
+                    if (!enqueuedFiles.Add(targetTextFile)) continue;
+
+                    ParseTask newTask = new ParseTask(
+                        Id: targetTextFile.Key,
+                        tarfgetTextFile: targetTextFile);
+                    EnqueueWork(newTask, workQueue, completeIds);
+                }
+            }
         }
 
         // 下層から上層に向けての再parse。
