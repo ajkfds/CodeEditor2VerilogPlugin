@@ -62,11 +62,15 @@ namespace pluginVerilog.Verilog
         public bool IsVirtualScope { get; init; } = false;
 
         /// <summary>
-        /// The target BuildingBlock this virtual scope wraps. Set only when
-        /// <see cref="IsVirtualScope"/> is true.
+        /// The target BuildingBlock this virtual scope wraps. Set when
+        /// <see cref="IsVirtualScope"/> is true. The setter exists so that a
+        /// VirtualScopeNameSpace created with a null target (because the
+        /// referenced building block was not yet parsed at the time of
+        /// @scope annotation) can have its target bound later when the
+        /// referenced file is parsed and the building block becomes available.
         /// </summary>
         [JsonIgnore]
-        public BuildingBlocks.BuildingBlock? VirtualScopeTarget { get; init; } = null;
+        public BuildingBlocks.BuildingBlock? VirtualScopeTarget { get; set; } = null;
 
         /// <summary>
         /// The originating <see cref="CommentScopeReference"/> if this NameSpace
