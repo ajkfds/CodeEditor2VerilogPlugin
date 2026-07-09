@@ -152,11 +152,34 @@ namespace pluginVerilog.Verilog.Expressions
                         return null;
                     }
                 }
+                else if (letDecl != null && letDecl.Ports.Count != 0)
+                {
+                    // Check if all let ports have default values
+                    bool allHaveDefaults = true;
+                    foreach (var port in letDecl.PortsList)
+                    {
+                        if (port.DefaultArgument == null)
+                        {
+                            allHaveDefaults = false;
+                            break;
+                        }
+                    }
+                    if (!allHaveDefaults)
+                    {
+                        word.AddError("illegal let call (argument required)");
+                        return null;
+                    }
+                }
                 return functionCall;
             }
 
             // Use common ListOfArguments parser
-            ListOfArguments.ParseListOfArguments(word, nameSpace, function, functionCall.PortConnection, out bool returnConstant);
+            // Pass letDecl (which implements IPortNameSpace) so that port checks work
+            // for let calls as well as function calls.
+            IPortNameSpace? portNameSpace = function != null
+                ? (IPortNameSpace)function
+                : (letDecl != null ? (IPortNameSpace)letDecl : null);
+            ListOfArguments.ParseListOfArguments(word, nameSpace, portNameSpace, functionCall.PortConnection, out bool returnConstant);
 
             // Check if function call ended properly
             functionCall.Reference = WordReference.CreateReferenceRange(functionCall.Reference, word.GetReference());

@@ -12,19 +12,19 @@ namespace pluginVerilog.Verilog.DataObjects
     /// <summary>
     /// Let Declaration
     /// IEEE 1800-2017 SystemVerilog
-    /// 
+    ///
     /// let_declaration ::=
     ///     "let" let_identifier [ ( [ let_port_list ] ) ] = expression ;
-    /// 
+    ///
     /// let_identifier ::= identifier
     /// let_port_list ::= let_port_item { , let_port_item }
     /// let_port_item ::= { attribute_instance } [ const ] let_formal_type formal_port_identifier { variable_dimension } [ = let_actual_arg ]
     /// let_formal_type ::= data_type_or_void
     /// let_actual_arg ::= expression
-    /// 
+    ///
     /// Let declarations allow defining reusable expressions with formal arguments.
     /// </summary>
-    public class LetDeclaration : NameSpace,INamedElement
+    public class LetDeclaration : NameSpace, INamedElement, IPortNameSpace
     {
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
 
@@ -37,6 +37,43 @@ namespace pluginVerilog.Verilog.DataObjects
         /// The expression this let declaration defines
         /// </summary>
         public Expression? Expression { get; set; }
+
+        // IPortNameSpace implementation: convert LetPortItem entries into Port instances
+        // so that FunctionCall / ListOfArguments can treat let-declaration calls uniformly.
+        private Dictionary<string, DataObjects.Port> ports = new Dictionary<string, DataObjects.Port>();
+        private List<DataObjects.Port> portsList = new List<DataObjects.Port>();
+        private bool portsBuilt = false;
+        public Dictionary<string, DataObjects.Port> Ports { get { EnsurePortsBuilt(); return ports; } }
+        public List<DataObjects.Port> PortsList { get { EnsurePortsBuilt(); return portsList; } }
+
+        private void EnsurePortsBuilt()
+        {
+            if (portsBuilt) return;
+            portsBuilt = true;
+            ports.Clear();
+            portsList.Clear();
+            foreach (var item in PortList)
+            {
+                DataTypes.IDataType dataType = item.DataType != null
+                    ? item.DataType
+                    : DataTypes.LogicType.Create(false, null)!;
+                DataObjects.Port port = new DataObjects.Port()
+                {
+                    Name = item.Identifier,
+                    Direction = item.IsConst ? DataObjects.Port.DirectionEnum.Ref : DataObjects.Port.DirectionEnum.Input,
+                    Project = Project,
+                    DefinitionReference = null
+                };
+                Variables.Variable? portVar = Variables.Variable.Create(port.Name, dataType);
+                if (portVar != null)
+                {
+                    port.DataObject = portVar;
+                }
+                port.DefaultArgument = item.DefaultValue;
+                ports[port.Name] = port;
+                portsList.Add(port);
+            }
+        }
 
         public class LetPortItem
         {
