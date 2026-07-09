@@ -68,6 +68,12 @@ namespace pluginVerilog.Verilog.Items
 
                     foreach (var namedElement in package.NamedElements)
                     {
+                        // dataobject を import する場合は Defined = true にする。
+                        // そうでなければ、参照時に「not defined here」エラー (Undefined access) 扱いになる。
+                        if (namedElement is DataObjects.DataObject dataObject)
+                        {
+                            dataObject.Defined = true;
+                        }
                         if (nameSpace.BuildingBlock.NamedElements.ContainsKey(namedElement.Name))
                         {
                             if (word.Prototype) word.AddError("Name conflict: " + namedElement.Name);
@@ -93,6 +99,12 @@ namespace pluginVerilog.Verilog.Items
                 if (package.NamedElements.ContainsKey(identifier)) targetElement = package.NamedElements[identifier];
                 if (targetElement != null)
                 {
+                    // dataobject を import する場合は Defined = true にする。
+                    // そうでなければ、参照時に「not defined here」エラー (Undefined access) 扱いになる。
+                    if (targetElement is DataObjects.DataObject dataObject)
+                    {
+                        dataObject.Defined = true;
+                    }
                     if (nameSpace.BuildingBlock.NamedElements.ContainsKey(identifier))
                     {
                         if (!word.Prototype) word.AddError("Name conflict: " + identifier);
