@@ -404,6 +404,16 @@ number
 
             if (element is NameSpace)
             {
+                // If the found NameSpace is a Function or LetDeclaration and the next
+                // token is not ".", the identifier is used as a call/reference, not as
+                // a hierarchical namespace traversal.  In that case leave word on the
+                // identifier and return the original nameSpace so the caller can
+                // recognize the element as a FunctionCall / LetDeclaration.
+                if (word.NextText != "."
+                    && (element is Function || element is DataObjects.LetDeclaration))
+                {
+                    return nameSpace;
+                }
                 word.Color(CodeDrawStyle.ColorType.Identifier);
                 word.MoveNext();
                 NameSpace newNameSpace = (NameSpace)element;
