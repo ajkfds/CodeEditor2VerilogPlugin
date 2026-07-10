@@ -144,13 +144,27 @@ namespace pluginVerilog.Verilog
             }
             else
             {
-                if (nameSpace.BuildingBlock.NamedElements.ContainsTask(task.Name))
+                if (word.Prototype)
                 {
-                    nameSpace.BuildingBlock.NamedElements.Replace(task.Name, task);
+                    if (nameSpace.BuildingBlock.NamedElements.ContainsTask(task.Name))
+                    {
+                        word.AddPrototypeError("duplicate task name");
+                    }
+                    else
+                    {
+                        nameSpace.BuildingBlock.NamedElements.Add(task.Name, task);
+                    }
                 }
                 else
                 {
-                    nameSpace.BuildingBlock.NamedElements.Add(task.Name, task);
+                    if (nameSpace.BuildingBlock.NamedElements.ContainsTask(task.Name))
+                    {
+                        task =(Task)nameSpace.BuildingBlock.NamedElements[task.Name];
+                    }
+                    else
+                    {
+                        nameSpace.BuildingBlock.NamedElements.Add(task.Name, task);
+                    }
                 }
             }
 
