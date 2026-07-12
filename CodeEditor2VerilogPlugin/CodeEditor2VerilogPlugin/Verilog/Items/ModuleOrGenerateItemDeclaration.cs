@@ -14,31 +14,35 @@ namespace pluginVerilog.Verilog.Items
             | default clocking clocking_identifier ;
         */
 
-        public static async System.Threading.Tasks.Task<bool> Parse(WordScanner word, BuildingBlocks.BuildingBlock buildingBlock)
+        public static async System.Threading.Tasks.Task<bool> Parse(WordScanner word, NameSpace nameSpace)
         {
+            if(nameSpace is not BuildingBlock && nameSpace is not Generate.GenerateBlock)
+            {
+                if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+            }
             // package_or_generate_item_declaration
-            if (await PackageOrGenerateItemDeclaration.Parse(word, buildingBlock)) return true;
+            if (await PackageOrGenerateItemDeclaration.Parse(word, nameSpace)) return true;
 
             switch (word.Text)
             {
                 // genvar_declaration
                 case "genvar":
-                    DataObjects.Variables.Genvar.ParseCreateFromDeclaration(word, buildingBlock);
+                    DataObjects.Variables.Genvar.ParseCreateFromDeclaration(word, nameSpace);
                     return true;
 
                 // clocking_declaration ::= [ default ] clocking [ clocking_identifier ] clocking_event ; { clocking_item } endclocking  [ : clocking_identifier]
                 //                        | global clocking [ clocking_identifier ] clocking_event ; endclocking [ : clocking_identifier]
                 case "clocking":
                 case "global":
-                    Clocking? clocking = Clocking.ParseCreate(word, buildingBlock, null);
+                    Clocking? clocking = Clocking.ParseCreate(word, nameSpace, null);
                     if (clocking != null)
                     {
                         // Register the clocking block in the namespace if it has a name
                         if (!string.IsNullOrEmpty(clocking.Name) && !word.Prototype)
                         {
-                            if (!buildingBlock.NamedElements.ContainsKey(clocking.Name))
+                            if (!nameSpace.NamedElements.ContainsKey(clocking.Name))
                             {
-                                buildingBlock.NamedElements.Add(clocking.Name, clocking);
+                                nameSpace.NamedElements.Add(clocking.Name, clocking);
                             }
                         }
                         return true;
@@ -52,7 +56,7 @@ namespace pluginVerilog.Verilog.Items
                     if (word.Text == "clocking")
                     {
                         // Parse default clocking statement
-                        Clocking.ParseDefaultClocking(word, buildingBlock);
+                        Clocking.ParseDefaultClocking(word, nameSpace);
                     }
                     else
                     {

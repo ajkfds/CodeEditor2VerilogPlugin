@@ -30,7 +30,7 @@ namespace pluginVerilog.Verilog.Items
 
 
             // module_or_generate_item_declaration
-            if (await ModuleOrGenerateItemDeclaration.Parse(word, nameSpace.BuildingBlock)) return true;
+            if (await ModuleOrGenerateItemDeclaration.Parse(word, nameSpace)) return true;
             //assertion_item::= concurrent_assertion_item | deferred_immediate_assertion_item
 
             switch (word.Text)
