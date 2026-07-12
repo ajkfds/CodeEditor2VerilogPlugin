@@ -584,6 +584,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             if (word.Eof || word.GetCharAt(0) != ';')
             {
                 word.AddError("; expected");
+                word.SkipToKeywords(new List<string> { ";" });
             }
             else
             {
