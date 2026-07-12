@@ -241,36 +241,6 @@ namespace pluginVerilog.Verilog.ModuleItems
                 }
             }
 
-            //Data.VerilogFile? baseFile = instancedModule?.File as Data.VerilogFile;
-            //if (baseFile != null && baseFile.ReparseRequested && nameSpace.BuildingBlock.File.ID != baseFile.ID && !word.RootParsedDocument.RestrictBaseParse)
-            //{
-            //    await baseFile.BaseParseSemapho.WaitAsync();
-            //    try
-            //    {
-            //        if (baseFile.ReparseRequested)
-            //        {
-            //            CodeEditor2.Controller.AppendLog("parsebase : " + baseFile.ID, Avalonia.Media.Colors.Orange);
-            //            var baseParser = baseFile.CreateDocumentParser(CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.BackgroundParse, null);
-            //            ((ParsedDocument)baseParser.ParsedDocument).RestrictBaseParse = true;
-            //                await baseParser.Parse();
-
-            //            await Dispatcher.UIThread.InvokeAsync(
-            //                () => {
-            //                    baseFile.AcceptParsedDocument(baseParser.ParsedDocument);
-            //                    baseFile.ReparseRequested = false;
-            //                }
-            //            );
-            //            instancedModule = word.ProjectProperty.GetBuildingBlock(moduleName) as Module;
-            //        }
-            //    }
-            //    finally
-            //    {
-            //        baseFile.BaseParseSemapho.Release();
-            //    }
-            //}
-
-
-
             word.MoveNext();
             IndexReference blockBeginIndexReference = word.CreateIndexReference();
 
