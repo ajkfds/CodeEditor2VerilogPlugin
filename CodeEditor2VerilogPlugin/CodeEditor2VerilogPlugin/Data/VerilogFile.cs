@@ -154,8 +154,6 @@ namespace pluginVerilog.Data
 
             if (oldParsedDocument == newParsedDocument) return;
 
-            // swap ParsedDocument
-            ParsedDocument = newParsedDocument; // no lock is needed. ParsedDocument property is thread safe
 
             Verilog.ParsedDocument? vParsedDocument;
             vParsedDocument = newParsedDocument as Verilog.ParsedDocument;
@@ -196,16 +194,18 @@ namespace pluginVerilog.Data
                 }
 
                 _reparseRequested = vParsedDocument.ReparseRequested;
+
+                // swap ParsedDocument
+                _parsedDocument = vParsedDocument; // no lock is needed. ParsedDocument property is thread safe
             }
             finally
             {
                 textFileLock.ExitWriteLock();
             }
 
-            // Now that all building blocks in this file are registered, resolve
-            // and apply @scope comment annotations. This must happen after
-            // RegisterBuildingBlock so that @scope targets are findable via
-            // ProjectProperty.GetBuildingBlock().
+
+            // Now that all building blocks in this file are registered, resolve and apply @scope comment annotations.
+            // This must happen after RegisterBuildingBlock so that @scope targets are findable via ProjectProperty.GetBuildingBlock().
             if (vParsedDocument.Root != null)
             {
                 vParsedDocument.Root.ApplyCommentScopeReferences();
@@ -215,12 +215,11 @@ namespace pluginVerilog.Data
                 }
             }
 
-            //TextFile? textFile = await Controller.CodeEditor.GetTextFileAsync();
-            //if (textFile == this)
-            //{
-            //    textFile.CodeDocument?.CopyColorMarkFrom(parser.Document);
-            //    CodeEditor2.Controller.CodeEditor.PostRefresh();
-            //}
+            TextFile? currentTextFile = await Controller.CodeEditor.GetTextFileAsync();
+            if (currentTextFile == this)
+            {
+                currentTextFile.CodeDocument?.CopyColorMarkFrom(parser.Document);
+            }
 
 
             await updateIncludeFilesAsync(vParsedDocument, Items);
@@ -542,6 +541,15 @@ namespace pluginVerilog.Data
             await base.UpdateAsync();
             await VerilogCommon.Updater.UpdateAsync(this, itemUpdateSemaphore);
 
+            Dispatcher.UIThread.Post(() =>
+            {
+                NavigatePanelNode?.UpdateVisual();
+                if (CodeEditor2.Controller.NavigatePanel.GetSelectedFile() == this)
+                {
+                    CodeEditor2.Controller.CodeEditor.PostRefresh();
+                    if (ParsedDocument != null) CodeEditor2.Controller.MessageView.Update(ParsedDocument);
+                }
+            });
         }
 
         public override Task ParseHierarchyAsync(Action<ITextFile> action)
