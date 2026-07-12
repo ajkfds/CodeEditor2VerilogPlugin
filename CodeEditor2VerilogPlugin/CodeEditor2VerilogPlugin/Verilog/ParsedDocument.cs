@@ -730,8 +730,10 @@ public List<string> ImportedPackages = new List<string>();
             appendItems(items, candidate, new AutoComplete.TaskAutocompleteItem());
             if (candidate == "<=") items.Add(new AutoComplete.NonBlockingAssignmentAutoCompleteItem());
 
-            appendKeywordItems(items, candidate, "@sync"); // annotation
+            appendKeywordItems(items, candidate, "sync"); // annotation
             appendKeywordItems(items, candidate, "async"); // annotation
+            appendKeywordItems(items, candidate, "clock"); // annotation
+            appendKeywordItems(items, candidate, "reset"); // annotation
 
             appendKeywordItems(items, candidate, "always"); // verilog
             appendKeywordItems(items, candidate, "integer"); // verilog
