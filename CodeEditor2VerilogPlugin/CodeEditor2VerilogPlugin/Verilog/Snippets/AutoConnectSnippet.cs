@@ -1,7 +1,7 @@
 using Avalonia.Input;
 using Avalonia.Threading;
 using CodeEditor2.Views;
-using pluginVerilog.Verilog.ModuleItems;
+using pluginVerilog.Verilog.Items;
 using System;
 using System.Collections.Generic;
 using System.Linq;

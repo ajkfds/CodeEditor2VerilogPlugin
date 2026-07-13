@@ -5,7 +5,7 @@ using CodeEditor2.CodeEditor;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.Expressions;
-using pluginVerilog.Verilog.ModuleItems;
+using pluginVerilog.Verilog.Items;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

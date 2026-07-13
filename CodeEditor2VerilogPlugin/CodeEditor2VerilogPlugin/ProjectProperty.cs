@@ -3,7 +3,7 @@ using CodeEditor2.Data;
 using CodeEditor2.Tools;
 using pluginVerilog.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
-using pluginVerilog.Verilog.ModuleItems;
+using pluginVerilog.Verilog.Items;
 using System;
 using System.Collections.Generic;
 using System.Text.Json;

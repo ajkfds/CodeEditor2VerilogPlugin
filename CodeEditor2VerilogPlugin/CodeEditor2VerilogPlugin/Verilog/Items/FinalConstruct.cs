@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace pluginVerilog.Verilog.ModuleItems
+namespace pluginVerilog.Verilog.Items
 {
     public class FinalConstruct
     {
@@ -12,7 +12,7 @@ namespace pluginVerilog.Verilog.ModuleItems
 
         public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
         {
-            ModuleItems.FinalConstruct? initial = await ModuleItems.FinalConstruct.ParseCreate(word, nameSpace);
+            Items.FinalConstruct? initial = await Items.FinalConstruct.ParseCreate(word, nameSpace);
             return true;
         }
 

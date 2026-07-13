@@ -2,7 +2,7 @@ using CodeEditor2.CodeEditor;
 using CodeEditor2.CodeEditor.PopupMenu;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects.Nets;
-using pluginVerilog.Verilog.ModuleItems;
+using pluginVerilog.Verilog.Items;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,7 +56,7 @@ namespace pluginVerilog.Verilog.Snippets
             }
         }
 
-        private async System.Threading.Tasks.Task writeModuleInstanceAsync(CodeDocument codeDocument, int index, ModuleItems.ModuleInstantiation moduleInstantiation)
+        private async System.Threading.Tasks.Task writeModuleInstanceAsync(CodeDocument codeDocument, int index, Items.ModuleInstantiation moduleInstantiation)
         {
             CodeEditor.CodeDocument? vCodeDocument = codeDocument as CodeEditor.CodeDocument;
             if (vCodeDocument == null) return;
@@ -81,7 +81,7 @@ namespace pluginVerilog.Verilog.Snippets
 
         public List<string> RemoveSuffixList = new List<string> { "_I", "_O", "_IO" };
 
-        private string CreateString(ModuleInstantiation moduleInstantiation, string indent, ProjectProperty projectProperty)
+        private string CreateString(Verilog.Items.ModuleInstantiation moduleInstantiation, string indent, ProjectProperty projectProperty)
         {
             Module? instancedModule = moduleInstantiation.GetInstancedBuildingBlock() as Module;
             //            Module? instancedModule = projectProperty.GetBuildingBlock(moduleInstantiation.SourceName) as Module;

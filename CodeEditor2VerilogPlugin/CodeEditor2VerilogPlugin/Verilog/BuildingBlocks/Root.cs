@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using pluginVerilog.Verilog.ModuleItems;
+using pluginVerilog.Verilog.Items;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
@@ -365,7 +365,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             if (word.Text != "bind") throw new Exception();
 
             BindDirective? bindDirective;
-            if (ModuleItems.BindDirective.Parse(word, null, out bindDirective))
+            if (Items.BindDirective.Parse(word, null, out bindDirective))
             {
                 // Bind directive parsed successfully
                 // Note: Bind directive is a compiler directive-like construct that doesn't create a building block

@@ -5,7 +5,7 @@ using pluginVerilog.CodeEditor;
 using pluginVerilog.FileTypes;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
-using pluginVerilog.Verilog.ModuleItems;
+using pluginVerilog.Verilog.Items;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,7 +1,7 @@
 using pluginVerilog.Data;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.Expressions;
-using pluginVerilog.Verilog.ModuleItems;
+using pluginVerilog.Verilog.Items;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -134,7 +134,7 @@ namespace pluginVerilog.Verilog
         //    return null;
         //}
 
-        private DataObject? getModuleInstancePortConnection(ModuleItems.ModuleInstantiation moduleInst, string portName)
+        private DataObject? getModuleInstancePortConnection(Verilog.Items.ModuleInstantiation moduleInst, string portName)
         {
             if (!moduleInst.PortConnection.ContainsKey(portName)) return null;
             Expressions.Expression expression = moduleInst.PortConnection[portName];
@@ -142,7 +142,7 @@ namespace pluginVerilog.Verilog
             return null;
         }
 
-        private ModuleItems.ModuleInstantiation? getParentModuleInstance(CodeEditor2.Data.File file)
+        private Verilog.Items.ModuleInstantiation? getParentModuleInstance(CodeEditor2.Data.File file)
         {
             Data.VerilogModuleInstance? moduleInstance = file as Data.VerilogModuleInstance;
             if (moduleInstance == null) return null;
@@ -151,7 +151,7 @@ namespace pluginVerilog.Verilog
             Data.IVerilogRelatedFile? parentFile = file.Parent as Data.IVerilogRelatedFile;
             if (parentFile?.VerilogParsedDocument?.Root?.NamedElements.ContainsKey(instanceName) != true) return null;
             INamedElement namedElement = parentFile.VerilogParsedDocument.Root.NamedElements[instanceName];
-            Verilog.ModuleItems.ModuleInstantiation? moduleInst = namedElement as Verilog.ModuleItems.ModuleInstantiation;
+            Verilog.Items.ModuleInstantiation? moduleInst = namedElement as Verilog.Items.ModuleInstantiation;
             if (moduleInst == null) return null;
             return moduleInst;
         }

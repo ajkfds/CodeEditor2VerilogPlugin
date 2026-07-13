@@ -132,8 +132,8 @@ namespace pluginVerilog.Data
         private readonly SemaphoreSlim _updateSemaphore = new SemaphoreSlim(1, 1);
         public override async System.Threading.Tasks.Task UpdateAsync()
         {
-            await base.UpdateAsync();
             await VerilogCommon.Updater.UpdateAsync(this, _updateSemaphore);
+            await base.UpdateAsync();
         }
         // read text document from file
         private bool readFromFile()

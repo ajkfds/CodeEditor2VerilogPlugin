@@ -1,5 +1,5 @@
 using pluginVerilog.Verilog.BuildingBlocks;
-using pluginVerilog.Verilog.ModuleItems;
+using pluginVerilog.Verilog.Items;
 using System.Collections.Generic;
 
 namespace pluginVerilog.Verilog.Statements

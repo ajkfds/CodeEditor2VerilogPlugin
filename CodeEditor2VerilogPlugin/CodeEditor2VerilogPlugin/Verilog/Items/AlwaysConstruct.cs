@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace pluginVerilog.Verilog.ModuleItems
+namespace pluginVerilog.Verilog.Items
 {
     public class AlwaysConstruct
     {
@@ -17,7 +17,7 @@ namespace pluginVerilog.Verilog.ModuleItems
 
         public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
         {
-            ModuleItems.AlwaysConstruct? always = await ModuleItems.AlwaysConstruct.ParseCreate(word, nameSpace);
+            Items.AlwaysConstruct? always = await Items.AlwaysConstruct.ParseCreate(word, nameSpace);
             return true;
         }
         public static async Task<AlwaysConstruct?> ParseCreate(WordScanner word, NameSpace nameSpace)

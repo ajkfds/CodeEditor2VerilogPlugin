@@ -3,7 +3,7 @@ using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.Expressions;
 using System.Collections.Generic;
 
-namespace pluginVerilog.Verilog.ModuleItems
+namespace pluginVerilog.Verilog.Items
 {
     /// <summary>
     /// Represents a Net Alias declaration

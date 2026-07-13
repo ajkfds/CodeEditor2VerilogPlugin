@@ -35,17 +35,44 @@ namespace pluginVerilog.Verilog.Expressions
         }
         public static TaskReference ParseCreate(WordScanner word, NameSpace nameSpace, NameSpace taskNameSpace)
         {
-            TaskReference ret = new TaskReference();
+            TaskReference? ret = parseCreate(word, nameSpace, taskNameSpace);
+            if(ret != null)
+            {
+                return ret;
+            }
+
+            ret = new TaskReference();
             ret.TaskName = word.Text;
             ret.ModuleName = nameSpace.BuildingBlock.Name;
             word.Color(CodeDrawStyle.ColorType.Keyword);
-            if (taskNameSpace.BuildingBlock.NamedElements.ContainsTask(ret.TaskName))
+
+            if (!word.Prototype)
             {
-                ret.Task = (Task)taskNameSpace.BuildingBlock.NamedElements[ret.TaskName];
+                word.AddError("illegal task name");
             }
-            else if (taskNameSpace.BuildingBlock.NamedElements.ContainsFunction(ret.TaskName))
+            word.MoveNext();
+            return ret;
+        }
+        private static TaskReference? parseCreate(WordScanner word, NameSpace nameSpace, NameSpace taskNameSpace)
+        {
+            if (taskNameSpace.BuildingBlock.NamedElements.ContainsTask(word.Text))
             {
-                Function function = (Function)taskNameSpace.BuildingBlock.NamedElements[ret.TaskName];
+                TaskReference ret = new TaskReference();
+                ret.TaskName = word.Text;
+                ret.ModuleName = nameSpace.BuildingBlock.Name;
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+
+                ret.Task = (Task)taskNameSpace.NamedElements[ret.TaskName];
+                return ret;
+            }
+            else if (taskNameSpace.BuildingBlock.NamedElements.ContainsFunction(word.Text))
+            {
+                TaskReference ret = new TaskReference();
+                ret.TaskName = word.Text;
+                ret.ModuleName = nameSpace.BuildingBlock.Name;
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+
+                Function function = (Function)taskNameSpace.NamedElements[ret.TaskName];
                 if (function.ReturnVariable != null)
                 {
                     word.AddError("illegal task name");
@@ -54,14 +81,15 @@ namespace pluginVerilog.Verilog.Expressions
                 {
                     ret.Task = function;
                 }
+                return ret;
             }
-            else if (!word.Prototype)
-            {
-                word.AddError("illegal task name");
-            }
-            word.MoveNext();
 
-            return ret;
+            if(taskNameSpace.Parent==null)
+            {
+                return null;
+            }
+
+            return parseCreate(word, nameSpace, taskNameSpace.Parent);
         }
     }
 

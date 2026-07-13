@@ -178,10 +178,10 @@ namespace pluginVerilog.Verilog
             }
         }
 
-        public override List<ModuleItems.IBuildingBlockInstantiation> GetBuildingBlockInstantiations()
+        public override List<Items.IBuildingBlockInstantiation> GetBuildingBlockInstantiations()
         {
             // Virtual scopes must not be traversed for instantiations.
-            return new List<ModuleItems.IBuildingBlockInstantiation>();
+            return new List<Items.IBuildingBlockInstantiation>();
         }
 
         /// <summary>

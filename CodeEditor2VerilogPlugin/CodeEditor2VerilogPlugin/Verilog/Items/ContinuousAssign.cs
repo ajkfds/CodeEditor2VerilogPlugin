@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace pluginVerilog.Verilog.ModuleItems
+namespace pluginVerilog.Verilog.Items
 {
     public class ContinuousAssign
     {
@@ -13,7 +13,7 @@ namespace pluginVerilog.Verilog.ModuleItems
 
         public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
         {
-            List<ModuleItems.ContinuousAssign> continuousAssigns = ModuleItems.ContinuousAssign.ParseCreate(word, nameSpace);
+            List<Items.ContinuousAssign> continuousAssigns = Items.ContinuousAssign.ParseCreate(word, nameSpace);
 
 
             return await System.Threading.Tasks.Task.FromResult(true);

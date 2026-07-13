@@ -395,13 +395,6 @@ namespace pluginVerilog.Data
         // update sub-items from ParsedDocument
         public override async System.Threading.Tasks.Task UpdateAsync()
         {
-            await base.UpdateAsync();
-
-            //if (Parent == null)
-            //{
-            //    await VerilogCommon.Updater.UpdateAsync(this, itemUpdateSemaphore);
-            //}
-
             // search parent verilogFile hierachy
             CodeEditor2.Data.Item? parentItem = Parent;
             while (true)
@@ -422,6 +415,8 @@ namespace pluginVerilog.Data
                 VerilogFile vFile = (VerilogFile)parentItem;
                 await VerilogCommon.Updater.UpdateAsync(vFile, itemUpdateSemaphore);
             }
+
+            await base.UpdateAsync();
         }
 
         // Auto Complete Handler

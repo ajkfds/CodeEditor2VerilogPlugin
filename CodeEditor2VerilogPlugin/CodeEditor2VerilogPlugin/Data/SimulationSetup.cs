@@ -5,7 +5,7 @@ using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.DataObjects.Variables;
-using pluginVerilog.Verilog.ModuleItems;
+using pluginVerilog.Verilog.Items;
 using System. Collections. Generic;
 using System. Linq;
 
@@ -114,9 +114,8 @@ namespace pluginVerilog. Data
             {
                 if (element is NameSpace ns && ns.IsVirtualScope)
                 {
-                    // @scope comment references are NOT real instances and must
-                    // not be collected for simulation. The target file is already
-                    // collected via its own ModuleInstantiation chain.
+                    // @scope comment references are NOT real instances and must not be collected for simulation.
+                    // The target file is already collected via its own ModuleInstantiation chain.
                     continue;
                 }
                 if (element is NameSpace)

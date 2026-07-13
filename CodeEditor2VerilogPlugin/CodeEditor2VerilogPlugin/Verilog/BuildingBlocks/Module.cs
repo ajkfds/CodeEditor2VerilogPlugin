@@ -1,6 +1,5 @@
 using CodeEditor2.CodeEditor.CodeComplete;
 using pluginVerilog.Verilog.Items;
-using pluginVerilog.Verilog.ModuleItems;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

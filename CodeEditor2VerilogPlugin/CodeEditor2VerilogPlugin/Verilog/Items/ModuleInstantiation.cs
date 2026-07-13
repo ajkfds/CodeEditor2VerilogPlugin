@@ -13,7 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace pluginVerilog.Verilog.ModuleItems
+namespace pluginVerilog.Verilog.Items
 {
     public class ModuleInstantiation : Item, IBuildingBlockInstantiation, INamedElement
     {

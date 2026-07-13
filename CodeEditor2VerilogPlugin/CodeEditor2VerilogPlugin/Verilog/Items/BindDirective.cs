@@ -23,7 +23,7 @@ using pluginVerilog.Verilog.Expressions;
 using System;
 using System.Collections.Generic;
 
-namespace pluginVerilog.Verilog.ModuleItems
+namespace pluginVerilog.Verilog.Items
 {
     public class BindDirective
     {

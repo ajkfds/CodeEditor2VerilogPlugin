@@ -1,4 +1,4 @@
-namespace pluginVerilog.Verilog.ModuleItems
+namespace pluginVerilog.Verilog.Items
 {
     public class ParameterOverride
     {

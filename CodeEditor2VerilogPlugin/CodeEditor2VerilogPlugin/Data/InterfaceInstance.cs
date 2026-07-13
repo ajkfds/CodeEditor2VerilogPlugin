@@ -259,9 +259,14 @@ namespace pluginVerilog.Data
                 source.RegisterInstanceParsedDocument(ModuleName + ":" + ParameterId, newParsedDocument, this);
                 await acceptParameterizedParsedDocument(newParsedDocument);
             }
-            //            ReparseRequested = vParsedDocument.ReparseRequested;
-            //            Update();
-            System.Diagnostics.Debug.Print("### Verilog Module Instance Parsed " + ID);
+
+            TextFile? currentTextFile = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync();
+            if (currentTextFile == this)
+            {
+                currentTextFile.CodeDocument?.CopyColorMarkFrom(parser.Document);
+                CodeEditor2.Controller.MessageView.Update(newParsedDocument);
+                CodeEditor2.Controller.CodeEditor.PostRefresh();
+            }
         }
 
         private async System.Threading.Tasks.Task acceptParameterizedParsedDocument(ParsedDocument newParsedDocument)
@@ -363,6 +368,7 @@ namespace pluginVerilog.Data
         public override async Task UpdateAsync()
         {
             await VerilogCommon.Updater.UpdateAsync(this, _updateSemaphore);
+            await base.UpdateAsync();
         }
         // Auto Complete Handler
 

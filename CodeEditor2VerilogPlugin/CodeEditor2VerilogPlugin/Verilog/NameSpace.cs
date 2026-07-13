@@ -167,18 +167,18 @@ namespace pluginVerilog.Verilog
             return this;
         }
 
-        public virtual List<ModuleItems.IBuildingBlockInstantiation> GetBuildingBlockInstantiations()
+        public virtual List<Items.IBuildingBlockInstantiation> GetBuildingBlockInstantiations()
         {
-            List<ModuleItems.IBuildingBlockInstantiation> list = new List<ModuleItems.IBuildingBlockInstantiation>();
+            List<Items.IBuildingBlockInstantiation> list = new List<Items.IBuildingBlockInstantiation>();
             return getBuildingBlockInstantiations(this, list);
         }
-        private List<ModuleItems.IBuildingBlockInstantiation> getBuildingBlockInstantiations(NameSpace nameSpace, List<ModuleItems.IBuildingBlockInstantiation> list)
+        private List<Items.IBuildingBlockInstantiation> getBuildingBlockInstantiations(NameSpace nameSpace, List<Items.IBuildingBlockInstantiation> list)
         {
             foreach (INamedElement namedElement in nameSpace.NamedElements.Values)
             {
-                if (namedElement is ModuleItems.IBuildingBlockInstantiation)
+                if (namedElement is Items.IBuildingBlockInstantiation)
                 {
-                    list.Add((ModuleItems.IBuildingBlockInstantiation)namedElement);
+                    list.Add((Items.IBuildingBlockInstantiation)namedElement);
                 }
                 else if (namedElement is NameSpace && !(namedElement is VirtualScopeNameSpace))
                 {

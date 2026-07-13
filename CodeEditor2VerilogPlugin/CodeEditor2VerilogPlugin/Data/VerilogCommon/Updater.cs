@@ -2,7 +2,7 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using CodeEditor2.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
-using pluginVerilog.Verilog.ModuleItems;
+using pluginVerilog.Verilog.Items;
 using System;
 using System.Collections.Generic;
 using System.Threading;

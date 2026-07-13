@@ -2,7 +2,7 @@ using Avalonia.Media;
 using CodeEditor2.CodeEditor;
 using CodeEditor2.CodeEditor.PopupMenu;
 using pluginVerilog.Verilog.BuildingBlocks;
-using pluginVerilog.Verilog.ModuleItems;
+using pluginVerilog.Verilog.Items;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -54,7 +54,7 @@ namespace pluginVerilog.Verilog.Snippets
             }
         }
 
-        private void writeModuleInstance(CodeDocument codeDocument, int index, ModuleItems.ModuleInstantiation moduleInstantiation)
+        private void writeModuleInstance(CodeDocument codeDocument, int index, Items.ModuleInstantiation moduleInstantiation)
         {
             CodeEditor.CodeDocument? vCodeDocument = codeDocument as CodeEditor.CodeDocument;
             if (vCodeDocument == null) return;

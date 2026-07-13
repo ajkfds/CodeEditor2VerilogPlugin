@@ -44,28 +44,28 @@ namespace pluginVerilog.Verilog.Items
                     return await ConcurrentAssertionItemExceptCheckerInstantiation.Parse(word, nameSpace);
                 // bind_directive
                 case "bind":
-                    ModuleItems.BindDirective? bindDirective;
-                    return ModuleItems.BindDirective.Parse(word, nameSpace, out bindDirective);
+                    Items.BindDirective? bindDirective;
+                    return Items.BindDirective.Parse(word, nameSpace, out bindDirective);
                 // net_alias
                 case "alias":
-                    return ModuleItems.NetAlias.Parse(word, nameSpace);
+                    return Items.NetAlias.Parse(word, nameSpace);
                 // final_construct
                 case "final":
-                    return await ModuleItems.FinalConstruct.Parse(word, nameSpace);
+                    return await Items.FinalConstruct.Parse(word, nameSpace);
                 // elaboration_system_task
 
                 // continuous_assign
                 case "assign":
-                    return await ModuleItems.ContinuousAssign.Parse(word, nameSpace);
+                    return await Items.ContinuousAssign.Parse(word, nameSpace);
                 // initial_construct
                 case "initial":
-                    return await ModuleItems.InitialConstruct.Parse(word, nameSpace);
+                    return await Items.InitialConstruct.Parse(word, nameSpace);
                 // always_construct
                 case "always":
                 case "always_comb":
                 case "always_latch":
                 case "always_ff":
-                    return await ModuleItems.AlwaysConstruct.Parse(word, nameSpace);
+                    return await Items.AlwaysConstruct.Parse(word, nameSpace);
                 // loop_generate_construct
                 case "for":
                     //                    word.AddSystemVerilogError();
@@ -85,7 +85,7 @@ namespace pluginVerilog.Verilog.Items
             if (InterfaceInstance.Parse(word, nameSpace)) return true;
 
             // program_instantiation
-            if (await ModuleItems.ProgramInstantiation.Parse(word, nameSpace)) return true;
+            if (await Items.ProgramInstantiation.Parse(word, nameSpace)) return true;
 
             //assertion_item ::=
             //        [block_identifier: ] concurrent_assertion_statement

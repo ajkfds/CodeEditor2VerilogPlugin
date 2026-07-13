@@ -395,17 +395,17 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                     // initial_construct
                     case "initial":
-                        await Verilog.ModuleItems.InitialConstruct.ParseCreate(word, checker);
+                        await Verilog.Items.InitialConstruct.ParseCreate(word, checker);
                         break;
 
                     // always_construct
                     case "always":
-                        await Verilog.ModuleItems.AlwaysConstruct.ParseCreate(word, checker);
+                        await Verilog.Items.AlwaysConstruct.ParseCreate(word, checker);
                         break;
 
                     // final_construct
                     case "final":
-                        await Verilog.ModuleItems.FinalConstruct.ParseCreate(word, checker);
+                        await Verilog.Items.FinalConstruct.ParseCreate(word, checker);
                         break;
 
                     // assertion_item or assertion_item_declaration
@@ -427,7 +427,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                     // continuous_assign
                     case "assign":
-                        Verilog.ModuleItems.ContinuousAssign.ParseCreate(word, checker);
+                        Verilog.Items.ContinuousAssign.ParseCreate(word, checker);
                         break;
 
                     // default clocking

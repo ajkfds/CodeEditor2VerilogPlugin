@@ -1,7 +1,7 @@
 using pluginVerilog.Verilog.BuildingBlocks;
 using System.Collections.Generic;
 
-namespace pluginVerilog.Verilog.ModuleItems
+namespace pluginVerilog.Verilog.Items
 {
     public interface IBuildingBlockInstantiation
     {

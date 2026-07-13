@@ -20,7 +20,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         // module
         Dictionary<string, Function> Functions { get; }
         Dictionary<string, Task> Tasks { get; }
-        Dictionary<string, ModuleItems.ModuleInstantiation> ModuleInstantiations { get; }
+        Dictionary<string, Items.ModuleInstantiation> ModuleInstantiations { get; }
 
     }
 }

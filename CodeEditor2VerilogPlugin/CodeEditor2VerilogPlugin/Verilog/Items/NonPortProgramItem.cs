@@ -42,10 +42,10 @@ namespace pluginVerilog.Verilog.Items
             {
                 //{ attribute_instance } continuous_assign 
                 case "assign":
-                    return await ModuleItems.ContinuousAssign.Parse(word, nameSpace);
+                    return await Items.ContinuousAssign.Parse(word, nameSpace);
                 //{ attribute_instance } initial_construct 
                 case "initial":
-                    return await ModuleItems.InitialConstruct.Parse(word, nameSpace);
+                    return await Items.InitialConstruct.Parse(word, nameSpace);
                 // timeunits_declaration
                 case "timeunit":
                 case "timeprecision":

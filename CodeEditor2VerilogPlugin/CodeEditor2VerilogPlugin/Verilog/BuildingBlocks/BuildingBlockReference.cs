@@ -1,4 +1,4 @@
-using pluginVerilog.Verilog.ModuleItems;
+using pluginVerilog.Verilog.Items;
 using System.Collections.Generic;
 
 namespace pluginVerilog.Verilog.BuildingBlocks

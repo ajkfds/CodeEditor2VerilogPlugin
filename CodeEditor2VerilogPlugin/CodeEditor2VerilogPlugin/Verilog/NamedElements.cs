@@ -1,4 +1,4 @@
-using pluginVerilog.Verilog.ModuleItems;
+using pluginVerilog.Verilog.Items;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -50,12 +50,12 @@ namespace pluginVerilog.Verilog
             return true;
         }
 
-        public bool TryGetModuleInstantiation(string key, out ModuleInstantiation? moduleInstantiation)
+        public bool TryGetModuleInstantiation(string key, out Verilog.Items.ModuleInstantiation? moduleInstantiation)
         {
             moduleInstantiation = null;
             if (!itemDict.TryGetValue(key, out INamedElement? namedElement))
             {
-                moduleInstantiation = namedElement as ModuleInstantiation;
+                moduleInstantiation = namedElement as Verilog.Items.ModuleInstantiation;
                 return false;
             }
             return true;
@@ -159,7 +159,7 @@ namespace pluginVerilog.Verilog
         public bool ContainsIBuldingBlockInstantiation(string key)
         {
             if (!itemDict.ContainsKey(key)) return false;
-            if (itemDict[key] is ModuleItems.IBuildingBlockInstantiation) return true;
+            if (itemDict[key] is Items.IBuildingBlockInstantiation) return true;
             return false;
         }
 

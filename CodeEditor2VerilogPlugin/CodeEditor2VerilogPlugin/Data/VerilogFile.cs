@@ -219,6 +219,8 @@ namespace pluginVerilog.Data
             if (currentTextFile == this)
             {
                 currentTextFile.CodeDocument?.CopyColorMarkFrom(parser.Document);
+                CodeEditor2.Controller.MessageView.Update(newParsedDocument);
+                CodeEditor2.Controller.CodeEditor.PostRefresh();
             }
 
 
@@ -538,18 +540,8 @@ namespace pluginVerilog.Data
         // update sub-items from ParsedDocument
         public override async Task UpdateAsync()
         {
-            await base.UpdateAsync();
             await VerilogCommon.Updater.UpdateAsync(this, itemUpdateSemaphore);
-
-            Dispatcher.UIThread.Post(() =>
-            {
-                NavigatePanelNode?.UpdateVisual();
-                if (CodeEditor2.Controller.NavigatePanel.GetSelectedFile() == this)
-                {
-                    CodeEditor2.Controller.CodeEditor.PostRefresh();
-                    if (ParsedDocument != null) CodeEditor2.Controller.MessageView.Update(ParsedDocument);
-                }
-            });
+            await base.UpdateAsync();
         }
 
         public override Task ParseHierarchyAsync(Action<ITextFile> action)

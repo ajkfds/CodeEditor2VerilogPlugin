@@ -7,7 +7,7 @@ using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
 using pluginVerilog.CodeEditor;
 using pluginVerilog.Verilog.BuildingBlocks;
-using pluginVerilog.Verilog.ModuleItems;
+using pluginVerilog.Verilog.Items;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -200,7 +200,7 @@ namespace pluginVerilog.Data
         /// <param name="isArrayInstance">True if this is part of an instance array</param>
         /// <returns>The created VerilogModuleInstance</returns>
         public static VerilogModuleInstance? Create(
-            Verilog.ModuleItems.ModuleInstantiation moduleInstantiation,
+            Verilog.Items.ModuleInstantiation moduleInstantiation,
             int instanceIndex = 0,
             bool isArrayInstance = false
             )
@@ -246,7 +246,7 @@ namespace pluginVerilog.Data
                 if (vFile.SystemVerilog) fileItem.SystemVerilog = true;
             }
 
-            fileItem.weakInstantiating = new WeakReference<ModuleInstantiation>(moduleInstantiation);
+            fileItem.weakInstantiating = new WeakReference<Verilog.Items.ModuleInstantiation>(moduleInstantiation);
             return fileItem;
         }
 
@@ -256,7 +256,7 @@ namespace pluginVerilog.Data
         /// <param name="moduleInstantiation">The module instantiation with array range</param>
         /// <returns>List of created VerilogModuleInstances</returns>
         public static List<VerilogModuleInstance>? CreateArray(
-            Verilog.ModuleItems.ModuleInstantiation moduleInstantiation
+            Verilog.Items.ModuleInstantiation moduleInstantiation
             )
         {
             int instanceCount = moduleInstantiation.InstanceCount;
@@ -278,8 +278,8 @@ namespace pluginVerilog.Data
 
 
 
-        protected WeakReference<Verilog.ModuleItems.ModuleInstantiation> weakInstantiating;
-        public Verilog.ModuleItems.ModuleInstantiation? GetParentInstanciatiation()
+        protected WeakReference<Verilog.Items.ModuleInstantiation> weakInstantiating;
+        public Verilog.Items.ModuleInstantiation? GetParentInstanciatiation()
         {
             if (weakInstantiating == null) return null;
             weakInstantiating.TryGetTarget(out var moduleInstantiation);
@@ -348,7 +348,7 @@ namespace pluginVerilog.Data
         }
 
         public bool ReplaceBy(
-            Verilog.ModuleItems.ModuleInstantiation moduleInstantiation,
+            Verilog.Items.ModuleInstantiation moduleInstantiation,
             CodeEditor2.Data.Project project
             )
         {
@@ -381,7 +381,7 @@ namespace pluginVerilog.Data
                 Data.VerilogFile? vFile = file as Data.VerilogFile;
                 if (vFile == null) return false;
             }
-            weakInstantiating = new WeakReference<ModuleInstantiation>(moduleInstantiation);
+            weakInstantiating = new WeakReference<Verilog.Items.ModuleInstantiation>(moduleInstantiation);
 
             return true;
         }
@@ -523,6 +523,7 @@ namespace pluginVerilog.Data
             if (textFile == this)
             {
                 textFile.CodeDocument?.CopyColorMarkFrom(parser.Document);
+                CodeEditor2.Controller.MessageView.Update(newParsedDocument);
                 CodeEditor2.Controller.CodeEditor.PostRefresh();
             }
 
@@ -605,23 +606,8 @@ namespace pluginVerilog.Data
         // update sub-items from ParsedDocument
         public override async Task UpdateAsync()
         {
-            await base.UpdateAsync();
             await VerilogCommon.Updater.UpdateAsync(this, itemUpdateSemaphore);
-            
-            //CodeEditor2.CodeEditor.ParsedDocument? parsedDoc;
-            //parsedDoc = ParsedDocument;
-
-            //await Dispatcher.UIThread.InvokeAsync(
-            //    async () =>
-            //    {
-            //        await VerilogCommon.Updater.UpdateAsync(this, itemUpdateSemaphore);
-            //        NavigatePanelNode.UpdateVisual();
-            //        if (CodeEditor2.Controller.NavigatePanel.GetSelectedFile() == this)
-            //        {
-            //            CodeEditor2.Controller.CodeEditor.PostRefresh();
-            //            if (parsedDoc != null) CodeEditor2.Controller.MessageView.Update(parsedDoc);
-            //        }
-            //    });
+            await base.UpdateAsync();
         }
 
 

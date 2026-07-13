@@ -440,13 +440,28 @@ namespace pluginVerilog.Verilog
                     function.NamedElements.Add(retVal.Name, retVal);
                 }
 
-                if (nameSpace.BuildingBlock.NamedElements.ContainsKey(function.Name) && nameSpace.BuildingBlock.NamedElements[function.Name] is Function)
+
+                if (word.Prototype)
                 {
-                    nameSpace.BuildingBlock.NamedElements.Replace(function.Name, function);
+                    if (nameSpace.NamedElements.ContainsKey(function.Name) && nameSpace.NamedElements[function.Name] is Function)
+                    {
+                        word.AddPrototypeError("duplicate task name");
+                    }
+                    else
+                    {
+                        nameSpace.NamedElements.Add(function.Name, function);
+                    }
                 }
                 else
                 {
-                    nameSpace.BuildingBlock.NamedElements.Add(function.Name, function);
+                    if (nameSpace.NamedElements.ContainsKey(function.Name) && nameSpace.NamedElements[function.Name] is Function)
+                    {
+                        nameSpace.NamedElements.Replace(function.Name, function);
+                    }
+                    else
+                    {
+                        nameSpace.NamedElements.Add(function.Name, function);
+                    }
                 }
             }
 

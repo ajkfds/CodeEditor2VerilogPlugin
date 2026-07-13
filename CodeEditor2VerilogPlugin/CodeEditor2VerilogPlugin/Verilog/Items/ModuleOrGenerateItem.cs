@@ -19,7 +19,7 @@ namespace pluginVerilog.Verilog.Items
                 // parameter_override
                 // parameter_override::= ""defparam"" list_of_defparam_assignments;
                 case "defparam":
-                    return ModuleItems.ParameterOverride.Parse(word, nameSpace);
+                    return Items.ParameterOverride.Parse(word, nameSpace);
                 // gate_instantiation
                 case "cmos":
                 case "rcmos":
@@ -47,7 +47,7 @@ namespace pluginVerilog.Verilog.Items
                 case "rtran":
                 case "pullup":
                 case "pulldown":
-                    return await ModuleItems.GateInstantiation.Parse(word, nameSpace);
+                    return await Items.GateInstantiation.Parse(word, nameSpace);
             }
 
             // module_common_item
@@ -56,7 +56,7 @@ namespace pluginVerilog.Verilog.Items
 
             // udp_instantiation
             // module_instantiation
-            if (await ModuleItems.ModuleInstantiation.Parse(word, nameSpace)) return true;
+            if (await Items.ModuleInstantiation.Parse(word, nameSpace)) return true;
 
 
 

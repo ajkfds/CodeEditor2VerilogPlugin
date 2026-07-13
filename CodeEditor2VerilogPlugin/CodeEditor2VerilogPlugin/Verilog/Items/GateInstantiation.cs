@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace pluginVerilog.Verilog.ModuleItems
+namespace pluginVerilog.Verilog.Items
 {
     public class GateInstantiation : Item
     {
