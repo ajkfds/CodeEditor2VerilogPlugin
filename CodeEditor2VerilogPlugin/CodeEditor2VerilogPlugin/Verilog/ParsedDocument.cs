@@ -848,8 +848,6 @@ public List<string> ImportedPackages = new List<string>();
                 AutocompleteItem item = new pluginVerilog.Data.VerilogCommon.AutoCompleteItem(
                     keyword.Item1,
                     CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
-                    candidateStartIndex,
-                    candidate.Length,
                     Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword),
                     "CodeEditor2/Assets/Icons/bookmark.svg"
                     );
@@ -867,8 +865,6 @@ public List<string> ImportedPackages = new List<string>();
                     AutocompleteItem item = new pluginVerilog.Data.VerilogCommon.AutoCompleteItem(
                         keyword.Item1,
                         CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
-                        candidateStartIndex,
-                        candidate.Length,
                         Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword),
                         "CodeEditor2/Assets/Icons/bookmark.svg"
                         );
@@ -887,7 +883,9 @@ public List<string> ImportedPackages = new List<string>();
         private static void appendKeywordItems(List<AutocompleteItem> items, string cantidate, string keyword)
         {
             if (!keyword.StartsWith(cantidate)) return;
-            AutocompleteItem item = new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
+
+
+            AutocompleteItem item = new pluginVerilog.Data.VerilogCommon.AutoCompleteItem(
                 keyword,
                 CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
                 Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword),

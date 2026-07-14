@@ -143,8 +143,6 @@ namespace pluginVerilog.Data.VerilogCommon
                             (
                                 subElement.Name,
                                 CodeDrawStyle.ColorIndex(subElement.ColorType),
-                                candidateStartIndex,
-                                candidateWord.Length,
                                 Global.CodeDrawStyle.Color(subElement.ColorType),
                                 "CodeEditor2/Assets/Icons/tag.svg"
                             )
@@ -167,8 +165,6 @@ namespace pluginVerilog.Data.VerilogCommon
                      new pluginVerilog.Data.VerilogCommon.AutoCompleteItem(
                         subElement.Name,
                         CodeDrawStyle.ColorIndex(subElement.ColorType),
-                        candidateStartIndex,
-                        candidateWord.Length,
                         Global.CodeDrawStyle.Color(subElement.ColorType),
                         "CodeEditor2/Assets/Icons/tag.svg"
                         )
