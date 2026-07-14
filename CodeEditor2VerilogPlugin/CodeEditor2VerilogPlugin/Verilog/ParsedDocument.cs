@@ -560,32 +560,6 @@ public List<string> ImportedPackages = new List<string>();
                 blockStartIndex = words[0].Item2;
                 blockEndIndex = words.Last().Item2 + words.Last().Item1.Length;
 
-            //    (string, int) lastWord = ("", 0);
-            //    if (words.Count == 0)
-            //    {
-            //        lastWord = ("", 0);
-            //    }
-            //    else if (words.Last().Item1 == "." || words.Last().Item1 == "::" || words.Last().Item1 == "->")
-            //    {
-            //        lastWord = ("", words.Last().Item2 + words.Last().Item1.Length);
-            //        blockEndIndex = words.Last().Item2;
-            //        blockStartIndex = words[0].Item2;
-            //    }
-            //    else
-            //    {
-            //        // word . lastword
-            //        lastWord = words.Last();
-            //        blockStartIndex = words[0].Item2;
-            //        if (words.Count > 1)
-            //        {
-            //            (string, int) prevLast = words[words.Count - 1];
-            //            blockEndIndex = prevLast.Item2;
-            //        }
-            //        else
-            //        {
-            //            blockEndIndex = blockStartIndex + lastWord.Item1.Length;
-            //        }
-            //    }
             }
 
             // get namespace
@@ -894,27 +868,6 @@ public List<string> ImportedPackages = new List<string>();
             items.Add(item);
         }
 
-        private INamedElement? getSearchElement(NameSpace nameSpace, List<string> hier)
-        {
-            if (nameSpace == null) return null;
-            if (hier.Count == 0) return nameSpace;
-
-            if (nameSpace.NamedElements.ContainsKey(hier[0]))
-            {
-                INamedElement element = nameSpace.NamedElements[hier[0]];
-                hier.RemoveAt(0);
-                getSearchSubElement(element, hier);
-            }
-
-            while (nameSpace.Parent != null)
-            {
-                nameSpace = nameSpace.Parent;
-                INamedElement element = nameSpace.NamedElements[hier[0]];
-                hier.RemoveAt(0);
-                getSearchSubElement(element, hier);
-            }
-            return nameSpace;
-        }
 
         private INamedElement? getSearchSubElement(INamedElement element, List<string> hier)
         {
