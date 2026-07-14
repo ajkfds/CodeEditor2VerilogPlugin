@@ -61,7 +61,14 @@ namespace pluginVerilog.Data.VerilogCommon
                 addVhInstance(newSubItems, item, newVhInstance);
             }
 
-            if (item is VerilogModuleInstance)
+            if(item is InterfaceInstance)
+            {
+                string? moduleName = null;
+                InterfaceInstance? verilogModuleInstance = item as InterfaceInstance;
+                moduleName = verilogModuleInstance?.ModuleName;
+                addSubItemsSingleBuldingBlock(item, moduleName, newSubItems, parent, project);
+            }
+            else if (item is VerilogModuleInstance)
             {
                 string? moduleName = null;
                 VerilogModuleInstance? verilogModuleInstance = item as VerilogModuleInstance;

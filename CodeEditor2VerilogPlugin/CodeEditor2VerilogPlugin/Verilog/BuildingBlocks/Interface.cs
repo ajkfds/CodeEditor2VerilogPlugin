@@ -330,6 +330,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                 while (!word.Eof)
                 {
+                    await CommentAnnotationItem.ParseAsync(word, interface_);
                     if (!await Items.InterfaceItem.Parse(word, interface_))
                     {
                         if (word.Text == "endinterface") break;

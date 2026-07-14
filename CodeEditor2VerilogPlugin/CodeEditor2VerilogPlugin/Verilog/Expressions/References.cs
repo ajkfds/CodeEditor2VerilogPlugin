@@ -55,22 +55,24 @@ namespace pluginVerilog.Verilog.Expressions
         }
         private static TaskReference? parseCreate(WordScanner word, NameSpace nameSpace, NameSpace taskNameSpace)
         {
-            if (taskNameSpace.BuildingBlock.NamedElements.ContainsTask(word.Text))
+            if (taskNameSpace.NamedElements.ContainsTask(word.Text))
             {
                 TaskReference ret = new TaskReference();
                 ret.TaskName = word.Text;
                 ret.ModuleName = nameSpace.BuildingBlock.Name;
                 word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext();
 
                 ret.Task = (Task)taskNameSpace.NamedElements[ret.TaskName];
                 return ret;
             }
-            else if (taskNameSpace.BuildingBlock.NamedElements.ContainsFunction(word.Text))
+            else if (taskNameSpace.NamedElements.ContainsFunction(word.Text))
             {
                 TaskReference ret = new TaskReference();
                 ret.TaskName = word.Text;
                 ret.ModuleName = nameSpace.BuildingBlock.Name;
                 word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext();
 
                 Function function = (Function)taskNameSpace.NamedElements[ret.TaskName];
                 if (function.ReturnVariable != null)
