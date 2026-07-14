@@ -146,9 +146,23 @@ namespace pluginVerilog. Data
                 }
                 else if (element is pluginVerilog.Verilog.DataObjects.InterfaceInstance)
                 {
-                    // Handle InterfaceInstance - add the source Interface file to Files
-                    pluginVerilog.Verilog.DataObjects.InterfaceInstance interfaceInstance = (pluginVerilog.Verilog.DataObjects.InterfaceInstance)element;
-                    appendInterfaceInstance(file, interfaceInstance, setup);
+                    pluginVerilog.Verilog.DataObjects.InterfaceInstance moduleInstantiation = (pluginVerilog.Verilog.DataObjects.InterfaceInstance)element;
+                    //if (nameSpace.BuildingBlock.Project.Name != moduleInstantiation.SourceProjectName)
+                    //{
+                    //    string newPath = path + "." + moduleInstantiation.Name;
+                    //    setup.ExternalProjectEntryInstance.Add(
+                    //        newPath,
+                    //        CodeEditor2.Global.Projects[moduleInstantiation.SourceProjectName]
+                    //        );
+                    //}
+                    if (file.Items.TryGetValue(moduleInstantiation.Name, out CodeEditor2.Data.Item? item))
+                    {
+                        string newPath = moduleInstantiation.Name;
+                        if (path != "") newPath = path + "." + newPath;
+
+                        var subfile = item as IVerilogRelatedFile;
+                        if (subfile != null) searchHier(subfile, moduleInstantiation.SourceName, ids, setup, newPath);
+                    }
                 }
                 else if (element is DataObject)
                 {
@@ -206,27 +220,40 @@ namespace pluginVerilog. Data
                     pSetup. Files. Add(sourceFile);
                 }
                 return;
-            }
-        }
-
-        private static void appendInterfaceInstance(IVerilogRelatedFile file, pluginVerilog.Verilog.DataObjects.InterfaceInstance interfaceInstance, SimulationSetup setup)
-        {
-            // Get the source Interface file from ProjectProperty
-            ProjectProperty? projectProperty = file.ProjectProperty;
-            if (projectProperty == null) return;
-
-            // Use SourceName directly from InterfaceInstance
-            IVerilogRelatedFile? sourceFile = projectProperty.GetFileOfBuildingBlock(interfaceInstance.SourceName);
-            if (sourceFile == null) return;
-
-            // Add to Files (same logic as appendFile for VerilogFile)
-            if (sourceFile is pluginVerilog.Data.VerilogFile || sourceFile is SystemVerilogFile)
+            }else if(file is InterfaceInstance)
             {
-                if (setup.Files.Contains(sourceFile)) return;
-                setup.Files.Add(sourceFile);
+                InterfaceInstance? instance = file as InterfaceInstance;
+                if (instance == null) return;
+                IVerilogRelatedFile? sourceFile = instance.SourceTextFile as IVerilogRelatedFile;
+                if (sourceFile == null) return;
+
+                if (sourceFile.Project == setup.Project)
+                {
+                    if (setup.Files.Contains(sourceFile)) return;
+                    setup.Files.Add(sourceFile);
+                }
+                else
+                {
+                    CodeEditor2.Data.Project project = sourceFile.Project;
+                    SimulationSetup pSetup;
+                    if (!setup.ExternalProjectReferences.ContainsKey(project))
+                    {
+                        pSetup = new SimulationSetup() { Project = project };
+                        setup.ExternalProjectReferences.Add(project, pSetup);
+                        pSetup.TopFile = instance.SourceVerilogFile;
+                        pSetup.TopName = instance.ModuleName;
+                    }
+                    else
+                    {
+                        pSetup = setup.ExternalProjectReferences[project];
+                    }
+                    if (pSetup.Files.Contains(sourceFile)) return;
+                    pSetup.Files.Add(sourceFile);
+                }
                 return;
             }
         }
+
 
         private static void appendClassInstance(IVerilogRelatedFile file, DataObject dataObject, SimulationSetup setup)
         {
