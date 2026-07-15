@@ -65,7 +65,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         public List<DataObjects.Port> PortsList { get; } = new List<DataObjects.Port>();
 
         private WeakReference<Data.IVerilogRelatedFile> fileRef;
-        public required override Data.IVerilogRelatedFile File
+        public required override Data.IVerilogRelatedFile? File
         {
             get
             {
@@ -91,12 +91,12 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         /// </summary>
         public Expressions.Expression? DefaultDisable { get; set; }
 
-        public static async Task<Checker?> ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static Checker? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
-            return await ParseCreate(word, nameSpace, null, nameSpace.BuildingBlock, word.RootParsedDocument.File, word.Prototype);
+            return ParseCreate(word, nameSpace, null, nameSpace.BuildingBlock, word.RootParsedDocument.File, word.Prototype);
         }
 
-        public static async Task<Checker?> ParseCreate(
+        public static Checker? ParseCreate(
             WordScanner word,
             NameSpace nameSpace,
             Attribute? attribute,
@@ -189,7 +189,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
 
             // Parse checker items
-            await parseCheckerItems(word, checker);
+            parseCheckerItems(word, checker);
 
             // endchecker keyword
             if (word.Text == "endchecker")
@@ -379,7 +379,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         /// <summary>
         /// Parse checker items (body of the checker)
         /// </summary>
-        private static async System.Threading.Tasks.Task parseCheckerItems(WordScanner word, Checker checker)
+        private static void parseCheckerItems(WordScanner word, Checker checker)
         {
             while (!word.Eof && word.Text != "endchecker")
             {
@@ -390,22 +390,22 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     // checker_or_generate_item_declaration
                     case "function":
                     case "task":
-                        await FunctionOrTask.Parse(word, checker);
+                        FunctionOrTask.Parse(word, checker);
                         break;
 
                     // initial_construct
                     case "initial":
-                        await Verilog.Items.InitialConstruct.ParseCreate(word, checker);
+                        Verilog.Items.InitialConstruct.ParseCreate(word, checker);
                         break;
 
                     // always_construct
                     case "always":
-                        await Verilog.Items.AlwaysConstruct.ParseCreate(word, checker);
+                        Verilog.Items.AlwaysConstruct.ParseCreate(word, checker);
                         break;
 
                     // final_construct
                     case "final":
-                        await Verilog.Items.FinalConstruct.ParseCreate(word, checker);
+                        Verilog.Items.FinalConstruct.ParseCreate(word, checker);
                         break;
 
                     // assertion_item or assertion_item_declaration
@@ -416,11 +416,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         // Check if it's a concurrent assertion (with property keyword)
                         if (word.NextText == "property")
                         {
-                            await Statements.ProceduralAssertionStatement.ParseCreate(word, checker, null);
+                            Statements.ProceduralAssertionStatement.ParseCreate(word, checker, null);
                         }
                         else
                         {
-                            await Statements.ImmidiateAssertionStatement.ParseCreate(word, checker, null);
+                            Statements.ImmidiateAssertionStatement.ParseCreate(word, checker, null);
                         }
                         break;
 
@@ -487,7 +487,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                     // covergroup_declaration
                     case "covergroup":
-                        var covergroup = await Coverage.CovergroupDeclaration.ParseCreate(word, checker);
+                        var covergroup = Coverage.CovergroupDeclaration.ParseCreate(word, checker);
                         if (covergroup != null && !string.IsNullOrEmpty(covergroup.Name))
                         {
                             if (!checker.NamedElements.ContainsKey(covergroup.Name))
@@ -529,7 +529,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                     // property_declaration
                     case "property":
-                        var property = await Property.PropertyDeclaration.ParseCreate(word, checker);
+                        var property = Property.PropertyDeclaration.ParseCreate(word, checker);
                         if (property != null && !string.IsNullOrEmpty(property.Name))
                         {
                             if (!checker.NamedElements.ContainsKey(property.Name))
@@ -541,7 +541,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                     // sequence_declaration
                     case "sequence":
-                        var sequence = await Sequence.SequenceDeclaration.ParseCreate(word, checker);
+                        var sequence = Sequence.SequenceDeclaration.ParseCreate(word, checker);
                         if (sequence != null && !string.IsNullOrEmpty(sequence.Name))
                         {
                             if (!checker.NamedElements.ContainsKey(sequence.Name))
@@ -633,15 +633,15 @@ namespace pluginVerilog.Verilog.BuildingBlocks
     /// </summary>
     internal static class FunctionOrTask
     {
-        public static async　System.Threading.Tasks.Task Parse(WordScanner word, NameSpace nameSpace)
+        public static void Parse(WordScanner word, NameSpace nameSpace)
         {
             switch (word.Text)
             {
                 case "function":
-                    await Verilog.Function.ParseFunctionOrConstructor(word, nameSpace);
+                    Verilog.Function.ParseFunctionOrConstructor(word, nameSpace);
                     break;
                 case "task":
-                    await Verilog.Task.Parse(word, nameSpace);
+                    Verilog.Task.Parse(word, nameSpace);
                     break;
             }
         }

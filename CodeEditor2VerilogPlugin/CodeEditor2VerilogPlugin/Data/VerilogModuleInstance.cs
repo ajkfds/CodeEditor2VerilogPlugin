@@ -137,7 +137,7 @@ namespace pluginVerilog.Data
         }
 
         // ModuleInstaceでparsedDocumentを保持しないとSourceFile側で保持するのはWeakReferenceだけなので消えてしまう。
-        private CodeEditor2.CodeEditor.ParsedDocument? _parsedDocument;
+        private new CodeEditor2.CodeEditor.ParsedDocument? _parsedDocument;
         public override CodeEditor2.CodeEditor.ParsedDocument? ParsedDocument
         {
             get

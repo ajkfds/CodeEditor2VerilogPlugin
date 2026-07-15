@@ -54,7 +54,7 @@ namespace pluginVerilog.Verilog.Statements
         par_block               ::= fork [ : block_identifier { block_item_declaration } ] { statement } join
         seq_block          ::= begin[ : block_identifier { block_item_declaration } ] { statement } end  
         */
-        public static async Task<IStatement?> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
+        public static IStatement? ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             if (word.Text != "fork") throw new Exception();
             word.Color(CodeDrawStyle.ColorType.Keyword);
@@ -63,21 +63,21 @@ namespace pluginVerilog.Verilog.Statements
 
             if (word.Text == ":")
             {
-                return await parseNamedParallelBlock(word, nameSpace, beginIndex);
+                return parseNamedParallelBlock(word, nameSpace, beginIndex);
             }
             else
             {
-                return await parseParallelBlock(word, nameSpace, beginIndex);
+                return parseParallelBlock(word, nameSpace, beginIndex);
             }
         }
 
-        private static async Task<ParallelBlock> parseParallelBlock(WordScanner word, NameSpace nameSpace, IndexReference beginIndex)
+        private static ParallelBlock parseParallelBlock(WordScanner word, NameSpace nameSpace, IndexReference beginIndex)
         {
             ParallelBlock sequentialBlock = new ParallelBlock();
 
             while (!word.Eof && !join_families.Contains(word.Text))
             {
-                IStatement? statement = await Verilog.Statements.Statements.ParseCreateStatement(word, nameSpace);
+                IStatement? statement = Verilog.Statements.Statements.ParseCreateStatement(word, nameSpace);
                 if (statement == null) break;
                 sequentialBlock.Statements.Add(statement);
             }
@@ -110,7 +110,7 @@ namespace pluginVerilog.Verilog.Statements
         private static List<string> endKeyword = new List<string> { "endmodule", "endtask", "endtask", "endinterface", "endfunction" };
         private static List<string> join_families = new List<string> { "join", "join_any", "join_none" };
 
-        private static async Task<IStatement> parseNamedParallelBlock(WordScanner word, NameSpace nameSpace, IndexReference beginIndex)
+        private static IStatement parseNamedParallelBlock(WordScanner word, NameSpace nameSpace, IndexReference beginIndex)
         {
             NamedParallelBlock namedBlock;
             string name = "";
@@ -119,7 +119,7 @@ namespace pluginVerilog.Verilog.Statements
             if (!General.IsIdentifier(word.Text))
             {
                 word.AddError("illegal ifdentifier name");
-                return await parseParallelBlock(word, nameSpace, beginIndex);
+                return parseParallelBlock(word, nameSpace, beginIndex);
             }
 
             if (word.Prototype)
@@ -129,7 +129,7 @@ namespace pluginVerilog.Verilog.Statements
                     word.AddError("duplicated name");
                     name = word.Text;
                     word.MoveNext();
-                    return await parseParallelBlock(word, nameSpace, beginIndex);
+                    return parseParallelBlock(word, nameSpace, beginIndex);
                 }
                 else
                 {
@@ -169,7 +169,7 @@ namespace pluginVerilog.Verilog.Statements
             while (!word.Eof && !join_families.Contains(word.Text))
             {
                 IStatement? statement = null;
-                statement = await Verilog.Statements.Statements.ParseCreateStatement(word, namedBlock);
+                statement = Verilog.Statements.Statements.ParseCreateStatement(word, namedBlock);
                 if (statement == null) break;
                 namedBlock.Statements.Add(statement);
             }

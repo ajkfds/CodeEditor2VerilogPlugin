@@ -29,7 +29,7 @@ namespace pluginVerilog.Verilog.Statements
                 "CodeEditor2/Assets/Icons/tag.svg"
                 );
         }
-        public static async Task<ProceduralTimingControlStatement?> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label, List<string>? clockDomains = null)
+        public static ProceduralTimingControlStatement? ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label, List<string>? clockDomains = null)
         {
             switch (word.Text)
             {
@@ -39,7 +39,7 @@ namespace pluginVerilog.Verilog.Statements
                         if (statement_label != null) { statement.Name = statement_label; }
 
                         statement.DelayControl = DelayControl.ParseCreate(word, nameSpace);
-                        statement.Statement = await Statements.ParseCreateStatementOrNull(word, nameSpace);
+                        statement.Statement = Statements.ParseCreateStatementOrNull(word, nameSpace);
                         return statement;
                     }
                 case "@":
@@ -49,7 +49,7 @@ namespace pluginVerilog.Verilog.Statements
 
                         if (clockDomains == null) clockDomains = new List<string>();
                         statement.EventControl = EventControl.ParseCreate(word, nameSpace, clockDomains);
-                        statement.Statement = await Statements.ParseCreateStatementOrNull(word, nameSpace, clockDomains);
+                        statement.Statement = Statements.ParseCreateStatementOrNull(word, nameSpace, clockDomains);
                         return statement;
                     }
                 default:

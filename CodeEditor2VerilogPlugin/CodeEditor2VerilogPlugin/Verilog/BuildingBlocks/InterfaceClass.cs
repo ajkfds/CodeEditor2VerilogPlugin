@@ -34,7 +34,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         public List<DataObjects.Port> PortsList { get; } = new List<DataObjects.Port>();
 
         private WeakReference<Data.IVerilogRelatedFile> fileRef;
-        public required override Data.IVerilogRelatedFile File
+        public required override Data.IVerilogRelatedFile? File
         {
             get
             {
@@ -66,9 +66,9 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         /// </summary>
         public List<InterfaceClass> ExtendedInterfaceClasses { get; } = new List<InterfaceClass>();
 
-        public static async System.Threading.Tasks.Task ParseDeclaration(WordScanner word, NameSpace nameSpace)
+        public static void ParseDeclaration(WordScanner word, NameSpace nameSpace)
         {
-            InterfaceClass? interfaceClass = await ParseCreate(word, nameSpace);
+            InterfaceClass? interfaceClass = ParseCreate(word, nameSpace);
             if (interfaceClass == null) return;
 
             if (word.Prototype)
@@ -113,12 +113,12 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             return interfaceClass;
         }
 
-        public static async System.Threading.Tasks.Task<InterfaceClass?> ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static InterfaceClass? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
-            return await ParseCreate(word, nameSpace, null);
+            return ParseCreate(word, nameSpace, null);
         }
 
-        public static async System.Threading.Tasks.Task<InterfaceClass?> ParseCreate(
+        public static InterfaceClass? ParseCreate(
             WordScanner word,
             NameSpace nameSpace,
             Dictionary<string, Expressions.Expression>? parameterOverrides
@@ -187,16 +187,16 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 // prototype parse
                 WordScanner prototypeWord = word.Clone();
                 prototypeWord.Prototype = true;
-                await parseInterfaceClassItems(prototypeWord, nameSpace, parameterOverrides, null, interfaceClass);
+                parseInterfaceClassItems(prototypeWord, nameSpace, parameterOverrides, null, interfaceClass);
                 prototypeWord.Dispose();
 
                 // parse
                 word.RootParsedDocument.Macros = macroKeep;
-                await parseInterfaceClassItems(word, nameSpace, parameterOverrides, null, interfaceClass);
+                parseInterfaceClassItems(word, nameSpace, parameterOverrides, null, interfaceClass);
             }
             else
             {
-                await parseInterfaceClassItems(word, nameSpace, parameterOverrides, null, interfaceClass);
+                parseInterfaceClassItems(word, nameSpace, parameterOverrides, null, interfaceClass);
             }
 
             // endclass keyword
@@ -281,7 +281,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 | # ( parameter_port_declaration { , parameter_port_declaration } )  
                 | #( )   
         */
-        protected static async System.Threading.Tasks.Task parseInterfaceClassItems(
+        protected static void parseInterfaceClassItems(
             WordScanner word,
             NameSpace nameSpace,
             Dictionary<string, Expressions.Expression>? parameterOverrides,
@@ -427,7 +427,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                 while (!word.Eof)
                 {
-                    if (!await parseInterfaceClassItem(word, nameSpace, interfaceClass))
+                    if (!parseInterfaceClassItem(word, nameSpace, interfaceClass))
                     {
                         if (word.Text == "endclass") break;
                         word.AddError("illegal interface class item");
@@ -444,7 +444,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         /// Parse interface_class_item
         /// interface_class_item ::= type
         /// </summary>
-        private static async System.Threading.Tasks.Task<bool> parseInterfaceClassItem(WordScanner word, NameSpace nameSpace, InterfaceClass interfaceClass)
+        private static bool parseInterfaceClassItem(WordScanner word, NameSpace nameSpace, InterfaceClass interfaceClass)
         {
             //interface_class_item ::=
             //      type_declaration
@@ -476,17 +476,17 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 // { attribute_instance } interface_class_method
                 case "(*":
                     Attribute attribute = Attribute.ParseCreate(word, nameSpace);
-                    await parseInterfaceClassItem(word, nameSpace, interfaceClass);
+                    parseInterfaceClassItem(word, nameSpace, interfaceClass);
                     return true;
                 // { attribute_instance } interface_class_method
                 case "pure":
-                    return await MethodPrototype.ParseCreateWithPureVirtual(word, interfaceClass);
+                    return MethodPrototype.ParseCreateWithPureVirtual(word, interfaceClass);
                 default:
                     return false;
             }
         }
 
-        private static async System.Threading.Tasks.Task<bool> parseImport(WordScanner word, InterfaceClass interfaceClass)
+        private static async System.Threading.Tasks.Task<bool> parseImportAsync(WordScanner word, InterfaceClass interfaceClass)
         {
             /*
             import_declaration ::= 

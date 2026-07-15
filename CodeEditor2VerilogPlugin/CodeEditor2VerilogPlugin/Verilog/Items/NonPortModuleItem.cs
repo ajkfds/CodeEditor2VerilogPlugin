@@ -17,13 +17,13 @@ namespace pluginVerilog.Verilog.Items
             | timeunits_declaration
             | clocking_declaration
        */
-        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
+        public static async System.Threading.Tasks.Task<bool> ParseAsync(WordScanner word, NameSpace nameSpace)
         {
             switch (word.Text)
             {
                 // generate_region
                 case "generate":
-                    return await GenerateRegion.Parse(word, nameSpace);
+                    return await GenerateRegion.ParseAsync(word, nameSpace);
                 // specify_block
                 case "specify":
                     return SpecifyBlock.Parse(word, nameSpace);
@@ -33,12 +33,12 @@ namespace pluginVerilog.Verilog.Items
                     return true;
                 // program_declaration
                 case "program":
-                    await BuildingBlocks.Program.Parse(word, null, nameSpace.BuildingBlock, word.RootParsedDocument.File, word.Prototype);
+                    await BuildingBlocks.Program.ParseAsync(word, null, nameSpace.BuildingBlock, word.RootParsedDocument.File, word.Prototype);
                     return true;
                 // module_declaration
                 case "module":
                 case "macromodule":
-                    await BuildingBlocks.Module.ParseCreate(word, null, nameSpace.BuildingBlock, word.RootParsedDocument.File, word.Prototype);
+                    await BuildingBlocks.Module.ParseCreateAsync(word, null, nameSpace.BuildingBlock, word.RootParsedDocument.File, word.Prototype);
                     return true;
                 // interface_declaration
                 case "interface":
@@ -96,7 +96,7 @@ namespace pluginVerilog.Verilog.Items
                     break;
 
             }
-            if (await ModuleOrGenerateItem.Parse(word, nameSpace)) return true;
+            if (await ModuleOrGenerateItem.ParseAsync(word, nameSpace)) return true;
             return false;
         }
     }

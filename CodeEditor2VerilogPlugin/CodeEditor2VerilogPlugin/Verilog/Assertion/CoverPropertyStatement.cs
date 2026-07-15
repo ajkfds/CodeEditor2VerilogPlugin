@@ -13,7 +13,7 @@ namespace pluginVerilog.Verilog.Assertion
             "cover" "property" "(" property_spec ")" statement_or_null
         */
 
-        public static async Task<CoverPropertyStatement> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
+        public static CoverPropertyStatement ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             if (word.Text != "cover" || word.NextText != "property")
             {
@@ -31,25 +31,25 @@ namespace pluginVerilog.Verilog.Assertion
 
             if (word.Eof || word.Text != "(")
             {
-                return await ExitTask(word, nameSpace, coverPropertyStatement);
+                return ExitTask(word, nameSpace, coverPropertyStatement);
             }
             word.MoveNext();
 
-            PropertySpec propertySpec = await PropertySpec.ParseCreate(word, nameSpace);
+            PropertySpec propertySpec = PropertySpec.ParseCreate(word, nameSpace);
 
             if (word.Eof || word.Text != ")")
             {
-                return await ExitTask(word, nameSpace, coverPropertyStatement);
+                return ExitTask(word, nameSpace, coverPropertyStatement);
             }
             word.MoveNext();
 
             // cover property statement does not have action_block, only statement_or_null
-            coverPropertyStatement.CoverStatement = await Statements.Statements.ParseCreateStatementOrNull(word, nameSpace);
+            coverPropertyStatement.CoverStatement = Statements.Statements.ParseCreateStatementOrNull(word, nameSpace);
 
             return coverPropertyStatement;
         }
 
-        private static async Task<CoverPropertyStatement> ExitTask(WordScanner word, NameSpace nameSpace, CoverPropertyStatement statement)
+        private static CoverPropertyStatement ExitTask(WordScanner word, NameSpace nameSpace, CoverPropertyStatement statement)
         {
             word.AddError("illegal cover property statement");
             word.SkipToKeyword(";");

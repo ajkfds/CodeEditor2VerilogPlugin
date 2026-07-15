@@ -64,7 +64,7 @@ namespace pluginVerilog.Verilog.Statements
                                 | { attribute_instance } disable_statement
                                 | { attribute_instance } system_task_enable  
         */
-        public static async Task<IStatement?> ParseCreateStatement(WordScanner word, NameSpace nameSpace, string? blockIdentifier = null, List<string>? clockDomains = null)
+        public static IStatement? ParseCreateStatement(WordScanner word, NameSpace nameSpace, string? blockIdentifier = null, List<string>? clockDomains = null)
         {
             /*
             A.6.4 Statements
@@ -138,56 +138,56 @@ namespace pluginVerilog.Verilog.Statements
             {
                 case "(*":
                     Attribute attribute = Attribute.ParseCreate(word, nameSpace);
-                    return await Statements.ParseCreateStatement(word, nameSpace,blockIdentifier, clockDomains);
+                    return Statements.ParseCreateStatement(word, nameSpace,blockIdentifier, clockDomains);
 
                 // unique_priority
                 case "unique":
                 case "unique0":
                 case "priority":
-                    return await ParseUniquePriority(word, nameSpace, statement_label);
+                    return ParseUniquePriority(word, nameSpace, statement_label);
 
                 // conditional_statement 
                 case "if":
-                    return await ConditionalStatement.ParseCreate(word, nameSpace, statement_label, clockDomains);
+                    return ConditionalStatement.ParseCreate(word, nameSpace, statement_label, clockDomains);
 
                 // procedural_timing_control_statement 
                 case "#":
                 case "@":
-                    return await ProceduralTimingControlStatement.ParseCreate(word, nameSpace, statement_label, clockDomains);
+                    return ProceduralTimingControlStatement.ParseCreate(word, nameSpace, statement_label, clockDomains);
 
                 // seq_block 
                 case "begin":
-                    return await SequentialBlock.ParseCreate(word, nameSpace, statement_label, blockIdentifier, clockDomains);
+                    return SequentialBlock.ParseCreate(word, nameSpace, statement_label, blockIdentifier, clockDomains);
 
                 // par_block 
                 case "fork":
-                    return await ParallelBlock.ParseCreate(word, nameSpace, statement_label);
+                    return ParallelBlock.ParseCreate(word, nameSpace, statement_label);
 
                 // ## loop_statement 
                 // forever statement_or_null
                 case "forever":
-                    return await ForeverStatement.ParseCreate(word, nameSpace, statement_label);
+                    return ForeverStatement.ParseCreate(word, nameSpace, statement_label);
                 // repeat(expression) statement_or_null
                 case "repeat":
-                    return await RepeatStatement.ParseCreate(word, nameSpace, statement_label);
+                    return RepeatStatement.ParseCreate(word, nameSpace, statement_label);
                 // while (expression) statement_or_null
                 case "while":
-                    return await WhileStatememt.ParseCreate(word, nameSpace, statement_label);
+                    return WhileStatememt.ParseCreate(word, nameSpace, statement_label);
                 // ([for_initialization]; [expression]; [for_step]) statement_or_null
                 case "for":
-                    return await ForStatememt.ParseCreate(word, nameSpace, statement_label);
+                    return ForStatememt.ParseCreate(word, nameSpace, statement_label);
                 // do statement_or_null while (expression);
                 case "do":
-                    return await DoStatement.ParseCreate(word, nameSpace, statement_label);
+                    return DoStatement.ParseCreate(word, nameSpace, statement_label);
                 // foreach (ps_or_hierarchical_array_identifier[loop_variables] ) statement
                 case "foreach":
-                    return await ForeachStatement.ParseCreate(word, nameSpace, statement_label);
+                    return ForeachStatement.ParseCreate(word, nameSpace, statement_label);
 
                 // case_statement 
                 case "case":
                 case "casex":
                 case "casez":
-                    return await CaseStatement.ParseCreate(word, nameSpace, statement_label);
+                    return CaseStatement.ParseCreate(word, nameSpace, statement_label);
 
                 // disable_statement 
                 case "disable":
@@ -227,7 +227,7 @@ namespace pluginVerilog.Verilog.Statements
                 // wait_statement 
                 case "wait":
                 case "wait_order":
-                    return await WaitStatement.ParseCreate(word, nameSpace, statement_label);
+                    return WaitStatement.ParseCreate(word, nameSpace, statement_label);
                 case "reg":
                 case "logic":
                 case "wire":
@@ -248,29 +248,29 @@ namespace pluginVerilog.Verilog.Statements
                     // Check if it's a concurrent assertion (with property keyword)
                     if (word.NextText == "property")
                     {
-                        return await ProceduralAssertionStatement.ParseCreate(word, nameSpace, statement_label);
+                        return ProceduralAssertionStatement.ParseCreate(word, nameSpace, statement_label);
                     }
-                    return await ImmidiateAssertionStatement.ParseCreate(word, nameSpace, statement_label);
+                    return ImmidiateAssertionStatement.ParseCreate(word, nameSpace, statement_label);
 
                 // restrict property (concurrent assertion)
                 case "restrict":
                     if (word.NextText == "property")
                     {
-                        return await ProceduralAssertionStatement.ParseCreate(word, nameSpace, statement_label);
+                        return ProceduralAssertionStatement.ParseCreate(word, nameSpace, statement_label);
                     }
                     break;
 
                 // expect_property_statement
                 case "expect":
-                    return await ExpectPropertyStatement.ParseCreate(word, nameSpace, statement_label);
+                    return ExpectPropertyStatement.ParseCreate(word, nameSpace, statement_label);
 
                 // randsequence_statement
                 case "randsequence":
-                    return await RandsequenceStatement.ParseCreate(word, nameSpace, statement_label);
+                    return RandsequenceStatement.ParseCreate(word, nameSpace, statement_label);
 
                 // randcase_statement
                 case "randcase":
-                    return await RandcaseStatement.ParseCreate(word, nameSpace, statement_label);
+                    return RandcaseStatement.ParseCreate(word, nameSpace, statement_label);
 
                 default:
 
@@ -282,7 +282,7 @@ namespace pluginVerilog.Verilog.Statements
                         word.MoveNext();
                         // ;
                         word.MoveNext();
-                        return await Statements.ParseCreateStatement(word, nameSpace, blockIdentifier, null);
+                        return Statements.ParseCreateStatement(word, nameSpace, blockIdentifier, null);
                     }
 
 
@@ -447,7 +447,7 @@ namespace pluginVerilog.Verilog.Statements
             return null;
         }
 
-        private static async Task<IStatement> ParseUniquePriority(WordScanner word, NameSpace nameSpace, string? statement_label)
+        private static IStatement ParseUniquePriority(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             switch (word.Text)
             {
@@ -471,13 +471,13 @@ namespace pluginVerilog.Verilog.Statements
             {
                 // conditional_statement 
                 case "if":
-                    return await ConditionalStatement.ParseCreate(word, nameSpace, statement_label);
+                    return ConditionalStatement.ParseCreate(word, nameSpace, statement_label);
 
                 // case_statement 
                 case "case":
                 case "casex":
                 case "casez":
-                    return await CaseStatement.ParseCreate(word, nameSpace, statement_label);
+                    return CaseStatement.ParseCreate(word, nameSpace, statement_label);
 
                 default:
                     word.AddError("if or case required");
@@ -495,20 +495,20 @@ namespace pluginVerilog.Verilog.Statements
             return getSpace(identifier, nameSpace.Parent);
         }
 
-        public static async Task<IStatement?> ParseCreateStatementOrNull(WordScanner word, NameSpace nameSpace, List<string>? clockDomains = null)
+        public static IStatement? ParseCreateStatementOrNull(WordScanner word, NameSpace nameSpace, List<string>? clockDomains = null)
         {
             if (word.GetCharAt(0) == ';')
             {
                 word.MoveNext();
                 return null;
             }
-            return await ParseCreateStatement(word, nameSpace, null, clockDomains);
+            return ParseCreateStatement(word, nameSpace, null, clockDomains);
         }
 
 
-        public static async Task<IStatement?> ParseCreateFunctionStatement(WordScanner word, NameSpace nameSpace)
+        public static IStatement? ParseCreateFunctionStatement(WordScanner word, NameSpace nameSpace)
         {
-            return await ParseCreateStatement(word, nameSpace);
+            return ParseCreateStatement(word, nameSpace);
         }
     }
 

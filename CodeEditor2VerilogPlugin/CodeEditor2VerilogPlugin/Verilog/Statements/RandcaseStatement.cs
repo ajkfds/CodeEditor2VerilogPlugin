@@ -43,7 +43,7 @@ namespace pluginVerilog.Verilog.Statements
             public bool IsDefault { get; set; }
         }
 
-        public static async Task<RandcaseStatement?> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
+        public static RandcaseStatement? ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             if (word.Text != "randcase") return null;
 
@@ -76,7 +76,7 @@ namespace pluginVerilog.Verilog.Statements
                 }
 
                 // Parse statement
-                item.Statement = await Statements.ParseCreateStatementOrNull(word, nameSpace);
+                item.Statement = Statements.ParseCreateStatementOrNull(word, nameSpace);
 
                 statement.Items.Add(item);
             }

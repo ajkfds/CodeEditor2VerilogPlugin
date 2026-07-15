@@ -151,7 +151,7 @@ namespace pluginVerilog.Verilog.Statements
             public bool IsDefault { get; set; }
         }
 
-        public static async Task<RandsequenceStatement?> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
+        public static RandsequenceStatement? ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             if (word.Text != "randsequence") return null;
 

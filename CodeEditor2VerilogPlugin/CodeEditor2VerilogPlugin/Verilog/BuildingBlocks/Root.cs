@@ -115,7 +115,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             return null;
         }
 
-        public static async System.Threading.Tasks.Task<Root> ParseCreate(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
+        public static async System.Threading.Tasks.Task<Root> ParseCreateAsync(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
         {
             Root root = new Root()
             {
@@ -136,36 +136,36 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     // module_declaration
                     case "module":
                     case "macromodule":
-                        await parseModule(word, parsedDocument, file);
+                        await parseModuleAsync(word, parsedDocument, file);
                         break;
                     // udp_declaration
                     case "primitive":
-                        await parsePrimitive(word, parsedDocument, file);
+                        await parsePrimitiveAsync(word, parsedDocument, file);
                         break;
                     // interface_declaration
                     case "interface":
-                        await parseInterface(word, parsedDocument, file);
+                        await parseInterfaceAsync(word, parsedDocument, file);
                         break;
                     // program_declaration
                     case "program":
-                        await parseProgram(word, parsedDocument, file);
+                        await parseProgramAsync(word, parsedDocument, file);
                         break;
                     // bind_directive
                     case "bind":
-                        await parseBindDirective(word, parsedDocument, file);
+                        await parseBindDirectiveAsync(word, parsedDocument, file);
                         break;
                     // checker_declaration
                     case "checker":
-                        await parseChecker(word, parsedDocument, file);
+                        await parseCheckerAsync(word, parsedDocument, file);
                         break;
                     // config_declaration
                     // package_declaration
                     case "package":
-                        await parsePackage(word, parsedDocument, file);
+                        await parsePackageAsync(word, parsedDocument, file);
                         break;
                     default:
                         // package_item
-                        if (!await Items.PackageItem.Parse(word, root))
+                        if (!Verilog.Items.PackageItem.Parse(word, root))
                         {
                             word.MoveNext();
                         }
@@ -187,7 +187,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         }
 
 
-        private static async System.Threading.Tasks.Task parseModule(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
+        private static async System.Threading.Tasks.Task parseModuleAsync(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
         {
             if (word.Text != "module" && word.Text != "macromodule") throw new Exception();
 
@@ -208,16 +208,16 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             // This prevents cascading re-parses that cause instability
             if (parsedDocument.ParameterOverrides == null)
             {
-                module = await Module.ParseCreate(word, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
+                module = await Module.ParseCreateAsync(word, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
             }
             else
             {
-                module = await Module.ParseCreate(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
+                module = await Module.ParseCreateAsync(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
             }
             // Note: ReparseRequested is now set only once at the end of ParseCreate based on ParseMode
         }
 
-        private static async System.Threading.Tasks.Task parsePackage(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
+        private static async System.Threading.Tasks.Task parsePackageAsync(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
         {
             if (word.Text != "package") System.Diagnostics.Debugger.Break();
 
@@ -237,16 +237,16 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             // This prevents cascading re-parses that cause instability
             if (parsedDocument.ParameterOverrides == null)
             {
-                package = await Package.ParseCreate(word, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
+                package = await Package.ParseCreateAsync(word, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
             }
             else
             {
-                package = await Package.ParseCreate(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
+                package = await Package.ParseCreateAsync(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
             }
             // Note: ReparseRequested is now set only once at the end of ParseCreate based on ParseMode
         }
 
-        private static async System.Threading.Tasks.Task parseProgram(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
+        private static async System.Threading.Tasks.Task parseProgramAsync(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
         {
             if (word.Text != "program") System.Diagnostics.Debugger.Break();
 
@@ -267,11 +267,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             // This prevents cascading re-parses that cause instability
             if (parsedDocument.ParameterOverrides == null)
             {
-                program = await Program.Parse(word, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
+                program = await Program.ParseAsync(word, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
             }
             else
             {
-                program = await Program.Parse(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
+                program = await Program.ParseAsync(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
             }
 
             bool added = parsedDocument.Root.AddOrUpdateBuildingBlock(program.Name, program);
@@ -316,7 +316,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
         }
 
-        private static async System.Threading.Tasks.Task parseInterface(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
+        private static async System.Threading.Tasks.Task parseInterfaceAsync(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
         {
             if (word.Text != "interface") System.Diagnostics.Debugger.Break();
 
@@ -360,12 +360,12 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             // Note: ReparseRequested for ParseMode is now set only once at the end of ParseCreate based on ParseMode
         }
 
-        private static async System.Threading.Tasks.Task parseBindDirective(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
+        private static async System.Threading.Tasks.Task parseBindDirectiveAsync(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
         {
             if (word.Text != "bind") throw new Exception();
 
             BindDirective? bindDirective;
-            if (Items.BindDirective.Parse(word, null, out bindDirective))
+            if (Verilog.Items.BindDirective.Parse(word, null, out bindDirective))
             {
                 // Bind directive parsed successfully
                 // Note: Bind directive is a compiler directive-like construct that doesn't create a building block
@@ -373,7 +373,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
         }
 
-        private static async System.Threading.Tasks.Task parsePrimitive(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
+        private static async System.Threading.Tasks.Task parsePrimitiveAsync(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
         {
             if (word.Text != "primitive") throw new Exception();
 
@@ -402,7 +402,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             // Note: ReparseRequested is now set only once at the end of ParseCreate based on ParseMode
         }
 
-        private static async System.Threading.Tasks.Task parseChecker(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
+        private static async System.Threading.Tasks.Task parseCheckerAsync(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
         {
             if (word.Text != "checker") throw new Exception();
 
@@ -420,11 +420,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             // This prevents cascading re-parses that cause instability
             if (parsedDocument.ParameterOverrides == null)
             {
-                checker = await Checker.ParseCreate(word, parsedDocument.Root, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
+                checker = Checker.ParseCreate(word, parsedDocument.Root, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
             }
             else
             {   // TODO :  parameter override parse implementation for checker, currently just pass null
-                checker = await Checker.ParseCreate(word, parsedDocument.Root, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
+                checker = Checker.ParseCreate(word, parsedDocument.Root, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
             }
 
             if (checker != null)

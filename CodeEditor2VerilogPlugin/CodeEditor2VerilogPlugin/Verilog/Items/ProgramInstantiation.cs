@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Items
 {
-    public class ProgramInstantiation : Item, IBuildingBlockInstantiation, INamedElement
+    public class ProgramInstantiation : NamedItem, IBuildingBlockInstantiation, INamedElement
     {
         public NamedElements NamedElements { get; } = new NamedElements();
 
@@ -133,7 +133,7 @@ namespace pluginVerilog.Verilog.Items
         public IndexReference? LastIndexReference { get; set; }
 
 
-        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
+        public static async Task<bool> ParseAsync(WordScanner word, NameSpace nameSpace)
         {
             // program instantiation can be placed only in module, interface, or program
             BuildingBlock buildingBlock = nameSpace.BuildingBlock as BuildingBlock;
@@ -154,10 +154,10 @@ namespace pluginVerilog.Verilog.Items
             {
                 // module instanceである可能性がある。
                 return false;
-                word.AddError("unfound program");
-                word.RootParsedDocument.ReparseRequested = true;
-                if (!word.RootParsedDocument.UnfoundModules.Contains(programName)) word.RootParsedDocument.UnfoundModules.Add(programName);
-                CodeEditor2.Controller.AppendLog("## unfound " + programName + " at " + buildingBlock.Name, Avalonia.Media.Colors.Orange);
+                //word.AddError("unfound program");
+                //word.RootParsedDocument.ReparseRequested = true;
+                //if (!word.RootParsedDocument.UnfoundModules.Contains(programName)) word.RootParsedDocument.UnfoundModules.Add(programName);
+                //CodeEditor2.Controller.AppendLog("## unfound " + programName + " at " + buildingBlock.Name, Avalonia.Media.Colors.Orange);
             }
 
             word.MoveNext();

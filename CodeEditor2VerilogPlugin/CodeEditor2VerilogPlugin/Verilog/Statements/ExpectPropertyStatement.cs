@@ -19,7 +19,7 @@ namespace pluginVerilog.Verilog.Statements
             [clocking_event ] [ "disable" "iff" "(" expression_or_dist ")" ] property_expr
         */
 
-        public static async Task<ExpectPropertyStatement> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
+        public static ExpectPropertyStatement ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             if (word.Text != "expect")
             {
@@ -38,34 +38,34 @@ namespace pluginVerilog.Verilog.Statements
 
             if (word.Eof || word.Text != "(")
             {
-                return await ExitTask(word, nameSpace, expectPropertyStatement);
+                return ExitTask(word, nameSpace, expectPropertyStatement);
             }
             word.MoveNext();
 
             // Parse property_spec using the SVA PropertySpec parser
-            var propertySpec = await Assertion.PropertySpec.ParseCreate(word, nameSpace);
+            var propertySpec = Assertion.PropertySpec.ParseCreate(word, nameSpace);
 
             if (word.Eof || word.Text != ")")
             {
-                return await ExitTask(word, nameSpace, expectPropertyStatement);
+                return ExitTask(word, nameSpace, expectPropertyStatement);
             }
             word.MoveNext();
 
             // action_block ::= [ statement ] [ else statement ]
-            expectPropertyStatement.PassStatement = await Statements.ParseCreateStatementOrNull(word, nameSpace);
+            expectPropertyStatement.PassStatement = Statements.ParseCreateStatementOrNull(word, nameSpace);
 
             if (word.Text == "else")
             {
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 word.MoveNext(); // else
 
-                expectPropertyStatement.ElseStatement = await Statements.ParseCreateStatementOrNull(word, nameSpace);
+                expectPropertyStatement.ElseStatement = Statements.ParseCreateStatementOrNull(word, nameSpace);
             }
 
             return expectPropertyStatement;
         }
 
-        private static async Task<ExpectPropertyStatement> ExitTask(WordScanner word, NameSpace nameSpace, ExpectPropertyStatement statement)
+        private static ExpectPropertyStatement ExitTask(WordScanner word, NameSpace nameSpace, ExpectPropertyStatement statement)
         {
             word.AddError("illegal expect property statement");
             word.SkipToKeyword(";");

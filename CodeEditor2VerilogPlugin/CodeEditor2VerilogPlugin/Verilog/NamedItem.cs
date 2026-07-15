@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace pluginVerilog.Verilog
 {
-    public class Item
+    public class NamedItem
     {
         public required string Name { get; init; }
         public Attribute? Attribute { get; set; }

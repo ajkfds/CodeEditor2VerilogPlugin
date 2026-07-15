@@ -11,7 +11,7 @@ namespace pluginVerilog.Verilog
 {
     public static class MethodPrototype
     {
-        public static async System.Threading.Tasks.Task<bool> ParseCreateWithPureVirtual(WordScanner word, NameSpace nameSpace)
+        public static bool ParseCreateWithPureVirtual(WordScanner word, NameSpace nameSpace)
         {
             /*
             interface_class_method ::=
@@ -32,7 +32,7 @@ namespace pluginVerilog.Verilog
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
-            if (await ParseCreate(word, nameSpace))
+            if (ParseCreate(word, nameSpace))
             {
                 return true;
             }
@@ -42,7 +42,7 @@ namespace pluginVerilog.Verilog
             }
         }
 
-        public static async System.Threading.Tasks.Task<bool> ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static bool ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             /*
             method_prototype ::=
@@ -58,14 +58,14 @@ namespace pluginVerilog.Verilog
             switch (word.Text)
             {
                 case "task":
-                    await Task.ParsePrototype(word, nameSpace);
+                    Task.ParsePrototype(word, nameSpace);
                     return true;
                 case "function":
-                    await Function.ParsePrototype(word, nameSpace);
+                    Function.ParsePrototype(word, nameSpace);
                     return true;
                 case "new":
                     // class_constructor_prototype: extern new [ ( [ tf_port_list ] ) ] ;
-                    await ParseConstructorPrototype(word, nameSpace);
+                    ParseConstructorPrototype(word, nameSpace);
                     return true;
                 default:
                     word.AddError("illegal method prototype");
@@ -86,7 +86,7 @@ namespace pluginVerilog.Verilog
         /// - "extern new (...)" in class items
         /// - "new (...)" as constructor prototype in method_qualifier context
         /// </summary>
-        public static async System.Threading.Tasks.Task ParseConstructorPrototype(WordScanner word, NameSpace nameSpace)
+        public static void ParseConstructorPrototype(WordScanner word, NameSpace nameSpace)
         {
             /*
             class_constructor_declaration ::= 

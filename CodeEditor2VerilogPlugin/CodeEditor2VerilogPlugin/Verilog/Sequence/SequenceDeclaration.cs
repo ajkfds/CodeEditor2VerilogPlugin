@@ -63,7 +63,7 @@ namespace pluginVerilog.Verilog.Sequence
         /// <summary>
         /// Parse a sequence declaration
         /// </summary>
-        public static async Task<SequenceDeclaration?> ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static SequenceDeclaration? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "sequence")
             {

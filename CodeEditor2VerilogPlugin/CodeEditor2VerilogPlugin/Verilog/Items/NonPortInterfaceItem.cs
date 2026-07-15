@@ -13,13 +13,13 @@ namespace pluginVerilog.Verilog.Items
                                     | interface_declaration 
                                     | timeunits_declaration3
        */
-        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
+        public static async Task<bool> ParseAsync(WordScanner word, NameSpace nameSpace)
         {
             switch (word.Text)
             {
                 // generate_region 
                 case "generate":
-                    return await GenerateRegion.Parse(word, nameSpace);
+                    return await GenerateRegion.ParseAsync(word, nameSpace);
                 case "specify":
                     return SpecifyBlock.Parse(word, nameSpace);
                 // modport_declaration
@@ -40,7 +40,7 @@ namespace pluginVerilog.Verilog.Items
 
             }
             // interface_or_generate_item 
-            if (await InterfaceOrGenerateItem.Parse(word, nameSpace)) return true;
+            if (await InterfaceOrGenerateItem.ParseAsync(word, nameSpace)) return true;
             return false;
         }
     }

@@ -34,11 +34,11 @@ namespace pluginVerilog.Verilog.Snippets
             ParsedDocument? parsedDocument = file.ParsedDocument as ParsedDocument;
 
 
-            string indent = "";
-            if (document.GetCharAt(document.GetLineStartIndex(document.GetLineAt(document.CaretIndex))) == '\t')
-            {
-                indent = "\t";
-            }
+            //string indent = "";
+            //if (document.GetCharAt(document.GetLineStartIndex(document.GetLineAt(document.CaretIndex))) == '\t')
+            //{
+            //    indent = "\t";
+            //}
 
             await base.ApplyAsync();
 
@@ -62,7 +62,7 @@ namespace pluginVerilog.Verilog.Snippets
 
             _currentTask = System.Threading.Tasks.Task.Run(async () =>
             {
-                await runBackGround(token);
+                await runBackGroundAsync(token);
             }, token);
 
             try
@@ -79,7 +79,7 @@ namespace pluginVerilog.Verilog.Snippets
             }
             return;
         }
-        private async System.Threading.Tasks.Task runBackGround(CancellationToken token)
+        private async System.Threading.Tasks.Task runBackGroundAsync(CancellationToken token)
         {
             try
             {

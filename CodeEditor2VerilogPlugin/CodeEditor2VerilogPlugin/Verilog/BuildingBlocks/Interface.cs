@@ -331,14 +331,16 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 while (!word.Eof)
                 {
                     await CommentAnnotationItem.ParseAsync(word, interface_);
-                    if (!await Items.InterfaceItem.Parse(word, interface_))
+
+                    IndexReference beforeRef = word.CreateIndexReference();
+                    await Verilog.Items.InterfaceItem.Parse(word, interface_);
+                    if (beforeRef.IsSameAs(word.CreateIndexReference()))
                     {
                         if (word.Text == "endinterface") break;
                         word.AddError("illegal module item");
                         word.MoveNext();
                     }
                 }
-                //parseModuleItems(word, module);
                 break;
             }
 

@@ -538,7 +538,6 @@ number
                 word.AddError("unfound object");
                 word.MoveNext();
                 return null;
-                return dataObjectReference;
             }
 
             //if (!variable.DataObject.NamedElements.ContainsKey(word.Text))

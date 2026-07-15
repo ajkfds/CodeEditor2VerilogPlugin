@@ -37,11 +37,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
 
 
-        public static async System.Threading.Tasks.Task<Package> ParseCreate(WordScanner word, Attribute attribute, BuildingBlock parent, Data.IVerilogRelatedFile file, bool protoType)
+        public static async System.Threading.Tasks.Task<Package> ParseCreateAsync(WordScanner word, Attribute attribute, BuildingBlock parent, Data.IVerilogRelatedFile file, bool protoType)
         {
-            return await ParseCreate(word, null, attribute, parent, file, protoType);
+            return await ParseCreateAsync(word, null, attribute, parent, file, protoType);
         }
-        public static async System.Threading.Tasks.Task<Package> ParseCreate(
+        public static async System.Threading.Tasks.Task<Package> ParseCreateAsync(
             WordScanner word,
             Dictionary<string, Expressions.Expression>? parameterOverrides,
             Attribute attribute,
@@ -107,18 +107,18 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 // prototype parse
                 WordScanner prototypeWord = word.Clone();
                 prototypeWord.Prototype = true;
-                await parsePackageItems(prototypeWord, parameterOverrides, null, package);
+                await parsePackageItemsAsync(prototypeWord, parameterOverrides, null, package);
                 prototypeWord.Dispose();
 
                 // parse
                 word.RootParsedDocument.Macros = macroKeep;
-                await parsePackageItems(word, parameterOverrides, null, package);
+                await parsePackageItemsAsync(word, parameterOverrides, null, package);
             }
             else
             {
                 // parse prototype only
                 word.Prototype = true;
-                await parsePackageItems(word, parameterOverrides, null, package);
+                await parsePackageItemsAsync(word, parameterOverrides, null, package);
                 word.Prototype = false;
             }
 
@@ -168,7 +168,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 | package_export_declaration 
                 | timeunits_declaration
         */
-        protected static async System.Threading.Tasks.Task parsePackageItems(
+        protected static async System.Threading.Tasks.Task parsePackageItemsAsync(
             WordScanner word,
             //            string parameterOverrideModuleName,
             Dictionary<string, Expressions.Expression>? parameterOverrides,
@@ -198,7 +198,9 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                 while (!word.Eof)
                 {
-                    if (!await Items.PackageItem.Parse(word, module))
+                    IndexReference beforeRef = word.CreateIndexReference();
+                    Verilog.Items.PackageItem.Parse(word, module);
+                    if (beforeRef.IsSameAs(word.CreateIndexReference()))
                     {
                         if (word.Text == "endpackage") break;
                         word.AddError("illegal package item");

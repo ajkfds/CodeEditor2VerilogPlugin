@@ -65,12 +65,12 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
 
 
-        public static async Task<Module> ParseCreate(WordScanner word, Attribute attribute, BuildingBlock parent, Data.IVerilogRelatedFile file, bool protoType)
+        public static async System.Threading.Tasks.Task<Module> ParseCreateAsync(WordScanner word, Attribute attribute, BuildingBlock parent, Data.IVerilogRelatedFile file, bool protoType)
         {
-            return await ParseCreate(word, null, attribute, parent, file, protoType);
+            return await ParseCreateAsync(word, null, attribute, parent, file, protoType);
         }
 
-        public static async Task<Module> ParseCreate(
+        public static async System.Threading.Tasks.Task<Module> ParseCreateAsync(
             WordScanner word,
             Dictionary<string, Expressions.Expression>? parameterOverrides,
             Attribute attribute,
@@ -139,19 +139,19 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 // prototype parse
                 WordScanner prototypeWord = word.Clone();
                 prototypeWord.Prototype = true;
-                await parseModule(prototypeWord, parameterOverrides, null, module);
+                await parseModuleAsync(prototypeWord, parameterOverrides, null, module);
                 prototypeWord.Dispose();
                 word.CheckCancelToken();
 
                 // parse
                 word.RootParsedDocument.Macros = macroKeep;
-                await parseModule(word, parameterOverrides, null, module);
+                await parseModuleAsync(word, parameterOverrides, null, module);
             }
             else
             {
                 // parse prototype only
                 word.Prototype = true;
-                await parseModule(word, parameterOverrides, null, module);
+                await parseModuleAsync(word, parameterOverrides, null, module);
                 word.Prototype = false;
             }
 
@@ -214,7 +214,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         module_parameter_port_list  ::= # ( parameter_declaration { , parameter_declaration } ) 
         list_of_ports ::= ( port { , port } )
         */
-        protected static async System.Threading.Tasks.Task parseModule(
+        protected static async System.Threading.Tasks.Task parseModuleAsync(
             WordScanner word,
             //            string parameterOverrideModuleName,
             Dictionary<string, Expressions.Expression>? parameterOverrides,
@@ -325,8 +325,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                 while (!word.Eof)
                 {
-                    // Parse comment annotations (@scope, etc.) before the
-                    // following module item so that a wire/assign whose RHS
+                    // Parse comment annotations (@scope, etc.) before the following module item so that a wire/assign whose RHS
                     // references a name introduced by @scope (e.g.
                     //   // @scope MY_MOD inst0
                     //   wire [7:0] aa = inst0.SIG;
@@ -336,7 +335,9 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                     if (module.AnsiStylePortDefinition)
                     {
-                        if (!await Items.NonPortModuleItem.Parse(word, module))
+                        IndexReference beforeRef = word.CreateIndexReference();
+                        await Verilog.Items.NonPortModuleItem.ParseAsync(word, module);
+                        if (beforeRef.IsSameAs(word.CreateIndexReference()))
                         {
                             word.CheckCancelToken();
                             if (word.Text == "endmodule") break;
@@ -349,7 +350,9 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     }
                     else
                     {
-                        if (!await Items.ModuleItem.Parse(word, module))
+                        IndexReference beforeRef = word.CreateIndexReference();
+                        await Verilog.Items.ModuleItem.Parse(word, module);
+                        if (beforeRef.IsSameAs(word.CreateIndexReference()))
                         {
                             word.CheckCancelToken();
                             if (word.Text == "endmodule") break;
@@ -377,11 +380,6 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 CheckVariablesUseAndDriven(word, module);
             }
 
-            //foreach (var variable in module.Variables.Values)
-            //{
-            //    if (variable.DefinedReference == null) continue;
-            //    variable.UsedReferences.Clear();
-            //}
             return;
         }
 

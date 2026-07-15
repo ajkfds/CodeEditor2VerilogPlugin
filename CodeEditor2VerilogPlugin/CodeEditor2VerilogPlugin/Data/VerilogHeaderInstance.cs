@@ -125,7 +125,7 @@ namespace pluginVerilog.Data
         public IndexReference InstancedReference { get; protected set; }
 
 
-        public bool SystemVerilog { get { return RootFile.SystemVerilog; } }
+        public new bool SystemVerilog { get { return RootFile.SystemVerilog; } }
 
         public override bool ReparseRequested
         {
@@ -142,7 +142,7 @@ namespace pluginVerilog.Data
                 vParsedDocument.ReparseRequested = value;
             }
         }
-        public void CheckDirty()
+        public new void CheckDirty()
         {
             ParsedDocument? vParsedDocument = VerilogParsedDocument;
             if (vParsedDocument == null) return;
@@ -312,7 +312,7 @@ namespace pluginVerilog.Data
             await SourceTextFile.SaveAsync();
         }
 
-        public Verilog.ParsedDocument? VerilogParsedDocument
+        public new Verilog.ParsedDocument? VerilogParsedDocument
         {
             get
             {
@@ -354,7 +354,7 @@ namespace pluginVerilog.Data
 
 
         [JsonIgnore]
-        public ProjectProperty ProjectProperty
+        public new ProjectProperty ProjectProperty
         {
             get
             {

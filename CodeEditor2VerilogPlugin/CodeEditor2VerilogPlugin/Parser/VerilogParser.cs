@@ -238,7 +238,7 @@ namespace pluginVerilog.Parser
             word.RootParsedDocument.LockedDocument.Add(word.Document);
             if (File is not Data.VerilogFile) throw new Exception();
 
-            Root root = await Root.ParseCreate(word, VerilogParsedDocument, File);
+            Root root = await Root.ParseCreateAsync(word, VerilogParsedDocument, File);
         }
     }
 }

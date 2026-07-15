@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Items
 {
-    public class AlwaysConstruct
+    public class AlwaysConstruct : IItem
     {
         protected AlwaysConstruct() { }
         public Statements.IStatement? Statement { get; protected set; }
@@ -14,13 +14,15 @@ namespace pluginVerilog.Verilog.Items
             always_construct ::= always_keyword statement 
             always_keyword ::= always | always_comb | always_latch | always_ff     
          */
+        public IndexReference? BeginIndexReference { get; protected set; }
+        public IndexReference? LastIndexReference { get; protected set; }
 
-        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
+        public static bool Parse(WordScanner word, NameSpace nameSpace)
         {
-            Items.AlwaysConstruct? always = await Items.AlwaysConstruct.ParseCreate(word, nameSpace);
+            Items.AlwaysConstruct? always = Items.AlwaysConstruct.ParseCreate(word, nameSpace);
             return true;
         }
-        public static async Task<AlwaysConstruct?> ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static AlwaysConstruct? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             switch (word.Text)
             {
@@ -38,16 +40,18 @@ namespace pluginVerilog.Verilog.Items
 
 
             //System.Diagnostics.Debug.Assert(word.Text == "always");
+            IndexReference beginIndex = word.CreateIndexReference();
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
-            AlwaysConstruct always = new AlwaysConstruct();
-            always.Statement = await Statements.Statements.ParseCreateStatement(word, nameSpace);
+            AlwaysConstruct always = new AlwaysConstruct() { BeginIndexReference = beginIndex };
+            always.Statement = Statements.Statements.ParseCreateStatement(word, nameSpace);
             if (always.Statement == null)
             {
                 word.AddError("illegal always construct");
                 return null;
             }
+            always.LastIndexReference = word.CreateIndexReferenceBefore();
             return always;
         }
     }

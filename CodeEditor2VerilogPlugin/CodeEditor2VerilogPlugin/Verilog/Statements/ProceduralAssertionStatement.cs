@@ -45,7 +45,7 @@ namespace pluginVerilog.Verilog.Statements
 
         */
 
-        public static async System.Threading.Tasks.Task<IStatement?> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
+        public static IStatement? ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             switch (word.Text)
             {
@@ -65,20 +65,20 @@ namespace pluginVerilog.Verilog.Statements
                 switch (word.Text)
                 {
                     case "assert":
-                        return await Assertion.AssertPropertyStatement.ParseCreate(word, nameSpace, statement_label);
+                        return Assertion.AssertPropertyStatement.ParseCreate(word, nameSpace, statement_label);
                     case "assume":
-                        return await Assertion.AssumePropertyStatement.ParseCreate(word, nameSpace, statement_label);
+                        return Assertion.AssumePropertyStatement.ParseCreate(word, nameSpace, statement_label);
                     case "cover":
-                        return await Assertion.CoverPropertyStatement.ParseCreate(word, nameSpace, statement_label);
+                        return Assertion.CoverPropertyStatement.ParseCreate(word, nameSpace, statement_label);
                     case "restrict":
-                        return await Assertion.RestrictPropertyStatement.ParseCreate(word, nameSpace, statement_label);
+                        return Assertion.RestrictPropertyStatement.ParseCreate(word, nameSpace, statement_label);
                 }
             }
 
             // Handle cover sequence
             if (word.Text == "cover" && word.NextText == "sequence")
             {
-                return await Assertion.CoverSequenceStatement.ParseCreate(word, nameSpace, statement_label);
+                return Assertion.CoverSequenceStatement.ParseCreate(word, nameSpace, statement_label);
             }
 
             return null;

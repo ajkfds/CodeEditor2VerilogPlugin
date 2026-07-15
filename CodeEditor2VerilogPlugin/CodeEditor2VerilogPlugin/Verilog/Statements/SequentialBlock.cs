@@ -52,7 +52,7 @@ namespace pluginVerilog.Verilog.Statements
         list_of_block_variable_identifiers ::=  block_variable_type { , block_variable_type } 
         block_variable_type ::=  variable_identifier        | variable_identifier dimension { dimension }  
         */
-        public static async Task<IStatement?> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label,string? blockIdentifier = null, List<string>? clockDomains = null)
+        public static IStatement? ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label,string? blockIdentifier = null, List<string>? clockDomains = null)
         {
             if (word.Text != "begin") throw new Exception();
 
@@ -66,31 +66,31 @@ namespace pluginVerilog.Verilog.Statements
                 if (!General.IsIdentifier(word.Text))
                 {
                     word.AddError("illegal ifdentifier name");
-                    return await parseCreateUnnamedSequentialBlock(word, nameSpace, beginIndex, clockDomains);
+                    return parseCreateUnnamedSequentialBlock(word, nameSpace, beginIndex, clockDomains);
                 }
                 else
                 {
                     string name = word.Text;
                     word.Color(CodeDrawStyle.ColorType.Identifier);
                     word.MoveNext();
-                    return await parseCreateNamedSequentialBlock(word, nameSpace, beginIndex, name, clockDomains);
+                    return parseCreateNamedSequentialBlock(word, nameSpace, beginIndex, name, clockDomains);
                 }
             }
             else
             {
                 if(blockIdentifier != null)
                 {
-                    return await parseCreateNamedSequentialBlock(word, nameSpace, beginIndex, blockIdentifier, clockDomains);
+                    return parseCreateNamedSequentialBlock(word, nameSpace, beginIndex, blockIdentifier, clockDomains);
                 }
                 else
                 {
-                    return await parseCreateUnnamedSequentialBlock(word, nameSpace, beginIndex, clockDomains);
+                    return parseCreateUnnamedSequentialBlock(word, nameSpace, beginIndex, clockDomains);
                 }
             }
         }
 
         private static List<string> endKeyword = new List<string> { "endmodule", "endtask", "endtask", "endinterface", "endfunction" };
-        private static async Task<IStatement?> parseCreateUnnamedSequentialBlock(WordScanner word, NameSpace nameSpace, IndexReference beginIndex, List<string>? clockDomains = null)
+        private static IStatement? parseCreateUnnamedSequentialBlock(WordScanner word, NameSpace nameSpace, IndexReference beginIndex, List<string>? clockDomains = null)
         {
             SequentialBlock sequentialBlock = new SequentialBlock();
 
@@ -106,14 +106,14 @@ namespace pluginVerilog.Verilog.Statements
                 NamedSequentialBlock namedBlock = createNamedSequentialBlock(word, nameSpace, beginIndex, name);
                 while (word.SystemVerilog && !word.Eof && word.Text != "end")
                 {
-                    if (!await Items.BlockItemDeclaration.Parse(word, namedBlock)) break;
+                    if (!Items.BlockItemDeclaration.Parse(word, namedBlock)) break;
                 }
                 if (!startRef.IsSameAs(word.CreateIndexReference()))
                 {
                     // parse statements
                     while (!word.Eof && word.Text != "end")
                     {
-                        IStatement? statement = await Verilog.Statements.Statements.ParseCreateStatement(word, namedBlock,null, clockDomains);
+                        IStatement? statement = Verilog.Statements.Statements.ParseCreateStatement(word, namedBlock,null, clockDomains);
                         if (statement != null)
                         {
                             namedBlock.Statements.Add(statement);
@@ -153,7 +153,7 @@ namespace pluginVerilog.Verilog.Statements
 
             while (!word.Eof && word.Text != "end")
             {
-                IStatement? statement = await Verilog.Statements.Statements.ParseCreateStatement(word, nameSpace, null, clockDomains);
+                IStatement? statement = Verilog.Statements.Statements.ParseCreateStatement(word, nameSpace, null, clockDomains);
                 if (statement != null)
                 {
                     sequentialBlock.Statements.Add(statement);
@@ -236,7 +236,7 @@ namespace pluginVerilog.Verilog.Statements
             }
             return namedBlock;
         }
-        private static async Task<IStatement?> parseCreateNamedSequentialBlock(WordScanner word, NameSpace nameSpace, IndexReference beginIndex, string name, List<string>? clockDomains = null)
+        private static IStatement? parseCreateNamedSequentialBlock(WordScanner word, NameSpace nameSpace, IndexReference beginIndex, string name, List<string>? clockDomains = null)
         {
             // start at identifier
 
@@ -246,13 +246,13 @@ namespace pluginVerilog.Verilog.Statements
             // local item declaration
             while (!word.Eof && word.Text != "end")
             {
-                if (!await Items.BlockItemDeclaration.Parse(word, namedBlock)) break;
+                if (!Items.BlockItemDeclaration.Parse(word, namedBlock)) break;
             }
 
             // parse statements
             while (!word.Eof && word.Text != "end")
             {
-                IStatement? statement = await Verilog.Statements.Statements.ParseCreateStatement(word, namedBlock,null, clockDomains);
+                IStatement? statement = Verilog.Statements.Statements.ParseCreateStatement(word, namedBlock,null, clockDomains);
                 if (statement != null)
                 {
                     namedBlock.Statements.Add(statement);

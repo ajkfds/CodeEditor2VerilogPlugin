@@ -46,7 +46,6 @@ namespace pluginVerilog.Data
         ~VerilogFile()
         {
             //if(System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
-            string a = "";
         }
         public override string Key
         {
@@ -69,7 +68,7 @@ namespace pluginVerilog.Data
             CodeEditor2.Data.Item.PolymorphicResolver.DerivedTypes.Add(new JsonDerivedType(typeof(VerilogFile)));
         }
 
-        public static async Task<VerilogFile> CreateSystemVerilog(string relativePath, CodeEditor2.Data.Project project)
+        public static async Task<VerilogFile> CreateSystemVerilogAsync(string relativePath, CodeEditor2.Data.Project project)
         {
             string name;
             if (relativePath.Contains(System.IO.Path.DirectorySeparatorChar))

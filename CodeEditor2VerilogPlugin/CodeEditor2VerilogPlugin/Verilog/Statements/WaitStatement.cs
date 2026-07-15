@@ -40,9 +40,9 @@ namespace pluginVerilog.Verilog.Statements
               statement_or_null
             | [ statement ] "else" statement_or_null         
          */
-        public static async Task<WaitStatement?> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
+        public static WaitStatement? ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
-            if (word.Text == "wait_order") return await parseCreate_wait_order(word, nameSpace);
+            if (word.Text == "wait_order") return parseCreate_wait_order(word, nameSpace);
 
             if (word.Text != "wait") throw new Exception();
 
@@ -85,7 +85,7 @@ namespace pluginVerilog.Verilog.Statements
                 return waitStatement;
             }
 
-            IStatement? statement = await Statements.ParseCreateStatement(word, nameSpace);
+            IStatement? statement = Statements.ParseCreateStatement(word, nameSpace);
             waitStatement.Statement = statement;
 
             if (word.Text != ";")
@@ -116,7 +116,7 @@ namespace pluginVerilog.Verilog.Statements
         }
 
         // wait_order "(" hierarchical_identifier { "," hierarchical_identifier } ")" action_block
-        public static async Task<WaitStatement?> parseCreate_wait_order(WordScanner word, NameSpace nameSpace)
+        public static WaitStatement? parseCreate_wait_order(WordScanner word, NameSpace nameSpace)
         {
             // | "wait_order" "(" hierarchical_identifier { "," hierarchical_identifier } ")" action_block
             if (word.Text != "wait_order") throw new Exception();
@@ -166,7 +166,7 @@ namespace pluginVerilog.Verilog.Statements
             word.MoveNext();
 
             // action_block ::= [ statement ] [ else statement ]
-            IStatement? statement = await Statements.ParseCreateStatementOrNull(word, nameSpace);
+            IStatement? statement = Statements.ParseCreateStatementOrNull(word, nameSpace);
             waitOrderStatement.Statement = statement;
 
             // Handle else clause
@@ -175,7 +175,7 @@ namespace pluginVerilog.Verilog.Statements
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 word.MoveNext(); // else
 
-                IStatement? elseStatement = await Statements.ParseCreateStatementOrNull(word, nameSpace);
+                IStatement? elseStatement = Statements.ParseCreateStatementOrNull(word, nameSpace);
                 waitOrderStatement.ElseStatement = elseStatement;
             }
 

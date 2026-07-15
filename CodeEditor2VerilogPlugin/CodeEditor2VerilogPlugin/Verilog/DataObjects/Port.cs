@@ -10,7 +10,7 @@ using System.Collections.Generic;
 
 namespace pluginVerilog.Verilog.DataObjects
 {
-    public class Port : Item, ICommentAnnotated
+    public class Port : NamedItem, ICommentAnnotated
     {
         public DirectionEnum Direction = DirectionEnum.Undefined;
 

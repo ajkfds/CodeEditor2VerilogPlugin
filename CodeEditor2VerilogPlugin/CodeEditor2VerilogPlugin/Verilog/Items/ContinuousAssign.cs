@@ -11,12 +11,12 @@ namespace pluginVerilog.Verilog.Items
 
         public DataObjects.VariableAssignment? VariableAssignment { get; protected set; }
 
-        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
+        public static bool Parse(WordScanner word, NameSpace nameSpace)
         {
             List<Items.ContinuousAssign> continuousAssigns = Items.ContinuousAssign.ParseCreate(word, nameSpace);
 
 
-            return await System.Threading.Tasks.Task.FromResult(true);
+            return true;
         }
 
         public static List<ContinuousAssign> ParseCreate(WordScanner word, NameSpace nameSpace)

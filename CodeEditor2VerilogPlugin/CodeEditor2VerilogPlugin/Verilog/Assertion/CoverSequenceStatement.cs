@@ -24,7 +24,7 @@ namespace pluginVerilog.Verilog.Assertion
             | ( event_expression )
         */
 
-        public static async Task<CoverSequenceStatement> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
+        public static CoverSequenceStatement ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             if (word.Text != "cover" || word.NextText != "sequence")
             {
@@ -42,7 +42,7 @@ namespace pluginVerilog.Verilog.Assertion
 
             if (word.Eof || word.Text != "(")
             {
-                return await ExitTask(word, nameSpace, coverSequenceStatement);
+                return ExitTask(word, nameSpace, coverSequenceStatement);
             }
             word.MoveNext();
 
@@ -95,17 +95,17 @@ namespace pluginVerilog.Verilog.Assertion
 
             if (word.Eof || word.Text != ")")
             {
-                return await ExitTask(word, nameSpace, coverSequenceStatement);
+                return ExitTask(word, nameSpace, coverSequenceStatement);
             }
             word.MoveNext();
 
             // Parse statement_or_null (no action_block, just a single statement or null)
-            coverSequenceStatement.CoverStatement = await Statements.Statements.ParseCreateStatementOrNull(word, nameSpace);
+            coverSequenceStatement.CoverStatement = Statements.Statements.ParseCreateStatementOrNull(word, nameSpace);
 
             return coverSequenceStatement;
         }
 
-        private static async Task<CoverSequenceStatement> ExitTask(WordScanner word, NameSpace nameSpace, CoverSequenceStatement statement)
+        private static CoverSequenceStatement ExitTask(WordScanner word, NameSpace nameSpace, CoverSequenceStatement statement)
         {
             word.AddError("illegal cover sequence statement");
             word.SkipToKeyword(";");

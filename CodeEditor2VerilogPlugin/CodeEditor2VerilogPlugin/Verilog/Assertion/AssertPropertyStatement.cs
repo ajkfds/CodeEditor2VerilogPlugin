@@ -9,7 +9,7 @@ namespace pluginVerilog.Verilog.Assertion
         protected AssertPropertyStatement() { }
 
 
-        public static async Task<AssertPropertyStatement> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
+        public static AssertPropertyStatement ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             // assert_property_statement::= "assert" "property" ( property_spec ) action_block
             if (word.Text != "assert" || word.NextText != "property")
@@ -25,12 +25,12 @@ namespace pluginVerilog.Verilog.Assertion
 
             AssertPropertyStatement assertPropertyStatement = new AssertPropertyStatement();
 
-            if (word.Eof || word.Text != "(") return await exitTask(word, nameSpace, assertPropertyStatement);
+            if (word.Eof || word.Text != "(") return exitTask(word, nameSpace, assertPropertyStatement);
             word.MoveNext();
 
-            PropertySpec propertySpec = await PropertySpec.ParseCreate(word, nameSpace);
+            PropertySpec propertySpec = PropertySpec.ParseCreate(word, nameSpace);
 
-            if (word.Eof || word.Text != ")") return await exitTask(word, nameSpace, assertPropertyStatement);
+            if (word.Eof || word.Text != ")") return exitTask(word, nameSpace, assertPropertyStatement);
             word.MoveNext();
 
             if(word.Text == ";") //  null statement
@@ -41,7 +41,7 @@ namespace pluginVerilog.Verilog.Assertion
 
             if (word.Text != "else")
             {
-                assertPropertyStatement.PassStatement = await Statements.Statements.ParseCreateStatement(word, nameSpace);
+                assertPropertyStatement.PassStatement = Statements.Statements.ParseCreateStatement(word, nameSpace);
             }
 
             if (word.Text != "else")
@@ -51,12 +51,12 @@ namespace pluginVerilog.Verilog.Assertion
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
-            assertPropertyStatement.ElseStatement = await Statements.Statements.ParseCreateStatement(word, nameSpace);
+            assertPropertyStatement.ElseStatement = Statements.Statements.ParseCreateStatement(word, nameSpace);
             return assertPropertyStatement;
         }
         public Statements.IStatement? PassStatement { set; get; }
         public Statements.IStatement? ElseStatement { set; get; }
-        private static async Task<AssertPropertyStatement> exitTask(WordScanner word, NameSpace nameSpace, AssertPropertyStatement assertPropertyStatement)
+        private static AssertPropertyStatement exitTask(WordScanner word, NameSpace nameSpace, AssertPropertyStatement assertPropertyStatement)
         {
             word.AddError("iilegal property statement");
             word.SkipToKeyword(";");

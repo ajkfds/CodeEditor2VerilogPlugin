@@ -77,7 +77,7 @@ namespace pluginVerilog.Verilog.Statements
         public Expressions.Expression? ConditionalExpression;
         public IStatement? Statement;
         public IStatement? ElseStatement;
-        public static async Task<ImmidiateAssertionStatement> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
+        public static ImmidiateAssertionStatement ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             System.Diagnostics.Debug.Assert(word.Text == "assert" || word.Text == "assume" || word.Text == "cover");
             word.Color(CodeDrawStyle.ColorType.Keyword);
@@ -133,7 +133,7 @@ namespace pluginVerilog.Verilog.Statements
             word.MoveNext(); // )
 
             // action_block ::= [ statement ] [ else statement ]
-            IStatement? statement = await Statements.ParseCreateStatementOrNull(word, nameSpace);
+            IStatement? statement = Statements.ParseCreateStatementOrNull(word, nameSpace);
             assertion.Statement = statement;
 
             // Handle else clause (only for assert and assume)
@@ -142,7 +142,7 @@ namespace pluginVerilog.Verilog.Statements
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 word.MoveNext(); // else
 
-                IStatement? elseStatement = await Statements.ParseCreateStatementOrNull(word, nameSpace);
+                IStatement? elseStatement = Statements.ParseCreateStatementOrNull(word, nameSpace);
                 assertion.ElseStatement = elseStatement;
             }
 

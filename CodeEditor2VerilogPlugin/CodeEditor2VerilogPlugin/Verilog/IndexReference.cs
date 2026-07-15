@@ -21,7 +21,7 @@ namespace pluginVerilog.Verilog
             else
             {
                 ret.rootParsedDocumentRef = new WeakReference<ParsedDocument>(wordPointer.ParsedDocument);
-            }
+            }                          
 
             ret.parsedDocumentRef = new WeakReference<ParsedDocument>(wordPointer.ParsedDocument);
             if (stocks.Count != 0)
@@ -35,6 +35,28 @@ namespace pluginVerilog.Verilog
 
             return ret;
         }
+        public static IndexReference CreateBefore(WordPointer wordPointer, List<WordPointer> stocks)
+        {
+            IndexReference ret = Create(wordPointer, stocks);
+            moveBefore(ret);
+            return ret;
+        }
+        private static void moveBefore(IndexReference indexReference)
+        {
+            if (indexReference.indexes[indexReference.indexes.Count-1] == 0)
+            {
+                if (indexReference.indexes.Count == 1) return;
+                indexReference.indexes.RemoveAt(indexReference.indexes.Count - 1);
+                moveBefore(indexReference);
+                return;
+            }
+            else
+            {
+                indexReference.indexes[indexReference.indexes.Count - 1]--;
+            }
+        }
+
+
         public static IndexReference Create(ParsedDocument parsedDocument, CodeEditor.CodeDocument document, int index)
         {
             IndexReference ret = new IndexReference();

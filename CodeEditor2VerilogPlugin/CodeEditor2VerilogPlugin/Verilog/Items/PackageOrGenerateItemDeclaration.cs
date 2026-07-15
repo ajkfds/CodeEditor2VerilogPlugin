@@ -23,7 +23,7 @@ namespace pluginVerilog.Verilog.Items
             | assertion_item_declaration 
             | ;
          */
-        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
+        public static bool Parse(WordScanner word, NameSpace nameSpace)
         {
             // data_declaration
             if (DataDeclaration.Parse(word, nameSpace)) return true;
@@ -76,12 +76,12 @@ namespace pluginVerilog.Verilog.Items
 
                 // task_declaration
                 case "task":
-                    await Task.Parse(word, nameSpace);
+                    Task.Parse(word, nameSpace);
                     break;
 
                 // function_declaration
                 case "function":
-                    await Function.Parse(word, nameSpace);
+                    Function.Parse(word, nameSpace);
                     break;
 
                 // checker_declaration
@@ -90,7 +90,7 @@ namespace pluginVerilog.Verilog.Items
                 // dpi_import_export
                 case "import":
                 case "export":
-                    await DpiImportExport.Parse(word, nameSpace);
+                    DpiImportExport.Parse(word, nameSpace);
                     break;
                 // extern_constraint_declaration
                 // TODO
@@ -98,7 +98,7 @@ namespace pluginVerilog.Verilog.Items
                 // class_declaration
                 case "virtual":
                 case "class":
-                    await BuildingBlocks.Class.ParseDeclaration(word, nameSpace);
+                    BuildingBlocks.Class.ParseDeclaration(word, nameSpace);
                     break;
 
                 // interface_class_declaration
@@ -106,7 +106,7 @@ namespace pluginVerilog.Verilog.Items
                     // Check if it's interface class
                     if (word.NextText == "class")
                     {
-                        await BuildingBlocks.InterfaceClass.ParseDeclaration(word, nameSpace);
+                        BuildingBlocks.InterfaceClass.ParseDeclaration(word, nameSpace);
                         break;
                     }
                     // Fall through to module/interface handling if needed
@@ -123,7 +123,7 @@ namespace pluginVerilog.Verilog.Items
 
                 // covergroup_declaration
                 case "covergroup":
-                    var covergroup = await Coverage.CovergroupDeclaration.ParseCreate(word, nameSpace);
+                    var covergroup = Coverage.CovergroupDeclaration.ParseCreate(word, nameSpace);
                     if (covergroup != null)
                     {
                         nameSpace.NamedElements.Add(covergroup.Name, covergroup);
@@ -135,7 +135,7 @@ namespace pluginVerilog.Verilog.Items
                 // assertion_item_declaration
                 case "property":
                     // property_declaration ::= property property_identifier [ ( [ property_port_list ] ) ] ; { assertion_variable_declaration } property_spec [ ; ] endproperty [ : property_identifier ]
-                    var propertyDecl = await Property.PropertyDeclaration.ParseCreate(word, nameSpace);
+                    var propertyDecl = Property.PropertyDeclaration.ParseCreate(word, nameSpace);
                     if (propertyDecl != null)
                     {
                         nameSpace.NamedElements.Add(propertyDecl.Name, propertyDecl);
@@ -144,7 +144,7 @@ namespace pluginVerilog.Verilog.Items
 
                 case "sequence":
                     // sequence_declaration ::= sequence sequence_identifier [ ( [ sequence_port_list ] ) ] ; { assertion_variable_declaration } sequence_expr [ ; ] endsequence [ : sequence_identifier ]
-                    var sequenceDecl = await Sequence.SequenceDeclaration.ParseCreate(word, nameSpace);
+                    var sequenceDecl = Sequence.SequenceDeclaration.ParseCreate(word, nameSpace);
                     if (sequenceDecl != null)
                     {
                         nameSpace.NamedElements.Add(sequenceDecl.Name, sequenceDecl);

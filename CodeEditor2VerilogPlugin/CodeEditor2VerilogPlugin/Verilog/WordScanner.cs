@@ -331,6 +331,11 @@ namespace pluginVerilog.Verilog
             return IndexReference.Create(wordPointer, stock);
         }
 
+        public IndexReference CreateIndexReferenceBefore()
+        {
+            return IndexReference.CreateBefore(wordPointer, stock);
+        }
+
         public WordReference CrateWordReference()
         {
             return WordReference.Create(wordPointer, stock);

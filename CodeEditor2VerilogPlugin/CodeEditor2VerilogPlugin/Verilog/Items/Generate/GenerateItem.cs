@@ -16,11 +16,11 @@ namespace pluginVerilog.Verilog.Items.Generate
          */
 
 
-        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
+        public static async System.Threading.Tasks.Task<bool> ParseAsync(WordScanner word, NameSpace nameSpace)
         {
             if (nameSpace.BuildingBlock is BuildingBlocks.BuildingBlock)
             {
-                return await ModuleOrGenerateItem.Parse(word, nameSpace);
+                return await ModuleOrGenerateItem.ParseAsync(word, nameSpace);
             }
 
             return false;

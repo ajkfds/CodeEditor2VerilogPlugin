@@ -10,7 +10,7 @@ namespace pluginVerilog.Verilog.Items
         /// <summary>
         /// Parse assert property statement
         /// </summary>
-        public static async Task<bool> ParseAssertProperty(WordScanner word, NameSpace nameSpace, string? blockIdentifier)
+        public static bool ParseAssertProperty(WordScanner word, NameSpace nameSpace, string? blockIdentifier)
         {
             if (word.Text != "assert" || word.NextText != "property")
             {
@@ -20,13 +20,13 @@ namespace pluginVerilog.Verilog.Items
 
             if (blockIdentifier == null)
             {
-                await AssertPropertyStatement.ParseCreate(word, nameSpace, blockIdentifier);
+                AssertPropertyStatement.ParseCreate(word, nameSpace, blockIdentifier);
             }
             else
             {
                 ConcurrentAssertionStatementItem item = new ConcurrentAssertionStatementItem()
                 {
-                    AssertPropertyStatement = await AssertPropertyStatement.ParseCreate(word, nameSpace, blockIdentifier),
+                    AssertPropertyStatement = AssertPropertyStatement.ParseCreate(word, nameSpace, blockIdentifier),
                     Name = blockIdentifier
                 };
                 nameSpace.NamedElements.Add(item.Name, item);
@@ -38,17 +38,17 @@ namespace pluginVerilog.Verilog.Items
         /// <summary>
         /// Parse assume property statement
         /// </summary>
-        public static async Task<bool> ParseAssumeProperty(WordScanner word, NameSpace nameSpace, string? blockIdentifier)
+        public static bool ParseAssumeProperty(WordScanner word, NameSpace nameSpace, string? blockIdentifier)
         {
             if (blockIdentifier == null)
             {
-                await AssumePropertyStatement.ParseCreate(word, nameSpace, blockIdentifier);
+                AssumePropertyStatement.ParseCreate(word, nameSpace, blockIdentifier);
             }
             else
             {
                 ConcurrentAssertionStatementItem item = new ConcurrentAssertionStatementItem()
                 {
-                    AssumePropertyStatement = await AssumePropertyStatement.ParseCreate(word, nameSpace, blockIdentifier),
+                    AssumePropertyStatement = AssumePropertyStatement.ParseCreate(word, nameSpace, blockIdentifier),
                     Name = blockIdentifier
                 };
                 nameSpace.NamedElements.Add(item.Name, item);
@@ -60,17 +60,17 @@ namespace pluginVerilog.Verilog.Items
         /// <summary>
         /// Parse cover property statement
         /// </summary>
-        public static async Task<bool> ParseCoverProperty(WordScanner word, NameSpace nameSpace, string? blockIdentifier)
+        public static bool ParseCoverProperty(WordScanner word, NameSpace nameSpace, string? blockIdentifier)
         {
             if (blockIdentifier == null)
             {
-                await CoverPropertyStatement.ParseCreate(word, nameSpace, blockIdentifier);
+                CoverPropertyStatement.ParseCreate(word, nameSpace, blockIdentifier);
             }
             else
             {
                 ConcurrentAssertionStatementItem item = new ConcurrentAssertionStatementItem()
                 {
-                    CoverPropertyStatement = await CoverPropertyStatement.ParseCreate(word, nameSpace, blockIdentifier),
+                    CoverPropertyStatement = CoverPropertyStatement.ParseCreate(word, nameSpace, blockIdentifier),
                     Name = blockIdentifier
                 };
                 nameSpace.NamedElements.Add(item.Name, item);
@@ -82,17 +82,17 @@ namespace pluginVerilog.Verilog.Items
         /// <summary>
         /// Parse restrict property statement
         /// </summary>
-        public static async Task<bool> ParseRestrictProperty(WordScanner word, NameSpace nameSpace, string? blockIdentifier)
+        public static bool ParseRestrictProperty(WordScanner word, NameSpace nameSpace, string? blockIdentifier)
         {
             if (blockIdentifier == null)
             {
-                await RestrictPropertyStatement.ParseCreate(word, nameSpace, blockIdentifier);
+                RestrictPropertyStatement.ParseCreate(word, nameSpace, blockIdentifier);
             }
             else
             {
                 ConcurrentAssertionStatementItem item = new ConcurrentAssertionStatementItem()
                 {
-                    RestrictPropertyStatement = await RestrictPropertyStatement.ParseCreate(word, nameSpace, blockIdentifier),
+                    RestrictPropertyStatement = RestrictPropertyStatement.ParseCreate(word, nameSpace, blockIdentifier),
                     Name = blockIdentifier
                 };
                 nameSpace.NamedElements.Add(item.Name, item);
@@ -104,17 +104,17 @@ namespace pluginVerilog.Verilog.Items
         /// <summary>
         /// Parse cover sequence statement
         /// </summary>
-        public static async Task<bool> ParseCoverSequence(WordScanner word, NameSpace nameSpace, string? blockIdentifier)
+        public static bool ParseCoverSequence(WordScanner word, NameSpace nameSpace, string? blockIdentifier)
         {
             if (blockIdentifier == null)
             {
-                await CoverSequenceStatement.ParseCreate(word, nameSpace, blockIdentifier);
+                CoverSequenceStatement.ParseCreate(word, nameSpace, blockIdentifier);
             }
             else
             {
                 ConcurrentAssertionStatementItem item = new ConcurrentAssertionStatementItem()
                 {
-                    CoverSequenceStatement = await CoverSequenceStatement.ParseCreate(word, nameSpace, blockIdentifier),
+                    CoverSequenceStatement = CoverSequenceStatement.ParseCreate(word, nameSpace, blockIdentifier),
                     Name = blockIdentifier
                 };
                 nameSpace.NamedElements.Add(item.Name, item);

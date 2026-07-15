@@ -19,7 +19,7 @@ namespace pluginVerilog.Verilog.Assertion
             [clocking_event ] [ "disable" "iff" "(" expression_or_dist ")" ] property_expr
         */
 
-        public static async Task<AssumePropertyStatement> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
+        public static AssumePropertyStatement ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             if (word.Text != "assume" || word.NextText != "property")
             {
@@ -37,34 +37,34 @@ namespace pluginVerilog.Verilog.Assertion
 
             if (word.Eof || word.Text != "(")
             {
-                return await ExitTask(word, nameSpace, assumePropertyStatement);
+                return ExitTask(word, nameSpace, assumePropertyStatement);
             }
             word.MoveNext();
 
-            PropertySpec propertySpec = await PropertySpec.ParseCreate(word, nameSpace);
+            PropertySpec propertySpec = PropertySpec.ParseCreate(word, nameSpace);
 
             if (word.Eof || word.Text != ")")
             {
-                return await ExitTask(word, nameSpace, assumePropertyStatement);
+                return ExitTask(word, nameSpace, assumePropertyStatement);
             }
             word.MoveNext();
 
             // action_block ::= [ statement ] [ else statement ]
             if (word.Text != "else")
             {
-                assumePropertyStatement.PassStatement = await Statements.Statements.ParseCreateStatementOrNull(word, nameSpace);
+                assumePropertyStatement.PassStatement = Statements.Statements.ParseCreateStatementOrNull(word, nameSpace);
             }
 
             if (word.Text != "else") return assumePropertyStatement;
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext(); // else
 
-            assumePropertyStatement.ElseStatement = await Statements.Statements.ParseCreateStatementOrNull(word, nameSpace);
+            assumePropertyStatement.ElseStatement = Statements.Statements.ParseCreateStatementOrNull(word, nameSpace);
 
             return assumePropertyStatement;
         }
 
-        private static async Task<AssumePropertyStatement> ExitTask(WordScanner word, NameSpace nameSpace, AssumePropertyStatement statement)
+        private static AssumePropertyStatement ExitTask(WordScanner word, NameSpace nameSpace, AssumePropertyStatement statement)
         {
             word.AddError("illegal assume property statement");
             word.SkipToKeyword(";");

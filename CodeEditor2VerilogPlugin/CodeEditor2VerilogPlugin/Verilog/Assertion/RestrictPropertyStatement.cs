@@ -16,7 +16,7 @@ namespace pluginVerilog.Verilog.Assertion
             [clocking_event ] [ "disable" "iff" "(" expression_or_dist ")" ] property_expr
         */
 
-        public static async Task<RestrictPropertyStatement> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
+        public static RestrictPropertyStatement ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             if (word.Text != "restrict" || word.NextText != "property")
             {
@@ -34,15 +34,15 @@ namespace pluginVerilog.Verilog.Assertion
 
             if (word.Eof || word.Text != "(")
             {
-                return await ExitTask(word, nameSpace, restrictPropertyStatement);
+                return ExitTask(word, nameSpace, restrictPropertyStatement);
             }
             word.MoveNext();
 
-            PropertySpec propertySpec = await PropertySpec.ParseCreate(word, nameSpace);
+            PropertySpec propertySpec = PropertySpec.ParseCreate(word, nameSpace);
 
             if (word.Eof || word.Text != ")")
             {
-                return await ExitTask(word, nameSpace, restrictPropertyStatement);
+                return ExitTask(word, nameSpace, restrictPropertyStatement);
             }
             word.MoveNext();
 
@@ -58,7 +58,7 @@ namespace pluginVerilog.Verilog.Assertion
             return restrictPropertyStatement;
         }
 
-        private static async Task<RestrictPropertyStatement> ExitTask(WordScanner word, NameSpace nameSpace, RestrictPropertyStatement statement)
+        private static RestrictPropertyStatement ExitTask(WordScanner word, NameSpace nameSpace, RestrictPropertyStatement statement)
         {
             word.AddError("illegal restrict property statement");
             word.SkipToKeyword(";");

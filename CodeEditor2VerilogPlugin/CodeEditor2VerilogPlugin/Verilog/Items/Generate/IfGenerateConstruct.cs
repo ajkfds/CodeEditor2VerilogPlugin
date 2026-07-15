@@ -8,7 +8,7 @@ namespace pluginVerilog.Verilog.Items.Generate
      */
     public class IfGenerateConstruct
     {
-        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
+        public static async System.Threading.Tasks.Task<bool> ParseAsync(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "if") return false;
 
@@ -43,7 +43,7 @@ namespace pluginVerilog.Verilog.Items.Generate
                 word.StartNonGenerated();
                 while (!word.Eof)
                 {
-                    if (!await GenerateBlock.Parse(word, nameSpace)) break;
+                    if (!await GenerateBlock.ParseAsync(word, nameSpace)) break;
                 }
                 word.EndNonGenerated();
             }
@@ -51,7 +51,7 @@ namespace pluginVerilog.Verilog.Items.Generate
             {
                 while (!word.Eof)
                 {
-                    if (!await GenerateBlock.Parse(word, nameSpace)) break;
+                    if (!await GenerateBlock.ParseAsync(word, nameSpace)) break;
                 }
             }
 
@@ -66,12 +66,12 @@ namespace pluginVerilog.Verilog.Items.Generate
                 {
                     // false
                     word.StartNonGenerated();
-                    await Parse(word, nameSpace);
+                    await ParseAsync(word, nameSpace);
                     word.EndNonGenerated();
                 }
                 else
                 {
-                    await Parse(word, nameSpace);
+                    await ParseAsync(word, nameSpace);
                 }
                 return true;
             }
@@ -83,7 +83,7 @@ namespace pluginVerilog.Verilog.Items.Generate
                     word.StartNonGenerated();
                     while (!word.Eof)
                     {
-                        if (!await GenerateBlock.Parse(word, nameSpace)) break;
+                        if (!await GenerateBlock.ParseAsync(word, nameSpace)) break;
                     }
                     word.EndNonGenerated();
                 }
@@ -91,7 +91,7 @@ namespace pluginVerilog.Verilog.Items.Generate
                 {
                     while (!word.Eof)
                     {
-                        if (!await GenerateBlock.Parse(word, nameSpace)) break;
+                        if (!await GenerateBlock.ParseAsync(word, nameSpace)) break;
                     }
                 }
             }

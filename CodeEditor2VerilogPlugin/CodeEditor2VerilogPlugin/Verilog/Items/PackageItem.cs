@@ -22,13 +22,13 @@ namespace pluginVerilog.Verilog.Items
             | package_export_declaration 
             | timeunits_declaration
         */
-        public static async System.Threading.Tasks.Task<bool> Parse(WordScanner word, NameSpace nameSpace)
+        public static bool Parse(WordScanner word, NameSpace nameSpace)
         {
             switch (word.Text)
             {
                 // anonymous_program
                 case "program":
-                    return await BuildingBlocks.Program.Parse(word, null, nameSpace.BuildingBlock, word.RootParsedDocument.File, word.Prototype) != null;
+                    return BuildingBlocks.Program.ParseAsync(word, null, nameSpace.BuildingBlock, word.RootParsedDocument.File, word.Prototype) != null;
                 // package_export_declaration
                 case "export":
                     PackageExportDeclaration.ParseExportDeclaration(word, nameSpace);
@@ -38,7 +38,7 @@ namespace pluginVerilog.Verilog.Items
                     return true;
                 // timeunits_declaration
                 default:
-                    return await PackageOrGenerateItemDeclaration.Parse(word, nameSpace);
+                    return PackageOrGenerateItemDeclaration.Parse(word, nameSpace);
             }
         }
     }

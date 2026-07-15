@@ -33,7 +33,7 @@ namespace pluginVerilog.Verilog.Statements
                 caseItem.DisposeSubRefrence();
             }
         }
-        public static async Task<CaseStatement> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
+        public static CaseStatement ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             /*
             case_statement ::=  case ( expression ) case_item { case_item } endcase          
@@ -116,7 +116,7 @@ namespace pluginVerilog.Verilog.Statements
 
             while (!word.Eof && word.Text != "endcase" && word.Text != "endmodule" && word.Text != "endfunction")
             {
-                CaseItem caseItem = await CaseItem.ParseCreate(word, nameSpace, caseStatement.IsInsideMode);
+                CaseItem caseItem = CaseItem.ParseCreate(word, nameSpace, caseStatement.IsInsideMode);
                 if (caseItem == null)
                 {
                     break;
@@ -153,7 +153,7 @@ namespace pluginVerilog.Verilog.Statements
             /// <summary>
             /// Parse a case item. In inside mode, supports open_range_list which can include range expressions like [5:6].
             /// </summary>
-            public static async Task<CaseItem> ParseCreate(WordScanner word, NameSpace nameSpace, bool isInsideMode = false)
+            public static CaseItem ParseCreate(WordScanner word, NameSpace nameSpace, bool isInsideMode = false)
             {
                 //            case_item ::=       expression { , expression } : statement_or_null 
                 //                                | default[ : ] statement_or_null
@@ -172,7 +172,7 @@ namespace pluginVerilog.Verilog.Statements
                     {
                         word.MoveNext();
                     }
-                    caseItem.Statement = await Statements.ParseCreateStatementOrNull(word, nameSpace);
+                    caseItem.Statement = Statements.ParseCreateStatementOrNull(word, nameSpace);
                     return caseItem;
                 }
 
@@ -180,7 +180,7 @@ namespace pluginVerilog.Verilog.Statements
                 {
                     // Parse open_range_list for inside mode
                     // open_value_range can be: expression, or expression:expression (range)
-                    caseItem.Expressions = await ParseOpenRangeList(word, nameSpace);
+                    caseItem.Expressions = ParseOpenRangeList(word, nameSpace);
                     if (caseItem.Expressions.Count == 0)
                     {
                         word.AddError("illegal open range item");
@@ -221,7 +221,7 @@ namespace pluginVerilog.Verilog.Statements
                     return null;
                 }
 
-                caseItem.Statement = await Statements.ParseCreateStatementOrNull(word, nameSpace);
+                caseItem.Statement = Statements.ParseCreateStatementOrNull(word, nameSpace);
                 return caseItem;
             }
 
@@ -231,7 +231,7 @@ namespace pluginVerilog.Verilog.Statements
             /// open_value_range ::= value_range | expression
             /// value_range ::= expression | expression : expression
             /// </summary>
-            private static async Task<List<Expressions.Expression>> ParseOpenRangeList(WordScanner word, NameSpace nameSpace)
+            private static List<Expressions.Expression> ParseOpenRangeList(WordScanner word, NameSpace nameSpace)
             {
                 List<Expressions.Expression> expressions = new List<Expressions.Expression>();
 

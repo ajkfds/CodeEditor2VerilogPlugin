@@ -99,7 +99,7 @@ namespace pluginVerilog.Verilog
             label.AppendText(Name);
         }
 
-        public static async System.Threading.Tasks.Task Parse(WordScanner word, NameSpace nameSpace)
+        public static void Parse(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "task")
             {
@@ -193,7 +193,7 @@ namespace pluginVerilog.Verilog
             }
             else if (word.Text == "(")
             {
-                await parse_task_items_ansi(word, nameSpace, task);
+                parse_task_items_ansi(word, nameSpace, task);
             }
             else
             {
@@ -244,7 +244,7 @@ namespace pluginVerilog.Verilog
                                     break;
                             }
                             var index = word.CreateIndexReference();
-                            Statements.IStatement statement = await Statements.Statements.ParseCreateFunctionStatement(word, task);
+                            Statements.IStatement statement = Statements.Statements.ParseCreateFunctionStatement(word, task);
                             if (word.CreateIndexReference().IsSameAs(index))
                             {
                                 word.MoveNext();
@@ -253,7 +253,7 @@ namespace pluginVerilog.Verilog
                     }
                     else
                     {
-                        Statements.IStatement statement = await Statements.Statements.ParseCreateFunctionStatement(word, task);
+                        Statements.IStatement statement = Statements.Statements.ParseCreateFunctionStatement(word, task);
                     }
                 }
             }
@@ -291,7 +291,7 @@ namespace pluginVerilog.Verilog
         }
 
         // task_prototype::= task task_identifier[([tf_port_list])]
-        public static async System.Threading.Tasks.Task ParsePrototype(WordScanner word, NameSpace nameSpace)
+        public static void ParsePrototype(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "task") throw new Exception();
 
@@ -336,7 +336,7 @@ namespace pluginVerilog.Verilog
 
             if (word.Text != "(") return;
 
-            await parse_task_items_ansi(word, nameSpace, task);
+            parse_task_items_ansi(word, nameSpace, task);
         }
 
         // function_body_declaration    ::=   function_data_type_or_implicit [interface_identifier. | class_scope] function_identifier;
@@ -394,7 +394,7 @@ namespace pluginVerilog.Verilog
         }
 
         // ( [ tf_port_list ] ) ; { block_item_declaration }
-        private static async System.Threading.Tasks.Task parse_task_items_ansi(WordScanner word, NameSpace nameSpace, Task task)
+        private static void parse_task_items_ansi(WordScanner word, NameSpace nameSpace, Task task)
         {
             if (word.Text != "(") throw new Exception(); //System.Diagnostics.Debugger.Break();
             word.MoveNext();
@@ -420,7 +420,7 @@ namespace pluginVerilog.Verilog
 
             while (!word.Eof)
             {
-                if (!await BlockItemDeclaration.Parse(word, task)) break;
+                if (!BlockItemDeclaration.Parse(word, task)) break;
             }
 
         }

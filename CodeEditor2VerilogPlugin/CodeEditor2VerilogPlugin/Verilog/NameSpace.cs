@@ -1,4 +1,3 @@
-using Avalonia.Input;
 using CodeEditor2.CodeEditor.CodeComplete;
 using pluginVerilog.Verilog.BuildingBlocks;
 using System.Collections.Generic;
@@ -6,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace pluginVerilog.Verilog
 {
-    public class NameSpace : Item, INamedElement
+    public class NameSpace : NamedItem, INamedElement, Items.IItem
     {
         protected NameSpace(BuildingBlocks.BuildingBlock buildingBlock, NameSpace parent)
         {
@@ -38,17 +37,14 @@ namespace pluginVerilog.Verilog
         /// </summary>
         public List<CommentScopeReference> CommentScopeReferences { get; } = new List<CommentScopeReference>();
 
-        [JsonIgnore]
         public IndexReference BeginIndexReference { get; init; }
-        [JsonIgnore]
         public IndexReference? BlockBeginIndexReference = null;
-        [JsonIgnore]
-        public IndexReference? LastIndexReference = null;
+        public IndexReference? LastIndexReference { get; set; } = null;
 
-        [JsonIgnore]
         public NameSpace Parent { get; init; } = null;
 
-        [JsonIgnore]
+        public List<Items.IItem> Items { get; protected set; } = new List<Items.IItem>();
+
         public BuildingBlocks.BuildingBlock BuildingBlock { get; protected set; }
 
         // ====== VirtualScope support (for @scope annotation) ======
@@ -58,7 +54,6 @@ namespace pluginVerilog.Verilog
         /// injected via @scope comment annotation. Virtual scopes have no
         /// associated file and are skipped by SimSetup file collection.
         /// </summary>
-        [JsonIgnore]
         public bool IsVirtualScope { get; init; } = false;
 
         /// <summary>
@@ -69,14 +64,12 @@ namespace pluginVerilog.Verilog
         /// @scope annotation) can have its target bound later when the
         /// referenced file is parsed and the building block becomes available.
         /// </summary>
-        [JsonIgnore]
         public BuildingBlocks.BuildingBlock? VirtualScopeTarget { get; set; } = null;
 
         /// <summary>
         /// The originating <see cref="CommentScopeReference"/> if this NameSpace
         /// was created from an @scope annotation.
         /// </summary>
-        [JsonIgnore]
         public CommentScopeReference? SourceCommentScopeReference { get; init; } = null;
 
         /// <summary>
@@ -84,7 +77,6 @@ namespace pluginVerilog.Verilog
         /// <see cref="NamedElements"/>. For @scope buildingBlock [instanceName],
         /// this is the instanceName (if specified) or the buildingBlockName.
         /// </summary>
-        [JsonIgnore]
         public string VirtualScopeEntryName { get; init; } = "";
 
         // ====== end VirtualScope support ======

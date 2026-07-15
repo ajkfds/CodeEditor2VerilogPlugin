@@ -4,7 +4,7 @@ namespace pluginVerilog.Verilog.Items.Generate
 {
     public class CaseGenerateConstruct
     {
-        public static async Task<bool> Parse(WordScanner word, NameSpace module)
+        public static async Task<bool> ParseAsync(WordScanner word, NameSpace module)
         {
             if (word.Text != "case") return false;
 
@@ -21,7 +21,7 @@ namespace pluginVerilog.Verilog.Items.Generate
             }
             word.MoveNext();
 
-            Expressions.Expression conditionExpression = Expressions.Expression.ParseCreate(word, module as NameSpace);
+            Expressions.Expression? conditionExpression = Expressions.Expression.ParseCreate(word, module as NameSpace);
             if (conditionExpression == null)
             {
                 word.AddError("illegal constant_expression");
@@ -61,7 +61,7 @@ namespace pluginVerilog.Verilog.Items.Generate
                         word.StartNonGenerated();
                         while (!word.Eof)
                         {
-                            if (!await GenerateItem.Parse(word, module)) break;
+                            if (!await GenerateItem.ParseAsync(word, module)) break;
                         }
                         word.EndNonGenerated();
                     }
@@ -69,7 +69,7 @@ namespace pluginVerilog.Verilog.Items.Generate
                     {
                         while (!word.Eof)
                         {
-                            if (!await GenerateItem.Parse(word, module)) break;
+                            if (!await GenerateItem.ParseAsync(word, module)) break;
                         }
                     }
                 }
@@ -103,7 +103,7 @@ namespace pluginVerilog.Verilog.Items.Generate
                         word.StartNonGenerated();
                         while (!word.Eof)
                         {
-                            if (!await GenerateItem.Parse(word, module)) break;
+                            if (!await GenerateItem.ParseAsync(word, module)) break;
                         }
                         word.EndNonGenerated();
                     }
@@ -111,7 +111,7 @@ namespace pluginVerilog.Verilog.Items.Generate
                     {
                         while (!word.Eof)
                         {
-                            if (!await GenerateItem.Parse(word, module)) break;
+                            if (!await GenerateItem.ParseAsync(word, module)) break;
                         }
                         caseSelected = true;
                     }

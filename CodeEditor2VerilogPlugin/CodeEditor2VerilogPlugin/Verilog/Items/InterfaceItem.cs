@@ -27,7 +27,7 @@ namespace pluginVerilog.Verilog.Items
                     }
                     break;
                 default:
-                    return await NonPortInterfaceItem.Parse(word, nameSpace);
+                    return await NonPortInterfaceItem.ParseAsync(word, nameSpace);
             }
             return true;
         }

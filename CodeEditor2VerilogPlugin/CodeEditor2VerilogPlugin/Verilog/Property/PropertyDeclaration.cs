@@ -67,7 +67,7 @@ namespace pluginVerilog.Verilog.Property
         /// <summary>
         /// Parse a property declaration
         /// </summary>
-        public static async System.Threading.Tasks.Task<PropertyDeclaration?> ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static PropertyDeclaration? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "property")
             {
@@ -174,7 +174,7 @@ namespace pluginVerilog.Verilog.Property
                     word.Text == "eventually" || word.Text == "s_eventually" ||
                     General.IsIdentifier(word.Text))
                 {
-                    propertyDecl.PropertySpec = await Assertion.PropertySpec.ParseCreate(word, nameSpace);
+                    propertyDecl.PropertySpec = Assertion.PropertySpec.ParseCreate(word, nameSpace);
                     break;
                 }
 

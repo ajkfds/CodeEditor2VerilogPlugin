@@ -71,7 +71,7 @@ namespace pluginVerilog.Verilog.Coverage
         /// <summary>
         /// Parse a covergroup declaration
         /// </summary>
-        public static async Task<CovergroupDeclaration?> ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static CovergroupDeclaration? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "covergroup")
             {

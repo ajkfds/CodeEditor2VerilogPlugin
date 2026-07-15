@@ -26,14 +26,14 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         public bool AnsiPortStyle = false;
         public bool Static = true;
 
-        public static async System.Threading.Tasks.Task<Program> Parse(WordScanner word, Attribute attribute, BuildingBlock parent, Data.IVerilogRelatedFile file, bool protoType)
+        public static System.Threading.Tasks.Task<Program> ParseAsync(WordScanner word, Attribute attribute, BuildingBlock parent, Data.IVerilogRelatedFile file, bool protoType)
         {
-            return await Parse(word, null, attribute, parent, file, protoType);
+            return ParseAsync(word, null, attribute, parent, file, protoType);
         }
-        public static async Task<Program> Parse(
+        public static async System.Threading.Tasks.Task<Program> ParseAsync(
             WordScanner word,
             Dictionary<string, Expressions.Expression>? parameterOverrides,
-            Attribute attribute,
+            Attribute? attribute,
             BuildingBlock parent,
             Data.IVerilogRelatedFile file,
             bool protoType
@@ -137,18 +137,18 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 // prototype parse
                 WordScanner prototypeWord = word.Clone();
                 prototypeWord.Prototype = true;
-                await parseProgramItems(prototypeWord, parameterOverrides, null, program);
+                await parseProgramItemsAsync(prototypeWord, parameterOverrides, null, program);
                 prototypeWord.Dispose();
 
                 // parse
                 word.RootParsedDocument.Macros = macroKeep;
-                await parseProgramItems(word, parameterOverrides, null, program);
+                await parseProgramItemsAsync(word, parameterOverrides, null, program);
             }
             else
             {
                 // parse prototype only
                 word.Prototype = true;
-                await parseProgramItems(word, parameterOverrides, null, program);
+                await parseProgramItemsAsync(word, parameterOverrides, null, program);
                 word.Prototype = false;
             }
 
@@ -238,7 +238,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             | conditional_generate_construct 
             | generate_region
          */
-        protected static async System.Threading.Tasks.Task parseProgramItems(
+        protected static async System.Threading.Tasks.Task parseProgramItemsAsync(
             WordScanner word,
             //            string parameterOverrideModuleName,
             Dictionary<string, Expressions.Expression>? parameterOverrides,
@@ -329,7 +329,9 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                 while (!word.Eof)
                 {
-                    if (!await Items.ProgramItem.Parse(word, program))
+                    IndexReference beforeRef = word.CreateIndexReference();
+                    await Verilog.Items.ProgramItem.ParseAsync(word, program);
+                    if (beforeRef.IsSameAs(word.CreateIndexReference()))
                     {
                         if (word.Text == "endprogram") break;
                         word.AddError("illegal program item");

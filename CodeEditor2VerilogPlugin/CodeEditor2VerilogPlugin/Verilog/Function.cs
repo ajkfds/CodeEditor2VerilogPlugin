@@ -47,13 +47,13 @@ namespace pluginVerilog.Verilog
             realtime,
             time
         }
-        public static async System.Threading.Tasks.Task Parse(WordScanner word, NameSpace nameSpace)
+        public static void Parse(WordScanner word, NameSpace nameSpace)
         {
-            await Parse(word, nameSpace, false);
+            Parse(word, nameSpace, false);
         }
-        public static async System.Threading.Tasks.Task ParseFunctionOrConstructor(WordScanner word, NameSpace nameSpace)
+        public static void ParseFunctionOrConstructor(WordScanner word, NameSpace nameSpace)
         {
-            await Parse(word, nameSpace, true);
+            Parse(word, nameSpace, true);
         }
         public virtual void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
@@ -64,7 +64,7 @@ namespace pluginVerilog.Verilog
             label.AppendText(Name);
         }
 
-        private static async System.Threading.Tasks.Task Parse(WordScanner word, NameSpace nameSpace, bool acceptClassConstructor)
+        private static void Parse(WordScanner word, NameSpace nameSpace, bool acceptClassConstructor)
         {
             if (word.Text != "function") throw new System.Exception();
 
@@ -260,11 +260,11 @@ namespace pluginVerilog.Verilog
 
             if (word.Text == ";")
             {
-                await parse_function_items_non_ansi(word, nameSpace, function);
+                parse_function_items_non_ansi(word, nameSpace, function);
             }
             else if (word.Text == "(")
             {
-                await parse_function_items_ansi(word, nameSpace, function);
+                parse_function_items_ansi(word, nameSpace, function);
             }
 
             if (!word.SystemVerilog && word.Text == "endfunction")
@@ -310,7 +310,7 @@ namespace pluginVerilog.Verilog
                                 default:
                                     break;
                             }
-                            Statements.IStatement statement = await Statements.Statements.ParseCreateFunctionStatement(word, function);
+                            Statements.IStatement statement = Statements.Statements.ParseCreateFunctionStatement(word, function);
                             if (statement == null)
                             {
                                 word.MoveNext();
@@ -319,7 +319,7 @@ namespace pluginVerilog.Verilog
                     }
                     else
                     {
-                        Statements.IStatement statement = await Statements.Statements.ParseCreateFunctionStatement(word, function);
+                        Statements.IStatement statement = Statements.Statements.ParseCreateFunctionStatement(word, function);
                     }
                 }
             }
@@ -355,7 +355,7 @@ namespace pluginVerilog.Verilog
         }
 
         //function_prototype::= function data_type_or_void function_identifier[([tf_port_list])]
-        public static async System.Threading.Tasks.Task ParsePrototype(WordScanner word, NameSpace nameSpace)
+        public static void ParsePrototype(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "function") throw new System.Exception();
 
@@ -471,7 +471,7 @@ namespace pluginVerilog.Verilog
 
             if (word.Text == "(")
             {
-                await parse_function_items_ansi(word, nameSpace, function);
+                parse_function_items_ansi(word, nameSpace, function);
             }
             else
             {
@@ -486,7 +486,7 @@ namespace pluginVerilog.Verilog
 
 
         //  ; { tf_item_declaration }
-        private static async System.Threading.Tasks.Task parse_function_items_non_ansi(WordScanner word, NameSpace nameSpace, Function function)
+        private static void parse_function_items_non_ansi(WordScanner word, NameSpace nameSpace, Function function)
         {
             if (word.Text != ";") throw new System.Exception();
             word.MoveNext();
@@ -494,7 +494,7 @@ namespace pluginVerilog.Verilog
             while (!word.Eof)
             {
                 // Try BlockItemDeclaration.Parse first for comprehensive data type handling
-                if (await BlockItemDeclaration.Parse(word, function))
+                if (BlockItemDeclaration.Parse(word, function))
                 {
                     continue;
                 }
@@ -549,7 +549,7 @@ namespace pluginVerilog.Verilog
         // tf_port_list ::= tf_port_item { "," tf_port_item } 
         // tf_port_item ::= { attribute_instance } [ tf_port_direction ] [ var ] data_type_or_implicit [ port_identifier { variable_dimension } [ = expression ] ]
 
-        private static async System.Threading.Tasks.Task parse_function_items_ansi(WordScanner word, NameSpace nameSpace, Function function)
+        private static void parse_function_items_ansi(WordScanner word, NameSpace nameSpace, Function function)
         {
             if (word.Text != "(") throw new System.Exception();
             word.MoveNext();
@@ -575,7 +575,7 @@ namespace pluginVerilog.Verilog
 
             while (!word.Eof)
             {
-                if (!await BlockItemDeclaration.Parse(word, function)) break;
+                if (!BlockItemDeclaration.Parse(word, function)) break;
             }
 
         }

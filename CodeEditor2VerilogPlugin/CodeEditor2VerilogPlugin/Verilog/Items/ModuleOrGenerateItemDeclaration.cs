@@ -14,14 +14,14 @@ namespace pluginVerilog.Verilog.Items
             | default clocking clocking_identifier ;
         */
 
-        public static async System.Threading.Tasks.Task<bool> Parse(WordScanner word, NameSpace nameSpace)
+        public static bool Parse(WordScanner word, NameSpace nameSpace)
         {
             if(nameSpace is not BuildingBlock && nameSpace is not Generate.GenerateBlock)
             {
                 if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
             }
             // package_or_generate_item_declaration
-            if (await PackageOrGenerateItemDeclaration.Parse(word, nameSpace)) return true;
+            if (PackageOrGenerateItemDeclaration.Parse(word, nameSpace)) return true;
 
             switch (word.Text)
             {

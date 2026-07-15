@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Items
 {
-    public class ModuleInstantiation : Item, IBuildingBlockInstantiation, INamedElement
+    public class ModuleInstantiation : NamedItem, IBuildingBlockInstantiation, INamedElement
     {
         public NamedElements NamedElements { get; } = new NamedElements();
 
@@ -182,7 +182,7 @@ namespace pluginVerilog.Verilog.Items
         }
 
 
-        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
+        public static async Task<bool> ParseAsync(WordScanner word, NameSpace nameSpace)
         {
             // interface instantiation can be placed only in module
             BuildingBlock buildingBlock = nameSpace.BuildingBlock as BuildingBlock;

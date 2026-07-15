@@ -61,7 +61,7 @@ namespace pluginVerilog.Verilog.Items
             public Dictionary<string, Expression> PortConnections { get; set; } = new Dictionary<string, Expression>();
         }
 
-        public static bool Parse(WordScanner word, NameSpace nameSpace, out BindDirective? bindDirective)
+        public static bool Parse(WordScanner word, NameSpace? nameSpace, out BindDirective? bindDirective)
         {
             bindDirective = null;
 

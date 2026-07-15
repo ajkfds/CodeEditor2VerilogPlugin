@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Items
 {
-    public class GateInstantiation : Item
+    public class GateInstantiation : NamedItem
     {
         protected GateInstantiation() { }
         public DriveStrength? DriveStrength = null;
@@ -46,10 +46,10 @@ namespace pluginVerilog.Verilog.Items
         //        private List<Verilog.DataObjects.Port> ports = new List<DataObjects.Port>();
         //        public IReadOnlyList<Verilog.DataObjects.Port> Ports { get { return ports; } }
 
-        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
+        public static bool Parse(WordScanner word, NameSpace nameSpace)
         {
             GateInstantiation? gate = ParseCreate(word, nameSpace);
-            return await System.Threading.Tasks.Task.FromResult(true);
+            return true;
         }
         public static GateInstantiation? ParseCreate(WordScanner word, NameSpace nameSpace)
         {

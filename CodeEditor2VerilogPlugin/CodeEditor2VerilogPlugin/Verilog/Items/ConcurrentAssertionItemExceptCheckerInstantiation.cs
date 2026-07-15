@@ -19,7 +19,7 @@ namespace pluginVerilog.Verilog.Items
             checker_instantiation ::=
                     ps_checker_identifier name_of_instance ( [list_of_checker_port_connections] ) ;
         */
-        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
+        public static bool Parse(WordScanner word, NameSpace nameSpace)
         {
             string? blockIdentifier = null;
             if (General.IsSimpleIdentifier(word.Text) && word.NextText == ":")
@@ -33,31 +33,31 @@ namespace pluginVerilog.Verilog.Items
             // Handle assert property
             if (word.Text == "assert" && word.NextText == "property")
             {
-                return await ConcurrentAssertionStatementItem.ParseAssertProperty(word, nameSpace, blockIdentifier);
+                return ConcurrentAssertionStatementItem.ParseAssertProperty(word, nameSpace, blockIdentifier);
             }
 
             // Handle assume property
             if (word.Text == "assume" && word.NextText == "property")
             {
-                return await ConcurrentAssertionStatementItem.ParseAssumeProperty(word, nameSpace, blockIdentifier);
+                return ConcurrentAssertionStatementItem.ParseAssumeProperty(word, nameSpace, blockIdentifier);
             }
 
             // Handle cover property
             if (word.Text == "cover" && word.NextText == "property")
             {
-                return await ConcurrentAssertionStatementItem.ParseCoverProperty(word, nameSpace, blockIdentifier);
+                return ConcurrentAssertionStatementItem.ParseCoverProperty(word, nameSpace, blockIdentifier);
             }
 
             // Handle restrict property
             if (word.Text == "restrict" && word.NextText == "property")
             {
-                return await ConcurrentAssertionStatementItem.ParseRestrictProperty(word, nameSpace, blockIdentifier);
+                return ConcurrentAssertionStatementItem.ParseRestrictProperty(word, nameSpace, blockIdentifier);
             }
 
             // Handle cover sequence
             if (word.Text == "cover" && word.NextText == "sequence")
             {
-                return await ConcurrentAssertionStatementItem.ParseCoverSequence(word, nameSpace, blockIdentifier);
+                return ConcurrentAssertionStatementItem.ParseCoverSequence(word, nameSpace, blockIdentifier);
             }
 
             if (blockIdentifier == null) return false;

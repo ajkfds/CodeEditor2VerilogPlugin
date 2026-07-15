@@ -73,7 +73,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         public Net.NetTypeEnum DefaultNetType = Net.NetTypeEnum.Wire;
 
         [JsonIgnore]
-        public virtual Data.IVerilogRelatedFile File { get; init; }
+        public virtual Data.IVerilogRelatedFile? File { get; init; }
 
 
 

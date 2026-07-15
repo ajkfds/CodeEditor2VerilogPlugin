@@ -10,13 +10,13 @@ namespace pluginVerilog.Verilog.Items
         // function_statement ::= statement
         public Statements.IStatement? Statement { get; protected set; }
 
-        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
+        public static bool Parse(WordScanner word, NameSpace nameSpace)
         {
-            Items.FinalConstruct? initial = await Items.FinalConstruct.ParseCreate(word, nameSpace);
+            Items.FinalConstruct? initial = Items.FinalConstruct.ParseCreate(word, nameSpace);
             return true;
         }
 
-        public static async Task<FinalConstruct?> ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static FinalConstruct? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             //    initial_construct   ::= initial statement
             System.Diagnostics.Debug.Assert(word.Text == "final");
@@ -24,7 +24,7 @@ namespace pluginVerilog.Verilog.Items
             word.MoveNext();
 
             FinalConstruct finalConstruct = new FinalConstruct();
-            finalConstruct.Statement = await Statements.Statements.ParseCreateStatement(word, nameSpace);
+            finalConstruct.Statement = Statements.Statements.ParseCreateStatement(word, nameSpace);
             if (finalConstruct.Statement == null)
             {
                 word.AddError("illegal initial construct");

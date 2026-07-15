@@ -12,7 +12,7 @@ namespace pluginVerilog.Verilog.Items
             | { attribute_instance } module_instantiation 
             | { attribute_instance } module_common_item         
          */
-        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
+        public static async System.Threading.Tasks.Task<bool> ParseAsync(WordScanner word, NameSpace nameSpace)
         {
             switch (word.Text)
             {
@@ -47,16 +47,16 @@ namespace pluginVerilog.Verilog.Items
                 case "rtran":
                 case "pullup":
                 case "pulldown":
-                    return await Items.GateInstantiation.Parse(word, nameSpace);
+                    return Items.GateInstantiation.Parse(word, nameSpace);
             }
 
             // module_common_item
-            if (await ModuleCommonItem.Parse(word, nameSpace)) return true;
+            if (await ModuleCommonItem.ParseAsync(word, nameSpace)) return true;
 
 
             // udp_instantiation
             // module_instantiation
-            if (await Items.ModuleInstantiation.Parse(word, nameSpace)) return true;
+            if (await Items.ModuleInstantiation.ParseAsync(word, nameSpace)) return true;
 
 
 

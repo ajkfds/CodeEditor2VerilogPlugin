@@ -60,12 +60,12 @@ namespace pluginVerilog.Verilog.Items
 
         class_scope ::= class_type ::  
        */
-        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace)
+        public static bool Parse(WordScanner word, NameSpace nameSpace)
         {
-            return await Parse(word, nameSpace, null);
+            return Parse(word, nameSpace, null);
         }
 
-        public static async Task<bool> Parse(WordScanner word, NameSpace nameSpace,Attribute? attribute)
+        public static bool Parse(WordScanner word, NameSpace nameSpace,Attribute? attribute)
         {
             // { attribute_instance } class_property
             {
@@ -92,7 +92,7 @@ namespace pluginVerilog.Verilog.Items
                 // { attribute_instance }
                 case "(*":
                     Attribute attr = Attribute.ParseCreate(word, nameSpace);
-                    await Parse(word, nameSpace, attr);
+                    Parse(word, nameSpace, attr);
                     return true;
                 // ;
                 case ";":
@@ -111,16 +111,16 @@ namespace pluginVerilog.Verilog.Items
                 // { attribute_instance } class_method
                 //        { method_qualifier } task_declaration  
                 case "task":
-                    await Task.Parse(word, nameSpace);
+                    Task.Parse(word, nameSpace);
                     return true;
 
                 //      | { method_qualifier } function_declaration  
                 case "function":
-                    await Function.ParseFunctionOrConstructor(word, nameSpace);
+                    Function.ParseFunctionOrConstructor(word, nameSpace);
                     return true;
                 //      | "pure" "virtual" { class_item_qualifier } method_prototype ;  
                 case "pure":
-                    return await MethodPrototype.ParseCreateWithPureVirtual(word, nameSpace);
+                    return MethodPrototype.ParseCreateWithPureVirtual(word, nameSpace);
                 //      | "extern" { method_qualifier } method_prototype ;
                 //      | "extern" { method_qualifier } class_constructor_prototype
                 case "extern":
@@ -130,12 +130,12 @@ namespace pluginVerilog.Verilog.Items
                     // Handle "extern new (...)" - class constructor prototype
                     if (word.Text == "new")
                     {
-                        await MethodPrototype.ParseConstructorPrototype(word, nameSpace);
+                        MethodPrototype.ParseConstructorPrototype(word, nameSpace);
                         return true;
                     }
 
                     // Handle other extern method prototypes
-                    return await MethodPrototype.ParseCreate(word, nameSpace);
+                    return MethodPrototype.ParseCreate(word, nameSpace);
 
                 //      | { method_qualifier } class_constructor_declaration  
                 //      | "extern" { method_qualifier } class_constructor_prototype
@@ -162,13 +162,13 @@ namespace pluginVerilog.Verilog.Items
 
                 // { attribute_instance } class_declaration
                 case "class":
-                    await BuildingBlocks.Class.ParseCreate(word, nameSpace);//, attribute, nameSpace.BuildingBlock, nameSpace.BuildingBlock.File);
+                    BuildingBlocks.Class.ParseCreate(word, nameSpace);//, attribute, nameSpace.BuildingBlock, nameSpace.BuildingBlock.File);
                     return true;
 
                 // { attribute_instance } covergroup_declaration
                 case "covergroup":
                     {
-                        var covergroup = await Coverage.CovergroupDeclaration.ParseCreate(word, nameSpace);
+                        var covergroup = Coverage.CovergroupDeclaration.ParseCreate(word, nameSpace);
                         if (covergroup != null)
                         {
                             // Register covergroup in namespace
@@ -192,7 +192,7 @@ namespace pluginVerilog.Verilog.Items
                 case "local":
                     word.Color(CodeDrawStyle.ColorType.Keyword);
                     word.MoveNext();
-                    await Parse(word, nameSpace);
+                    Parse(word, nameSpace);
                     return true;
                 default:
                     break;

@@ -51,7 +51,7 @@ namespace pluginVerilog.Verilog.Statements
                                             | function_if_else_if_statement
         function_if_else_if_statement   ::= if (expression ) function_statement_or_null { else if (expression) function_statement_or_null } [ else function_statement_or_null]
         */
-        public static async Task<ConditionalStatement?> ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label, List<string>? clockDomains = null)
+        public static ConditionalStatement? ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label, List<string>? clockDomains = null)
         {
             System.Diagnostics.Debug.Assert(word.Text == "if");
             word.Color(CodeDrawStyle.ColorType.Keyword);
@@ -81,7 +81,7 @@ namespace pluginVerilog.Verilog.Statements
             }
             word.MoveNext(); // )
 
-            IStatement? statement = await Statements.ParseCreateStatementOrNull(word, nameSpace, clockDomains);
+            IStatement? statement = Statements.ParseCreateStatementOrNull(word, nameSpace, clockDomains);
             if (statement == null)
             {
                 word.AddError("illegal conditional expression");
@@ -119,12 +119,12 @@ namespace pluginVerilog.Verilog.Statements
                     }
                     word.MoveNext(); // )
 
-                    statement = await Statements.ParseCreateStatementOrNull(word, nameSpace, clockDomains);
+                    statement = Statements.ParseCreateStatementOrNull(word, nameSpace, clockDomains);
                     if (statement != null) conditionalStatement.ConditionStatementPairs.Add(new ConditionStatementPair(conditionExpression, statement));
                 }
                 else
                 {
-                    statement = await Statements.ParseCreateStatementOrNull(word, nameSpace, clockDomains);
+                    statement = Statements.ParseCreateStatementOrNull(word, nameSpace, clockDomains);
                     if (statement != null) conditionalStatement.ConditionStatementPairs.Add(new ConditionStatementPair(null, statement));
                     break;
                 }
