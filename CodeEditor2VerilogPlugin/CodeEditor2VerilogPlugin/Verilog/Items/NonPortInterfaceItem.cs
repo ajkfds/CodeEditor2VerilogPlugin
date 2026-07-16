@@ -13,35 +13,38 @@ namespace pluginVerilog.Verilog.Items
                                     | interface_declaration 
                                     | timeunits_declaration3
        */
-        public static async Task<bool> ParseAsync(WordScanner word, NameSpace nameSpace)
+        public static async System.Threading.Tasks.Task ParseAsync(WordScanner word, NameSpace nameSpace)
         {
             switch (word.Text)
             {
                 // generate_region 
                 case "generate":
-                    return await GenerateRegion.ParseAsync(word, nameSpace);
+                    await GenerateRegion.ParseAsync(word, nameSpace);
+                    return;
                 case "specify":
-                    return SpecifyBlock.Parse(word, nameSpace);
+                    SpecifyBlock.Parse(word, nameSpace);
+                    return;
                 // modport_declaration
                 case "modport":
-                    return ModPort.Parse(word, nameSpace);
+                    ModPort.Parse(word, nameSpace);
+                    return;
                 // timeunits_declaration3
                 case "timeunit":
                 case "timeprecision":
-                    var timeunits = DataObjects.TimeunitsDeclaration.ParseCreate(word, nameSpace);
-                    return timeunits != null;
+                    DataObjects.TimeunitsDeclaration.ParseCreate(word, nameSpace);
+                    return;
                 // interface_declaration 
                 case "interface":
                     await BuildingBlocks.Interface.Create(word, nameSpace, null, nameSpace.BuildingBlock, word.RootParsedDocument.File, word.Prototype);
-                    return true;
+                    return;
                 // program_declaration 
                 default:
                     break;
 
             }
             // interface_or_generate_item 
-            if (await InterfaceOrGenerateItem.ParseAsync(word, nameSpace)) return true;
-            return false;
+            await InterfaceOrGenerateItem.ParseAsync(word, nameSpace);
+            return;
         }
     }
 }

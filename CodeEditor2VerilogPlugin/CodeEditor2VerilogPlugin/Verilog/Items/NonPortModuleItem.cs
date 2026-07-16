@@ -17,39 +17,41 @@ namespace pluginVerilog.Verilog.Items
             | timeunits_declaration
             | clocking_declaration
        */
-        public static async System.Threading.Tasks.Task<bool> ParseAsync(WordScanner word, NameSpace nameSpace)
+        public static async System.Threading.Tasks.Task ParseAsync(WordScanner word, NameSpace nameSpace)
         {
             switch (word.Text)
             {
                 // generate_region
                 case "generate":
-                    return await GenerateRegion.ParseAsync(word, nameSpace);
+                    await GenerateRegion.ParseAsync(word, nameSpace);
+                    return;
                 // specify_block
                 case "specify":
-                    return SpecifyBlock.Parse(word, nameSpace);
+                    SpecifyBlock.Parse(word, nameSpace);
+                    return;
                 // { attribute_instance }specparam_declaration
                 case "specparam":
                     DataObjects.Constants.Constants.ParseCreateDeclaration(word, nameSpace,null);
-                    return true;
+                    return;
                 // program_declaration
                 case "program":
                     await BuildingBlocks.Program.ParseAsync(word, null, nameSpace.BuildingBlock, word.RootParsedDocument.File, word.Prototype);
-                    return true;
+                    return;
                 // module_declaration
                 case "module":
                 case "macromodule":
                     await BuildingBlocks.Module.ParseCreateAsync(word, null, nameSpace.BuildingBlock, word.RootParsedDocument.File, word.Prototype);
-                    return true;
+                    return;
                 // interface_declaration
                 case "interface":
                     if (word.NextText == "class") break;
                     await BuildingBlocks.Interface.Create(word, nameSpace, null, nameSpace.BuildingBlock, word.RootParsedDocument.File, word.Prototype);
-                    return true;
+                    return;
 
                 // clocking_declaration
                 case "clocking":
                     BuildingBlocks.Clocking.ParseCreate(word, nameSpace, null);
-                    return true;
+                    return;
 
                 // default clocking clocking_identifier ;
                 // or default disable iff expression_or_dist ;
@@ -57,7 +59,7 @@ namespace pluginVerilog.Verilog.Items
                     if (word.NextText == "clocking")
                     {
                         BuildingBlocks.Clocking.ParseDefaultClocking(word, nameSpace);
-                        return true;
+                        return;
                     }
                     if (word.NextText == "disable")
                     {
@@ -74,15 +76,15 @@ namespace pluginVerilog.Verilog.Items
                         // Skip to semicolon
                         word.SkipToKeyword(";");
                         if (word.Text == ";") word.MoveNext();
-                        return true;
+                        return;
                     }
                     break;
 
                 // timeunits_declaration
                 case "timeunit":
                 case "timeprecision":
-                    var timeunits = DataObjects.TimeunitsDeclaration.ParseCreate(word, nameSpace);
-                    return timeunits != null;
+                    DataObjects.TimeunitsDeclaration.ParseCreate(word, nameSpace);
+                    return;
                 // let_declaration
                 case "let":
                     var letDecl = DataObjects.LetDeclaration.ParseCreate(word, nameSpace);
@@ -90,14 +92,14 @@ namespace pluginVerilog.Verilog.Items
                     {
                         nameSpace.NamedElements.Add(letDecl.Name, letDecl);
                     }
-                    return true;
+                    return;
                 // module_or_generate_item
                 default:
                     break;
 
             }
-            if (await ModuleOrGenerateItem.ParseAsync(word, nameSpace)) return true;
-            return false;
+            await ModuleOrGenerateItem.ParseAsync(word, nameSpace);
+            return;
         }
     }
 }

@@ -10,7 +10,7 @@ namespace pluginVerilog.Verilog.Items
             | non_port_program_item
 
        */
-        public static async System.Threading.Tasks.Task<bool> ParseAsync(WordScanner word, NameSpace nameSpace)
+        public static async System.Threading.Tasks.Task ParseAsync(WordScanner word, NameSpace nameSpace)
         {
             switch (word.Text)
             {
@@ -28,9 +28,9 @@ namespace pluginVerilog.Verilog.Items
                     }
                     break;
                 default:
-                    return await NonPortProgramItem.ParseAsync(word, nameSpace);
+                    await NonPortProgramItem.ParseAsync(word, nameSpace);
+                    break;
             }
-            return true;
         }
 
     }

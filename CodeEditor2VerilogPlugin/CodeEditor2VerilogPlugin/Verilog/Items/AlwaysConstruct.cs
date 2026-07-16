@@ -52,6 +52,7 @@ namespace pluginVerilog.Verilog.Items
                 return null;
             }
             always.LastIndexReference = word.CreateIndexReferenceBefore();
+            if (!word.Prototype) nameSpace.Items.Add(always);
             return always;
         }
     }

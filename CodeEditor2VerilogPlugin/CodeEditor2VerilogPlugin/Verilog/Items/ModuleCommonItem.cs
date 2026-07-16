@@ -69,7 +69,8 @@ namespace pluginVerilog.Verilog.Items
                 // loop_generate_construct
                 case "for":
                     //                    word.AddSystemVerilogError();
-                    return await Generate.LoopGenerateConstruct.ParseAsync(word, nameSpace);
+                    await Generate.LoopGenerateConstruct.ParseAsync(word, nameSpace);
+                    return true;
                 // conditional_generate_construct
                 case "if":
                     return await Generate.IfGenerateConstruct.ParseAsync(word, nameSpace);

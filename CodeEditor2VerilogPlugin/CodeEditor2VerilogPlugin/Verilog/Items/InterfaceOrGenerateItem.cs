@@ -8,14 +8,12 @@ namespace pluginVerilog.Verilog.Items
         interface_or_generate_item  ::=   { attribute_instance } module_common_item 
                                         | { attribute_instance } extern_tf_declaration      
          */
-        public static async Task<bool> ParseAsync(WordScanner word, NameSpace nameSpace)
+        public static async System.Threading.Tasks.Task ParseAsync(WordScanner word, NameSpace nameSpace)
         {
 
             // module_common_item
-            if (await ModuleCommonItem.ParseAsync(word, nameSpace)) return true;
-
-
-            return false;
+            await ModuleCommonItem.ParseAsync(word, nameSpace);
+            return;
         }
     }
 }

@@ -17,7 +17,7 @@ namespace pluginVerilog.Verilog.Items
             | { attribute_instance } interface_port_declaration
 
        */
-        public static async System.Threading.Tasks.Task Parse(WordScanner word, NameSpace nameSpace)
+        public static async System.Threading.Tasks.Task ParseAsync(WordScanner word, NameSpace nameSpace)
         {
             switch (word.Text)
             {

@@ -391,7 +391,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             // list_of_port_identifiers | output output_variable_type list_of_variable_port_identifiers 
             // list_of_port_identifiers::= (From Annex A -A.2.3) port_identifier { , port_identifier }
 
-            // list_of_variable_port_identifiers ::= port_identifier [ = constant_expression ]                               { , port_identifier [ = constant_expression ] }  
+            // list_of_variable_port_identifiers ::= port_identifier [ = constant_expression ] { , port_identifier [ = constant_expression ] }  
 
             if (word.Text != "(") return;
             word.MoveNext();

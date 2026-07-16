@@ -19,7 +19,7 @@ namespace pluginVerilog.Verilog.Items
 
 
 
-        public static async System.Threading.Tasks.Task<bool> ParseAsync(WordScanner word, NameSpace nameSpace)
+        public static async System.Threading.Tasks.Task ParseAsync(WordScanner word, NameSpace nameSpace)
         {
             // TODO
             //{ attribute_instance } final_construct 
@@ -29,12 +29,12 @@ namespace pluginVerilog.Verilog.Items
             //program_generate_item
             if (await ProgramGenerateItem.ParseAsync(word, nameSpace))
             {
-                return true;
+                return;
             }
             //{ attribute_instance } module_or_generate_item_declaration 
             if (ModuleOrGenerateItemDeclaration.Parse(word, nameSpace))
             {
-                return true;
+                return;
             }
 
 
@@ -42,21 +42,23 @@ namespace pluginVerilog.Verilog.Items
             {
                 //{ attribute_instance } continuous_assign 
                 case "assign":
-                    return Items.ContinuousAssign.Parse(word, nameSpace);
+                    Items.ContinuousAssign.Parse(word, nameSpace);
+                    return;
                 //{ attribute_instance } initial_construct 
                 case "initial":
-                    return Items.InitialConstruct.Parse(word, nameSpace);
+                    Items.InitialConstruct.Parse(word, nameSpace);
+                    return;
                 // timeunits_declaration
                 case "timeunit":
                 case "timeprecision":
-                    var timeunits = DataObjects.TimeunitsDeclaration.ParseCreate(word, nameSpace);
-                    return timeunits != null;
+                    DataObjects.TimeunitsDeclaration.ParseCreate(word, nameSpace);
+                    return;
                 default:
                     break;
 
             }
-            if (await ModuleOrGenerateItem.ParseAsync(word, nameSpace)) return true;
-            return false;
+            await ModuleOrGenerateItem.ParseAsync(word, nameSpace);
+            return;
         }
     }
 }

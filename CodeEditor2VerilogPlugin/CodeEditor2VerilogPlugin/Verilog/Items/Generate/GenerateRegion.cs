@@ -7,9 +7,9 @@ namespace pluginVerilog.Verilog.Items.Generate
         // generate_region ::=
         //      "generate" { generate_item } "endgenerate"
 
-        public static async Task<bool> ParseAsync(WordScanner word, NameSpace nameSpace)
+        public static async System.Threading.Tasks.Task ParseAsync(WordScanner word, NameSpace nameSpace)
         {
-            if (word.Text != "generate") return false;
+            if (word.Text != "generate") throw new System.Exception();
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
@@ -28,7 +28,7 @@ namespace pluginVerilog.Verilog.Items.Generate
                 word.AddError("endgenerate missing");
             }
 
-            return true;
+            return;
         }
     }
 }

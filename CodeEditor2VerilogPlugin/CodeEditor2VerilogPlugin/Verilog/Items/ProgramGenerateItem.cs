@@ -1,5 +1,4 @@
 using pluginVerilog.Verilog.Items.Generate;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Items
 {
@@ -17,10 +16,12 @@ namespace pluginVerilog.Verilog.Items
             {
                 // generate_region
                 case "generate":
-                    return await GenerateRegion.ParseAsync(word, nameSpace);
+                    await GenerateRegion.ParseAsync(word, nameSpace);
+                    return true;
                 case "for":
                     // loop_generate_construct
-                    return await Generate.LoopGenerateConstruct.ParseAsync(word, nameSpace);
+                    await Generate.LoopGenerateConstruct.ParseAsync(word, nameSpace);
+                    return true;
                 case "if":
                     // conditional_generate_construct
                     return await Generate.IfGenerateConstruct.ParseAsync(word, nameSpace);

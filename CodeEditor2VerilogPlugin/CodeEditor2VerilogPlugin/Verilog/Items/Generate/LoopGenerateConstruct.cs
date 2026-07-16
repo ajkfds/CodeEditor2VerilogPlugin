@@ -19,35 +19,34 @@ namespace pluginVerilog.Verilog.Items.Generate
         //      | inc_or_dec_operator genvar_identifier 
         //      | genvar_identifier inc_or_dec_operator
 
-        public static async System.Threading.Tasks.Task<bool> ParseAsync(WordScanner word, NameSpace module)
+        public static async System.Threading.Tasks.Task ParseAsync(WordScanner word, NameSpace module)
         {
-            if (word.Text != "for") return false;
-
             // generate_loop_statement::=  for (genvar_assignment; constant_expression; genvar_assignment) begin : generate_block_identifier { generate_item } end
+            if (word.Text != "for") throw new System.Exception();
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
             if (word.Text != "(")
             {
                 word.AddError("( expected");
-                return true;
+                return;
             }
             word.MoveNext();
 
             if (!GenvarInitialization.Parse(word, module))
             {
-                return true;
+                return;
             }
 
             if (word.Text != ";")
             {
                 word.AddError("; expected");
-                return true;
+                return;
             }
             word.MoveNext();
 
             Expressions.Expression? constant = Expressions.Expression.ParseCreate(word, module as NameSpace);
-            if (constant == null) return true;
+            if (constant == null) return;
             if (!constant.Constant)
             {
                 //constant.Reference.AddError("should be constant");
@@ -56,24 +55,24 @@ namespace pluginVerilog.Verilog.Items.Generate
             if (word.Text != ";")
             {
                 word.AddError("; expected");
-                return true;
+                return;
             }
             word.MoveNext();
 
             if (!GenvarIteration.Parse(word, module as NameSpace))
             {
-                return true;
+                return;
             }
 
             if (word.Text != ")")
             {
                 word.AddError(") expected");
-                return true;
+                return;
             }
             word.MoveNext();
 
             await GenerateBlock.ParseAsync(word, module);
-            return true;
+            return;
         }
     }
 }

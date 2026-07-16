@@ -351,7 +351,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     else
                     {
                         IndexReference beforeRef = word.CreateIndexReference();
-                        await Verilog.Items.ModuleItem.Parse(word, module);
+                        await Verilog.Items.ModuleItem.ParseAsync(word, module);
                         if (beforeRef.IsSameAs(word.CreateIndexReference()))
                         {
                             word.CheckCancelToken();
