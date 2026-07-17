@@ -286,7 +286,7 @@ namespace pluginVerilog.Verilog.DataObjects
         public abstract DataObject Clone(string name);
 
         // IInstance
-        public virtual Task? GetTask(string identifier)
+        public virtual Task_? GetTask(string identifier)
         {
             return null;
         }

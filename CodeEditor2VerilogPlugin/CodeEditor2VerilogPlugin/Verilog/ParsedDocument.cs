@@ -383,9 +383,9 @@ public List<string> ImportedPackages = new List<string>();
                 {
                     ((Function)element).AppendLabel(ret);
                 }
-                else if (element is Task)
+                else if (element is Task_)
                 {
-                    ((Task)element).AppendLabel(ret);
+                    ((Task_)element).AppendLabel(ret);
                 }
                 else if (element is DataObjects.Typedef)
                 {
@@ -458,9 +458,9 @@ public List<string> ImportedPackages = new List<string>();
                     {
                         ((Function)namedElement).AppendLabel(ret);
                     }
-                    else if (namedElement is Task)
+                    else if (namedElement is Task_)
                     {
-                        ((Task)namedElement).AppendLabel(ret);
+                        ((Task_)namedElement).AppendLabel(ret);
                     }
                     else if (namedElement is DataObjects.Typedef)
                     {

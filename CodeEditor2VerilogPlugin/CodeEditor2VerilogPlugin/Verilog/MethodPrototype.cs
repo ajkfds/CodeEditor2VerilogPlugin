@@ -58,7 +58,7 @@ namespace pluginVerilog.Verilog
             switch (word.Text)
             {
                 case "task":
-                    Task.ParsePrototype(word, nameSpace);
+                    Task_.ParsePrototype(word, nameSpace);
                     return true;
                 case "function":
                     Function.ParsePrototype(word, nameSpace);

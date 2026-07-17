@@ -141,7 +141,7 @@ namespace pluginVerilog.Verilog
         public bool ContainsTask(string key)
         {
             if (!itemDict.ContainsKey(key)) return false;
-            if (itemDict[key] is Task) return true;
+            if (itemDict[key] is Task_) return true;
             return false;
         }
         public bool ContainsFunction(string key)

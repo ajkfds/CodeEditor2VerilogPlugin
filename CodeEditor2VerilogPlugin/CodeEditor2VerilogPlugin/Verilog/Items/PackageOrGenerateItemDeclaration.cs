@@ -76,7 +76,7 @@ namespace pluginVerilog.Verilog.Items
 
                 // task_declaration
                 case "task":
-                    Task.Parse(word, nameSpace);
+                    Task_.Parse(word, nameSpace);
                     break;
 
                 // function_declaration

@@ -546,9 +546,9 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                                 Function function = (Function)namedElement;
                                 if (!class_.NamedElements.ContainsKey(namedElement.Name)) class_.NamedElements.Add(namedElement.Name, function);
                             }
-                            else if (namedElement is Task)
+                            else if (namedElement is Task_)
                             {
-                                Task task = (Task)namedElement;
+                                Task_ task = (Task_)namedElement;
                                 if (!class_.NamedElements.ContainsKey(namedElement.Name)) class_.NamedElements.Add(namedElement.Name, task);
                             }
                         }

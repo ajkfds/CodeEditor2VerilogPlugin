@@ -311,7 +311,7 @@ number
 
                     // Since Task and Function are also namespaces, they need to be processed before namespaces.
                     // task reference : for left side only
-                    if (lValue && element is Task)
+                    if (lValue && element is Task_)
                     {
                         return TaskReference.ParseCreate(word, nameSpace, targetNameSpace);
                     }
@@ -581,7 +581,7 @@ number
             }
 
             // task reference : for left side only
-            if (lValue && element is Task && obj != null)
+            if (lValue && element is Task_ && obj != null)
             {
                 TaskReference task = TaskReference.ParseCreate(word, nameSpace.BuildingBlock, obj.Class);
                 return task;
@@ -741,7 +741,7 @@ number
                                 }
 
                             }
-                            else if (nameSpace is BuildingBlock && nameSpace.BuildingBlock.NamedElements.ContainsKey(word.Text) && nameSpace.BuildingBlock.NamedElements[word.Text] is Task)
+                            else if (nameSpace is BuildingBlock && nameSpace.BuildingBlock.NamedElements.ContainsKey(word.Text) && nameSpace.BuildingBlock.NamedElements[word.Text] is Task_)
                             {
                                 return TaskReference.ParseCreate(word, nameSpace.BuildingBlock, acceptImplicitNet);
                             }

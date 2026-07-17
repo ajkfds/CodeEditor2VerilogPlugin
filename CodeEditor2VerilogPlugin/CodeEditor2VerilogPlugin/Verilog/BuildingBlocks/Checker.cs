@@ -641,7 +641,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     Verilog.Function.ParseFunctionOrConstructor(word, nameSpace);
                     break;
                 case "task":
-                    Verilog.Task.Parse(word, nameSpace);
+                    Verilog.Task_.Parse(word, nameSpace);
                     break;
             }
         }

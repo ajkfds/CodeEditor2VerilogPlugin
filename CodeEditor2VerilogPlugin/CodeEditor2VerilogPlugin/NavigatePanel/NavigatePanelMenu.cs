@@ -59,13 +59,13 @@ namespace pluginVerilog.NavigatePanel
             }
         }
 
-        private static async Task generateFile(
+        private static async Task GenerateFileAsync(
             string typeName,
             string extension,
             Action<System.IO.StreamWriter, string> streamWriter
             )
         {
-            NavigatePanelNode? node = CodeEditor2.Controller.NavigatePanel.GetSelectedNode();
+            NavigatePanelNode? node = await CodeEditor2.Controller.NavigatePanel.GetSelectedNodeAsync();
             if (node == null) return;
 
             Project project = CodeEditor2.Controller.NavigatePanel.GetProject(node);
@@ -86,7 +86,15 @@ namespace pluginVerilog.NavigatePanel
             BuildingBlock? buildingBlock = projectProperty.GetBuildingBlock(name);
             if (buildingBlock != null)
             {
-                CodeEditor2.Controller.AppendLog("Duplicate BuildingBlock Name ;" + buildingBlock.File.RelativePath, Avalonia.Media.Colors.Red);
+                var file = buildingBlock.File;
+                if(file == null)
+                {
+                    CodeEditor2.Controller.AppendLog("Duplicate BuildingBlock Name ; ?", Avalonia.Media.Colors.Red);
+                }
+                else
+                {
+                    CodeEditor2.Controller.AppendLog("Duplicate BuildingBlock Name ;" + file.RelativePath, Avalonia.Media.Colors.Red);
+                }
                 return;
             }
 
@@ -127,11 +135,12 @@ namespace pluginVerilog.NavigatePanel
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "<event handler with try-catch>")]
         private static async void menuItem_AddVerilogModule_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
             try
             {
-                await generateFile("verilog module", "v",
+                await GenerateFileAsync("verilog module", "v",
                     (sw, name) =>
                     {
                         sw.Write("`timescale 1ns / 1ps\n");
@@ -149,11 +158,12 @@ namespace pluginVerilog.NavigatePanel
                 throw;
             }
         }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "<event handler with try-catch>")]
         private static async void menuItem_AddSystemVerilogModule_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
             try
             {
-                await generateFile("system verilog module", "sv",
+                await GenerateFileAsync("system verilog module", "sv",
                     (sw, name) =>
                     {
                         sw.Write("`timescale 1ns / 1ps\n");
@@ -172,11 +182,12 @@ namespace pluginVerilog.NavigatePanel
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "VSTHRD100:Avoid async void methods", Justification = "<event handler with try-catch>")]
         private static async void menuItem_AddSystemVerilogInterface_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
             try
             {
-                await generateFile("system verilog interface", "sv",
+                await GenerateFileAsync("system verilog interface", "sv",
                     (sw, name) =>
                     {
                         sw.Write("interface " + name + ";\n");
@@ -203,7 +214,7 @@ namespace pluginVerilog.NavigatePanel
             }
 
             FolderNode? folderNode = node as FolderNode;
-            if (folderNode != null)
+            if (folderNode != null && folderNode.Folder != null)
             {
                 return folderNode.Folder.RelativePath;
             }

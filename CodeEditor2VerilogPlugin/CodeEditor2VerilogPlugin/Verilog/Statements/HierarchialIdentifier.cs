@@ -65,7 +65,7 @@ namespace pluginVerilog.Verilog.Statements
 
             // Since Task and Function are also namespaces, they need to be processed before namespaces.
             // task reference : for left side only
-            if (element is Task)
+            if (element is Task_)
             {
                 return hierarchialIdentifier;
             }

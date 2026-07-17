@@ -1191,12 +1191,19 @@ namespace pluginVerilog.Verilog.DataObjects
                     }
                     else
                     {
-                        if (word.Prototype) port.DefinitionReference.AddError("duplicated");
+                        if (word.Prototype)
+                        {
+                            port.DefinitionReference.AddError("duplicated");
+                        }
+                        else
+                        {
+                            port = function.Ports[port.Name];
+                        }
                     }
                 }
-                else if (nameSpace is Task)
+                else if (nameSpace is Task_)
                 {
-                    Task? task = nameSpace as Task;
+                    Task_? task = nameSpace as Task_;
                     if (task == null) throw new Exception();
                     if (!task.Ports.ContainsKey(port.Name))
                     {
@@ -1205,7 +1212,14 @@ namespace pluginVerilog.Verilog.DataObjects
                     }
                     else
                     {
-                        if (word.Prototype) port.DefinitionReference.AddError("duplicated");
+                        if (word.Prototype)
+                        {
+                            port.DefinitionReference.AddError("duplicated");
+                        }
+                        else
+                        {
+                            port = task.Ports[port.Name];
+                        }
                     }
                 }
 

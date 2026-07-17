@@ -63,7 +63,7 @@ namespace pluginVerilog.Verilog.Expressions
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 word.MoveNext();
 
-                ret.Task = (Task)taskNameSpace.NamedElements[ret.TaskName];
+                ret.Task = (Task_)taskNameSpace.NamedElements[ret.TaskName];
                 return ret;
             }
             else if (taskNameSpace.NamedElements.ContainsFunction(word.Text))

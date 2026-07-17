@@ -111,7 +111,7 @@ namespace pluginVerilog.Verilog.Items
                 // { attribute_instance } class_method
                 //        { method_qualifier } task_declaration  
                 case "task":
-                    Task.Parse(word, nameSpace);
+                    Task_.Parse(word, nameSpace);
                     return true;
 
                 //      | { method_qualifier } function_declaration  

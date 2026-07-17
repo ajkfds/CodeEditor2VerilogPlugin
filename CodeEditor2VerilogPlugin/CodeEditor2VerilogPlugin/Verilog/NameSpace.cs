@@ -133,9 +133,9 @@ namespace pluginVerilog.Verilog
                     if (iref.IsGreaterThan(function.LastIndexReference)) continue;
                     return function.GetHierarchyNameSpaceDownward(iref);
                 }
-                else if (namedElement is Task)
+                else if (namedElement is Task_)
                 {
-                    Task task = (Task)namedElement;
+                    Task_ task = (Task_)namedElement;
                     if (task.BeginIndexReference == null) continue;
                     if (task.LastIndexReference == null) continue;
 
@@ -232,9 +232,9 @@ namespace pluginVerilog.Verilog
                     Function function = (Function)element;
                     items.Add(newItem(function.Name, CodeDrawStyle.ColorType.Identifier));
                 }
-                else if (element is Task)
+                else if (element is Task_)
                 {
-                    Task task = (Task)element;
+                    Task_ task = (Task_)element;
                     items.Add(newItem(task.Name, CodeDrawStyle.ColorType.Identifier));
                 }
             }

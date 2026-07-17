@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace pluginVerilog.Verilog
 {
-    public class Task : NameSpace, IPortNameSpace
+    public class Task_ : NameSpace, IPortNameSpace
     {
         /*
         // # SystemVerilog2017
@@ -84,7 +84,7 @@ namespace pluginVerilog.Verilog
         // task_body_declaration    ::=   [ interface_identifier . | class_scope ] task_identifier ; { tf_item_declaration } { statement_or_null } endtask [ : task_identifier ] 
         //                              | [ interface_identifier . | class_scope ] task_identifier ( [ tf_port_list ] ) ; { block_item_declaration } { statement_or_null } endtask [ : task_identifier ]
          */
-        protected Task(NameSpace parent) : base(parent.BuildingBlock, parent)
+        protected Task_(NameSpace parent) : base(parent.BuildingBlock, parent)
         {
         }
 
@@ -128,7 +128,7 @@ namespace pluginVerilog.Verilog
                 return;
             }
 
-            Task task = new Task(nameSpace)
+            Task_ task = new Task_(nameSpace)
             {
                 BeginIndexReference = beginReference,
                 DefinitionReference = word.CrateWordReference(),
@@ -159,7 +159,7 @@ namespace pluginVerilog.Verilog
                 {
                     if (nameSpace.NamedElements.ContainsTask(task.Name))
                     {
-                        task =(Task)nameSpace.NamedElements[task.Name];
+                        task =(Task_)nameSpace.NamedElements[task.Name];
                     }
                     else
                     {
@@ -244,7 +244,7 @@ namespace pluginVerilog.Verilog
                                     break;
                             }
                             var index = word.CreateIndexReference();
-                            Statements.IStatement statement = Statements.Statements.ParseCreateFunctionStatement(word, task);
+                            Statements.IStatement? statement = Statements.Statements.ParseCreateFunctionStatement(word, task);
                             if (word.CreateIndexReference().IsSameAs(index))
                             {
                                 word.MoveNext();
@@ -253,7 +253,7 @@ namespace pluginVerilog.Verilog
                     }
                     else
                     {
-                        Statements.IStatement statement = Statements.Statements.ParseCreateFunctionStatement(word, task);
+                        Statements.IStatement? statement = Statements.Statements.ParseCreateFunctionStatement(word, task);
                     }
                 }
             }
@@ -305,7 +305,7 @@ namespace pluginVerilog.Verilog
                 return;
             }
 
-            Task task = new Task(nameSpace)
+            Task_ task = new Task_(nameSpace)
             {
                 BeginIndexReference = beginReference,
                 DefinitionReference = word.CrateWordReference(),
@@ -343,7 +343,7 @@ namespace pluginVerilog.Verilog
 
 
         // ; { tf_item_declaration }
-        private static void parse_task_items_non_ansi(WordScanner word, NameSpace nameSpace, Task function)
+        private static void parse_task_items_non_ansi(WordScanner word, NameSpace nameSpace, Task_ function)
         {
             if (word.Text != ";") System.Diagnostics.Debugger.Break();
             word.MoveNext();
@@ -394,7 +394,7 @@ namespace pluginVerilog.Verilog
         }
 
         // ( [ tf_port_list ] ) ; { block_item_declaration }
-        private static void parse_task_items_ansi(WordScanner word, NameSpace nameSpace, Task task)
+        private static void parse_task_items_ansi(WordScanner word, NameSpace nameSpace, Task_ task)
         {
             if (word.Text != "(") throw new Exception(); //System.Diagnostics.Debugger.Break();
             word.MoveNext();

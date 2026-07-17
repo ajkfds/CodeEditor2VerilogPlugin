@@ -96,7 +96,7 @@ namespace pluginVerilog.Verilog
             if (word.Text == "task")
             {
                 if (shouldBeFunction) word.AddError("cannot use task with pure keyword");
-                Task.ParsePrototype(word, nameSpace);
+                Task_.ParsePrototype(word, nameSpace);
                 return;
             }
             if (word.Text == "function")
