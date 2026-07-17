@@ -77,16 +77,44 @@ namespace pluginVerilog.Data.VerilogCommon
         {
             candidateWord = "";
 
-            if (item.VerilogParsedDocument == null) return null;
-            if (item.CodeDocument == null) return null;
+            CodeEditor.CodeDocument? codeDocument = item.CodeDocument as CodeEditor.CodeDocument;
+            if (codeDocument == null) return null;
 
-            int line = item.CodeDocument.GetLineAt(index);
-            int lineStartIndex = item.CodeDocument.GetLineStartIndex(line);
+            int line = codeDocument.GetLineAt(index);
+            int lineStartIndex = codeDocument.GetLineStartIndex(line);
 
             if (!GetAutoCompleteTarget(item, parsedDocument, index, out NameSpace? nameSpace, out INamedElement? element, out candidateWord, out int candidateStartIndex))
             {
                 return null;
             }
+
+            IndexReference iref = Verilog.IndexReference.Create(parsedDocument, codeDocument, lineStartIndex);
+            parsedDocument.TryGetRegion(iref, out NameSpace? namSpace, out Verilog.Items.IRegion? region);
+
+
+            bool onLineStart = false;
+            while(true){
+                string lineString =codeDocument.CreateLineString(line);
+                int inlinePosition = index - lineStartIndex;
+                if (inlinePosition < 0) break;
+                if (inlinePosition > lineString.Length) break;
+
+                string headString = lineString.Substring(0, inlinePosition);
+                headString = headString.Replace("\t", " ");
+                headString = headString.Replace(" ", "");
+                if (headString.Length == 0) onLineStart = true;
+                break;
+            }
+
+          
+
+
+
+
+
+
+
+            //////////
 
             List<AutocompleteItem> items = new List<AutocompleteItem>();
 
@@ -129,7 +157,7 @@ namespace pluginVerilog.Data.VerilogCommon
                     appendItemsUpward(items, nameSpace, candidateStartIndex, candidateWord);
                 }
                 // keywords
-                Verilog.ParsedDocument.AppendKeywordAutoCompleteItems(items, candidateWord, candidateStartIndex, parsedDocument.SystemVerilog);
+                VerilogCommon.AutoCompleteKeyword.AppendKeywordAutoCompleteItems(items, candidateWord, candidateStartIndex, lineStartIndex, parsedDocument.SystemVerilog);
             }
             else // sub element
             {

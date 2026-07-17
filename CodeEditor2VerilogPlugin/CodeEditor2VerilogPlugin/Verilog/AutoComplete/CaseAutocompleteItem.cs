@@ -3,7 +3,7 @@ using pluginVerilog.Data;
 
 namespace pluginVerilog.Verilog.AutoComplete
 {
-    public class CaseAutocompleteItem : AutocompleteItem
+    public class CaseAutocompleteItem : pluginVerilog.Data.VerilogCommon.AutoCompleteItem
     {
         public CaseAutocompleteItem() : base("case", CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Plugin.ThemeColor, "CodeEditor2/Assets/Icons/screwdriver.svg")
         {

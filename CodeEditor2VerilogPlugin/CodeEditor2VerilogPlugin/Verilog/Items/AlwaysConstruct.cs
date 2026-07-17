@@ -1,8 +1,9 @@
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace pluginVerilog.Verilog.Items
 {
-    public class AlwaysConstruct : IItem
+    public class AlwaysConstruct : IRegion
     {
         protected AlwaysConstruct() { }
         public Statements.IStatement? Statement { get; protected set; }
@@ -14,8 +15,8 @@ namespace pluginVerilog.Verilog.Items
             always_construct ::= always_keyword statement 
             always_keyword ::= always | always_comb | always_latch | always_ff     
          */
-        public IndexReference? BeginIndexReference { get; protected set; }
-        public IndexReference? LastIndexReference { get; protected set; }
+        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; } = null;
 
         public static bool Parse(WordScanner word, NameSpace nameSpace)
         {

@@ -1,11 +1,12 @@
 using CodeEditor2.CodeEditor.CodeComplete;
 using pluginVerilog.Verilog.BuildingBlocks;
+using pluginVerilog.Verilog.Items;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace pluginVerilog.Verilog
 {
-    public class NameSpace : NamedItem, INamedElement, Items.IItem
+    public class NameSpace : NamedItem, INamedElement, Items.IRegion
     {
         protected NameSpace(BuildingBlocks.BuildingBlock buildingBlock, NameSpace parent)
         {
@@ -38,12 +39,15 @@ namespace pluginVerilog.Verilog
         public List<CommentScopeReference> CommentScopeReferences { get; } = new List<CommentScopeReference>();
 
         public IndexReference BeginIndexReference { get; init; }
-        public IndexReference? BlockBeginIndexReference = null;
         public IndexReference? LastIndexReference { get; set; } = null;
+        public List<IRegion> Regions { get; protected set; } = new List<IRegion>();
+
+
+        public IndexReference? BlockBeginIndexReference = null;
 
         public NameSpace Parent { get; init; } = null;
 
-        public List<Items.IItem> Items { get; protected set; } = new List<Items.IItem>();
+        public List<Items.IRegion> Items { get; protected set; } = new List<Items.IRegion>();
 
         public BuildingBlocks.BuildingBlock BuildingBlock { get; protected set; }
 

@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Items
 {
-    public class ModuleInstantiation : NamedItem, IBuildingBlockInstantiation, INamedElement
+    public class ModuleInstantiation : NamedItem, IBuildingBlockInstantiation, INamedElement,IRegion
     {
         public NamedElements NamedElements { get; } = new NamedElements();
 
@@ -151,10 +151,11 @@ namespace pluginVerilog.Verilog.Items
         }
 
         public bool Prototype { get; set; } = false;
-
         public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; } = null;
+
+
         public IndexReference? BlockBeginIndexReference { get; set; } = null;
-        public IndexReference? LastIndexReference { get; set; }
 
         // Instance array support
         public RangeExpression? InstanceRange { get; set; }
@@ -417,14 +418,17 @@ namespace pluginVerilog.Verilog.Items
                 if (word.Text != ",") break;
                 word.MoveNext();
 
+                moduleInstantiation.LastIndexReference = word.CreateIndexReference();
+                if (!word.Prototype) nameSpace.Items.Add(moduleInstantiation);
             }
-
 
             if (word.Text != ";")
             {
                 word.AddError("; expected");
                 return true;
             }
+
+            
             word.MoveNext();
             return true;
         }

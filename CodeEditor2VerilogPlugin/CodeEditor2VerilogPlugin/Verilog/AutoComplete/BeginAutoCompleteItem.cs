@@ -2,7 +2,7 @@ using CodeEditor2.CodeEditor.CodeComplete;
 
 namespace pluginVerilog.Verilog.AutoComplete
 {
-    public class BeginAutoCompleteItem : AutocompleteItem
+    public class BeginAutoCompleteItem : pluginVerilog.Data.VerilogCommon.AutoCompleteItem
     {
         public BeginAutoCompleteItem() : base("begin", CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Plugin.ThemeColor, "CodeEditor2/Assets/Icons/screwdriver.svg")
         {
