@@ -1,3 +1,5 @@
+using Microsoft.Playwright;
+
 namespace pluginVerilog.Verilog
 {
     // A.2.2.3 Delays
@@ -7,23 +9,23 @@ namespace pluginVerilog.Verilog
 
     public class Delay2
     {
-        public Expressions.Expression DelayValue0 { get; protected set; }
-        public Expressions.Expression DelayValue1 { get; protected set; }
+        public Expressions.Expression? DelayValue0 { get; protected set; }
+        public Expressions.Expression? DelayValue1 { get; protected set; }
 
-        public static Delay2 ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static Delay2? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "#") return null;
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
             Delay2 delay = new Delay2();
-            Expressions.Expression expression;
 
+            Expressions.Expression? expression;
             expression = Expressions.Expression.ParseCreate(word, nameSpace);
-            if (expression == null) return null;
+            if (expression == null) return delay;
             delay.DelayValue0 = expression;
 
-            if (word.Text != ",") return delay;
+            if (word.Text != ",") return null;
             word.MoveNext();
 
             expression = Expressions.Expression.ParseCreate(word, nameSpace);
@@ -33,20 +35,20 @@ namespace pluginVerilog.Verilog
             return delay;
         }
 
-        private static Expressions.Expression parseCreateDelayValue(WordScanner word, NameSpace nameSpace)
-        {
-            Expressions.Expression expression = Expressions.Expression.ParseCreate(word, nameSpace);
-            if (expression == null)
-            {
-                word.AddError("illegal delay value");
-                return null;
-            }
-            if (!expression.Constant)
-            {
-                word.AddError("should be constant");
-            }
-            return expression;
-        }
+        //private static Expressions.Expression parseCreateDelayValue(WordScanner word, NameSpace nameSpace)
+        //{
+        //    Expressions.Expression expression = Expressions.Expression.ParseCreate(word, nameSpace);
+        //    if (expression == null)
+        //    {
+        //        word.AddError("illegal delay value");
+        //        return null;
+        //    }
+        //    if (!expression.Constant)
+        //    {
+        //        word.AddError("should be constant");
+        //    }
+        //    return expression;
+        //}
     }
 
     public class Delay3
