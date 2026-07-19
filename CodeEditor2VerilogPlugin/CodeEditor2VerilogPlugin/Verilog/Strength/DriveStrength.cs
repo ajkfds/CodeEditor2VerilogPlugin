@@ -1,6 +1,7 @@
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.Expressions;
 using System;
+using System.Collections.Generic;
 
 namespace pluginVerilog.Verilog.DataObjects.Nets
 {
@@ -73,6 +74,15 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             */
 
             if (word.Text != "(") return null;
+
+            List<string> cantidates = new List<string> {
+                "supply0","strong0","pull0","weak0",
+                "supply1","strong1","pull1","weak1",
+                "highz0","highz1"
+            };
+            // will not proceed word if this is not drive strength
+            if (!cantidates.Contains(word.NextText)) return null;
+
             word.MoveNext();
 
             StrengthValueEnum? strength0 = ParseStrengthValue(word);

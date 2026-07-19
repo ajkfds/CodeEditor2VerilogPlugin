@@ -49,12 +49,18 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             {
                 case "small":
                     strength = StrengthValueEnum.Small;
+                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.MoveNext();
                     break;
                 case "medium":
                     strength = StrengthValueEnum.Medium;
+                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.MoveNext();
                     break;
                 case "large":
                     strength = StrengthValueEnum.Large;
+                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.MoveNext();
                     break;
                 default:
                     word.AddError("small, medium, or large expected");
