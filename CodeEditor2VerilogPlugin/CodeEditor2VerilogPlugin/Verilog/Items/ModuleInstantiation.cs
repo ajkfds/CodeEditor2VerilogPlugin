@@ -65,6 +65,8 @@ namespace pluginVerilog.Verilog.Items
         public string? ModuleNameComment { get; set; }
         public required Dictionary<string, Expressions.Expression> ParameterOverrides { get; init; }
 
+        public List<string> InstancedNameSpaceNames { get; } = new List<string>();
+
         public Dictionary<string, Expressions.Expression> PortConnection { get; set; } = new Dictionary<string, Expressions.Expression>();
 
         public List<PortReference> PortReferences = new List<PortReference>();
@@ -321,22 +323,14 @@ namespace pluginVerilog.Verilog.Items
 
                             instancedModule = word.ProjectProperty.GetInstancedBuildingBlock(moduleInstantiation) as Module;
                         }
-                        if (moduleName == "scr1_tcm" && instancedModule == null)
-                        {
-                            System.Diagnostics.Debugger.Break();
-                        }
                     }
 
 
-
-                        if (instancedModule == null)
+                    if (instancedModule == null)
                     {
-                        //                        nameSpace.BuildingBlock.ReparseRequested = true;
-                        //                        word.RootParsedDocument.ReparseRequested = true;
                         word.AddError("not parsed yet.");
                     }
                 }
-                //                moduleInstantiation.InstancedModule = instancedModule;
 
                 if (word.Prototype)
                 {
@@ -363,22 +357,25 @@ namespace pluginVerilog.Verilog.Items
                     }
                     else if (nameSpace.NamedElements.ContainsIBuldingBlockInstantiation(moduleInstantiation.Name))
                     {   // duplicated
-                        if (((IBuildingBlockInstantiation)nameSpace.NamedElements[moduleInstantiation.Name]).Prototype)
-                        {
-                            ModuleInstantiation? mod = nameSpace.NamedElements[moduleInstantiation.Name] as ModuleInstantiation;
-                            if (mod != null)
-                            {
-                                moduleInstantiation = mod;
-                                moduleInstantiation.Prototype = false;
-                            }
-                        }
-                        else
-                        {
-                        }
+                        nameSpace.NamedElements.Replace(moduleInstantiation.Name, moduleInstantiation);
+                        SetInstancedNamespaceNames(moduleInstantiation, nameSpace);
+
+                        //if (((IBuildingBlockInstantiation)nameSpace.NamedElements[moduleInstantiation.Name]).Prototype)
+                        //{
+                        //    ModuleInstantiation? mod = nameSpace.NamedElements[moduleInstantiation.Name] as ModuleInstantiation;
+                        //    if (mod != null)
+                        //    {
+                        //        moduleInstantiation = mod;
+                        //        moduleInstantiation.Prototype = false;
+                        //    }
+                        //}
+                        //else
+                        //{
+                        //}
                     }
                     else
                     {
-                        //module.ModuleInstantiations.Add(moduleInstantiation.Name, moduleInstantiation);
+                        nameSpace.NamedElements.Add(moduleInstantiation.Name, moduleInstantiation);
                     }
                 }
 
@@ -414,7 +411,7 @@ namespace pluginVerilog.Verilog.Items
                 {
                     word.AppendBlock(moduleInstantiation.BlockBeginIndexReference, moduleInstantiation.LastIndexReference);
                 }
-                syncCheck(word, nameSpace, moduleInstantiation);
+                SyncCheck(word, nameSpace, moduleInstantiation);
                 if (word.Text != ",") break;
                 word.MoveNext();
 
@@ -427,13 +424,20 @@ namespace pluginVerilog.Verilog.Items
                 word.AddError("; expected");
                 return true;
             }
-
             
             word.MoveNext();
             return true;
         }
 
-        private static void syncCheck(WordScanner word, NameSpace nameSpace, ModuleInstantiation moduleInstantiation)
+        private static void SetInstancedNamespaceNames(ModuleInstantiation moduleInstantiation,NameSpace nameSpace)
+        {
+            if (nameSpace is BuildingBlock) return;
+            moduleInstantiation.InstancedNameSpaceNames.Insert(0, nameSpace.Name);
+            SetInstancedNamespaceNames(moduleInstantiation, nameSpace.Parent);
+        }
+
+
+        private static void SyncCheck(WordScanner word, NameSpace nameSpace, ModuleInstantiation moduleInstantiation)
         {
             if (word.Prototype) return;
 

@@ -180,7 +180,14 @@ namespace pluginVerilog.NavigatePanel
             else
             {
                 Data.VerilogModuleInstance instance = (Data.VerilogModuleInstance)Item;
-                Text = instance.Name + " - " + instance.ModuleName;
+                if (instance.NameSpaceString != "")
+                {
+                    Text = instance.NameSpaceString+"."+ instance.Name + " - " + instance.ModuleName;
+                }
+                else
+                {
+                    Text = instance.Name + " - " + instance.ModuleName;
+                }
             }
 
             if (VerilogFile == null) return;

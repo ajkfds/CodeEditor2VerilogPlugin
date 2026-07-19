@@ -10,6 +10,8 @@ using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.Items;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -136,6 +138,8 @@ namespace pluginVerilog.Data
             }
         }
 
+        public string NameSpaceString { set; get; } = "";
+
         // ModuleInstaceでparsedDocumentを保持しないとSourceFile側で保持するのはWeakReferenceだけなので消えてしまう。
         private new CodeEditor2.CodeEditor.ParsedDocument? _parsedDocument;
         public override CodeEditor2.CodeEditor.ParsedDocument? ParsedDocument
@@ -234,6 +238,20 @@ namespace pluginVerilog.Data
             if (moduleInstantiation.Project != project)
             {
                 fileItem.ExternalProject = true;
+            }
+
+            if (moduleInstantiation.InstancedNameSpaceNames.Count != 0)
+            {
+                StringBuilder sb = new StringBuilder();
+                foreach( var i in moduleInstantiation.InstancedNameSpaceNames)
+                {
+                    sb.Append(i);
+                    if (moduleInstantiation.InstancedNameSpaceNames.Last() != i)
+                    {
+                        sb.Append(",");
+                    }
+                }
+                fileItem.NameSpaceString = sb.ToString();
             }
 
             if (file is Data.VerilogFile)
