@@ -372,6 +372,9 @@ number
                         DataTypeReference dataTypeReference = new DataTypeReference { IDataType = dataType };
                         return dataTypeReference;
                     }
+
+                    word.AddError("unfound object");
+                    word.MoveNext();
                     return null;
             }
             return null;
