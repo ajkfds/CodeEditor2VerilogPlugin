@@ -143,21 +143,16 @@ namespace pluginVerilog.Data
         /// <param name="newParsedDocument"></param>
         public override async Task AcceptParsedDocumentAsync(CodeEditor2.CodeEditor.Parser.DocumentParser parser)
         {
-            CodeEditor2.CodeEditor.ParsedDocument? newParsedDocument = parser.ParsedDocument;
-            if (newParsedDocument == null) return;
-
             if (Plugin.StopParse) return;
 
-            ParsedDocument? oldParsedDocument;
-            oldParsedDocument = ParsedDocument; // no lock is needed. ParsedDocument property is thread safe
+            Verilog.ParsedDocument? newParsedDocument = parser.ParsedDocument as Verilog.ParsedDocument;
+            if (newParsedDocument == null) return;
+
+            ParsedDocument? oldParsedDocument = ParsedDocument; // no lock is needed. ParsedDocument property is thread safe
 
             if (oldParsedDocument == newParsedDocument) return;
 
-
-            Verilog.ParsedDocument? vParsedDocument;
-            vParsedDocument = newParsedDocument as Verilog.ParsedDocument;
-
-            if (vParsedDocument == null)
+            if (newParsedDocument == null)
             {
                 await UpdateAsync();
                 return;
@@ -169,10 +164,10 @@ namespace pluginVerilog.Data
             if (codeDoc == null) return;
             if (newParsedDocument == null) return;
 
-            if (codeDoc.Version != vParsedDocument.Version)
+            if (codeDoc.Version != newParsedDocument.Version)
             {
                 // if code document is updated during parsing, do not accept parsed document because it may be outdated.
-                vParsedDocument.ReparseRequested = true;
+                newParsedDocument.ReparseRequested = true;
                 return;
             }
             else
@@ -184,18 +179,18 @@ namespace pluginVerilog.Data
             try
             {
                 // Register New Building Block
-                if (vParsedDocument.Root != null)
+                if (newParsedDocument.Root != null)
                 {
-                    foreach (var buildingBlockKvp in vParsedDocument.Root.BuildingBlocks)
+                    foreach (var buildingBlockKvp in newParsedDocument.Root.BuildingBlocks)
                     {
                         ProjectProperty.RegisterBuildingBlock(buildingBlockKvp.Key, buildingBlockKvp.Value, this);
                     }
                 }
 
-                _reparseRequested = vParsedDocument.ReparseRequested;
+                _reparseRequested = newParsedDocument.ReparseRequested;
 
                 // swap ParsedDocument
-                _parsedDocument = vParsedDocument; // no lock is needed. ParsedDocument property is thread safe
+                _parsedDocument = newParsedDocument;
             }
             finally
             {
@@ -205,10 +200,10 @@ namespace pluginVerilog.Data
 
             // Now that all building blocks in this file are registered, resolve and apply @scope comment annotations.
             // This must happen after RegisterBuildingBlock so that @scope targets are findable via ProjectProperty.GetBuildingBlock().
-            if (vParsedDocument.Root != null)
+            if (newParsedDocument.Root != null)
             {
-                vParsedDocument.Root.ApplyCommentScopeReferences();
-                foreach (var bbKvp in vParsedDocument.Root.BuildingBlocks)
+                newParsedDocument.Root.ApplyCommentScopeReferences();
+                foreach (var bbKvp in newParsedDocument.Root.BuildingBlocks)
                 {
                     bbKvp.Value.ApplyCommentScopeReferences();
                 }
@@ -223,7 +218,7 @@ namespace pluginVerilog.Data
             }
 
 
-            await updateIncludeFilesAsync(vParsedDocument, Items);
+            await updateIncludeFilesAsync(newParsedDocument, Items);
             
             // CodeEditor & NavigateNode & Messgae update will done in UpdateAsync
             await UpdateAsync();

@@ -498,22 +498,37 @@ namespace pluginVerilog.Data
         {
             if (Plugin.StopParse) return;
 
-            CodeEditor2.CodeEditor.ParsedDocument? newParsedDocument = parser.ParsedDocument;
+            Verilog.ParsedDocument? newParsedDocument = parser.ParsedDocument as Verilog.ParsedDocument;
             if (newParsedDocument == null) return;
 
-            if (newParsedDocument == null) throw new Exception();
             Data.VerilogFile source = SourceVerilogFile;
             if (source == null) return;
 
             string key = _getKey();
 
-            ParsedDocument? oldParsedDocument;
-            oldParsedDocument = ParsedDocument;
-            ParsedDocument = newParsedDocument; // should keep parseddocument 1st
+            Verilog.ParsedDocument? oldParsedDocument = VerilogParsedDocument;
 
             {
                 source.RegisterInstanceParsedDocument(key, newParsedDocument, this);
-                await acceptParameterizedParsedDocumentAsync(newParsedDocument);
+                //                await acceptParameterizedParsedDocumentAsync(newParsedDocument);
+                // copy include files
+
+
+                //if (oldParsedDocument == null)
+                //{
+                //    await UpdateAsync();
+                //    return;
+                //}
+
+                //Verilog.ParsedDocument? vParsedDocument = newParsedDocument as Verilog.ParsedDocument;
+                //if (vParsedDocument != null)
+               // {
+               //     ReparseRequested = vParsedDocument.ReparseRequested;
+                //}
+
+                //await VerilogFile.updateIncludeFilesAsync(oldParsedDocument, Items);
+
+
             }
 
             if (source.ParsedDocument != null)// && source.ParsedDocument.Version != newParsedDocument.Version)
@@ -537,6 +552,11 @@ namespace pluginVerilog.Data
                     ReparseRequested = vParsedDocument.ReparseRequested;
                 }
             }
+
+
+
+            _parsedDocument = newParsedDocument;
+
             TextFile? textFile = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync();
             if (textFile == this)
             {
@@ -545,35 +565,7 @@ namespace pluginVerilog.Data
                 CodeEditor2.Controller.CodeEditor.PostRefresh();
             }
 
-            NavigatePanelNode.UpdateVisual();
-        }
-
-
-        private async Task acceptParameterizedParsedDocumentAsync(ParsedDocument newParsedDocument)
-        {
-
-            // copy include files
-
-            ParsedDocument = newParsedDocument;
-
-            Verilog.ParsedDocument? vParsedDoc = VerilogParsedDocument;
-
-            if (vParsedDoc == null)
-            {
-                await UpdateAsync();
-                return;
-            }
-
-            Verilog.ParsedDocument? vParsedDocument = newParsedDocument as Verilog.ParsedDocument;
-            if (vParsedDocument != null)
-            {
-                ReparseRequested = vParsedDocument.ReparseRequested;
-            }
-
-            await VerilogFile.updateIncludeFilesAsync(vParsedDoc, Items);
-
-            await UpdateAsync(); // eliminated here
-            //System.Diagnostics.Debug.Print("### Verilog File Parsed " + ID);
+            await UpdateAsync(); // update navigate panel node and message view
         }
 
 
