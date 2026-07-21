@@ -1,3 +1,4 @@
+using OpenAI.Realtime;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
@@ -257,7 +258,7 @@ number
                         }
 
                         // search downward
-                        NameSpace? searchDownwardNameSpace = searchNameSpace(word, targetNameSpace, ref nameSpaceText);
+                        NameSpace? searchDownwardNameSpace = searchNameSpace(word, targetNameSpace, ref nameSpaceText,out bool endWithDot,true);
                         if (searchDownwardNameSpace is UnfoundNameSpace)
                         {
                             word.RootParsedDocument.ReparseRequested = true;
@@ -267,9 +268,10 @@ number
                         {
                             if (nameSpaceText != "") acceptImplicitNet = false;
                             targetNameSpace = searchDownwardNameSpace;
-                            if (word.Text == "")
+                            if (!endWithDot)
                             {
-                                return new NameSpaceReference(searchDownwardNameSpace);
+                                NameSpaceReference nameSpaceRef = new NameSpaceReference(searchDownwardNameSpace);
+                                return nameSpaceRef;
                             }
                         }
                         else
@@ -380,8 +382,10 @@ number
             return null;
         }
 
-        public static NameSpace? searchNameSpace(WordScanner word, NameSpace nameSpace, ref string nameSpaceText)
+        public static NameSpace? searchNameSpace(WordScanner word, NameSpace nameSpace, ref string nameSpaceText,out bool endWithDot,bool firstElement)
         {
+            endWithDot = true;
+
             if (!General.IsIdentifier(word.Text) || General.ListOfKeywords.Contains(word.Text))
             {
                 return nameSpace;
@@ -389,6 +393,11 @@ number
             if (word.NextText == "(" || word.NextText == ";")
             {
                 return nameSpace;
+            }
+
+            if (word.NextText != ".")
+            {
+                endWithDot = false;
             }
 
             if (!nameSpace.NamedElements.ContainsKey(word.Text))
@@ -399,6 +408,7 @@ number
                 }
                 else
                 {
+                    if (firstElement) return null;
                     return nameSpace;    // implicit net declaration?
                 }
             }
@@ -407,13 +417,13 @@ number
 
             if (element is NameSpace)
             {
-                // If the found NameSpace is a Function or LetDeclaration and the next
-                // token is not ".", the identifier is used as a call/reference, not as
-                // a hierarchical namespace traversal.  In that case leave word on the
-                // identifier and return the original nameSpace so the caller can
-                // recognize the element as a FunctionCall / LetDeclaration.
+                // If the found NameSpace is a Function or LetDeclaration and the next token is not ".",
+                // the identifier is used as a call/reference,
+                // not as a hierarchical namespace traversal.
+                // In that case leave word on the identifier and return the original nameSpace
+                // so the caller can recognize the element as a FunctionCall / LetDeclaration.
                 if (word.NextText != "."
-                    && (element is Function || element is DataObjects.LetDeclaration))
+                && (element is Function || element is DataObjects.LetDeclaration))
                 {
                     return nameSpace;
                 }
@@ -431,7 +441,7 @@ number
                     {
                         nameSpaceText = nameSpaceText + "." + newNameSpace.Name;
                     }
-                    return searchNameSpace(word, newNameSpace, ref nameSpaceText);
+                    return searchNameSpace(word, newNameSpace, ref nameSpaceText, out endWithDot,false);
                 }
                 return newNameSpace;
             }
@@ -470,9 +480,13 @@ number
                     {
                         nameSpaceText = nameSpaceText + "." + buildingBlockInstantiation.Name;
                     }
-                    return searchNameSpace(word, buildingBlock, ref nameSpaceText);
+                    return searchNameSpace(word, buildingBlock, ref nameSpaceText, out endWithDot,false);
                 }
                 return buildingBlock;
+            }
+            if (firstElement)
+            {
+                return null;
             }
             return nameSpace;
         }
