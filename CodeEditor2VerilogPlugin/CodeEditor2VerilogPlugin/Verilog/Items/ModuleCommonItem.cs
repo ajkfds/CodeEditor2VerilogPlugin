@@ -1,4 +1,3 @@
-using pluginVerilog.Verilog.DataObjects;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Items

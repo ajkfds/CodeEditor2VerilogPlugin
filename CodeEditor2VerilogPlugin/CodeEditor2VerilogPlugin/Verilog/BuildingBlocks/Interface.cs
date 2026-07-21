@@ -6,12 +6,64 @@ using System.Linq;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
-    public class Interface : BuildingBlock, IModuleOrInterface, IModuleOrInterfaceOrCheckerOrClass
+    public class Interface : BuildingBlock, IModuleOrInterface, IModuleOrInterfaceOrCheckerOrClass, DataObjects.DataTypes.IDataType
     {
         protected Interface() : base(null, null)
         {
 
         }
+        public virtual bool PartSelectable { get { return false; } }
+        public bool IsValidForNet { get { return false; } }
+
+        // data type
+        public int? BitWidth { get; } = null;
+        public new CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
+        public bool IsVector { get { return false; } }
+
+        public bool Packable
+        {
+            get { return false; }
+        }
+        public DataObjects.DataTypes.DataTypeEnum Type
+        {
+            get { return DataObjects.DataTypes.DataTypeEnum.Interface; }
+            set { }
+        }
+        public string CreateString()
+        {
+            AjkAvaloniaLibs.Controls.ColorLabel label = new AjkAvaloniaLibs.Controls.ColorLabel();
+            AppendTypeLabel(label);
+            return label.CreateString();
+        }
+        public void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        {
+            label.AppendText("interface ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+            label.AppendText(Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Identifier));
+        }
+
+        public DataObjects.DataTypes.IDataType Clone()
+        {
+            Interface interface_ = new Interface()
+            {
+                BeginIndexReference = BeginIndexReference,
+                DefinitionReference = DefinitionReference,
+                File = File,
+                Name = Name,
+                Parent = Parent,
+                Project = Project
+            };
+            foreach (var namedElement in NamedElements)
+            {
+                interface_.NamedElements.Add(namedElement.Name, namedElement);
+            }
+            return interface_;
+        }
+
+
+        public virtual List<DataObjects.Arrays.PackedArray> PackedDimensions { get; protected set; } = new List<DataObjects.Arrays.PackedArray>();
+
+        /// 
+
 
         //string IDataType.CreateString()
         //{

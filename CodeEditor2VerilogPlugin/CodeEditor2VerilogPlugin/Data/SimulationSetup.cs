@@ -25,6 +25,7 @@ namespace pluginVerilog. Data
         public List<IVerilogRelatedFile> ImportFiles = new List<IVerilogRelatedFile>();
         public List<string> ImportPaths = new List<string>();
 
+
         public List<string> ExternalLibraryPathList = new List<string>();
         public List<string> UnfoundModules = new List<string>();
 
@@ -144,9 +145,9 @@ namespace pluginVerilog. Data
                         if (subfile != null) searchHier(subfile, moduleInstantiation. SourceName, ids, setup, newPath);
                     }
                 }
-                else if (element is pluginVerilog.Verilog.DataObjects.InterfaceInstance)
+                else if ((element is Verilog.Items.InterfaceInstance))
                 {
-                    pluginVerilog.Verilog.DataObjects.InterfaceInstance moduleInstantiation = (pluginVerilog.Verilog.DataObjects.InterfaceInstance)element;
+                    Verilog.Items.InterfaceInstance moduleInstantiation = (Verilog.Items.InterfaceInstance)element;
                     //if (nameSpace.BuildingBlock.Project.Name != moduleInstantiation.SourceProjectName)
                     //{
                     //    string newPath = path + "." + moduleInstantiation.Name;

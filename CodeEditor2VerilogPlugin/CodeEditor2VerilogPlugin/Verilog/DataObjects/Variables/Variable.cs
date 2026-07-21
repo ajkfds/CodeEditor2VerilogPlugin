@@ -104,6 +104,9 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                     return UserDefinedVariable.Create(name, dataType);
                 case DataTypeEnum.TypeReference:
                     return CreateFromTypeReference(name, dataType);
+
+                case DataTypeEnum.Interface:
+                    return VirtualInterface.Create(name, dataType);
                 default:
                     if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
                     return null;
@@ -234,6 +237,12 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
             IDataType? dataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, null);
             if (dataType == null) return pointerMoved;
+
+            if(dataType is BuildingBlocks.Class)
+            {
+                BuildingBlocks.Class class_ = (BuildingBlocks.Class)dataType;
+                if (!word.RootParsedDocument.UsedClasses.Contains(class_.Name)) word.RootParsedDocument.UsedClasses.Add(class_.Name);
+            }
 
             List<DataObject> vars = new List<DataObject>();
 

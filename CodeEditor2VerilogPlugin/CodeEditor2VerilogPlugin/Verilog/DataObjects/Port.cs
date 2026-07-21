@@ -5,6 +5,7 @@ using pluginVerilog.Verilog.CommentAnnotation;
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.DataObjects.Nets;
+using pluginVerilog.Verilog.Items;
 using System;
 using System.Collections.Generic;
 

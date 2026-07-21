@@ -135,11 +135,10 @@ namespace pluginVerilog.Verilog
         public Dictionary<string, Data.VerilogHeaderInstance> IncludeFiles = new Dictionary<string, Data.VerilogHeaderInstance>();
         [JsonIgnore]
         public Dictionary<string, Macro> Macros = new Dictionary<string, Macro>();
-public List<string> ImportedPackages = new List<string>();
+        public List<string> ImportedPackages = new List<string>();
+        public List<string> UsedClasses = new List<string>();
 
-        [JsonIgnore]
         public Dictionary<string, Verilog.Expressions.Expression> ParameterOverrides = new Dictionary<string, Expressions.Expression>();
-        [JsonIgnore]
         public string? TargetBuildingBlockName = null;
 
         public List<string> ExternalRefrenceModules = new List<string>();

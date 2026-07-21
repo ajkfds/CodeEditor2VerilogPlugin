@@ -260,6 +260,15 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 return class_;
             }
 
+            // interface
+            if (buildingBlock is Interface)
+            {
+                Interface interface_ = (Interface)buildingBlock;
+                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.MoveNext();
+                return interface_;
+            }
+
             // interface_class_type
             if (buildingBlock is InterfaceClass)
             {

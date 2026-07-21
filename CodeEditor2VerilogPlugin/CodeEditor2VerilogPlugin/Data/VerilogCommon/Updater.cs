@@ -234,7 +234,7 @@ namespace pluginVerilog.Data.VerilogCommon
                         Interface iface = (Interface)buldingBlockKvp.Value;
 
                         // Use the Interface as the source directly (same pattern as Module)
-                        Verilog.DataObjects.InterfaceInstance interfaceInstantiation = new Verilog.DataObjects.InterfaceInstance()
+                        Verilog.Items.InterfaceInstance interfaceInstantiation = new Verilog.Items.InterfaceInstance()
                         {
                             BeginIndexReference = iface.BeginIndexReference,
                             DefinitionReference = iface.DefinitionReference,
@@ -314,9 +314,9 @@ namespace pluginVerilog.Data.VerilogCommon
                                 }
                             }
                         }
-                        else if (instantiation is Verilog.DataObjects.InterfaceInstance)
+                        else if ((instantiation is Verilog.Items.InterfaceInstance))
                         {
-                            Verilog.DataObjects.InterfaceInstance interfaceInstantiation = (Verilog.DataObjects.InterfaceInstance)instantiation;
+                            Verilog.Items.InterfaceInstance interfaceInstantiation = (Verilog.Items.InterfaceInstance)instantiation;
                             InterfaceInstance? interfaceInstance = subItem as InterfaceInstance;
 
                             // Compare using source name and parameter overrides
@@ -375,9 +375,9 @@ namespace pluginVerilog.Data.VerilogCommon
                                 newSubItems.Add(instantiation.Name, newVerilogModuleInstance);
                             }
                         }
-                        else if(instantiation is Verilog.DataObjects.InterfaceInstance)
+                        else if((instantiation is Verilog.Items.InterfaceInstance))
                         {
-                            Verilog.DataObjects.InterfaceInstance moduleInstantiation = (Verilog.DataObjects.InterfaceInstance)instantiation;
+                            Verilog.Items.InterfaceInstance moduleInstantiation = (Verilog.Items.InterfaceInstance)instantiation;
 
                             InterfaceInstance? newVerilogModuleInstance = InterfaceInstance.Create(moduleInstantiation,project);
                             if (newSubItems.ContainsKey(instantiation.Name) || newVerilogModuleInstance == null) continue;

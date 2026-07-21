@@ -1,13 +1,13 @@
 using CodeEditor2.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
-using pluginVerilog.Verilog.Items;
+using pluginVerilog.Verilog.DataObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace pluginVerilog.Verilog.DataObjects
+namespace pluginVerilog.Verilog.Items
 {
     public class InterfaceInstance : DataObject, IBuildingBlockInstantiation, INamedElement
     {

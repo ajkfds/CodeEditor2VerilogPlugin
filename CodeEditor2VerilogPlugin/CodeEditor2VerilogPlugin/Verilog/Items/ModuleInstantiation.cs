@@ -933,9 +933,9 @@ namespace pluginVerilog.Verilog.Items
                     checkModPortConnection(projectProperty, expression, modportInstantiation, interface_, pinName, output);
                 }
             }
-            else if (portDataObject is DataObjects.InterfaceInstance)
+            else if ((((portDataObject is InterfaceInstance))))
             {
-                DataObjects.InterfaceInstance? portInterfaceInstantiation = instancedModule.Ports[pinName].DataObject as DataObjects.InterfaceInstance;
+                InterfaceInstance? portInterfaceInstantiation = (((instancedModule.Ports[pinName].DataObject as InterfaceInstance)));
                 if (portInterfaceInstantiation == null) throw new Exception();
                 Interface? interface_ = instancedModule.Project.GetPluginProperty().GetBuildingBlock(portInterfaceInstantiation.SourceName) as Interface;
                 if (interface_ == null)
@@ -1058,7 +1058,7 @@ namespace pluginVerilog.Verilog.Items
         private static void checkInterfacePortConnection(
             ProjectProperty projectProperty,
             Expressions.Expression expression,
-            DataObjects.InterfaceInstance portInterfaceInstantiation,
+            InterfaceInstance portInterfaceInstantiation,
             Interface interface_,
             string pinName,
             bool output
@@ -1071,7 +1071,7 @@ namespace pluginVerilog.Verilog.Items
                 return;
             }
 
-            DataObjects.InterfaceInstance? interfaceInstance = variableReference.TargetDataObject as DataObjects.InterfaceInstance;
+            InterfaceInstance? interfaceInstance = (((variableReference.TargetDataObject as InterfaceInstance)));
             if (interfaceInstance == null)
             {
                 expression.Reference.AddError("should be " + portInterfaceInstantiation.SourceName);

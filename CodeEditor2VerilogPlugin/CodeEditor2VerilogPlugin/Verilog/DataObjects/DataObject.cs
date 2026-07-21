@@ -182,8 +182,8 @@ namespace pluginVerilog.Verilog.DataObjects
                         System.Diagnostics.Debugger.Break();
                     }
                     return Variables.Object.Create(name, dataType);
-                //                case DataTypeEnum.Interface:
-                //                    return InterfaceInstance.Create(name,dataType);
+                case DataTypeEnum.Interface:
+                    return VirtualInterface.Create(name,dataType);
                 case DataTypeEnum.Event:
                     return Event.Create(name, dataType);
                 //                case DataTypeEnum.CoverGroup:
