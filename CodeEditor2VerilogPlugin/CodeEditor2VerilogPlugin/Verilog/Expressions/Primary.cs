@@ -472,7 +472,7 @@ number
             if (element is DataObjects.Variables.VirtualInterface)
             {
                 DataObjects.Variables.VirtualInterface virtualInterface = (DataObjects.Variables.VirtualInterface)element;
-                BuildingBlocks.Interface? @interface = virtualInterface.Interface;
+                BuildingBlocks.Interface? @interface = virtualInterface.GetSourceInterface();
                 word.Color(CodeDrawStyle.ColorType.Identifier);
                 word.MoveNext();
 

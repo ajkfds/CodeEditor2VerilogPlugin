@@ -1,3 +1,4 @@
+using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using System;
 using System.Collections.Generic;
@@ -9,9 +10,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         protected Object() { }
         public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
 
-        private BuildingBlocks.Class Class { get; set; }
-
-        public required Dictionary<string, Expressions.Expression> ParameterOverrides { get; init; } = new Dictionary<string, Expressions.Expression>();
+        public required Dictionary<string, Expressions.Expression> ParameterOverrides { get; init; }
         public BuildingBlocks.Class? GetSourceClass() {
 
             ProjectProperty projectProperty = (ProjectProperty)Project.GetPluginProperty();
@@ -49,7 +48,11 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         public required string SourceName { get; init; }
         public required CodeEditor2.Data.Project Project { get; init; }
 
-        public override NamedElements NamedElements { get { return Class.NamedElements; } }
+        public override NamedElements NamedElements { get {
+                Class? @class = GetSourceClass();
+                if(@class == null) return new NamedElements();
+                return @class.NamedElements; 
+            } }
 
         public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
@@ -58,7 +61,9 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         }
         public override void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
-            label.AppendText(Class.Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+            Class? @class = GetSourceClass();
+            if(@class == null) return;
+            label.AppendText(@class.Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
             label.AppendText(" ");
         }
         public static new Object Create(string name, IDataType dataType)
@@ -68,7 +73,6 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             if (class_ == null) throw new Exception();
 
             Object val = new Object() { 
-                Class = class_, 
                 Name = name, 
                 ParameterOverrides = new Dictionary<string, Expressions.Expression>(), 
                 Project = class_.Project,
@@ -101,7 +105,6 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         public override Variable Clone(string name)
         {
             Object val = new Object() { 
-                Class = Class, 
                 Name = name, 
                 Defined = Defined, 
                 ParameterOverrides = new Dictionary<string, Expressions.Expression>(), 
@@ -119,22 +122,34 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         // IInstance
         public override Task_? GetTask(string identifier)
         {
-            if (Class.NamedElements.ContainsKey(identifier) && Class.NamedElements[identifier] is Task_) return (Task_)Class.NamedElements[identifier];
+            Class? @class = GetSourceClass();
+            if (@class == null) return null;
+
+            if (@class.NamedElements.ContainsKey(identifier) && @class.NamedElements[identifier] is Task_) return (Task_)@class.NamedElements[identifier];
             return null;
         }
         public override Function? GetFunction(string identifier)
         {
-            if (Class.NamedElements.ContainsKey(identifier) && Class.NamedElements[identifier] is Function) return (Function)Class.NamedElements[identifier];
+            Class? @class = GetSourceClass();
+            if (@class == null) return null;
+
+            if (@class.NamedElements.ContainsKey(identifier) && @class.NamedElements[identifier] is Function) return (Function)@class.NamedElements[identifier];
             return null;
         }
         public override DataObject? GetDataObject(string identifier)
         {
-            if (!Class.NamedElements.ContainsKey(identifier)) return null;
-            return Class.NamedElements[identifier] as DataObject;
+            Class? @class = GetSourceClass();
+            if (@class == null) return null;
+
+            if (!@class.NamedElements.ContainsKey(identifier)) return null;
+            return @class.NamedElements[identifier] as DataObject;
         }
         public override void AppendAutoCompleteItem(List<CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem> items)
         {
-            Class.AppendAutoCompleteItem(items);
+            Class? @class = GetSourceClass();
+            if (@class == null) return;
+
+            @class.AppendAutoCompleteItem(items);
         }
 
 
