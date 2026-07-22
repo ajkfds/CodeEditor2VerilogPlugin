@@ -446,6 +446,52 @@ number
                 return newNameSpace;
             }
 
+            if (element is DataObjects.Variables.Object)
+            {
+                DataObjects.Variables.Object object_ = (DataObjects.Variables.Object)element;
+                BuildingBlocks.Class? class_ = object_.GetSourceClass();
+                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.MoveNext();
+
+                if (word.Text == ".")
+                {
+                    word.MoveNext();
+                    if (nameSpaceText == "")
+                    {
+                        nameSpaceText = object_.Name;
+                    }
+                    else
+                    {
+                        nameSpaceText = nameSpaceText + "." + object_.Name;
+                    }
+                    return searchNameSpace(word, class_, ref nameSpaceText, out endWithDot, false);
+                }
+                return class_;
+            }
+
+            if (element is DataObjects.Variables.VirtualInterface)
+            {
+                DataObjects.Variables.VirtualInterface virtualInterface = (DataObjects.Variables.VirtualInterface)element;
+                BuildingBlocks.Interface? @interface = virtualInterface.Interface;
+                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.MoveNext();
+
+                if (word.Text == ".")
+                {
+                    word.MoveNext();
+                    if (nameSpaceText == "")
+                    {
+                        nameSpaceText = virtualInterface.Name;
+                    }
+                    else
+                    {
+                        nameSpaceText = nameSpaceText + "." + virtualInterface.Name;
+                    }
+                    return searchNameSpace(word, @interface, ref nameSpaceText, out endWithDot, false);
+                }
+                return @interface;
+            }
+
             if (element is IBuildingBlockInstantiation)
             {
                 IBuildingBlockInstantiation buildingBlockInstantiation = (IBuildingBlockInstantiation)element;
@@ -485,57 +531,57 @@ number
                 return buildingBlock;
             }
 
-            if( element is DataObjects.Variables.Object )
-            {
-                DataObjects.Variables.Object object_ = (DataObjects.Variables.Object)element;
-                Class? class_ = object_.Class;
-                if(class_ != null)
-                {
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
-                    word.MoveNext();
+            //if( element is DataObjects.Variables.Object )
+            //{
+            //    DataObjects.Variables.Object object_ = (DataObjects.Variables.Object)element;
+            //    Class? class_ = object_.Class;
+            //    if(class_ != null)
+            //    {
+            //        word.Color(CodeDrawStyle.ColorType.Identifier);
+            //        word.MoveNext();
 
-                    if (word.Text == ".")
-                    {
-                        word.MoveNext();
-                        if (nameSpaceText == "")
-                        {
-                            nameSpaceText = object_.Name;
-                        }
-                        else
-                        {
-                            nameSpaceText = nameSpaceText + "." + object_.Name;
-                        }
-                        return searchNameSpace(word, class_, ref nameSpaceText, out endWithDot, false);
-                    }
-                    return class_;
-                }
-            }
+            //        if (word.Text == ".")
+            //        {
+            //            word.MoveNext();
+            //            if (nameSpaceText == "")
+            //            {
+            //                nameSpaceText = object_.Name;
+            //            }
+            //            else
+            //            {
+            //                nameSpaceText = nameSpaceText + "." + object_.Name;
+            //            }
+            //            return searchNameSpace(word, class_, ref nameSpaceText, out endWithDot, false);
+            //        }
+            //        return class_;
+            //    }
+            //}
 
-            if(element is DataObjects.Variables.VirtualInterface)
-            {
-                DataObjects.Variables.VirtualInterface virtualInterface = (DataObjects.Variables.VirtualInterface)element;
-                Interface? interfaceObj = virtualInterface.Interface;
-                if (interfaceObj != null)
-                {
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
-                    word.MoveNext();
+            //if(element is DataObjects.Variables.VirtualInterface)
+            //{
+            //    DataObjects.Variables.VirtualInterface virtualInterface = (DataObjects.Variables.VirtualInterface)element;
+            //    Interface? interfaceObj = virtualInterface.Interface;
+            //    if (interfaceObj != null)
+            //    {
+            //        word.Color(CodeDrawStyle.ColorType.Identifier);
+            //        word.MoveNext();
 
-                    if (word.Text == ".")
-                    {
-                        word.MoveNext();
-                        if (nameSpaceText == "")
-                        {
-                            nameSpaceText = virtualInterface.Name;
-                        }
-                        else
-                        {
-                            nameSpaceText = nameSpaceText + "." + virtualInterface.Name;
-                        }
-                        return searchNameSpace(word, interfaceObj, ref nameSpaceText, out endWithDot, false);
-                    }
-                    return interfaceObj;
-                }
-            }
+            //        if (word.Text == ".")
+            //        {
+            //            word.MoveNext();
+            //            if (nameSpaceText == "")
+            //            {
+            //                nameSpaceText = virtualInterface.Name;
+            //            }
+            //            else
+            //            {
+            //                nameSpaceText = nameSpaceText + "." + virtualInterface.Name;
+            //            }
+            //            return searchNameSpace(word, interfaceObj, ref nameSpaceText, out endWithDot, false);
+            //        }
+            //        return interfaceObj;
+            //    }
+            //}
 
             if (firstElement)
             {
@@ -651,17 +697,18 @@ number
                 return builtinMethodCall;
             }
 
+            Class class_ = obj.GetSourceClass();
             // task reference : for left side only
             if (lValue && element is Task_ && obj != null)
             {
-                TaskReference task = TaskReference.ParseCreate(word, nameSpace.BuildingBlock, obj.Class);
+                TaskReference task = TaskReference.ParseCreate(word, nameSpace.BuildingBlock, class_);
                 return task;
             }
 
             // void function call : for left side only
             if (lValue && element is Function && obj != null)
             {
-                FunctionCall? func = FunctionCall.ParseCreate(word, nameSpace, obj.Class);
+                FunctionCall? func = FunctionCall.ParseCreate(word, nameSpace, class_);
                 Function? function = func?.Function;
                 if (function != null && function.ReturnVariable == null) return func;
             }
@@ -669,7 +716,7 @@ number
             // function call : for right side only
             if (!lValue && element is Function && obj != null)
             {
-                FunctionCall? func = FunctionCall.ParseCreate(word, nameSpace, obj.Class);
+                FunctionCall? func = FunctionCall.ParseCreate(word, nameSpace, class_);
                 return func;
             }
 

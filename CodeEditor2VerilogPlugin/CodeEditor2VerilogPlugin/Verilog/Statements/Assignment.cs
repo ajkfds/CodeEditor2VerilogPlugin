@@ -312,7 +312,7 @@ namespace pluginVerilog.Verilog.Statements
                         if (dref.TargetDataObject is DataObjects.Variables.Object)
                         {
                             DataObjects.Variables.Object? obj = (DataObjects.Variables.Object)dref.TargetDataObject;
-                            class_ = obj.Class;
+                            class_ = obj.GetSourceClass();
                         }
                     }
                 }

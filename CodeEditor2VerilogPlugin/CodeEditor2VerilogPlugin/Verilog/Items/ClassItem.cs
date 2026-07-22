@@ -185,8 +185,8 @@ namespace pluginVerilog.Verilog.Items
                     }
 
                 case "virtual":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
-                    word.MoveNext();
+//                    word.Color(CodeDrawStyle.ColorType.Keyword);
+//                    word.MoveNext();
                     DataObjects.Variables.VirtualInterface.ParseDeclaration(word, nameSpace);
 
 //                    Parse(word, nameSpace);

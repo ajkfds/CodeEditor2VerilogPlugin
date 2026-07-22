@@ -7,6 +7,7 @@ using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.DataObjects.Variables;
 using pluginVerilog.Verilog.Items;
 using System. Collections. Generic;
+using System.Globalization;
 using System. Linq;
 
 namespace pluginVerilog. Data
@@ -24,6 +25,9 @@ namespace pluginVerilog. Data
 
         public List<IVerilogRelatedFile> ImportFiles = new List<IVerilogRelatedFile>();
         public List<string> ImportPaths = new List<string>();
+
+        public List<IVerilogRelatedFile> ClassFiles = new List<IVerilogRelatedFile>();
+        public List<string> ClassPaths = new List<string>();
 
 
         public List<string> ExternalLibraryPathList = new List<string>();
@@ -86,6 +90,11 @@ namespace pluginVerilog. Data
             foreach (var ifile in parsedDocument. IncludeFiles. Values)
             {
                 appendVerilogHeaderInstance(ifile, setup);
+            }
+
+            foreach (string cFile in parsedDocument.UsedClasses)
+            {
+                appendClass(cFile, file.Project, setup);
             }
 
             // Process imported packages
@@ -264,7 +273,7 @@ namespace pluginVerilog. Data
             // Handle Object (class instance) - has Class property
             if (dataObject is Object objectInstance)
             {
-                Class class_ = objectInstance.Class;
+                Class class_ = objectInstance.GetSourceClass();
                 if (class_ == null) return;
 
                 IVerilogRelatedFile? sourceFile = projectProperty.GetFileOfBuildingBlock(class_.Name);
@@ -390,6 +399,41 @@ namespace pluginVerilog. Data
                 if (!pSetup. ImportPaths. Contains(path)) pSetup. ImportPaths. Add(path);
             }
         }
+        private static void appendClass(string  className, CodeEditor2.Data.Project project, SimulationSetup setup)
+        {
+            IVerilogRelatedFile? classFile = findClassFile(className, project, setup);
+            if (classFile == null) return;
+
+            // Add to ImportFiles
+            if (classFile.Project == setup.Project)
+            {
+                if (setup.ClassFiles.Contains(classFile)) return;
+                setup.ClassFiles.Add(classFile);
+                string? path = System.IO.Path.GetDirectoryName(classFile.Project.GetAbsolutePath(classFile.RelativePath));
+                if (path == null) return;
+                if (!setup.ClassPaths.Contains(path)) setup.ClassPaths.Add(path);
+            }
+            else
+            {
+                // Handle external project reference
+                CodeEditor2.Data.Project extProject = classFile.Project;
+                SimulationSetup pSetup;
+                if (!setup.ExternalProjectReferences.ContainsKey(extProject))
+                {
+                    pSetup = new SimulationSetup() { Project = extProject };
+                    setup.ExternalProjectReferences.Add(extProject, pSetup);
+                }
+                else
+                {
+                    pSetup = setup.ExternalProjectReferences[extProject];
+                }
+                if (pSetup.ClassFiles.Contains(classFile)) return;
+                pSetup.ClassFiles.Add(classFile);
+                string? path = System.IO.Path.GetDirectoryName(classFile.Project.GetAbsolutePath(classFile.RelativePath));
+                if (path == null) return;
+                if (!pSetup.ClassPaths.Contains(path)) pSetup.ClassPaths.Add(path);
+            }
+        }
 
         private static IVerilogRelatedFile? findPackageFile(string packageName, CodeEditor2. Data. Project project, SimulationSetup setup)
         {
@@ -398,6 +442,15 @@ namespace pluginVerilog. Data
 
             Package? package = projectProperty.GetBuildingBlock(packageName) as Package;
             IVerilogRelatedFile? verilogRelatedFile = projectProperty.GetFileOfBuildingBlock(packageName);
+            return verilogRelatedFile;
+        }
+        private static IVerilogRelatedFile? findClassFile(string className, CodeEditor2.Data.Project project, SimulationSetup setup)
+        {
+            ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+            if (projectProperty == null) return null;
+
+            Class? package = projectProperty.GetBuildingBlock(className) as Class;
+            IVerilogRelatedFile? verilogRelatedFile = projectProperty.GetFileOfBuildingBlock(className);
             return verilogRelatedFile;
         }
 

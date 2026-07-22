@@ -331,9 +331,8 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 word.AppendBlock(class_.BeginIndexReference, class_.LastIndexReference);
                 word.MoveNext();
 
-                if (!nameSpace.BuildingBlock.NamedElements.ContainsKey(class_.Name))
+                if (!nameSpace.NamedElements.ContainsKey(class_.Name))
                 {
-                    nameSpace.BuildingBlock.NamedElements.Add(class_.Name, class_);
                 }
 
                 if (word.Text == ":")

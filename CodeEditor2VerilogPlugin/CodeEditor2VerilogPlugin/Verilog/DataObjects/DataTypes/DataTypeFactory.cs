@@ -103,7 +103,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         signing ::= "signed" | "unsigned"
         */
 
-        public static IDataType? ParseCreate(WordScanner word, NameSpace nameSpace, DataTypeEnum? defaultDataType)
+        public static IDataType? ParseCreate(WordScanner word, NameSpace nameSpace, DataTypeEnum? defaultDataType,bool virtual_ = false)
         {
             /*
             data_type::=
@@ -261,7 +261,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             }
 
             // interface
-            if (buildingBlock is Interface)
+            if (buildingBlock is Interface && virtual_)
             {
                 Interface interface_ = (Interface)buildingBlock;
                 word.Color(CodeDrawStyle.ColorType.Identifier);

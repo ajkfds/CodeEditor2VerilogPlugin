@@ -9,7 +9,11 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         protected Object() { }
         public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
 
-        public required BuildingBlocks.Class Class { get; init; }
+        private BuildingBlocks.Class Class { get; set; }
+
+        public BuildingBlocks.Class GetSourceClass() {
+            return Class; 
+        }
 
         public override NamedElements NamedElements { get { return Class.NamedElements; } }
 

@@ -224,6 +224,14 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 pointerMoved = true;
             }
 
+            bool virtual_ = false;
+            if (word.Text == "virtual")
+            {
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext();
+                virtual_ = true;
+            }
+
             if (!pointerMoved)
             {   // shadowing check
                 // buidingblock内にclassと同名のclass 以外のidentifierが存在した場合はクラスの定義とはみなさない。
@@ -235,7 +243,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             }
 
 
-            IDataType? dataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, null);
+            IDataType? dataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, null,virtual_);
             if (dataType == null) return pointerMoved;
 
             if(dataType is BuildingBlocks.Class)

@@ -97,6 +97,15 @@ namespace pluginVerilog.Verilog.Items
 
                 // class_declaration
                 case "virtual":
+                    if(word.NextText == "class")
+                    {
+                        BuildingBlocks.Class.ParseDeclaration(word, nameSpace);
+                        break;
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 case "class":
                     BuildingBlocks.Class.ParseDeclaration(word, nameSpace);
                     break;
