@@ -11,9 +11,43 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         private BuildingBlocks.Class Class { get; set; }
 
-        public BuildingBlocks.Class GetSourceClass() {
-            return Class; 
+        public required Dictionary<string, Expressions.Expression> ParameterOverrides { get; init; } = new Dictionary<string, Expressions.Expression>();
+        public BuildingBlocks.Class? GetSourceClass() {
+
+            ProjectProperty projectProperty = (ProjectProperty)Project.GetPluginProperty();
+    
+            Data.IVerilogRelatedFile? file = projectProperty.GetFileOfBuildingBlock(SourceName);
+            if (file == null) return null;
+            if (file is not Data.VerilogFile) return null;
+
+            Data.VerilogFile source = (Data.VerilogFile)file;
+            if (source == null) return null;
+
+            string instanceKey = Verilog.ParsedDocument.KeyGenerator(file, SourceName, ParameterOverrides);
+
+            CodeEditor2.CodeEditor.ParsedDocument? codeEditorParsedDocument = source.GetInstancedParsedDocument(instanceKey);
+            if(codeEditorParsedDocument == null) // don't have module parse result
+            {
+                codeEditorParsedDocument = source.ParsedDocument;
+            }
+
+
+            if (codeEditorParsedDocument is not ParsedDocument) return null;
+            ParsedDocument? parsedDocument = (ParsedDocument)codeEditorParsedDocument;
+            if (parsedDocument == null) return null;
+            if (parsedDocument.Root == null) return null;
+
+            if(parsedDocument.Root.BuildingBlocks.TryGetValue(SourceName, out BuildingBlocks. BuildingBlock? buildingBlock))
+            {
+                return buildingBlock as BuildingBlocks.Class;
+            }
+            else
+            {
+                return null;
+            }
         }
+        public required string SourceName { get; init; }
+        public required CodeEditor2.Data.Project Project { get; init; }
 
         public override NamedElements NamedElements { get { return Class.NamedElements; } }
 
@@ -33,7 +67,13 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             BuildingBlocks.Class? class_ = dataType as BuildingBlocks.Class;
             if (class_ == null) throw new Exception();
 
-            Object val = new Object() { Class = class_, Name = name };
+            Object val = new Object() { 
+                Class = class_, 
+                Name = name, 
+                ParameterOverrides = new Dictionary<string, Expressions.Expression>(), 
+                Project = class_.Project,
+                SourceName = class_.Name
+            };
 
             defineElements(val);
 
@@ -60,7 +100,14 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public override Variable Clone(string name)
         {
-            Object val = new Object() { Class = Class, Name = name, Defined = Defined };
+            Object val = new Object() { 
+                Class = Class, 
+                Name = name, 
+                Defined = Defined, 
+                ParameterOverrides = new Dictionary<string, Expressions.Expression>(), 
+                Project = Project, 
+                SourceName = SourceName 
+            };
             val.DataType = DataType;
             foreach (var unpackedArray in UnpackedArrays)
             {
