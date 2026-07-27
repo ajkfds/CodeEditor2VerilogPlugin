@@ -83,20 +83,35 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             VirtualInterface val = new VirtualInterface() {
                 Name = name, Project = interface_.Project, SourceName = interface_.Name,ParameterOverrides = new Dictionary<string, Expressions.Expression>() };
 
-            defineElements(val);
+            List<string> ids = new List<string>();
+            defineElements(val,ids);
 
             val.DataType = dataType;
             return val;
         }
 
-        private static void defineElements(INamedElement namedElement)
+        private static void defineElements(INamedElement namedElement,List<string> ids)
         {
             foreach (INamedElement subElement in namedElement.NamedElements)
             {
                 Variable? variable = subElement as Variable;
                 if (variable != null) variable.Defined = true;
+                string key = subElement.Name;
+                if(subElement is DataObjects.Variables.VirtualInterface)
+                {
+                    var vi = (DataObjects.Variables.VirtualInterface) subElement;
+                    key = vi.SourceName;
+                }
+                if (ids.Contains(key))
+                {
+                    continue;
+                }
+                else
+                {
+                    ids.Add(key);
+                }
 
-                defineElements(subElement);
+                defineElements(subElement,ids);
             }
         }
 
