@@ -857,7 +857,7 @@ namespace pluginVerilog.Verilog.Items
                 }
                 else
                 {
-                    if (expression != null && moduleInstantiation.PortConnection.ContainsKey(pinName))
+                    if (expression != null && !moduleInstantiation.PortConnection.ContainsKey(pinName))
                     {
                         moduleInstantiation.PortConnection[pinName] = expression;
                     }
@@ -877,7 +877,7 @@ namespace pluginVerilog.Verilog.Items
                 }
                 else
                 {
-                    if (expression != null && moduleInstantiation.PortConnection.ContainsKey(pinName))
+                    if (expression != null && !moduleInstantiation.PortConnection.ContainsKey(pinName))
                     {
                         moduleInstantiation.PortConnection[pinName] = expression;
                     }
