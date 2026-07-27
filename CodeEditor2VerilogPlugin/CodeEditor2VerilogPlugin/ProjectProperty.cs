@@ -77,6 +77,7 @@ namespace pluginVerilog
         public class AnnotationCommandsClass
         {
             public string Synchronized = "@sync";
+            public string SameSync = "@samesync";
             public string Clock = "@clock";
             public string Reset = "@reset";
             public string PortGroup = "@portgroup";

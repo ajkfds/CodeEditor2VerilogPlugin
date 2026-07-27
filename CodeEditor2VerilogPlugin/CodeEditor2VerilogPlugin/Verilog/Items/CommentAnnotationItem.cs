@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace pluginVerilog.Verilog.Items
 {
@@ -78,6 +79,13 @@ namespace pluginVerilog.Verilog.Items
                         // Format: @scope buildingBlockName [#(.paramName(paramValue),...)] [instanceName]
                         await parseScopeAnnotationAsync(comment, word, nameSpace);
                     }
+                    else if (comment.Text == word.ProjectProperty.AnnotationCommands.SameSync)
+                    {
+                        // Parse @samesync annotation
+                        // Format: @samesync A = B [, C = D, ...]
+                        // Treats each pair (A, B) as belonging to the same sync domain.
+                        parseSameSyncAnnotation(comment, nameSpace);
+                    }
                     else
                     {
                         comment.MoveNext();
@@ -86,6 +94,56 @@ namespace pluginVerilog.Verilog.Items
                 else
                 {
                     comment.MoveNext();
+                }
+            }
+        }
+
+        private static void parseSameSyncAnnotation(CommentScanner comment, NameSpace nameSpace)
+        {
+            comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+            comment.MoveNext();
+
+            if (comment.EOC) return;
+
+            // Parse one or more pairs: name "=" name ["," name "=" name ...]
+            while (!comment.EOC)
+            {
+                // Expect LHS identifier
+                if (comment.EOC || !General.IsSimpleIdentifier(comment.Text)) return;
+                string lhsName = comment.Text;
+                comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                comment.MoveNext();
+
+                // Expect '='
+                if (comment.EOC || comment.Text != "=") return;
+                comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                comment.MoveNext();
+
+                // Expect RHS identifier
+                if (comment.EOC || !General.IsSimpleIdentifier(comment.Text)) return;
+                string rhsName = comment.Text;
+                comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                comment.MoveNext();
+
+                // Record the link unconditionally. In prototype parse the
+                // operands may not yet be defined as DataObjects, so we rely
+                // on the deferred ApplyPendingSameSyncPairs to actually merge
+                // their SyncContexts once they become available.
+                if (string.IsNullOrEmpty(lhsName) || string.IsNullOrEmpty(rhsName) || lhsName == rhsName) { }
+                else if (!nameSpace.PendingSameSyncPairs.Any(p => p.Lhs == lhsName && p.Rhs == rhsName))
+                {
+                    nameSpace.PendingSameSyncPairs.Add(new NameSpace.SameSyncPair { Lhs = lhsName, Rhs = rhsName });
+                }
+
+                // Optional ',' separator
+                if (!comment.EOC && comment.Text == ",")
+                {
+                    comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                    comment.MoveNext();
+                }
+                else
+                {
+                    break;
                 }
             }
         }
