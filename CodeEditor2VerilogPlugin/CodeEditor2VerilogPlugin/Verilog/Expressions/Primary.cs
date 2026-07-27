@@ -450,21 +450,24 @@ number
             {
                 DataObjects.Variables.Object object_ = (DataObjects.Variables.Object)element;
                 BuildingBlocks.Class? class_ = object_.GetSourceClass();
-                word.Color(CodeDrawStyle.ColorType.Identifier);
-                word.MoveNext();
-
-                if (word.Text == ".")
+                if(class_ != null)
                 {
+                    word.Color(CodeDrawStyle.ColorType.Identifier);
                     word.MoveNext();
-                    if (nameSpaceText == "")
+
+                    if (word.Text == ".")
                     {
-                        nameSpaceText = object_.Name;
+                        word.MoveNext();
+                        if (nameSpaceText == "")
+                        {
+                            nameSpaceText = object_.Name;
+                        }
+                        else
+                        {
+                            nameSpaceText = nameSpaceText + "." + object_.Name;
+                        }
+                        return searchNameSpace(word, class_, ref nameSpaceText, out endWithDot, false);
                     }
-                    else
-                    {
-                        nameSpaceText = nameSpaceText + "." + object_.Name;
-                    }
-                    return searchNameSpace(word, class_, ref nameSpaceText, out endWithDot, false);
                 }
                 return class_;
             }

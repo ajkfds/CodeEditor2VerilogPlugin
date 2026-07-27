@@ -354,10 +354,10 @@ namespace pluginVerilog.Verilog.Statements
                     }
 
                     Expressions.Expression? expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace, false);
-                    if (expression is Expressions.UnfoundObjectReference)
+                    if (expression is Expressions.UnfoundObjectReference | expression is Expressions.UnfoundObjectReference)
                     {
                         word.SkipToKeyword(";");
-                        if (word.Text == ";") word.MoveNext();
+                        //if (word.Text == ";") word.MoveNext();
                         return null;
                     }
 
