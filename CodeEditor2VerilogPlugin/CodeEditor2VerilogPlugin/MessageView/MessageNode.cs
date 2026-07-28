@@ -90,9 +90,11 @@ namespace pluginVerilog.MessageView
 
             Avalonia.Controls.Image image = new Avalonia.Controls.Image();
             image.Source = iimage;
-            image.Width = 12;
-            image.Height = 12;
-            image.Margin = new Avalonia.Thickness(0, 0, 4, 0);
+            image.Width = textBlock.FontSize;
+            image.Height = textBlock.FontSize;
+            //            image.Width = 12;
+            //           image.Height = 12;
+            //            image.Margin = new Avalonia.Thickness(0, 0, 4, 0);
             image.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center;
             {
                 InlineUIContainer uiContainer = new InlineUIContainer();
