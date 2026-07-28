@@ -319,42 +319,41 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             */
 
             // endclass keyword
-            if (word.Text != "endclass")
-            {
-                word.AddError("endclass expected");
-            }
-            else
+            if (word.Text == "endclass")
             {
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 class_.LastIndexReference = word.CreateIndexReference();
-
                 word.AppendBlock(class_.BeginIndexReference, class_.LastIndexReference);
                 word.MoveNext();
+            }
+            else
+            {
+                word.AddError("endclass expected");
+                class_.LastIndexReference = word.CreateIndexReference();
+                word.AppendBlock(class_.BeginIndexReference, class_.LastIndexReference);
+            }
 
-                if (!nameSpace.NamedElements.ContainsKey(class_.Name))
-                {
-                }
 
-                if (word.Text == ":")
+
+            if (word.Text == ":")
+            {
+                word.MoveNext();
+                if (class_ != null && word.Text == class_.Name)
                 {
+                    word.Color(CodeDrawStyle.ColorType.Identifier);
                     word.MoveNext();
-                    if (class_ != null && word.Text == class_.Name)
+                }
+                else
+                {
+                    if (General.IsIdentifier(word.Text))
                     {
-                        word.Color(CodeDrawStyle.ColorType.Identifier);
-                        word.MoveNext();
+                        word.AddError("illegal clas name");
                     }
                     else
                     {
-                        if (General.IsIdentifier(word.Text))
-                        {
-                            word.AddError("illegal clas name");
-                        }
-                        else
-                        {
-                            word.Color(CodeDrawStyle.ColorType.Identifier);
-                            word.AddError("illegal clas name");
-                            word.MoveNext();
-                        }
+                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.AddError("illegal clas name");
+                        word.MoveNext();
                     }
                 }
             }

@@ -156,14 +156,15 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
 
             // endmodule keyword
-            if (word.Text != "endmodule")
+            if(word.Text == "endmodule")
+            {
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+            }
+            else
             {
                 word.AddError("endmodule expected");
-                module.LastIndexReference = word.CreateIndexReference();
-                return module;
             }
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
             module.LastIndexReference = word.CreateIndexReference();
 
             if (module.BlockBeginIndexReference != null)
