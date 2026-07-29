@@ -51,14 +51,17 @@ namespace pluginVerilog.Verilog.CommentAnnotation
                     if (comment.Text.Contains(word.ProjectProperty.AnnotationCommands.Synchronized))
                     {
                         parseSyncAnnotation(comment, nameSpace, port, word.ProjectProperty);
+                        break;
                     }
                     else if (comment.Text.Contains(word.ProjectProperty.AnnotationCommands.Clock))
                     {
                         parseClockAnnotation(comment, nameSpace, port, word.ProjectProperty);
+                        break;
                     }
                     else if (comment.Text.Contains(word.ProjectProperty.AnnotationCommands.Reset))
                     {
                         parseResetAnnotation(comment, nameSpace, port, word.ProjectProperty);
+                        break;
                     }
                     else
                     {

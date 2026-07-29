@@ -27,6 +27,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
                     if (comment.Text.Contains(word.ProjectProperty.AnnotationCommands.Synchronized))
                     {
                         parseSyncAnnotation(comment, nameSpace, dataObject, word.ProjectProperty);
+                        break;
                     }
                     else if (comment.Text.Contains(word.ProjectProperty.AnnotationCommands.Clock))
                     {

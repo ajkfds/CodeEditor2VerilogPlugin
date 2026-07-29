@@ -73,7 +73,7 @@ namespace pluginVerilog.Verilog.Items
                             comment.MoveNextUntilEol();
                         }
                     }
-                    else if (comment.Text == "@scope")
+                    else if (comment.Text == word.ProjectProperty.AnnotationCommands.Scope )
                     {
                         // Parse @scope annotation
                         // Format: @scope buildingBlockName [#(.paramName(paramValue),...)] [instanceName]

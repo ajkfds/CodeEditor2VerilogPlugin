@@ -86,6 +86,7 @@ namespace pluginVerilog
             public string RefInstance = "@ref_instance";
             public string Markdown = "@markdown";
             public string ToolOption = "@tool_option";
+            public string Scope = "@scope";
         }
 
         public BuildingBlock? GetInstancedBuildingBlock(IBuildingBlockInstantiation instantiation)
