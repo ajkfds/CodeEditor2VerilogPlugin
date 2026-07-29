@@ -105,6 +105,10 @@ namespace pluginVerilog.Verilog.Items
                 {
                     word.AddError("unfound");
                 }
+                else
+                {
+                    if (!word.RootParsedDocument.UsedClasses.Contains(targetBuildingBlock.Name)) word.RootParsedDocument.UsedClasses.Add(targetBuildingBlock.Name);
+                }
                 word.Color(CodeDrawStyle.ColorType.Identifier);
                 word.MoveNext();
 
