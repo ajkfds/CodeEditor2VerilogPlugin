@@ -37,6 +37,7 @@ namespace pluginVerilog.Verilog.Expressions
         // 参照先DataObject.DefinedDataObjectの部分Clone
         public DataObjects.DataObject? TargetDataObject = null;
 
+
         // Structメンバーアクセス時の親Struct変数参照
         // 例: aaa.AA の場合、aaa の AssignedMap を更新する必要がある
         public DataObjects.DataObject? StructParentObject { get; set; } = null;
@@ -83,6 +84,11 @@ namespace pluginVerilog.Verilog.Expressions
                 sb.Append(NameSpacePath);
             }
             sb.Append(DatObjectName);
+
+            foreach(RangeExpression rangeExpression in RangesFromOriginal)
+            {
+                sb.Append(rangeExpression.CreateString());
+            }   
             return sb.ToString();
         }
 
