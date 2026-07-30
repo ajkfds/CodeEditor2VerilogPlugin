@@ -49,13 +49,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\AjkAvaloniaLibs\AjkAvaloniaLibs\AjkAvaloniaLibs.csproj" />
-    <ProjectReference Include="..\..\..\CodeEditor2Plugin\CodeEditor2Plugin\CodeEditor2Plugin\CodeEditor2Plugin.csproj" />
-    <ProjectReference Include="..\..\..\CodeEditor2\CodeEditor2\CodeEditor2\CodeEditor2.csproj" />
+    <Folder Include="Assets\Icons\" />
+    <Folder Include="Docs\" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Assets\Icons\" />
-    <Folder Include="Docs\" />
+    <ProjectReference Include="..\..\AjkAvaloniaLibs\AjkAvaloniaLibs\AjkAvaloniaLibs.csproj" />
+    <ProjectReference Include="..\..\CodeEditor2Plugin\CodeEditor2Plugin\CodeEditor2Plugin\CodeEditor2Plugin.csproj" />
+    <ProjectReference Include="..\..\CodeEditor2\CodeEditor2\CodeEditor2\CodeEditor2.csproj" />
   </ItemGroup>
 </Project>
