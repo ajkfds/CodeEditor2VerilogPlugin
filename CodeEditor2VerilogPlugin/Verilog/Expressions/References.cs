@@ -53,6 +53,16 @@ namespace pluginVerilog.Verilog.Expressions
             word.MoveNext();
             return ret;
         }
+        public static TaskReference Create(Task_ task, NameSpace nameSpace, NameSpace taskNameSpace)
+        {
+            TaskReference ret = new TaskReference();
+            ret.TaskName = task.Name;
+            ret.ModuleName = nameSpace.BuildingBlock.Name;
+
+            ret.Task = (Task_)taskNameSpace.NamedElements[ret.TaskName];
+            return ret;
+        }
+
         private static TaskReference? parseCreate(WordScanner word, NameSpace nameSpace, NameSpace taskNameSpace)
         {
             if (taskNameSpace.NamedElements.ContainsTask(word.Text))

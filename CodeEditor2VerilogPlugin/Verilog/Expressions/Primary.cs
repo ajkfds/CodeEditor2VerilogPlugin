@@ -148,6 +148,7 @@ number
         private static Primary? parseCreate(WordScanner word, NameSpace nameSpace, bool lValue, bool acceptImplicitNet, bool acceptRange = true)
         {
             //if (word.Text == "srif") System.Diagnostics.Debugger.Break();
+            // acceptRange = false is used for foreach(data[i])
 
             switch (word.WordType)
             {
@@ -223,6 +224,26 @@ number
                         return FunctionCall.ParseCreate(word, nameSpace);
                     }
 
+
+                    NameReference? nameReference = NameReference.ParseCreate(word, nameSpace,acceptRange);
+                    if (nameReference == null)
+                    {
+//                        word.MoveNext();
+                        return null;
+                    }
+
+                    INamedElement? element;
+                    NameSpace? targetNameSpace;
+                    (element, targetNameSpace) = nameReference.GetElement(nameSpace);
+                    if (targetNameSpace == null) return null;
+                    if (element == null) return null;
+
+                    string nameSpaceText = nameReference.GetNameSpaceText();
+
+
+                    /*
+
+
                     string nameSpaceText = "";
                     NameSpace? targetNameSpace = nameSpace;
 
@@ -296,14 +317,16 @@ number
                     }
 
                     INamedElement? element = null;
-                    if (targetNameSpace.NamedElements.ContainsKey(word.Text))
-                    {
-                        element = targetNameSpace.NamedElements[word.Text];
-                    }
-                    else
-                    {
-                        element = targetNameSpace.GetNamedElementUpward(word.Text);
-                    }
+
+                    */
+                    //if (targetNameSpace.NamedElements.ContainsKey(word.Text))
+                    //{
+                    //    element = targetNameSpace.NamedElements[word.Text];
+                    //}
+                    //else
+                    //{
+                    //    element = targetNameSpace.GetNamedElementUpward(word.Text);
+                    //}
 
                     // variable reference
                     if (element is DataObject)

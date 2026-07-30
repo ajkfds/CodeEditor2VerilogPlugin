@@ -54,6 +54,7 @@ namespace pluginVerilog.Verilog.Statements
             // Parse case items
             while (!word.Eof && word.Text != "endcase")
             {
+                IndexReference iref = word.CreateIndexReference();
                 RandcaseItem item = new RandcaseItem();
 
                 if (word.Text == "default")
@@ -79,6 +80,8 @@ namespace pluginVerilog.Verilog.Statements
                 item.Statement = Statements.ParseCreateStatementOrNull(word, nameSpace);
 
                 statement.Items.Add(item);
+
+                if (word.CreateIndexReference().IsSameAs(iref)) break;
             }
 
             // endcase
