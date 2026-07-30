@@ -63,7 +63,7 @@ namespace pluginVerilog.Verilog.Statements
             if (lvalue == null || value == null) return null;
             ProceduralContinuousAssignment ret = new ProceduralContinuousAssignment() { LValue = lvalue, Value = value };
 
-            lvalue.SyncContext.PropageteClockDomainFrom(value.SyncContext, equalPointer);
+            lvalue.SyncContext.PropageteClockDomainFrom(value.SyncContext, equalPointer,nameSpace.BuildingBlock.SameSync);
             return ret;
         }
     }

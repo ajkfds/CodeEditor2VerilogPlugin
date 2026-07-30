@@ -63,7 +63,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
         public delegate void OperatedAction(IncDecOperator unaryOperator);
         public static OperatedAction Operated;
 
-        public IncDecOperator Operate(Primary primary, bool prototype)
+        public IncDecOperator Operate(Primary primary,NameSpace nameSpace, bool prototype)
         {
             Primary = primary;
             bool constant = false;
@@ -81,7 +81,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
             {
                 Reference = WordReference.CreateReferenceRange(Primary.Reference, Primary.Reference);
             }
-            SyncContext.PropageteClockDomainFrom(Primary.SyncContext, Reference);
+            SyncContext.PropageteClockDomainFrom(Primary.SyncContext, Reference, nameSpace.BuildingBlock.SameSync);
             if (Operated != null) Operated(this);
             return this;
         }

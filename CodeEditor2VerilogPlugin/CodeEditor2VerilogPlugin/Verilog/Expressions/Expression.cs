@@ -275,7 +275,7 @@ namespace pluginVerilog.Verilog.Expressions
                     if (primaries.Count < 2) return null;
                     BinaryOperator? op = item as BinaryOperator;
                     if (op == null) throw new Exception();
-                    Primary primary = op.Operate(primaries[primaries.Count - 2], primaries[primaries.Count - 1], word.Prototype);
+                    Primary primary = op.Operate(primaries[primaries.Count - 2], primaries[primaries.Count - 1], nameSpace, word.Prototype);
                     primaries.RemoveAt(primaries.Count - 1);
                     primaries.RemoveAt(primaries.Count - 1);
                     primaries.Add(primary);
@@ -299,7 +299,7 @@ namespace pluginVerilog.Verilog.Expressions
                     if (primaries.Count < 1) return null;
 
                     Primary operand = primaries[primaries.Count - 1];
-                    Primary primary = uop.Operate(operand, word.Prototype);
+                    Primary primary = uop.Operate(operand, nameSpace, word.Prototype);
                     primaries.RemoveAt(primaries.Count - 1);
                     primaries.Add(primary);
                 }
@@ -317,14 +317,19 @@ namespace pluginVerilog.Verilog.Expressions
                     if (primaries.Count < 1) return null;
 
                     Primary operand = primaries[primaries.Count - 1];
-                    Primary primary = idop.Operate(operand, word.Prototype);
+                    Primary primary = idop.Operate(operand, nameSpace, word.Prototype);
                     primaries.RemoveAt(primaries.Count - 1);
                     primaries.Add(primary);
                 }
                 else if (item is TenaryOperator top)
                 {
                     if (primaries.Count < 3) return null;
-                    Primary primary = top.Operate(primaries[primaries.Count - 3], primaries[primaries.Count - 2], primaries[primaries.Count - 1], word.Prototype);
+                    Primary primary = top.Operate(
+                        primaries[primaries.Count - 3], 
+                        primaries[primaries.Count - 2], 
+                        primaries[primaries.Count - 1],
+                        nameSpace,
+                        word.Prototype);
                     primaries.RemoveAt(primaries.Count - 1);
                     primaries.RemoveAt(primaries.Count - 1);
                     primaries.RemoveAt(primaries.Count - 1);
@@ -394,7 +399,7 @@ namespace pluginVerilog.Verilog.Expressions
                     if (Primaries.Count < 2) return null;
                     BinaryOperator? op = item as BinaryOperator;
                     if (op == null) throw new Exception();
-                    Primary primary = op.Operate(Primaries[0], Primaries[1], word.Prototype);
+                    Primary primary = op.Operate(Primaries[0], Primaries[1], nameSpace, word.Prototype);
                     Primaries.RemoveAt(0);
                     Primaries.RemoveAt(0);
                     Primaries.Add(primary);
@@ -414,7 +419,7 @@ namespace pluginVerilog.Verilog.Expressions
                     if (Primaries.Count < 1) return null;
                     UnaryOperator? op = item as UnaryOperator;
                     if (op == null) throw new Exception();
-                    Primary primary = op.Operate(Primaries[0], word.Prototype);
+                    Primary primary = op.Operate(Primaries[0], nameSpace,word.Prototype);
                     Primaries.RemoveAt(0);
                     Primaries.Add(primary);
                 }
@@ -423,7 +428,7 @@ namespace pluginVerilog.Verilog.Expressions
                     if (Primaries.Count < 3) return null;
                     TenaryOperator? op = item as TenaryOperator;
                     if (op == null) throw new Exception();
-                    Primary primary = op.Operate(Primaries[0], Primaries[1], Primaries[2], word.Prototype);
+                    Primary primary = op.Operate(Primaries[0], Primaries[1], Primaries[2], nameSpace, word.Prototype);
                     Primaries.RemoveAt(0);
                     Primaries.RemoveAt(0);
                     Primaries.RemoveAt(0);

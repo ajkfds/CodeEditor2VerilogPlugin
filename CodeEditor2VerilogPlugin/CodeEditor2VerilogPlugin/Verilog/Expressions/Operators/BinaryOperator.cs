@@ -160,7 +160,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
         public delegate void OperatedAction(BinaryOperator binaryOperator);
         public static OperatedAction Operated;
 
-        public BinaryOperator Operate(Primary primary1, Primary primary2, bool prototype)
+        public BinaryOperator Operate(Primary primary1, Primary primary2, NameSpace nameSpace, bool prototype)
         {
             Primary1 = primary1;
             Primary2 = primary2;
@@ -196,8 +196,8 @@ namespace pluginVerilog.Verilog.Expressions.Operators
                 }
             }
 
-            if (Primary1 != null) SyncContext.PropageteClockDomainFrom(Primary1.SyncContext, Primary1.Reference);
-            if (Primary2 != null) SyncContext.PropageteClockDomainFrom(Primary2.SyncContext, Primary2.Reference);
+            if (Primary1 != null) SyncContext.PropageteClockDomainFrom(Primary1.SyncContext, Primary1.Reference,nameSpace.BuildingBlock.SameSync);
+            if (Primary2 != null) SyncContext.PropageteClockDomainFrom(Primary2.SyncContext, Primary2.Reference,nameSpace.BuildingBlock.SameSync);
             if (Operated != null) Operated(this);
             return this;
         }

@@ -452,12 +452,7 @@ namespace pluginVerilog.Verilog.Items
                 if (!instancedModule.Ports.TryGetValue(portName, out Port? targetPort)) continue;
                 if (targetPort.DataObject == null) continue;
 
-                // EffectiveSyncTargets unions the target port's SyncContext.Data
-                // (declared via @sync on the port) with any net/variable names
-                // linked to the port via @samesync, so that downstream port
-                // connections inherit the same clock domain through the merged
-                // SyncContext.
-                foreach (string syncTargetPortName in targetPort.DataObject.SyncContext.EffectiveSyncTargets())
+                foreach (string syncTargetPortName in targetPort.DataObject.SyncContext.Data)
                 {
                     if (!moduleInstantiation.PortConnection.TryGetValue(syncTargetPortName, out Expressions.Expression? syncExpression)) continue;
                     if (syncExpression is not DataObjectReference) continue;
@@ -465,7 +460,7 @@ namespace pluginVerilog.Verilog.Items
 
                     //                    if(targetPort.Direction == Port.DirectionEnum.Output || targetPort.Direction== Port.DirectionEnum.Inout)
                     {
-                        kvp.Value.SyncContext.AddClockDomain(clockDomain, kvp.Value.Reference);
+                        kvp.Value.SyncContext.AddClockDomain(clockDomain, kvp.Value.Reference,nameSpace.BuildingBlock.SameSync);
                     }
                 }
             }

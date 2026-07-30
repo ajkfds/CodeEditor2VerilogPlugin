@@ -122,7 +122,7 @@ namespace pluginVerilog.Verilog.Statements
                             if (clkObject.SyncContext.IsReset) continue;
                         }
 
-                        targetDataObject.SyncContext.AddClockDomain(clockDomain, lExpression.Reference);
+                        targetDataObject.SyncContext.AddClockDomain(clockDomain, lExpression.Reference,nameSpace.BuildingBlock.SameSync);
                     }
                 }
             }
@@ -264,7 +264,7 @@ namespace pluginVerilog.Verilog.Statements
 
             if (!word.Prototype && lExpression != null && expression != null)
             {
-                lExpression.SyncContext.PropageteClockDomainFrom(expression.SyncContext, equalPointer);
+                lExpression.SyncContext.PropageteClockDomainFrom(expression.SyncContext, equalPointer, nameSpace.BuildingBlock.SameSync);
             }
 
             if (lExpression != null)

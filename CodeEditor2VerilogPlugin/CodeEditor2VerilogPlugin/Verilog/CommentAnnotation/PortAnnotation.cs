@@ -136,7 +136,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
                     break;
                 }
                 port.AppendAnnotation("sync", syncTarget);
-                if (port.DataObject != null) port.DataObject.SyncContext.AddClockDomain(syncTarget, port.DefinitionReference);
+                if (port.DataObject != null) port.DataObject.SyncContext.AddClockDomain(syncTarget, port.DefinitionReference,nameSpace.BuildingBlock.SameSync);
                 comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
                 comment.MoveNext();
 

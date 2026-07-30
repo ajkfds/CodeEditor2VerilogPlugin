@@ -57,6 +57,7 @@ namespace pluginVerilog.Verilog.Expressions
             bracket.Constant = exp1.Constant;
             bracket.BitWidth = exp1.BitWidth;
             bracket.Value = exp1.Value;
+            bracket.SyncContext.PropageteClockDomainFrom(exp1.SyncContext, bracket.Reference, nameSpace.SameSync);
             return bracket;
         }
     }

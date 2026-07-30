@@ -51,7 +51,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
         public Primary Condition;
         public Primary Primary1;
         public Primary Primary2;
-        public TenaryOperator Operate(Primary condition, Primary primary1, Primary primary2, bool prototype)
+        public TenaryOperator Operate(Primary condition, Primary primary1, Primary primary2,NameSpace nameSpace, bool prototype)
         {
             Condition = condition;
             Primary1 = primary1;
@@ -72,9 +72,9 @@ namespace pluginVerilog.Verilog.Expressions.Operators
             {
                 Reference = WordReference.CreateReferenceRange(Condition.Reference, Primary2.Reference);
             }
-            SyncContext.PropageteClockDomainFrom(Primary1.SyncContext, Primary1.Reference);
-            SyncContext.PropageteClockDomainFrom(Primary2.SyncContext, Primary2.Reference);
-            SyncContext.PropageteClockDomainFrom(Condition.SyncContext, Condition.Reference);
+            SyncContext.PropageteClockDomainFrom(Primary1.SyncContext, Primary1.Reference, nameSpace.BuildingBlock.SameSync);
+            SyncContext.PropageteClockDomainFrom(Primary2.SyncContext, Primary2.Reference, nameSpace.BuildingBlock.SameSync);
+            SyncContext.PropageteClockDomainFrom(Condition.SyncContext, Condition.Reference, nameSpace.BuildingBlock.SameSync);
 
             if (Operated != null) Operated(this);
             return this;

@@ -111,6 +111,8 @@ namespace pluginVerilog.Verilog.Items
                 // Expect LHS identifier
                 if (comment.EOC || !General.IsSimpleIdentifier(comment.Text)) return;
                 string lhsName = comment.Text;
+                if (!nameSpace.NamedElements.ContainsKey(lhsName)) return;
+
                 comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
                 comment.MoveNext();
 
@@ -122,17 +124,19 @@ namespace pluginVerilog.Verilog.Items
                 // Expect RHS identifier
                 if (comment.EOC || !General.IsSimpleIdentifier(comment.Text)) return;
                 string rhsName = comment.Text;
+                if (!nameSpace.NamedElements.ContainsKey(rhsName)) return;
                 comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
                 comment.MoveNext();
 
-                // Record the link unconditionally. In prototype parse the
-                // operands may not yet be defined as DataObjects, so we rely
-                // on the deferred ApplyPendingSameSyncPairs to actually merge
-                // their SyncContexts once they become available.
-                if (string.IsNullOrEmpty(lhsName) || string.IsNullOrEmpty(rhsName) || lhsName == rhsName) { }
-                else if (!nameSpace.PendingSameSyncPairs.Any(p => p.Lhs == lhsName && p.Rhs == rhsName))
+
+                if (nameSpace.BuildingBlock.SameSync.ContainsKey(rhsName))
                 {
-                    nameSpace.PendingSameSyncPairs.Add(new NameSpace.SameSyncPair { Lhs = lhsName, Rhs = rhsName });
+                    if (!nameSpace.BuildingBlock.SameSync[rhsName].Contains(lhsName)) nameSpace.BuildingBlock.SameSync[rhsName].Add(lhsName);
+                }
+                else
+                {
+                    nameSpace.BuildingBlock.SameSync.Add(rhsName, new List<string>() { lhsName });
+
                 }
 
                 // Optional ',' separator

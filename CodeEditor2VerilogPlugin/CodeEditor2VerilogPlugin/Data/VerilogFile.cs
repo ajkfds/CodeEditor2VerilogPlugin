@@ -206,11 +206,6 @@ namespace pluginVerilog.Data
                 foreach (var bbKvp in newParsedDocument.Root.BuildingBlocks)
                 {
                     bbKvp.Value.ApplyCommentScopeReferences();
-                    // Resolve any @samesync pairs whose operands were not yet
-                    // registered when the annotation was parsed (typical for
-                    // forward references that get registered later in the same
-                    // building block).
-                    bbKvp.Value.ApplyPendingSameSyncPairs();
                 }
             }
 

@@ -240,7 +240,7 @@ namespace pluginVerilog.Verilog.Expressions
             {
                 val.Constant = true;
             }
-            val.SyncContext.PropageteClockDomainFrom(dataObject.SyncContext, val.Reference);
+            val.SyncContext.PropageteClockDomainFrom(dataObject.SyncContext, val.Reference,nameSpace.BuildingBlock.SameSync);
             return val;
         }
 
@@ -519,7 +519,7 @@ namespace pluginVerilog.Verilog.Expressions
                 originalObject.UsedReferences.Add(val.Reference);
             }
 
-            val.SyncContext.PropageteClockDomainFrom(originalObject.SyncContext, val.Reference);
+            val.SyncContext.PropageteClockDomainFrom(originalObject.SyncContext, val.Reference,nameSpace.BuildingBlock.SameSync);
             return val;
         }
 

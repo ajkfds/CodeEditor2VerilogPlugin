@@ -85,7 +85,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
         public delegate void OperatedAction(UnaryOperator unaryOperator);
         public static OperatedAction? Operated;
 
-        public UnaryOperator Operate(Primary primary, bool prototype)
+        public UnaryOperator Operate(Primary primary, NameSpace nameSpace, bool prototype)
         {
             Primary = primary;
             bool constant = false;
@@ -103,7 +103,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
             {
                 Reference = Primary.Reference;
             }
-            SyncContext.PropageteClockDomainFrom(Primary.SyncContext, Reference);
+            SyncContext.PropageteClockDomainFrom(Primary.SyncContext, Reference, nameSpace.BuildingBlock.SameSync);
             if (Operated != null) Operated(this);
             return this;
         }

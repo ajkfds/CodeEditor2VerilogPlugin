@@ -51,6 +51,9 @@ namespace pluginVerilog.Verilog
 
         public BuildingBlocks.BuildingBlock BuildingBlock { get; protected set; }
 
+        public Dictionary<string, List<string>> SameSync = new Dictionary<string, List<string>>();
+
+
         // ====== VirtualScope support (for @scope annotation) ======
 
         /// <summary>
@@ -85,82 +88,6 @@ namespace pluginVerilog.Verilog
 
         // ====== end VirtualScope support ======
 
-        // ====== @samesync support ======
-
-        /// <summary>
-        /// A pending @samesync link that could not be applied immediately
-        /// because one or both of its operands were not yet registered as
-        /// DataObjects in this NameSpace. The link is re-applied later (after
-        /// the referenced symbols are parsed) by
-        /// <see cref="ApplyPendingSameSyncPairs"/>.
-        /// </summary>
-        public struct SameSyncPair
-        {
-            public string Lhs;
-            public string Rhs;
-        }
-
-        [JsonIgnore]
-        public List<SameSyncPair> PendingSameSyncPairs { get; } = new List<SameSyncPair>();
-
-        /// <summary>
-        /// Re-applies every pending @samesync pair that was deferred because
-        /// one or both sides were not yet defined at the time of parsing the
-        /// annotation. After the data objects are registered (e.g. via a
-        /// subsequent re-parse), this method resolves the previously-missing
-        /// sides and links their SyncContexts together.
-        /// </summary>
-        public void ApplyPendingSameSyncPairs()
-        {
-            if (PendingSameSyncPairs.Count == 0) return;
-
-            // Snapshot and clear first so that any re-entrant registration
-            // does not see the same pair twice.
-            var snapshot = new List<SameSyncPair>(PendingSameSyncPairs);
-            PendingSameSyncPairs.Clear();
-
-            foreach (var pair in snapshot)
-            {
-                DataObjects.DataObject? lhs = NamedElements.GetDataObject(pair.Lhs);
-                DataObjects.DataObject? rhs = NamedElements.GetDataObject(pair.Rhs);
-
-                if (lhs == null && rhs == null)
-                {
-                    // Neither side registered yet; defer again.
-                    PendingSameSyncPairs.Add(pair);
-                    continue;
-                }
-
-                if (lhs != null && rhs != null)
-                {
-                    lhs.SyncContext.MergeFrom(rhs.SyncContext, pair.Rhs);
-                    rhs.SyncContext.MergeFrom(lhs.SyncContext, pair.Lhs);
-                }
-                else if (lhs != null)
-                {
-                    // LHS is available but RHS is not; record the link so
-                    // that when the RHS becomes available, both sides merge.
-                    lhs.SyncContext.AddSameSyncTarget(pair.Rhs);
-                }
-                else if (rhs != null)
-                {
-                    rhs.SyncContext.AddSameSyncTarget(pair.Lhs);
-                }
-            }
-
-            // Try to resolve any previously-recorded but unresolved
-            // @samesync partners (e.g. ones added in a prior pass that
-            // referenced a forward-declared symbol now registered).
-            foreach (var element in NamedElements.Values)
-            {
-                if (element is DataObjects.DataObject dataObject)
-                {
-                    dataObject.SyncContext.ResolveSameSyncTargets(this, dataObject.Name);
-                }
-            }
-        }
-
-        // ====== end @samesync support ======
 
         public INamedElement? GetNamedElementUpward(string name)
         {

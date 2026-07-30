@@ -43,7 +43,7 @@ namespace pluginVerilog.Verilog.DataObjects
             if (expression == null) return null;
             variableAssign.Expression = expression;
 
-            lExpression.SyncContext.PropageteClockDomainFrom(expression.SyncContext, equalPointer);
+            lExpression.SyncContext.PropageteClockDomainFrom(expression.SyncContext, equalPointer,nameSpace.BuildingBlock.SameSync);
 
             if (!word.Prototype)
             {
