@@ -147,8 +147,11 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             }
             word.MoveNext(); // "{"
 
-            while (!word.Eof | word.Text != "}")
+            while (!word.Eof)
             {
+                if (word.Text == "]") break;
+                IndexReference iref = word.CreateIndexReference();
+
                 if (!parseMembers(type, word, nameSpace)) break;
 
                 if (word.Text == ";")
@@ -158,6 +161,12 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 else
                 {
                     word.AddError("illegal ;");
+                }
+
+                if (General.ListOfKeywords.Contains(word.Text)) break;
+                if (word.CreateIndexReference().IsSameAs(iref))
+                {
+                    word.MoveNext();
                 }
             }
 

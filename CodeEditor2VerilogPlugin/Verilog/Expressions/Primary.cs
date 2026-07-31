@@ -233,121 +233,35 @@ number
                     }
 
                     INamedElement? element;
+                    INamedElement? targetElement;
                     NameSpace? targetNameSpace;
-                    (element, targetNameSpace) = nameReference.GetElement(nameSpace);
-                    if (targetNameSpace == null) return null;
+                    (element, targetElement) = nameReference.GetElement(nameSpace);
+                    targetNameSpace = targetElement as NameSpace;
+//                    if (targetNameSpace == null) return null;
                     if (element == null) return null;
 
                     string nameSpaceText = nameReference.GetNameSpaceText();
 
-
-                    /*
-
-
-                    string nameSpaceText = "";
-                    NameSpace? targetNameSpace = nameSpace;
-
-                    // Class scope resolution operator
-                    if (word.NextText == "::")
-                    {
-                        //                        string a = "";
-                    }
-
-                    if (word.Text == "this" && word.NextText == ".")
-                    {
-                        // The this keyword shall only be used within non -static class methods, constraints,
-                        // inlined constraint methods, or covergroups embedded within classes(see 19.4);
-                        // otherwise, an error shall be issued.
-
-                        word.Color(CodeDrawStyle.ColorType.Identifier);
-                        word.MoveNext();
-                        word.MoveNext();
-                        targetNameSpace = nameSpace.BuildingBlock;
-                        nameSpaceText = "this.";
-                    }
-                    else
-                    {
-                        { // search upward
-                            NameSpace? searchUpwardNameSpace = null;
-                            INamedElement? upwardElement = nameSpace.GetNamedElementUpward(word.Text, out searchUpwardNameSpace);
-                            if (upwardElement != null)
-                            {
-                                acceptImplicitNet = false;
-                                targetNameSpace = searchUpwardNameSpace;
-                            }
-                            if (targetNameSpace == null) targetNameSpace = nameSpace;
-                        }
-
-                        // search downward
-                        NameSpace? searchDownwardNameSpace = searchNameSpace(word, targetNameSpace, ref nameSpaceText,out bool endWithDot,true);
-                        if (searchDownwardNameSpace is UnfoundNameSpace)
-                        {
-                            word.RootParsedDocument.ReparseRequested = true;
-                            return new UnfoundObjectReference() { Reference = ((UnfoundNameSpace)searchDownwardNameSpace).Reference };
-                        }
-                        if (searchDownwardNameSpace != null)
-                        {
-                            if (nameSpaceText != "") acceptImplicitNet = false;
-                            targetNameSpace = searchDownwardNameSpace;
-                            if (!endWithDot)
-                            {
-                                NameSpaceReference nameSpaceRef = new NameSpaceReference(searchDownwardNameSpace);
-                                return nameSpaceRef;
-                            }
-                        }
-                        else
-                        {
-                            if (targetNameSpace == null)
-                            {
-                                targetNameSpace = nameSpace;
-                            }
-                        }
-                        if (targetNameSpace is BuildingBlocks.Class)
-                        {
-                            if (word.Text == "::")
-                            {
-                                word.MoveNext();
-                            }
-                        }
-                        else if (targetNameSpace is BuildingBlocks.Module)
-                        {
-
-                        }
-
-                    }
-
-                    INamedElement? element = null;
-
-                    */
-                    //if (targetNameSpace.NamedElements.ContainsKey(word.Text))
-                    //{
-                    //    element = targetNameSpace.NamedElements[word.Text];
-                    //}
-                    //else
-                    //{
-                    //    element = targetNameSpace.GetNamedElementUpward(word.Text);
-                    //}
-
                     // variable reference
-                    if (element is DataObject)
+                    if (element is DataObject && targetNameSpace != null)
                     {
                         return parseDataObject(word, nameSpace, targetNameSpace, lValue, acceptRange, nameSpaceText);
                     }
 
                     // Since Task and Function are also namespaces, they need to be processed before namespaces.
                     // task reference : for left side only
-                    if (lValue && element is Task_)
+                    if (lValue && element is Task_ && targetNameSpace != null)
                     {
                         return TaskReference.ParseCreate(word, nameSpace, targetNameSpace);
                     }
 
                     // function call : for right side only
-                    if (!lValue && (element is Function || element is LetDeclaration))
+                    if (!lValue && (element is Function || element is LetDeclaration) && targetNameSpace != null)
                     {
                         return FunctionCall.ParseCreate(word, nameSpace,targetNameSpace);
                     }
 
-                    if (element is DataObjects.Constants.Constants)
+                    if (element is DataObjects.Constants.Constants && targetNameSpace != null)
                     {
                         return ParameterReference.ParseCreate(word, targetNameSpace);
                     }
@@ -388,7 +302,8 @@ number
                             word.ApplyPrototypeRule(word.ProjectProperty.RuleSet.ImplicitNetDeclaretion);
                         }
 
-                        return parseDataObject(word, nameSpace, targetNameSpace, lValue, acceptRange, nameSpaceText);
+                        if (targetNameSpace != null) return parseDataObject(word, nameSpace, targetNameSpace, lValue, acceptRange, nameSpaceText);
+                        return null;
                     }
 
                     IDataType? dataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, null);

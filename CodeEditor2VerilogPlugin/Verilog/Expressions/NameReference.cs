@@ -73,7 +73,7 @@ namespace pluginVerilog.Verilog.Expressions
             }
             return sb.ToString();
         }
-        public (INamedElement?, NameSpace?) GetElement(NameSpace nameSpace)
+        public (INamedElement?, INamedElement?) GetElement(NameSpace nameSpace)
         {
             if (Names.Count <= 0) return (null, null);
 
@@ -121,7 +121,7 @@ namespace pluginVerilog.Verilog.Expressions
             return searchElement(baseNameSpace, index);
         }
 
-        private (INamedElement?, NameSpace?) searchElement(NameSpace nameSpace,int index)
+        private (INamedElement?, INamedElement?) searchElement(INamedElement nameSpace,int index)
         {
             string name = Names[index];
 
@@ -131,7 +131,23 @@ namespace pluginVerilog.Verilog.Expressions
                 index++;
                 if (index >= Names.Count) return (namedElement, nameSpace);
                 NameSpace? subNameSpace = namedElement as NameSpace;
-                if (subNameSpace != null) searchElement(subNameSpace, index);
+                if (subNameSpace != null) return searchElement(subNameSpace, index);
+
+                Items.IBuildingBlockInstantiation? instantiation = namedElement as Items.IBuildingBlockInstantiation;
+                BuildingBlock? instancedBuildingBlock = instantiation?.GetInstancedBuildingBlock();
+                if (instancedBuildingBlock != null) return searchElement(instancedBuildingBlock, index);
+
+                DataObjects.Variables.VirtualInterface? virtualInterface = namedElement as DataObjects.Variables.VirtualInterface;
+                if(virtualInterface != null)
+                {
+                    Interface? @interface = virtualInterface.GetSourceInterface();
+                    if (@interface == null) return (null, null);
+                    return searchElement(@interface, index);
+                }
+
+                DataObjects.Variables.Variable? variable = namedElement as DataObjects.Variables.Variable;
+                if(variable != null) return searchElement(variable, index);
+
                 return (null,null);
             }
             return (null, null);
@@ -187,13 +203,11 @@ namespace pluginVerilog.Verilog.Expressions
                 break;
             }
 
-            for(int i = 0; i < nameReference.Names.Count-2; i++)
+            while (!word.Eof && !nameReference.WordReferences.Last().IndexReference.IsSameAs(word.CreateIndexReference()) )
             {
-                while(!word.Eof && word.Text != nameReference.Separators[i])
-                {
-                    word.MoveNext();
-                }
+                word.MoveNext();
             }
+
             return nameReference;
         }
 
