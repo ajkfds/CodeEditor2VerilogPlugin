@@ -150,6 +150,7 @@ namespace pluginVerilog.Verilog.Expressions
 
                 return (null,null);
             }
+            WordReferences[index].AddError("unfound object");
             return (null, null);
         }
 

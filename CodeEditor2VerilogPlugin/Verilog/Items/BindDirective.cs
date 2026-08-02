@@ -82,6 +82,8 @@ namespace pluginVerilog.Verilog.Items
                 Prototype = word.Prototype
             };
 
+            Expression? targetExpression = Expressions.Expression.ParseCreate(word, nameSpace);
+
             string target = word.Text;
             BuildingBlocks.BuildingBlock? targetBuildingBlock = word.ProjectProperty.GetBuildingBlock(target);
             if(targetBuildingBlock != null)

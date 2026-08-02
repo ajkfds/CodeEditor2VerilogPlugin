@@ -3,6 +3,8 @@ using CodeEditor2.CodeEditor.CodeComplete;
 using CodeEditor2.CodeEditor.PopupHint;
 using CodeEditor2.CodeEditor.PopupMenu;
 using pluginVerilog.Verilog;
+using pluginVerilog.Verilog.BuildingBlocks;
+using pluginVerilog.Verilog.Items.Generate;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -73,9 +75,10 @@ namespace pluginVerilog.Data.VerilogCommon
         public delegate void AppendToolItemDelegate(List<ToolItem> toolItems, IVerilogRelatedFile item, int index);
         public static AppendToolItemDelegate? AppendToolItems;
 
-        public static List<AutocompleteItem>? GetAutoCompleteItems(IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, int index, out string candidateWord)
+        public static List<CodeEditor2.CodeEditor.PopupMenu.ToolItem>? GetAutoCompleteItems(IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, int index, out string candidateWord)
         {
             candidateWord = "";
+            List<CodeEditor2.CodeEditor.PopupMenu.ToolItem> items = new List<CodeEditor2.CodeEditor.PopupMenu.ToolItem>();
 
             CodeEditor.CodeDocument? codeDocument = item.CodeDocument as CodeEditor.CodeDocument;
             if (codeDocument == null) return null;
@@ -88,14 +91,63 @@ namespace pluginVerilog.Data.VerilogCommon
                 return null;
             }
 
+            if (element != null)
+            {   // has hier nameSpace cantidate
+                foreach (INamedElement subElement in element.NamedElements.Values)
+                {
+                    if (candidateWord != "" && !subElement.Name.StartsWith(candidateWord)) continue;
+                    if (subElement.Name.StartsWith("\0", StringComparison.Ordinal)) continue; // reject unnamed elements
+                    items.Add(
+                        new pluginVerilog.Data.VerilogCommon.AutoCompleteItem
+                            (
+                                subElement.Name,
+                                CodeDrawStyle.ColorIndex(subElement.ColorType),
+                                Global.CodeDrawStyle.Color(subElement.ColorType),
+                                "CodeEditor2/Assets/Icons/tag.svg"
+                            )
+                    );
+                }
+                return items;
+            }
+            //if (nameSpace != null)
+            //{   // has hier nameSpace cantidate
+            //    foreach (INamedElement subElement in nameSpace.NamedElements.Values)
+            //    {
+            //        if (candidateWord != "" && !subElement.Name.StartsWith(candidateWord)) continue;
+            //        if (subElement.Name.StartsWith("\0", StringComparison.Ordinal)) continue; // reject unnamed elements
+            //        items.Add(
+            //            new pluginVerilog.Data.VerilogCommon.AutoCompleteItem
+            //                (
+            //                    subElement.Name,
+            //                    CodeDrawStyle.ColorIndex(subElement.ColorType),
+            //                    Global.CodeDrawStyle.Color(subElement.ColorType),
+            //                    "CodeEditor2/Assets/Icons/tag.svg"
+            //                )
+            //        );
+            //    }
+            //    return items;
+            //}
+            if(nameSpace is Verilog.BuildingBlocks.Module || nameSpace is Verilog.NamedGeneratedBlock)
+            {
+                //CodeEditor2.Data.Project project = item.Project;
+                //ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+                //if (projectProperty == null) throw new Exception();
+
+                //List<string> moduleNames = projectProperty.GetModuleNameList();
+                //foreach (string moduleName in moduleNames)
+                //{
+                //    items.Add(new Verilog.Snippets.ModuleInstanceSnippet(moduleName));
+                //}
+            }
+
+            // hier cantidate : get current line namespace and region
             IndexReference iref = Verilog.IndexReference.Create(parsedDocument, codeDocument, lineStartIndex);
             parsedDocument.TryGetRegion(iref, out NameSpace? namSpace, out Verilog.Items.IRegion? region);
-
 
             bool onLineStart = false;
             while(true){
                 string lineString =codeDocument.CreateLineString(line);
-                int inlinePosition = index - lineStartIndex;
+                int inlinePosition = candidateStartIndex - lineStartIndex;
                 if (inlinePosition < 0) break;
                 if (inlinePosition > lineString.Length) break;
 
@@ -106,23 +158,11 @@ namespace pluginVerilog.Data.VerilogCommon
                 break;
             }
 
-          
-
-
-
-
-
-
-
-            //////////
-
-            List<AutocompleteItem> items = new List<AutocompleteItem>();
-
             // system task & functions
             // return system task and function if the word starts with "$"
             if (candidateWord.StartsWith("$") && parsedDocument.ProjectProperty != null)
             {
-                items = new List<AutocompleteItem>();
+                items = new List<CodeEditor2.CodeEditor.PopupMenu.ToolItem>();
                 foreach (string key in parsedDocument.ProjectProperty.SystemFunctions.Keys)
                 {
                     if (!key.StartsWith(candidateWord)) continue;
@@ -147,6 +187,22 @@ namespace pluginVerilog.Data.VerilogCommon
                 }
                 return items;
             }
+
+            if(nameSpace != null && nameSpace.BuildingBlock is Module && candidateWord.Length > 1 && (nameSpace is Module || nameSpace is GenerateBlock) )
+            {
+
+                CodeEditor2.Data.Project project = nameSpace.Project;
+                ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+                if (projectProperty == null) throw new Exception();
+
+                List<string> moduleNames = projectProperty.GetModuleNameList();
+                foreach (string moduleName in moduleNames)
+                {
+                    items.Add(new Verilog.Snippets.ModuleInstanceSnippet(moduleName));
+                }
+
+            }
+
 
 
             if (element == null)
@@ -182,7 +238,7 @@ namespace pluginVerilog.Data.VerilogCommon
         }
 
 
-        public static void appendItemsUpward(List<AutocompleteItem> items, NameSpace nameSpace, int candidateStartIndex, string candidateWord)
+        public static void appendItemsUpward(List<CodeEditor2.CodeEditor.PopupMenu.ToolItem> items, NameSpace nameSpace, int candidateStartIndex, string candidateWord)
         {
             foreach (INamedElement subElement in nameSpace.NamedElements.Values)
             {
@@ -325,6 +381,26 @@ namespace pluginVerilog.Data.VerilogCommon
                 pluginVerilog.CodeEditor.CodeDocument document = new pluginVerilog.CodeEditor.CodeDocument(elementText);
                 WordScanner word = new WordScanner(document, parsedDocument, parsedDocument.SystemVerilog);
 
+                if (nameSpace != null)
+                {
+                    Verilog.Expressions.NameReference? nameReference = Verilog.Expressions.NameReference.ParseCreate(word, nameSpace, true);
+                    if (nameReference != null)
+                    {
+                        INamedElement? targetElement;
+                        NameSpace? targetNameSpace;
+                        (element, targetElement) = nameReference.GetElement(nameSpace);
+                        targetNameSpace = targetElement as NameSpace;
+                    }
+
+                }
+
+                if(element is Verilog.Items.IBuildingBlockInstantiation)
+                {
+                    Verilog.Items.IBuildingBlockInstantiation inst = (Verilog.Items.IBuildingBlockInstantiation)element;
+                    element = inst.GetInstancedBuildingBlock();
+                }
+
+                /*
                 Verilog.Expressions.Expression? expression = null;
                 while (!word.Eof)
                 {
@@ -341,6 +417,7 @@ namespace pluginVerilog.Data.VerilogCommon
                     NameSpace targetNameSpace = ((Verilog.Expressions.NameSpaceReference)expression).NameSpace;
                     element = targetNameSpace;
                 }
+                */
             }
             return true;
         }

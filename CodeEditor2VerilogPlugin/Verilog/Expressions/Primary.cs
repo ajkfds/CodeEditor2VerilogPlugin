@@ -228,7 +228,6 @@ number
                     NameReference? nameReference = NameReference.ParseCreate(word, nameSpace,acceptRange);
                     if (nameReference == null)
                     {
-//                        word.MoveNext();
                         return null;
                     }
 
@@ -237,7 +236,6 @@ number
                     NameSpace? targetNameSpace;
                     (element, targetElement) = nameReference.GetElement(nameSpace);
                     targetNameSpace = targetElement as NameSpace;
-//                    if (targetNameSpace == null) return null;
                     if (element == null) return null;
 
                     string nameSpaceText = nameReference.GetNameSpaceText();
@@ -319,7 +317,7 @@ number
             }
             return null;
         }
-
+        /*
         public static NameSpace? searchNameSpace(WordScanner word, NameSpace nameSpace, ref string nameSpaceText,out bool endWithDot,bool firstElement)
         {
             endWithDot = true;
@@ -472,58 +470,6 @@ number
                 return buildingBlock;
             }
 
-            //if( element is DataObjects.Variables.Object )
-            //{
-            //    DataObjects.Variables.Object object_ = (DataObjects.Variables.Object)element;
-            //    Class? class_ = object_.Class;
-            //    if(class_ != null)
-            //    {
-            //        word.Color(CodeDrawStyle.ColorType.Identifier);
-            //        word.MoveNext();
-
-            //        if (word.Text == ".")
-            //        {
-            //            word.MoveNext();
-            //            if (nameSpaceText == "")
-            //            {
-            //                nameSpaceText = object_.Name;
-            //            }
-            //            else
-            //            {
-            //                nameSpaceText = nameSpaceText + "." + object_.Name;
-            //            }
-            //            return searchNameSpace(word, class_, ref nameSpaceText, out endWithDot, false);
-            //        }
-            //        return class_;
-            //    }
-            //}
-
-            //if(element is DataObjects.Variables.VirtualInterface)
-            //{
-            //    DataObjects.Variables.VirtualInterface virtualInterface = (DataObjects.Variables.VirtualInterface)element;
-            //    Interface? interfaceObj = virtualInterface.Interface;
-            //    if (interfaceObj != null)
-            //    {
-            //        word.Color(CodeDrawStyle.ColorType.Identifier);
-            //        word.MoveNext();
-
-            //        if (word.Text == ".")
-            //        {
-            //            word.MoveNext();
-            //            if (nameSpaceText == "")
-            //            {
-            //                nameSpaceText = virtualInterface.Name;
-            //            }
-            //            else
-            //            {
-            //                nameSpaceText = nameSpaceText + "." + virtualInterface.Name;
-            //            }
-            //            return searchNameSpace(word, interfaceObj, ref nameSpaceText, out endWithDot, false);
-            //        }
-            //        return interfaceObj;
-            //    }
-            //}
-
             if (firstElement)
             {
                 return null;
@@ -531,6 +477,7 @@ number
             endWithDot = true;
             return nameSpace;
         }
+        */
         public static NameSpace? searchUnfoundNameSpace(WordScanner word, ref string nameSpaceText)
         {
             WordReference beginRef = word.GetReference();

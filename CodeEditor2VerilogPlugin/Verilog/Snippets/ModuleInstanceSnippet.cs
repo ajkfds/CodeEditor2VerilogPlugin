@@ -34,6 +34,28 @@ namespace pluginVerilog.Verilog.Snippets
             codeDocument = textFile.CodeDocument;
 
             CodeEditor2.Data.Project project = textFile.Project;
+            if (codeDocument == null) return;
+            Data.IVerilogRelatedFile? file = codeDocument.TextFile as Data.IVerilogRelatedFile;
+            if (file == null) return;
+            Verilog.ParsedDocument? parsedDocument = file.VerilogParsedDocument;
+            if (parsedDocument == null) return;
+
+            Data.VerilogCommon.AutoComplete.GetAutoCompleteTarget(
+                file, parsedDocument, codeDocument.CaretIndex,
+                out Verilog.NameSpace? nameSpace,
+                out Verilog.INamedElement? namedElement,
+                out string cantidate,
+                out int cantidateIndex);
+
+            // delete after last .
+//            codeDocument.Replace(cantidateIndex, cantidate.Length, ColorIndex, Text);
+//            CodeEditor2.Controller.CodeEditor.SetCaretPosition(cantidateIndex + Text.Length);
+
+//            CodeEditor2.Controller.CodeEditor.AutoCompleteHandled();
+//            return;
+
+
+
 
             ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
             if (projectProperty == null) return;
@@ -67,12 +89,12 @@ namespace pluginVerilog.Verilog.Snippets
 
             string replaceText = getReplaceText(targetModule, instanceName);
 
-
-            int index = codeDocument.CaretIndex;
+            codeDocument.Replace(cantidateIndex, cantidate.Length, 0, "");
+            int index = cantidateIndex;
 
             if (initials.Count == 0)
             {
-                codeDocument.Replace(index, 0, 0, replaceText);
+                codeDocument.Replace(index,0, 0, replaceText);
                 CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
             }
             else

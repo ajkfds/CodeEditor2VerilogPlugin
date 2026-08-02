@@ -643,7 +643,7 @@ namespace pluginVerilog.Data
             return VerilogCommon.AutoComplete.GetToolItems(this, index);
         }
 
-        public override List<AutocompleteItem>? GetAutoCompleteItems(int index, out string candidateWord)
+        public override List<CodeEditor2.CodeEditor.PopupMenu.ToolItem>? GetAutoCompleteItems(int index, out string candidateWord)
         {
             candidateWord = "";
             Verilog.ParsedDocument? vParsedDoc = VerilogParsedDocument;
