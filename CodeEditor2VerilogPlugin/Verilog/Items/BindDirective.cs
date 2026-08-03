@@ -60,6 +60,27 @@ namespace pluginVerilog.Verilog.Items
             public Dictionary<string, Expression> ParameterOverrides { get; set; } = new Dictionary<string, Expression>();
             public Dictionary<string, Expression> PortConnections { get; set; } = new Dictionary<string, Expression>();
         }
+        /*
+        bind_directive ::=
+              "bind" bind_target_scope [: bind_target_instance_list] bind_instantiation ;
+            | "bind" bind_target_instance bind_instantiation ;
+
+        bind_target_scope ::=
+              module_identifier
+            | interface_identifier
+
+        bind_target_instance ::=
+              hierarchical_identifier constant_bit_select
+
+        bind_target_instance_list ::=
+              bind_target_instance { , bind_target_instance }
+
+        bind_instantiation ::=
+              program_instantiation
+            | module_instantiation
+            | interface_instantiation
+            | checker_instantiation 
+         */
 
         public static bool Parse(WordScanner word, NameSpace? nameSpace, out BindDirective? bindDirective)
         {
@@ -82,44 +103,38 @@ namespace pluginVerilog.Verilog.Items
                 Prototype = word.Prototype
             };
 
+            // instance name
             Expression? targetExpression = Expressions.Expression.ParseCreate(word, nameSpace);
-
             string target = word.Text;
             BuildingBlocks.BuildingBlock? targetBuildingBlock = word.ProjectProperty.GetBuildingBlock(target);
-            if(targetBuildingBlock != null)
+            if (targetBuildingBlock == null)
             {
-                word.Color(CodeDrawStyle.ColorType.Identifier);
-                word.MoveNext();
+                word.SkipToKeyword(";");
+                return true;
+            }
 
-                if (word.Text == ":")
-                {
-                    word.MoveNext();
-
-                    // TODO: implement
-                }
+            // class name
+            targetBuildingBlock = word.ProjectProperty.GetBuildingBlock(word.Text);
+            if (targetBuildingBlock == null)
+            {
+                word.AddError("unfound");
             }
             else
             {
-                Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace,true);
+                if (!word.RootParsedDocument.UsedClasses.Contains(targetBuildingBlock.Name)) word.RootParsedDocument.UsedClasses.Add(targetBuildingBlock.Name);
+            }
+            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.MoveNext();
 
-                targetBuildingBlock = word.ProjectProperty.GetBuildingBlock(word.Text);
-                if(targetBuildingBlock == null)
-                {
-                    word.AddError("unfound");
-                }
-                else
-                {
-                    if (!word.RootParsedDocument.UsedClasses.Contains(targetBuildingBlock.Name)) word.RootParsedDocument.UsedClasses.Add(targetBuildingBlock.Name);
-                }
-                word.Color(CodeDrawStyle.ColorType.Identifier);
-                word.MoveNext();
+            // 
+            if (!General.IsSimpleIdentifier(word.Text))
+            {
+                word.AddError("illegal name");
+            }
+            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.MoveNext();
 
-                if (!General.IsSimpleIdentifier(word.Text))
-                {
-                    word.AddError("illegal name");
-                }
-                word.Color(CodeDrawStyle.ColorType.Identifier);
-                word.MoveNext();
+            {
 
                 if (word.Text != "(")
                 {
