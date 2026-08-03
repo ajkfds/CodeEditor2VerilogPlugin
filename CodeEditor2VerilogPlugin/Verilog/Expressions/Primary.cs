@@ -224,6 +224,35 @@ number
                         return FunctionCall.ParseCreate(word, nameSpace);
                     }
 
+                    // implicit net declaration
+                    if (acceptImplicitNet && word.NextText != "." && word.NextText !="::" && word.NextText != "[")
+                    { 
+                        Net net = DataObjects.Nets.Net.Create(word.Text, DataObjects.Nets.Net.NetTypeEnum.Wire, null);
+                        net.DefinedReference = word.GetReference();
+                        net.Defined = true;
+
+                        if (word.Prototype)
+                        {
+                            nameSpace.NamedElements.Add(net.Name, net);
+                        }
+                        else
+                        {
+                            if (nameSpace.NamedElements.ContainsKey(net.Name))
+                            {
+                                nameSpace.NamedElements.RemoveKey(net.Name);
+                                nameSpace.NamedElements.Add(net.Name, net);
+                            }
+                        }
+
+                        // define @ protptype
+                        if (word.Prototype)
+                        {
+                            word.ApplyPrototypeRule(word.ProjectProperty.RuleSet.ImplicitNetDeclaretion);
+                        }
+
+                        return parseDataObject(word, nameSpace, nameSpace, lValue, acceptRange, "");
+                    }
+
 
                     NameReference? nameReference = NameReference.ParseCreate(word, nameSpace,acceptRange);
                     if (nameReference == null)
@@ -236,7 +265,13 @@ number
                     NameSpace? targetNameSpace;
                     (element, targetElement) = nameReference.GetElement(nameSpace);
                     targetNameSpace = targetElement as NameSpace;
-                    if (element == null) return null;
+                    if (element == null)
+                    {
+                        WordReference beginRef = word.GetReference();
+                        word.AddError("unfound object");
+                        word.MoveNext();
+                        return new UnfoundObjectReference() { Reference = WordReference.CreateReferenceRange(beginRef, word.GetReference()) };
+                    }
 
                     string nameSpaceText = nameReference.GetNameSpaceText();
 
@@ -274,35 +309,6 @@ number
                         return parseUndefinedFunction(word);
                     }
 
-                    // implicit net declaration
-                    if (acceptImplicitNet)
-                    {
-                        Net net = DataObjects.Nets.Net.Create(word.Text, DataObjects.Nets.Net.NetTypeEnum.Wire, null);
-                        net.DefinedReference = word.GetReference();
-                        net.Defined = true;
-
-                        if (word.Prototype)
-                        {
-                            nameSpace.NamedElements.Add(net.Name, net);
-                        }
-                        else
-                        {
-                            if (nameSpace.NamedElements.ContainsKey(net.Name))
-                            {
-                                nameSpace.NamedElements.RemoveKey(net.Name);
-                                nameSpace.NamedElements.Add(net.Name, net);
-                            }
-                        }
-
-                        // define @ protptype
-                        if (word.Prototype)
-                        {
-                            word.ApplyPrototypeRule(word.ProjectProperty.RuleSet.ImplicitNetDeclaretion);
-                        }
-
-                        if (targetNameSpace != null) return parseDataObject(word, nameSpace, targetNameSpace, lValue, acceptRange, nameSpaceText);
-                        return null;
-                    }
 
                     IDataType? dataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, null);
                     if (dataType != null)
@@ -311,18 +317,22 @@ number
                         return dataTypeReference;
                     }
 
-                    WordReference beginRef = word.GetReference();
-                    if (element is ModuleInstantiation)
                     {
-                        word.MoveNext();
-                        ModuleInstantiation? moduleInstantiation = (ModuleInstantiation)element;
-                        BlockReference blockReference = new BlockReference() { Reference = WordReference.CreateReferenceRange(beginRef, word.GetReference()) };
-                        return blockReference;
+                        if (element is ModuleInstantiation)
+                        {
+                            WordReference beginRef = word.GetReference();
+                            word.MoveNext();
+                            ModuleInstantiation? moduleInstantiation = (ModuleInstantiation)element;
+                            BlockReference blockReference = new BlockReference() { Reference = WordReference.CreateReferenceRange(beginRef, word.GetReference()) };
+                            return blockReference;
+                        }
                     }
-
-                    word.AddError("unfound object");
-                    word.MoveNext();
-                    return new UnfoundObjectReference() { Reference = WordReference.CreateReferenceRange(beginRef , word.GetReference()) };
+                    {
+                        WordReference beginRef = word.GetReference();
+                        word.AddError("unfound object");
+                        word.MoveNext();
+                        return new UnfoundObjectReference() { Reference = WordReference.CreateReferenceRange(beginRef, word.GetReference()) };
+                    }
             }
             return null;
         }
@@ -340,85 +350,87 @@ number
                 obj = (DataObjects.Variables.Object)dataObjectReference.TargetDataObject;
             }
 
-            if (word.Text != ".") return dataObjectReference;
-            if (dataObjectReference.UnpackedArrays.Count != 0 & !word.Prototype)
-            {
-                dataObjectReference.Reference.AddError("unpacked array");
-            }
-            word.MoveNext();
+            return dataObjectReference;
 
-            if (!dataObjectReference.TargetDataObject.NamedElements.ContainsKey(word.Text))
-            {
-                if (word.NextText == "(" || word.NextText == ";")
-                {
-                    return parseUndefinedFunction(word);
-                }
-                word.AddError("unfound object");
-                word.MoveNext();
-                return null;
-            }
+            //if (word.Text != ".") return dataObjectReference;
+            //if (dataObjectReference.UnpackedArrays.Count != 0 & !word.Prototype)
+            //{
+            //    dataObjectReference.Reference.AddError("unpacked array");
+            //}
+            //word.MoveNext();
 
-            INamedElement? element = dataObjectReference.TargetDataObject.NamedElements[word.Text];
+            //if (!dataObjectReference.TargetDataObject.NamedElements.ContainsKey(word.Text))
+            //{
+            //    if (word.NextText == "(" || word.NextText == ";")
+            //    {
+            //        return parseUndefinedFunction(word);
+            //    }
+            //    word.AddError("unfound object");
+            //    word.MoveNext();
+            //    return null;
+            //}
+
+            //INamedElement? element = dataObjectReference.TargetDataObject.NamedElements[word.Text];
 
 
-            // Since ModPort are also namespaces, they need to be processed before namespaces.
-            if (element is DataObject)
-            {
-                // Struct member access (aaa.AA) の場合、親Structへの参照を設定
+            //// Since ModPort are also namespaces, they need to be processed before namespaces.
+            //if (element is DataObject)
+            //{
+            //    // Struct member access (aaa.AA) の場合、親Structへの参照を設定
 
-                DataObjects.DataObject? structParentObject = null;
-                string? structMemberName = null;
+            //    DataObjects.DataObject? structParentObject = null;
+            //    string? structMemberName = null;
 
-                if(dataObjectReference.TargetDataObject.DataType is UserDefinedType)
-                {
-                    structParentObject = dataObjectReference.TargetDataObject;
-                    structMemberName = word.Text;
-                }
+            //    if(dataObjectReference.TargetDataObject.DataType is UserDefinedType)
+            //    {
+            //        structParentObject = dataObjectReference.TargetDataObject;
+            //        structMemberName = word.Text;
+            //    }
 
-                if (nameSpaceText != "") nameSpaceText = nameSpaceText + ".";
-                nameSpaceText = nameSpaceText + dataObjectReference.DatObjectName + ".";
-                Primary? primary = parseDataObject(word, nameSpace, dataObjectReference.TargetDataObject, lValue, acceptRange, nameSpaceText);
-                if(primary is DataObjectReference r_dataObjectReference)
-                {
-                    r_dataObjectReference.StructParentObject = structParentObject;
-                    r_dataObjectReference.StructMemberName = structMemberName;
-                }
-                return primary;
-            }
+            //    if (nameSpaceText != "") nameSpaceText = nameSpaceText + ".";
+            //    nameSpaceText = nameSpaceText + dataObjectReference.DatObjectName + ".";
+            //    Primary? primary = parseDataObject(word, nameSpace, dataObjectReference.TargetDataObject, lValue, acceptRange, nameSpaceText);
+            //    if(primary is DataObjectReference r_dataObjectReference)
+            //    {
+            //        r_dataObjectReference.StructParentObject = structParentObject;
+            //        r_dataObjectReference.StructMemberName = structMemberName;
+            //    }
+            //    return primary;
+            //}
 
-            // Since Task and Function are also namespaces, they need to be processed before namespaces.
+            //// Since Task and Function are also namespaces, they need to be processed before namespaces.
 
-            if (element is BuiltInMethod)
-            {
-                BuiltinMethodCall? builtinMethodCall = BuiltinMethodCall.ParseCreate(word, nameSpace, dataObjectReference.TargetDataObject);
-                return builtinMethodCall;
-            }
+            //if (element is BuiltInMethod)
+            //{
+            //    BuiltinMethodCall? builtinMethodCall = BuiltinMethodCall.ParseCreate(word, nameSpace, dataObjectReference.TargetDataObject);
+            //    return builtinMethodCall;
+            //}
 
-            Class class_ = obj.GetSourceClass();
-            // task reference : for left side only
-            if (lValue && element is Task_ && obj != null)
-            {
-                TaskReference task = TaskReference.ParseCreate(word, nameSpace.BuildingBlock, class_);
-                return task;
-            }
+            //Class class_ = obj.GetSourceClass();
+            //// task reference : for left side only
+            //if (lValue && element is Task_ && obj != null)
+            //{
+            //    TaskReference task = TaskReference.ParseCreate(word, nameSpace.BuildingBlock, class_);
+            //    return task;
+            //}
 
-            // void function call : for left side only
-            if (lValue && element is Function && obj != null)
-            {
-                FunctionCall? func = FunctionCall.ParseCreate(word, nameSpace, class_);
-                Function? function = func?.Function;
-                if (function != null && function.ReturnVariable == null) return func;
-            }
+            //// void function call : for left side only
+            //if (lValue && element is Function && obj != null)
+            //{
+            //    FunctionCall? func = FunctionCall.ParseCreate(word, nameSpace, class_);
+            //    Function? function = func?.Function;
+            //    if (function != null && function.ReturnVariable == null) return func;
+            //}
 
-            // function call : for right side only
-            if (!lValue && element is Function && obj != null)
-            {
-                FunctionCall? func = FunctionCall.ParseCreate(word, nameSpace, class_);
-                return func;
-            }
+            //// function call : for right side only
+            //if (!lValue && element is Function && obj != null)
+            //{
+            //    FunctionCall? func = FunctionCall.ParseCreate(word, nameSpace, class_);
+            //    return func;
+            //}
 
-            word.AddError("illegal primitive");
-            return null;
+            //word.AddError("illegal primitive");
+            //return null;
         }
 
         private static Primary? parseUndefinedFunction(WordScanner word)
