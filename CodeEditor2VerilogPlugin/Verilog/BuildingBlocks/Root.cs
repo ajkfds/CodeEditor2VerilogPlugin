@@ -131,6 +131,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
             while (!word.Eof)
             {
+                IndexReference iref = word.CreateIndexReference();
                 switch (word.Text)
                 {
                     // module_declaration
@@ -165,12 +166,12 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         break;
                     default:
                         // package_item
-                        if (!Verilog.Items.PackageItem.Parse(word, root))
-                        {
-                            word.MoveNext();
-                        }
+                        Verilog.Items.PackageItem.Parse(word, root);
                         break;
-
+                }
+                if (word.CreateIndexReference().IsSameAs(iref))
+                {
+                    word.MoveNext();
                 }
             }
 
@@ -334,11 +335,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
             // Parse mode is now handled at the end of ParseCreate, not per-block
             // This prevents cascading re-parses that cause instability
-            if (parsedDocument.ParameterOverrides == null)
-            {
-                module = await Interface.Create(word, parsedDocument.Root, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
-            }
-            else
+            ////if (parsedDocument.ParameterOverrides == null)
+            ////{
+            ////    module = await Interface.Create(word, parsedDocument.Root, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
+            ////}
+            ////else
             {
                 module = await Interface.Create(word, parsedDocument.Root, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
             }

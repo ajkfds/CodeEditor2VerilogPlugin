@@ -241,9 +241,9 @@ number
                     string nameSpaceText = nameReference.GetNameSpaceText();
 
                     // variable reference
-                    if (element is DataObject && targetNameSpace != null)
+                    if (element is DataObject && targetElement != null)
                     {
-                        return parseDataObject(word, nameSpace, targetNameSpace, lValue, acceptRange, nameSpaceText);
+                        return parseDataObject(word, nameSpace, targetElement, lValue, acceptRange, nameSpaceText);
                     }
 
                     // Since Task and Function are also namespaces, they need to be processed before namespaces.
@@ -311,207 +311,20 @@ number
                         return dataTypeReference;
                     }
 
+                    WordReference beginRef = word.GetReference();
+                    if (element is ModuleInstantiation)
+                    {
+                        word.MoveNext();
+                        ModuleInstantiation? moduleInstantiation = (ModuleInstantiation)element;
+                        BlockReference blockReference = new BlockReference() { Reference = WordReference.CreateReferenceRange(beginRef, word.GetReference()) };
+                        return blockReference;
+                    }
+
                     word.AddError("unfound object");
                     word.MoveNext();
-                    return null;
+                    return new UnfoundObjectReference() { Reference = WordReference.CreateReferenceRange(beginRef , word.GetReference()) };
             }
             return null;
-        }
-        /*
-        public static NameSpace? searchNameSpace(WordScanner word, NameSpace nameSpace, ref string nameSpaceText,out bool endWithDot,bool firstElement)
-        {
-            endWithDot = true;
-
-            if (!General.IsIdentifier(word.Text) || General.ListOfKeywords.Contains(word.Text))
-            {
-                return nameSpace;
-            }
-            if (word.NextText == "(" || word.NextText == ";")
-            {
-                return nameSpace;
-            }
-
-            if (word.NextText != ".")
-            {
-                endWithDot = false;
-            }
-
-            if (!nameSpace.NamedElements.ContainsKey(word.Text))
-            {   // namespace not found
-                if (word.NextText == ".")
-                { // unfound heirarchy
-                    return searchUnfoundNameSpace(word, ref nameSpaceText);
-                }
-                else
-                {
-                    if (firstElement) return null;
-                    return nameSpace;    // implicit net declaration?
-                }
-            }
-
-            INamedElement element = nameSpace.NamedElements[word.Text];
-
-            if (element is NameSpace)
-            {
-                // If the found NameSpace is a Function or LetDeclaration and the next token is not ".",
-                // the identifier is used as a call/reference,
-                // not as a hierarchical namespace traversal.
-                // In that case leave word on the identifier and return the original nameSpace
-                // so the caller can recognize the element as a FunctionCall / LetDeclaration.
-                if (word.NextText != "."
-                && (element is Function || element is DataObjects.LetDeclaration))
-                {
-                    return null;
-                }
-                word.Color(CodeDrawStyle.ColorType.Identifier);
-                word.MoveNext();
-                NameSpace newNameSpace = (NameSpace)element;
-                if (word.Text == ".")
-                {
-                    word.MoveNext();
-                    if (nameSpaceText == "")
-                    {
-                        nameSpaceText = newNameSpace.Name;
-                    }
-                    else
-                    {
-                        nameSpaceText = nameSpaceText + "." + newNameSpace.Name;
-                    }
-                    return searchNameSpace(word, newNameSpace, ref nameSpaceText, out endWithDot,false);
-                }
-                return newNameSpace;
-            }
-
-            if (element is DataObjects.Variables.Object)
-            {
-                DataObjects.Variables.Object object_ = (DataObjects.Variables.Object)element;
-                BuildingBlocks.Class? class_ = object_.GetSourceClass();
-                if(class_ != null)
-                {
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
-                    word.MoveNext();
-
-                    if (word.Text == ".")
-                    {
-                        word.MoveNext();
-                        if (nameSpaceText == "")
-                        {
-                            nameSpaceText = object_.Name;
-                        }
-                        else
-                        {
-                            nameSpaceText = nameSpaceText + "." + object_.Name;
-                        }
-                        return searchNameSpace(word, class_, ref nameSpaceText, out endWithDot, false);
-                    }
-                }
-                return class_;
-            }
-
-            if (element is DataObjects.Variables.VirtualInterface)
-            {
-                DataObjects.Variables.VirtualInterface virtualInterface = (DataObjects.Variables.VirtualInterface)element;
-                BuildingBlocks.Interface? @interface = virtualInterface.GetSourceInterface();
-                word.Color(CodeDrawStyle.ColorType.Identifier);
-                word.MoveNext();
-
-                if (word.Text == ".")
-                {
-                    word.MoveNext();
-                    if (nameSpaceText == "")
-                    {
-                        nameSpaceText = virtualInterface.Name;
-                    }
-                    else
-                    {
-                        nameSpaceText = nameSpaceText + "." + virtualInterface.Name;
-                    }
-                    return searchNameSpace(word, @interface, ref nameSpaceText, out endWithDot, false);
-                }
-                return @interface;
-            }
-
-            if (element is IBuildingBlockInstantiation)
-            {
-                IBuildingBlockInstantiation buildingBlockInstantiation = (IBuildingBlockInstantiation)element;
-                BuildingBlock? buildingBlock = buildingBlockInstantiation.GetInstancedBuildingBlock();
-                if (buildingBlock != null)
-                {
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
-                    word.MoveNext();
-                } else {
-                    if (word.NextText == ".")
-                    { // unfound heirarchy
-                        return searchUnfoundNameSpace(word, ref nameSpaceText);
-                    }
-                    else
-                    {
-                        nameSpaceText += word.Text;
-                        word.Color(CodeDrawStyle.ColorType.Identifier);
-                        word.MoveNext();
-                        return new UnfoundNameSpace() { DefinitionReference = word.GetReference(), Name = nameSpaceText, Reference = word.GetReference() };
-                    }
-                }
-
-
-                if (word.Text == ".")
-                {
-                    word.MoveNext();
-                    if (nameSpaceText == "")
-                    {
-                        nameSpaceText = buildingBlockInstantiation.Name;
-                    }
-                    else
-                    {
-                        nameSpaceText = nameSpaceText + "." + buildingBlockInstantiation.Name;
-                    }
-                    return searchNameSpace(word, buildingBlock, ref nameSpaceText, out endWithDot,false);
-                }
-                return buildingBlock;
-            }
-
-            if (firstElement)
-            {
-                return null;
-            }
-            endWithDot = true;
-            return nameSpace;
-        }
-        */
-        public static NameSpace? searchUnfoundNameSpace(WordScanner word, ref string nameSpaceText)
-        {
-            WordReference beginRef = word.GetReference();
-            if (!General.IsIdentifier(word.Text) || General.ListOfKeywords.Contains(word.Text))
-            {
-                return null;
-            }
-
-            if (word.NextText != ".")
-            {
-                return null;
-            }
-
-            do
-            {
-                nameSpaceText += word.Text;
-                word.Color(CodeDrawStyle.ColorType.Identifier);
-                if (word.NextText == ".")
-                {
-                    word.MoveNext();
-                    nameSpaceText += ".";
-                    word.MoveNext();
-                    continue;
-                }
-
-                if (!word.Prototype) WordReference.CreateReferenceRange(beginRef, word.GetReference()).AddError("unfound object");
-                word.MoveNext();
-                break;
-            } while (!word.Eof);
-
-            WordReference wordReference = WordReference.CreateReferenceRange(beginRef, word.GetReference());
-
-            word.RootParsedDocument.ReparseRequested = true;
-            return new UnfoundNameSpace() { DefinitionReference = beginRef, Name = "?", Reference = wordReference };
         }
 
         public static Primary? parseDataObject(WordScanner word, NameSpace nameSpace, INamedElement owner, bool lValue, bool acceptRange, string nameSpaceText)
@@ -545,10 +358,6 @@ number
                 return null;
             }
 
-            //if (!variable.DataObject.NamedElements.ContainsKey(word.Text))
-            //{ // undefined primitive
-            //    return parseUndefinedDataObject(word, nameSpace, owner, lValue, nameSpaceText);
-            //}
             INamedElement? element = dataObjectReference.TargetDataObject.NamedElements[word.Text];
 
 
@@ -612,19 +421,6 @@ number
             return null;
         }
 
-        //private static Primary? parseUndefinedDataObject(WordScanner word)
-        //{
-        //    word.Color(CodeDrawStyle.ColorType.Identifier);
-        //    word.MoveNext();
-
-        //    if(word.Text == "(")
-        //    {
-        //        word.MoveNext();
-        //        word.SkipToKeywords(new List<string> { ";",")" });
-        //        if (word.Text == ")") word.MoveNext();
-        //    }
-        //    return null;
-        //}
         private static Primary? parseUndefinedFunction(WordScanner word)
         {
             WordReference beginRef = word.GetReference();
@@ -645,140 +441,8 @@ number
         }
 
 
-        private static Primary? subParseCreate(WordScanner word, NameSpace nameSpace, bool lValue, bool acceptImplicitNet, bool acceptRange)
-        {
-            if (nameSpace == null) throw new Exception();
-
-            switch (word.WordType)
-            {
-                case WordPointer.WordTypeEnum.Number:
-                    return null;
-                case WordPointer.WordTypeEnum.Symbol:
-                    return null;
-                case WordPointer.WordTypeEnum.String:
-                    return null;
-                case WordPointer.WordTypeEnum.Text:
-                    {
-                        var variable = DataObjectReference.ParseCreate(word, nameSpace, nameSpace, lValue, acceptRange);
-                        if (variable != null) return variable;
-
-                        var parameter = ParameterReference.ParseCreate(word, nameSpace);
-                        if (parameter != null) return parameter;
-
-                        if (!lValue && word.NextText == "(")
-                        {
-                            return FunctionCall.ParseCreate(word, nameSpace);
-                        }
-
-                        if (word.NextText == ".")
-                        {
-                            if (
-                                nameSpace.BuildingBlock.NamedElements.ContainsIBuldingBlockInstantiation(word.Text)
-                            )
-                            { // module instance
-
-                                IBuildingBlockWithModuleInstance? buildingBlock = nameSpace.BuildingBlock as IBuildingBlockWithModuleInstance;
-                                if (buildingBlock == null) throw new Exception();
-
-                                word.Color(CodeDrawStyle.ColorType.Identifier);
-                                IBuildingBlockInstantiation instantiation = (IBuildingBlockInstantiation)nameSpace.BuildingBlock.NamedElements[word.Text];
-
-                                string moduleName = instantiation.SourceName;
-                                if (word.RootParsedDocument.ProjectProperty == null) return null;
-                                BuildingBlock? module = word.RootParsedDocument.ProjectProperty.GetBuildingBlock(moduleName);
-                                if (module == null) return null;
-                                word.MoveNext();
-                                word.MoveNext(); // .
-
-                                Primary? primary = subParseCreate(word, module, lValue, acceptImplicitNet, acceptRange);
-                                if (primary == null)
-                                {
-                                    word.AddError("illegal variable");
-                                }
-                                return primary;
-                            }
-                            else if (nameSpace.NamedElements.ContainsKey(word.Text) && nameSpace.NamedElements[word.Text] is NameSpace)
-                            { // namespaces
-                                word.Color(CodeDrawStyle.ColorType.Identifier);
-                                NameSpace space = (NameSpace)nameSpace.NamedElements[word.Text];
-                                if (space == null) return null;
-                                word.MoveNext();
-                                word.MoveNext(); // .
-
-                                Primary? primary = subParseCreate(word, space, lValue, acceptImplicitNet, acceptRange);
-                                if (primary == null)
-                                {
-                                    word.AddError("illegal variable");
-                                }
-                                return primary;
-                            }
-                        }
-                        else
-                        {
-                            if (
-                                nameSpace.BuildingBlock.NamedElements.ContainsIBuldingBlockInstantiation(word.Text)
-                            )
-                            { // module instance
-                                IBuildingBlockWithModuleInstance? buildingBlock = nameSpace.BuildingBlock as IBuildingBlockWithModuleInstance;
-                                if (buildingBlock == null) throw new Exception();
-
-                                word.Color(CodeDrawStyle.ColorType.Identifier);
-                                IBuildingBlockInstantiation instantiation = (IBuildingBlockInstantiation)nameSpace.BuildingBlock.NamedElements[word.Text];
-                                string moduleName = instantiation.SourceName;
-
-                                if (word.RootParsedDocument.ProjectProperty == null) return null;
-                                BuildingBlock? module = word.RootParsedDocument.ProjectProperty.GetBuildingBlock(moduleName);
-                                if (module == null) return null;
-                                word.MoveNext();
-
-                                if (word.Text == ".")
-                                {
-                                    word.MoveNext();
-                                    Primary? primary = subParseCreate(word, module, lValue, acceptImplicitNet, acceptRange);
-                                    if (primary == null)
-                                    {
-                                        word.AddError("illegal variable");
-                                    }
-                                    return new NameSpaceReference(module);
-                                }
-                                else
-                                {
-                                    return new NameSpaceReference(module);
-                                }
-
-                            }
-                            else if (nameSpace is BuildingBlock && nameSpace.BuildingBlock.NamedElements.ContainsKey(word.Text) && nameSpace.BuildingBlock.NamedElements[word.Text] is Task_)
-                            {
-                                return TaskReference.ParseCreate(word, nameSpace.BuildingBlock, acceptImplicitNet);
-                            }
-                            else if (nameSpace.NamedElements.ContainsKey(word.Text) && nameSpace.NamedElements[word.Text] is NameSpace)
-                            {
-                                word.Color(CodeDrawStyle.ColorType.Identifier);
-                                NameSpace space = (NameSpace)nameSpace.NamedElements[word.Text];
-                                if (space == null) return null;
-                                word.MoveNext();
-                                return new NameSpaceReference(space);
-
-                            }
-                        }
-
-                        if (word.Eof || General.ListOfKeywords.Contains(word.Text))
-                        {
-                            return new NameSpaceReference(nameSpace);
-                        }
-                    }
-                    break;
-            }
-            return null;
-        }
-
 
     }
-
-
-
-
-
 
 }
 

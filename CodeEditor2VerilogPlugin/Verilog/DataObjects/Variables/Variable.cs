@@ -1,3 +1,4 @@
+using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using System;
@@ -250,6 +251,11 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             {
                 BuildingBlocks.Class class_ = (BuildingBlocks.Class)dataType;
                 if (!word.RootParsedDocument.UsedClasses.Contains(class_.Name)) word.RootParsedDocument.UsedClasses.Add(class_.Name);
+            }
+
+            if(dataType is InterfaceClass)
+            {
+                return pointerMoved;
             }
 
             List<DataObject> vars = new List<DataObject>();
