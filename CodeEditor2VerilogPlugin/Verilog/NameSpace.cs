@@ -364,7 +364,7 @@ namespace pluginVerilog.Verilog
                 // For now, GetInstancedBuildingBlock requires an IBuildingBlockInstantiation.
                 // Fall back to the base block; parameter overrides for @scope are
                 // applied lazily by the VirtualScopeNameSpace wrapper.
-                buildingBlock = projectProperty.GetBuildingBlock(scopeRef.BuildingBlockName);
+                buildingBlock = projectProperty.GetBuildingBlockFromDefinitionNameSpace(scopeRef.BuildingBlockName);
 
                 if (buildingBlock != null)
                 {
@@ -373,7 +373,7 @@ namespace pluginVerilog.Verilog
             }
             else
             {
-                buildingBlock = projectProperty.GetBuildingBlock(scopeRef.BuildingBlockName);
+                buildingBlock = projectProperty.GetBuildingBlockFromDefinitionNameSpace(scopeRef.BuildingBlockName);
                 scopeRef.ResolvedBuildingBlock = buildingBlock;
             }
         }

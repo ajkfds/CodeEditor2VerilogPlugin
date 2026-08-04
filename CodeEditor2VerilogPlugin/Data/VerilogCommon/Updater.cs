@@ -292,7 +292,7 @@ namespace pluginVerilog.Data.VerilogCommon
                             ProjectProperty? projectProperty = sourceProject.ProjectProperties[Plugin.StaticID] as ProjectProperty;
                             if (projectProperty == null) throw new Exception();
 
-                            Data.IVerilogRelatedFile? ivFile = projectProperty.GetFileOfBuildingBlock(moduleInstantiation.SourceName);
+                            Data.IVerilogRelatedFile? ivFile = projectProperty.GetFileOfDefinitionNameSpace(moduleInstantiation.SourceName);
                             if (ivFile != null)
                             {
                                 string instanceKey = Verilog.ParsedDocument.KeyGenerator(ivFile, moduleInstantiation.SourceName, moduleInstantiation.ParameterOverrides);

@@ -183,7 +183,7 @@ namespace pluginVerilog.Data
                 {
                     foreach (var buildingBlockKvp in newParsedDocument.Root.BuildingBlocks)
                     {
-                        ProjectProperty.RegisterBuildingBlock(buildingBlockKvp.Key, buildingBlockKvp.Value, this);
+                        ProjectProperty.RegisterToDefinitionNameSpace(buildingBlockKvp.Key, buildingBlockKvp.Value, this);
                     }
                 }
 

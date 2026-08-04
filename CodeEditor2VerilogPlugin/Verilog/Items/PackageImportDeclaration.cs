@@ -19,7 +19,7 @@ namespace pluginVerilog.Verilog.Items
             word.MoveNext();
 
             string packageIdentifier = word.Text;
-            Package? package = word.ProjectProperty.GetBuildingBlock(packageIdentifier) as Package;
+            Package? package = word.ProjectProperty.GetBuildingBlockFromDefinitionNameSpace(packageIdentifier) as Package;
             word.RootParsedDocument.ImportedPackages.Add(word.Text);
 
             while (!word.Eof)

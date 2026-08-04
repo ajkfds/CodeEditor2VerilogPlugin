@@ -60,7 +60,7 @@ namespace pluginVerilog.Verilog.Snippets
             ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
             if (projectProperty == null) return;
 
-            Data.VerilogFile? targetFile = projectProperty.GetFileOfBuildingBlock(moduleName) as Data.VerilogFile;
+            Data.VerilogFile? targetFile = projectProperty.GetFileOfDefinitionNameSpace(moduleName) as Data.VerilogFile;
             if (targetFile == null) return;
 
             string instanceName = moduleName + "_";

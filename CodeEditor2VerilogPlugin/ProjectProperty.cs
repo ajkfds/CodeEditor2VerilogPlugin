@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading;
+using System.Diagnostics.CodeAnalysis;
 
 namespace pluginVerilog
 {
@@ -93,42 +94,45 @@ namespace pluginVerilog
         {
             if (instantiation.ParameterOverrides.Count == 0)
             {
-                return GetBuildingBlock(instantiation.SourceName);
+                return GetBuildingBlockFromDefinitionNameSpace(instantiation.SourceName);
             }
             else
             {
-                Data.VerilogFile? file = GetFileOfBuildingBlock(instantiation.SourceName) as Data.VerilogFile;
+                Data.VerilogFile? file = GetFileOfDefinitionNameSpace(instantiation.SourceName) as Data.VerilogFile;
                 if (file == null) return null;
                 string InstanceKey = Verilog.ParsedDocument.KeyGenerator(file, instantiation.SourceName, instantiation.ParameterOverrides);
 
                 Verilog.ParsedDocument? parsedDocument = file.GetInstancedParsedDocument(InstanceKey) as Verilog.ParsedDocument;
                 if (parsedDocument == null) return null;
                 if (parsedDocument.Root == null) return null;
-                if(!parsedDocument.Root.BuildingBlocks.TryGetValue(instantiation.SourceName, out BuildingBlock? buildingBlock))
+                if(parsedDocument.Root.BuildingBlocks.TryGetValue(instantiation.SourceName, out BuildingBlock? buildingBlock))
                 {
-                    return null;
+                    return buildingBlock;
                 }
-                return buildingBlock;
+                return null;
             }
         }
 
 
+        // Definition NameSpace ----------------------------------------------------------------------------------------------------------------------------------
+        // top level module, primitive, program, interface register to this namespace
+
+        // Thread-safe access using ReaderWriterLockSlim
+        private readonly ReaderWriterLockSlim definitionNameSpaceLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
 
         // BuildingBlock -> File Table
         private WeakReferenceDictionary<string, Data.IVerilogRelatedFile> buildingBlockFileTable = new WeakReferenceDictionary<string, Data.IVerilogRelatedFile>();
         private WeakReferenceDictionary<string, BuildingBlock> buildingBlockTable = new WeakReferenceDictionary<string, BuildingBlock>();
 
-        // Thread-safe access using ReaderWriterLockSlim
-        private readonly ReaderWriterLockSlim buildingBlockTableLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
 
-        public void RegisterBuildingBlock(string buildingBlockName, BuildingBlock buildingBlock, VerilogFile file)
+        public void RegisterToDefinitionNameSpace(string buildingBlockName, BuildingBlock buildingBlock, VerilogFile file)
         {
             if (file == null)
             {
                 if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
             }
 
-            buildingBlockTableLock.EnterWriteLock();
+            definitionNameSpaceLock.EnterWriteLock();
             try
             {
                 if (System.Diagnostics.Debugger.IsAttached && buildingBlockTable.Count != buildingBlockFileTable.Count)
@@ -144,116 +148,44 @@ namespace pluginVerilog
             }
             finally
             {
-                buildingBlockTableLock.ExitWriteLock();
+                definitionNameSpaceLock.ExitWriteLock();
             }
         }
 
 
-        public bool HasRegisteredBuildingBlock(string moduleName)
+
+        public Data.IVerilogRelatedFile? GetFileOfDefinitionNameSpace(string elementName)
         {
-            buildingBlockTableLock.EnterReadLock();
+            definitionNameSpaceLock.EnterReadLock();
             try
             {
-                if (System.Diagnostics.Debugger.IsAttached && buildingBlockTable.Count != buildingBlockFileTable.Count)
-                {
-                    System.Diagnostics.Debugger.Break();
-                }
-                bool ret1 = false;
-                bool ret2 = false;
-                ret1 = buildingBlockTable.HasItem(moduleName);
-                ret2 = buildingBlockFileTable.HasItem(moduleName);
-                if (ret1 != ret2)
-                {
-                    System.Diagnostics.Debugger.Break();
-                }
-                if (System.Diagnostics.Debugger.IsAttached && buildingBlockTable.Count != buildingBlockFileTable.Count)
-                {
-                    System.Diagnostics.Debugger.Break();
-                }
-                return ret2;
+                return buildingBlockFileTable.GetItem(elementName);
             }
             finally
             {
-                buildingBlockTableLock.ExitReadLock();
+                definitionNameSpaceLock.ExitReadLock();
             }
         }
 
-        public Data.IVerilogRelatedFile? GetFileOfBuildingBlock(string buildingBlockName)
-        {
-            buildingBlockTableLock.EnterReadLock();
-            try
-            {
-                return buildingBlockFileTable.GetItem(buildingBlockName);
-            }
-            finally
-            {
-                buildingBlockTableLock.ExitReadLock();
-            }
-        }
-
-        public List<string> GetBuildingBlockNameList()
-        {
-            buildingBlockTableLock.EnterWriteLock();
-            try
-            {
-                if (System.Diagnostics.Debugger.IsAttached && buildingBlockTable.Count != buildingBlockFileTable.Count)
-                {
-                    System.Diagnostics.Debugger.Break();
-                }
-
-                buildingBlockTable.CleanDictionary();
-                if (System.Diagnostics.Debugger.IsAttached && buildingBlockTable.Count != buildingBlockFileTable.Count)
-                {
-                    System.Diagnostics.Debugger.Break();
-                }
-                List<string> ret = buildingBlockTable.KeyList();
-                if (System.Diagnostics.Debugger.IsAttached && buildingBlockTable.Count != buildingBlockFileTable.Count)
-                {
-                    System.Diagnostics.Debugger.Break();
-                }
-                return ret;
-            }
-            finally
-            {
-                buildingBlockTableLock.ExitWriteLock();
-            }
-        }
 
         public List<string> GetModuleNameList()
         {
-            buildingBlockTableLock.EnterReadLock();
+            definitionNameSpaceLock.EnterReadLock();
             try
             {
                 return buildingBlockTable.GetMatchedKeyList((x) => { return (x is Module); });
             }
             finally
             {
-                buildingBlockTableLock.ExitReadLock();
+                definitionNameSpaceLock.ExitReadLock();
             }
         }
 
-        public List<string> GetObjectsNameList()
-        {
-            buildingBlockTableLock.EnterReadLock();
-            try
-            {
-                return buildingBlockTable.GetMatchedKeyList(
-                    (x) =>
-                    {
-                        return (x is Object) || (x is Interface) || (x is Program);
-                    });
-            }
-            finally
-            {
-                buildingBlockTableLock.ExitReadLock();
-            }
-        }
 
-        public BuildingBlock? GetBuildingBlock(string buildingBlockName)
+        public BuildingBlock? GetBuildingBlockFromDefinitionNameSpace(string buildingBlockName)
         {
-            Data.IVerilogRelatedFile? file = GetFileOfBuildingBlock(buildingBlockName);
+            Data.IVerilogRelatedFile? file = GetFileOfDefinitionNameSpace(buildingBlockName);
             if (file == null) return null;
-
 
 
             if (file.VerilogParsedDocument == null) return null;
@@ -266,16 +198,18 @@ namespace pluginVerilog
             return buildingBlock;
         }
 
+        // -----------------------------------------------------------------------------------------------------------------------------------------
 
 
         // inline comment
-        public Dictionary<string, Action<Verilog.ParsedDocument>> InLineCommentCommands = new Dictionary<string, Action<Verilog.ParsedDocument>>();
+//        public Dictionary<string, Action<Verilog.ParsedDocument>> InLineCommentCommands { get; } = new Dictionary<string, Action<Verilog.ParsedDocument>>();
 
         // macros
-        public Dictionary<string, Verilog.Macro> Macros = new Dictionary<string, Verilog.Macro>();
+        public Dictionary<string, Verilog.Macro> Macros { get; } = new Dictionary<string, Verilog.Macro>();
 
         // system tasks
-        public Dictionary<string, Func<Verilog.WordScanner, Verilog.NameSpace, Verilog.Statements.SystemTask.SystemTask>?> SystemTaskParsers = new Dictionary<string, Func<Verilog.WordScanner, Verilog.NameSpace, Verilog.Statements.SystemTask.SystemTask>?>
+        public Dictionary<string, Func<Verilog.WordScanner, Verilog.NameSpace, Verilog.Statements.SystemTask.SystemTask>?> SystemTaskParsers { get; }
+            = new Dictionary<string, Func<Verilog.WordScanner, Verilog.NameSpace, Verilog.Statements.SystemTask.SystemTask>?>
         {
             // Display task
             {"$display",null },
@@ -437,7 +371,8 @@ namespace pluginVerilog
          
          */
 
-        public Dictionary<string, Func<Verilog.DataObjects.Variables.Variable, Verilog.WordScanner>?> SystemFunctions = new Dictionary<string, Func<Verilog.DataObjects.Variables.Variable, Verilog.WordScanner>?>
+        public Dictionary<string, Func<Verilog.DataObjects.Variables.Variable, Verilog.WordScanner>?> SystemFunctions { get; }
+            = new Dictionary<string, Func<Verilog.DataObjects.Variables.Variable, Verilog.WordScanner>?>
         {
             {"$sformat", null },
             {"$ferror", null },

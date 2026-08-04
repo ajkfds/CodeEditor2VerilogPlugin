@@ -108,7 +108,7 @@ namespace pluginVerilog.Verilog.Expressions
 
             if (baseNameSpace == null)
             { // unfound element
-                BuildingBlock? buildingBlock = nameSpace.ProjectProperty.GetBuildingBlock(name);
+                BuildingBlock? buildingBlock = nameSpace.ProjectProperty.GetBuildingBlockFromDefinitionNameSpace(name);
                 if(buildingBlock != null)
                 {
                     baseNameSpace = buildingBlock;

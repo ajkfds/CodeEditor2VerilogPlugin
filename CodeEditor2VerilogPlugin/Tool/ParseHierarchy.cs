@@ -608,7 +608,7 @@ namespace pluginVerilog.Tool
                     // RegisterBuildingBlock, after which the
                     // VirtualScopeNameSpace's late-binding lookup can find it.
                     Data.IVerilogRelatedFile? targetFile =
-                        projectProperty.GetFileOfBuildingBlock(scopeRef.BuildingBlockName);
+                        projectProperty.GetFileOfDefinitionNameSpace(scopeRef.BuildingBlockName);
                     if (targetFile == null) continue;
 
                     // The target file must be a TextFile for the parse queue

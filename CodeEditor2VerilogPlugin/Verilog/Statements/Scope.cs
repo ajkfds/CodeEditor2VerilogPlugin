@@ -28,7 +28,7 @@ namespace pluginVerilog.Verilog.Statements
                 return new PackageScope() { Name = name, projectProperty = word.ProjectProperty };
             }
 
-            BuildingBlocks.BuildingBlock? buildingBlock = word.ProjectProperty.GetBuildingBlock(name);
+            BuildingBlocks.BuildingBlock? buildingBlock = word.ProjectProperty.GetBuildingBlockFromDefinitionNameSpace(name);
 
 
             if (buildingBlock == null)
@@ -42,7 +42,7 @@ namespace pluginVerilog.Verilog.Statements
         {
             get
             {
-                return projectProperty.GetBuildingBlock(Name);
+                return projectProperty.GetBuildingBlockFromDefinitionNameSpace(Name);
             }
         }
     }

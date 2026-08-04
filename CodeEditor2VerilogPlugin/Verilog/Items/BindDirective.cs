@@ -106,7 +106,7 @@ namespace pluginVerilog.Verilog.Items
             // instance name
             Expression? targetExpression = Expressions.Expression.ParseCreate(word, nameSpace);
             string target = word.Text;
-            BuildingBlocks.BuildingBlock? targetBuildingBlock = word.ProjectProperty.GetBuildingBlock(target);
+            BuildingBlocks.BuildingBlock? targetBuildingBlock = word.ProjectProperty.GetBuildingBlockFromDefinitionNameSpace(target);
             if (targetBuildingBlock == null)
             {
                 word.SkipToKeyword(";");
@@ -114,14 +114,14 @@ namespace pluginVerilog.Verilog.Items
             }
 
             // class name
-            targetBuildingBlock = word.ProjectProperty.GetBuildingBlock(word.Text);
+            targetBuildingBlock = word.ProjectProperty.GetBuildingBlockFromDefinitionNameSpace(word.Text);
             if (targetBuildingBlock == null)
             {
                 word.AddError("unfound");
             }
             else
             {
-                if (!word.RootParsedDocument.UsedClasses.Contains(targetBuildingBlock.Name)) word.RootParsedDocument.UsedClasses.Add(targetBuildingBlock.Name);
+                if (!word.RootParsedDocument.ReferencedUnitNameSpace.Contains(targetBuildingBlock.Name)) word.RootParsedDocument.ReferencedUnitNameSpace.Add(targetBuildingBlock.Name);
             }
             word.Color(CodeDrawStyle.ColorType.Identifier);
             word.MoveNext();

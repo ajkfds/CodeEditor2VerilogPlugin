@@ -26,7 +26,7 @@ namespace pluginVerilog.LLM.Tools
         {
             ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
             if (projectProperty == null) throw new Exception();
-            var file = projectProperty.GetBuildingBlock(moduleName)?.File;
+            var file = projectProperty.GetBuildingBlockFromDefinitionNameSpace(moduleName)?.File;
             Data.VerilogFile? verilogFile = file as Data.VerilogFile;
             if (verilogFile == null) return "failed to run simulation";
 

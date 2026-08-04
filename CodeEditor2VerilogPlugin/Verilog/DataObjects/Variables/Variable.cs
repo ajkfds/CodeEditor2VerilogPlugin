@@ -250,7 +250,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             if(dataType is BuildingBlocks.Class)
             {
                 BuildingBlocks.Class class_ = (BuildingBlocks.Class)dataType;
-                if (!word.RootParsedDocument.UsedClasses.Contains(class_.Name)) word.RootParsedDocument.UsedClasses.Add(class_.Name);
+                if (!word.RootParsedDocument.ReferencedUnitNameSpace.Contains(class_.Name)) word.RootParsedDocument.ReferencedUnitNameSpace.Add(class_.Name);
             }
 
             if(dataType is InterfaceClass)

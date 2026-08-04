@@ -136,7 +136,10 @@ namespace pluginVerilog.Verilog
         [JsonIgnore]
         public Dictionary<string, Macro> Macros = new Dictionary<string, Macro>();
         public List<string> ImportedPackages = new List<string>();
-        public List<string> UsedClasses = new List<string>();
+
+        public List<string> ReferencedUnitNameSpace = new List<string>();
+        public List<string> ReferencedDefinitionNameSpace = new List<string>();
+        public List<string> ReferencedPackageNamemeSpace = new List<string>();
 
         public Dictionary<string, Verilog.Expressions.Expression> ParameterOverrides = new Dictionary<string, Expressions.Expression>();
         public string? TargetBuildingBlockName = null;
@@ -499,26 +502,6 @@ namespace pluginVerilog.Verilog
                     if (preChar == '\t') return false;
                 }
             }
-
-            //{ // remove comment start to activate auto complete in comments
-            //    int commentIndex = lineText.LastIndexOf("/*");
-            //    if (commentIndex > 0)
-            //    {
-            //        commentIndex = commentIndex + 2;
-            //        lineText = lineText.Substring(commentIndex);
-            //        candidateStartIndex += commentIndex;
-            //    }
-            //}
-            //{ // remove comment start to activate auto complete in comments
-            //    int commentIndex = lineText.LastIndexOf("//");
-            //    if (commentIndex > 0)
-            //    {
-            //        commentIndex = commentIndex + 2;
-            //        lineText = lineText.Substring(commentIndex);
-            //        candidateStartIndex += commentIndex;
-            //    }
-            //}
-
 
             int blockStartIndex = 0;
             int blockEndIndex = 0;
