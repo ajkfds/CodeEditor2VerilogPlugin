@@ -52,6 +52,36 @@ namespace pluginVerilog. Data
             setup.TopName = buildingBlock. Name;
             searchHier(verilogFile, setup. TopName, ids, setup, setup.TopName);
 
+            List<IVerilogRelatedFile> targetClassFiles = setup.ClassFiles.ToList();
+
+            while (true)
+            {
+                List<IVerilogRelatedFile> newClassFiles = new List<IVerilogRelatedFile>();
+
+                foreach (IVerilogRelatedFile classFile in targetClassFiles)
+                {
+                    Data.VerilogFile? file = classFile as Data.VerilogFile;
+                    if (file == null) continue;
+                    Verilog.ParsedDocument? parsedDocument = file.VerilogParsedDocument;
+                    if (parsedDocument == null) continue;
+                    ProjectProperty? projectProperty = parsedDocument.ProjectProperty;
+                    if(projectProperty == null) continue;
+                    foreach(string className in parsedDocument.ReferencedUnitNameSpace)
+                    {
+                        IVerilogRelatedFile? newfile = projectProperty.GetFileOfDefinitionNameSpace(className);
+                        if(newfile !=null && !newClassFiles.Contains(newfile)) newClassFiles.Add(newfile);
+                    }
+                }
+                if (newClassFiles.Count == 0) break;
+                foreach(IVerilogRelatedFile file in newClassFiles)
+                {
+                    setup.ClassFiles.Add(file);
+                }
+
+                targetClassFiles = newClassFiles;
+            }
+
+
             if (setup. UnfoundModules. Count != 0)
             {
                 foreach (var module in setup. UnfoundModules)
