@@ -148,6 +148,12 @@ namespace pluginVerilog.Verilog.Expressions
                 DataObjects.Variables.Variable? variable = namedElement as DataObjects.Variables.Variable;
                 if(variable != null) return searchElement(variable, index);
 
+                DataObjects.Nets.Net? net = namedElement as DataObjects.Nets.Net;
+                if(net != null)
+                {
+                    return searchElement(net, index);
+                }
+
                 return (null,null);
             }
             WordReferences[index].AddError("unfound object");

@@ -19,6 +19,10 @@ namespace pluginVerilog.Verilog.Items
             word.MoveNext();
 
             string packageIdentifier = word.Text;
+            if (General.IsSimpleIdentifier(packageIdentifier) && !word.RootParsedDocument.ReferencedPackageNamemeSpace.Contains(packageIdentifier))
+            {
+                word.RootParsedDocument.ReferencedPackageNamemeSpace.Add(packageIdentifier);
+            }
             Package? package = word.ProjectProperty.GetBuildingBlockFromDefinitionNameSpace(packageIdentifier) as Package;
             word.RootParsedDocument.ImportedPackages.Add(word.Text);
 

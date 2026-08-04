@@ -203,6 +203,8 @@ namespace pluginVerilog.Verilog.Items
 
             // instance対象となるmoduleを取得する
             Module? instancedModule = word.ProjectProperty.GetBuildingBlockFromDefinitionNameSpace(moduleName) as Module;
+            if(!word.RootParsedDocument.ReferencedDefinitionNameSpace.Contains(moduleName)) word.RootParsedDocument.ReferencedDefinitionNameSpace.Add(moduleName);
+
             string moduleComment = word.GetNextComment();
             {
                 if (word.GetNextComment().Contains("@project")) // 他project moduleのinstance取得

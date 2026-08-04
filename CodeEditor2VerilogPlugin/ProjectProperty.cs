@@ -198,11 +198,18 @@ namespace pluginVerilog
             return buildingBlock;
         }
 
+        // Package NameSpace ----------------------------------------------------------------------------------------------------------------------------------
+        // 
+
+        // Compile Unit NameSpace ----------------------------------------------------------------------------------------------------------------------------------
+        // 
+
+
         // -----------------------------------------------------------------------------------------------------------------------------------------
 
 
         // inline comment
-//        public Dictionary<string, Action<Verilog.ParsedDocument>> InLineCommentCommands { get; } = new Dictionary<string, Action<Verilog.ParsedDocument>>();
+        //        public Dictionary<string, Action<Verilog.ParsedDocument>> InLineCommentCommands { get; } = new Dictionary<string, Action<Verilog.ParsedDocument>>();
 
         // macros
         public Dictionary<string, Verilog.Macro> Macros { get; } = new Dictionary<string, Verilog.Macro>();

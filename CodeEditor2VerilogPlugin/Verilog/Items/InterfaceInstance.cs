@@ -125,6 +125,8 @@ namespace pluginVerilog.Verilog.Items
             // check interface name
             string interfaceName = word.Text;
             Interface? instancedInterface = word.ProjectProperty.GetBuildingBlockFromDefinitionNameSpace(interfaceName) as Interface;
+            if (!word.RootParsedDocument.ReferencedDefinitionNameSpace.Contains(interfaceName)) word.RootParsedDocument.ReferencedDefinitionNameSpace.Add(interfaceName);
+
             if (instancedInterface == null) return false;   // this identifier is not interface name
 
             IndexReference beginIndexReference = word.CreateIndexReference();

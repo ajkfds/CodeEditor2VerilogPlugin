@@ -348,89 +348,11 @@ number
             if (dataObjectReference.TargetDataObject is DataObjects.Variables.Object)
             {
                 obj = (DataObjects.Variables.Object)dataObjectReference.TargetDataObject;
+                if (!word.RootParsedDocument.ReferencedUnitNameSpace.Contains(obj.Name)) word.RootParsedDocument.ReferencedUnitNameSpace.Add(obj.Name);
             }
 
             return dataObjectReference;
 
-            //if (word.Text != ".") return dataObjectReference;
-            //if (dataObjectReference.UnpackedArrays.Count != 0 & !word.Prototype)
-            //{
-            //    dataObjectReference.Reference.AddError("unpacked array");
-            //}
-            //word.MoveNext();
-
-            //if (!dataObjectReference.TargetDataObject.NamedElements.ContainsKey(word.Text))
-            //{
-            //    if (word.NextText == "(" || word.NextText == ";")
-            //    {
-            //        return parseUndefinedFunction(word);
-            //    }
-            //    word.AddError("unfound object");
-            //    word.MoveNext();
-            //    return null;
-            //}
-
-            //INamedElement? element = dataObjectReference.TargetDataObject.NamedElements[word.Text];
-
-
-            //// Since ModPort are also namespaces, they need to be processed before namespaces.
-            //if (element is DataObject)
-            //{
-            //    // Struct member access (aaa.AA) の場合、親Structへの参照を設定
-
-            //    DataObjects.DataObject? structParentObject = null;
-            //    string? structMemberName = null;
-
-            //    if(dataObjectReference.TargetDataObject.DataType is UserDefinedType)
-            //    {
-            //        structParentObject = dataObjectReference.TargetDataObject;
-            //        structMemberName = word.Text;
-            //    }
-
-            //    if (nameSpaceText != "") nameSpaceText = nameSpaceText + ".";
-            //    nameSpaceText = nameSpaceText + dataObjectReference.DatObjectName + ".";
-            //    Primary? primary = parseDataObject(word, nameSpace, dataObjectReference.TargetDataObject, lValue, acceptRange, nameSpaceText);
-            //    if(primary is DataObjectReference r_dataObjectReference)
-            //    {
-            //        r_dataObjectReference.StructParentObject = structParentObject;
-            //        r_dataObjectReference.StructMemberName = structMemberName;
-            //    }
-            //    return primary;
-            //}
-
-            //// Since Task and Function are also namespaces, they need to be processed before namespaces.
-
-            //if (element is BuiltInMethod)
-            //{
-            //    BuiltinMethodCall? builtinMethodCall = BuiltinMethodCall.ParseCreate(word, nameSpace, dataObjectReference.TargetDataObject);
-            //    return builtinMethodCall;
-            //}
-
-            //Class class_ = obj.GetSourceClass();
-            //// task reference : for left side only
-            //if (lValue && element is Task_ && obj != null)
-            //{
-            //    TaskReference task = TaskReference.ParseCreate(word, nameSpace.BuildingBlock, class_);
-            //    return task;
-            //}
-
-            //// void function call : for left side only
-            //if (lValue && element is Function && obj != null)
-            //{
-            //    FunctionCall? func = FunctionCall.ParseCreate(word, nameSpace, class_);
-            //    Function? function = func?.Function;
-            //    if (function != null && function.ReturnVariable == null) return func;
-            //}
-
-            //// function call : for right side only
-            //if (!lValue && element is Function && obj != null)
-            //{
-            //    FunctionCall? func = FunctionCall.ParseCreate(word, nameSpace, class_);
-            //    return func;
-            //}
-
-            //word.AddError("illegal primitive");
-            //return null;
         }
 
         private static Primary? parseUndefinedFunction(WordScanner word)

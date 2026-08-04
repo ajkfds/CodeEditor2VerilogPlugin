@@ -245,7 +245,15 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
 
             IDataType? dataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, null,virtual_);
-            if (dataType == null) return pointerMoved;
+            if (dataType == null)
+            {
+                if (virtual_)
+                {
+                    word.AddError("virtual interface type required");
+                    if(!word.RootParsedDocument.ReferencedUnitNameSpace.Contains(word.Text)) word.RootParsedDocument.ReferencedUnitNameSpace.Add(word.Text);
+                }
+                return pointerMoved;
+            }
 
             if(dataType is BuildingBlocks.Class)
             {

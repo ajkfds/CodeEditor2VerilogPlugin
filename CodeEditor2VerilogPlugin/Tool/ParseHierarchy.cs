@@ -2,6 +2,7 @@ using Avalonia.Threading;
 using CodeEditor2.Data;
 using Microsoft.Extensions.AI;
 using pluginVerilog.Data;
+using pluginVerilog.Verilog.BuildingBlocks;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -60,302 +61,6 @@ namespace pluginVerilog.Tool
         }
 
 
-
-
-
-
-
-        ///// <summary>
-        ///// Parse request record for queue-based processing
-        ///// </summary>
-        //public record ParseRequest(
-        //    CodeEditor2.Data.TextFile TextFile,
-        //    ParseMode Mode,
-        //    DateTime Timestamp
-        //);
-
-        ///// <summary>
-        ///// Queue for pending parse requests
-        ///// </summary>
-        //private static readonly ConcurrentQueue<ParseRequest> _parseQueue = new();
-
-        ///// <summary>
-        ///// Indicates if a queue processor is running
-        ///// </summary>
-        //private static volatile bool _isProcessingQueue = false;
-
-        ///// <summary>
-        ///// Semaphore to ensure only one parse operation runs at a time
-        ///// </summary>
-        //private static readonly SemaphoreSlim _parseLock = new(1, 1);
-
-        ///// <summary>
-        ///// Timestamp of the currently executing parse request
-        ///// </summary>
-        //private static DateTime _currentParseTimestamp = DateTime.MinValue;
-
-        ///// <summary>
-        ///// CancellationTokenSource for the currently running parse operation.
-        ///// Used to cancel running parses when a ForceAllFiles parse is requested.
-        ///// </summary>
-        //private static CancellationTokenSource? _currentParseCts = null;
-
-        ///// <summary>
-        ///// Lock object for synchronizing access to _currentParseCts
-        ///// </summary>
-        //private static readonly object _ctsLock = new object();
-
-        ///// <summary>
-        ///// Lock object for synchronizing access to the parse queue
-        ///// </summary>
-        //private static readonly object _queueLock = new object();
-
-        ///// <summary>
-        ///// Current parse mode of the running parse operation.
-        ///// Used to determine which parse modes can cancel each other.
-        ///// </summary>
-
-        ///// <summary>
-        ///// Enqueues a parse request and starts queue processing if not already running.
-        ///// Replaces the immediate cancellation approach with queue-based sequential processing.
-        ///// All parse modes (including ForceAllFiles) now go through the queue.
-        ///// </summary>
-        //public static void PostParseAsync(CodeEditor2.Data.TextFile textFile, ParseMode parseMode)
-        //{
-        //    Dispatcher.UIThread.Post(() =>
-        //    {
-        //        var request = new ParseRequest(textFile, parseMode, DateTime.UtcNow);
-        //        _parseQueue.Enqueue(request);
-
-        //        // Start queue processor if not already running
-        //        if (!_isProcessingQueue)
-        //        {
-        //            _ = ProcessQueueAsync();
-        //        }
-        //    });
-        //}
-
-        ///// <summary>
-        ///// Synchronous parse that waits for completion.
-        ///// For backward compatibility - prefer using PostParseAsync for non-blocking behavior.
-        ///// </summary>
-        //public static async Task ParseAsync(CodeEditor2.Data.TextFile textFile, ParseMode parseMode)
-        //{
-        //    await _parseLock.WaitAsync();
-        //    try
-        //    {
-        //        await ParseInternalAsync(textFile, parseMode);
-        //    }
-        //    finally
-        //    {
-        //        _parseLock.Release();
-        //    }
-        //}
-
-        ///// <summary>
-        ///// Semaphore to ensure only one queue processor runs at a time
-        ///// </summary>
-        //private static readonly SemaphoreSlim _queueProcessorLock = new(1, 1);
-
-        ///// <summary>
-        ///// Processes parse requests from the queue sequentially.
-        ///// ForceAllFiles parse requests cancel any running non-ForceAll parse and clear the queue.
-        ///// </summary>
-        //private static async Task ProcessQueueAsync()
-        //{
-        //    // Try to acquire the queue processor lock to prevent concurrent execution
-        //    if (!await _queueProcessorLock.WaitAsync(TimeSpan.FromMilliseconds(100)))
-        //    {
-        //        // Another queue processor is already running, just return
-        //        return;
-        //    }
-
-        //    bool hasForceAllRunning = false;
-        //    bool shouldReturn = false;
-
-        //    try
-        //    {
-        //        _isProcessingQueue = true;
-        //        while (_parseQueue.TryDequeue(out var request))
-        //        {
-        //            // Wait for any currently running parse to complete
-        //            await _parseLock.WaitAsync();
-        //            try
-        //            {
-        //                // Check if this is a ForceAllFiles request
-        //                if (request.Mode == ParseMode.ForceAllFiles)
-        //                {
-        //                    // ForceAllFiles can only be cancelled by another ForceAllFiles
-        //                    // If a non-ForceAll parse is running, cancel it
-        //                    CancelCurrentParseIfNotForceAll();
-
-        //                    // Clear the queue of any pending non-ForceAll requests
-        //                    ClearNonForceAllFromQueue();
-
-        //                    _currentParseTimestamp = request.Timestamp;
-
-        //                    CodeEditor2.Controller.AppendLog("ForceAllFiles requested - processing now", Avalonia.Media.Colors.Yellow);
-
-        //                    // Call ParseInternalAsync directly to avoid deadlock
-        //                    await ParseInternalAsync(request.TextFile, request.Mode);
-        //                }
-        //                else
-        //                {
-        //                    // SearchReparseRequestedTree cancels any non-ForceAll parse
-        //                    // but waits for ForceAllFiles to complete
-        //                    lock (_ctsLock)
-        //                    {
-        //                        if (_currentParseMode == ParseMode.ForceAllFiles)
-        //                        {
-        //                            // ForceAllFiles is running, re-queue this request and return
-        //                            // It will be processed after ForceAllFiles completes
-        //                            // Use queue lock to prevent race condition
-        //                            lock (_queueLock)
-        //                            {
-        //                                _parseQueue.Enqueue(request);
-        //                            }
-        //                            CodeEditor2.Controller.AppendLog("ForceAllFiles is running, re-queuing SearchReparseRequestedTree request", Avalonia.Media.Colors.Yellow);
-        //                            shouldReturn = true;
-        //                            return;
-        //                        }
-        //                    }
-
-        //                    // No ForceAllFiles running, cancel any current parse and proceed
-        //                    CancelCurrentParse();
-
-        //                    _currentParseTimestamp = request.Timestamp;
-
-        //                    // Call ParseInternalAsync directly to avoid deadlock
-        //                    await ParseInternalAsync(request.TextFile, request.Mode);
-        //                }
-        //            }
-        //            finally
-        //            {
-        //                _parseLock.Release();
-        //            }
-        //        }
-        //    }
-        //    finally
-        //    {
-        //        _isProcessingQueue = false;
-        //        _queueProcessorLock.Release();
-        //    }
-        //}
-
-        ///// <summary>
-        ///// Cancels the currently running parse operation if any
-        ///// </summary>
-        //private static void CancelCurrentParse()
-        //{
-        //    lock (_ctsLock)
-        //    {
-        //        if (_currentParseCts != null)
-        //        {
-        //            if (!_currentParseCts.IsCancellationRequested)
-        //            {
-        //                _currentParseCts.Cancel();
-        //                CodeEditor2.Controller.AppendLog("Cancelled running parse operation", Avalonia.Media.Colors.Orange);
-        //            }
-        //        }
-        //    }
-        //}
-
-        ///// <summary>
-        ///// Cancels the currently running parse operation only if it's not a ForceAllFiles parse.
-        ///// ForceAllFiles parses are never cancelled by other parse modes.
-        ///// </summary>
-        //private static void CancelCurrentParseIfNotForceAll()
-        //{
-        //    lock (_ctsLock)
-        //    {
-        //        if (_currentParseMode == ParseMode.ForceAllFiles)
-        //        {
-        //            // Don't cancel ForceAllFiles parse
-        //            CodeEditor2.Controller.AppendLog("ForceAllFiles is running, not cancelling", Avalonia.Media.Colors.Yellow);
-        //            return;
-        //        }
-        //        CancelCurrentParse();
-        //    }
-        //}
-
-        ///// <summary>
-        ///// Clears all non-ForceAllFiles requests from the queue.
-        ///// ForceAllFiles requests are kept (unlikely but possible edge case).
-        ///// </summary>
-        //private static void ClearNonForceAllFromQueue()
-        //{
-        //    var tempQueue = new ConcurrentQueue<ParseRequest>();
-        //    while (_parseQueue.TryDequeue(out var request))
-        //    {
-        //        // Keep only ForceAllFiles requests
-        //        if (request.Mode == ParseMode.ForceAllFiles)
-        //        {
-        //            tempQueue.Enqueue(request);
-        //        }
-        //    }
-        //    // Put back the ForceAllFiles requests (if any)
-        //    while (tempQueue.TryDequeue(out var request))
-        //    {
-        //        _parseQueue.Enqueue(request);
-        //    }
-        //}
-
-        ///// <summary>
-        ///// Internal implementation that performs the actual parsing.
-        ///// Returns parsed files and include files for non-ForceAllFiles modes.
-        ///// Creates a CancellationTokenSource that can be used to cancel the parse operation.
-        ///// </summary>
-        //private static async Task<(List<IVerilogRelatedFile> files, List<IVerilogRelatedFile> includeFiles)?> ParseInternalAsync(CodeEditor2.Data.TextFile textFile, ParseMode parseMode)
-        //{
-        //    ConcurrentDictionary<string, IVerilogRelatedFile> filesDict = new ConcurrentDictionary<string, IVerilogRelatedFile>();
-        //    ConcurrentDictionary<string, IVerilogRelatedFile> includeFilesDict = new ConcurrentDictionary<string, IVerilogRelatedFile>();
-
-        //    // Create a new CancellationTokenSource for this parse operation
-        //    CancellationTokenSource cts = new CancellationTokenSource();
-
-        //    // Store the CTS and current parse mode so it can be cancelled by a subsequent request
-        //    lock (_ctsLock)
-        //    {
-        //        // Dispose previous CTS if it was cancelled and not yet disposed
-        //        if (_currentParseCts != null && _currentParseCts.IsCancellationRequested)
-        //        {
-        //            _currentParseCts.Dispose();
-        //            _currentParseCts = null;
-        //        }
-        //        _currentParseCts = cts;
-        //        _currentParseMode = parseMode;
-        //    }
-
-        //    try
-        //    {
-        //        await runParallelAsync(textFile, parseMode, filesDict, includeFilesDict, cts.Token);
-        //    }
-        //    catch (OperationCanceledException)
-        //    {
-        //        CodeEditor2.Controller.AppendLog("Parse operation cancelled", Avalonia.Media.Colors.Orange);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
-        //        CodeEditor2.Controller.AppendLog("# Exception : " + ex.Message, Avalonia.Media.Colors.Red);
-        //    }
-        //    finally
-        //    {
-        //        // Clear the CTS reference after the parse completes
-        //        // Only clear if this is still the current CTS (hasn't been replaced by a new parse)
-        //        lock (_ctsLock)
-        //        {
-        //            if (_currentParseCts == cts)
-        //            {
-        //                _currentParseCts = null;
-        //                _currentParseMode = ParseMode.ThisFileOnly;
-        //            }
-        //        }
-        //        cts.Dispose();
-        //    }
-
-        //    return (filesDict.Values.ToList(), includeFilesDict.Values.ToList());
-        //}
 
         public record ParseTask(
             string Id,
@@ -526,6 +231,8 @@ namespace pluginVerilog.Tool
                 }
             }
 
+
+
             bool needReparse = false;
             if (verilogFile.ReparseRequested) needReparse = true;
             if (verilogFile.VerilogParsedDocument != null && verilogFile.VerilogParsedDocument.ErrorCount != 0) needReparse = true;
@@ -544,6 +251,19 @@ namespace pluginVerilog.Tool
                 {
                     ParseTask newTask = new ParseTask(Id: tfile.Key, tarfgetTextFile: tfile);
                     EnqueueWork(newTask, workQueue, completeIds);
+                }
+            }
+
+            if (verilogFile.VerilogParsedDocument != null)
+            {
+                foreach (string elementName in verilogFile.VerilogParsedDocument.ReferencedUnitNameSpace)
+                {
+                    pluginVerilog.ProjectProperty projectProperty = (ProjectProperty)verilogFile.Project.ProjectProperties[pluginVerilog.Plugin.StaticID];
+                    TextFile? vFile = projectProperty.GetFileOfDefinitionNameSpace(elementName) as TextFile;
+                    if (vFile == null) continue;
+                    ParseTask newTask = new ParseTask(Id: vFile.ID, tarfgetTextFile: vFile);
+                    EnqueueWork(newTask, workQueue, completeIds);
+
                 }
             }
 
@@ -590,6 +310,7 @@ namespace pluginVerilog.Tool
             // re-enqueue the same file repeatedly when several scope
             // references point at the same target.
             HashSet<CodeEditor2.Data.TextFile> enqueuedFiles = new HashSet<CodeEditor2.Data.TextFile>();
+
 
             foreach (var buildingBlock in buildingBlocks)
             {
