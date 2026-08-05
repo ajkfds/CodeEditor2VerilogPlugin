@@ -37,11 +37,13 @@ namespace pluginVerilog.Tool
         {
             if(cts != null)
             {
-                cts.Cancel();
+                CodeEditor2.Controller.AppendLog("reparseTop : " + textFile.ID, Avalonia.Media.Colors.Red);
+                await cts.CancelAsync();
             }
 
             CancellationTokenSource _cts = new CancellationTokenSource();
             cts = _cts;
+
             try
             {
                 await runParallelAsync(textFile, parseMode, _cts.Token);
@@ -71,8 +73,6 @@ namespace pluginVerilog.Tool
         private static async Task runParallelAsync(
             CodeEditor2.Data.TextFile textFile, 
             ParseMode parseMode,
-            //ConcurrentDictionary<string, IVerilogRelatedFile> files,
-            //ConcurrentDictionary<string, IVerilogRelatedFile> includeFiles,
             CancellationToken? token)
         {
             textFile.ReparseRequested = true;
@@ -125,6 +125,11 @@ namespace pluginVerilog.Tool
                             {
                                 await Task.Delay(1);
                             }
+                            var currentCount = Volatile.Read(ref activeTaskCount);
+                            if (currentCount == 0 && workQueue.IsEmpty && completeIds.Count != 0)
+                            {
+                                break;
+                            }
                         }
                     }
                 });
@@ -143,13 +148,34 @@ namespace pluginVerilog.Tool
                 token?.ThrowIfCancellationRequested();
             }
 
+            {// reparse top file
+                var parser = textFile.CreateDocumentParser(CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.BackgroundParse, token);
+                if (parser == null) return;
+
+                if (parseMode == ParseMode.ForceAllFiles)
+                {
+                    CodeEditor2.Controller.AppendLog("reparseTop : " + textFile.ID, Avalonia.Media.Colors.Cyan);
+                }
+                else
+                {
+                    CodeEditor2.Controller.AppendLog("reparseTop : " + textFile.ID, Avalonia.Media.Colors.Violet);
+                }
+
+                await parser.ParseAsync();
+                Verilog.ParsedDocument? parsedDocument = parser.ParsedDocument as Verilog.ParsedDocument;
+                if (parsedDocument != null)
+                {
+                    await textFile.AcceptParsedDocumentAsync(parser);
+                }
+            }
+
             if (parseMode == ParseMode.ForceAllFiles)
             {
-                CodeEditor2.Controller.AppendLog("parseComplete : " + textFile.ID, Avalonia.Media.Colors.Violet);
+                CodeEditor2.Controller.AppendLog("parseComplete : " + textFile.ID, Avalonia.Media.Colors.Cyan);
             }
             else
             {
-                CodeEditor2.Controller.AppendLog("parseComplete : " + textFile.ID, Avalonia.Media.Colors.Orange);
+                CodeEditor2.Controller.AppendLog("parseComplete : " + textFile.ID, Avalonia.Media.Colors.Violet);
             }
         }
 
@@ -211,7 +237,7 @@ namespace pluginVerilog.Tool
                 }
                 else
                 {
-                    CodeEditor2.Controller.AppendLog("parseHier " + index.ToString() + " : " + verilogFile.ID);
+                    CodeEditor2.Controller.AppendLog("parseHier " + index.ToString() + " : " + verilogFile.ID, Avalonia.Media.Colors.Violet);
                 }
 
                 await parser.ParseAsync();
@@ -379,7 +405,7 @@ namespace pluginVerilog.Tool
             }
             else
             {
-                CodeEditor2.Controller.AppendLog("reparseHier : " + verilogFile.ID);
+                CodeEditor2.Controller.AppendLog("reparseHier : " + verilogFile.ID, Avalonia.Media.Colors.Violet);
             }
 
             await parser.ParseAsync();

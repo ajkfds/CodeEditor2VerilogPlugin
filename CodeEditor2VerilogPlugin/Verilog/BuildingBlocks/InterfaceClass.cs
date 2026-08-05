@@ -185,7 +185,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             if (nameSpace.BuildingBlock is Root)
             {
                 // prototype parse
-                WordScanner prototypeWord = word.Clone();
+                WordScanner prototypeWord = word.Clone(false);
                 prototypeWord.Prototype = true;
                 parseInterfaceClassItems(prototypeWord, nameSpace, parameterOverrides, null, interfaceClass);
                 prototypeWord.Dispose();

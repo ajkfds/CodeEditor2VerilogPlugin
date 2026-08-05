@@ -110,6 +110,7 @@ namespace pluginVerilog.Verilog.Expressions
             var assignmentPattern = new AsssignmentPatternWithValues();
             while (!word.Eof)
             {
+                IndexReference iref = word.CreateIndexReference();
                 Expression? expression = Expression.ParseCreate(word, nameSpace);
                 if (expression == null)
                 {
@@ -118,6 +119,7 @@ namespace pluginVerilog.Verilog.Expressions
                 }
                 assignmentPattern.Items.Add(expression);
                 if (word.Text == "}") break;
+                if (!word.CreateIndexReference().IsSameAs(iref)) break;
             }
             return assignmentPattern;
         }

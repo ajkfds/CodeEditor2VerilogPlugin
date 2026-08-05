@@ -149,9 +149,9 @@ namespace pluginVerilog.Verilog
         protected List<WordPointer> stock = new List<WordPointer>();
 
         static System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
-        public WordScanner Clone()
+        public WordScanner Clone(bool supressError)
         {
-            WordScanner ret = new WordScanner(wordPointer.Document, RootParsedDocument, systemVerilog, true);
+            WordScanner ret = new WordScanner(wordPointer.Document, RootParsedDocument, systemVerilog, supressError);
             ret.wordPointer = wordPointer.Clone();
             ret.nonGeneratedCount = nonGeneratedCount;
             ret.prototype = prototype;

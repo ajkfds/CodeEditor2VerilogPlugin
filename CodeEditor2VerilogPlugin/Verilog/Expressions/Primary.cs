@@ -224,9 +224,24 @@ number
                         return FunctionCall.ParseCreate(word, nameSpace);
                     }
 
+
+
+
+                    NameReference? nameReference = NameReference.ParseCreate(word, nameSpace,acceptRange);
+                    if (nameReference == null)
+                    {
+                        return null;
+                    }
+
+                    INamedElement? element;
+                    INamedElement? targetElement;
+                    NameSpace? targetNameSpace;
+                    (element, targetElement) = nameReference.GetElement(nameSpace);
+                    targetNameSpace = targetElement as NameSpace;
+
                     // implicit net declaration
-                    if (acceptImplicitNet && word.NextText != "." && word.NextText !="::" && word.NextText != "[")
-                    { 
+                    if (acceptImplicitNet && element == null && nameReference.CanBeImplecitNet )
+                    {
                         Net net = DataObjects.Nets.Net.Create(word.Text, DataObjects.Nets.Net.NetTypeEnum.Wire, null);
                         net.DefinedReference = word.GetReference();
                         net.Defined = true;
@@ -253,18 +268,6 @@ number
                         return parseDataObject(word, nameSpace, nameSpace, lValue, acceptRange, "");
                     }
 
-
-                    NameReference? nameReference = NameReference.ParseCreate(word, nameSpace,acceptRange);
-                    if (nameReference == null)
-                    {
-                        return null;
-                    }
-
-                    INamedElement? element;
-                    INamedElement? targetElement;
-                    NameSpace? targetNameSpace;
-                    (element, targetElement) = nameReference.GetElement(nameSpace);
-                    targetNameSpace = targetElement as NameSpace;
                     if (element == null)
                     {
                         WordReference beginRef = word.GetReference();

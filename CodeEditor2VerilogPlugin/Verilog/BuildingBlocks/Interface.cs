@@ -178,7 +178,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             if (!word.CellDefine && !protoType)
             {
                 // protptype parse
-                WordScanner prototypeWord = word.Clone();
+                WordScanner prototypeWord = word.Clone(false);
                 prototypeWord.Prototype = true;
                 await parseInterfaceItems(prototypeWord, parameterOverrides, null, interface_);
                 prototypeWord.Dispose();

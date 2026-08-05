@@ -55,6 +55,18 @@ namespace pluginVerilog.Verilog.Expressions
             return null;
         }
 
+        public bool CanBeImplecitNet
+        {
+            get
+            {
+                if (Names.Count != 1) return false;
+                if (Ranges[0] != null) return false;
+                return true;
+            }
+        }
+
+
+
         public string GetNameSpaceText()
         {
             StringBuilder sb = new StringBuilder();
@@ -166,7 +178,7 @@ namespace pluginVerilog.Verilog.Expressions
             if (word.Eof) return null;
             if (!General.IsSimpleIdentifier(word.Text)) return null;
 
-            WordScanner wordClone = word.Clone();
+            WordScanner wordClone = word.Clone(true);
 
             NameReference nameReference = new NameReference(wordClone.Project);
             while (!wordClone.Eof)

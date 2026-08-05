@@ -280,7 +280,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             if (nameSpace.BuildingBlock is Root)
             {
                 // prototype parse
-                WordScanner prototypeWord = word.Clone();
+                WordScanner prototypeWord = word.Clone(false);
                 //                WordScanner prototypeWord = word;
                 prototypeWord.Prototype = true;
                 parseClassItems(prototypeWord, nameSpace, parameterOverrides, null, class_);
