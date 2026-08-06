@@ -326,6 +326,7 @@ namespace pluginVerilog.Verilog.Expressions
             }
             val.TargetDataObject.UnpackedArrays.Clear();
 
+
             { // DataObjectReferenceのUnpackedArray数の上限まで、Range表記を処理する。
                 int unpackedArrayIndex = 0;
                 while (!word.Eof)

@@ -268,6 +268,14 @@ number
                         return parseDataObject(word, nameSpace, nameSpace, lValue, acceptRange, "");
                     }
 
+                    {
+                        if (element is VirtualScopeNameSpace)
+                        {
+                            VirtualScopeNameSpace virtualScopeNameSpace = (VirtualScopeNameSpace)element;
+                            element =  virtualScopeNameSpace.VirtualScopeTarget;
+                        }
+                    }
+
                     if (element == null)
                     {
                         WordReference beginRef = word.GetReference();
@@ -321,13 +329,38 @@ number
                     }
 
                     {
-                        if (element is ModuleInstantiation)
+                        if (element is IBuildingBlockInstantiation)
                         {
                             WordReference beginRef = word.GetReference();
-                            word.MoveNext();
                             ModuleInstantiation? moduleInstantiation = (ModuleInstantiation)element;
-                            BlockReference blockReference = new BlockReference() { Reference = WordReference.CreateReferenceRange(beginRef, word.GetReference()) };
-                            return blockReference;
+                            BuildingBlock? buildingBlock = moduleInstantiation.GetInstancedBuildingBlock();
+                            if(buildingBlock == null)
+                            {
+                                word.AddError("unfound object");
+                                word.MoveNext();
+                                return new UnfoundObjectReference() { Reference = WordReference.CreateReferenceRange(beginRef, word.GetReference()) };
+                            }
+                            NameSpaceReference nameSpaceReference = new NameSpaceReference(buildingBlock) { 
+                                Reference = WordReference.CreateReferenceRange(beginRef, word.GetReference()) 
+                            };
+                            word.Color(CodeDrawStyle.ColorType.Identifier);
+                            word.MoveNext();
+                            return nameSpaceReference;
+                        }
+                    }
+
+                    {
+                        if (element is NameSpace)
+                        {
+                            NameSpace space = (NameSpace)element;
+                            WordReference beginRef = word.GetReference();
+                            NameSpaceReference nameSpaceReference = new NameSpaceReference(space)
+                            {
+                                Reference = WordReference.CreateReferenceRange(beginRef, word.GetReference())
+                            };
+                            word.Color(CodeDrawStyle.ColorType.Identifier);
+                            word.MoveNext();
+                            return nameSpaceReference;
                         }
                     }
                     {
