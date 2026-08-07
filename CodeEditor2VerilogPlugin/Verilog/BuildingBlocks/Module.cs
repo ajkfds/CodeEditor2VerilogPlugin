@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
-    public class Module : BuildingBlock, IModuleOrInterface, IPortNameSpace, IBuildingBlockWithModuleInstance, IModuleOrInterfaceOrCheckerOrClass
+    public class Module : BuildingBlock, IModuleOrInterface, IPortNameSpace, IBuildingBlockWithModuleInstance, IModuleOrInterfaceOrCheckerOrClass, IRegion
     {
         protected Module() : base(null, null)
         {

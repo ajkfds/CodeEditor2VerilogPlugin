@@ -101,14 +101,16 @@ namespace pluginVerilog.Verilog.Items.Generate
             {
                 while (!word.Eof)
                 {
+                    IndexReference iref = word.CreateIndexReference();
                     if (generateBlock != null)
                     {
-                        if (!await GenerateItem.ParseAsync(word, generateBlock)) break;
+                        await GenerateItem.ParseAsync(word, generateBlock);
                     }
                     else
                     {
-                        if (!await GenerateItem.ParseAsync(word, nameSpace)) break;
+                        await GenerateItem.ParseAsync(word, nameSpace);
                     }
+                    if (word.CreateIndexReference().IsSameAs(iref)) break;
                 }
             }
             else

@@ -12,14 +12,15 @@ namespace pluginVerilog.Verilog.Items
             | { attribute_instance } module_instantiation 
             | { attribute_instance } module_common_item         
          */
-        public static async System.Threading.Tasks.Task<bool> ParseAsync(WordScanner word, NameSpace nameSpace)
+        public static async Task ParseAsync(WordScanner word, NameSpace nameSpace)
         {
             switch (word.Text)
             {
                 // parameter_override
                 // parameter_override::= ""defparam"" list_of_defparam_assignments;
                 case "defparam":
-                    return Items.ParameterOverride.Parse(word, nameSpace);
+                    Items.ParameterOverride.Parse(word, nameSpace);
+                    return;
                 // gate_instantiation
                 case "cmos":
                 case "rcmos":
@@ -47,20 +48,21 @@ namespace pluginVerilog.Verilog.Items
                 case "rtran":
                 case "pullup":
                 case "pulldown":
-                    return Items.GateInstantiation.Parse(word, nameSpace);
+                    Items.GateInstantiation.Parse(word, nameSpace);
+                    return;
             }
 
+
+            IndexReference iref = word.CreateIndexReference();
             // module_common_item
-            if (await ModuleCommonItem.ParseAsync(word, nameSpace)) return true;
+            if (await ModuleCommonItem.ParseAsync(word, nameSpace)) return;
+            if(!word.CreateIndexReference().IsSameAs(iref)) return;
 
 
             // udp_instantiation
             // module_instantiation
-            if (await Items.ModuleInstantiation.ParseAsync(word, nameSpace)) return true;
+            if (await Items.ModuleInstantiation.ParseAsync(word, nameSpace)) return;
 
-
-
-            return false;
         }
     }
 }

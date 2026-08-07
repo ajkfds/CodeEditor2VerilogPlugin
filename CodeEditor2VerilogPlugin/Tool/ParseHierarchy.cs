@@ -99,38 +99,44 @@ namespace pluginVerilog.Tool
                 int index = i;
                 workers[i] = Task.Run(async () =>
                 {
-                    while (true)
+                    try
                     {
-                        token?.ThrowIfCancellationRequested();
-
-                        if (workQueue.TryDequeue(out var newTask))
+                        while (true)
                         {
-                            Interlocked.Increment(ref activeTaskCount);
+                            token?.ThrowIfCancellationRequested();
 
-                            await parseDownwardAsync(index, newTask, reparseTargetFiles, workQueue, completeIds, parseMode, token);
+                            if (workQueue.TryDequeue(out var newTask))
+                            {
+                                Interlocked.Increment(ref activeTaskCount);
 
-                            var currentCount = Interlocked.Decrement(ref activeTaskCount);
-                            if (currentCount == 0 && workQueue.IsEmpty)
-                            {
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            if(token != null)
-                            {
-                                await Task.Delay(10, (System.Threading.CancellationToken)token);
+                                await parseDownwardAsync(index, newTask, reparseTargetFiles, workQueue, completeIds, parseMode, token);
+
+                                var currentCount = Interlocked.Decrement(ref activeTaskCount);
+                                if (currentCount == 0 && workQueue.IsEmpty)
+                                {
+                                    break;
+                                }
                             }
                             else
                             {
-                                await Task.Delay(1);
-                            }
-                            var currentCount = Volatile.Read(ref activeTaskCount);
-                            if (currentCount == 0 && workQueue.IsEmpty && completeIds.Count != 0)
-                            {
-                                break;
+                                if (token != null)
+                                {
+                                    await Task.Delay(10, (System.Threading.CancellationToken)token);
+                                }
+                                else
+                                {
+                                    await Task.Delay(1);
+                                }
+                                var currentCount = Volatile.Read(ref activeTaskCount);
+                                if (currentCount == 0 && workQueue.IsEmpty && completeIds.Count != 0)
+                                {
+                                    break;
+                                }
                             }
                         }
+                    }catch(Exception ex)
+                    {
+                        CodeEditor2.Controller.AppendLog(ex);
                     }
                 });
             }

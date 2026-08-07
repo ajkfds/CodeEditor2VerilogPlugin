@@ -121,10 +121,9 @@ namespace pluginVerilog.Verilog
             {
                 while (!word.Eof)
                 {
-                    while (!word.Eof)
-                    {
-                        if (!await GenerateItem.ParseAsync(word, nameSpace)) break;
-                    }
+                    IndexReference iref = word.CreateIndexReference();
+                    await GenerateItem.ParseAsync(word, nameSpace);
+                    if (word.CreateIndexReference().IsSameAs(iref)) break;
                 }
             }
             else
@@ -208,7 +207,9 @@ namespace pluginVerilog.Verilog
             {
                 while (!word.Eof)
                 {
-                    if (!await GenerateItem.ParseAsync(word, nameSpace)) break;
+                    IndexReference iref = word.CreateIndexReference();
+                    await GenerateItem.ParseAsync(word, nameSpace);
+                    if (word.CreateIndexReference().IsSameAs(iref)) break;
                 }   
             }
             else

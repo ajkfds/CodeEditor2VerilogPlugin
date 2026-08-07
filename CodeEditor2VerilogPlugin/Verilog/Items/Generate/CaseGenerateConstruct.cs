@@ -61,7 +61,9 @@ namespace pluginVerilog.Verilog.Items.Generate
                         word.StartNonGenerated();
                         while (!word.Eof)
                         {
-                            if (!await GenerateItem.ParseAsync(word, module)) break;
+                            IndexReference iref = word.CreateIndexReference();
+                            await GenerateItem.ParseAsync(word, module);
+                            if (word.CreateIndexReference().IsSameAs(iref)) break;
                         }
                         word.EndNonGenerated();
                     }
@@ -69,7 +71,9 @@ namespace pluginVerilog.Verilog.Items.Generate
                     {
                         while (!word.Eof)
                         {
-                            if (!await GenerateItem.ParseAsync(word, module)) break;
+                            IndexReference iref = word.CreateIndexReference();
+                            await GenerateItem.ParseAsync(word, module);
+                            if (word.CreateIndexReference().IsSameAs(iref)) break;
                         }
                     }
                 }
@@ -103,7 +107,9 @@ namespace pluginVerilog.Verilog.Items.Generate
                         word.StartNonGenerated();
                         while (!word.Eof)
                         {
-                            if (!await GenerateItem.ParseAsync(word, module)) break;
+                            IndexReference iref = word.CreateIndexReference();
+                            await GenerateItem.ParseAsync(word, module);
+                            if (word.CreateIndexReference().IsSameAs(iref)) break;
                         }
                         word.EndNonGenerated();
                     }
@@ -111,7 +117,9 @@ namespace pluginVerilog.Verilog.Items.Generate
                     {
                         while (!word.Eof)
                         {
-                            if (!await GenerateItem.ParseAsync(word, module)) break;
+                            IndexReference iref = word.CreateIndexReference();
+                            await GenerateItem.ParseAsync(word, module);
+                            if (word.CreateIndexReference().IsSameAs(iref)) break;
                         }
                         caseSelected = true;
                     }
