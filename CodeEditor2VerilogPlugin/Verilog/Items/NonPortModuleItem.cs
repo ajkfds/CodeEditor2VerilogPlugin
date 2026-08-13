@@ -40,7 +40,17 @@ namespace pluginVerilog.Verilog.Items
                 // module_declaration
                 case "module":
                 case "macromodule":
-                    await BuildingBlocks.Module.ParseCreateAsync(word, null, nameSpace.BuildingBlock, word.RootParsedDocument.File, word.Prototype);
+                    {
+                        var nestedModule = await BuildingBlocks.Module.ParseCreateAsync(word, null, nameSpace.BuildingBlock, word.RootParsedDocument.File, word.Prototype);
+                        if (nestedModule != null && nameSpace.BuildingBlock != null)
+                        {
+                            bool added = nameSpace.BuildingBlock.AddOrUpdateBuildingBlock(nestedModule.Name, nestedModule);
+                            if (!added && word.Prototype)
+                            {
+                                word.AddPrototypeError("duplicated module name");
+                            }
+                        }
+                    }
                     return;
                 // interface_declaration
                 case "interface":

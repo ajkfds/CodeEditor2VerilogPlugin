@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace pluginVerilog.Verilog.Items
 {
-    public class AlwaysConstruct : IRegion
+    public class AlwaysConstruct : IItem
     {
         protected AlwaysConstruct() { }
         public Statements.IStatement? Statement { get; protected set; }

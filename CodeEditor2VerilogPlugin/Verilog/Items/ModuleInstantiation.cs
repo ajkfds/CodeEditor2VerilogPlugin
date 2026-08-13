@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Items
 {
-    public class ModuleInstantiation : NamedItem, IBuildingBlockInstantiation, INamedElement,IRegion
+    public class ModuleInstantiation : NamedItem, IBuildingBlockInstantiation, INamedElement,IItem
     {
         public NamedElements NamedElements { get; } = new NamedElements();
 

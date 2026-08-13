@@ -599,34 +599,62 @@ namespace pluginVerilog.Verilog
             return null;
         }
 
-
-        public bool TryGetRegion(IndexReference iref, out NameSpace? nameSpace, out IRegion? item)
+        public Items.IItem? GetItemAt(int index)
         {
-            item = null;
-            nameSpace = GetNameSpace(iref);
-            if (nameSpace == null) return false;
+            if (Root == null) return null;
+            IndexReference iref = IndexReference.Create(this.IndexReference, index);
 
-            IRegion? find = null;
-            foreach (IRegion subItem in nameSpace.Regions)
+            IndexReference? foundBegin = null;
+            IndexReference? foundLast = null;
+            Items.IItem? item = null;
+
+            searchNameSpace(Root,iref,foundBegin, foundLast, item);
+            if(item is NameSpace)
             {
-                if (subItem.BeginIndexReference == null) continue;
-                if (subItem.LastIndexReference == null) continue;
-                if (iref.IsSmallerThan(subItem.BeginIndexReference)) continue;
-                if (iref.IsGreaterThan(subItem.LastIndexReference)) continue;
-                find = subItem;
+                searchItem((NameSpace)item, iref, foundBegin, foundLast, item);
+            }
+            return item;
+        }
+
+        private void searchNameSpace(NameSpace nameSpace, IndexReference targetIndexRef, IndexReference? foundBegin,IndexReference? foundLast ,Items.IItem? item )
+        {
+            foreach (var element in nameSpace.NamedElements.Values)
+            {
+                NameSpace? subNameSpace = element as NameSpace;
+                if (subNameSpace == null) return;
+
+                if (targetIndexRef.IsSmallerThan(subNameSpace.BeginIndexReference)) continue;
+                if (subNameSpace.LastIndexReference == null) continue;
+                if (targetIndexRef.IsGreaterThan(subNameSpace.LastIndexReference)) continue;
+
+                item = subNameSpace;
+                foundBegin = subNameSpace.BeginIndexReference;
+                foundLast = subNameSpace.LastIndexReference;
+                searchNameSpace(subNameSpace, targetIndexRef, foundBegin, foundLast, item );
                 break;
-            }
-            if (find != null)
-            {
-                item = find;
-                return true;
-            }
-            else
-            {
-                return false;
             }
         }
 
+        private void searchItem(NameSpace nameSpace, IndexReference targetIndexRef, IndexReference? foundBegin, IndexReference? foundLast, Items.IItem? item)
+        {
+            foreach (Items.IItem itemBlock in nameSpace.Items)
+            {
+                if (itemBlock.BeginIndexReference == null) continue;
+                if (targetIndexRef.IsSmallerThan(itemBlock.BeginIndexReference)) continue;
+                if (itemBlock.LastIndexReference == null) continue;
+                if (targetIndexRef.IsGreaterThan(itemBlock.LastIndexReference)) continue;
+
+                if(foundBegin != null && foundLast != null)
+                {
+                    if (itemBlock.BeginIndexReference.IsSmallerThan(foundBegin)) continue;
+                    if (itemBlock.LastIndexReference.IsGreaterThan(foundLast)) continue;
+                }
+
+                item = itemBlock;
+                foundBegin = itemBlock.BeginIndexReference;
+                foundLast = itemBlock.LastIndexReference;
+            }
+        }
 
 
         public NameSpace? GetNameSpace(IndexReference iref)

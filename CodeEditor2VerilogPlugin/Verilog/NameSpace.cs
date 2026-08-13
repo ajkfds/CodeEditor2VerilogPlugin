@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 
 namespace pluginVerilog.Verilog
 {
-    public class NameSpace : NamedItem, INamedElement, Items.IRegion
+    public class NameSpace : NamedItem, INamedElement, Items.IItem
     {
         protected NameSpace(BuildingBlocks.BuildingBlock buildingBlock, NameSpace parent)
         {
@@ -32,6 +32,7 @@ namespace pluginVerilog.Verilog
         [JsonIgnore]
         public virtual NamedElements NamedElements { get; } = new NamedElements();
 
+
         /// <summary>
         /// Comment-based scope references (from @scope annotation)
         /// Allows accessing elements from other building blocks without explicit instance connection.
@@ -40,14 +41,14 @@ namespace pluginVerilog.Verilog
 
         public IndexReference BeginIndexReference { get; init; }
         public IndexReference? LastIndexReference { get; set; } = null;
-        public List<IRegion> Regions { get; protected set; } = new List<IRegion>();
+        public List<IItem> Regions { get; protected set; } = new List<IItem>();
 
 
         public IndexReference? BlockBeginIndexReference = null;
 
         public NameSpace Parent { get; init; } = null;
 
-        public List<Items.IRegion> Items { get; protected set; } = new List<Items.IRegion>();
+        public List<Items.IItem> Items { get; protected set; } = new List<Items.IItem>();
 
         public BuildingBlocks.BuildingBlock BuildingBlock { get; protected set; }
 

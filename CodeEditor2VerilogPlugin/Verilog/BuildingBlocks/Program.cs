@@ -197,6 +197,15 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 }
             }
 
+            // Also register in parent name space's NamedElements so that the
+            // program is reachable from expression parse and autocomplete as a
+            // sub-namespace entry. NamedElements.Add is a no-op if the same key
+            // already exists, so duplicate registration is safe.
+            if (parent != null && !string.IsNullOrEmpty(program.Name))
+            {
+                parent.NamedElements.Add(program.Name, program);
+            }
+
             return program;
         }
 

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
-    public class Module : BuildingBlock, IModuleOrInterface, IPortNameSpace, IBuildingBlockWithModuleInstance, IModuleOrInterfaceOrCheckerOrClass, IRegion
+    public class Module : BuildingBlock, IModuleOrInterface, IPortNameSpace, IBuildingBlockWithModuleInstance, IModuleOrInterfaceOrCheckerOrClass, IItem
     {
         protected Module() : base(null, null)
         {
@@ -188,15 +188,13 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 }
             }
 
-            // register with the parent module
-            bool added = parent.AddOrUpdateBuildingBlock(module.Name, module);
-            if (!added)
+            // Register this module into the parent (top-level Root, or enclosing module)
+            // NameSpace's NamedElements so that it is reachable from expression parse
+            // and autocomplete as a sub-namespace entry. NamedElements.Add is a no-op
+            // if the same key already exists, so duplicate registration is safe.
+            if (parent != null && !string.IsNullOrEmpty(module.Name))
             {
-                if (protoType)
-                {
-                    module.NameReference.AddError("duplicated module name");
-                }
-                // If not prototype, the update is already done by AddOrUpdateBuildingBlock
+                parent.NamedElements.Add(module.Name, module);
             }
 
             return module;

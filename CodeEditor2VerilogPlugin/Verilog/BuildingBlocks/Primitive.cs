@@ -273,6 +273,15 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             // Register with parent building block
             parent.AddOrUpdateBuildingBlock(primitive.Name, primitive);
 
+            // Also register in parent name space's NamedElements so that the
+            // primitive is reachable from expression parse and autocomplete as a
+            // sub-namespace entry. NamedElements.Add is a no-op if the same key
+            // already exists, so duplicate registration is safe.
+            if (parent != null && !string.IsNullOrEmpty(primitive.Name))
+            {
+                parent.NamedElements.Add(primitive.Name, primitive);
+            }
+
             return primitive;
         }
 

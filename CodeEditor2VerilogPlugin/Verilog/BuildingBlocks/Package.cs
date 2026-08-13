@@ -158,6 +158,16 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
                 package.NameReference.AddError("duplicated package name");
             }
+
+            // Also register in parent name space's NamedElements so that the
+            // package is reachable from expression parse and autocomplete as a
+            // sub-namespace entry. NamedElements.Add is a no-op if the same key
+            // already exists, so duplicate registration is safe.
+            if (parent != null && !string.IsNullOrEmpty(package.Name))
+            {
+                parent.NamedElements.Add(package.Name, package);
+            }
+
             return package;
         }
 

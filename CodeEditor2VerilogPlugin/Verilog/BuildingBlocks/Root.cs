@@ -215,7 +215,22 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
                 module = await Module.ParseCreateAsync(word, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
             }
-            // Note: ReparseRequested is now set only once at the end of ParseCreate based on ParseMode
+
+            bool added = parsedDocument.Root.AddOrUpdateBuildingBlock(module.Name, module);
+            if (added)
+            {
+                // Only set ReparseRequested if building block was actually added for the first time
+                parsedDocument.ReparseRequested = true;
+            }
+            else
+            {
+                if (word.Prototype)
+                {
+                    word.AddPrototypeError("duplicated module name");
+                }
+                // If not prototype, the update is already done by AddOrUpdateBuildingBlock
+            }
+            // Note: ReparseRequested for ParseMode is now set only once at the end of ParseCreate based on ParseMode
         }
 
         private static async System.Threading.Tasks.Task parsePackageAsync(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
