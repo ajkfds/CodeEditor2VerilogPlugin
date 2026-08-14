@@ -153,7 +153,6 @@ namespace pluginVerilog
         }
 
 
-
         public Data.IVerilogRelatedFile? GetFileOfDefinitionNameSpace(string elementName)
         {
             definitionNameSpaceLock.EnterReadLock();
@@ -168,12 +167,12 @@ namespace pluginVerilog
         }
 
 
-        public List<string> GetModuleNameList()
+        public List<string> GetDefinitionNameSpaceElementNameList(Func<BuildingBlock,bool> isMatched)
         {
             definitionNameSpaceLock.EnterReadLock();
             try
             {
-                return buildingBlockTable.GetMatchedKeyList((x) => { return (x is Module); });
+                return buildingBlockTable.GetMatchedKeyList( (x) => { return isMatched(x); });
             }
             finally
             {
@@ -199,10 +198,10 @@ namespace pluginVerilog
         }
 
         // Package NameSpace ----------------------------------------------------------------------------------------------------------------------------------
-        // 
+        // packages
 
         // Compile Unit NameSpace ----------------------------------------------------------------------------------------------------------------------------------
-        // 
+        // top level class 
 
 
         // -----------------------------------------------------------------------------------------------------------------------------------------

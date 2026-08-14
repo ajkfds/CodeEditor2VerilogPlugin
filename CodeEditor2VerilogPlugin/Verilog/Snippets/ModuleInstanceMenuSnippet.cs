@@ -1,6 +1,7 @@
 using CodeEditor2.CodeEditor.PopupMenu;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 
 namespace pluginVerilog.Verilog.Snippets
@@ -27,7 +28,7 @@ namespace pluginVerilog.Verilog.Snippets
             ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
             if (projectProperty == null) throw new Exception();
 
-            List<string> moduleNames = projectProperty.GetModuleNameList();
+            List<string> moduleNames = projectProperty.GetDefinitionNameSpaceElementNameList((x) => { return (x is Verilog.BuildingBlocks.Module); });
             foreach (string moduleName in moduleNames)
             {
                 items.Add(new ModuleInstanceSnippet(moduleName));
