@@ -141,9 +141,10 @@ namespace pluginVerilog.Data.VerilogCommon
             }
 
             // hier cantidate : get current line namespace and region
-            //IndexReference iref = Verilog.IndexReference.Create(parsedDocument, codeDocument, lineStartIndex);
-            //            parsedDocument.TryGetRegion(iref, out NameSpace? namSpace, out Verilog.Items.IItem? region);
-            Verilog.Items.IItem? currentItem = parsedDocument.GetItemAt(lineStartIndex);
+            IndexReference iref = Verilog.IndexReference.Create(parsedDocument, codeDocument, lineStartIndex);
+            Verilog.Items.IItem? currentItem = parsedDocument.GetItemAt(iref);
+
+
 
             bool onLineStart = false;
             while(true){

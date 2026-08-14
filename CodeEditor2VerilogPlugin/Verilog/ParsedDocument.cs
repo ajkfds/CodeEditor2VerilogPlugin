@@ -599,24 +599,23 @@ namespace pluginVerilog.Verilog
             return null;
         }
 
-        public Items.IItem? GetItemAt(int index)
+        public Items.IItem? GetItemAt(IndexReference indexRef)
         {
             if (Root == null) return null;
-            IndexReference iref = IndexReference.Create(this.IndexReference, index);
 
             IndexReference? foundBegin = null;
             IndexReference? foundLast = null;
             Items.IItem? item = null;
 
-            searchNameSpace(Root,iref,foundBegin, foundLast, item);
+            searchNameSpace(Root, indexRef, ref foundBegin, ref foundLast, ref item);
             if(item is NameSpace)
             {
-                searchItem((NameSpace)item, iref, foundBegin, foundLast, item);
+                searchItem((NameSpace)item, indexRef, ref foundBegin, ref foundLast, ref item);
             }
             return item;
         }
 
-        private void searchNameSpace(NameSpace nameSpace, IndexReference targetIndexRef, IndexReference? foundBegin,IndexReference? foundLast ,Items.IItem? item )
+        private void searchNameSpace(NameSpace nameSpace, IndexReference targetIndexRef, ref IndexReference? foundBegin,ref IndexReference? foundLast ,ref Items.IItem? item )
         {
             foreach (var element in nameSpace.NamedElements.Values)
             {
@@ -630,12 +629,12 @@ namespace pluginVerilog.Verilog
                 item = subNameSpace;
                 foundBegin = subNameSpace.BeginIndexReference;
                 foundLast = subNameSpace.LastIndexReference;
-                searchNameSpace(subNameSpace, targetIndexRef, foundBegin, foundLast, item );
+                searchNameSpace(subNameSpace, targetIndexRef, ref foundBegin, ref foundLast,ref item );
                 break;
             }
         }
 
-        private void searchItem(NameSpace nameSpace, IndexReference targetIndexRef, IndexReference? foundBegin, IndexReference? foundLast, Items.IItem? item)
+        private void searchItem(NameSpace nameSpace, IndexReference targetIndexRef, ref IndexReference? foundBegin, ref IndexReference? foundLast,ref Items.IItem? item)
         {
             foreach (Items.IItem itemBlock in nameSpace.Items)
             {
