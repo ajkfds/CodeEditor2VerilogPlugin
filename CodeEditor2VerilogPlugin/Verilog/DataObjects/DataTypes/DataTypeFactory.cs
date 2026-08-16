@@ -251,15 +251,15 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             }
 
             // class_type
-            BuildingBlock? buildingBlock = word.ProjectProperty.GetBuildingBlockFromDefinitionNameSpace(word.Text);
-            if (buildingBlock is Class)
+            Class? @class = word.ProjectProperty.UnitNameSpace.Get(word.Text) as Class;
+            if (@class != null)
             {
-                Class class_ = (Class)buildingBlock;
                 word.Color(CodeDrawStyle.ColorType.Identifier);
                 word.MoveNext();
-                return class_;
+                return @class;
             }
 
+            BuildingBlock? buildingBlock = word.ProjectProperty.DefinitionNameSpace.Get(word.Text) as BuildingBlock;
             // interface
             if (buildingBlock is Interface && virtual_)
             {

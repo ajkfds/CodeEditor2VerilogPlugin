@@ -197,7 +197,7 @@ namespace pluginVerilog.Data.VerilogCommon
                 ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
                 if (projectProperty == null) throw new Exception();
 
-                List<string> moduleNames = projectProperty.GetDefinitionNameSpaceElementNameList((x) => { return (x is Module); });
+                List<string> moduleNames = projectProperty.DefinitionNameSpace.GetNameList((x) => { return (x is Module); });
                 foreach (string moduleName in moduleNames)
                 {
                     items.Add(new Verilog.Snippets.ModuleInstanceSnippet(moduleName));

@@ -68,7 +68,7 @@ namespace pluginVerilog. Data
                     if(projectProperty == null) continue;
                     foreach(string className in parsedDocument.ReferencedUnitNameSpace)
                     {
-                        IVerilogRelatedFile? newfile = projectProperty.GetFileOfDefinitionNameSpace(className);
+                        IVerilogRelatedFile? newfile = projectProperty.UnitNameSpace.GetFile(className);
                         if(newfile !=null && !newClassFiles.Contains(newfile)) newClassFiles.Add(newfile);
                     }
                 }
@@ -119,7 +119,7 @@ namespace pluginVerilog. Data
 
             foreach(string className in parsedDocument.ReferencedUnitNameSpace)
             {
-                Class? class_ = parsedDocument.ProjectProperty?.GetBuildingBlockFromDefinitionNameSpace(className) as Class;
+                Class? class_ = parsedDocument.ProjectProperty?.UnitNameSpace.GetFile(className) as Class;
                 if (parsedDocument.Project == null) continue;
                 if (class_ != null) appendClass(className, parsedDocument.Project, setup);
             }
@@ -295,10 +295,10 @@ namespace pluginVerilog. Data
             // Handle Object (class instance) - has Class property
             if (dataObject is Object objectInstance)
             {
-                Class class_ = objectInstance.GetSourceClass();
+                Class? class_ = objectInstance.GetSourceClass();
                 if (class_ == null) return;
 
-                IVerilogRelatedFile? sourceFile = projectProperty.GetFileOfDefinitionNameSpace(class_.Name);
+                IVerilogRelatedFile? sourceFile = projectProperty.UnitNameSpace.GetFile(class_.Name);
                 if (sourceFile == null) return;
 
                 if (sourceFile is pluginVerilog.Data.VerilogFile || sourceFile is SystemVerilogFile)
@@ -314,7 +314,7 @@ namespace pluginVerilog. Data
             {
                 if (userDefinedVariable.DataType is UserDefinedType userDefinedType)
                 {
-                    IVerilogRelatedFile? sourceFile = projectProperty.GetFileOfDefinitionNameSpace(userDefinedType.Typedef.Name);
+                    IVerilogRelatedFile? sourceFile = projectProperty.DefinitionNameSpace.GetFile(userDefinedType.Typedef.Name);
                     if (sourceFile == null) return;
 
                     if (sourceFile is pluginVerilog.Data.VerilogFile || sourceFile is SystemVerilogFile)
@@ -338,7 +338,7 @@ namespace pluginVerilog. Data
             {
                 if (userDefinedVariable.DataType is UserDefinedType userDefinedType)
                 {
-                    IVerilogRelatedFile? sourceFile = projectProperty.GetFileOfDefinitionNameSpace(userDefinedType.Typedef.Name);
+                    IVerilogRelatedFile? sourceFile = projectProperty.UnitNameSpace.GetFile(userDefinedType.Typedef.Name);
                     if (sourceFile == null) return;
 
                     if (sourceFile is pluginVerilog.Data.VerilogFile || sourceFile is SystemVerilogFile)
@@ -450,8 +450,8 @@ namespace pluginVerilog. Data
             ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
             if (projectProperty == null) return null;
 
-            Package? package = projectProperty.GetBuildingBlockFromDefinitionNameSpace(packageName) as Package;
-            IVerilogRelatedFile? verilogRelatedFile = projectProperty.GetFileOfDefinitionNameSpace(packageName);
+//            Package? package = projectProperty.PackageNameSpace.Get(packageName) as Package;
+            IVerilogRelatedFile? verilogRelatedFile = projectProperty.PackageNameSpace.GetFile(packageName);
             return verilogRelatedFile;
         }
         private static IVerilogRelatedFile? findClassFile(string className, CodeEditor2.Data.Project project, SimulationSetup setup)
@@ -459,8 +459,8 @@ namespace pluginVerilog. Data
             ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
             if (projectProperty == null) return null;
 
-            Class? package = projectProperty.GetBuildingBlockFromDefinitionNameSpace(className) as Class;
-            IVerilogRelatedFile? verilogRelatedFile = projectProperty.GetFileOfDefinitionNameSpace(className);
+//            Class? class_ = projectProperty.UnitNameSpace.Get(className) as Class;
+            IVerilogRelatedFile? verilogRelatedFile = projectProperty.UnitNameSpace.GetFile(className);
             return verilogRelatedFile;
         }
 

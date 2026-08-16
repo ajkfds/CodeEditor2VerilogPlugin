@@ -120,10 +120,15 @@ namespace pluginVerilog.Verilog.Expressions
 
             if (baseNameSpace == null)
             { // unfound element
-                BuildingBlock? buildingBlock = nameSpace.ProjectProperty.GetBuildingBlockFromDefinitionNameSpace(name);
+                BuildingBlock? buildingBlock = nameSpace.ProjectProperty.DefinitionNameSpace.Get(name);
                 if(buildingBlock != null)
                 {
                     baseNameSpace = buildingBlock;
+                }
+                else
+                {
+                    Class? @class = nameSpace.ProjectProperty.UnitNameSpace.Get(name) as Class;
+                    if (@class != null) baseNameSpace = @class;
                 }
                 index++;
                 if (index >= Names.Count) return (baseNameSpace,baseNameSpace);

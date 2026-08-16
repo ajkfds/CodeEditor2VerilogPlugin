@@ -24,7 +24,7 @@ namespace pluginVerilog.Verilog.Items
                         comment.MoveNext();
 
                         if (comment.EOC) continue;
-                        var buildingBlock = word.ProjectProperty.GetBuildingBlockFromDefinitionNameSpace(comment.Text);
+                        var buildingBlock = word.ProjectProperty.DefinitionNameSpace.Get(comment.Text);
                         if (buildingBlock == null) continue;
                         comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
                         comment.MoveNext();
@@ -323,10 +323,10 @@ namespace pluginVerilog.Verilog.Items
                 // BuildingBlock's owning file -- no synthetic instance is
                 // created.
                 if (word.RootParsedDocument.ParseMode == CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.EditParse
-                    && word.ProjectProperty.GetBuildingBlockFromDefinitionNameSpace(scopeRef.BuildingBlockName) == null)
+                    && word.ProjectProperty.DefinitionNameSpace.Get(scopeRef.BuildingBlockName) == null)
                 {
                     Data.IVerilogRelatedFile? targetFile =
-                        word.ProjectProperty.GetFileOfDefinitionNameSpace(scopeRef.BuildingBlockName);
+                        word.ProjectProperty.DefinitionNameSpace.GetFile(scopeRef.BuildingBlockName);
                     if (targetFile is Data.VerilogFile targetVerilogFile
                         && targetVerilogFile.VerilogParsedDocument == null)
                     {
@@ -344,7 +344,7 @@ namespace pluginVerilog.Verilog.Items
                     }
                 }
 
-                scopeRef.ResolvedBuildingBlock = word.ProjectProperty.GetBuildingBlockFromDefinitionNameSpace(scopeRef.BuildingBlockName);
+                scopeRef.ResolvedBuildingBlock = word.ProjectProperty.DefinitionNameSpace.Get(scopeRef.BuildingBlockName);
 
                 // Even when the target BuildingBlock is not yet registered (it
                 // may live in a different file whose parse hasn't completed),

@@ -292,7 +292,7 @@ namespace pluginVerilog.Verilog.Statements
             // If not dynamic array new, try to resolve class reference
             if (!isDynamicArrayNew)
             {
-                BuildingBlocks.Class? class_ = word.ProjectProperty.GetBuildingBlockFromDefinitionNameSpace(word.Text) as BuildingBlocks.Class;
+                BuildingBlocks.Class? class_ = word.ProjectProperty.UnitNameSpace.Get(word.Text) as BuildingBlocks.Class;
                 if (class_ != null)
                 {
                     word.Color(CodeDrawStyle.ColorType.Identifier);

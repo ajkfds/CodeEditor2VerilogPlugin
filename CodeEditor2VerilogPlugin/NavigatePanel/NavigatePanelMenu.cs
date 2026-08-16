@@ -83,7 +83,7 @@ namespace pluginVerilog.NavigatePanel
             // duplicate check
             ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as pluginVerilog.ProjectProperty;
             if (projectProperty == null) return;
-            BuildingBlock? buildingBlock = projectProperty.GetBuildingBlockFromDefinitionNameSpace(name);
+            BuildingBlock? buildingBlock = projectProperty.DefinitionNameSpace.Get(name);
             if (buildingBlock != null)
             {
                 var file = buildingBlock.File;

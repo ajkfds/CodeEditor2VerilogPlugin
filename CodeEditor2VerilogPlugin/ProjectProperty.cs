@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading;
 using System.Diagnostics.CodeAnalysis;
+using pluginVerilog.Verilog;
 
 namespace pluginVerilog
 {
@@ -94,11 +95,11 @@ namespace pluginVerilog
         {
             if (instantiation.ParameterOverrides.Count == 0)
             {
-                return GetBuildingBlockFromDefinitionNameSpace(instantiation.SourceName);
+                return DefinitionNameSpace.Get(instantiation.SourceName);
             }
             else
             {
-                Data.VerilogFile? file = GetFileOfDefinitionNameSpace(instantiation.SourceName) as Data.VerilogFile;
+                Data.VerilogFile? file = DefinitionNameSpace.GetFile(instantiation.SourceName) as Data.VerilogFile;
                 if (file == null) return null;
                 string InstanceKey = Verilog.ParsedDocument.KeyGenerator(file, instantiation.SourceName, instantiation.ParameterOverrides);
 
@@ -116,92 +117,30 @@ namespace pluginVerilog
 
         // Definition NameSpace ----------------------------------------------------------------------------------------------------------------------------------
         // top level module, primitive, program, interface register to this namespace
+        public Verilog.RegisterNameSpace<BuildingBlock> DefinitionNameSpace { get; } = new Verilog.RegisterNameSpace<BuildingBlock>();
+        /*
+        定義ネームスペース (Definitions name space): 他の宣言の外側で定義された、ネストされていないモジュール、プリミティブ、プログラム、インターフェースの識別子を統合します。
+        あるコンパイル単位でこれらの名前が使用されると、他のコンパイル単位も含め、デザイン全体で同じ名前を再利用することはできません。
+        */
 
-        // Thread-safe access using ReaderWriterLockSlim
-        private readonly ReaderWriterLockSlim definitionNameSpaceLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
-
-        // BuildingBlock -> File Table
-        private WeakReferenceDictionary<string, Data.IVerilogRelatedFile> buildingBlockFileTable = new WeakReferenceDictionary<string, Data.IVerilogRelatedFile>();
-        private WeakReferenceDictionary<string, BuildingBlock> buildingBlockTable = new WeakReferenceDictionary<string, BuildingBlock>();
-
-
-        public void RegisterToDefinitionNameSpace(string buildingBlockName, BuildingBlock buildingBlock, VerilogFile file)
-        {
-            if (file == null)
-            {
-                if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
-            }
-
-            definitionNameSpaceLock.EnterWriteLock();
-            try
-            {
-                if (System.Diagnostics.Debugger.IsAttached && buildingBlockTable.Count != buildingBlockFileTable.Count)
-                {
-                    System.Diagnostics.Debugger.Break();
-                }
-                buildingBlockTable.Register(buildingBlockName, buildingBlock);
-                buildingBlockFileTable.Register(buildingBlockName, file);
-                if (System.Diagnostics.Debugger.IsAttached && buildingBlockTable.Count != buildingBlockFileTable.Count)
-                {
-                    System.Diagnostics.Debugger.Break();
-                }
-            }
-            finally
-            {
-                definitionNameSpaceLock.ExitWriteLock();
-            }
-        }
-
-
-        public Data.IVerilogRelatedFile? GetFileOfDefinitionNameSpace(string elementName)
-        {
-            definitionNameSpaceLock.EnterReadLock();
-            try
-            {
-                return buildingBlockFileTable.GetItem(elementName);
-            }
-            finally
-            {
-                definitionNameSpaceLock.ExitReadLock();
-            }
-        }
-
-
-        public List<string> GetDefinitionNameSpaceElementNameList(Func<BuildingBlock,bool> isMatched)
-        {
-            definitionNameSpaceLock.EnterReadLock();
-            try
-            {
-                return buildingBlockTable.GetMatchedKeyList( (x) => { return isMatched(x); });
-            }
-            finally
-            {
-                definitionNameSpaceLock.ExitReadLock();
-            }
-        }
-
-
-        public BuildingBlock? GetBuildingBlockFromDefinitionNameSpace(string buildingBlockName)
-        {
-            Data.IVerilogRelatedFile? file = GetFileOfDefinitionNameSpace(buildingBlockName);
-            if (file == null) return null;
-
-
-            if (file.VerilogParsedDocument == null) return null;
-            if (file.VerilogParsedDocument.Root == null) return null;
-
-            if (!file.VerilogParsedDocument.Root.BuildingBlocks.TryGetValue(buildingBlockName, out BuildingBlock? buildingBlock))
-            {
-                return null;
-            }
-            return buildingBlock;
-        }
 
         // Package NameSpace ----------------------------------------------------------------------------------------------------------------------------------
         // packages
+        public Verilog.RegisterNameSpace<Package> PackageNameSpace { get; } = new Verilog.RegisterNameSpace<Package>();
+        /*
+        パッケージ・ネームスペース (Package name space): すべてのコンパイル単位で定義されたすべてのパッケージ識別子を統合します。
+        パッケージ名もデザイン全体で一意である必要があります。
+        */
 
         // Compile Unit NameSpace ----------------------------------------------------------------------------------------------------------------------------------
         // top level class 
+        public Verilog.RegisterNameSpace<INamedElement> UnitNameSpace { get; } = new Verilog.RegisterNameSpace<INamedElement>();
+        /*
+        コンパイル単位でグローバルなネームスペース
+        コンパイル単位スコープ・ネームスペース (Compilation-unit scope name space): 
+        モジュール、インターフェース、パッケージなどの外側に存在し、そのコンパイル単位内での関数、タスク、チェッカー、
+        パラメータ、名前付きイベント、ネット、変数、ユーザー定義型を統合します
+        */
 
 
         // -----------------------------------------------------------------------------------------------------------------------------------------

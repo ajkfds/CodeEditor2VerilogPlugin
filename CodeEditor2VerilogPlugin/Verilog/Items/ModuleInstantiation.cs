@@ -95,7 +95,7 @@ namespace pluginVerilog.Verilog.Items
             if (portRef == null) return;
 
             string portName = portRef.Name;
-            Module? originalModule = ProjectProperty.GetBuildingBlockFromDefinitionNameSpace(SourceName) as Module;
+            Module? originalModule = ProjectProperty.DefinitionNameSpace.Get(SourceName) as Module;
             if (originalModule == null) return;
             if (!originalModule.Ports.ContainsKey(portName)) return;
             Verilog.DataObjects.Port port = originalModule.Ports[portName];
@@ -121,7 +121,7 @@ namespace pluginVerilog.Verilog.Items
                 projectProperty = (ProjectProperty)sourceProject.GetPluginProperty();
             }
 
-            Data.IVerilogRelatedFile? file = projectProperty.GetFileOfDefinitionNameSpace(SourceName);
+            Data.IVerilogRelatedFile? file = projectProperty.DefinitionNameSpace.GetFile(SourceName);
             if (file == null) return null;
             if (file is not Data.VerilogFile) return null;
 
@@ -202,7 +202,7 @@ namespace pluginVerilog.Verilog.Items
             IndexReference beginIndexReference = word.CreateIndexReference();
 
             // instance対象となるmoduleを取得する
-            Module? instancedModule = word.ProjectProperty.GetBuildingBlockFromDefinitionNameSpace(moduleName) as Module;
+            Module? instancedModule = word.ProjectProperty.DefinitionNameSpace.Get(moduleName) as Module;
             if(!word.RootParsedDocument.ReferencedDefinitionNameSpace.Contains(moduleName)) word.RootParsedDocument.ReferencedDefinitionNameSpace.Add(moduleName);
 
             string moduleComment = word.GetNextComment();
@@ -223,7 +223,7 @@ namespace pluginVerilog.Verilog.Items
                         if (!CodeEditor2.Global.Projects.ContainsKey(comment.Text)) break;
 
                         sourceProject = CodeEditor2.Global.Projects[comment.Text];
-                        instancedModule = ((ProjectProperty)sourceProject.GetPluginProperty()).GetBuildingBlockFromDefinitionNameSpace(moduleName) as Module;
+                        instancedModule = ((ProjectProperty)sourceProject.GetPluginProperty()).DefinitionNameSpace.Get(moduleName) as Module;
 
                         word.RootParsedDocument.ReparseRequested = true;
                         break;
@@ -303,7 +303,7 @@ namespace pluginVerilog.Verilog.Items
                         instancedModule = word.ProjectProperty.GetInstancedBuildingBlock(moduleInstantiation) as Module;
                     }
 
-                    VerilogFile? baseFile = word.ProjectProperty.GetFileOfDefinitionNameSpace(moduleName) as VerilogFile;
+                    VerilogFile? baseFile = word.ProjectProperty.DefinitionNameSpace.GetFile(moduleName) as VerilogFile;
 
                     if (word.RootParsedDocument.ParseMode == CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.EditParse)
                     { // editparse時処理
@@ -926,7 +926,7 @@ namespace pluginVerilog.Verilog.Items
                 ModportInstance? modportInstantiation = instancedModule.Ports[pinName].DataObject as ModportInstance;
                 if (modportInstantiation == null) throw new Exception();
                 string interfaceName = modportInstantiation.InterfaceName;
-                Interface? interface_ = instancedModule.Project.GetPluginProperty().GetBuildingBlockFromDefinitionNameSpace(interfaceName) as Interface;
+                Interface? interface_ = instancedModule.Project.GetPluginProperty().DefinitionNameSpace.Get(interfaceName) as Interface;
                 if (interface_ == null)
                 {
                     expression.Reference.AddError("illegal interface");
@@ -940,7 +940,7 @@ namespace pluginVerilog.Verilog.Items
             {
                 InterfaceInstance? portInterfaceInstantiation = (((instancedModule.Ports[pinName].DataObject as InterfaceInstance)));
                 if (portInterfaceInstantiation == null) throw new Exception();
-                Interface? interface_ = instancedModule.Project.GetPluginProperty().GetBuildingBlockFromDefinitionNameSpace(portInterfaceInstantiation.SourceName) as Interface;
+                Interface? interface_ = instancedModule.Project.GetPluginProperty().DefinitionNameSpace.Get(portInterfaceInstantiation.SourceName) as Interface;
                 if (interface_ == null)
                 {
                     expression.Reference.AddError("illegal interface");

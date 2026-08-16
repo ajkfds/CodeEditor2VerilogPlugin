@@ -19,7 +19,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         {
             ProjectProperty projectProperty = (ProjectProperty)Project.GetPluginProperty();
 
-            Data.IVerilogRelatedFile? file = projectProperty.GetFileOfDefinitionNameSpace(SourceName);
+            Data.IVerilogRelatedFile? file = projectProperty.DefinitionNameSpace.GetFile(SourceName);
             if (file == null) return null;
             if (file is not Data.VerilogFile) return null;
 

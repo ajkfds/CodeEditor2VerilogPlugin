@@ -291,7 +291,15 @@ namespace pluginVerilog.Tool
                 foreach (string elementName in verilogFile.VerilogParsedDocument.ReferencedUnitNameSpace)
                 {
                     pluginVerilog.ProjectProperty projectProperty = (ProjectProperty)verilogFile.Project.ProjectProperties[pluginVerilog.Plugin.StaticID];
-                    TextFile? vFile = projectProperty.GetFileOfDefinitionNameSpace(elementName) as TextFile;
+                    TextFile? vFile = projectProperty.DefinitionNameSpace.GetFile(elementName) as TextFile;
+                    if (vFile == null)
+                    {
+                        vFile = projectProperty.PackageNameSpace.GetFile(elementName) as TextFile;
+                    }
+                    if (vFile == null)
+                    {
+                        vFile = projectProperty.UnitNameSpace.GetFile(elementName) as TextFile;
+                    }
                     if (vFile == null) continue;
                     ParseTask newTask = new ParseTask(Id: vFile.ID, tarfgetTextFile: vFile);
                     EnqueueWork(newTask, workQueue, completeIds);
@@ -361,7 +369,7 @@ namespace pluginVerilog.Tool
                     // RegisterBuildingBlock, after which the
                     // VirtualScopeNameSpace's late-binding lookup can find it.
                     Data.IVerilogRelatedFile? targetFile =
-                        projectProperty.GetFileOfDefinitionNameSpace(scopeRef.BuildingBlockName);
+                        projectProperty.DefinitionNameSpace.GetFile(scopeRef.BuildingBlockName);
                     if (targetFile == null) continue;
 
                     // The target file must be a TextFile for the parse queue

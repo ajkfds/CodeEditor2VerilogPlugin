@@ -74,7 +74,7 @@ namespace pluginVerilog.Verilog.Items
             if (portRef == null) return;
 
             string portName = portRef.Name;
-            Program? originalProgram = ProjectProperty.GetBuildingBlockFromDefinitionNameSpace(SourceName) as Program;
+            Program? originalProgram = ProjectProperty.DefinitionNameSpace.Get(SourceName) as Program;
             if (originalProgram == null) return;
             if (!originalProgram.Ports.ContainsKey(portName)) return;
             Verilog.DataObjects.Port port = originalProgram.Ports[portName];
@@ -101,7 +101,7 @@ namespace pluginVerilog.Verilog.Items
                 projectProperty = (ProjectProperty)sourceProject.GetPluginProperty();
             }
 
-            Data.IVerilogRelatedFile? file = projectProperty.GetFileOfDefinitionNameSpace(SourceName);
+            Data.IVerilogRelatedFile? file = projectProperty.DefinitionNameSpace.GetFile(SourceName);
             if (file == null) return null;
             if (file is not Data.VerilogFile) return null;
 
@@ -149,7 +149,7 @@ namespace pluginVerilog.Verilog.Items
             IndexReference beginIndexReference = word.CreateIndexReference();
 
             // Get the instanced program
-            Program? instancedProgram = word.ProjectProperty.GetBuildingBlockFromDefinitionNameSpace(programName) as Program;
+            Program? instancedProgram = word.ProjectProperty.DefinitionNameSpace.Get(programName) as Program;
             if (instancedProgram == null)
             {
                 // module instanceである可能性がある。

@@ -23,8 +23,10 @@ bind_instantiation ::=
 
 */
 
+using Avalonia.Controls;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.Expressions;
+using pluginVerilog.Verilog.Property;
 using System;
 using System.Collections.Generic;
 
@@ -106,15 +108,23 @@ namespace pluginVerilog.Verilog.Items
             // instance name
             Expression? targetExpression = Expressions.Expression.ParseCreate(word, nameSpace);
             string target = word.Text;
-            BuildingBlocks.BuildingBlock? targetBuildingBlock = word.ProjectProperty.GetBuildingBlockFromDefinitionNameSpace(target);
+            BuildingBlocks.BuildingBlock? targetBuildingBlock = word.ProjectProperty.DefinitionNameSpace.Get(target);
             if (targetBuildingBlock == null)
             {
                 word.SkipToKeyword(";");
                 return true;
             }
 
-            // class name
-            targetBuildingBlock = word.ProjectProperty.GetBuildingBlockFromDefinitionNameSpace(word.Text);
+            BuildingBlocks.Class? @class = word.ProjectProperty.UnitNameSpace.Get(word.Text) as BuildingBlocks.Class;
+            if(@class != null)
+            {
+                targetBuildingBlock = @class as BuildingBlocks.BuildingBlock;
+            }
+            else
+            {
+                targetBuildingBlock = word.ProjectProperty.DefinitionNameSpace.Get(word.Text) as BuildingBlocks.BuildingBlock;
+            }
+
             if (targetBuildingBlock == null)
             {
                 word.AddError("unfound");

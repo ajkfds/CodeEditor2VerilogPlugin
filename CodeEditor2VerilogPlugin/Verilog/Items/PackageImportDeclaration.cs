@@ -23,7 +23,7 @@ namespace pluginVerilog.Verilog.Items
             {
                 word.RootParsedDocument.ReferencedPackageNamemeSpace.Add(packageIdentifier);
             }
-            Package? package = word.ProjectProperty.GetBuildingBlockFromDefinitionNameSpace(packageIdentifier) as Package;
+            Package? package = word.ProjectProperty.PackageNameSpace.Get(packageIdentifier) as Package;
             word.RootParsedDocument.ImportedPackages.Add(word.Text);
 
             while (!word.Eof)

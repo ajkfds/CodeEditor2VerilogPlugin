@@ -103,7 +103,7 @@ namespace pluginVerilog.Verilog.Items
                 }
 
                 ProjectProperty projectProperty = (ProjectProperty)Project.ProjectProperties[Plugin.StaticID];
-                instancedInterface = projectProperty.GetBuildingBlockFromDefinitionNameSpace(SourceName) as Interface;
+                instancedInterface = projectProperty.DefinitionNameSpace.Get(SourceName) as Interface;
                 return instancedInterface;
             }
         }
@@ -124,7 +124,7 @@ namespace pluginVerilog.Verilog.Items
 
             // check interface name
             string interfaceName = word.Text;
-            Interface? instancedInterface = word.ProjectProperty.GetBuildingBlockFromDefinitionNameSpace(interfaceName) as Interface;
+            Interface? instancedInterface = word.ProjectProperty.DefinitionNameSpace.Get(interfaceName) as Interface;
             if (!word.RootParsedDocument.ReferencedDefinitionNameSpace.Contains(interfaceName)) word.RootParsedDocument.ReferencedDefinitionNameSpace.Add(interfaceName);
 
             if (instancedInterface == null) return false;   // this identifier is not interface name
@@ -544,7 +544,7 @@ namespace pluginVerilog.Verilog.Items
                 }
                 else
                 {
-                    instancedModule = ProjectProperty.GetBuildingBlockFromDefinitionNameSpace(SourceName);
+                    instancedModule = ProjectProperty.DefinitionNameSpace.Get(SourceName);
                 }
             }
 
@@ -564,7 +564,7 @@ namespace pluginVerilog.Verilog.Items
         }
         public string CreateString(string indent)
         {
-            Interface? instancedModule = ProjectProperty.GetBuildingBlockFromDefinitionNameSpace(SourceName) as Interface;
+            Interface? instancedModule = ProjectProperty.DefinitionNameSpace.Get(SourceName) as Interface;
             if (instancedModule == null) return "";
 
             StringBuilder sb = new StringBuilder();

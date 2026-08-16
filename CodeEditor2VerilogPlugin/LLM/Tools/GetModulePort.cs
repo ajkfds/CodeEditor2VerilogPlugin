@@ -18,7 +18,7 @@ namespace pluginVerilog.LLM.Tools
         {
             ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
             if (projectProperty == null) throw new Exception();
-            var file = projectProperty.GetBuildingBlockFromDefinitionNameSpace(moduleName)?.File;
+            var file = projectProperty.DefinitionNameSpace.Get(moduleName)?.File;
             if (file == null || file.CodeDocument == null) return "not found";
             Verilog.ParsedDocument? pdoc = file.VerilogParsedDocument;
             if (pdoc == null) return "not found";

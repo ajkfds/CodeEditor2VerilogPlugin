@@ -345,7 +345,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 }
             }
 
-            Interface module;
+            Interface interface_;
             //IndexReference iref = IndexReference.Create(parsedDocument);
 
             // Parse mode is now handled at the end of ParseCreate, not per-block
@@ -356,10 +356,10 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             ////}
             ////else
             {
-                module = await Interface.Create(word, parsedDocument.Root, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
+                interface_ = await Interface.Create(word, parsedDocument.Root, parsedDocument.ParameterOverrides, null, parsedDocument.Root, file, parsedDocument.ParseMode == Parser.VerilogParser.ParseModeEnum.LoadParse);
             }
 
-            bool added = parsedDocument.Root.AddOrUpdateBuildingBlock(module.Name, module);
+            bool added = parsedDocument.Root.AddOrUpdateBuildingBlock(interface_.Name, interface_);
             if (added)
             {
                 // Only set ReparseRequested if building block was actually added for the first time

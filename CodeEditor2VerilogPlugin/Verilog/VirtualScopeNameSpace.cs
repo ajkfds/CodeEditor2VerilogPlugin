@@ -153,7 +153,7 @@ namespace pluginVerilog.Verilog
                                 // can't late-bind the target.
                                 if (projectProperty is pluginVerilog.ProjectProperty verilogPP)
                                 {
-                                    resolved = verilogPP.GetBuildingBlockFromDefinitionNameSpace(
+                                    resolved = verilogPP.DefinitionNameSpace.Get(
                                         SourceCommentScopeReference.BuildingBlockName);
                                     if (resolved != null)
                                     {

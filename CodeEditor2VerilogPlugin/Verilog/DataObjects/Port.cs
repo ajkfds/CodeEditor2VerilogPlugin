@@ -742,7 +742,7 @@ namespace pluginVerilog.Verilog.DataObjects
             }
             if (interface_ == null)
             {
-                interface_ = word.ProjectProperty.GetBuildingBlockFromDefinitionNameSpace(identifier) as Interface;
+                interface_ = word.ProjectProperty.DefinitionNameSpace.Get(identifier) as Interface;
             }
 
             if (interface_ == null)

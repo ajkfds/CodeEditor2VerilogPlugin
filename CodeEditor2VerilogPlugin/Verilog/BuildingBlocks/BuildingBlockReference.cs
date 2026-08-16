@@ -20,7 +20,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             INamedElement? namedElement = buildingBlock.GetNamedElementUpward(word.Text); // search upward
             if (namedElement == null || namedElement is not BuildingBlock)
             {
-                targetBuildingBlock = word.ProjectProperty.GetBuildingBlockFromDefinitionNameSpace(word.Text);
+                targetBuildingBlock = word.ProjectProperty.DefinitionNameSpace.Get(word.Text);
             }
             else
             {

@@ -7,6 +7,7 @@ using CodeEditor2.CodeEditor.PopupHint;
 using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
 using pluginVerilog.CodeEditor;
+using pluginVerilog.Verilog;
 using pluginVerilog.Verilog.BuildingBlocks;
 using System;
 using System.Collections.Concurrent;
@@ -148,7 +149,7 @@ namespace pluginVerilog.Data
             Verilog.ParsedDocument? newParsedDocument = parser.ParsedDocument as Verilog.ParsedDocument;
             if (newParsedDocument == null) return;
 
-            ParsedDocument? oldParsedDocument = ParsedDocument; // no lock is needed. ParsedDocument property is thread safe
+            CodeEditor2.CodeEditor.ParsedDocument? oldParsedDocument = ParsedDocument; // no lock is needed. ParsedDocument property is thread safe
 
             if (oldParsedDocument == newParsedDocument) return;
 
@@ -181,9 +182,29 @@ namespace pluginVerilog.Data
                 // Register New Building Block
                 if (newParsedDocument.Root != null)
                 {
-                    foreach (var buildingBlockKvp in newParsedDocument.Root.BuildingBlocks)
+                    foreach(INamedElement element in newParsedDocument.Root.NamedElements.Values)
                     {
-                        ProjectProperty.RegisterToDefinitionNameSpace(buildingBlockKvp.Key, buildingBlockKvp.Value, this);
+                        Package? package = element as Package;
+                        if(package != null)
+                        {
+                            ProjectProperty.PackageNameSpace.Register(package.Name, package, this);
+                            continue;
+                        }
+
+                        Class? @class = element as Class;
+                        if(@class != null)
+                        {
+                            ProjectProperty.UnitNameSpace.Register(@class.Name, @class, this);
+                            continue;
+                        }
+
+                        BuildingBlock? buildingBlock = element as BuildingBlock;
+                        if(buildingBlock != null) {
+                            ProjectProperty.DefinitionNameSpace.Register(buildingBlock.Name, buildingBlock, this);
+                            continue;
+                        }
+
+                        ProjectProperty.UnitNameSpace.Register(element.Name, element, this);
                     }
                 }
 
@@ -269,18 +290,18 @@ namespace pluginVerilog.Data
         // Instance ParsedDocument Registration
         // このファイルがインスタンスされたときにそのインスタンスのWeakReferenceを保持する
 
-        private ConcurrentDictionary<string, System.WeakReference<ParsedDocument>> instancedParsedDocumentRefs = new ConcurrentDictionary<string, WeakReference<ParsedDocument>>();
+        private ConcurrentDictionary<string, System.WeakReference<CodeEditor2.CodeEditor.ParsedDocument>> instancedParsedDocumentRefs = new ConcurrentDictionary<string, WeakReference<CodeEditor2.CodeEditor.ParsedDocument>>();
 
-        public ParsedDocument? GetInstancedParsedDocument(string key)
+        public CodeEditor2.CodeEditor.ParsedDocument? GetInstancedParsedDocument(string key)
         {
-            ParsedDocument? ret;
+            CodeEditor2.CodeEditor.ParsedDocument? ret;
             if (key == "")
             {
                 return ParsedDocument; // no lock is needed. ParsedDocument property is thread safe
             }
             else
             {
-                if (instancedParsedDocumentRefs.TryGetValue(key, out WeakReference<ParsedDocument>? weakRef))
+                if (instancedParsedDocumentRefs.TryGetValue(key, out WeakReference<CodeEditor2.CodeEditor.ParsedDocument>? weakRef))
                 {
                     if (weakRef == null)
                     {
@@ -308,7 +329,7 @@ namespace pluginVerilog.Data
             }
         }
 
-        public void RegisterInstanceParsedDocument(string id, ParsedDocument parsedDocument, InstanceTextFile moduleInstance)
+        public void RegisterInstanceParsedDocument(string id, CodeEditor2.CodeEditor.ParsedDocument parsedDocument, InstanceTextFile moduleInstance)
         {
             if (parsedDocument == null && System.Diagnostics.Debugger.IsAttached)
             {
@@ -321,13 +342,13 @@ namespace pluginVerilog.Data
             }
             else
             {
-                instancedParsedDocumentRefs.AddOrUpdate(id, new WeakReference<ParsedDocument>(parsedDocument), (key, oldValue) => new WeakReference<ParsedDocument>(parsedDocument));
+                instancedParsedDocumentRefs.AddOrUpdate(id, new WeakReference<CodeEditor2.CodeEditor.ParsedDocument>(parsedDocument), (key, oldValue) => new WeakReference<CodeEditor2.CodeEditor.ParsedDocument>(parsedDocument));
             }
         }
 
         public void CleanWeakRef()
         {
-            ParsedDocument? ret;
+            CodeEditor2.CodeEditor.ParsedDocument? ret;
             foreach (var r in instancedParsedDocumentRefs)
             {
                 if (!r.Value.TryGetTarget(out ret)) instancedParsedDocumentRefs.TryRemove(r.Key, out _);
