@@ -75,7 +75,7 @@ namespace pluginVerilog.NavigatePanel
 
             CodeEditor2.Tools.InputWindow window = new CodeEditor2.Tools.InputWindow("Create new " + typeName, "new " + typeName + " name");
             // await window.ShowDialog(Controller.GetMainWindow());
-            await CodeEditor2.Controller.ShowDialog(window);
+            await CodeEditor2.Controller.ShowDialogAsync(window);
 
             if (window.Cancel) return;
             string name = window.InputText.Trim();
