@@ -40,12 +40,16 @@ namespace pluginVerilog.Verilog
             accessLock.EnterReadLock();
             try
             {
-                return fileTable.GetItem(name);
+                return _GetFile(name);
             }
             finally
             {
                 accessLock.ExitReadLock();
             }
+        }
+        private Data.IVerilogRelatedFile? _GetFile(string name)
+        {
+            return fileTable.GetItem(name);
         }
 
 
@@ -58,7 +62,7 @@ namespace pluginVerilog.Verilog
             {
                 foreach(var key in fileTable.KeyList())
                 {
-                    T? target = Get(key);
+                    T? target = _Get(key);
                     if (target == null) continue; 
                     if(isMatched(target)) results.Add(key);
                 }
@@ -73,6 +77,17 @@ namespace pluginVerilog.Verilog
         public T? Get(string name)
         {
             Data.IVerilogRelatedFile? file = GetFile(name);
+            if (file == null) return null;
+
+            if (file.VerilogParsedDocument == null) return null;
+            if (file.VerilogParsedDocument.Root == null) return null;
+
+            if (!file.VerilogParsedDocument.Root.NamedElements.ContainsKey(name)) return null;
+            return file.VerilogParsedDocument.Root.NamedElements[name] as T;
+        }
+        private T? _Get(string name)
+        {
+            Data.IVerilogRelatedFile? file = _GetFile(name);
             if (file == null) return null;
 
             if (file.VerilogParsedDocument == null) return null;
