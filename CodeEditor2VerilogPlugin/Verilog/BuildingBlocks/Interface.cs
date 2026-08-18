@@ -178,13 +178,17 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             if (!word.CellDefine && !protoType)
             {
                 // protptype parse
+                word.Prototype = true;
                 WordScanner prototypeWord = word.Clone(false);
-                prototypeWord.Prototype = true;
+                word.Prototype = false;
+                // document頭の`* parseによるColor付けを避けるため、prototype modeにしてからCloneする必要がある。
+
                 await parseInterfaceItems(prototypeWord, parameterOverrides, null, interface_);
                 prototypeWord.Dispose();
 
                 // parse
                 word.RootParsedDocument.Macros = macroKeep;
+//                word = word.Clone(false);
                 await parseInterfaceItems(word, parameterOverrides, null, interface_);
             }
             else

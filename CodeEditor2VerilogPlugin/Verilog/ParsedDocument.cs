@@ -508,7 +508,7 @@ namespace pluginVerilog.Verilog
             {
                 // create short document to parse current pretext
                 pluginVerilog.CodeEditor.CodeDocument document = new pluginVerilog.CodeEditor.CodeDocument(lineText);
-                WordScanner word = new WordScanner(document, this, SystemVerilog,true);
+                WordScanner word = new WordScanner(document, this, SystemVerilog,true,false);
 
                 List<(string, int)> words = new List<(string, int)>();
                 while (!word.Eof)
@@ -559,7 +559,7 @@ namespace pluginVerilog.Verilog
             {
                 // create short document to parse current pretext
                 pluginVerilog.CodeEditor.CodeDocument document = new pluginVerilog.CodeEditor.CodeDocument(elementText);
-                WordScanner word = new WordScanner(document, this, SystemVerilog,true);
+                WordScanner word = new WordScanner(document, this, SystemVerilog,true, false );
 
                 Verilog.Expressions.Expression? expression = null;
                 while (!word.Eof)

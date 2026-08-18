@@ -280,9 +280,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             if (nameSpace.BuildingBlock is Root)
             {
                 // prototype parse
+                word.Prototype = true;
                 WordScanner prototypeWord = word.Clone(false);
-                //                WordScanner prototypeWord = word;
-                prototypeWord.Prototype = true;
+                word.Prototype = false;
+                // document頭の`* parseによるColor付けを避けるため、prototype modeにしてからCloneする必要がある。
+
                 parseClassItems(prototypeWord, nameSpace, parameterOverrides, null, class_);
                 prototypeWord.Dispose();
 

@@ -11,15 +11,16 @@ namespace pluginVerilog.Verilog
 {
     public class WordScanner : IDisposable
     {
-        public WordScanner(CodeEditor.CodeDocument document, Verilog.ParsedDocument parsedDocument, bool systemVerilog) : this(document, parsedDocument, systemVerilog, false)
+        public WordScanner(CodeEditor.CodeDocument document, Verilog.ParsedDocument parsedDocument, bool systemVerilog) : this(document, parsedDocument, systemVerilog, false,false)
         {
         }
 
-        public WordScanner(CodeEditor.CodeDocument document, Verilog.ParsedDocument parsedDocument, bool systemVerilog, bool supressCompilerDirectiveError)
+        public WordScanner(CodeEditor.CodeDocument document, Verilog.ParsedDocument parsedDocument, bool systemVerilog, bool supressCompilerDirectiveError,bool prototype)
         {
             RootParsedDocument = parsedDocument;
             wordPointer = new WordPointer(document, parsedDocument);
             SupressCompilerDerectiveError = supressCompilerDirectiveError;
+            this.prototype = prototype;
             recheckWord();
             this.systemVerilog = systemVerilog;
         }
@@ -151,7 +152,7 @@ namespace pluginVerilog.Verilog
         static System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
         public WordScanner Clone(bool supressError)
         {
-            WordScanner ret = new WordScanner(wordPointer.Document, RootParsedDocument, systemVerilog, supressError);
+            WordScanner ret = new WordScanner(wordPointer.Document, RootParsedDocument, systemVerilog, supressError, prototype);
             ret.wordPointer = wordPointer.Clone();
             ret.nonGeneratedCount = nonGeneratedCount;
             ret.prototype = prototype;
@@ -188,8 +189,6 @@ namespace pluginVerilog.Verilog
 
         public void Color(CodeDrawStyle.ColorType colorType)
         {
-            if (prototype) return;
-            //            if (nonGeneratedCount != 0 || prototype) return;
             if (prototype) return;
             wordPointer.Color(colorType);
         }
@@ -437,7 +436,7 @@ namespace pluginVerilog.Verilog
                 {
                     if (nonGeneratedCount != 0)
                     {
-                        wordPointer.Color(CodeDrawStyle.ColorType.Inactivated);
+                        Color(CodeDrawStyle.ColorType.Inactivated);
                     }
                     while (wordPointer.Eof && stock.Count != 0)
                     {
@@ -606,24 +605,24 @@ namespace pluginVerilog.Verilog
                     parseDefine();
                     break;
                 case "`celldefine":
-                    wordPointer.Color(CodeDrawStyle.ColorType.Keyword);
+                    Color(CodeDrawStyle.ColorType.Keyword);
                     cellDefine = true;
                     wordPointer.MoveNext();
                     break;
                 case "`resetall":
-                    wordPointer.Color(CodeDrawStyle.ColorType.Keyword);
+                    Color(CodeDrawStyle.ColorType.Keyword);
                     wordPointer.MoveNext();
                     break;
                 case "`undefineall":
                     parseUndefineAll();
                     break;
                 case "`endcelldefine":
-                    wordPointer.Color(CodeDrawStyle.ColorType.Keyword);
+                    Color(CodeDrawStyle.ColorType.Keyword);
                     cellDefine = false;
                     wordPointer.MoveNext();
                     break;
                 case "`default_nettype":
-                    wordPointer.Color(CodeDrawStyle.ColorType.Keyword);
+                    Color(CodeDrawStyle.ColorType.Keyword);
                     wordPointer.MoveNext();
 
                     switch (wordPointer.Text)
@@ -678,14 +677,14 @@ namespace pluginVerilog.Verilog
                     }
                     break;
                 case "`endif":
-                    wordPointer.Color(CodeDrawStyle.ColorType.Keyword);
+                    Color(CodeDrawStyle.ColorType.Keyword);
                     wordPointer.MoveNext();
                     if (ifDefList.Count != 0) ifDefList.Remove(ifDefList.Last());
                     break;
                 case "`ifdef":
-                    wordPointer.Color(CodeDrawStyle.ColorType.Keyword);
+                    Color(CodeDrawStyle.ColorType.Keyword);
                     wordPointer.MoveNext();
-                    wordPointer.Color(CodeDrawStyle.ColorType.Identifier);
+                    Color(CodeDrawStyle.ColorType.Identifier);
                     if (
                         RootParsedDocument.Macros.ContainsKey(wordPointer.Text) ||
                         RootParsedDocument.ProjectProperty.Macros.ContainsKey(wordPointer.Text)
@@ -694,7 +693,7 @@ namespace pluginVerilog.Verilog
                         wordPointer.MoveNext();
                         if (wordPointer.Text == "`else")
                         {
-                            wordPointer.Color(CodeDrawStyle.ColorType.Keyword);
+                            Color(CodeDrawStyle.ColorType.Keyword);
                             wordPointer.MoveNext();
                         }
                     }
@@ -705,9 +704,9 @@ namespace pluginVerilog.Verilog
                     }
                     break;
                 case "`ifndef":
-                    wordPointer.Color(CodeDrawStyle.ColorType.Keyword);
+                    Color(CodeDrawStyle.ColorType.Keyword);
                     wordPointer.MoveNext();
-                    wordPointer.Color(CodeDrawStyle.ColorType.Identifier);
+                    Color(CodeDrawStyle.ColorType.Identifier);
                     if (
                         !RootParsedDocument.Macros.ContainsKey(wordPointer.Text) &&
                         !RootParsedDocument.ProjectProperty.Macros.ContainsKey(wordPointer.Text)
@@ -716,7 +715,7 @@ namespace pluginVerilog.Verilog
                         wordPointer.MoveNext();
                         if (wordPointer.Text == "`else")
                         {
-                            wordPointer.Color(CodeDrawStyle.ColorType.Keyword);
+                            Color(CodeDrawStyle.ColorType.Keyword);
                             wordPointer.MoveNext();
                         }
                     }
@@ -727,14 +726,14 @@ namespace pluginVerilog.Verilog
                     }
                     break;
                 case "`else":
-                    wordPointer.Color(CodeDrawStyle.ColorType.Keyword);
+                    Color(CodeDrawStyle.ColorType.Keyword);
                     wordPointer.MoveNext();
                     skip();
                     break;
                 case "`elsif":
-                    wordPointer.Color(CodeDrawStyle.ColorType.Keyword);
+                    Color(CodeDrawStyle.ColorType.Keyword);
                     wordPointer.MoveNext();
-                    wordPointer.Color(CodeDrawStyle.ColorType.Identifier);
+                    Color(CodeDrawStyle.ColorType.Identifier);
                     if (
                         RootParsedDocument.Macros.ContainsKey(wordPointer.Text) ||
                         RootParsedDocument.ProjectProperty.Macros.ContainsKey(wordPointer.Text)
@@ -743,7 +742,7 @@ namespace pluginVerilog.Verilog
                         wordPointer.MoveNext();
                         if (wordPointer.Text == "`else")
                         {
-                            wordPointer.Color(CodeDrawStyle.ColorType.Keyword);
+                            Color(CodeDrawStyle.ColorType.Keyword);
                             wordPointer.MoveNext();
                         }
                     }
@@ -759,12 +758,12 @@ namespace pluginVerilog.Verilog
                 case "`line":
                 case "`nounconnected_drive":
                 case "`unconnected_drive":
-                    wordPointer.Color(CodeDrawStyle.ColorType.Keyword);
+                    Color(CodeDrawStyle.ColorType.Keyword);
                     if (!SupressCompilerDerectiveError) wordPointer.AddError("unsupported compiler directive");
                     wordPointer.MoveNext();
                     break;
                 case "`timescale":
-                    wordPointer.Color(CodeDrawStyle.ColorType.Keyword);
+                    Color(CodeDrawStyle.ColorType.Keyword);
                     wordPointer.MoveNextUntilEol();
                     break;
                 default: // macro call
@@ -784,50 +783,50 @@ namespace pluginVerilog.Verilog
                     {
                         case "`ifdef":
                             depth++;
-                            wordPointer.Color(CodeDrawStyle.ColorType.Inactivated);
+                            Color(CodeDrawStyle.ColorType.Inactivated);
                             wordPointer.MoveNext();
                             break;
                         case "`ifndef":
                             depth++;
-                            wordPointer.Color(CodeDrawStyle.ColorType.Inactivated);
+                            Color(CodeDrawStyle.ColorType.Inactivated);
                             wordPointer.MoveNext();
                             break;
                         case "`else":
                             if (depth == 0)
                             {
-                                wordPointer.Color(CodeDrawStyle.ColorType.Keyword);
+                                Color(CodeDrawStyle.ColorType.Keyword);
                                 wordPointer.MoveNext();
                                 return;
                             }
                             else
                             {
-                                wordPointer.Color(CodeDrawStyle.ColorType.Inactivated);
+                                Color(CodeDrawStyle.ColorType.Inactivated);
                                 wordPointer.MoveNext();
                             }
                             break;
                         case "`endif":
                             if (depth == 0)
                             {
-                                wordPointer.Color(CodeDrawStyle.ColorType.Keyword);
+                                Color(CodeDrawStyle.ColorType.Keyword);
                                 wordPointer.MoveNext();
                                 return;
                             }
                             else
                             {
                                 depth--;
-                                wordPointer.Color(CodeDrawStyle.ColorType.Inactivated);
+                                Color(CodeDrawStyle.ColorType.Inactivated);
                                 wordPointer.MoveNext();
                             }
                             break;
                         default:
-                            wordPointer.Color(CodeDrawStyle.ColorType.Inactivated);
+                            Color(CodeDrawStyle.ColorType.Inactivated);
                             wordPointer.MoveNext();
                             break;
                     }
                 }
                 else
                 {
-                    wordPointer.Color(CodeDrawStyle.ColorType.Inactivated);
+                    Color(CodeDrawStyle.ColorType.Inactivated);
                     wordPointer.MoveNext();
                 }
             }
@@ -835,7 +834,7 @@ namespace pluginVerilog.Verilog
 
         private void parseUndef()
         {
-            wordPointer.Color(CodeDrawStyle.ColorType.Keyword);
+            Color(CodeDrawStyle.ColorType.Keyword);
             wordPointer.MoveNextUntilEol();
 
             string text = wordPointer.Text;
@@ -850,7 +849,7 @@ namespace pluginVerilog.Verilog
 
         private void parseDefine()
         {
-            wordPointer.Color(CodeDrawStyle.ColorType.Keyword);
+            Color(CodeDrawStyle.ColorType.Keyword);
             wordPointer.MoveNextUntilEol();
 
             WordReference wordRef = GetReference();
@@ -886,13 +885,13 @@ namespace pluginVerilog.Verilog
             if (separatorIndex == int.MaxValue)
             { // identifier only
                 identifier = macroText;
-                wordPointer.Color(CodeDrawStyle.ColorType.Identifier);
+                Color(CodeDrawStyle.ColorType.Identifier);
                 macroText = "";
             }
             else
             {
                 identifier = macroText.Substring(0, separatorIndex);
-                wordPointer.Color(CodeDrawStyle.ColorType.Identifier, index, index + separatorIndex);
+                if(!prototype) wordPointer.Color(CodeDrawStyle.ColorType.Identifier, index, index + separatorIndex);
                 macroText = macroText.Substring(separatorIndex);
             }
 
@@ -917,14 +916,14 @@ namespace pluginVerilog.Verilog
 
         private void parseUndefineAll()
         {
-            wordPointer.Color(CodeDrawStyle.ColorType.Keyword);
+            Color(CodeDrawStyle.ColorType.Keyword);
             wordPointer.MoveNext();
             RootParsedDocument.Macros.Clear();
         }
 
         private void parseInclude()
         {
-            wordPointer.Color(CodeDrawStyle.ColorType.Keyword);
+            Color(CodeDrawStyle.ColorType.Keyword);
             wordPointer.MoveNext();
             if (wordPointer.WordType != WordPointer.WordTypeEnum.String || wordPointer.Text.Length <= 2)
             {
@@ -1045,7 +1044,7 @@ namespace pluginVerilog.Verilog
 
         private void parseMacro()
         {
-            wordPointer.Color(CodeDrawStyle.ColorType.Identifier);
+            Color(CodeDrawStyle.ColorType.Identifier);
             string macroIdentifier = wordPointer.Text.Substring(1);
 
             Macro macro;
