@@ -172,12 +172,7 @@ namespace pluginVerilog.Verilog.Expressions
                     if (RangesFromOriginal.Count == 0)
                     {
                         // メンバーの全ビットがassignされたとみなす
-                        // AbsoluteRangeExpressionを作成して追加
-                        var msbExpr = Expression.CreateTempExpression(structOffset.ToString());
-                        var lsbExpr = Expression.CreateTempExpression((structOffset + memberWidth - 1).ToString());
-                        var rangeExpr = new AbsoluteRangeExpression(msbExpr, lsbExpr);
-                        rangeExpr.WordReference = StructParentObject.DefinedReference;
-                        StructParentObject.AssignedMap.Assert(new List<RangeExpression> { rangeExpr });
+                        StructParentObject.AssignedMap.Assert(structOffset, structOffset + memberWidth - 1);
                     }
                     else
                     {
@@ -187,10 +182,7 @@ namespace pluginVerilog.Verilog.Expressions
                             if (range is SingleBitRangeExpression singleBit && singleBit.BitIndex != null)
                             {
                                 int bitPos = (int)(structOffset + singleBit.BitIndex);
-                                var expr = Expression.CreateTempExpression(bitPos.ToString());
-                                var rangeExpr = new SingleBitRangeExpression(expr);
-                                rangeExpr.WordReference = singleBit.WordReference;
-                                StructParentObject.AssignedMap.Assert(new List<RangeExpression> { rangeExpr });
+                                StructParentObject.AssignedMap.Assert(bitPos, bitPos);
                             }
                             else if (range is AbsoluteRangeExpression absRange)
                             {
@@ -198,11 +190,7 @@ namespace pluginVerilog.Verilog.Expressions
                                 {
                                     int minPos = (int)(structOffset + absRange.MinBitIndex);
                                     int maxPos = (int)(structOffset + absRange.MaxBitIndex);
-                                    var msbExpr = Expression.CreateTempExpression(maxPos.ToString());
-                                    var lsbExpr = Expression.CreateTempExpression(minPos.ToString());
-                                    var rangeExpr = new AbsoluteRangeExpression(msbExpr, lsbExpr);
-                                    rangeExpr.WordReference = absRange.WordReference;
-                                    StructParentObject.AssignedMap.Assert(new List<RangeExpression> { rangeExpr });
+                                    StructParentObject.AssignedMap.Assert(minPos, maxPos);
                                 }
                             }
                         }
@@ -280,6 +268,27 @@ namespace pluginVerilog.Verilog.Expressions
             };
             DataObjects.DataObject originalObject = originalDataObject;
             bool partial = false;
+
+            // Struct member access (e.g. aaa.AA): if the owner is a Struct variable
+            // (or a UserDefinedVariable wrapping a StructType), record the parent
+            // variable and member name so that AssertAssigned() updates the
+            // parent Struct's AssignedMap. This prevents spurious "undriven"
+            // notices when all members of a Struct are driven via member access.
+            if (owner is DataObjects.DataObject structOwner)
+            {
+                DataObjects.DataTypes.IDataType? ownerDataType = structOwner.DataType;
+                if (ownerDataType is DataObjects.DataTypes.StructType)
+                {
+                    val.StructParentObject = structOwner;
+                    val.StructMemberName = word.Text;
+                }
+                else if (ownerDataType is DataObjects.DataTypes.UserDefinedType udt
+                         && udt.OriginalDataType is DataObjects.DataTypes.StructType)
+                {
+                    val.StructParentObject = structOwner;
+                    val.StructMemberName = word.Text;
+                }
+            }
 
             // もともとのdataobject定義を保持
             val.OrigainalDataObject = originalDataObject;
@@ -518,6 +527,16 @@ namespace pluginVerilog.Verilog.Expressions
             else
             {
                 originalObject.UsedReferences.Add(val.Reference);
+            }
+
+            // For Struct member access (e.g. aaa.AA = 0; or if (aaa.AA)),
+            // also register the parent Struct variable as referenced so that
+            // "unused" notices are not raised on the parent Struct.
+            // The parent's AssignedMap is updated separately via
+            // AssertAssigned() through val.StructParentObject.
+            if (val.StructParentObject != null && val.Reference != null)
+            {
+                val.StructParentObject.UsedReferences.Add(val.Reference);
             }
 
             val.SyncContext.PropageteClockDomainFrom(originalObject.SyncContext, val.Reference,nameSpace.BuildingBlock.SameSync);
