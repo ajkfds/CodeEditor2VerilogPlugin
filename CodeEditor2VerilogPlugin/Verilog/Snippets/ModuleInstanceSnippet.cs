@@ -70,7 +70,12 @@ namespace pluginVerilog.Verilog.Snippets
 
                 ParsedDocument? parentParsedDocument = vFile.VerilogParsedDocument;
                 if (parentParsedDocument == null) return;
-                BuildingBlock? module = parentParsedDocument.GetBuildingBlockAt(vFile.CodeDocument.CaretIndex);
+                if (vFile == null) return;
+                if (vFile.CodeDocument == null) return;
+
+                int line = vFile.CodeDocument.GetLineAt(vFile.CodeDocument.CaretIndex);
+                int lineStartIndex = vFile.CodeDocument.GetLineStartIndex(line);
+                BuildingBlock? module = parentParsedDocument.GetBuildingBlockAt(lineStartIndex);
                 if (module == null) return;
 
                 int instanceCount = 0;
