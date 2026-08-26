@@ -223,6 +223,10 @@ namespace pluginVerilog.Tool
             {
                 verilogFile = (Data.InterfaceInstance)textFile;
             }
+            else if (textFile is Data.ImportedPackage)
+            {
+                verilogFile = (Data.ImportedPackage)textFile;
+            }
             if (verilogFile == null) return;
 
             token?.ThrowIfCancellationRequested();
@@ -288,6 +292,18 @@ namespace pluginVerilog.Tool
 
             if (verilogFile.VerilogParsedDocument != null)
             {
+                // Also enqueue source files for imported packages so that
+                // navigate-panel ImportedPackage sub-items have an up-to-date
+                // parsed document (Package body items, etc.).
+                foreach (string importedPackageName in verilogFile.VerilogParsedDocument.ImportedPackages)
+                {
+                    pluginVerilog.ProjectProperty projectProperty = (ProjectProperty)verilogFile.Project.ProjectProperties[pluginVerilog.Plugin.StaticID];
+                    TextFile? pkgFile = projectProperty.PackageNameSpace.GetFile(importedPackageName) as TextFile;
+                    if (pkgFile == null) continue;
+                    ParseTask newTask = new ParseTask(Id: pkgFile.Key, tarfgetTextFile: pkgFile);
+                    EnqueueWork(newTask, workQueue, completeIds);
+                }
+
                 foreach (string elementName in verilogFile.VerilogParsedDocument.ReferencedUnitNameSpace)
                 {
                     pluginVerilog.ProjectProperty projectProperty = (ProjectProperty)verilogFile.Project.ProjectProperties[pluginVerilog.Plugin.StaticID];
@@ -406,6 +422,10 @@ namespace pluginVerilog.Tool
             else if (textFile is Data.InterfaceInstance)
             {
                 verilogFile = (Data.InterfaceInstance)textFile;
+            }
+            else if (textFile is Data.ImportedPackage)
+            {
+                verilogFile = (Data.ImportedPackage)textFile;
             }
             if (verilogFile == null) return;
 

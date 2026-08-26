@@ -61,6 +61,12 @@ namespace pluginVerilog.Data.VerilogCommon
                 addVhInstance(newSubItems, item, newVhInstance);
             }
 
+            // add imported packages as sub-items
+            foreach (string importedPackageName in item.VerilogParsedDocument.ImportedPackages)
+            {
+                addImportedPackage(newSubItems, item, importedPackageName, project);
+            }
+
             if(item is InterfaceInstance)
             {
                 string? moduleName = null;
@@ -74,6 +80,11 @@ namespace pluginVerilog.Data.VerilogCommon
                 VerilogModuleInstance? verilogModuleInstance = item as VerilogModuleInstance;
                 moduleName = verilogModuleInstance?.ModuleName;
                 addSubItemsSingleBuldingBlock(item, moduleName, newSubItems, parent, project);
+            }
+            else if (item is ImportedPackage)
+            {
+                // Packages don't have child module/interface instantiations to enumerate;
+                // they are leaves in the navigate-panel hierarchy.
             }
             else if (item is VerilogFile)
             {
@@ -150,6 +161,51 @@ namespace pluginVerilog.Data.VerilogCommon
             // add new one
             newSubItems.Add(keyName, newVhInstance);
             newVhInstance.Parent = item as CodeEditor2.Data.Item;
+        }
+
+        /// <summary>
+        /// Add or reuse a <see cref="ImportedPackage"/> sub-item for the given package name.
+        /// The package file is resolved via <c>ProjectProperty.PackageNameSpace</c>; if the
+        /// package cannot be resolved, no sub-item is added.
+        /// </summary>
+        private static void addImportedPackage(Dictionary<string, CodeEditor2.Data.Item> newSubItems, IVerilogRelatedFile item, string importedPackageName, Project project)
+        {
+            // Use the package name as the key within the parent.
+            string keyName = importedPackageName;
+
+            // Try to reuse an existing ImportedPackage sub-item if it already represents
+            // the same package in the same project.
+            ImportedPackage? oldImportedPackage = null;
+            if (item.Items.TryGetValue(keyName, out CodeEditor2.Data.Item? gotItem))
+            {
+                if (gotItem == null) throw new Exception();
+                oldImportedPackage = gotItem as ImportedPackage;
+            }
+
+            if (
+                oldImportedPackage != null &&
+                oldImportedPackage.PackageName == importedPackageName &&
+                oldImportedPackage.Project == project
+                )
+            {
+                newSubItems.Add(keyName, oldImportedPackage);
+                return;
+            }
+
+            // Create a new ImportedPackage sub-item. If the package is not registered in
+            // the project, silently skip it (the imported name may refer to an unresolved
+            // or external package that the user has not added to the project).
+            ImportedPackage? newImportedPackage = ImportedPackage.Create(importedPackageName, project);
+            if (newImportedPackage == null) return;
+
+            // Propagate external project flag to child sub-items.
+            if (item is InstanceTextFile inst && inst.ExternalProject)
+            {
+                newImportedPackage.ExternalProject = true;
+            }
+
+            newSubItems.Add(keyName, newImportedPackage);
+            newImportedPackage.Parent = item as CodeEditor2.Data.Item;
         }
 
         private static void addSubItemsMultiBuildingBlock(VerilogFile verilogFile, Dictionary<string, CodeEditor2.Data.Item> newSubItems, CodeEditor2.Data.Item? parent, Project project)
