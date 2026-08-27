@@ -24,7 +24,7 @@ namespace pluginVerilog.Verilog.Items
                 word.RootParsedDocument.ReferencedPackageNamemeSpace.Add(packageIdentifier);
             }
             Package? package = word.ProjectProperty.PackageNameSpace.Get(packageIdentifier) as Package;
-            word.RootParsedDocument.ImportedPackages.Add(word.Text);
+            if(!word.RootParsedDocument.ImportedPackages.Contains(word.Text)) word.RootParsedDocument.ImportedPackages.Add(word.Text);
 
             while (!word.Eof)
             {

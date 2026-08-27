@@ -99,12 +99,24 @@ namespace pluginVerilog.Parser
             if (textFile == null) throw new Exception();
             this.TextFile = textFile;
 
+            bool systemVerilog = false;
+
             VerilogFile? verilogFile = verilogRelatedFile as VerilogFile;
-            Data.VerilogModuleInstance? verilogModuleInstance = verilogRelatedFile as Data.VerilogModuleInstance;
+            if (verilogFile != null && verilogFile.SystemVerilog) systemVerilog = true;
+
             if (verilogFile == null)
             {
+                VerilogModuleInstance? verilogModuleInstance = verilogRelatedFile as VerilogModuleInstance;
                 if (verilogModuleInstance != null) verilogFile = verilogModuleInstance.SourceVerilogFile;
+                if (verilogModuleInstance != null && verilogModuleInstance.SystemVerilog) systemVerilog = true;
             }
+            if (verilogFile == null)
+            {
+                Data.ImportedPackage? importedPackage = verilogRelatedFile as Data.ImportedPackage;
+                if (importedPackage != null) verilogFile = importedPackage.SourceVerilogFile;
+                if (importedPackage != null && importedPackage.SystemVerilog) systemVerilog = true;
+            }
+
             if (verilogFile == null) throw new Exception();
 
             fileRef = new WeakReference<Data.VerilogFile>(verilogFile);
@@ -118,13 +130,7 @@ namespace pluginVerilog.Parser
             parsedDocument.CodeDocument.CopyTextOnlyFrom(originalCodeDocument);
             this.Document = parsedDocument.CodeDocument;
 
-            if (
-                (verilogFile != null && verilogFile.SystemVerilog) ||
-                (verilogModuleInstance != null && verilogModuleInstance.SystemVerilog)
-            )
-            {
-                parsedDocument.SystemVerilog = true;
-            }
+            parsedDocument.SystemVerilog = systemVerilog;
             parsedDocument.Version = verilogRelatedFile.CodeDocument.Version;
             parsedDocument.Instance = true;
             parsedDocument.ParameterOverrides = parameterOverrides;

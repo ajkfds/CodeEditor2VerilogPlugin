@@ -188,6 +188,11 @@ namespace pluginVerilog.Data.VerilogCommon
                 oldImportedPackage.Project == project
                 )
             {
+                if (newSubItems.ContainsKey(keyName))
+                {
+                    System.Diagnostics.Debugger.Break();
+                    return;
+                }
                 newSubItems.Add(keyName, oldImportedPackage);
                 return;
             }
