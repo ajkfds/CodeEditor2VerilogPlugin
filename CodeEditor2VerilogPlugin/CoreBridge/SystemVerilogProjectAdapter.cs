@@ -66,14 +66,20 @@ namespace pluginVerilog.CoreBridge
 
         public Task<ISystemVerilogNamedElement?> FindDefinitionAsync(ISystemVerilogFile file, int index, CancellationToken cancellationToken = default)
         {
-            // First cut: no parsed lookups yet. This will be wired to the
-            // plugin's VerilogParser in a follow-up change.
-            return Task.FromResult<ISystemVerilogNamedElement?>(null);
+            if (file is not SystemVerilogFileAdapter adapter) return Task.FromResult<ISystemVerilogNamedElement?>(null);
+            pluginVerilog.Data.IVerilogRelatedFile verilogFile = adapter.File;
+            pluginVerilog.Verilog.ParsedDocument? parsed = verilogFile.VerilogParsedDocument;
+            if (parsed == null) return Task.FromResult<ISystemVerilogNamedElement?>(null);
+            return Task.FromResult(SymbolResolver.FindDefinition(parsed, adapter, index));
         }
 
         public Task<IReadOnlyList<ISystemVerilogNamedElement>> FindReferencesAsync(ISystemVerilogFile file, int index, CancellationToken cancellationToken = default)
         {
-            return Task.FromResult<IReadOnlyList<ISystemVerilogNamedElement>>(System.Array.Empty<ISystemVerilogNamedElement>());
+            if (file is not SystemVerilogFileAdapter adapter) return Task.FromResult<IReadOnlyList<ISystemVerilogNamedElement>>(System.Array.Empty<ISystemVerilogNamedElement>());
+            pluginVerilog.Data.IVerilogRelatedFile verilogFile = adapter.File;
+            pluginVerilog.Verilog.ParsedDocument? parsed = verilogFile.VerilogParsedDocument;
+            if (parsed == null) return Task.FromResult<IReadOnlyList<ISystemVerilogNamedElement>>(System.Array.Empty<ISystemVerilogNamedElement>());
+            return Task.FromResult(SymbolResolver.FindReferences(parsed, adapter, index));
         }
 
         private static IEnumerable<Data.IVerilogRelatedFile> EnumerateVerilogFiles(Project project)
