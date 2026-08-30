@@ -94,7 +94,7 @@ namespace pluginVerilog.CoreBridge
                 Verilog.ParsedDocument.Message.MessageType.Hint => SystemVerilogSeverity.Hint,
                 _ => SystemVerilogSeverity.Hint,
             };
-            Code = string.Empty;
+            Code = DiagnosticCodeMap.FromMessage(Message);
             Range = new SystemVerilogRange(message.Index, message.Length);
         }
 
