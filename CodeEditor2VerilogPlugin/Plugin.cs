@@ -14,6 +14,11 @@ namespace pluginVerilog
 
         public bool Register()
         {
+            // register the plugin-specific hover content provider so that
+            // any embedded LSP / `ISystemVerilogCore` consumer can render
+            // rich hover descriptions (data type, bit width, port direction, ...).
+            CoreBridge.PluginHoverInstaller.Install();
+
             // register filetypes
             {
                 FileTypes.VerilogFile fileType = new FileTypes.VerilogFile();

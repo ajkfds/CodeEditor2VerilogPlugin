@@ -209,9 +209,11 @@ namespace pluginVerilog.CoreBridge
         /// Lightweight read-only <see cref="ISystemVerilogNamedElement"/>
         /// implementation backed by a single word reference. Used to expose
         /// use sites of a <see cref="pluginVerilog.Verilog.DataObjects.DataObject"/>
-        /// through the LSP-friendly surface.
+        /// through the LSP-friendly surface. Exposed as <c>internal</c> so
+        /// <see cref="PluginHoverContentProvider"/> can skip the underlying
+        /// element lookup.
         /// </summary>
-        private sealed class ReferenceAdapter : ISystemVerilogNamedElement
+        internal sealed class ReferenceAdapter : ISystemVerilogNamedElement
         {
             public ReferenceAdapter(
                 pluginVerilog.Verilog.DataObjects.DataObject declaration,
