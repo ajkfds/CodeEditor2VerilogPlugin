@@ -46,11 +46,7 @@ namespace pluginVerilog.Tool
 
             try
             {
-                await runParallelAsync(textFile, parseMode, _cts.Token);
-            }
-            catch (OperationCanceledException)
-            {
-
+                await ParseAsync(textFile, parseMode, _cts);
             }
             finally
             {
@@ -62,6 +58,17 @@ namespace pluginVerilog.Tool
             }
         }
 
+        public static async Task ParseAsync(CodeEditor2.Data.TextFile textFile, ParseMode parseMode,CancellationTokenSource cancellationTokenSource)
+        {
+            try
+            {
+                await runParallelAsync(textFile, parseMode, cancellationTokenSource.Token);
+            }
+            catch (OperationCanceledException ex)
+            {
+                CodeEditor2.Controller.AppendLog(ex);
+            }
+        }
 
 
         public record ParseTask(

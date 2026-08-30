@@ -1,3 +1,4 @@
+using Avalonia;
 using CodeEditor2.Data;
 using pluginVerilog.FileTypes;
 using pluginVerilog.Verilog;
@@ -9,6 +10,8 @@ using pluginVerilog.Verilog.Items;
 using System. Collections. Generic;
 using System.Globalization;
 using System. Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace pluginVerilog. Data
 {
@@ -35,6 +38,13 @@ namespace pluginVerilog. Data
 
         public Dictionary<CodeEditor2. Data. Project, SimulationSetup> ExternalProjectReferences = new Dictionary<Project, SimulationSetup>();
         public Dictionary<string, CodeEditor2. Data. Project> ExternalProjectEntryInstance = new Dictionary<string, Project>();
+
+        public static async Task<SimulationSetup?> CreateAsync(pluginVerilog.Data.VerilogFile verilogFile)
+        {
+            CancellationTokenSource cts = new CancellationTokenSource();
+            await Tool.ParseHierarchy.ParseAsync(verilogFile, Tool.ParseHierarchy.ParseMode.SearchReparseReqestedTree);
+            return Create(verilogFile);
+        }
         public static SimulationSetup? Create(pluginVerilog. Data. VerilogFile verilogFile)
         {
             SimulationSetup setup = new SimulationSetup();
