@@ -41,7 +41,23 @@ namespace pluginVerilog.CoreBridge
 
         public ISystemVerilogCodeDocument CodeDocument { get; }
 
-        public IReadOnlyList<ISystemVerilogBuildingBlock> TopLevelBlocks =>
-            System.Array.Empty<ISystemVerilogBuildingBlock>();
+        public IReadOnlyList<ISystemVerilogBuildingBlock> TopLevelBlocks
+        {
+            get
+            {
+                pluginVerilog.Verilog.ParsedDocument? parsed = File.VerilogParsedDocument;
+                if (parsed?.Root == null)
+                {
+                    return System.Array.Empty<ISystemVerilogBuildingBlock>();
+                }
+
+                List<ISystemVerilogBuildingBlock> list = new List<ISystemVerilogBuildingBlock>();
+                foreach (pluginVerilog.Verilog.BuildingBlocks.BuildingBlock block in parsed.Root.BuildingBlocks.Values)
+                {
+                    list.Add(new BuildingBlockAdapter(block, this, BuildingBlockAdapter.MapBuildingBlockKind(block)));
+                }
+                return list;
+            }
+        }
     }
 }

@@ -9,9 +9,8 @@ namespace pluginVerilog.CoreBridge
     /// Adapter that exposes a plugin-side <see cref="Verilog.ParsedDocument"/>
     /// through the UI-agnostic <see cref="ISystemVerilogDocument"/> surface.
     /// The diagnostics list is wired to the parser's accumulated
-    /// <c>Messages</c>; everything else (members, building blocks,
-    /// element-at-index) is currently empty in this first cut and will be
-    /// expanded in follow-up changes.
+    /// <c>Messages</c>; the root building block and <c>FindElementAt</c> are
+    /// built on top of the parser's namespace tree.
     /// </summary>
     public sealed class SystemVerilogDocumentAdapter : ISystemVerilogDocument
     {
@@ -19,7 +18,9 @@ namespace pluginVerilog.CoreBridge
         {
             File = file;
             ParsedDocument = parsed;
-            Root = new RootBlockAdapter(file);
+            Root = parsed.Root != null
+                ? new BuildingBlockAdapter(parsed.Root, file, SystemVerilogBuildingBlockKind.Root)
+                : new EmptyRootBlockAdapter(file);
             Diagnostics = new List<ISystemVerilogDiagnostic>(BuildDiagnostics(parsed));
         }
 
@@ -28,7 +29,45 @@ namespace pluginVerilog.CoreBridge
         public ISystemVerilogBuildingBlock Root { get; }
         public IReadOnlyList<ISystemVerilogDiagnostic> Diagnostics { get; }
 
-        public ISystemVerilogNamedElement? FindElementAt(int index) => null;
+        public ISystemVerilogNamedElement? FindElementAt(int index)
+        {
+            pluginVerilog.Verilog.BuildingBlocks.Root? root = ParsedDocument.Root;
+            if (root == null) return null;
+
+            pluginVerilog.Verilog.IndexReference iref =
+                pluginVerilog.Verilog.IndexReference.Create(ParsedDocument, ParsedDocument.CodeDocument, index);
+
+            // Resolve the deepest namespace that contains the index.
+            pluginVerilog.Verilog.NameSpace? ns = root.GetHierarchyNameSpace(iref);
+            if (ns == null) return null;
+
+            // Find the smallest item in that namespace that covers the index.
+            pluginVerilog.Verilog.Items.IItem? item = null;
+            pluginVerilog.Verilog.IndexReference? foundBegin = null;
+            pluginVerilog.Verilog.IndexReference? foundLast = null;
+            foreach (pluginVerilog.Verilog.Items.IItem candidate in ns.Items)
+            {
+                if (candidate.BeginIndexReference == null) continue;
+                if (candidate.LastIndexReference == null) continue;
+                if (iref.IsSmallerThan(candidate.BeginIndexReference)) continue;
+                if (iref.IsGreaterThan(candidate.LastIndexReference)) continue;
+
+                if (foundBegin != null && foundLast != null)
+                {
+                    if (candidate.BeginIndexReference.IsSmallerThan(foundBegin)) continue;
+                    if (candidate.LastIndexReference.IsGreaterThan(foundLast)) continue;
+                }
+
+                item = candidate;
+                foundBegin = candidate.BeginIndexReference;
+                foundLast = candidate.LastIndexReference;
+            }
+
+            pluginVerilog.Verilog.INamedElement? element = item as pluginVerilog.Verilog.INamedElement
+                ?? (pluginVerilog.Verilog.INamedElement?)item;
+            if (element == null) return null;
+            return NamedElementAdapter.TryCreate(element, File);
+        }
 
         ISystemVerilogFile ISystemVerilogDocument.File => File;
 
@@ -65,9 +104,13 @@ namespace pluginVerilog.CoreBridge
         public SystemVerilogRange Range { get; }
     }
 
-    internal sealed class RootBlockAdapter : ISystemVerilogBuildingBlock
+    /// <summary>
+    /// Minimal stand-in used when the parser has not produced a
+    /// <c>Root</c> yet (e.g. the document has not been parsed).
+    /// </summary>
+    internal sealed class EmptyRootBlockAdapter : ISystemVerilogBuildingBlock
     {
-        public RootBlockAdapter(SystemVerilogFileAdapter file)
+        public EmptyRootBlockAdapter(SystemVerilogFileAdapter file)
         {
             File = file;
         }
@@ -80,7 +123,7 @@ namespace pluginVerilog.CoreBridge
         public IReadOnlyList<ISystemVerilogNamedElement> Members { get; }
             = System.Array.Empty<ISystemVerilogNamedElement>();
         public ISystemVerilogBuildingBlock? Owner => null;
-        public new SystemVerilogFileAdapter File { get; }
+        public SystemVerilogFileAdapter File { get; }
 
         SystemVerilogNamedElementKind ISystemVerilogNamedElement.Kind => SystemVerilogNamedElementKind.Unknown;
         ISystemVerilogFile? ISystemVerilogNamedElement.File => File;
