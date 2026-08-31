@@ -311,6 +311,23 @@ namespace pluginVerilog.Tool
                     EnqueueWork(newTask, workQueue, completeIds);
                 }
 
+                // If this file is an ImportedPackage, also enqueue the source
+                // VerilogFile that defines the package so that the source file
+                // itself gets re-parsed in this hierarchy pass. Without this,
+                // editing the package body would not be reflected in the
+                // package definition registered against the source file,
+                // because the source VerilogFile is not otherwise reachable
+                // from the ImportedPackage sub-items.
+                if (verilogFile is Data.ImportedPackage importedPackage)
+                {
+                    Data.VerilogFile? sourceFile = importedPackage.SourceVerilogFile;
+                    if (sourceFile != null)
+                    {
+                        ParseTask sourceTask = new ParseTask(Id: sourceFile.Key, tarfgetTextFile: sourceFile);
+                        EnqueueWork(sourceTask, workQueue, completeIds);
+                    }
+                }
+
                 foreach (string elementName in verilogFile.VerilogParsedDocument.ReferencedUnitNameSpace)
                 {
                     pluginVerilog.ProjectProperty projectProperty = (ProjectProperty)verilogFile.Project.ProjectProperties[pluginVerilog.Plugin.StaticID];
