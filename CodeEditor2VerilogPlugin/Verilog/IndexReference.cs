@@ -137,6 +137,14 @@ namespace pluginVerilog.Verilog
             }
         }
 
+        public int RootIndex
+        {
+            get
+            {
+                return indexes.First();
+            }
+        }
+
         public int Index
         {
             get

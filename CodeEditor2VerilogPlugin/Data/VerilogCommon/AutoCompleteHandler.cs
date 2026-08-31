@@ -2,12 +2,15 @@ using Avalonia.Input;
 using CodeEditor2.CodeEditor.CodeComplete;
 using CodeEditor2.CodeEditor.PopupHint;
 using CodeEditor2.CodeEditor.PopupMenu;
+using pluginVerilog.Parser;
 using pluginVerilog.Verilog;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.Items.Generate;
+using pluginVerilog.Verilog.Statements;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace pluginVerilog.Data.VerilogCommon
 {
@@ -75,6 +78,77 @@ namespace pluginVerilog.Data.VerilogCommon
         public delegate void AppendToolItemDelegate(List<ToolItem> toolItems, IVerilogRelatedFile item, int index);
         public static AppendToolItemDelegate? AppendToolItems;
 
+//        public static List<CodeEditor2.CodeEditor.PopupMenu.ToolItem>? GetAutoCompleteItemsNext(IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, int index, out string candidateWord)
+//        {
+//            candidateWord = "";
+//            List<CodeEditor2.CodeEditor.PopupMenu.ToolItem> items = new List<CodeEditor2.CodeEditor.PopupMenu.ToolItem>();
+
+//            CodeEditor.CodeDocument? codeDocument = item.CodeDocument as CodeEditor.CodeDocument;
+//            if (codeDocument == null) return null;
+
+//            int line = codeDocument.GetLineAt(index);
+//            int lineStartIndex = codeDocument.GetLineStartIndex(line);
+
+//            if (!GetAutoCompleteTarget(item, parsedDocument, index, out NameSpace? nameSpace, out INamedElement? element, out candidateWord, out int candidateStartIndex))
+//            {
+//                return null;
+//            }
+//            if (nameSpace == null) return null;
+//            if (item.CodeDocument == null) return null;
+//            string blockText = item.CodeDocument.CreateString(nameSpace.BeginIndexReference.RootIndex, index);
+//            pluginVerilog.CodeEditor.CodeDocument document = new pluginVerilog.CodeEditor.CodeDocument(blockText);
+//            WordScanner word = new WordScanner(document, parsedDocument, parsedDocument.SystemVerilog);
+
+//            if(nameSpace is Module)
+//            {
+//                nameSpace = await Module.ParseCreateAsync(word, null, null, nameSpace.BuildingBlock, item, false);
+//            }
+
+//            IndexReference iref = nameSpace.BeginIndexReference.Clone();
+//            ParsedDocument partialParsedDodument = new ParsedDocument(item, item.ID, iref, CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.EditParse);
+//            CancellationTokenSource cts = new CancellationTokenSource();
+//            VerilogParser parser = new VerilogParser(item, CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.EditParse, cts.Token);
+
+
+            
+////            parser.ParseAsync
+
+
+
+//            return null;
+//        }
+
+
+        //public static async System.Threading.Tasks.Task RunPartialParseAsync(IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, int index, out string candidateWord)
+        //{
+        //    candidateWord = "";
+        //    List<CodeEditor2.CodeEditor.PopupMenu.ToolItem> items = new List<CodeEditor2.CodeEditor.PopupMenu.ToolItem>();
+
+        //    CodeEditor.CodeDocument? codeDocument = item.CodeDocument as CodeEditor.CodeDocument;
+        //    if (codeDocument == null) return null;
+
+        //    int line = codeDocument.GetLineAt(index);
+        //    int lineStartIndex = codeDocument.GetLineStartIndex(line);
+
+        //    if (!GetAutoCompleteTarget(item, parsedDocument, index, out NameSpace? nameSpace, out INamedElement? element, out candidateWord, out int candidateStartIndex))
+        //    {
+        //        return null;
+        //    }
+        //    if (nameSpace == null) return null;
+        //    if (item.CodeDocument == null) return null;
+        //    string blockText = item.CodeDocument.CreateString(nameSpace.BeginIndexReference.RootIndex, index);
+        //    pluginVerilog.CodeEditor.CodeDocument document = new pluginVerilog.CodeEditor.CodeDocument(blockText);
+        //    WordScanner word = new WordScanner(document, parsedDocument, parsedDocument.SystemVerilog);
+
+        //    if (nameSpace is NamedGeneratedBlock)
+        //    {
+        //        SequentialBlock 
+        //    }
+
+
+        //    }
+        //}
+
         public static List<CodeEditor2.CodeEditor.PopupMenu.ToolItem>? GetAutoCompleteItems(IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, int index, out string candidateWord)
         {
             candidateWord = "";
@@ -108,36 +182,6 @@ namespace pluginVerilog.Data.VerilogCommon
                     );
                 }
                 return items;
-            }
-            //if (nameSpace != null)
-            //{   // has hier nameSpace cantidate
-            //    foreach (INamedElement subElement in nameSpace.NamedElements.Values)
-            //    {
-            //        if (candidateWord != "" && !subElement.Name.StartsWith(candidateWord)) continue;
-            //        if (subElement.Name.StartsWith("\0", StringComparison.Ordinal)) continue; // reject unnamed elements
-            //        items.Add(
-            //            new pluginVerilog.Data.VerilogCommon.AutoCompleteItem
-            //                (
-            //                    subElement.Name,
-            //                    CodeDrawStyle.ColorIndex(subElement.ColorType),
-            //                    Global.CodeDrawStyle.Color(subElement.ColorType),
-            //                    "CodeEditor2/Assets/Icons/tag.svg"
-            //                )
-            //        );
-            //    }
-            //    return items;
-            //}
-            if(nameSpace is Verilog.BuildingBlocks.Module || nameSpace is Verilog.NamedGeneratedBlock)
-            {
-                //CodeEditor2.Data.Project project = item.Project;
-                //ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
-                //if (projectProperty == null) throw new Exception();
-
-                //List<string> moduleNames = projectProperty.GetModuleNameList();
-                //foreach (string moduleName in moduleNames)
-                //{
-                //    items.Add(new Verilog.Snippets.ModuleInstanceSnippet(moduleName));
-                //}
             }
 
             // hier cantidate : get current line namespace and region
