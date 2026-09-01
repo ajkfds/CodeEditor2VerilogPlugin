@@ -55,48 +55,19 @@ namespace pluginVerilog.Data
         public string NameSpaceString { set; get; } = "";
 
         // ImportedPackageでparsedDocumentを保持しないとSourceFile側で保持するのはWeakReferenceだけなので消えてしまう。
-        private new CodeEditor2.CodeEditor.ParsedDocument? _parsedDocument;
         public override CodeEditor2.CodeEditor.ParsedDocument? ParsedDocument
         {
             get
             {
                 Data.VerilogFile? vFile = SourceVerilogFile;
-                if (vFile == null) return null;
-                CodeEditor2.CodeEditor.ParsedDocument? parsedDocument = vFile.GetInstancedParsedDocument(_getKey());
-                // 取得するたびに保持しているparsedDocumentを最新のものに置き換える。
-                // 不要なparsedDocumentのGC回収を促進するため。
-                _parsedDocument = parsedDocument;
-                return parsedDocument;
+                if (SourceVerilogFile == null) return null;
+                return SourceVerilogFile.ParsedDocument;
             }
             set
             {
-                // ImportedPackageで保持する。instanceが消えないようにするために。
-                _parsedDocument = value;
-                // Sourceへの登録はAcceptParseDocument側で行う
-            }
-        }
-
-        public override string Key
-        {
-            get
-            {
-                return _getKey();
-            }
-        }
-
-        /// <summary>
-        /// Atomically generates the key from package name while holding the read lock.
-        /// </summary>
-        private string _getKey()
-        {
-            textFileLock.EnterReadLock();
-            try
-            {
-                return pluginVerilog.Verilog.ParsedDocument.KeyGenerator(this, _packageName, null);
-            }
-            finally
-            {
-                textFileLock.ExitReadLock();
+                Data.VerilogFile? vFile = SourceVerilogFile;
+                if (SourceVerilogFile == null) return;
+                SourceVerilogFile.ParsedDocument = value;
             }
         }
 
@@ -292,54 +263,8 @@ namespace pluginVerilog.Data
 
         public override async Task AcceptParsedDocumentAsync(CodeEditor2.CodeEditor.Parser.DocumentParser parser)
         {
-            if (Plugin.StopParse) return;
-
-            VerilogDocument? newParsedDocument = parser.ParsedDocument as VerilogDocument;
-            if (newParsedDocument == null) return;
-
-            Data.VerilogFile? source = SourceVerilogFile;
-            if (source == null) return;
-
-            string key = _getKey();
-
-            VerilogDocument? oldParsedDocument = VerilogParsedDocument;
-
-            {
-                source.RegisterInstanceParsedDocument(key, newParsedDocument, this);
-            }
-
-            if (source.ParsedDocument != null)
-            {
-                VerilogDocument vParsedDocument = (VerilogDocument)newParsedDocument;
-                VerilogDocument sourceParsedDocument = (VerilogDocument)source.ParsedDocument;
-                if (sourceParsedDocument.Root != null && sourceParsedDocument.Root.BuildingBlocks.Count == 1)
-                {
-                    await source.AcceptParsedDocumentAsync(parser);
-                }
-                else
-                {
-                    source.ReparseRequested = true;
-                }
-            }
-
-            {
-                VerilogDocument? vParsedDocument = ParsedDocument as VerilogDocument;
-
-                if (vParsedDocument != null)
-                {
-                    ReparseRequested = vParsedDocument.ReparseRequested;
-                }
-            }
-
-            _parsedDocument = newParsedDocument;
-
-            TextFile? textFile = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync();
-            if (textFile == this)
-            {
-                textFile.CodeDocument?.CopyColorMarkFrom(parser.Document);
-                CodeEditor2.Controller.MessageView.Update(newParsedDocument);
-                CodeEditor2.Controller.CodeEditor.PostRefresh();
-            }
+            if(SourceVerilogFile == null) return;
+            await SourceVerilogFile.AcceptParsedDocumentAsync(parser);
 
             await UpdateAsync();
         }
