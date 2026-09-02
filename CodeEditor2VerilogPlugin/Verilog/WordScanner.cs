@@ -902,7 +902,7 @@ namespace pluginVerilog.Verilog
             }
             else if (RootParsedDocument.Macros.ContainsKey(macro.Name))
             {
-                if (!SupressCompilerDerectiveError) wordRef.AddError("duplicate macro name");
+                if (!SupressCompilerDerectiveError&!prototype) wordRef.AddError("duplicate macro name");
             }
             else
             {
