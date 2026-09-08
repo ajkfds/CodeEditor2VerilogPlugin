@@ -61,7 +61,8 @@ namespace pluginVerilog.Verilog.Items
 
             // udp_instantiation
             // module_instantiation
-            if (await Items.ModuleInstantiation.ParseAsync(word, nameSpace)) return;
+            await Items.ModuleInstantiation.ParseAsync(word, nameSpace);
+            if (!word.CreateIndexReference().IsSameAs(iref)) return;
 
         }
     }

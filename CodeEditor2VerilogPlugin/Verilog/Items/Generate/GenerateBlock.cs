@@ -155,11 +155,16 @@ namespace pluginVerilog.Verilog.Items.Generate
                         word.AddError("block identifier mismatch");
                     }
                 }
-                return true;
             }
             else
             {
                 word.AddError("end required");
+            }
+
+            if(generateBlock != null)
+            {
+                generateBlock.LastIndexReference = word.CreateIndexReference();
+                if (!word.Prototype) nameSpace.Items.Add(generateBlock);
             }
             return true;
         }

@@ -6,13 +6,17 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Statements
 {
-    public class SequentialBlock : IStatement
+    public class SequentialBlock : IStatement,Items.IItem
     {
         protected SequentialBlock() { }
 
         public string Name { get; protected set; }
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
+
+        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; } = null;
+
         public void DisposeSubReference()
         {
             foreach (IStatement statement in Statements)
@@ -92,7 +96,7 @@ namespace pluginVerilog.Verilog.Statements
         private static List<string> endKeyword = new List<string> { "endmodule", "endtask", "endtask", "endinterface", "endfunction" };
         private static IStatement? parseCreateUnnamedSequentialBlock(WordScanner word, NameSpace nameSpace, IndexReference beginIndex, List<string>? clockDomains = null)
         {
-            SequentialBlock sequentialBlock = new SequentialBlock();
+            SequentialBlock sequentialBlock = new SequentialBlock() { BeginIndexReference = beginIndex };
 
             // An unnamed block creates a new hierarchy scope only if it directly contains a block item declaration, 
             // such as a variable declaration or a type declaration. This hierarchy scope is unnamed and the items declared in it cannot be hierarchically referenced.
@@ -172,6 +176,7 @@ namespace pluginVerilog.Verilog.Statements
                     }
                 }
             }
+            sequentialBlock.LastIndexReference = word.CreateIndexReference();
             if (word.Text != "end")
             {
                 word.AddError("'end' required");
@@ -180,6 +185,7 @@ namespace pluginVerilog.Verilog.Statements
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext(); // end
 
+            if (!word.Prototype) nameSpace.Items.Add(sequentialBlock);
             return sequentialBlock;
         }
 
@@ -234,6 +240,7 @@ namespace pluginVerilog.Verilog.Statements
                     nameSpace.NamedElements.Add(namedBlock.Name, namedBlock);
                 }
             }
+            if (!word.Prototype) nameSpace.Items.Add(namedBlock);
             return namedBlock;
         }
         private static IStatement? parseCreateNamedSequentialBlock(WordScanner word, NameSpace nameSpace, IndexReference beginIndex, string name, List<string>? clockDomains = null)
@@ -303,12 +310,13 @@ namespace pluginVerilog.Verilog.Statements
                 nameSpace.NamedElements.Add(namedBlock.Name, namedBlock);
             }
 
+            if (!word.Prototype) nameSpace.Items.Add(namedBlock);
             return namedBlock;
         }
 
     }
 
-    public class NamedSequentialBlock : Verilog.NameSpace, IStatement
+    public class NamedSequentialBlock : Verilog.NameSpace, IStatement, Items.IItem
     {
         public void DisposeSubReference()
         {

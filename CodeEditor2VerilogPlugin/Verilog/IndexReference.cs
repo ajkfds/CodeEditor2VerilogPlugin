@@ -35,6 +35,17 @@ namespace pluginVerilog.Verilog
 
             return ret;
         }
+        public static IndexReference Create(int index,ParsedDocument parsedDocument)
+        {
+            IndexReference ret = new IndexReference();
+
+            ret.rootParsedDocumentRef = new WeakReference<ParsedDocument>(parsedDocument);
+            ret.parsedDocumentRef = new WeakReference<ParsedDocument>(parsedDocument);
+            ret.indexes.Add(index);
+
+            return ret;
+        }
+
         public static IndexReference CreateBefore(WordPointer wordPointer, List<WordPointer> stocks)
         {
             IndexReference ret = Create(wordPointer, stocks);

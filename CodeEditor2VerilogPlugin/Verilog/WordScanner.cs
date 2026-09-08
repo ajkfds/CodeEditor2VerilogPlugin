@@ -75,6 +75,11 @@ namespace pluginVerilog.Verilog
             }
         }
 
+        public bool ReadOnly
+        {
+            get;set;
+        }
+
         public ProjectProperty ProjectProperty
         {
             get
@@ -190,6 +195,7 @@ namespace pluginVerilog.Verilog
         public void Color(CodeDrawStyle.ColorType colorType)
         {
             if (prototype) return;
+            if (ReadOnly) return;
             wordPointer.Color(colorType);
         }
 
@@ -204,6 +210,7 @@ namespace pluginVerilog.Verilog
         }
         public void appendBlock(IndexReference startIndexReference, IndexReference lastIndexReference, string? name, bool? defaultClose)
         {
+            if (ReadOnly) return;
             if (startIndexReference.Indexes.Count != lastIndexReference.Indexes.Count) return;
             for (int i = 0; i < startIndexReference.Indexes.Count - 1; i++)
             {
@@ -225,6 +232,7 @@ namespace pluginVerilog.Verilog
         private bool systemVerilogError = false;
         public void AddSystemVerilogError()
         {
+            if (ReadOnly) return;
             if (RootParsedDocument.SystemVerilog) return;
             if (systemVerilogError) return;
             AddError("SystemVerilog Description");
@@ -232,6 +240,7 @@ namespace pluginVerilog.Verilog
 
         public void AddError(string message)
         {
+            if (ReadOnly) return;
             if (SupressCompilerDerectiveError) return;
             if (prototype) return;
             wordPointer.AddError(message);
@@ -239,6 +248,7 @@ namespace pluginVerilog.Verilog
 
         public void AddWarning(string message)
         {
+            if (ReadOnly) return;
             if (SupressCompilerDerectiveError) return;
             if (prototype) return;
             wordPointer.AddWarning(message);
@@ -246,6 +256,7 @@ namespace pluginVerilog.Verilog
 
         public void AddPrototypeError(string message)
         {
+            if (ReadOnly) return;
             if (SupressCompilerDerectiveError) return;
             //            if (prototype) return;
             wordPointer.AddError(message);
@@ -253,6 +264,7 @@ namespace pluginVerilog.Verilog
 
         public void AddPrototypeWarning(string message)
         {
+            if (ReadOnly) return;
             if (SupressCompilerDerectiveError) return;
             //            if (prototype) return;
             wordPointer.AddWarning(message);
@@ -260,12 +272,14 @@ namespace pluginVerilog.Verilog
 
         public void AddNotice(string message)
         {
+            if (ReadOnly) return;
             if (SupressCompilerDerectiveError) return;
             if (prototype) return;
             wordPointer.AddNotice(message);
         }
         public void AddHint(string message)
         {
+            if (ReadOnly) return;
             if (SupressCompilerDerectiveError) return;
             if (prototype) return;
             wordPointer.AddHint(message);
@@ -273,6 +287,7 @@ namespace pluginVerilog.Verilog
 
         public void ApplyPrototypeRule(Rule rule)
         {
+            if (ReadOnly) return;
             if (SupressCompilerDerectiveError) return;
             ApplyPrototypeRule(rule, "");
         }
@@ -295,6 +310,7 @@ namespace pluginVerilog.Verilog
         }
         private void applyRule(Rule rule, string message)
         {
+            if (ReadOnly) return;
             switch (rule.Severity)
             {
                 case Rule.SeverityEnum.Error:
