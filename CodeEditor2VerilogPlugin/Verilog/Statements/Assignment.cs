@@ -103,7 +103,7 @@ namespace pluginVerilog.Verilog.Statements
             assignment.LValue = lExpression;
             assignment.Expression = expression;
 
-            if (clockDomains != null && lExpression != null)
+            if (!word.Prototype && clockDomains != null && lExpression != null)
             {
                 List<DataObject> dataObjects = new List<DataObject>();
                 lExpression.AppendRefrencedDataObjects(dataObjects);
