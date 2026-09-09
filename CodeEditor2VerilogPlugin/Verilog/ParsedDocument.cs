@@ -620,7 +620,7 @@ namespace pluginVerilog.Verilog
             foreach (var element in nameSpace.NamedElements.Values)
             {
                 NameSpace? subNameSpace = element as NameSpace;
-                if (subNameSpace == null) return;
+                if (subNameSpace == null) continue;
 
                 if (targetIndexRef.IsSmallerThan(subNameSpace.BeginIndexReference)) continue;
                 if (subNameSpace.LastIndexReference == null) continue;

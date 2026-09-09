@@ -15,26 +15,27 @@ namespace pluginVerilog.Data.VerilogCommon
             string candidate, 
             int candidateStartIndex,
             int lineStartIndex,
-            bool systemVerilog
+            bool systemVerilog,
+            Func<Data.VerilogCommon.AutoCompleteItem, bool> itemFilter
             )
         {
 
 
-            appendItems(items, candidate, new Verilog.AutoComplete.BeginAutoCompleteItem());
-            appendItems(items, candidate, new Verilog.AutoComplete.CaseAutocompleteItem());
-            appendItems(items, candidate, new Verilog.AutoComplete.FunctionAutocompleteItem());
-            appendItems(items, candidate, new Verilog.AutoComplete.GenerateAutoCompleteItem());
-            appendItems(items, candidate, new Verilog.AutoComplete.ModuleAutocompleteItem());
-            appendItems(items, candidate, new Verilog.AutoComplete.TaskAutocompleteItem());
-            if (candidate == "<=") items.Add(new Verilog.AutoComplete.NonBlockingAssignmentAutoCompleteItem());
+            appendItems(items, candidate, new Verilog.AutoComplete.BeginAutoCompleteItem(),itemFilter);
+            appendItems(items, candidate, new Verilog.AutoComplete.CaseAutocompleteItem(), itemFilter);
+            appendItems(items, candidate, new Verilog.AutoComplete.FunctionAutocompleteItem(), itemFilter);
+            appendItems(items, candidate, new Verilog.AutoComplete.GenerateAutoCompleteItem(), itemFilter);
+            appendItems(items, candidate, new Verilog.AutoComplete.ModuleAutocompleteItem(), itemFilter);
+            appendItems(items, candidate, new Verilog.AutoComplete.TaskAutocompleteItem(), itemFilter);
+            if (candidate == "<=") appendItems(items, candidate, new Verilog.AutoComplete.NonBlockingAssignmentAutoCompleteItem(), itemFilter);
 
-            appendKeywordItems(items, candidate, "sync"); // annotation
-            appendKeywordItems(items, candidate, "async"); // annotation
-            appendKeywordItems(items, candidate, "clock"); // annotation
-            appendKeywordItems(items, candidate, "reset"); // annotation
+            appendKeywordItems(items, candidate, "sync",itemFilter); // annotation
+            appendKeywordItems(items, candidate, "async", itemFilter); // annotation
+            appendKeywordItems(items, candidate, "clock", itemFilter); // annotation
+            appendKeywordItems(items, candidate, "reset", itemFilter); // annotation
 
-            appendKeywordItems(items, candidate, "always"); // verilog
-            appendKeywordItems(items, candidate, "integer"); // verilog
+            appendKeywordItems(items, candidate, "always", itemFilter); // verilog
+            appendKeywordItems(items, candidate, "integer", itemFilter); // verilog
 
 
             List<(string, int)> keywords = new List<(string, int)>
@@ -144,15 +145,16 @@ namespace pluginVerilog.Data.VerilogCommon
                 if (!keyword.Item1.StartsWith(candidate)) continue;
                 if (candidate.Length < keyword.Item2) continue;
                 Data.VerilogCommon.AutoCompleteItem item = new pluginVerilog.Data.VerilogCommon.AutoCompleteItem(
+                    AutoCompleteItem.CompleteType.Keyword,
                     keyword.Item1,
                     CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
                     Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword),
                     "CodeEditor2/Assets/Icons/bookmark.svg"
                     );
-                items.Add(item);
+                if (itemFilter(item)) items.Add(item);
             }
 
-            appendItems(items, candidate, new Verilog.AutoComplete.InterfaceAutocompleteItem());
+            appendItems(items, candidate, new Verilog.AutoComplete.InterfaceAutocompleteItem(), itemFilter);
 
             if (systemVerilog)
             {
@@ -161,35 +163,37 @@ namespace pluginVerilog.Data.VerilogCommon
                     if (!keyword.Item1.StartsWith(candidate)) continue;
                     if (candidate.Length < keyword.Item2) continue;
                     pluginVerilog.Data.VerilogCommon.AutoCompleteItem item = new pluginVerilog.Data.VerilogCommon.AutoCompleteItem(
+                        AutoCompleteItem.CompleteType.Keyword,
                         keyword.Item1,
                         CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
                         Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword),
                         "CodeEditor2/Assets/Icons/bookmark.svg"
                         );
-                    items.Add(item);
+                    if (itemFilter(item)) items.Add(item);
                 }
 
             }
 
         }
 
-        private static void appendItems(List<CodeEditor2.CodeEditor.PopupMenu.ToolItem> items, string cantidate, pluginVerilog.Data.VerilogCommon.AutoCompleteItem item)
+        private static void appendItems(List<CodeEditor2.CodeEditor.PopupMenu.ToolItem> items, string cantidate, pluginVerilog.Data.VerilogCommon.AutoCompleteItem item, Func<Data.VerilogCommon.AutoCompleteItem, bool> itemFilter)
         {
             if (!item.Text.StartsWith(cantidate)) return;
-            items.Add(item);
+            if (itemFilter(item)) items.Add(item);
         }
-        private static void appendKeywordItems(List<CodeEditor2.CodeEditor.PopupMenu.ToolItem> items, string cantidate, string keyword)
+        private static void appendKeywordItems(List<CodeEditor2.CodeEditor.PopupMenu.ToolItem> items, string cantidate, string keyword, Func<Data.VerilogCommon.AutoCompleteItem, bool> itemFilter)
         {
             if (!keyword.StartsWith(cantidate)) return;
 
 
             pluginVerilog.Data.VerilogCommon.AutoCompleteItem item = new pluginVerilog.Data.VerilogCommon.AutoCompleteItem(
+                AutoCompleteItem.CompleteType.Keyword,
                 keyword,
                 CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
                 Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword),
                 "CodeEditor2/Assets/Icons/bookmark.svg"
                 );
-            items.Add(item);
+            if(itemFilter(item)) items.Add(item);
         }
 
     }

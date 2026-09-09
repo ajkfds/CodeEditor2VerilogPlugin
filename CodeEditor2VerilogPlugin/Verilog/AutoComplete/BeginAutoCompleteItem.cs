@@ -4,7 +4,7 @@ namespace pluginVerilog.Verilog.AutoComplete
 {
     public class BeginAutoCompleteItem : pluginVerilog.Data.VerilogCommon.AutoCompleteItem
     {
-        public BeginAutoCompleteItem() : base("begin", CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Plugin.ThemeColor, "CodeEditor2/Assets/Icons/screwdriver.svg")
+        public BeginAutoCompleteItem() : base(CompleteType.Keyword, "begin", CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Plugin.ThemeColor, "CodeEditor2/Assets/Icons/screwdriver.svg")
         {
         }
 

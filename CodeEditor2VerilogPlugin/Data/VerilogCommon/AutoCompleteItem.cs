@@ -5,13 +5,25 @@ namespace pluginVerilog.Data.VerilogCommon
 {
     public class AutoCompleteItem : CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem
     {
-        //public AutoCompleteItem(string text, byte colorIndex, Color color) : base(text,colorIndex,color)
-        //{
-        //}
-        public AutoCompleteItem(string text, byte colorIndex, Color color, string svgPath) : base(text, colorIndex, color, svgPath)
+        public AutoCompleteItem(CompleteType type, string text, byte colorIndex, Color color) : base(text, colorIndex, color)
         {
+            Type = type;
+        }
+        public AutoCompleteItem(CompleteType type, string text, byte colorIndex, Color color, string svgPath) : base(text, colorIndex, color, svgPath)
+        {
+            Type = type;
         }
 
+        public CompleteType Type { get; init; }
+
+        public enum CompleteType
+        {
+            Keyword,
+            Task,
+            Function,
+            DataObject,
+            NameSpace
+        }
         // autocomplete item作成時に取得したheadindex, lengthの場所を更新する
         //public override System.Threading.Tasks.Task ApplyAsync()
         //{

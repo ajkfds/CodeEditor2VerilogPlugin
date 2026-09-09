@@ -4,7 +4,7 @@ namespace pluginVerilog.Verilog.AutoComplete
 {
     public class TaskAutocompleteItem : pluginVerilog.Data.VerilogCommon.AutoCompleteItem
     {
-        public TaskAutocompleteItem() : base("task", CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Plugin.ThemeColor, "CodeEditor2/Assets/Icons/screwdriver.svg")
+        public TaskAutocompleteItem() : base(CompleteType.Keyword, "task", CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Plugin.ThemeColor, "CodeEditor2/Assets/Icons/screwdriver.svg")
         {
         }
 

@@ -5,7 +5,7 @@ namespace pluginVerilog.Verilog.AutoComplete
 {
     public class FunctionAutocompleteItem : pluginVerilog.Data.VerilogCommon.AutoCompleteItem
     {
-        public FunctionAutocompleteItem() : base("function", CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Plugin.ThemeColor, "CodeEditor2/Assets/Icons/screwdriver.svg")
+        public FunctionAutocompleteItem() : base(CompleteType.Keyword, "function", CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Plugin.ThemeColor, "CodeEditor2/Assets/Icons/screwdriver.svg")
         {
         }
 
