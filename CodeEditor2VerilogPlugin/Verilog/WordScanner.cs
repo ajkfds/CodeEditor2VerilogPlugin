@@ -1079,7 +1079,7 @@ namespace pluginVerilog.Verilog
                 if (wordPointer.Text == "(")
                 {
                     int bracketCount = 1;
-                    while (true)
+                    while (!wordPointer.Eof)
                     {
                         wordPointer.MoveNext();
                         if (wordPointer.Text == ")") bracketCount--;
@@ -1118,7 +1118,7 @@ namespace pluginVerilog.Verilog
 
             wordPointer = newPointer;
 
-            while (true)
+            while (!wordPointer.Eof)
             {
                 if (wordPointer.WordType == WordPointer.WordTypeEnum.Comment)
                 {

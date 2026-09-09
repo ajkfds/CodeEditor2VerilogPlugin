@@ -400,7 +400,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
 
 
-            while (true)
+            while (!word.Eof)
             {
                 if (word.Eof || word.Text == "endclass")
                 {

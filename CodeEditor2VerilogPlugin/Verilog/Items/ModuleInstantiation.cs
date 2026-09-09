@@ -781,7 +781,7 @@ namespace pluginVerilog.Verilog.Items
                     word.MoveNext();
                     return;
                 }
-                while (true)
+                while (!word.Eof)
                 {
                     if (new List<string> { "endmodule", "endtask", "end", "endinterface", "endfunction" }.Contains(word.Text)) return;
                     if (word.Text == ")")

@@ -10,6 +10,7 @@ using pluginVerilog.Verilog.Statements;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading;
 
 namespace pluginVerilog.Data.VerilogCommon
@@ -287,7 +288,7 @@ namespace pluginVerilog.Data.VerilogCommon
 
                 AutoCompleteItem.CompleteType completeType = AutoCompleteItem.CompleteType.Keyword;
                 if (subElement is NameSpace) completeType = AutoCompleteItem.CompleteType.NameSpace;
-                if (subElement is Verilog.DataObjects.DataObject) completeType = AutoCompleteItem.CompleteType.DataObject;
+                if (subElement is Verilog.DataObjects.DataObject || subElement is Verilog.DataObjects.Typedef) completeType = AutoCompleteItem.CompleteType.DataObject;
                 if (subElement is Verilog.Items.ModuleInstantiation) completeType = AutoCompleteItem.CompleteType.NameSpace;
                 if (completeType == AutoCompleteItem.CompleteType.Keyword && System.Diagnostics.Debugger.IsAttached)
                 {
