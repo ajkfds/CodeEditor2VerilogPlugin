@@ -60,7 +60,7 @@ namespace pluginVerilog.Verilog
                 return true;
             };
 
-            itemFilter = GetItemFilter(item, parsedDocument, index,element,candidateWord,candidateStartIndex);
+            itemFilter = GetItemFilter();
 
             if (element != null)
             {   // has hier nameSpace cantidate
@@ -182,7 +182,7 @@ namespace pluginVerilog.Verilog
             return;
         }
 
-        public Func<Data.VerilogCommon.AutoCompleteItem, bool> GetItemFilter(Data.IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, int index, INamedElement? element, string candidateWord, int candidateStartIndex)
+        public Func<Data.VerilogCommon.AutoCompleteItem, bool> GetItemFilter()
         {
             Func<Data.VerilogCommon.AutoCompleteItem, bool> itemFilter = (Data.VerilogCommon.AutoCompleteItem ac) =>
             {
