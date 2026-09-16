@@ -49,19 +49,33 @@ namespace pluginVerilog.Setups
                 ProjectProperty? projectProperty = yamlParser.TextFile.Project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
                 if (projectProperty == null) return;
 
-                projectProperty.ExtenralLibraryPath.Clear();
+                projectProperty.ExtenralModuleLibraryPath.Clear();
+                projectProperty.ExtenralPrimitiveLibraryPath.Clear();
 
                 foreach (ExternalLibarary externalLibarary in externalLibrariesSetup.ExternalLibraries)
                 {
                     if (externalLibarary == null) continue;
-                    if (externalLibarary.Modules == null) continue;
 
-                    foreach (string module in externalLibarary.Modules)
+                    if(externalLibarary.Modules != null)
                     {
-                        if (projectProperty.ExtenralLibraryPath.ContainsKey(module)) continue;
-                        projectProperty.ExtenralLibraryPath.Add(module, externalLibarary.Path);
+                        foreach (string module in externalLibarary.Modules)
+                        {
+                            if (module == null) continue;
+                            if (projectProperty.ExtenralModuleLibraryPath.ContainsKey(module)) continue;
+                            projectProperty.ExtenralModuleLibraryPath.Add(module, externalLibarary.Path);
+                        }
+                    }
+                    if (externalLibarary.Primitives != null)
+                    {
+                        foreach (string primitive in externalLibarary.Primitives)
+                        {
+                            if (primitive == null) continue;
+                            if (projectProperty.ExtenralPrimitiveLibraryPath.ContainsKey(primitive)) continue;
+                            projectProperty.ExtenralPrimitiveLibraryPath.Add(primitive, externalLibarary.Path);
+                        }
                     }
                 }
+
             }
             catch (YamlException ex)
             {

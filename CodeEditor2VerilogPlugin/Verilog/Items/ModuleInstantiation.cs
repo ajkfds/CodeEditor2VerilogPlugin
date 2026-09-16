@@ -239,7 +239,7 @@ namespace pluginVerilog.Verilog.Items
             }
             if (instancedModule == null)
             {
-                if (word.ProjectProperty.ExtenralLibraryPath.ContainsKey(moduleName))
+                if (word.ProjectProperty.ExtenralModuleLibraryPath.ContainsKey(moduleName))
                 {
                     word.AddHint("external library");
                     if (!word.RootParsedDocument.ExternalRefrenceModules.Contains(moduleName)) word.RootParsedDocument.ExternalRefrenceModules.Add(moduleName);

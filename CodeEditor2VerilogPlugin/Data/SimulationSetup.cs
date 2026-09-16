@@ -7,6 +7,7 @@ using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.DataObjects.Variables;
 using pluginVerilog.Verilog.Items;
+using System;
 using System. Collections. Generic;
 using System.Globalization;
 using System. Linq;
@@ -29,6 +30,19 @@ namespace pluginVerilog. Data
         public List<IVerilogRelatedFile> ImportFiles = new List<IVerilogRelatedFile>();
 
         public List<IVerilogRelatedFile> ClassFiles = new List<IVerilogRelatedFile>();
+
+        /// <summary>
+        /// 循環参照 (相互参照) を持つクラスファイルに対して、
+        /// シミュレーションコマンドに渡す前にファイル先頭に前置すべき
+        /// "typedef class X;" 宣言のソーステキスト。
+        /// key: 前方宣言が必要なファイル (IVerilogRelatedFile)
+        /// value: ファイル先頭に前置するテキスト (改行区切り)
+        ///
+        /// シミュレーション backend (IcarusVerilogSimulation など) は、
+        /// このマップを参照し、必要に応じてラッパー / prepend で
+        /// typedef class 行を挿入すること。
+        /// </summary>
+        public Dictionary<IVerilogRelatedFile, string> RequiredForwardDeclarations = new Dictionary<IVerilogRelatedFile, string>();
 
 
         public List<string> ExternalLibraryPathList = new List<string>();
@@ -91,6 +105,11 @@ namespace pluginVerilog. Data
                 targetClassFiles = newClassFiles;
             }
 
+            // Reorder setup.Files based on class dependency graph
+            // (extends / implements / references) so that referenced classes
+            // are compiled before the referencing files.
+            ReorderFilesByClassDependencies(setup);
+
 
             if (setup. UnfoundModules. Count != 0)
             {
@@ -101,6 +120,45 @@ namespace pluginVerilog. Data
                 return null;
             }
             return setup;
+        }
+
+        /// <summary>
+        /// setup.Files のうち VerilogFile 同士の依存関係 (extends / implements / 参照) に基づいて
+        /// コンパイル順を整列する。循環参照は typedef class 前方宣言で吸収する。
+        /// </summary>
+        private static void ReorderFilesByClassDependencies(SimulationSetup setup)
+        {
+            try
+            {
+                ClassFileOrderResolver.Result result = ClassFileOrderResolver.ResolveOrder(setup.Files, setup);
+                if (result.OrderedFiles != null && result.OrderedFiles.Count > 0)
+                {
+                    setup.Files.Clear();
+                    setup.Files.AddRange(result.OrderedFiles);
+                }
+                if (result.CyclicGroups != null)
+                {
+                    foreach (var group in result.CyclicGroups)
+                    {
+                        var names = new List<string>();
+                        foreach (var f in group)
+                        {
+                            try { names.Add(f.RelativePath); } catch { names.Add(f.ID); }
+                        }
+                        CodeEditor2.Controller.AppendLog(
+                            "class circular reference detected (typedef class will be inserted): " + string.Join(", ", names),
+                            Avalonia.Media.Colors.Orange);
+                    }
+                }
+                if (result.ForwardDeclarations != null && result.ForwardDeclarations.Count > 0)
+                {
+                    setup.RequiredForwardDeclarations = result.ForwardDeclarations;
+                }
+            }
+            catch (Exception ex)
+            {
+                CodeEditor2.Controller.AppendLog("class file order resolver failed: " + ex.Message, Avalonia.Media.Colors.Orange);
+            }
         }
 
         private static void searchHier(IVerilogRelatedFile file, string buildingBlockName, List<string> ids, SimulationSetup setup, string path)
@@ -120,9 +178,9 @@ namespace pluginVerilog. Data
 
             foreach (string external in parsedDocument. ExternalRefrenceModules)
             {
-                if (file.ProjectProperty.ExtenralLibraryPath.ContainsKey(external))
+                if (file.ProjectProperty.ExtenralModuleLibraryPath.ContainsKey(external))
                 {
-                    string libPath = file. ProjectProperty. ExtenralLibraryPath[external];
+                    string libPath = file. ProjectProperty. ExtenralModuleLibraryPath[external];
                     if (!setup. ExternalLibraryPathList. Contains(libPath)) setup. ExternalLibraryPathList. Add(libPath);
                 }
             }
@@ -303,7 +361,7 @@ namespace pluginVerilog. Data
             if (projectProperty == null) return;
 
             // Handle Object (class instance) - has Class property
-            if (dataObject is Object objectInstance)
+            if (dataObject is Verilog.DataObjects.Variables.Object objectInstance)
             {
                 Class? class_ = objectInstance.GetSourceClass();
                 if (class_ == null) return;

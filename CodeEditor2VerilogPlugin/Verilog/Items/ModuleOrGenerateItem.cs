@@ -59,12 +59,16 @@ namespace pluginVerilog.Verilog.Items
             if(!word.CreateIndexReference().IsSameAs(iref)) return;
 
 
+            if (!General.IsSimpleIdentifier(word.Text)) return;
+            if (General.ListOfKeywords.Contains(word.Text)) return;
+
             // udp_instantiation
             // Disambiguate: when the identifier refers to a Primitive, take the UDP path;
             // otherwise fall through to ModuleInstantiation.
-            if (General.IsSimpleIdentifier(word.Text)
-                && !General.ListOfKeywords.Contains(word.Text)
-                && word.ProjectProperty.DefinitionNameSpace.Get(word.Text) is BuildingBlocks.Primitive)
+            if (
+                word.ProjectProperty.DefinitionNameSpace.Get(word.Text) is BuildingBlocks.Primitive ||
+                word.ProjectProperty.ExtenralPrimitiveLibraryPath.ContainsKey(word.Text)
+                )
             {
                 await Items.UdpInstantiation.ParseAsync(word, nameSpace);
                 if (!word.CreateIndexReference().IsSameAs(iref)) return;

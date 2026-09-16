@@ -1,5 +1,6 @@
 using CodeEditor2.CodeEditor.CodeComplete;
 using CodeEditor2.Data;
+using OpenAI.Realtime;
 using pluginVerilog.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
@@ -178,7 +179,7 @@ namespace pluginVerilog.Verilog.Items
 
             if (instancedUdp == null)
             {
-                if (word.ProjectProperty.ExtenralLibraryPath.ContainsKey(udpName))
+                if (word.ProjectProperty.ExtenralPrimitiveLibraryPath.ContainsKey(udpName))
                 {
                     word.AddHint("external library");
                     if (!word.RootParsedDocument.ExternalRefrenceModules.Contains(udpName)) word.RootParsedDocument.ExternalRefrenceModules.Add(udpName);
@@ -192,7 +193,8 @@ namespace pluginVerilog.Verilog.Items
                 }
             }
             // else: already registered
-
+            
+            word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
             IndexReference blockBeginIndexReference = word.CreateIndexReference();
 
@@ -215,12 +217,22 @@ namespace pluginVerilog.Verilog.Items
             // [ name_of_instance ] ( output_terminal , input_terminal { , input_terminal } ) { , udp_instance }
             while (!word.Eof)
             {
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                string instanceName = "";
 
-                if (!General.IsIdentifier(word.Text))
+                if (General.IsIdentifier(word.Text))
+                {
+                    instanceName = word.Text;
+                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.MoveNext();
+                }
+                else if (word.Text == "(")
+                {
+                    // implicit name_of_instance
+                }else
                 {
                     if (word.Prototype) word.AddError("illegal instance name");
                     word.SkipToKeyword(";");
+                    return null;
                 }
 
                 if (word.RootParsedDocument.Project == null) throw new Exception();
@@ -229,7 +241,7 @@ namespace pluginVerilog.Verilog.Items
                 {
                     BeginIndexReference = beginIndexReference,
                     DefinitionReference = word.CrateWordReference(),
-                    Name = word.Text,
+                    Name = instanceName,
                     Project = word.RootParsedDocument.Project,
                     SourceName = udpName,
                     ParameterOverrides = new Dictionary<string, Expressions.Expression>(),
@@ -273,7 +285,6 @@ namespace pluginVerilog.Verilog.Items
                     }
                 }
 
-                word.MoveNext();
 
                 if (word.Text != "(")
                 {

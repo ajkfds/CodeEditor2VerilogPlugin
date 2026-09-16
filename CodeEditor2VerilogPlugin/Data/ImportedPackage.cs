@@ -340,13 +340,10 @@ namespace pluginVerilog.Data
             return VerilogCommon.AutoComplete.GetToolItems(this, index);
         }
 
-        public override List<CodeEditor2.CodeEditor.PopupMenu.ToolItem>? GetAutoCompleteItems(int index, out string candidateWord)
+        public override CodeEditor2.CodeEditor.CodeComplete.CompletionContext? GetAutoCompleteItems(int index)
         {
-            candidateWord = "";
-            VerilogDocument? vParsedDoc = VerilogParsedDocument;
-
-            if (vParsedDoc == null) return null;
-            return VerilogCommon.AutoComplete.GetAutoCompleteItems(this, vParsedDoc, index, out candidateWord);
+            if (VerilogParsedDocument == null) return null;
+            return VerilogCommon.AutoComplete.GetAutoCompleteItems(this, VerilogParsedDocument, index);
         }
 
 

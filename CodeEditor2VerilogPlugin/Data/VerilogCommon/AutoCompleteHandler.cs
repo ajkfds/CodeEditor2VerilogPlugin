@@ -81,7 +81,7 @@ namespace pluginVerilog.Data.VerilogCommon
 
 
 
-        public static List<CodeEditor2.CodeEditor.PopupMenu.ToolItem>? GetAutoCompleteItems(IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, int index, out string candidateWord)
+        public static CompletionContextResult? GetAutoCompleteItems(IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, int index)
         {
 
             List<CodeEditor2.CodeEditor.PopupMenu.ToolItem> items = new List<CodeEditor2.CodeEditor.PopupMenu.ToolItem>();
@@ -89,10 +89,7 @@ namespace pluginVerilog.Data.VerilogCommon
             CompletionContextResult completionContextResult = new CompletionContextResult(item, parsedDocument, index);
             completionContextResult.Append();
 
-            candidateWord = completionContextResult.candidateWord;
-            items = completionContextResult.autoCompleteItems;
-
-            return items;
+            return completionContextResult;
         }
 
         public static bool GetAutoCompleteTarget(Data.IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, int index, out NameSpace? nameSpace, out INamedElement? element, out string candidate, out int candidateStartIndex)

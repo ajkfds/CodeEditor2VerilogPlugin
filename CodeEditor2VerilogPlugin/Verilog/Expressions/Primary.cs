@@ -329,7 +329,7 @@ number
                     }
 
                     {
-                        if (element is IBuildingBlockInstantiation)
+                        if (element is ModuleInstantiation)
                         {
                             WordReference beginRef = word.GetReference();
                             ModuleInstantiation? moduleInstantiation = (ModuleInstantiation)element;

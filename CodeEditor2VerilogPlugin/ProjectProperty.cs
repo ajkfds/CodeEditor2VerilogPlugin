@@ -71,7 +71,8 @@ namespace pluginVerilog
 
         }
 
-        public Dictionary<string, string> ExtenralLibraryPath = new Dictionary<string, string>();
+        public Dictionary<string, string> ExtenralModuleLibraryPath = new Dictionary<string, string>();
+        public Dictionary<string, string> ExtenralPrimitiveLibraryPath = new Dictionary<string, string>();
 
         public AnnotationCommandsClass AnnotationCommands { get; set; } = new AnnotationCommandsClass();
         public string AnnotationKeyValueDelimiter = ":";
