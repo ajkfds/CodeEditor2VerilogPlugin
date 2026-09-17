@@ -185,22 +185,19 @@ namespace pluginVerilog.Verilog.Items
         }
 
 
-        public static async Task<Func<Data.VerilogCommon.AutoCompleteItem, bool>> ParseAsync(WordScanner word, NameSpace nameSpace)
+        public static async Task ParseAsync(WordScanner word, NameSpace nameSpace, CompletionContext? completionContext = null)
         {
-            Func<Data.VerilogCommon.AutoCompleteItem, bool>  itemFilter = (Data.VerilogCommon.AutoCompleteItem ac) =>
+            if(completionContext != null)
             {
-                if (ac.Type == Data.VerilogCommon.AutoCompleteItem.CompleteType.Keyword) return false;
-                if (ac.Type == Data.VerilogCommon.AutoCompleteItem.CompleteType.Task) return false;
-                return true;
-            };
+                completionContext.AppendExpression();
+            }
 
             // interface instantiation can be placed only in module
             BuildingBlock buildingBlock = nameSpace.BuildingBlock as BuildingBlock;
-            if (buildingBlock == null) return itemFilter;
+            if (buildingBlock == null) return;
 
-            if (!General.IsSimpleIdentifier(word.Text)) return itemFilter;
-            if (General.ListOfKeywords.Contains(word.Text)) return itemFilter;
-
+            if (!General.IsSimpleIdentifier(word.Text)) return;
+            if (General.ListOfKeywords.Contains(word.Text)) return;
 
             Project sourceProject = word.Project;
 
@@ -263,7 +260,7 @@ namespace pluginVerilog.Verilog.Items
                 moduleIdentifier.AddError("illegal module item");
                 word.SkipToKeyword(";");
                 if (word.Text == ";") word.MoveNext();
-                return itemFilter;
+                return;
             }
             moduleIdentifier.Color(CodeDrawStyle.ColorType.Keyword);
             //            word.MoveNext();
@@ -402,7 +399,7 @@ namespace pluginVerilog.Verilog.Items
                     word.AddError("( expected");
                     word.SkipToKeyword(";");
                     if (word.Text == ";") word.MoveNext();
-                    return itemFilter;
+                    return;
                 }
                 word.MoveNext();
 
@@ -411,7 +408,7 @@ namespace pluginVerilog.Verilog.Items
                 if (word.Text != ")")
                 {
                     word.AddError(") expected");
-                    return itemFilter;
+                    return;
                 }
                 word.MoveNext();
                 moduleInstantiation.LastIndexReference = word.CreateIndexReference();
@@ -431,11 +428,11 @@ namespace pluginVerilog.Verilog.Items
             if (word.Text != ";")
             {
                 word.AddError("; expected");
-                return itemFilter;
+                return;
             }
             
             word.MoveNext();
-            return itemFilter;
+            return;
         }
 
         private static void SetInstancedNamespaceNames(ModuleInstantiation moduleInstantiation,NameSpace nameSpace)

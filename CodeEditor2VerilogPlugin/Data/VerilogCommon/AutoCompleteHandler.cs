@@ -81,14 +81,13 @@ namespace pluginVerilog.Data.VerilogCommon
 
 
 
-        public static CompletionContextResult? GetAutoCompleteItems(IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, int index)
+        public static Verilog.CompletionContext? GetAutoCompleteItems(IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, int index)
         {
 
             List<CodeEditor2.CodeEditor.PopupMenu.ToolItem> items = new List<CodeEditor2.CodeEditor.PopupMenu.ToolItem>();
 
-            CompletionContextResult completionContextResult = new CompletionContextResult(item, parsedDocument, index);
-            completionContextResult.Append();
-
+            Verilog.CompletionContext completionContextResult = new Verilog.CompletionContext(item, parsedDocument, index);
+            if (completionContextResult.AutoCompleteItems.Count == 0) completionContextResult.AppendAll();
             return completionContextResult;
         }
 

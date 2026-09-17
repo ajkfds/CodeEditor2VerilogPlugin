@@ -58,7 +58,6 @@ namespace pluginVerilog.Verilog
         }
 
         public Verilog.ParsedDocument RootParsedDocument { get; protected set; }
-
         public CodeEditor.CodeDocument Document
         {
             get
