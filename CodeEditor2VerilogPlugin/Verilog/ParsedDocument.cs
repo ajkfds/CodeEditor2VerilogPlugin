@@ -599,13 +599,13 @@ namespace pluginVerilog.Verilog
             return null;
         }
 
-        public Items.IItem? GetItemAt(IndexReference indexRef)
+        public Items.IDocumentRegeion? GetDocumentRegionAt(IndexReference indexRef)
         {
             if (Root == null) return null;
 
             IndexReference? foundBegin = null;
             IndexReference? foundLast = null;
-            Items.IItem? item = null;
+            Items.IDocumentRegeion? item = null;
 
             searchNameSpace(Root, indexRef, ref foundBegin, ref foundLast, ref item);
             if(item is NameSpace)
@@ -615,7 +615,7 @@ namespace pluginVerilog.Verilog
             return item;
         }
 
-        private void searchNameSpace(NameSpace nameSpace, IndexReference targetIndexRef, ref IndexReference? foundBegin,ref IndexReference? foundLast ,ref Items.IItem? item )
+        private void searchNameSpace(NameSpace nameSpace, IndexReference targetIndexRef, ref IndexReference? foundBegin,ref IndexReference? foundLast ,ref Items.IDocumentRegeion? item )
         {
             foreach (var element in nameSpace.NamedElements.Values)
             {
@@ -634,9 +634,9 @@ namespace pluginVerilog.Verilog
             }
         }
 
-        private void searchItem(NameSpace nameSpace, IndexReference targetIndexRef, ref IndexReference? foundBegin, ref IndexReference? foundLast,ref Items.IItem? item)
+        private void searchItem(NameSpace nameSpace, IndexReference targetIndexRef, ref IndexReference? foundBegin, ref IndexReference? foundLast,ref Items.IDocumentRegeion? item)
         {
-            foreach (Items.IItem itemBlock in nameSpace.Items)
+            foreach (Items.IDocumentRegeion itemBlock in nameSpace.DocumentRegions)
             {
                 if (itemBlock.BeginIndexReference == null) continue;
                 if (targetIndexRef.IsSmallerThan(itemBlock.BeginIndexReference)) continue;

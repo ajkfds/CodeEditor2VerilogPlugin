@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace pluginVerilog.Verilog.Items
 {
-    public class AlwaysConstruct : IItem
+    public class AlwaysConstruct : IDocumentRegeion
     {
         protected AlwaysConstruct() { }
         public Statements.IStatement? Statement { get; protected set; }
@@ -53,7 +53,7 @@ namespace pluginVerilog.Verilog.Items
                 return null;
             }
             always.LastIndexReference = word.CreateIndexReferenceBefore();
-            if (!word.Prototype) nameSpace.Items.Add(always);
+            if (!word.Prototype) nameSpace.DocumentRegions.Add(always);
             return always;
         }
     }

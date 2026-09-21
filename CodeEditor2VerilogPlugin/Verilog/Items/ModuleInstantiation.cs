@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Items
 {
-    public class ModuleInstantiation : NamedItem, IBuildingBlockInstantiation, INamedElement,IItem
+    public class ModuleInstantiation : NamedItem, IBuildingBlockInstantiation, INamedElement,IDocumentRegeion
     {
         public NamedElements NamedElements { get; } = new NamedElements();
 
@@ -412,7 +412,7 @@ namespace pluginVerilog.Verilog.Items
                 }
                 word.MoveNext();
                 moduleInstantiation.LastIndexReference = word.CreateIndexReference();
-                if (!word.Prototype) nameSpace.Items.Add(moduleInstantiation);
+                if (!word.Prototype) nameSpace.DocumentRegions.Add(moduleInstantiation);
 
                 if (!word.Prototype && word.Active && moduleInstantiation.BlockBeginIndexReference != null)
                 {
@@ -743,7 +743,7 @@ namespace pluginVerilog.Verilog.Items
             if (completionContext != null && word.Eof)
             {
                 Port? port = instancedModule?.Ports[pinName];
-                if(port !=null) completionContext.PopupItems.Add(new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                if(port !=null) completionContext.CarletPopupItems.Add(new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
                 return;
             }
 
@@ -773,7 +773,7 @@ namespace pluginVerilog.Verilog.Items
             if (completionContext != null && word.Eof)
             {
                 Port? port = instancedModule?.Ports[pinName];
-                if (port != null) completionContext.PopupItems.Add(new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                if (port != null) completionContext.CarletPopupItems.Add(new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
                 return;
             }
 

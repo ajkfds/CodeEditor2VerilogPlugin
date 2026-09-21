@@ -164,7 +164,7 @@ namespace pluginVerilog.Verilog.Items.Generate
             if(generateBlock != null)
             {
                 generateBlock.LastIndexReference = word.CreateIndexReference();
-                if (!word.Prototype) nameSpace.Items.Add(generateBlock);
+                if (!word.Prototype) nameSpace.DocumentRegions.Add(generateBlock);
             }
             return true;
         }

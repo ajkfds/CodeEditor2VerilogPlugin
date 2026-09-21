@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Statements
 {
-    public class SequentialBlock : IStatement,Items.IItem
+    public class SequentialBlock : IStatement,Items.IDocumentRegeion
     {
         protected SequentialBlock() { }
 
@@ -185,7 +185,7 @@ namespace pluginVerilog.Verilog.Statements
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext(); // end
 
-            if (!word.Prototype) nameSpace.Items.Add(sequentialBlock);
+            if (!word.Prototype) nameSpace.DocumentRegions.Add(sequentialBlock);
             return sequentialBlock;
         }
 
@@ -240,7 +240,7 @@ namespace pluginVerilog.Verilog.Statements
                     nameSpace.NamedElements.Add(namedBlock.Name, namedBlock);
                 }
             }
-            if (!word.Prototype) nameSpace.Items.Add(namedBlock);
+            if (!word.Prototype) nameSpace.DocumentRegions.Add(namedBlock);
             return namedBlock;
         }
         private static IStatement? parseCreateNamedSequentialBlock(WordScanner word, NameSpace nameSpace, IndexReference beginIndex, string name, List<string>? clockDomains = null)
@@ -310,13 +310,13 @@ namespace pluginVerilog.Verilog.Statements
                 nameSpace.NamedElements.Add(namedBlock.Name, namedBlock);
             }
 
-            if (!word.Prototype) nameSpace.Items.Add(namedBlock);
+            if (!word.Prototype) nameSpace.DocumentRegions.Add(namedBlock);
             return namedBlock;
         }
 
     }
 
-    public class NamedSequentialBlock : Verilog.NameSpace, IStatement, Items.IItem
+    public class NamedSequentialBlock : Verilog.NameSpace, IStatement, Items.IDocumentRegeion
     {
         public void DisposeSubReference()
         {

@@ -60,7 +60,7 @@ namespace pluginVerilog.Verilog
             parseBlockIndex = NameSpace.BeginIndexReference.RootIndex;
 
             IndexReference iref = IndexReference.Create(lineStartIndex, parsedDocument);
-            iitem = parsedDocument.GetItemAt(iref);
+            iitem = parsedDocument.GetDocumentRegionAt(iref);
 
             if (iitem != null && iitem.BeginIndexReference != null)
             {
@@ -88,7 +88,7 @@ namespace pluginVerilog.Verilog
         int index { get; init; } = 0;
         private INamedElement? NamedElement;
         private NameSpace? NameSpace;
-        private Verilog.Items.IItem? iitem = null;
+        private Verilog.Items.IDocumentRegeion? iitem = null;
         private int line = 0;
         private int lineStartIndex = 0;
         private bool onLineStart = false;

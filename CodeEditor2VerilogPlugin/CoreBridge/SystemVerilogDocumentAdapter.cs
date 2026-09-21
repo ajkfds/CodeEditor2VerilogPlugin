@@ -42,10 +42,10 @@ namespace pluginVerilog.CoreBridge
             if (ns == null) return null;
 
             // Find the smallest item in that namespace that covers the index.
-            pluginVerilog.Verilog.Items.IItem? item = null;
+            pluginVerilog.Verilog.Items.IDocumentRegeion? item = null;
             pluginVerilog.Verilog.IndexReference? foundBegin = null;
             pluginVerilog.Verilog.IndexReference? foundLast = null;
-            foreach (pluginVerilog.Verilog.Items.IItem candidate in ns.Items)
+            foreach (pluginVerilog.Verilog.Items.IDocumentRegeion candidate in ns.DocumentRegions)
             {
                 if (candidate.BeginIndexReference == null) continue;
                 if (candidate.LastIndexReference == null) continue;

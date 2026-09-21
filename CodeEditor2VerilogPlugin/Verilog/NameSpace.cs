@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 
 namespace pluginVerilog.Verilog
 {
-    public class NameSpace : NamedItem, INamedElement, Items.IItem
+    public class NameSpace : NamedItem, INamedElement, Items.IDocumentRegeion
     {
         protected NameSpace(BuildingBlocks.BuildingBlock buildingBlock, NameSpace parent)
         {
@@ -41,14 +41,14 @@ namespace pluginVerilog.Verilog
 
         public IndexReference BeginIndexReference { get; init; }
         public IndexReference? LastIndexReference { get; set; } = null;
-        public List<IItem> Regions { get; protected set; } = new List<IItem>();
+        public List<IDocumentRegeion> Regions { get; protected set; } = new List<IDocumentRegeion>();
 
 
         public IndexReference? BlockBeginIndexReference = null;
 
         public NameSpace Parent { get; init; } = null;
 
-        public List<Items.IItem> Items { get; protected set; } = new List<Items.IItem>();
+        public List<Items.IDocumentRegeion> DocumentRegions { get; protected set; } = new List<Items.IDocumentRegeion>();
 
         public BuildingBlocks.BuildingBlock BuildingBlock { get; protected set; }
 

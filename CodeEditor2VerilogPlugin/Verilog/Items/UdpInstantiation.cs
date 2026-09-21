@@ -21,7 +21,7 @@ namespace pluginVerilog.Verilog.Items
     /// udp_instantiation ::= udp_identifier [ drive_strength ] [ delay2 ] udp_instance { , udp_instance } ;
     /// udp_instance      ::= [ name_of_instance ] ( output_terminal , input_terminal { , input_terminal } )
     /// </summary>
-    public class UdpInstantiation : NamedItem, IBuildingBlockInstantiation, INamedElement, IItem
+    public class UdpInstantiation : NamedItem, IBuildingBlockInstantiation, INamedElement, IDocumentRegeion
     {
         public NamedElements NamedElements { get; } = new NamedElements();
 
@@ -304,7 +304,7 @@ namespace pluginVerilog.Verilog.Items
                 }
                 word.MoveNext();
                 udpInstantiation.LastIndexReference = word.CreateIndexReference();
-                if (!word.Prototype) nameSpace.Items.Add(udpInstantiation);
+                if (!word.Prototype) nameSpace.DocumentRegions.Add(udpInstantiation);
 
                 if (!word.Prototype && word.Active && udpInstantiation.BlockBeginIndexReference != null)
                 {
