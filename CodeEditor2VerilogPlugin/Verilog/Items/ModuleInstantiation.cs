@@ -403,7 +403,7 @@ namespace pluginVerilog.Verilog.Items
                 }
                 word.MoveNext();
 
-                parseListOfPortConnections(word, nameSpace, instancedModule, moduleInstantiation, moduleIdentifier);
+                parseListOfPortConnections(word, nameSpace, instancedModule, moduleInstantiation, moduleIdentifier,completionContext);
 
                 if (word.Text != ")")
                 {
@@ -480,7 +480,8 @@ namespace pluginVerilog.Verilog.Items
             NameSpace nameSpace,
             Module? instancedModule,
             ModuleInstantiation moduleInstantiation,
-            WordReference moduleIdentifier)
+            WordReference moduleIdentifier
+            , CompletionContext? completionContext)
         {
             /*
             list_of_port_connections ::= 
@@ -490,7 +491,7 @@ namespace pluginVerilog.Verilog.Items
 
             if (word.Text ==".")// GetCharAt(0) == '.')
             { // named port assignment
-                parseNamedPortConnections(word, nameSpace, instancedModule, moduleInstantiation, moduleIdentifier);
+                parseNamedPortConnections(word, nameSpace, instancedModule, moduleInstantiation, moduleIdentifier,completionContext);
             }
             else
             { // ordered port assignment
@@ -556,7 +557,9 @@ namespace pluginVerilog.Verilog.Items
             NameSpace nameSpace,
             Module? instancedModule,
             ModuleInstantiation moduleInstantiation,
-            WordReference moduleIdentifier)
+            WordReference moduleIdentifier,
+            CompletionContext? completionContext
+            )
         {
             /*
             named_port_connection ::= 
@@ -635,7 +638,7 @@ namespace pluginVerilog.Verilog.Items
 
                 if (word.Text == "(")
                 {
-                    parseNamedPortConnection(word, nameSpace, instancedModule, moduleInstantiation, pinName, moduleIdentifier);
+                    parseNamedPortConnection(word, nameSpace, instancedModule, moduleInstantiation, pinName, moduleIdentifier,completionContext);
                 }
                 else
                 {
@@ -719,7 +722,9 @@ namespace pluginVerilog.Verilog.Items
         Module? instancedModule,
         ModuleInstantiation moduleInstantiation,
         string pinName,
-        WordReference moduleIdentifier)
+        WordReference moduleIdentifier,
+        CompletionContext? completionContext
+        )
         {
             if (word.Text != "(") throw new Exception();
             var startRef = word.GetReference();
@@ -733,6 +738,13 @@ namespace pluginVerilog.Verilog.Items
                 {
                     outPort = true;
                 }
+            }
+
+            if (completionContext != null && word.Eof)
+            {
+                Port? port = instancedModule?.Ports[pinName];
+                if(port !=null) completionContext.PopupItems.Add(new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                return;
             }
 
 
@@ -756,6 +768,13 @@ namespace pluginVerilog.Verilog.Items
             else
             {
                 expression = Expressions.Expression.ParseCreateAcceptImplicitNet(word, nameSpace, false);
+            }
+
+            if (completionContext != null && word.Eof)
+            {
+                Port? port = instancedModule?.Ports[pinName];
+                if (port != null) completionContext.PopupItems.Add(new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                return;
             }
 
             if (expression != null)

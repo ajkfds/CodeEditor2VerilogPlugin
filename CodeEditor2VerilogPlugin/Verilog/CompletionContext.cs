@@ -77,6 +77,9 @@ namespace pluginVerilog.Verilog
                 #pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
                 Verilog.Items.ModuleInstantiation.ParseAsync(word, NameSpace, this).GetAwaiter().GetResult();
                 #pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
+            }else if(iitem is Module module)
+            {
+                Module.ParseCreateAsync(word, module.ParameterOverrides, module.Attribute, module.BuildingBlock, item, false, this).GetAwaiter().GetResult();
             }
         }
 
@@ -169,9 +172,9 @@ namespace pluginVerilog.Verilog
                 if (filter(acItem)) AutoCompleteItems.Add(acItem);
             }
         }
-        private void appendModuleInstanceSnippets(Func<Data.VerilogCommon.AutoCompleteItem, bool> filter)
+        public void AppendModuleInstanceSnippets(Func<Data.VerilogCommon.AutoCompleteItem, bool> filter)
         {
-            if (onLineStart && NameSpace != null && NameSpace.BuildingBlock is Module && CandidateWord.Length > 1 && (item is Module || item is GenerateBlock))
+            if (onLineStart && NameSpace != null && NameSpace.BuildingBlock is Module && CandidateWord.Length > 1 && (iitem is Module ||iitem is GenerateBlock))
             {
                 CodeEditor2.Data.Project project = NameSpace.Project;
                 ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
@@ -187,13 +190,10 @@ namespace pluginVerilog.Verilog
         }
         private void appendKeyword(Func<Data.VerilogCommon.AutoCompleteItem, bool> filter)
         {
-            if (NamedElement == null)
-            {
-                // keywords
-                Data.VerilogCommon.AutoCompleteKeyword.AppendKeywordAutoCompleteItems(
-                    AutoCompleteItems, CandidateWord, CandidateStartIndex, lineStartIndex, parsedDocument.SystemVerilog, filter
-                    );
-            }
+            // keywords
+            Data.VerilogCommon.AutoCompleteKeyword.AppendKeywordAutoCompleteItems(
+                AutoCompleteItems, CandidateWord, CandidateStartIndex, lineStartIndex, parsedDocument.SystemVerilog, filter
+                );
         }
 
         private void appendNamedElements(Func<Data.VerilogCommon.AutoCompleteItem, bool> filter)

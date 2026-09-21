@@ -63,6 +63,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             get { return cellDefine; }
         }
 
+        public Dictionary<string, Expressions.Expression>? ParameterOverrides { set; get; }
 
 
         public static async System.Threading.Tasks.Task<Module> ParseCreateAsync(WordScanner word, Attribute attribute, BuildingBlock parent, Data.IVerilogRelatedFile file, bool protoType)
@@ -76,7 +77,8 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             Attribute attribute,
             BuildingBlock parent,
             Data.IVerilogRelatedFile file,
-            bool protoType
+            bool protoType,
+            CompletionContext? completionContext = null
             )
         {
             /*
@@ -116,7 +118,8 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 Parent = parent,
                 Project = word.Project,
                 File = file,
-                DefinitionReference = word.CrateWordReference()
+                DefinitionReference = word.CrateWordReference(),
+                ParameterOverrides = parameterOverrides
             };
 
             module.BuildingBlock = module;
@@ -142,19 +145,19 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 word.Prototype = false;
                 // document頭の`* parseによるColor付けを避けるため、prototype modeにしてからCloneする必要がある。
 
-                await parseModuleAsync(prototypeWord, parameterOverrides, null, module);
+                await parseModuleAsync(prototypeWord, parameterOverrides, null, module, completionContext);
                 prototypeWord.Dispose();
                 word.CheckCancelToken();
 
                 // parse
                 word.RootParsedDocument.Macros = macroKeep;
-                await parseModuleAsync(word, parameterOverrides, null, module);
+                await parseModuleAsync(word, parameterOverrides, null, module, completionContext);
             }
             else
             {
                 // parse prototype only
                 word.Prototype = true;
-                await parseModuleAsync(word, parameterOverrides, null, module);
+                await parseModuleAsync(word, parameterOverrides, null, module, completionContext);
                 word.Prototype = false;
             }
 
@@ -221,7 +224,8 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             //            string parameterOverrideModuleName,
             Dictionary<string, Expressions.Expression>? parameterOverrides,
             Attribute? attribute,
-            Module module
+            Module module,
+            CompletionContext? completionContext
             )
         {
             while (word.Text == "import")
@@ -325,8 +329,26 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     word.AddError("; expected");
                 }
 
-                while (!word.Eof)
+                while (true)
                 {
+                    if (word.Eof)
+                    {
+                        if (completionContext != null)
+                        {
+                            completionContext.AutoCompleteItems.Clear();
+                            completionContext.AppendKeywords(new List<string> { 
+                                "endmodule", 
+                                "always", "assign", "initial",
+                                "bit","logic","reg","byte","shortint","int","logint","integer","time","shortreal","real","realtime","struct","enum","string","chandle","event","type",
+                                "genvar"
+                            });
+                            completionContext.AppendModuleInstanceSnippets((ac) => true);
+                            return;
+                        }
+                        break;
+                    }
+
+
                     // Parse comment annotations (@scope, etc.) before the following module item so that a wire/assign whose RHS
                     // references a name introduced by @scope (e.g.
                     //   // @scope MY_MOD inst0
@@ -371,7 +393,6 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     }
                     word.CheckCancelToken();
                 }
-                //parseModuleItems(word, module);
                 break;
             }
 
