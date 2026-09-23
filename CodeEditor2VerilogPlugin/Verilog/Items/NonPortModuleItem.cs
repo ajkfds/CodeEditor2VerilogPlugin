@@ -1,3 +1,4 @@
+using CodeEditor2.CodeEditor.CodeComplete;
 using pluginVerilog.Verilog.Items.Generate;
 using System.Threading.Tasks;
 
@@ -17,7 +18,7 @@ namespace pluginVerilog.Verilog.Items
             | timeunits_declaration
             | clocking_declaration
        */
-        public static async System.Threading.Tasks.Task ParseAsync(WordScanner word, NameSpace nameSpace)
+        public static async System.Threading.Tasks.Task ParseAsync(WordScanner word, NameSpace nameSpace, CompletionContext? completionContext = null)
         {
             switch (word.Text)
             {
@@ -108,7 +109,7 @@ namespace pluginVerilog.Verilog.Items
                     break;
 
             }
-            await ModuleOrGenerateItem.ParseAsync(word, nameSpace);
+            await ModuleOrGenerateItem.ParseAsync(word, nameSpace, completionContext);
             return;
         }
     }

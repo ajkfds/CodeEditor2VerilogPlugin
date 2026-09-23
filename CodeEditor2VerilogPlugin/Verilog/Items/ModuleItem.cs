@@ -1,3 +1,4 @@
+using CodeEditor2.CodeEditor.CodeComplete;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Items
@@ -17,7 +18,7 @@ namespace pluginVerilog.Verilog.Items
             | { attribute_instance } interface_port_declaration
 
        */
-        public static async System.Threading.Tasks.Task ParseAsync(WordScanner word, NameSpace nameSpace)
+        public static async System.Threading.Tasks.Task ParseAsync(WordScanner word, NameSpace nameSpace, CompletionContext? completionContext = null)
         {
             switch (word.Text)
             {
@@ -35,7 +36,7 @@ namespace pluginVerilog.Verilog.Items
                     }
                     break;
                 default:
-                    await NonPortModuleItem.ParseAsync(word, nameSpace);
+                    await NonPortModuleItem.ParseAsync(word, nameSpace, completionContext);
                     return;
             }
             return;

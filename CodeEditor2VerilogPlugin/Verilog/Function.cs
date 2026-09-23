@@ -49,11 +49,15 @@ namespace pluginVerilog.Verilog
         }
         public static void Parse(WordScanner word, NameSpace nameSpace)
         {
-            Parse(word, nameSpace, false);
+            Parse(word, nameSpace, false, null);
+        }
+        public static void Parse(WordScanner word, NameSpace nameSpace, CompletionContext? completionContext)
+        {
+            Parse(word, nameSpace, false, completionContext);
         }
         public static void ParseFunctionOrConstructor(WordScanner word, NameSpace nameSpace)
         {
-            Parse(word, nameSpace, true);
+            Parse(word, nameSpace, true, null);
         }
         public virtual void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
@@ -64,7 +68,7 @@ namespace pluginVerilog.Verilog
             label.AppendText(Name);
         }
 
-        private static void Parse(WordScanner word, NameSpace nameSpace, bool acceptClassConstructor)
+        private static void Parse(WordScanner word, NameSpace nameSpace, bool acceptClassConstructor, CompletionContext? completionContext)
         {
             if (word.Text != "function") throw new System.Exception();
 
@@ -310,7 +314,7 @@ namespace pluginVerilog.Verilog
                                 default:
                                     break;
                             }
-                            Statements.IStatement statement = Statements.Statements.ParseCreateFunctionStatement(word, function);
+                            Statements.IStatement statement = Statements.Statements.ParseCreateFunctionStatement(word, function, completionContext);
                             if (statement == null)
                             {
                                 word.MoveNext();
@@ -319,7 +323,7 @@ namespace pluginVerilog.Verilog
                     }
                     else
                     {
-                        Statements.IStatement statement = Statements.Statements.ParseCreateFunctionStatement(word, function);
+                        Statements.IStatement statement = Statements.Statements.ParseCreateFunctionStatement(word, function, completionContext);
                     }
                 }
             }

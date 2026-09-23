@@ -80,6 +80,10 @@ namespace pluginVerilog.Verilog
             }else if(iitem is Module module)
             {
                 Module.ParseCreateAsync(word, module.ParameterOverrides, module.Attribute, module.BuildingBlock, item, false, this).GetAwaiter().GetResult();
+            }else if(iitem is Verilog.Items.AlwaysConstruct)
+            {
+                // partial parse of "always ..." statement: propagate completionContext to statements
+                Verilog.Items.AlwaysConstruct.ParseCreate(word, NameSpace, this);
             }
         }
 

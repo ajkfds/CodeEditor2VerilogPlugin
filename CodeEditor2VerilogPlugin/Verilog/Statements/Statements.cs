@@ -138,7 +138,7 @@ namespace pluginVerilog.Verilog.Statements
             {
                 case "(*":
                     Attribute attribute = Attribute.ParseCreate(word, nameSpace);
-                    return Statements.ParseCreateStatement(word, nameSpace,blockIdentifier, clockDomains);
+                    return Statements.ParseCreateStatement(word, nameSpace,blockIdentifier, clockDomains, completionContext);
 
                 // unique_priority
                 case "unique":
@@ -282,7 +282,7 @@ namespace pluginVerilog.Verilog.Statements
                         word.MoveNext();
                         // ;
                         word.MoveNext();
-                        return Statements.ParseCreateStatement(word, nameSpace, blockIdentifier, null);
+                        return Statements.ParseCreateStatement(word, nameSpace, blockIdentifier, null, completionContext);
                     }
 
 
@@ -331,7 +331,7 @@ namespace pluginVerilog.Verilog.Statements
                         }
                         else if (General.IsIdentifier(word.Text))
                         {
-                            return TaskEnable.ParseCreate(word, nameSpace, nameSpace);
+                            return TaskEnable.ParseCreate(word, nameSpace, nameSpace, completionContext);
                         }
                     }
                     else if (word.Text == "void" && nextText == "'")
@@ -364,7 +364,7 @@ namespace pluginVerilog.Verilog.Statements
                     if (expression != null && expression is Expressions.TaskReference)// Expressions.TaskReference)
                     {
                         Expressions.TaskReference taskReference = (Expressions.TaskReference)expression;
-                        return TaskEnable.ParseCreate(taskReference, word, nameSpace);
+                        return TaskEnable.ParseCreate(taskReference, word, nameSpace, completionContext);
                     }
                     if (expression != null && expression is Expressions.FunctionCall)
                     {
@@ -506,9 +506,9 @@ namespace pluginVerilog.Verilog.Statements
         }
 
 
-        public static IStatement? ParseCreateFunctionStatement(WordScanner word, NameSpace nameSpace)
+        public static IStatement? ParseCreateFunctionStatement(WordScanner word, NameSpace nameSpace, CompletionContext? completionContext = null)
         {
-            return ParseCreateStatement(word, nameSpace);
+            return ParseCreateStatement(word, nameSpace, null, null, completionContext);
         }
     }
 

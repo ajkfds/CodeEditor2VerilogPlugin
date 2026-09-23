@@ -494,8 +494,8 @@ namespace pluginVerilog.Verilog.Items
                 parseNamedPortConnections(word, nameSpace, instancedModule, moduleInstantiation, moduleIdentifier,completionContext);
             }
             else
-            { // ordered port assignment
-                parseOrderedPortConnections(word, nameSpace, instancedModule, moduleInstantiation, moduleIdentifier);
+            { // ordered port connection
+                parseOrderedPortConnections(word, nameSpace, instancedModule, moduleInstantiation, moduleIdentifier, completionContext);
             }
         }
 
@@ -504,7 +504,8 @@ namespace pluginVerilog.Verilog.Items
             NameSpace nameSpace,
             Module? instancedModule,
             ModuleInstantiation moduleInstantiation,
-            WordReference moduleIdentifier)
+            WordReference moduleIdentifier
+            , CompletionContext? completionContext)
         {
             /*
             ordered_port_connection ::= { attribute_instance } [ expression ]
@@ -512,6 +513,18 @@ namespace pluginVerilog.Verilog.Items
             int i = 0;
             while (!word.Eof && word.Text != ")")
             {
+                // (EOF just after "(" or ","): hint for the next ordered port
+                if (completionContext != null && word.Eof)
+                {
+                    Port? port = null;
+                    if (instancedModule != null && i < instancedModule.PortsList.Count)
+                    {
+                        port = instancedModule.PortsList[i];
+                    }
+                    if (port != null) completionContext.CarletPopupItems.Add(
+                        new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                    return;
+                }
                 // Check for wildcard port connection .*
                 if (word.Text == ".*")
                 {
@@ -533,13 +546,24 @@ namespace pluginVerilog.Verilog.Items
                 if (instancedModule != null && i < instancedModule.PortsList.Count)
                 {
                     pinName = instancedModule.PortsList[i].Name;
-                    Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
+                    Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace, completionContext);
                     if (word.Prototype && expression != null && !moduleInstantiation.PortConnection.ContainsKey(pinName)) moduleInstantiation.PortConnection.Add(pinName, expression);
                 }
                 else
                 {
                     if (instancedModule != null) word.AddError("illegal port connection");
-                    Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
+                    Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace, completionContext);
+                }
+                // (EOF just after an expression, e.g. "inst0(clk"): hint for the current port
+                if (completionContext != null && word.Eof)
+                {
+                    if (instancedModule != null && i < instancedModule.PortsList.Count)
+                    {
+                        Port port = instancedModule.PortsList[i];
+                        completionContext.CarletPopupItems.Add(
+                            new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                    }
+                    return;
                 }
                 if (word.Text != ",")
                 {

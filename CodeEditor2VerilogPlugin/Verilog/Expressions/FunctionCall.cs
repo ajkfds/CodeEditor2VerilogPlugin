@@ -57,6 +57,13 @@ namespace pluginVerilog.Verilog.Expressions
         {
             if (word.RootParsedDocument.ProjectProperty == null) throw new Exception();
 
+            // input-time completion for the function name position (e.g. "func|")
+            // (same pattern as ModuleInstantiation.ParseAsync)
+            if (completionContext != null)
+            {
+                completionContext.AppendExpression();
+            }
+
             FunctionCall functionCall = new FunctionCall() { FunctionName = word.Text, DefinedNameSpace = functionDefinedNameSpace, ProjectProperty = word.ProjectProperty };
             functionCall.Reference = word.GetReference();
 
@@ -179,7 +186,7 @@ namespace pluginVerilog.Verilog.Expressions
             IPortNameSpace? portNameSpace = function != null
                 ? (IPortNameSpace)function
                 : (letDecl != null ? (IPortNameSpace)letDecl : null);
-            ListOfArguments.ParseListOfArguments(word, nameSpace, portNameSpace, functionCall.PortConnection, out bool returnConstant,completionContext);
+            ListOfArguments.ParseListOfArguments(word, nameSpace, portNameSpace, functionCall.PortConnection, out bool returnConstant, completionContext);
 
             // Check if function call ended properly
             functionCall.Reference = WordReference.CreateReferenceRange(functionCall.Reference, word.GetReference());

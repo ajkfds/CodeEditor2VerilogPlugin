@@ -360,7 +360,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     if (module.AnsiStylePortDefinition)
                     {
                         IndexReference beforeRef = word.CreateIndexReference();
-                        await Verilog.Items.NonPortModuleItem.ParseAsync(word, module);
+                        await Verilog.Items.NonPortModuleItem.ParseAsync(word, module, completionContext);
                         if (beforeRef.IsSameAs(word.CreateIndexReference()))
                         {
                             word.CheckCancelToken();
@@ -375,7 +375,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     else
                     {
                         IndexReference beforeRef = word.CreateIndexReference();
-                        await Verilog.Items.ModuleItem.ParseAsync(word, module);
+                        await Verilog.Items.ModuleItem.ParseAsync(word, module, completionContext);
                         if (beforeRef.IsSameAs(word.CreateIndexReference()))
                         {
                             word.CheckCancelToken();

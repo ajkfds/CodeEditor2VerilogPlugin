@@ -1,3 +1,4 @@
+using CodeEditor2.CodeEditor.CodeComplete;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -11,15 +12,15 @@ namespace pluginVerilog.Verilog.Items
 
         public DataObjects.VariableAssignment? VariableAssignment { get; protected set; }
 
-        public static bool Parse(WordScanner word, NameSpace nameSpace)
+        public static bool Parse(WordScanner word, NameSpace nameSpace, CompletionContext? completionContext = null)
         {
-            List<Items.ContinuousAssign> continuousAssigns = Items.ContinuousAssign.ParseCreate(word, nameSpace);
+            List<Items.ContinuousAssign> continuousAssigns = Items.ContinuousAssign.ParseCreate(word, nameSpace, completionContext);
 
 
             return true;
         }
 
-        public static List<ContinuousAssign> ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static List<ContinuousAssign> ParseCreate(WordScanner word, NameSpace nameSpace, CompletionContext? completionContext = null)
         {
             // continuous_assign::= assign[drive_strength][delay3] list_of_net_assignments;
             // list_of_net_assignments::= net_assignment { , net_assignment }
@@ -46,7 +47,8 @@ namespace pluginVerilog.Verilog.Items
                 DataObjects.VariableAssignment? assignment = DataObjects.VariableAssignment.ParseCreate(
                     word,
                     nameSpace,
-                    true    // should accept implicit net declaration
+                    true,   // should accept implicit net declaration
+                    completionContext
                     );
                 if (assignment != null)
                 {

@@ -1,3 +1,5 @@
+using CodeEditor2.CodeEditor.CodeComplete;
+
 namespace pluginVerilog.Verilog.DataObjects
 {
     public class VariableAssignment
@@ -12,7 +14,7 @@ namespace pluginVerilog.Verilog.DataObjects
         public Expressions.Expression NetLValue { get; protected set; }
         public Expressions.Expression Expression { get; protected set; }
 
-        public static VariableAssignment? ParseCreate(WordScanner word, NameSpace nameSpace, bool acceptImplicitNet)
+        public static VariableAssignment? ParseCreate(WordScanner word, NameSpace nameSpace, bool acceptImplicitNet, CompletionContext? completionContext = null)
         {
             // variable_assignment  ::= variable_lvalue = expression
             // variable_lvalue      ::= hierarchical_variable_identifier
@@ -38,7 +40,7 @@ namespace pluginVerilog.Verilog.DataObjects
             WordReference equalPointer = word.CrateWordReference();
             word.MoveNext();
 
-            Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
+            Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace, completionContext);
 
             if (expression == null) return null;
             variableAssign.Expression = expression;

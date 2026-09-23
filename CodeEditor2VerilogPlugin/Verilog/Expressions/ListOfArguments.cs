@@ -14,7 +14,8 @@ namespace pluginVerilog.Verilog.Expressions
             ParseListOfArguments(word, usedNameSpace,
             portNameSpace,
             portConnection,
-            out _
+            out _,
+            completionContext
             );
         }
         public static void ParseListOfArguments(WordScanner word, NameSpace usedNameSpace,
@@ -44,6 +45,13 @@ namespace pluginVerilog.Verilog.Expressions
                 }
             }
             word.MoveNext();
+
+            // (EOF just after "("): hint for the first argument
+            if (completionContext != null && word.Eof)
+            {
+                AppendArgumentPopupItems(completionContext, portNameSpace, 0);
+                return;
+            }
 
             if (word.Text == ")")
             {
@@ -102,10 +110,25 @@ namespace pluginVerilog.Verilog.Expressions
                     continue;
                 }
 
-                Expression? expression = Expression.ParseCreate(word, usedNameSpace);
+                Expression? expression = Expression.ParseCreate(word, usedNameSpace, completionContext);
                 if (expression == null)
                 {
+                    // EOF while typing an argument expression (e.g. "func(arg1"):
+                    // hint for the argument currently being typed
+                    if (completionContext != null && word.Eof)
+                    {
+                        AppendArgumentPopupItems(completionContext, portNameSpace, i);
+                    }
                     word.SkipToKeyword(";");
+                    return;
+                }
+
+                // EOF just after an argument expression (e.g. "func(arg1"):
+                // show the hint for the current argument and return without side effects
+                // (partial-parse expressions must not be registered into the parsed document)
+                if (completionContext != null && word.Eof)
+                {
+                    AppendArgumentPopupItems(completionContext, portNameSpace, i);
                     return;
                 }
 
@@ -136,6 +159,14 @@ namespace pluginVerilog.Verilog.Expressions
                 return;
             }
 
+            // (EOF after comma or at the end of positional arguments, e.g. "func(arg1, "):
+            // hint for the next argument
+            if (completionContext != null && word.Eof)
+            {
+                AppendArgumentPopupItems(completionContext, portNameSpace, i);
+                return;
+            }
+
             // Named port connections (after positional arguments)
             while (!word.Eof & word.Text == ".")
             {
@@ -148,6 +179,14 @@ namespace pluginVerilog.Verilog.Expressions
                 }
 
                 word.MoveNext();
+
+                // (EOF just after "."): suggest unconnected argument names
+                if (completionContext != null && word.Eof)
+                {
+                    appendNamedArgumentCandidates(completionContext, portNameSpace, connectedPorts);
+                    return;
+                }
+
                 if (!portNameSpace.Ports.ContainsKey(word.Text))
                 {
                     word.AddError("undefined port");
@@ -173,17 +212,38 @@ namespace pluginVerilog.Verilog.Expressions
                 }
                 word.MoveNext();
 
+                // (EOF just after ".name("): hint for this argument
+                if (completionContext != null && word.Eof)
+                {
+                    AppendArgumentPopupItems(completionContext, portNameSpace, portNameSpace.PortsList.IndexOf(port));
+                    return;
+                }
+
                 // Check for empty expression (use default)
                 Expression? expression = null;
                 if (word.Text != ")")
                 {
-                    expression = Expression.ParseCreate(word, (NameSpace)portNameSpace);
+                    expression = Expression.ParseCreate(word, (NameSpace)portNameSpace, completionContext);
                     if (expression == null)
                     {
-                        word.AddError("illegal port expression");
+                        // EOF while typing the named argument expression (e.g. "func(.p("):
+                        // hint for this argument
+                        if (completionContext != null && word.Eof)
+                        {
+                            AppendArgumentPopupItems(completionContext, portNameSpace, portNameSpace.PortsList.IndexOf(port));
+                        }
                         word.SkipToKeyword(";");
                         return;
                     }
+
+                    // EOF just after the named argument expression (e.g. "func(.p(x"):
+                    // show the hint for this argument and return without side effects
+                    if (completionContext != null && word.Eof)
+                    {
+                        AppendArgumentPopupItems(completionContext, portNameSpace, portNameSpace.PortsList.IndexOf(port));
+                        return;
+                    }
+
                     if (!expression.Constant) constantConnected = false;
                 }
                 else
@@ -309,6 +369,44 @@ namespace pluginVerilog.Verilog.Expressions
             if (word.Text == ",")
             {
                 word.MoveNext();
+            }
+        }
+
+        /// <summary>
+        /// Append the label of the argument port at the given index to the input-time hint popup items.
+        /// (function call / task enable argument position)
+        /// </summary>
+        internal static void AppendArgumentPopupItems(
+            CompletionContext completionContext, IPortNameSpace? portNameSpace, int index)
+        {
+            if (portNameSpace == null) return;
+            if (index < 0) return;
+            if (index >= portNameSpace.PortsList.Count) return;   // all arguments are already given
+            DataObjects.Port port = portNameSpace.PortsList[index];
+            completionContext.CarletPopupItems.Add(
+                new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+        }
+
+        /// <summary>
+        /// Append unconnected argument names as autocomplete candidates (named argument "." position).
+        /// </summary>
+        private static void appendNamedArgumentCandidates(
+            CompletionContext completionContext, IPortNameSpace? portNameSpace, HashSet<string> connectedPorts)
+        {
+            if (portNameSpace == null) return;
+            foreach (DataObjects.Port port in portNameSpace.PortsList)
+            {
+                if (connectedPorts.Contains(port.Name)) continue;   // already connected (positional)
+                if (!port.Name.StartsWith(completionContext.CandidateWord)) continue;
+
+                Data.VerilogCommon.AutoCompleteItem acItem = new Data.VerilogCommon.AutoCompleteItem(
+                    Data.VerilogCommon.AutoCompleteItem.CompleteType.DataObject,
+                    port.Name,
+                    CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Variable),
+                    Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Variable),
+                    "CodeEditor2/Assets/Icons/tag.svg"
+                    );
+                completionContext.AutoCompleteItems.Add(acItem);
             }
         }
     }

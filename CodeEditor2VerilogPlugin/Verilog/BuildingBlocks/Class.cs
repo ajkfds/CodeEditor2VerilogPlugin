@@ -521,7 +521,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         if (word.Text == "(")
                         {
                             Dictionary<string, Expressions.Expression> portConnection = new Dictionary<string, Expressions.Expression>();
-                            Expressions.ListOfArguments.ParseListOfArguments(word, nameSpace, constructor, portConnection);
+                            Expressions.ListOfArguments.ParseListOfArguments(word, nameSpace, constructor, portConnection, null);
                         }
 
                         DataObjects.Variables.Object superClassObject = DataObjects.Variables.Object.Create("super", baseClass);

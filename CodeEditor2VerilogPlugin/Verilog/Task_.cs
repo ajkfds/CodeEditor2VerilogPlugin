@@ -1,3 +1,4 @@
+using CodeEditor2.CodeEditor.CodeComplete;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.Nets;
 using pluginVerilog.Verilog.Items;
@@ -100,6 +101,10 @@ namespace pluginVerilog.Verilog
         }
 
         public static void Parse(WordScanner word, NameSpace nameSpace)
+        {
+            Parse(word, nameSpace, null);
+        }
+        public static void Parse(WordScanner word, NameSpace nameSpace, CompletionContext? completionContext)
         {
             if (word.Text != "task")
             {
@@ -244,7 +249,7 @@ namespace pluginVerilog.Verilog
                                     break;
                             }
                             var index = word.CreateIndexReference();
-                            Statements.IStatement? statement = Statements.Statements.ParseCreateFunctionStatement(word, task);
+                            Statements.IStatement? statement = Statements.Statements.ParseCreateFunctionStatement(word, task, completionContext);
                             if (word.CreateIndexReference().IsSameAs(index))
                             {
                                 word.MoveNext();
@@ -253,7 +258,7 @@ namespace pluginVerilog.Verilog
                     }
                     else
                     {
-                        Statements.IStatement? statement = Statements.Statements.ParseCreateFunctionStatement(word, task);
+                        Statements.IStatement? statement = Statements.Statements.ParseCreateFunctionStatement(word, task, completionContext);
                     }
                 }
             }

@@ -1,3 +1,4 @@
+using CodeEditor2.CodeEditor.CodeComplete;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
@@ -18,7 +19,7 @@ namespace pluginVerilog.Verilog.Items
         public required IndexReference BeginIndexReference { get; init; }
         public IndexReference? LastIndexReference { get; set; } = null;
 
-        public static AlwaysConstruct? ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static AlwaysConstruct? ParseCreate(WordScanner word, NameSpace nameSpace, CompletionContext? completionContext = null)
         {
             switch (word.Text)
             {
@@ -41,7 +42,7 @@ namespace pluginVerilog.Verilog.Items
             word.MoveNext();
 
             AlwaysConstruct always = new AlwaysConstruct() { BeginIndexReference = beginIndex };
-            always.Statement = Statements.Statements.ParseCreateStatement(word, nameSpace);
+            always.Statement = Statements.Statements.ParseCreateStatement(word, nameSpace, null, null, completionContext);
             if (always.Statement == null)
             {
                 word.AddError("illegal always construct");
