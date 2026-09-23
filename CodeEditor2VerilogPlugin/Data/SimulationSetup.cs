@@ -183,9 +183,14 @@ namespace pluginVerilog. Data
                     string libPath = file. ProjectProperty. ExtenralModuleLibraryPath[external];
                     if (!setup. ExternalLibraryPathList. Contains(libPath)) setup. ExternalLibraryPathList. Add(libPath);
                 }
+                if (file.ProjectProperty.ExtenralPrimitiveLibraryPath.ContainsKey(external))
+                {
+                    string libPath = file.ProjectProperty.ExtenralPrimitiveLibraryPath[external];
+                    if (!setup.ExternalLibraryPathList.Contains(libPath)) setup.ExternalLibraryPathList.Add(libPath);
+                }
             }
 
-            foreach(string className in parsedDocument.ReferencedUnitNameSpace)
+            foreach (string className in parsedDocument.ReferencedUnitNameSpace)
             {
                 Class? class_ = parsedDocument.ProjectProperty?.UnitNameSpace.GetFile(className) as Class;
                 if (parsedDocument.Project == null) continue;
