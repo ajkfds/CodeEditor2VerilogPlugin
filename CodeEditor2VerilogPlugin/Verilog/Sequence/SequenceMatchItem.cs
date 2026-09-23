@@ -31,12 +31,12 @@ namespace pluginVerilog.Verilog.Sequence
         /// <summary>
         /// Parse a sequence match item
         /// </summary>
-        public static SequenceMatchItem? ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static SequenceMatchItem? ParseCreate(WordScanner word, NameSpace nameSpace, CompletionContext? completionContext = null)
         {
             if (word.Eof) return null;
 
             // Try to parse inc_or_dec_expression first (++i, i--, etc.)
-            var incDec = IncOrDecExpression.ParseCreate(word, nameSpace, true);
+            var incDec = IncOrDecExpression.ParseCreate(word, nameSpace, true, completionContext);
             if (incDec != null)
             {
                 return new SequenceMatchItem

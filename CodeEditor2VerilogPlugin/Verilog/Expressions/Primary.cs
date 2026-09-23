@@ -129,23 +129,23 @@ number
 
         */
 
-        public static new Primary? ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static new Primary? ParseCreate(WordScanner word, NameSpace nameSpace, CompletionContext? completionContext)
         {
-            return ParseCreate(word, nameSpace, false);
+            return ParseCreate(word, nameSpace, false, completionContext);
         }
-        public static new Primary? ParseCreate(WordScanner word, NameSpace nameSpace, bool acceptImplicitNet)
+        public static new Primary? ParseCreate(WordScanner word, NameSpace nameSpace, bool acceptImplicitNet, CompletionContext? completionContext)
         {
-            return parseCreate(word, nameSpace, false, acceptImplicitNet,true);
+            return parseCreate(word, nameSpace, false, acceptImplicitNet,true, completionContext);
         }
-        public static Primary? ParseCreateLValue(WordScanner word, NameSpace nameSpace, bool acceptImplicitNet)
+        public static Primary? ParseCreateLValue(WordScanner word, NameSpace nameSpace, bool acceptImplicitNet, CompletionContext? completionContext)
         {
-            return parseCreate(word, nameSpace, true, acceptImplicitNet,true);
+            return parseCreate(word, nameSpace, true, acceptImplicitNet,true, completionContext);
         }
-        public static Primary? ParseCreateWoRange(WordScanner word, NameSpace nameSpace, bool acceptImplicitNet)
+        public static Primary? ParseCreateWoRange(WordScanner word, NameSpace nameSpace, bool acceptImplicitNet, CompletionContext? completionContext=null)
         {
-            return parseCreate(word, nameSpace, false, acceptImplicitNet, false);
+            return parseCreate(word, nameSpace, false, acceptImplicitNet, false, completionContext);
         }
-        private static Primary? parseCreate(WordScanner word, NameSpace nameSpace, bool lValue, bool acceptImplicitNet, bool acceptRange = true)
+        private static Primary? parseCreate(WordScanner word, NameSpace nameSpace, bool lValue, bool acceptImplicitNet, bool acceptRange = true, CompletionContext? completionContext=null)
         {
             //if (word.Text == "srif") System.Diagnostics.Debugger.Break();
             // acceptRange = false is used for foreach(data[i])
@@ -189,7 +189,7 @@ number
                     // system function call
                     if (word.Text.StartsWith("$"))// && word.ProjectProperty.SystemFunctions.Keys.Contains(word.Text))
                     {
-                        return FunctionCall.ParseCreate(word, nameSpace);
+                        return FunctionCall.ParseCreate(word, nameSpace, completionContext);
                     }
 
                     // assignment pattern
@@ -221,7 +221,7 @@ number
                     {
                         // It shall be illegal to omit the parentheses in a tf_call unless the subroutine is a task, void function,
                         // or class method. If the subroutine is a nonvoid class function method, it shall be illegal to omit the parentheses if the call is directly recursive.
-                        return FunctionCall.ParseCreate(word, nameSpace);
+                        return FunctionCall.ParseCreate(word, nameSpace, completionContext);
                     }
 
 
@@ -302,7 +302,7 @@ number
                     // function call : for right side only
                     if (!lValue && (element is Function || element is LetDeclaration) && targetNameSpace != null)
                     {
-                        return FunctionCall.ParseCreate(word, nameSpace,targetNameSpace);
+                        return FunctionCall.ParseCreate(word, nameSpace,targetNameSpace, completionContext);
                     }
 
                     if (element is DataObjects.Constants.Constants && targetNameSpace != null)

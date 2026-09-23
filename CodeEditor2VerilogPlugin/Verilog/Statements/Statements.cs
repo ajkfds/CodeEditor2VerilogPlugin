@@ -64,7 +64,7 @@ namespace pluginVerilog.Verilog.Statements
                                 | { attribute_instance } disable_statement
                                 | { attribute_instance } system_task_enable  
         */
-        public static IStatement? ParseCreateStatement(WordScanner word, NameSpace nameSpace, string? blockIdentifier = null, List<string>? clockDomains = null)
+        public static IStatement? ParseCreateStatement(WordScanner word, NameSpace nameSpace, string? blockIdentifier = null, List<string>? clockDomains = null, CompletionContext? completionContext = null)
         {
             /*
             A.6.4 Statements
@@ -339,7 +339,7 @@ namespace pluginVerilog.Verilog.Statements
                         return VoidFunctionCall.ParseCreate(word, nameSpace);
                     }
 
-                    IncOrDecExpression? incOrDecExpression = IncOrDecExpression.ParseCreate(word, nameSpace, false);
+                    IncOrDecExpression? incOrDecExpression = IncOrDecExpression.ParseCreate(word, nameSpace, false,completionContext);
                     if (incOrDecExpression != null)
                     {
                         if (word.Text != ";")

@@ -763,7 +763,7 @@ namespace pluginVerilog.Verilog.Items
             Expressions.Expression? expression;
             if (outPort)
             {
-                expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace, true);
+                expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace, true, completionContext);
             }
             else
             {

@@ -48,12 +48,12 @@ namespace pluginVerilog.Verilog.Expressions
                 return namedElement as DataObjects.LetDeclaration;
             }
         }
-        public static new FunctionCall? ParseCreate(WordScanner word, NameSpace nameSpace)
+        public static new FunctionCall? ParseCreate(WordScanner word, NameSpace nameSpace, CompletionContext? completionContext)
         {
-            return ParseCreate(word, nameSpace, nameSpace);
+            return ParseCreate(word, nameSpace, nameSpace, completionContext);
         }
 
-        public static FunctionCall? ParseCreate(WordScanner word, NameSpace nameSpace, NameSpace functionDefinedNameSpace)
+        public static FunctionCall? ParseCreate(WordScanner word, NameSpace nameSpace, NameSpace functionDefinedNameSpace, CompletionContext? completionContext)
         {
             if (word.RootParsedDocument.ProjectProperty == null) throw new Exception();
 
@@ -179,7 +179,7 @@ namespace pluginVerilog.Verilog.Expressions
             IPortNameSpace? portNameSpace = function != null
                 ? (IPortNameSpace)function
                 : (letDecl != null ? (IPortNameSpace)letDecl : null);
-            ListOfArguments.ParseListOfArguments(word, nameSpace, portNameSpace, functionCall.PortConnection, out bool returnConstant);
+            ListOfArguments.ParseListOfArguments(word, nameSpace, portNameSpace, functionCall.PortConnection, out bool returnConstant,completionContext);
 
             // Check if function call ended properly
             functionCall.Reference = WordReference.CreateReferenceRange(functionCall.Reference, word.GetReference());

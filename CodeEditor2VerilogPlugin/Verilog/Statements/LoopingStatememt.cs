@@ -305,7 +305,7 @@ namespace pluginVerilog.Verilog.Statements
         // operator_assignment          ::= variable_lvalue assignment_operator expression
         // assignment_operator          ::= = | += | -= | *= | /= | %= | &= | |= | ^= | <<= | >>= | <<<= | >>>=
 
-        public static ForStatememt? ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
+        public static ForStatememt? ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label, CompletionContext? completionContext = null)
         {
             ForStatememt forStatement = new ForStatememt(nameSpace.BuildingBlock, nameSpace)
             {
@@ -392,7 +392,7 @@ namespace pluginVerilog.Verilog.Statements
             }
 
             // for_step
-            IncOrDecExpression? incOrDecExpression = IncOrDecExpression.ParseCreate(word, forStatement, false);
+            IncOrDecExpression? incOrDecExpression = IncOrDecExpression.ParseCreate(word, forStatement, false, completionContext);
             if (incOrDecExpression != null)
             {
 

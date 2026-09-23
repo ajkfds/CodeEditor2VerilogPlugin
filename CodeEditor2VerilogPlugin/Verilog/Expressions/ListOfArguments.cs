@@ -7,7 +7,8 @@ namespace pluginVerilog.Verilog.Expressions
     {
         public static void ParseListOfArguments(WordScanner word, NameSpace usedNameSpace,
             IPortNameSpace? portNameSpace,
-            Dictionary<string, Expressions.Expression> portConnection
+            Dictionary<string, Expressions.Expression> portConnection,
+            CompletionContext? completionContext = null
             )
         {
             ParseListOfArguments(word, usedNameSpace,
@@ -19,7 +20,8 @@ namespace pluginVerilog.Verilog.Expressions
         public static void ParseListOfArguments(WordScanner word, NameSpace usedNameSpace,
             IPortNameSpace? portNameSpace,
             Dictionary<string, Expressions.Expression> portConnection,
-            out bool constantConnected
+            out bool constantConnected,
+            CompletionContext? completionContext = null
             )
         {
             /*
