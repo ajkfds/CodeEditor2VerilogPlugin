@@ -245,3 +245,185 @@ input-time hint が部分parseを要求する一方、mouse-over は常に確定
   (一時ドキュメントの index 空間を持つ IndexReference を含む) が
   既存 ParsedDocument 側の NamedElements / DocumentRegions に一時的に登録されうる
   (コード読解に基づく挙動。次回の再parseで置き換えられる前提の設計と思われる)
+
+---
+
+## 修正案: function call 引数入力中の hint / autocomplete 表示の追加
+
+### 現状の課題 (コード解析結果)
+
+module instantiation の named port connection では `.clk (` まで入力すると port 情報の
+hint popup が表示されるが、**function call / let call の引数入力中は同様の hint が
+一切表示されない**。原因は以下の通り (`Verilog/Expressions/ListOfArguments.cs`,
+`Verilog/Expressions/FunctionCall.cs` の実装確認に基づく):
+
+1. **`ListOfArguments.ParseListOfArguments` が `completionContext` を使用していない**
+   - 引数で `CompletionContext? completionContext = null` を受けているが、
+     関数内で一度も参照していない (`word.Eof` 分岐の実装が存在しない)
+   - `word.Eof` パターン (部分parse末尾 = 入力位置) の検出が行われないため、
+     `func(arg1, ` のような入力中に何も hint が出ない
+
+2. **`completionContext` の式 parse への伝播漏れ**
+   - positional argument: `Expression.ParseCreate(word, usedNameSpace)` に
+     `completionContext` が渡されていない
+   - named argument: `Expression.ParseCreate(word, (NameSpace)portNameSpace)` も同様に未伝播
+   - このため `func(arg1, arg2|` のように引数の式入力中も内側の式位置 hint が出ない
+
+3. **function 名入力位置での候補生成の欠落**
+   - `ModuleInstantiation.ParseAsync` は冒頭で `completionContext.AppendExpression()` を
+     呼んで module 名入力位置の候補 (DataObject / Function / NameSpace) を生成するが、
+     `FunctionCall.ParseCreate` には同等の処理がない
+
+4. **対象外経路での同種の欠落**
+   - `ModuleInstantiation.parseOrderedPortConnections` (ordered port connection) は
+     `completionContext` を引数に取らない。named のみ hint が効いており
+     `inst0(clk, |` のような ordered 接続入力中は port 情報が出ない
+   - `BuiltinMethodCall.ParseCreate` (`data.find(...)` 等) も `completionContext` を
+     受け取らず、引数ループ内の `Expression.ParseCreate` に伝播しない
+   - `Task_` 呼び出し (task call) の引数経路も同様の確認・対応が望ましい
+
+### 追加すべき機能
+
+`ModuleInstantiation` の named port connection と同一の `word.Eof` パターンで、
+function call の文法位置に応じた hint / autocomplete を `CompletionContext` に追記する。
+
+#### 機能1: 引数位置での port (argument) 情報 hint (`CarletPopupItems`)
+
+`foo(arg1, ` のカンマ直後・`foo(` の括弧直後で、**次に入力すべき引数の宣言ラベル**
+(`input logic [7:0] data` 形式 = `Port.GetLabel()`) を hint popup 表示する。
+
+実装方針 (`Verilog/Expressions/ListOfArguments.cs`):
+
+```csharp
+public static void ParseListOfArguments(WordScanner word, NameSpace usedNameSpace,
+    IPortNameSpace? portNameSpace,
+    Dictionary<string, Expressions.Expression> portConnection,
+    out bool constantConnected,
+    CompletionContext? completionContext = null
+    )
+{
+    ...
+    word.MoveNext();
+
+    // (a) 括弧開き直後の EOF: 最初の引数 (or 引数なし) の hint
+    if (completionContext != null && word.Eof)
+    {
+        appendArgumentPopupItems(completionContext, portNameSpace, 0);
+        return;
+    }
+
+    int i = 0;
+    ...
+    while (!word.Eof)
+    {
+        ...
+        if (word.Text == ",")
+        {
+            // (b) カンマ直後の EOF: 次の引数 port の hint
+            if (completionContext != null && word.Eof)
+            {
+                appendArgumentPopupItems(completionContext, portNameSpace, i + 1);
+                return;
+            }
+            ...
+        }
+
+        // (c) 引数の式 parse へ completionContext を伝播
+        Expression? expression = Expression.ParseCreate(word, usedNameSpace, completionContext);
+        ...
+    }
+}
+
+// (d) helper: 指定 index の port ラベルを CarletPopupItems に追加
+private static void appendArgumentPopupItems(
+    CompletionContext completionContext, IPortNameSpace? portNameSpace, int index)
+{
+    if (portNameSpace == null) return;
+    if (index >= portNameSpace.PortsList.Count) return;   // 全引数済み
+    DataObjects.Port port = portNameSpace.PortsList[index];
+    completionContext.CarletPopupItems.Add(
+        new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+}
+```
+
+- positional 引数は `portNameSpace.PortsList[i]` で次の引数 port が一意に決まるため、
+  `Port.GetLabel()` (direction / 型 / ビット幅 / port 名 / コメント) をそのまま hint に使える
+- `DefaultArgument` を持つ引数ではラベルに `[= default]` を併記すると省略可能であることが伝わる
+- 全引数入力済み (`index >= PortsList.Count`) の場合は追加 hint なしで return
+
+#### 機能2: named argument (`.name(expr)`) の補完
+
+`tf_call ::= ... [ "(" list_of_arguments ")" ]` の named 形式
+(`list_of_arguments ::= ... { , "." identifier ( [ expression ] ) }`) に対して:
+
+- **`.` 直後の EOF**: 未接続の引数名一覧を autocomplete 候補に追加。
+  positional で接続済みの引数は除外する (実装済み `connectedPorts` HashSet を流用)。
+  `AppendExpression` 系の DataObject 候補ではなく、
+  `portNameSpace.PortsList` から引数名列挙の候補を生成する
+- **`.name(` 直後の EOF**: その引数の `Port.GetLabel()` を `CarletPopupItems` に追加
+- **`.name(expr` の EOF**: `Expression.ParseCreate` への伝播により式位置 hint を出す
+  (named 引数は式を `(NameSpace)portNameSpace` の名前空間で parse している点に注意。
+  completionContext 側の候補生成は `NameSpace`/`NamedElement` ベースなので、
+  伝播する `NameSpace` は `usedNameSpace` とどちらが適切か要検証
+  ―― 引数名スコープの解決位置は port 定義側だが、入力補完対象は呼び出し側スコープ)
+
+#### 機能3: function 名入力位置での候補生成
+
+`FunctionCall.ParseCreate` の冒頭 (または呼び出し元 `Primary.parseCreate` の
+function call 判定直前) で `AppendExpression()` を呼ぶ。
+`ModuleInstantiation.ParseAsync` 冒頭と同じパターンで、
+`func|` のように名前入力中に DataObject / Function / NameSpace / system function
+の候補を表示する。なお `AppendExpression` は既存の
+`GetAutoCompleteTarget` の結果 (`NameSpace`/`NamedElement`) を使うため、
+`FunctionCall.ParseCreate` 内ではなく **`CompletionContext` コンストラクタの
+部分parse開始位置** (式が切り出される前) で効かせる設計になる点に注意。
+現状は `Module` 本体の `word.Eof` (行頭) でしか keyword 候補生成が
+働いておらず、文途中の function 名位置では `ModuleInstantiation.ParseAsync` 経由
+(ModuleInstantiation region 内) でのみ効く。function call が statement 途中に
+埋め込まれるケース (`assign x = func(|`) では部分parseの region が
+Module 全体になり `Module.ParseCreateAsync` が走るため、
+その statement parse 経路で `Expression.ParseCreate(..., completionContext)` が
+繋がっていれば機能3は自然に成立する (要: statement 系 parse の伝播確認)。
+
+#### 機能4: 横展開 (同種経路への展開)
+
+| 対象 | 現状 | 追加内容 |
+|---|---|---|
+| `ModuleInstantiation.parseOrderedPortConnections` | `completionContext` 未対応 | 引数に `completionContext` を追加し、`instancedModule.PortsList[i]` の `GetLabel()` を `word.Eof` 時に `CarletPopupItems` へ。`Expression.ParseCreate` にも伝播 |
+| `BuiltinMethodCall.ParseCreate` | `completionContext` 未対応 | 引数に `completionContext` を追加し、`method.PortsList[i]` の `GetLabel()` を hint 表示、`Expression.ParseCreate` に伝播 |
+| task call (`Task_` 呼び出し) | 未確認 | `IPortNameSpace` を実装するため `ListOfArguments` 共通化で機能1/2がそのまま効くはず。parse 経路の completionContext 伝播のみ確認が必要 |
+| `Class` constructor 呼び出し (`Class.cs` 内) | `ParseListOfArguments` 呼び出しで `completionContext` 非渡し | `completionContext` を渡すのみ |
+
+### 設計上の注意
+
+- **`word.Eof` パターンとの整合**: 既存設計 (README 上部セクション参照) では
+  「部分parse末尾到達 = 入力位置」を `completionContext != null && word.Eof` で検出する。
+  function call 引数内でも同一パターンを守ることで、
+  parse 関数が「どの文法位置にいるか」を知り、候補生成を completionContext に委譲する
+  単一ソース設計が維持される
+- **`word.Eof` での早期 return 時の副作用**: `ModuleInstantiation.parseNamedPortConnection`
+  の既存実装と同様、EOF 検出したらそれ以上の文法検証 (bitwidth mismatch 等) を
+  行わず return すること。部分parseで生成された Expression は
+  一時ドキュメントの index 空間を持つため、参照登録を含む後続処理を走らせない方が安全
+  (既存の named port connection 分岐と同じ規律)
+- **`out bool constantConnected` の扱い**: EOF 早期 return 時は
+  `constantConnected = true` (初期値) のまま返す。呼び出し元の
+  `FunctionCall.Constant` 計算に影響するが、部分parseの結果は
+  一時オブジェクトにのみ反映されるため実害はないはず (要確認)
+- **UI 表示の既存インフラ**: `CarletPopupItems` → `CodeCompleteHandler.TextEntered` →
+  `Controller.CodeEditor.OpenPopup()` (caret 直下 hint popup) の表示経路は
+  実装済み (メインリポジトリ CodeEditor2 側)。plugin 側は
+  `CarletPopupItems` に `PopupItem` を追加するだけで表示される
+- **検証方法**: 部分parseは `EditParse` モード時のみ実効的に動作するため
+  (README 注意点参照)、実際の入力シナリオで
+  `func(` / `func(a, ` / `func(.p|` / `func(.p(` の各位置で
+  hint popup・autocomplete dropdown の出ることを確認する
+
+### 期待される効果
+
+- module instantiation と同等の入力支援が function / let / builtin method / task 呼び出しで得られる
+- 引数の方向・型・ビット幅が入力中に判明するため、bitwidth mismatch を
+  書いた後に warning で知るのではなく、入力前に防げる
+- named argument の補完により、長い引数リストを持つ function の
+  引数名タイプミス (実行時エラーではなく parse エラーとして検出される現状の
+  `undefined port` エラー) を未然に防げる
