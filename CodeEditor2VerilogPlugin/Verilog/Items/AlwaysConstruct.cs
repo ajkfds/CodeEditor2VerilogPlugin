@@ -18,11 +18,6 @@ namespace pluginVerilog.Verilog.Items
         public required IndexReference BeginIndexReference { get; init; }
         public IndexReference? LastIndexReference { get; set; } = null;
 
-        public static bool Parse(WordScanner word, NameSpace nameSpace)
-        {
-            Items.AlwaysConstruct? always = Items.AlwaysConstruct.ParseCreate(word, nameSpace);
-            return true;
-        }
         public static AlwaysConstruct? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             switch (word.Text)

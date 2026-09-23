@@ -55,7 +55,7 @@ namespace pluginVerilog.Verilog.Items
 
             IndexReference iref = word.CreateIndexReference();
             // module_common_item
-            if (await ModuleCommonItem.ParseAsync(word, nameSpace)) return;
+            await ModuleCommonItem.ParseAsync(word, nameSpace);
             if(!word.CreateIndexReference().IsSameAs(iref)) return;
 
 

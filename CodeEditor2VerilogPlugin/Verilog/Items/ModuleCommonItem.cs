@@ -23,13 +23,16 @@ namespace pluginVerilog.Verilog.Items
             | elaboration_system_task
         */
 
-        public static async System.Threading.Tasks.Task<bool> ParseAsync(WordScanner word, NameSpace nameSpace)
+        public static async System.Threading.Tasks.Task ParseAsync(WordScanner word, NameSpace nameSpace)
         {
 
 
+            IndexReference iref = word.CreateIndexReference();
+            // module_common_item
+            ModuleOrGenerateItemDeclaration.Parse(word, nameSpace);
+            if (!word.CreateIndexReference().IsSameAs(iref)) return;
 
             // module_or_generate_item_declaration
-            if (ModuleOrGenerateItemDeclaration.Parse(word, nameSpace)) return true;
             //assertion_item::= concurrent_assertion_item | deferred_immediate_assertion_item
 
             switch (word.Text)
@@ -40,52 +43,62 @@ namespace pluginVerilog.Verilog.Items
                     //        [block_identifier: ] concurrent_assertion_statement
                     //      | checker_instantiation
                     //      | deferred_immediate_assertion_item
-                    return ConcurrentAssertionItemExceptCheckerInstantiation.Parse(word, nameSpace);
+                    ConcurrentAssertionItemExceptCheckerInstantiation.Parse(word, nameSpace);
+                    return;
                 // bind_directive
                 case "bind":
                     Items.BindDirective? bindDirective;
-                    return Items.BindDirective.Parse(word, nameSpace, out bindDirective);
+                    Items.BindDirective.Parse(word, nameSpace, out bindDirective);
+                    return;
                 // net_alias
                 case "alias":
-                    return Items.NetAlias.Parse(word, nameSpace);
+                    Items.NetAlias.Parse(word, nameSpace);
+                    return;
                 // final_construct
                 case "final":
-                    return Items.FinalConstruct.Parse(word, nameSpace);
+                    Items.FinalConstruct.Parse(word, nameSpace);
+                    return;
                 // elaboration_system_task
 
                 // continuous_assign
                 case "assign":
-                    return Items.ContinuousAssign.Parse(word, nameSpace);
+                    Items.ContinuousAssign.Parse(word, nameSpace);
+                    return;
                 // initial_construct
                 case "initial":
-                    return Items.InitialConstruct.Parse(word, nameSpace);
+                    Items.InitialConstruct.Parse(word, nameSpace);
+                    return;
                 // always_construct
                 case "always":
                 case "always_comb":
                 case "always_latch":
                 case "always_ff":
-                    return Items.AlwaysConstruct.Parse(word, nameSpace);
+                    Items.AlwaysConstruct.ParseCreate(word, nameSpace);
+                    return;
                 // loop_generate_construct
                 case "for":
                     //                    word.AddSystemVerilogError();
                     await Generate.LoopGenerateConstruct.ParseAsync(word, nameSpace);
-                    return true;
+                    return;
                 // conditional_generate_construct
                 case "if":
-                    return await Generate.IfGenerateConstruct.ParseAsync(word, nameSpace);
+                    await Generate.IfGenerateConstruct.ParseAsync(word, nameSpace);
+                    return;
                 // timeunits_declaration
                 case "timeunit":
                 case "timeprecision":
                     var timeunits = DataObjects.TimeunitsDeclaration.ParseCreate(word, nameSpace);
-                    return timeunits != null;
+                    return;
             }
 
 
             // interface_instantiation
-            if (InterfaceInstance.Parse(word, nameSpace)) return true;
+            InterfaceInstance.Parse(word, nameSpace);
+            if (!word.CreateIndexReference().IsSameAs(iref)) return;
 
             // program_instantiation
-            if (await Items.ProgramInstantiation.ParseAsync(word, nameSpace)) return true;
+            await Items.ProgramInstantiation.ParseAsync(word, nameSpace);
+            if (!word.CreateIndexReference().IsSameAs(iref)) return;
 
             //assertion_item ::=
             //        [block_identifier: ] concurrent_assertion_statement
@@ -93,10 +106,8 @@ namespace pluginVerilog.Verilog.Items
             //      | deferred_immediate_assertion_item
             if (General.IsSimpleIdentifier(word.Text) && word.NextText == ":")
             {
-                return ConcurrentAssertionItemExceptCheckerInstantiation.Parse(word, nameSpace);
+                ConcurrentAssertionItemExceptCheckerInstantiation.Parse(word, nameSpace);
             }
-
-            return false;
         }
 
     }
