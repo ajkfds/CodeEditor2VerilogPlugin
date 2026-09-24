@@ -56,7 +56,7 @@ namespace pluginVerilog.Verilog.Statements
         list_of_block_variable_identifiers ::=  block_variable_type { , block_variable_type } 
         block_variable_type ::=  variable_identifier        | variable_identifier dimension { dimension }  
         */
-        public static IStatement? ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label,string? blockIdentifier = null, List<string>? clockDomains = null)
+        public static IStatement? ParseCreate(WordScanner word, NameSpace nameSpace, CompletionContext? completionContext, string? statement_label,string? blockIdentifier = null, List<string>? clockDomains = null)
         {
             if (word.Text != "begin") throw new Exception();
 

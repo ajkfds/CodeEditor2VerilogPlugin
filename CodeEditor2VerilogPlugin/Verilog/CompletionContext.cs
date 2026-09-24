@@ -2,6 +2,7 @@ using Avalonia.Input;
 using CodeEditor2.CodeEditor.CodeComplete;
 using CodeEditor2.CodeEditor.PopupHint;
 using CodeEditor2.CodeEditor.PopupMenu;
+using DynamicData.Aggregation;
 using pluginVerilog.Parser;
 using pluginVerilog.Verilog;
 using pluginVerilog.Verilog.BuildingBlocks;
@@ -60,11 +61,11 @@ namespace pluginVerilog.Verilog
             parseBlockIndex = NameSpace.BeginIndexReference.RootIndex;
 
             IndexReference iref = IndexReference.Create(lineStartIndex, parsedDocument);
-            iitem = parsedDocument.GetDocumentRegionAt(iref);
+            documentRegion = parsedDocument.GetDocumentRegionAt(iref);
 
-            if (iitem != null && iitem.BeginIndexReference != null)
+            if (documentRegion != null && documentRegion.BeginIndexReference != null)
             {
-                parseBlockIndex = iitem.BeginIndexReference.RootIndex;
+                parseBlockIndex = documentRegion.BeginIndexReference.RootIndex;
             }
             if (CandidateStartIndex - parseBlockIndex < 1) return;
 
@@ -72,19 +73,42 @@ namespace pluginVerilog.Verilog
             pluginVerilog.CodeEditor.CodeDocument document = new pluginVerilog.CodeEditor.CodeDocument(blockText);
             
             WordScanner word = new WordScanner(document, parsedDocument, parsedDocument.SystemVerilog);
-            if (iitem is Verilog.Items.ModuleInstantiation)
+            if (documentRegion is Verilog.Items.ModuleInstantiation)
             {
                 #pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
+                CodeEditor2.Controller.AppendLog("ModuleInstantiation.ParseCreate");
                 Verilog.Items.ModuleInstantiation.ParseAsync(word, NameSpace, this).GetAwaiter().GetResult();
                 #pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
-            }else if(iitem is Module module)
+            }else if(documentRegion is Module module)
             {
-                Module.ParseCreateAsync(word, module.ParameterOverrides, module.Attribute, module.BuildingBlock, item, false, this).GetAwaiter().GetResult();
-            }else if(iitem is Verilog.Items.AlwaysConstruct)
+                if (word.Text == "module" || word.Text == "macromodule")
+                {
+                    CodeEditor2.Controller.AppendLog("Module.ParseCreate");
+                    Module.ParseCreateAsync(word, module.ParameterOverrides, module.Attribute, module.BuildingBlock, item, false, this).GetAwaiter().GetResult();
+                }
+            }else if(documentRegion is Verilog.Items.AlwaysConstruct)
             {
                 // partial parse of "always ..." statement: propagate completionContext to statements
-                Verilog.Items.AlwaysConstruct.ParseCreate(word, NameSpace, this);
+                if(word.Text == "always" || word.Text == "always_comb" || word.Text == "always_latch" || word.Text == "always_ff")
+                {
+                    CodeEditor2.Controller.AppendLog("AlwaysConstruct.ParseCreate");
+                    Verilog.Items.AlwaysConstruct.ParseCreate(word, NameSpace, this);
+                }
+            }else if(documentRegion is NonBlockingAssignment)
+            {
+                CodeEditor2.Controller.AppendLog("NonBlockingAssignment.ParseCreate");
+                Verilog.Statements.NonBlockingAssignment.ParseCreate(word, NameSpace, this);
+            }else if(documentRegion is BlockingAssignment)
+            {
+                CodeEditor2.Controller.AppendLog("BlockingAssignment.ParseCreate");
+                Verilog.Statements.BlockingAssignment.ParseCreate(word, NameSpace, this);
+            }else if(documentRegion is SequentialBlock)
+            {
+                CodeEditor2.Controller.AppendLog("SequentialBlock.ParseCreate");
+                Verilog.Statements.SequentialBlock.ParseCreate(word, NameSpace, this, null);
             }
+
+            appendMacro((acItem) => true);
         }
 
         private Data.IVerilogRelatedFile item { get; init; } = null!;
@@ -92,7 +116,7 @@ namespace pluginVerilog.Verilog
         int index { get; init; } = 0;
         private INamedElement? NamedElement;
         private NameSpace? NameSpace;
-        private Verilog.Items.IDocumentRegeion? iitem = null;
+        private Verilog.Items.IDocumentRegeion? documentRegion = null;
         private int line = 0;
         private int lineStartIndex = 0;
         private bool onLineStart = false;
@@ -121,6 +145,37 @@ namespace pluginVerilog.Verilog
                 if (keywords.Contains(acItem.Text)) return true;
                 return false;
             });
+        }
+
+        private void appendMacro(Func<Data.VerilogCommon.AutoCompleteItem, bool> filter)
+        {
+            if (parsedDocument.ProjectProperty == null) return;
+            foreach (string macro in parsedDocument.ProjectProperty.Macros.Keys)
+            {
+                string macroText = "`" + macro;
+                if (!macroText.StartsWith(CandidateWord)) continue;
+                Data.VerilogCommon.AutoCompleteItem acItem = new Data.VerilogCommon.AutoCompleteItem(
+                    Data.VerilogCommon.AutoCompleteItem.CompleteType.Keyword,
+                    macroText,
+                    CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
+                    Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword),
+                    "CodeEditor2/Assets/Icons/bookmark.svg"
+                    );
+                if (filter(acItem)) AutoCompleteItems.Add(acItem);
+            }
+            foreach (string macro in parsedDocument.Macros.Keys)
+            {
+                string macroText = "`" + macro;
+                if (!macroText.StartsWith(CandidateWord)) continue;
+                Data.VerilogCommon.AutoCompleteItem acItem = new Data.VerilogCommon.AutoCompleteItem(
+                    Data.VerilogCommon.AutoCompleteItem.CompleteType.Keyword,
+                    macroText,
+                    CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
+                    Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword),
+                    "CodeEditor2/Assets/Icons/bookmark.svg"
+                    );
+                if (filter(acItem)) AutoCompleteItems.Add(acItem);
+            }
         }
 
         //private void AppendNameSpace(Func<Data.VerilogCommon.AutoCompleteItem, bool> filter)
@@ -178,7 +233,7 @@ namespace pluginVerilog.Verilog
         }
         public void AppendModuleInstanceSnippets(Func<Data.VerilogCommon.AutoCompleteItem, bool> filter)
         {
-            if (onLineStart && NameSpace != null && NameSpace.BuildingBlock is Module && CandidateWord.Length > 1 && (iitem is Module ||iitem is GenerateBlock))
+            if (onLineStart && NameSpace != null && NameSpace.BuildingBlock is Module && CandidateWord.Length > 1 && (documentRegion is Module ||documentRegion is GenerateBlock))
             {
                 CodeEditor2.Data.Project project = NameSpace.Project;
                 ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;

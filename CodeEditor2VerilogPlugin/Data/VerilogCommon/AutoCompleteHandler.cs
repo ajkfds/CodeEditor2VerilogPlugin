@@ -233,6 +233,36 @@ namespace pluginVerilog.Data.VerilogCommon
                 }
 
             }
+
+            if (candidate == "") // search undefined macro
+            {
+                int wordIndex = index;
+
+                while(wordIndex>0)
+                {
+                    char preChar = item.CodeDocument.GetCharAt(wordIndex - 1);
+                    if (preChar == ' ') break;
+                    if (preChar == '\r') break;
+                    if (preChar == '\n') break;
+                    if (preChar == '\t') break;
+                    wordIndex--;
+                }
+                if (item.CodeDocument.GetCharAt(wordIndex) != '`') return true;
+
+                int lastIndex = wordIndex;
+                while (lastIndex+1 < item.CodeDocument.Length)
+                {
+                    char nextChar = item.CodeDocument.GetCharAt(lastIndex+1);
+                    if (nextChar == ' ') break;
+                    if (nextChar == '\r') break;
+                    if (nextChar == '\n') break;
+                    if (nextChar == '\t') break;
+                    lastIndex++;
+                }
+                candidate = item.CodeDocument.CreateString(wordIndex, lastIndex - wordIndex+1);
+                candidateStartIndex = wordIndex;
+            }
+
             return true;
         }
 

@@ -74,7 +74,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         public static async System.Threading.Tasks.Task<Module> ParseCreateAsync(
             WordScanner word,
             Dictionary<string, Expressions.Expression>? parameterOverrides,
-            Attribute attribute,
+            Attribute? attribute,
             BuildingBlock parent,
             Data.IVerilogRelatedFile file,
             bool protoType,
@@ -339,6 +339,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                             completionContext.AppendKeywords(new List<string> { 
                                 "endmodule", 
                                 "always", "assign", "initial",
+                                "function","task",
                                 "bit","logic","reg","byte","shortint","int","logint","integer","time","shortreal","real","realtime","struct","enum","string","chandle","event","type",
                                 "genvar"
                             });

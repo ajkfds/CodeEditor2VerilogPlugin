@@ -636,22 +636,22 @@ namespace pluginVerilog.Verilog
 
         private void searchItem(NameSpace nameSpace, IndexReference targetIndexRef, ref IndexReference? foundBegin, ref IndexReference? foundLast,ref Items.IDocumentRegeion? item)
         {
-            foreach (Items.IDocumentRegeion itemBlock in nameSpace.DocumentRegions)
+            foreach (Items.IDocumentRegeion documentRegion in nameSpace.DocumentRegions)
             {
-                if (itemBlock.BeginIndexReference == null) continue;
-                if (targetIndexRef.IsSmallerThan(itemBlock.BeginIndexReference)) continue;
-                if (itemBlock.LastIndexReference == null) continue;
-                if (targetIndexRef.IsGreaterThan(itemBlock.LastIndexReference)) continue;
+                if (documentRegion.BeginIndexReference == null) continue;
+                if (targetIndexRef.IsSmallerThan(documentRegion.BeginIndexReference)) continue;
+                if (documentRegion.LastIndexReference == null) continue;
+                if (targetIndexRef.IsGreaterThan(documentRegion.LastIndexReference)) continue;
 
                 if(foundBegin != null && foundLast != null)
                 {
-                    if (itemBlock.BeginIndexReference.IsSmallerThan(foundBegin)) continue;
-                    if (itemBlock.LastIndexReference.IsGreaterThan(foundLast)) continue;
+                    if (documentRegion.BeginIndexReference.IsSmallerThan(foundBegin)) continue;
+                    if (documentRegion.LastIndexReference.IsGreaterThan(foundLast)) continue;
                 }
 
-                item = itemBlock;
-                foundBegin = itemBlock.BeginIndexReference;
-                foundLast = itemBlock.LastIndexReference;
+                item = documentRegion;
+                foundBegin = documentRegion.BeginIndexReference;
+                foundLast = documentRegion.LastIndexReference;
             }
         }
 

@@ -348,6 +348,7 @@ namespace pluginVerilog.Verilog.Statements
             // for_initialization
             if (!Verilog.DataObjects.Variables.Variable.ParseDeclaration(word, forStatement)) // define index parameter
             {
+                IndexReference expIref = word.CreateIndexReference();
                 Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, forStatement);
                 if (expression == null)
                 {
@@ -358,10 +359,10 @@ namespace pluginVerilog.Verilog.Statements
                 switch (word.Text)
                 {
                     case "=":
-                        BlockingAssignment.ParseCreate(word, nameSpace, expression);
+                        BlockingAssignment.ParseCreateAfterAssignmentOperator(word, nameSpace, expression,expIref,null);
                         break;
                     case "<=":
-                        NonBlockingAssignment.ParseCreate(word, nameSpace, expression);
+                        NonBlockingAssignment.ParseCreateAfterAssignmentOperator(word, nameSpace, expression, expIref, null);
                         break;
                     default:
                         word.AddError("illegal for_initialization");
