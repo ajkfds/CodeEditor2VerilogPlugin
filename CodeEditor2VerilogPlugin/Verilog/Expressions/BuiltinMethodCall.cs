@@ -70,6 +70,13 @@ namespace pluginVerilog.Verilog.Expressions
             }
             word.MoveNext();
 
+            // EOF just after "(": hint for the first argument (e.g. "obj.randomize(|")
+            if (word.CompletionContext != null && word.Eof)
+            {
+                appendArgumentPopupItems(word.CompletionContext, method, 0);
+                return methodCall;
+            }
+
             if (word.Text == ")")
             {
                 if (method != null && method.Ports.Count != 0)
@@ -91,6 +98,13 @@ namespace pluginVerilog.Verilog.Expressions
                 }
                 if (!expression.Constant) returnConstant = false;
                 methodCall.Expressions.Add(expression);
+
+                // EOF just after an argument expression: hint for the next argument
+                if (word.CompletionContext != null && word.Eof)
+                {
+                    appendArgumentPopupItems(word.CompletionContext, method, i + 1);
+                    return methodCall;
+                }
                 if (method != null)
                 {
                     if (i >= method.Ports.Count)
@@ -136,6 +150,21 @@ namespace pluginVerilog.Verilog.Expressions
                 i++;
             }
             return methodCall;
+        }
+
+        /// <summary>
+        /// Append the label of the method argument port at the given index to the input-time hint popup items.
+        /// (built-in method call argument position, e.g. "obj.randomize(|")
+        /// </summary>
+        private static void appendArgumentPopupItems(
+            CompletionContext completionContext, Verilog.BuiltInMethod method, int index)
+        {
+            if (method == null) return;
+            if (index < 0) return;
+            if (index >= method.PortsList.Count) return;   // all arguments are already given
+            DataObjects.Port port = method.PortsList[index];
+            completionContext.CarletPopupItems.Add(
+                new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
         }
     }
 }
