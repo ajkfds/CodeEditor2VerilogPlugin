@@ -72,19 +72,19 @@ namespace pluginVerilog.Verilog
             string blockText = item.CodeDocument.CreateString(parseBlockIndex, CandidateStartIndex - parseBlockIndex);
             pluginVerilog.CodeEditor.CodeDocument document = new pluginVerilog.CodeEditor.CodeDocument(blockText);
             
-            WordScanner word = new WordScanner(document, parsedDocument, parsedDocument.SystemVerilog);
+            WordScanner word = new WordScanner(document, parsedDocument, parsedDocument.SystemVerilog,CandidateStartIndex,this);
             if (documentRegion is Verilog.Items.ModuleInstantiation)
             {
                 #pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
                 CodeEditor2.Controller.AppendLog("ModuleInstantiation.ParseCreate");
-                Verilog.Items.ModuleInstantiation.ParseAsync(word, NameSpace, this).GetAwaiter().GetResult();
+                Verilog.Items.ModuleInstantiation.ParseAsync(word, NameSpace).GetAwaiter().GetResult();
                 #pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
             }else if(documentRegion is Module module)
             {
                 if (word.Text == "module" || word.Text == "macromodule")
                 {
                     CodeEditor2.Controller.AppendLog("Module.ParseCreate");
-                    Module.ParseCreateAsync(word, module.ParameterOverrides, module.Attribute, module.BuildingBlock, item, false, this).GetAwaiter().GetResult();
+                    Module.ParseCreateAsync(word, module.ParameterOverrides, module.Attribute, module.BuildingBlock, item, false).GetAwaiter().GetResult();
                 }
             }else if(documentRegion is Verilog.Items.AlwaysConstruct)
             {
@@ -92,20 +92,20 @@ namespace pluginVerilog.Verilog
                 if(word.Text == "always" || word.Text == "always_comb" || word.Text == "always_latch" || word.Text == "always_ff")
                 {
                     CodeEditor2.Controller.AppendLog("AlwaysConstruct.ParseCreate");
-                    Verilog.Items.AlwaysConstruct.ParseCreate(word, NameSpace, this);
+                    Verilog.Items.AlwaysConstruct.ParseCreate(word, NameSpace);
                 }
             }else if(documentRegion is NonBlockingAssignment)
             {
                 CodeEditor2.Controller.AppendLog("NonBlockingAssignment.ParseCreate");
-                Verilog.Statements.NonBlockingAssignment.ParseCreate(word, NameSpace, this);
+                Verilog.Statements.NonBlockingAssignment.ParseCreate(word, NameSpace);
             }else if(documentRegion is BlockingAssignment)
             {
                 CodeEditor2.Controller.AppendLog("BlockingAssignment.ParseCreate");
-                Verilog.Statements.BlockingAssignment.ParseCreate(word, NameSpace, this);
+                Verilog.Statements.BlockingAssignment.ParseCreate(word, NameSpace);
             }else if(documentRegion is SequentialBlock)
             {
                 CodeEditor2.Controller.AppendLog("SequentialBlock.ParseCreate");
-                Verilog.Statements.SequentialBlock.ParseCreate(word, NameSpace, this, null);
+                Verilog.Statements.SequentialBlock.ParseCreate(word, NameSpace, null);
             }
 
             appendMacro((acItem) => true);
@@ -276,10 +276,10 @@ namespace pluginVerilog.Verilog
                     Data.VerilogCommon.AutoCompleteItem.CompleteType completeType = Data.VerilogCommon.AutoCompleteItem.CompleteType.Keyword;
                     if (subElement is NameSpace) completeType = Data.VerilogCommon.AutoCompleteItem.CompleteType.NameSpace;
                     if (subElement is Verilog.DataObjects.DataObject) completeType = Data.VerilogCommon.AutoCompleteItem.CompleteType.DataObject;
-                    if (completeType == Data.VerilogCommon.AutoCompleteItem.CompleteType.Keyword && System.Diagnostics.Debugger.IsAttached)
-                    {
-                        System.Diagnostics.Debugger.Break();
-                    }
+                    //if (completeType == Data.VerilogCommon.AutoCompleteItem.CompleteType.Keyword && System.Diagnostics.Debugger.IsAttached)
+                    //{
+                    //    System.Diagnostics.Debugger.Break();
+                    //}
 
                     Data.VerilogCommon.AutoCompleteItem acItem = new Data.VerilogCommon.AutoCompleteItem(
                         completeType,
@@ -308,10 +308,11 @@ namespace pluginVerilog.Verilog
                 if (subElement is Verilog.DataObjects.DataObject || subElement is Verilog.DataObjects.Typedef) completeType = Data.VerilogCommon.AutoCompleteItem.CompleteType.DataObject;
                 if (subElement is Verilog.Items.ModuleInstantiation) completeType = Data.VerilogCommon.AutoCompleteItem.CompleteType.NameSpace;
                 if (subElement is Verilog.Items.UdpInstantiation) completeType = Data.VerilogCommon.AutoCompleteItem.CompleteType.NameSpace;
-                if (completeType == Data.VerilogCommon.AutoCompleteItem.CompleteType.Keyword && System.Diagnostics.Debugger.IsAttached)
-                {
-                    System.Diagnostics.Debugger.Break();
-                }
+                if (subElement is Verilog.BuiltInMethod) completeType = Data.VerilogCommon.AutoCompleteItem.CompleteType.Task;
+                //if (completeType == null && System.Diagnostics.Debugger.IsAttached)
+                //{
+                //    System.Diagnostics.Debugger.Break();
+                //}
 
                 Data.VerilogCommon.AutoCompleteItem acItem = new Data.VerilogCommon.AutoCompleteItem(
                     completeType,

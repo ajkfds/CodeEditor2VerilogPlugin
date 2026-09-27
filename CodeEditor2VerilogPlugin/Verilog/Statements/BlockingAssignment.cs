@@ -55,8 +55,7 @@ namespace pluginVerilog.Verilog.Statements
         public static BlockingAssignedAction? Assigned;
 
         public static BlockingAssignment? ParseCreate(
-        WordScanner word, NameSpace nameSpace,
-        CompletionContext? completionContext
+        WordScanner word, NameSpace nameSpace
         )
         {
             IndexReference expressionIref = word.CreateIndexReference();
@@ -81,12 +80,11 @@ namespace pluginVerilog.Verilog.Statements
                 default:
                     return null;
             }
-            return ParseCreateAfterAssignmentOperator(word, nameSpace, expression, expressionIref, completionContext);
+            return ParseCreateAfterAssignmentOperator(word, nameSpace, expression, expressionIref);
         }
         public static BlockingAssignment? ParseCreateAfterAssignmentOperator(
             WordScanner word, NameSpace nameSpace, Expressions.Expression lExpression,
-            IndexReference expressionIref,
-            CompletionContext? completionContext
+            IndexReference expressionIref
             )
         {
             switch (word.Text)
@@ -142,7 +140,7 @@ namespace pluginVerilog.Verilog.Statements
             else
             {
                 IndexReference expIref = word.CreateIndexReference();
-                expression = Expressions.Expression.ParseCreate(word, nameSpace,completionContext);
+                expression = Expressions.Expression.ParseCreate(word, nameSpace);
                 if (expression == null)
                 {
                     // classname :: new ();
@@ -150,7 +148,7 @@ namespace pluginVerilog.Verilog.Statements
                     if (assignment != null)
                     {
                         assignment.LastIndexReference = word.CreateIndexReferenceBefore();
-                        if (!word.Prototype) nameSpace.DocumentRegions.Add(assignment);
+                        if (!word.Prototype && word.CompletionContext == null) nameSpace.DocumentRegions.Add(assignment);
                         return assignment;
                     }
 
@@ -193,7 +191,7 @@ namespace pluginVerilog.Verilog.Statements
                 if (Assigned != null) Assigned(word, nameSpace, assignment);
 
                 assignment.LastIndexReference = word.CreateIndexReferenceBefore();
-                if (!word.Prototype) nameSpace.DocumentRegions.Add(assignment);
+                if (!word.Prototype && word.CompletionContext == null) nameSpace.DocumentRegions.Add(assignment);
                 return assignment;
             }
             else

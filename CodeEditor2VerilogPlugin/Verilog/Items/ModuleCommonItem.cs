@@ -24,7 +24,7 @@ namespace pluginVerilog.Verilog.Items
             | elaboration_system_task
         */
 
-        public static async System.Threading.Tasks.Task ParseAsync(WordScanner word, NameSpace nameSpace, CompletionContext? completionContext = null)
+        public static async System.Threading.Tasks.Task ParseAsync(WordScanner word, NameSpace nameSpace)
         {
 
 
@@ -63,18 +63,18 @@ namespace pluginVerilog.Verilog.Items
 
                 // continuous_assign
                 case "assign":
-                    Items.ContinuousAssign.Parse(word, nameSpace, completionContext);
+                    Items.ContinuousAssign.Parse(word, nameSpace);
                     return;
                 // initial_construct
                 case "initial":
-                    Items.InitialConstruct.ParseCreate(word, nameSpace, completionContext);
+                    Items.InitialConstruct.ParseCreate(word, nameSpace);
                     return;
                 // always_construct
                 case "always":
                 case "always_comb":
                 case "always_latch":
                 case "always_ff":
-                    Items.AlwaysConstruct.ParseCreate(word, nameSpace, completionContext);
+                    Items.AlwaysConstruct.ParseCreate(word, nameSpace);
                     return;
                 // loop_generate_construct
                 case "for":

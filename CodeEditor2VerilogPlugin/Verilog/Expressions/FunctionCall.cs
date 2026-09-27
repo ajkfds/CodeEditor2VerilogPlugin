@@ -48,20 +48,20 @@ namespace pluginVerilog.Verilog.Expressions
                 return namedElement as DataObjects.LetDeclaration;
             }
         }
-        public static new FunctionCall? ParseCreate(WordScanner word, NameSpace nameSpace, CompletionContext? completionContext)
+        public static new FunctionCall? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
-            return ParseCreate(word, nameSpace, nameSpace, completionContext);
+            return ParseCreate(word, nameSpace, nameSpace);
         }
 
-        public static FunctionCall? ParseCreate(WordScanner word, NameSpace nameSpace, NameSpace functionDefinedNameSpace, CompletionContext? completionContext)
+        public static FunctionCall? ParseCreate(WordScanner word, NameSpace nameSpace, NameSpace functionDefinedNameSpace)
         {
             if (word.RootParsedDocument.ProjectProperty == null) throw new Exception();
 
             // input-time completion for the function name position (e.g. "func|")
             // (same pattern as ModuleInstantiation.ParseAsync)
-            if (completionContext != null)
+            if (word.CompletionContext != null)
             {
-                completionContext.AppendExpression();
+                word.CompletionContext.AppendExpression();
             }
 
             FunctionCall functionCall = new FunctionCall() { FunctionName = word.Text, DefinedNameSpace = functionDefinedNameSpace, ProjectProperty = word.ProjectProperty };
@@ -186,7 +186,7 @@ namespace pluginVerilog.Verilog.Expressions
             IPortNameSpace? portNameSpace = function != null
                 ? (IPortNameSpace)function
                 : (letDecl != null ? (IPortNameSpace)letDecl : null);
-            ListOfArguments.ParseListOfArguments(word, nameSpace, portNameSpace, functionCall.PortConnection, out bool returnConstant, completionContext);
+            ListOfArguments.ParseListOfArguments(word, nameSpace, portNameSpace, functionCall.PortConnection, out bool returnConstant);
 
             // Check if function call ended properly
             functionCall.Reference = WordReference.CreateReferenceRange(functionCall.Reference, word.GetReference());

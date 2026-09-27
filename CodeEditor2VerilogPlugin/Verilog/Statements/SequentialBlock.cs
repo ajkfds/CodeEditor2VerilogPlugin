@@ -56,7 +56,11 @@ namespace pluginVerilog.Verilog.Statements
         list_of_block_variable_identifiers ::=  block_variable_type { , block_variable_type } 
         block_variable_type ::=  variable_identifier        | variable_identifier dimension { dimension }  
         */
-        public static IStatement? ParseCreate(WordScanner word, NameSpace nameSpace, CompletionContext? completionContext, string? statement_label,string? blockIdentifier = null, List<string>? clockDomains = null)
+        public static IStatement? ParseCreate(
+            WordScanner word, NameSpace nameSpace, 
+            string? statement_label,string? blockIdentifier = null,
+            List<string>? clockDomains = null
+            )
         {
             if (word.Text != "begin") throw new Exception();
 
@@ -94,7 +98,7 @@ namespace pluginVerilog.Verilog.Statements
         }
 
         private static List<string> endKeyword = new List<string> { "endmodule", "endtask", "endtask", "endinterface", "endfunction" };
-        private static IStatement? parseCreateUnnamedSequentialBlock(WordScanner word, NameSpace nameSpace, IndexReference beginIndex, List<string>? clockDomains = null)
+        private static IStatement? parseCreateUnnamedSequentialBlock(WordScanner word, NameSpace nameSpace, IndexReference beginIndex, List<string>? clockDomains = null, CompletionContext? completionContext = null)
         {
             SequentialBlock sequentialBlock = new SequentialBlock() { BeginIndexReference = beginIndex };
 
@@ -185,11 +189,11 @@ namespace pluginVerilog.Verilog.Statements
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext(); // end
 
-            if (!word.Prototype) nameSpace.DocumentRegions.Add(sequentialBlock);
+            if (!word.Prototype && completionContext == null) nameSpace.DocumentRegions.Add(sequentialBlock);
             return sequentialBlock;
         }
 
-        private static NamedSequentialBlock createNamedSequentialBlock(WordScanner word, NameSpace nameSpace, IndexReference beginIndex, string name, List<string>? clockDomains = null)
+        private static NamedSequentialBlock createNamedSequentialBlock(WordScanner word, NameSpace nameSpace, IndexReference beginIndex, string name, List<string>? clockDomains = null, CompletionContext? completionContext = null)
         {
             // create namedBlock
             NamedSequentialBlock namedBlock;
@@ -240,7 +244,7 @@ namespace pluginVerilog.Verilog.Statements
                     nameSpace.NamedElements.Add(namedBlock.Name, namedBlock);
                 }
             }
-            if (!word.Prototype) nameSpace.DocumentRegions.Add(namedBlock);
+            if (!word.Prototype && completionContext == null ) nameSpace.DocumentRegions.Add(namedBlock);
             return namedBlock;
         }
         private static IStatement? parseCreateNamedSequentialBlock(WordScanner word, NameSpace nameSpace, IndexReference beginIndex, string name, List<string>? clockDomains = null)

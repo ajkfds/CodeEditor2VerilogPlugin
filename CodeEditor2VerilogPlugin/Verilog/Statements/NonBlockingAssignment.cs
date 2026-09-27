@@ -51,7 +51,6 @@ namespace pluginVerilog.Verilog.Statements
 
         public static NonBlockingAssignment? ParseCreate(
         WordScanner word, NameSpace nameSpace,
-        CompletionContext? completionContext,
         List<string>? clockDomains = null
         )
         {
@@ -59,14 +58,13 @@ namespace pluginVerilog.Verilog.Statements
             Expressions.Expression? expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace, false);
             if (word.Text != "<=") return null;
             if (expression == null) return null;
-            return ParseCreateAfterAssignmentOperator(word, nameSpace, expression, expressionIref, completionContext, clockDomains);
+            return ParseCreateAfterAssignmentOperator(word, nameSpace, expression, expressionIref, clockDomains);
         }
 
         public static NonBlockingAssignment? ParseCreateAfterAssignmentOperator(
             WordScanner word, NameSpace nameSpace,
             Expressions.Expression lExpression,
             IndexReference expressionIref,
-            CompletionContext? completionContext,
             List<string>? clockDomains = null
             )
         {
@@ -151,7 +149,7 @@ namespace pluginVerilog.Verilog.Statements
             if (Assigned != null) Assigned(word, nameSpace, assignment);
 
             assignment.LastIndexReference = word.CreateIndexReferenceBefore();
-            if (!word.Prototype) nameSpace.DocumentRegions.Add(assignment);
+            if (!word.Prototype &&word.CompletionContext == null) nameSpace.DocumentRegions.Add(assignment);
             return assignment;
         }
     }

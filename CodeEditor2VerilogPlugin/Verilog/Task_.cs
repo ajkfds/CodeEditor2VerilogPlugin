@@ -102,10 +102,6 @@ namespace pluginVerilog.Verilog
 
         public static void Parse(WordScanner word, NameSpace nameSpace)
         {
-            Parse(word, nameSpace, null);
-        }
-        public static void Parse(WordScanner word, NameSpace nameSpace, CompletionContext? completionContext)
-        {
             if (word.Text != "task")
             {
                 System.Diagnostics.Debugger.Break();
@@ -249,7 +245,7 @@ namespace pluginVerilog.Verilog
                                     break;
                             }
                             var index = word.CreateIndexReference();
-                            Statements.IStatement? statement = Statements.Statements.ParseCreateFunctionStatement(word, task, completionContext);
+                            Statements.IStatement? statement = Statements.Statements.ParseCreateFunctionStatement(word, task);
                             if (word.CreateIndexReference().IsSameAs(index))
                             {
                                 word.MoveNext();
@@ -258,7 +254,7 @@ namespace pluginVerilog.Verilog
                     }
                     else
                     {
-                        Statements.IStatement? statement = Statements.Statements.ParseCreateFunctionStatement(word, task, completionContext);
+                        Statements.IStatement? statement = Statements.Statements.ParseCreateFunctionStatement(word, task);
                     }
                 }
             }

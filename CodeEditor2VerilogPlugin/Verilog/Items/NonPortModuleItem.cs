@@ -18,7 +18,7 @@ namespace pluginVerilog.Verilog.Items
             | timeunits_declaration
             | clocking_declaration
        */
-        public static async System.Threading.Tasks.Task ParseAsync(WordScanner word, NameSpace nameSpace, CompletionContext? completionContext = null)
+        public static async System.Threading.Tasks.Task ParseAsync(WordScanner word, NameSpace nameSpace)
         {
             switch (word.Text)
             {
@@ -109,7 +109,7 @@ namespace pluginVerilog.Verilog.Items
                     break;
 
             }
-            await ModuleOrGenerateItem.ParseAsync(word, nameSpace, completionContext);
+            await ModuleOrGenerateItem.ParseAsync(word, nameSpace);
             return;
         }
     }

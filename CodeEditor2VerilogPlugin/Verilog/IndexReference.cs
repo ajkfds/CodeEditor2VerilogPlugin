@@ -10,6 +10,7 @@ namespace pluginVerilog.Verilog
     {
         protected IndexReference() { }
 
+        public int Offset { get; set; } = 0;
         public static IndexReference Create(WordPointer wordPointer, List<WordPointer> stocks)
         {
             IndexReference ret = new IndexReference();
@@ -32,7 +33,7 @@ namespace pluginVerilog.Verilog
                 }
             }
             ret.indexes.Add(wordPointer.Index);
-
+            ret.Offset = wordPointer.IndexReferenceOffset;
             return ret;
         }
         public static IndexReference Create(int index,ParsedDocument parsedDocument)
@@ -186,7 +187,15 @@ namespace pluginVerilog.Verilog
 
             for (int j = 0; j < i; j++)
             {
-                if (indexes[j] > indexReference.indexes[j]) return true;
+                if (j == 0)
+                {
+                    if (indexes[j]+Offset > indexReference.indexes[j] + indexReference.Offset) return true;
+                }
+                else
+                {
+                    if (indexes[j] > indexReference.indexes[j]) return true;
+                }
+
             }
             return false;
         }
@@ -202,7 +211,14 @@ namespace pluginVerilog.Verilog
 
             for (int j = 0; j < i; j++)
             {
-                if (indexes[j] != indexReference.indexes[j]) return false;
+                if (j == 0)
+                {
+                    if (indexes[j]+Offset != indexReference.indexes[j] + indexReference.Offset) return false;
+                }
+                else
+                {
+                    if (indexes[j] != indexReference.indexes[j]) return false;
+                }
             }
             return true;
         }
@@ -219,7 +235,14 @@ namespace pluginVerilog.Verilog
 
             for (int j = 0; j < i; j++)
             {
-                if (indexes[j] < indexReference.indexes[j]) return true;
+                if (j == 0)
+                {
+                    if (indexes[j]+Offset < indexReference.indexes[j] + indexReference.Offset) return true;
+                }
+                else
+                {
+                    if (indexes[j] < indexReference.indexes[j]) return true;
+                }
             }
             return false;
         }
@@ -236,7 +259,14 @@ namespace pluginVerilog.Verilog
 
             for (int j = 0; j < i - 1; j++)
             {
-                if (indexes[j] != indexReference.indexes[j]) return false;
+                if (j == 0)
+                {
+                    if (indexes[j]+Offset != indexReference.indexes[j] + indexReference.Offset) return false;
+                }
+                else
+                {
+                    if (indexes[j] != indexReference.indexes[j]) return false;
+                }
             }
             return true;
 

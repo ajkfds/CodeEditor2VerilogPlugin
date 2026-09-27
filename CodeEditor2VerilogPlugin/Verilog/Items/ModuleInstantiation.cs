@@ -185,11 +185,11 @@ namespace pluginVerilog.Verilog.Items
         }
 
 
-        public static async Task ParseAsync(WordScanner word, NameSpace nameSpace, CompletionContext? completionContext = null)
+        public static async Task ParseAsync(WordScanner word, NameSpace nameSpace)
         {
-            if(completionContext != null)
+            if(word.CompletionContext != null)
             {
-                completionContext.AppendExpression();
+                word.CompletionContext.AppendExpression();
             }
 
             // interface instantiation can be placed only in module
@@ -403,7 +403,7 @@ namespace pluginVerilog.Verilog.Items
                 }
                 word.MoveNext();
 
-                parseListOfPortConnections(word, nameSpace, instancedModule, moduleInstantiation, moduleIdentifier,completionContext);
+                parseListOfPortConnections(word, nameSpace, instancedModule, moduleInstantiation, moduleIdentifier);
 
                 if (word.Text != ")")
                 {
@@ -412,7 +412,7 @@ namespace pluginVerilog.Verilog.Items
                 }
                 word.MoveNext();
                 moduleInstantiation.LastIndexReference = word.CreateIndexReference();
-                if (!word.Prototype) nameSpace.DocumentRegions.Add(moduleInstantiation);
+                if (!word.Prototype && word.CompletionContext == null) nameSpace.DocumentRegions.Add(moduleInstantiation);
 
                 if (!word.Prototype && word.Active && moduleInstantiation.BlockBeginIndexReference != null)
                 {
@@ -481,7 +481,7 @@ namespace pluginVerilog.Verilog.Items
             Module? instancedModule,
             ModuleInstantiation moduleInstantiation,
             WordReference moduleIdentifier
-            , CompletionContext? completionContext)
+            )
         {
             /*
             list_of_port_connections ::= 
@@ -491,11 +491,11 @@ namespace pluginVerilog.Verilog.Items
 
             if (word.Text ==".")// GetCharAt(0) == '.')
             { // named port assignment
-                parseNamedPortConnections(word, nameSpace, instancedModule, moduleInstantiation, moduleIdentifier,completionContext);
+                parseNamedPortConnections(word, nameSpace, instancedModule, moduleInstantiation, moduleIdentifier);
             }
             else
             { // ordered port connection
-                parseOrderedPortConnections(word, nameSpace, instancedModule, moduleInstantiation, moduleIdentifier, completionContext);
+                parseOrderedPortConnections(word, nameSpace, instancedModule, moduleInstantiation, moduleIdentifier);
             }
         }
 
@@ -505,7 +505,7 @@ namespace pluginVerilog.Verilog.Items
             Module? instancedModule,
             ModuleInstantiation moduleInstantiation,
             WordReference moduleIdentifier
-            , CompletionContext? completionContext)
+            )
         {
             /*
             ordered_port_connection ::= { attribute_instance } [ expression ]
@@ -514,14 +514,14 @@ namespace pluginVerilog.Verilog.Items
             while (!word.Eof && word.Text != ")")
             {
                 // (EOF just after "(" or ","): hint for the next ordered port
-                if (completionContext != null && word.Eof)
+                if (word.CompletionContext != null && word.Eof)
                 {
                     Port? port = null;
                     if (instancedModule != null && i < instancedModule.PortsList.Count)
                     {
                         port = instancedModule.PortsList[i];
                     }
-                    if (port != null) completionContext.CarletPopupItems.Add(
+                    if (port != null) word.CompletionContext.CarletPopupItems.Add(
                         new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
                     return;
                 }
@@ -546,21 +546,21 @@ namespace pluginVerilog.Verilog.Items
                 if (instancedModule != null && i < instancedModule.PortsList.Count)
                 {
                     pinName = instancedModule.PortsList[i].Name;
-                    Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace, completionContext);
+                    Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
                     if (word.Prototype && expression != null && !moduleInstantiation.PortConnection.ContainsKey(pinName)) moduleInstantiation.PortConnection.Add(pinName, expression);
                 }
                 else
                 {
                     if (instancedModule != null) word.AddError("illegal port connection");
-                    Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace, completionContext);
+                    Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
                 }
                 // (EOF just after an expression, e.g. "inst0(clk"): hint for the current port
-                if (completionContext != null && word.Eof)
+                if (word.CompletionContext != null && word.Eof)
                 {
                     if (instancedModule != null && i < instancedModule.PortsList.Count)
                     {
                         Port port = instancedModule.PortsList[i];
-                        completionContext.CarletPopupItems.Add(
+                        word.CompletionContext.CarletPopupItems.Add(
                             new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
                     }
                     return;
@@ -581,8 +581,7 @@ namespace pluginVerilog.Verilog.Items
             NameSpace nameSpace,
             Module? instancedModule,
             ModuleInstantiation moduleInstantiation,
-            WordReference moduleIdentifier,
-            CompletionContext? completionContext
+            WordReference moduleIdentifier
             )
         {
             /*
@@ -662,7 +661,7 @@ namespace pluginVerilog.Verilog.Items
 
                 if (word.Text == "(")
                 {
-                    parseNamedPortConnection(word, nameSpace, instancedModule, moduleInstantiation, pinName, moduleIdentifier,completionContext);
+                    parseNamedPortConnection(word, nameSpace, instancedModule, moduleInstantiation, pinName, moduleIdentifier);
                 }
                 else
                 {
@@ -746,8 +745,7 @@ namespace pluginVerilog.Verilog.Items
         Module? instancedModule,
         ModuleInstantiation moduleInstantiation,
         string pinName,
-        WordReference moduleIdentifier,
-        CompletionContext? completionContext
+        WordReference moduleIdentifier
         )
         {
             if (word.Text != "(") throw new Exception();
@@ -764,10 +762,10 @@ namespace pluginVerilog.Verilog.Items
                 }
             }
 
-            if (completionContext != null && word.Eof)
+            if (word.CompletionContext != null && word.Eof)
             {
                 Port? port = instancedModule?.Ports[pinName];
-                if(port !=null) completionContext.CarletPopupItems.Add(new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                if(port !=null) word.CompletionContext.CarletPopupItems.Add(new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
                 return;
             }
 
@@ -787,17 +785,17 @@ namespace pluginVerilog.Verilog.Items
             Expressions.Expression? expression;
             if (outPort)
             {
-                expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace, true, completionContext);
+                expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace, true);
             }
             else
             {
                 expression = Expressions.Expression.ParseCreateAcceptImplicitNet(word, nameSpace, false);
             }
 
-            if (completionContext != null && word.Eof)
+            if (word.CompletionContext != null && word.Eof)
             {
                 Port? port = instancedModule?.Ports[pinName];
-                if (port != null) completionContext.CarletPopupItems.Add(new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                if (port != null) word.CompletionContext.CarletPopupItems.Add(new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
                 return;
             }
 

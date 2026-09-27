@@ -18,7 +18,7 @@ namespace pluginVerilog.Verilog.Items
             | { attribute_instance } interface_port_declaration
 
        */
-        public static async System.Threading.Tasks.Task ParseAsync(WordScanner word, NameSpace nameSpace, CompletionContext? completionContext = null)
+        public static async System.Threading.Tasks.Task ParseAsync(WordScanner word, NameSpace nameSpace)
         {
             switch (word.Text)
             {
@@ -36,7 +36,7 @@ namespace pluginVerilog.Verilog.Items
                     }
                     break;
                 default:
-                    await NonPortModuleItem.ParseAsync(word, nameSpace, completionContext);
+                    await NonPortModuleItem.ParseAsync(word, nameSpace);
                     return;
             }
             return;

@@ -10,7 +10,7 @@ namespace pluginVerilog.Verilog.Items.Generate
         }
         public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Identifier; } }
 
-        public static async System.Threading.Tasks.Task<bool> ParseAsync(WordScanner word, NameSpace nameSpace)
+        public static async System.Threading.Tasks.Task<bool> ParseAsync(WordScanner word, NameSpace nameSpace, CompletionContext? completionContext = null)
         {
             if (word.Text != "begin") return false;
 
@@ -164,7 +164,7 @@ namespace pluginVerilog.Verilog.Items.Generate
             if(generateBlock != null)
             {
                 generateBlock.LastIndexReference = word.CreateIndexReference();
-                if (!word.Prototype) nameSpace.DocumentRegions.Add(generateBlock);
+                if (!word.Prototype && completionContext == null) nameSpace.DocumentRegions.Add(generateBlock);
             }
             return true;
         }

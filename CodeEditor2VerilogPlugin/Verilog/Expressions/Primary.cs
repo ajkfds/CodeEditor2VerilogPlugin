@@ -1,3 +1,5 @@
+using CSharpMath.Atom.Atoms;
+using Microsoft.Agents.AI;
 using OpenAI.Realtime;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
@@ -129,23 +131,23 @@ number
 
         */
 
-        public static new Primary? ParseCreate(WordScanner word, NameSpace nameSpace, CompletionContext? completionContext)
+        public static new Primary? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
-            return ParseCreate(word, nameSpace, false, completionContext);
+            return ParseCreate(word, nameSpace, false);
         }
-        public static new Primary? ParseCreate(WordScanner word, NameSpace nameSpace, bool acceptImplicitNet, CompletionContext? completionContext)
+        public static new Primary? ParseCreate(WordScanner word, NameSpace nameSpace, bool acceptImplicitNet)
         {
-            return parseCreate(word, nameSpace, false, acceptImplicitNet,true, completionContext);
+            return parseCreate(word, nameSpace, false, acceptImplicitNet,true);
         }
-        public static Primary? ParseCreateLValue(WordScanner word, NameSpace nameSpace, bool acceptImplicitNet, CompletionContext? completionContext)
+        public static Primary? ParseCreateLValue(WordScanner word, NameSpace nameSpace, bool acceptImplicitNet)
         {
-            return parseCreate(word, nameSpace, true, acceptImplicitNet,true, completionContext);
+            return parseCreate(word, nameSpace, true, acceptImplicitNet,true);
         }
-        public static Primary? ParseCreateWoRange(WordScanner word, NameSpace nameSpace, bool acceptImplicitNet, CompletionContext? completionContext=null)
+        public static Primary? ParseCreateWoRange(WordScanner word, NameSpace nameSpace, bool acceptImplicitNet)
         {
-            return parseCreate(word, nameSpace, false, acceptImplicitNet, false, completionContext);
+            return parseCreate(word, nameSpace, false, acceptImplicitNet, false);
         }
-        private static Primary? parseCreate(WordScanner word, NameSpace nameSpace, bool lValue, bool acceptImplicitNet, bool acceptRange = true, CompletionContext? completionContext=null)
+        private static Primary? parseCreate(WordScanner word, NameSpace nameSpace, bool lValue, bool acceptImplicitNet, bool acceptRange = true)
         {
             //if (word.Text == "srif") System.Diagnostics.Debugger.Break();
             // acceptRange = false is used for foreach(data[i])
@@ -189,7 +191,7 @@ number
                     // system function call
                     if (word.Text.StartsWith("$"))// && word.ProjectProperty.SystemFunctions.Keys.Contains(word.Text))
                     {
-                        return FunctionCall.ParseCreate(word, nameSpace, completionContext);
+                        return FunctionCall.ParseCreate(word, nameSpace);
                     }
 
                     // assignment pattern
@@ -221,7 +223,7 @@ number
                     {
                         // It shall be illegal to omit the parentheses in a tf_call unless the subroutine is a task, void function,
                         // or class method. If the subroutine is a nonvoid class function method, it shall be illegal to omit the parentheses if the call is directly recursive.
-                        return FunctionCall.ParseCreate(word, nameSpace, completionContext);
+                        return FunctionCall.ParseCreate(word, nameSpace);
                     }
 
 
@@ -302,7 +304,13 @@ number
                     // function call : for right side only
                     if (!lValue && (element is Function || element is LetDeclaration) && targetNameSpace != null)
                     {
-                        return FunctionCall.ParseCreate(word, nameSpace,targetNameSpace, completionContext);
+                        return FunctionCall.ParseCreate(word, nameSpace,targetNameSpace);
+                    }
+
+                    if ( (element is Verilog.BuiltInMethod) && targetElement is DataObjects.Variables.Object)
+                    {
+                        // TODO : implement built-in method call
+                        //                        return FunctionCall.ParseCreate(word, nameSpace, nameSpace);
                     }
 
                     if (element is DataObjects.Constants.Constants && targetNameSpace != null)

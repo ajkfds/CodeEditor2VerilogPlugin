@@ -77,8 +77,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             Attribute? attribute,
             BuildingBlock parent,
             Data.IVerilogRelatedFile file,
-            bool protoType,
-            CompletionContext? completionContext = null
+            bool protoType
             )
         {
             /*
@@ -145,19 +144,19 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 word.Prototype = false;
                 // document頭の`* parseによるColor付けを避けるため、prototype modeにしてからCloneする必要がある。
 
-                await parseModuleAsync(prototypeWord, parameterOverrides, null, module, completionContext);
+                await parseModuleAsync(prototypeWord, parameterOverrides, null, module );
                 prototypeWord.Dispose();
                 word.CheckCancelToken();
 
                 // parse
                 word.RootParsedDocument.Macros = macroKeep;
-                await parseModuleAsync(word, parameterOverrides, null, module, completionContext);
+                await parseModuleAsync(word, parameterOverrides, null, module );
             }
             else
             {
                 // parse prototype only
                 word.Prototype = true;
-                await parseModuleAsync(word, parameterOverrides, null, module, completionContext);
+                await parseModuleAsync(word, parameterOverrides, null, module );
                 word.Prototype = false;
             }
 
@@ -224,8 +223,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             //            string parameterOverrideModuleName,
             Dictionary<string, Expressions.Expression>? parameterOverrides,
             Attribute? attribute,
-            Module module,
-            CompletionContext? completionContext
+            Module module
             )
         {
             while (word.Text == "import")
@@ -333,17 +331,17 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 {
                     if (word.Eof)
                     {
-                        if (completionContext != null)
+                        if (word.CompletionContext != null)
                         {
-                            completionContext.AutoCompleteItems.Clear();
-                            completionContext.AppendKeywords(new List<string> { 
+                            word.CompletionContext.AutoCompleteItems.Clear();
+                            word.CompletionContext.AppendKeywords(new List<string> { 
                                 "endmodule", 
                                 "always", "assign", "initial",
                                 "function","task",
                                 "bit","logic","reg","byte","shortint","int","logint","integer","time","shortreal","real","realtime","struct","enum","string","chandle","event","type",
                                 "genvar"
                             });
-                            completionContext.AppendModuleInstanceSnippets((ac) => true);
+                            word.CompletionContext.AppendModuleInstanceSnippets((ac) => true);
                             return;
                         }
                         break;
@@ -361,7 +359,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     if (module.AnsiStylePortDefinition)
                     {
                         IndexReference beforeRef = word.CreateIndexReference();
-                        await Verilog.Items.NonPortModuleItem.ParseAsync(word, module, completionContext);
+                        await Verilog.Items.NonPortModuleItem.ParseAsync(word, module);
                         if (beforeRef.IsSameAs(word.CreateIndexReference()))
                         {
                             word.CheckCancelToken();
@@ -376,7 +374,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     else
                     {
                         IndexReference beforeRef = word.CreateIndexReference();
-                        await Verilog.Items.ModuleItem.ParseAsync(word, module, completionContext);
+                        await Verilog.Items.ModuleItem.ParseAsync(word, module);
                         if (beforeRef.IsSameAs(word.CreateIndexReference()))
                         {
                             word.CheckCancelToken();

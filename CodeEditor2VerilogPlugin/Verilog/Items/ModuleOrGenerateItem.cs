@@ -13,7 +13,7 @@ namespace pluginVerilog.Verilog.Items
             | { attribute_instance } module_instantiation 
             | { attribute_instance } module_common_item         
          */
-        public static async Task ParseAsync(WordScanner word, NameSpace nameSpace, CompletionContext? completionContext = null)
+        public static async Task ParseAsync(WordScanner word, NameSpace nameSpace)
         {
             switch (word.Text)
             {
@@ -56,7 +56,7 @@ namespace pluginVerilog.Verilog.Items
 
             IndexReference iref = word.CreateIndexReference();
             // module_common_item
-            await ModuleCommonItem.ParseAsync(word, nameSpace, completionContext);
+            await ModuleCommonItem.ParseAsync(word, nameSpace);
             if(!word.CreateIndexReference().IsSameAs(iref)) return;
 
 
@@ -77,7 +77,7 @@ namespace pluginVerilog.Verilog.Items
             }
 
             // module_instantiation
-            await Items.ModuleInstantiation.ParseAsync(word, nameSpace, completionContext);
+            await Items.ModuleInstantiation.ParseAsync(word, nameSpace);
             if (!word.CreateIndexReference().IsSameAs(iref)) return;
 
         }

@@ -11,14 +11,25 @@ namespace pluginVerilog.Verilog
 {
     public class WordScanner : IDisposable
     {
-        public WordScanner(CodeEditor.CodeDocument document, Verilog.ParsedDocument parsedDocument, bool systemVerilog) : this(document, parsedDocument, systemVerilog, false,false)
+        public WordScanner(
+            CodeEditor.CodeDocument document,
+            Verilog.ParsedDocument parsedDocument,
+            bool systemVerilog,
+            int indexReferenceOffset = 0,
+            CompletionContext completionContext = null
+            ) : this(document, parsedDocument, systemVerilog, false,false,indexReferenceOffset)
         {
+            CompletionContext = completionContext;
         }
 
-        public WordScanner(CodeEditor.CodeDocument document, Verilog.ParsedDocument parsedDocument, bool systemVerilog, bool supressCompilerDirectiveError,bool prototype)
+        public WordScanner(
+            CodeEditor.CodeDocument document, Verilog.ParsedDocument parsedDocument, 
+            bool systemVerilog, bool supressCompilerDirectiveError,
+            bool prototype, int indexReferenceOffset = 0
+            )
         {
             RootParsedDocument = parsedDocument;
-            wordPointer = new WordPointer(document, parsedDocument);
+            wordPointer = new WordPointer(document, parsedDocument,indexReferenceOffset);
             SupressCompilerDerectiveError = supressCompilerDirectiveError;
             this.prototype = prototype;
             recheckWord();
@@ -29,6 +40,12 @@ namespace pluginVerilog.Verilog
         public DefaultNetTypeEnum DefaultNetType = WordScanner.DefaultNetTypeEnum.none;
         public CancellationToken? CancellationToken { get; set; }
 
+        public CompletionContext CompletionContext { get; set; } = null;
+        public int IndexReferenceOffset
+        {
+            get { return wordPointer.IndexReferenceOffset; }
+            set { wordPointer.IndexReferenceOffset = value; }
+        }
         public void CheckCancelToken()
         {
             CancellationToken?.ThrowIfCancellationRequested();
@@ -1113,7 +1130,7 @@ namespace pluginVerilog.Verilog
                 key,
                 null,
                 wordPointer.ParsedDocument.ParseMode);
-            WordPointer newPointer = new WordPointer(codeDocument, newParsedDocument);// wordPointer.ParsedDocument);
+            WordPointer newPointer = new WordPointer(codeDocument, newParsedDocument, 0);// wordPointer.ParsedDocument);
 
             wordPointer = newPointer;
 
@@ -1263,7 +1280,7 @@ namespace pluginVerilog.Verilog
             }
             if (newParsedDocument == null) return;
 
-            WordPointer newPointer = new WordPointer(newParsedDocument.CodeDocument, newParsedDocument);
+            WordPointer newPointer = new WordPointer(newParsedDocument.CodeDocument, newParsedDocument,0);
 
             stock.Add(wordPointer);
             wordPointer = newPointer;

@@ -19,7 +19,7 @@ namespace pluginVerilog.Verilog.Items
         public required IndexReference BeginIndexReference { get; init; }
         public IndexReference? LastIndexReference { get; set; } = null;
 
-        public static AlwaysConstruct? ParseCreate(WordScanner word, NameSpace nameSpace, CompletionContext? completionContext = null)
+        public static AlwaysConstruct? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             switch (word.Text)
             {
@@ -42,14 +42,14 @@ namespace pluginVerilog.Verilog.Items
             word.MoveNext();
 
             AlwaysConstruct always = new AlwaysConstruct() { BeginIndexReference = beginIndex };
-            always.Statement = Statements.Statements.ParseCreateStatement(word, nameSpace, null, null, completionContext);
+            always.Statement = Statements.Statements.ParseCreateStatement(word, nameSpace, null, null);
             if (always.Statement == null)
             {
                 word.AddError("illegal always construct");
                 return null;
             }
             always.LastIndexReference = word.CreateIndexReferenceBefore();
-            if (!word.Prototype) nameSpace.DocumentRegions.Add(always);
+            if (!word.Prototype && word.CompletionContext == null) nameSpace.DocumentRegions.Add(always);
             return always;
         }
     }

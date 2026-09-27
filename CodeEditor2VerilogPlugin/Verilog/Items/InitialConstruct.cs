@@ -8,13 +8,13 @@ namespace pluginVerilog.Verilog.Items
         protected InitialConstruct() { }
         public Statements.IStatement? Statement { get; protected set; }
 
-        public static bool Parse(WordScanner word, NameSpace nameSpace, CompletionContext? completionContext = null)
+        public static bool Parse(WordScanner word, NameSpace nameSpace)
         {
-            Items.InitialConstruct? initial = Items.InitialConstruct.ParseCreate(word, nameSpace, completionContext);
+            Items.InitialConstruct? initial = Items.InitialConstruct.ParseCreate(word, nameSpace);
             return true;
         }
 
-        public static InitialConstruct? ParseCreate(WordScanner word, NameSpace nameSpace, CompletionContext? completionContext = null)
+        public static InitialConstruct? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             //    initial_construct   ::= initial statement
             System.Diagnostics.Debug.Assert(word.Text == "initial");
@@ -22,7 +22,7 @@ namespace pluginVerilog.Verilog.Items
             word.MoveNext();
 
             InitialConstruct initial = new InitialConstruct();
-            initial.Statement = Statements.Statements.ParseCreateStatement(word, nameSpace, null, null, completionContext);
+            initial.Statement = Statements.Statements.ParseCreateStatement(word, nameSpace, null, null);
             if (initial.Statement == null)
             {
                 word.AddError("illegal initial construct");

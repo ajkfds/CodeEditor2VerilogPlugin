@@ -66,7 +66,8 @@ namespace pluginVerilog.Verilog.Statements
         */
         public static IStatement? ParseCreateStatement(
             WordScanner word, NameSpace nameSpace,
-            string? blockIdentifier = null, List<string>? clockDomains = null, CompletionContext? completionContext = null)
+            string? blockIdentifier = null, List<string>? clockDomains = null
+            )
         {
             /*
             A.6.4 Statements
@@ -140,7 +141,7 @@ namespace pluginVerilog.Verilog.Statements
             {
                 case "(*":
                     Attribute attribute = Attribute.ParseCreate(word, nameSpace);
-                    return Statements.ParseCreateStatement(word, nameSpace,blockIdentifier, clockDomains, completionContext);
+                    return Statements.ParseCreateStatement(word, nameSpace,blockIdentifier, clockDomains);
 
                 // unique_priority
                 case "unique":
@@ -159,7 +160,7 @@ namespace pluginVerilog.Verilog.Statements
 
                 // seq_block 
                 case "begin":
-                    return SequentialBlock.ParseCreate(word, nameSpace, completionContext, statement_label, blockIdentifier, clockDomains);
+                    return SequentialBlock.ParseCreate(word, nameSpace, statement_label, blockIdentifier, clockDomains);
 
                 // par_block 
                 case "fork":
@@ -284,7 +285,7 @@ namespace pluginVerilog.Verilog.Statements
                         word.MoveNext();
                         // ;
                         word.MoveNext();
-                        return Statements.ParseCreateStatement(word, nameSpace, blockIdentifier, null, completionContext);
+                        return Statements.ParseCreateStatement(word, nameSpace, blockIdentifier, null );
                     }
 
 
@@ -333,7 +334,7 @@ namespace pluginVerilog.Verilog.Statements
                         }
                         else if (General.IsIdentifier(word.Text))
                         {
-                            return TaskEnable.ParseCreate(word, nameSpace, nameSpace, completionContext);
+                            return TaskEnable.ParseCreate(word, nameSpace, nameSpace );
                         }
                     }
                     else if (word.Text == "void" && nextText == "'")
@@ -341,7 +342,7 @@ namespace pluginVerilog.Verilog.Statements
                         return VoidFunctionCall.ParseCreate(word, nameSpace);
                     }
 
-                    IncOrDecExpression? incOrDecExpression = IncOrDecExpression.ParseCreate(word, nameSpace, false,completionContext);
+                    IncOrDecExpression? incOrDecExpression = IncOrDecExpression.ParseCreate(word, nameSpace, false );
                     if (incOrDecExpression != null)
                     {
                         if (word.Text != ";")
@@ -367,7 +368,7 @@ namespace pluginVerilog.Verilog.Statements
                     if (expression != null && expression is Expressions.TaskReference)// Expressions.TaskReference)
                     {
                         Expressions.TaskReference taskReference = (Expressions.TaskReference)expression;
-                        return TaskEnable.ParseCreate(taskReference, word, nameSpace, completionContext);
+                        return TaskEnable.ParseCreate(taskReference, word, nameSpace);
                     }
                     if (expression != null && expression is Expressions.FunctionCall)
                     {
@@ -408,12 +409,12 @@ namespace pluginVerilog.Verilog.Statements
                     {
                         // blocking_assignment ;
                         case "=":
-                            statement = BlockingAssignment.ParseCreateAfterAssignmentOperator(word, nameSpace, expression, expressionIref, completionContext);
+                            statement = BlockingAssignment.ParseCreateAfterAssignmentOperator(word, nameSpace, expression, expressionIref);
                             break;
                         // nonblocking_assignment ;
                         case "<=":
                             statement = NonBlockingAssignment.ParseCreateAfterAssignmentOperator(
-                                word, nameSpace, expression,expressionIref,completionContext, clockDomains);
+                                word, nameSpace, expression,expressionIref, clockDomains);
                             break;
                         case "+=":
                         case "-=":
@@ -427,7 +428,7 @@ namespace pluginVerilog.Verilog.Statements
                         case ">>=":
                         case "<<<=":
                         case ">>>=":
-                            statement = BlockingAssignment.ParseCreateAfterAssignmentOperator(word, nameSpace, expression,expressionIref,completionContext);
+                            statement = BlockingAssignment.ParseCreateAfterAssignmentOperator(word, nameSpace, expression,expressionIref);
                             break;
                         case "++":
                         case "--":
@@ -510,9 +511,9 @@ namespace pluginVerilog.Verilog.Statements
         }
 
 
-        public static IStatement? ParseCreateFunctionStatement(WordScanner word, NameSpace nameSpace, CompletionContext? completionContext = null)
+        public static IStatement? ParseCreateFunctionStatement(WordScanner word, NameSpace nameSpace)
         {
-            return ParseCreateStatement(word, nameSpace, null, null, completionContext);
+            return ParseCreateStatement(word, nameSpace, null, null);
         }
     }
 

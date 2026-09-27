@@ -8,10 +8,11 @@ namespace pluginVerilog.Verilog
     /// </summary>
     public class WordPointer
     {
-        public WordPointer(CodeEditor.CodeDocument document, Verilog.ParsedDocument parsedDocument)
+        public WordPointer(CodeEditor.CodeDocument document, Verilog.ParsedDocument parsedDocument,int indexReferenceOffset)
         {
             this.Document = document;
             this.ParsedDocument = parsedDocument;
+            this.IndexReferenceOffset = indexReferenceOffset;
             if (this.ParsedDocument == null) throw new Exception();
             string? sectionName = SectionName;
             fetchNext(this.Document, ref index, out length, out nextIndex, out wordType, ref sectionName, !InhibitColor);
@@ -24,6 +25,8 @@ namespace pluginVerilog.Verilog
             this.ParsedDocument = null;
         }
 
+        public int IndexReferenceOffset { get; set; } = 0;
+        
         public CodeEditor.CodeDocument Document { get; protected set; }
         public Verilog.ParsedDocument ParsedDocument { get; protected set; }
         public bool InhibitColor = false;
@@ -69,7 +72,7 @@ namespace pluginVerilog.Verilog
 
         public WordPointer Clone()
         {
-            WordPointer ret = new WordPointer(Document, ParsedDocument);
+            WordPointer ret = new WordPointer(Document, ParsedDocument,IndexReferenceOffset);
             ret.index = index;
             ret.length = length;
             ret.nextIndex = nextIndex;

@@ -305,7 +305,7 @@ namespace pluginVerilog.Verilog.Statements
         // operator_assignment          ::= variable_lvalue assignment_operator expression
         // assignment_operator          ::= = | += | -= | *= | /= | %= | &= | |= | ^= | <<= | >>= | <<<= | >>>=
 
-        public static ForStatememt? ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label, CompletionContext? completionContext = null)
+        public static ForStatememt? ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             ForStatememt forStatement = new ForStatememt(nameSpace.BuildingBlock, nameSpace)
             {
@@ -359,7 +359,7 @@ namespace pluginVerilog.Verilog.Statements
                 switch (word.Text)
                 {
                     case "=":
-                        BlockingAssignment.ParseCreateAfterAssignmentOperator(word, nameSpace, expression,expIref,null);
+                        BlockingAssignment.ParseCreateAfterAssignmentOperator(word, nameSpace, expression,expIref);
                         break;
                     case "<=":
                         NonBlockingAssignment.ParseCreateAfterAssignmentOperator(word, nameSpace, expression, expIref, null);
@@ -393,7 +393,7 @@ namespace pluginVerilog.Verilog.Statements
             }
 
             // for_step
-            IncOrDecExpression? incOrDecExpression = IncOrDecExpression.ParseCreate(word, forStatement, false, completionContext);
+            IncOrDecExpression? incOrDecExpression = IncOrDecExpression.ParseCreate(word, forStatement, false);
             if (incOrDecExpression != null)
             {
 

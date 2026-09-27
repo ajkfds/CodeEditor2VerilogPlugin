@@ -7,22 +7,19 @@ namespace pluginVerilog.Verilog.Expressions
     {
         public static void ParseListOfArguments(WordScanner word, NameSpace usedNameSpace,
             IPortNameSpace? portNameSpace,
-            Dictionary<string, Expressions.Expression> portConnection,
-            CompletionContext? completionContext = null
+            Dictionary<string, Expressions.Expression> portConnection
             )
         {
             ParseListOfArguments(word, usedNameSpace,
             portNameSpace,
             portConnection,
-            out _,
-            completionContext
+            out _
             );
         }
         public static void ParseListOfArguments(WordScanner word, NameSpace usedNameSpace,
             IPortNameSpace? portNameSpace,
             Dictionary<string, Expressions.Expression> portConnection,
-            out bool constantConnected,
-            CompletionContext? completionContext = null
+            out bool constantConnected
             )
         {
             /*
@@ -47,9 +44,9 @@ namespace pluginVerilog.Verilog.Expressions
             word.MoveNext();
 
             // (EOF just after "("): hint for the first argument
-            if (completionContext != null && word.Eof)
+            if (word.CompletionContext != null && word.Eof)
             {
-                AppendArgumentPopupItems(completionContext, portNameSpace, 0);
+                AppendArgumentPopupItems(word.CompletionContext, portNameSpace, 0);
                 return;
             }
 
@@ -110,14 +107,14 @@ namespace pluginVerilog.Verilog.Expressions
                     continue;
                 }
 
-                Expression? expression = Expression.ParseCreate(word, usedNameSpace, completionContext);
+                Expression? expression = Expression.ParseCreate(word, usedNameSpace);
                 if (expression == null)
                 {
                     // EOF while typing an argument expression (e.g. "func(arg1"):
                     // hint for the argument currently being typed
-                    if (completionContext != null && word.Eof)
+                    if (word.CompletionContext != null && word.Eof)
                     {
-                        AppendArgumentPopupItems(completionContext, portNameSpace, i);
+                        AppendArgumentPopupItems(word.CompletionContext, portNameSpace, i);
                     }
                     word.SkipToKeyword(";");
                     return;
@@ -126,9 +123,9 @@ namespace pluginVerilog.Verilog.Expressions
                 // EOF just after an argument expression (e.g. "func(arg1"):
                 // show the hint for the current argument and return without side effects
                 // (partial-parse expressions must not be registered into the parsed document)
-                if (completionContext != null && word.Eof)
+                if (word.CompletionContext != null && word.Eof)
                 {
-                    AppendArgumentPopupItems(completionContext, portNameSpace, i);
+                    AppendArgumentPopupItems(word.CompletionContext, portNameSpace, i);
                     return;
                 }
 
@@ -161,9 +158,9 @@ namespace pluginVerilog.Verilog.Expressions
 
             // (EOF after comma or at the end of positional arguments, e.g. "func(arg1, "):
             // hint for the next argument
-            if (completionContext != null && word.Eof)
+            if (word.CompletionContext != null && word.Eof)
             {
-                AppendArgumentPopupItems(completionContext, portNameSpace, i);
+                AppendArgumentPopupItems(word.CompletionContext, portNameSpace, i);
                 return;
             }
 
@@ -181,9 +178,9 @@ namespace pluginVerilog.Verilog.Expressions
                 word.MoveNext();
 
                 // (EOF just after "."): suggest unconnected argument names
-                if (completionContext != null && word.Eof)
+                if (word.CompletionContext != null && word.Eof)
                 {
-                    appendNamedArgumentCandidates(completionContext, portNameSpace, connectedPorts);
+                    appendNamedArgumentCandidates(word.CompletionContext, portNameSpace, connectedPorts);
                     return;
                 }
 
@@ -213,9 +210,9 @@ namespace pluginVerilog.Verilog.Expressions
                 word.MoveNext();
 
                 // (EOF just after ".name("): hint for this argument
-                if (completionContext != null && word.Eof)
+                if (word.CompletionContext != null && word.Eof)
                 {
-                    AppendArgumentPopupItems(completionContext, portNameSpace, portNameSpace.PortsList.IndexOf(port));
+                    AppendArgumentPopupItems(word.CompletionContext, portNameSpace, portNameSpace.PortsList.IndexOf(port));
                     return;
                 }
 
@@ -223,14 +220,14 @@ namespace pluginVerilog.Verilog.Expressions
                 Expression? expression = null;
                 if (word.Text != ")")
                 {
-                    expression = Expression.ParseCreate(word, (NameSpace)portNameSpace, completionContext);
+                    expression = Expression.ParseCreate(word, (NameSpace)portNameSpace, word.CompletionContext);
                     if (expression == null)
                     {
                         // EOF while typing the named argument expression (e.g. "func(.p("):
                         // hint for this argument
-                        if (completionContext != null && word.Eof)
+                        if (word.CompletionContext != null && word.Eof)
                         {
-                            AppendArgumentPopupItems(completionContext, portNameSpace, portNameSpace.PortsList.IndexOf(port));
+                            AppendArgumentPopupItems(word.CompletionContext, portNameSpace, portNameSpace.PortsList.IndexOf(port));
                         }
                         word.SkipToKeyword(";");
                         return;
@@ -238,9 +235,9 @@ namespace pluginVerilog.Verilog.Expressions
 
                     // EOF just after the named argument expression (e.g. "func(.p(x"):
                     // show the hint for this argument and return without side effects
-                    if (completionContext != null && word.Eof)
+                    if (word.CompletionContext != null && word.Eof)
                     {
-                        AppendArgumentPopupItems(completionContext, portNameSpace, portNameSpace.PortsList.IndexOf(port));
+                        AppendArgumentPopupItems(word.CompletionContext, portNameSpace, portNameSpace.PortsList.IndexOf(port));
                         return;
                     }
 
