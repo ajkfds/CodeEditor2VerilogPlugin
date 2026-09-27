@@ -315,7 +315,9 @@ number
                     // function call : for right side only
                     if (!lValue && (element is Function || element is LetDeclaration) && targetNameSpace != null)
                     {
-                        return FunctionCall.ParseCreate(word, nameSpace,targetNameSpace);
+                        Primary? functionCall = FunctionCall.ParseCreate(word, nameSpace,targetNameSpace);
+                        if (functionCall == null) return null;
+                        return parseChainedMethodCalls(word, nameSpace, functionCall);
                     }
 
                     // function call on a class object : e.g. obj.myFunc(...)
@@ -325,7 +327,9 @@ number
                         BuildingBlocks.Class? sourceClass = objectVariable.GetSourceClass();
                         if (sourceClass != null)
                         {
-                            return FunctionCall.ParseCreate(word, nameSpace, sourceClass);
+                            Primary? functionCall = FunctionCall.ParseCreate(word, nameSpace, sourceClass);
+                            if (functionCall == null) return null;
+                            return parseChainedMethodCalls(word, nameSpace, functionCall);
                         }
                     }
 
@@ -402,6 +406,53 @@ number
                     }
             }
             return null;
+        }
+
+        /// <summary>
+        /// Parse chained method calls on a function call's return value.
+        /// e.g. obj.getObj().method(), obj.getObj().method().method2()
+        /// (method_call ::= method_call_root . method_call_body, method_call_root ::= primary)
+        /// FunctionCall must be the last Primary in the chain.
+        /// </summary>
+        private static Primary? parseChainedMethodCalls(WordScanner word, NameSpace nameSpace, Primary primary)
+        {
+            while (true)
+            {
+                if (word.Eof) return primary;
+                if (word.Text != ".") return primary;
+
+                // the chained method name follows the dot
+                if (!General.IsIdentifier(word.NextText)) return primary;
+
+                // the return value of the previous call must be a class object
+                FunctionCall? previousCall = primary as FunctionCall;
+                if (previousCall == null) return primary;
+                BuildingBlocks.Class? returnClass = previousCall.GetReturnClass();
+                if (returnClass == null) return primary;
+
+                // consume the dot and resolve the next method within the return class
+                word.MoveNext();
+                if (!returnClass.NamedElements.ContainsKey(word.Text)) return primary;
+                INamedElement nextElement = returnClass.NamedElements[word.Text];
+
+                if (nextElement is Function nextFunction)
+                {
+                    Primary? nextCall = FunctionCall.ParseCreate(word, nameSpace, returnClass);
+                    if (nextCall == null) return null;
+                    primary = nextCall;
+                    continue;
+                }
+                else if (nextElement is Task_)
+                {
+                    // task call in a chain (as a statement); arguments are parsed by TaskReference
+                    TaskReference taskReference = TaskReference.ParseCreate(word, nameSpace, returnClass);
+                    return taskReference;
+                }
+                else
+                {
+                    return primary;
+                }
+            }
         }
 
         public static Primary? parseDataObject(WordScanner word, NameSpace nameSpace, INamedElement owner, bool lValue, bool acceptRange, string nameSpaceText)

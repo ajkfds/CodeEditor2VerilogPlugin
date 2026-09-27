@@ -32,6 +32,21 @@ namespace pluginVerilog.Verilog.Expressions
         }
 
         /// <summary>
+        /// Get the Class of the return value if the return variable type is a class.
+        /// Used for chained method calls (e.g. obj.getObj().method()).
+        /// </summary>
+        public BuildingBlocks.Class? GetReturnClass()
+        {
+            Function? function = Function;
+            if (function == null) return null;
+            if (function.ReturnVariable is DataObjects.Variables.Variable variable)
+            {
+                if (variable.DataType is BuildingBlocks.Class class_) return class_;
+            }
+            return null;
+        }
+
+        /// <summary>
         /// Get the LetDeclaration if this call refers to a let declaration
         /// </summary>
         public DataObjects.LetDeclaration? LetDeclaration
