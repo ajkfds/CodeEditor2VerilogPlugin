@@ -307,6 +307,17 @@ number
                         return FunctionCall.ParseCreate(word, nameSpace,targetNameSpace);
                     }
 
+                    // function call on a class object : e.g. obj.myFunc(...)
+                    // (Variables.Object is not a NameSpace, so the branch above cannot handle it)
+                    if (!lValue && element is Function && targetElement is DataObjects.Variables.Object objectVariable)
+                    {
+                        BuildingBlocks.Class? sourceClass = objectVariable.GetSourceClass();
+                        if (sourceClass != null)
+                        {
+                            return FunctionCall.ParseCreate(word, nameSpace, sourceClass);
+                        }
+                    }
+
                     if ( (element is Verilog.BuiltInMethod) && targetElement is DataObjects.Variables.Object)
                     {
                         // built-in method call (e.g. handle.randomize(), obj.srandom(seed))
