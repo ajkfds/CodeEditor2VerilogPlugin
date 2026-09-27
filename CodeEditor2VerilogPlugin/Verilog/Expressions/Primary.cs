@@ -301,6 +301,17 @@ number
                         return TaskReference.ParseCreate(word, nameSpace, targetNameSpace);
                     }
 
+                    // task reference on a class object : e.g. obj.myTask(...)
+                    // (Variables.Object is not a NameSpace, so the branch above cannot handle it)
+                    if (element is Task_ && targetElement is DataObjects.Variables.Object taskObjectVariable)
+                    {
+                        BuildingBlocks.Class? taskSourceClass = taskObjectVariable.GetSourceClass();
+                        if (taskSourceClass != null)
+                        {
+                            return TaskReference.ParseCreate(word, nameSpace, taskSourceClass);
+                        }
+                    }
+
                     // function call : for right side only
                     if (!lValue && (element is Function || element is LetDeclaration) && targetNameSpace != null)
                     {
