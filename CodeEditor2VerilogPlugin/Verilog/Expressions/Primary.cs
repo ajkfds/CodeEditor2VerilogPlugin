@@ -309,8 +309,9 @@ number
 
                     if ( (element is Verilog.BuiltInMethod) && targetElement is DataObjects.Variables.Object)
                     {
-                        // TODO : implement built-in method call
-                        //                        return FunctionCall.ParseCreate(word, nameSpace, nameSpace);
+                        // built-in method call (e.g. handle.randomize(), obj.srandom(seed))
+                        BuiltinMethodCall? methodCall = BuiltinMethodCall.ParseCreate(word, nameSpace, (DataObjects.DataObject)targetElement);
+                        return methodCall;
                     }
 
                     if (element is DataObjects.Constants.Constants && targetNameSpace != null)

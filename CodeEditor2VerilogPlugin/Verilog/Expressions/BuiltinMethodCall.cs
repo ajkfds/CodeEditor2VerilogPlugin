@@ -50,6 +50,7 @@ namespace pluginVerilog.Verilog.Expressions
 
             BuiltinMethodCall methodCall = new BuiltinMethodCall() { FunctionName = word.Text, ProjectProperty = word.ProjectProperty, BuiltInMethod = method };
             methodCall.Reference = word.GetReference();
+            methodCall.BitWidth = method.ReturnVariable?.BitWidth;
             bool returnConstant = true;
 
             word.Color(CodeDrawStyle.ColorType.Identifier);
