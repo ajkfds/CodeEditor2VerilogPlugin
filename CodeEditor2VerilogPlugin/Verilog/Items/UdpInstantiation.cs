@@ -251,7 +251,11 @@ namespace pluginVerilog.Verilog.Items
                 };
                 udpInstantiation.BlockBeginIndexReference = blockBeginIndexReference;
 
-                if (word.Prototype)
+                if (word.CompletionContext != null)
+                {
+                    // do not update building block tree @ code completion partial parse
+                }
+                else if (word.Prototype)
                 {
                     udpInstantiation.Prototype = true;
 
@@ -304,7 +308,7 @@ namespace pluginVerilog.Verilog.Items
                 }
                 word.MoveNext();
                 udpInstantiation.LastIndexReference = word.CreateIndexReference();
-                if (!word.Prototype) nameSpace.DocumentRegions.Add(udpInstantiation);
+                if (!word.Prototype && word.CompletionContext == null) nameSpace.DocumentRegions.Add(udpInstantiation);
 
                 if (!word.Prototype && word.Active && udpInstantiation.BlockBeginIndexReference != null)
                 {

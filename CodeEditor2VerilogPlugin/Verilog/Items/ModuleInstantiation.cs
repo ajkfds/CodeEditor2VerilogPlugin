@@ -701,6 +701,7 @@ namespace pluginVerilog.Verilog.Items
         {
             if (instancedModule == null) return;
             if (wildcardRef == null) throw new Exception();
+            if (word.CompletionContext != null) return; // do not update references @ code completion partial parse
 
             foreach (string pinName in notWrittenPortName)
             {
@@ -840,6 +841,7 @@ namespace pluginVerilog.Verilog.Items
             WordReference moduleIdentifier)
         {
             if (instancedModule == null) return;
+            if (word.CompletionContext != null) return; // do not update references @ code completion partial parse
             DataObject? targetObject = nameSpace.NamedElements.GetDataObject(pinName);
 
             if (targetObject == null)

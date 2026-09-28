@@ -197,7 +197,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             // NameSpace's NamedElements so that it is reachable from expression parse
             // and autocomplete as a sub-namespace entry. NamedElements.Add is a no-op
             // if the same key already exists, so duplicate registration is safe.
-            if (parent != null && !string.IsNullOrEmpty(module.Name))
+            if (word.CompletionContext != null)
+            {
+                // do not update building block tree @ code completion partial parse
+            }
+            else if (parent != null && !string.IsNullOrEmpty(module.Name))
             {
                 parent.NamedElements.Add(module.Name, module);
             }

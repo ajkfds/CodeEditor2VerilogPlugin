@@ -307,7 +307,11 @@ namespace pluginVerilog.Verilog.Items
                 }
 
                 // register to upper bulding block
-                if (word.Prototype)
+                if (word.CompletionContext != null)
+                {
+                    // do not update building block tree @ code completion partial parse
+                }
+                else if (word.Prototype)
                 {
                     interfaceInstance.Prototype = true;
 

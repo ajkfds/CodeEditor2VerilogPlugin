@@ -151,6 +151,10 @@ namespace pluginVerilog.Verilog
                     {
                         word.AddPrototypeError("duplicate task name");
                     }
+                    else if (word.CompletionContext != null)
+                    {
+                        // do not update building block tree @ code completion partial parse
+                    }
                     else
                     {
                         nameSpace.NamedElements.Add(task.Name, task);
@@ -161,6 +165,10 @@ namespace pluginVerilog.Verilog
                     if (nameSpace.NamedElements.ContainsTask(task.Name))
                     {
                         task =(Task_)nameSpace.NamedElements[task.Name];
+                    }
+                    else if (word.CompletionContext != null)
+                    {
+                        // do not update building block tree @ code completion partial parse
                     }
                     else
                     {
@@ -319,6 +327,10 @@ namespace pluginVerilog.Verilog
             if (!word.Active)
             {
                 // skip
+            }
+            else if (word.CompletionContext != null)
+            {
+                // do not update building block tree @ code completion partial parse
             }
             else
             {

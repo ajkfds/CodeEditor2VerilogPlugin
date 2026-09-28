@@ -224,7 +224,11 @@ namespace pluginVerilog.Verilog
                     function.NamedElements.Add(retVal.Name, retVal);
                 }
 
-                if (nameSpace.BuildingBlock.NamedElements.ContainsKey(function.Name) && nameSpace.BuildingBlock.NamedElements[function.Name] is Function)
+                if (word.CompletionContext != null)
+                {
+                    // do not update building block tree @ code completion partial parse
+                }
+                else if (nameSpace.BuildingBlock.NamedElements.ContainsKey(function.Name) && nameSpace.BuildingBlock.NamedElements[function.Name] is Function)
                 {
                     nameSpace.BuildingBlock.NamedElements.Replace(function.Name, function);
                 }
@@ -447,6 +451,10 @@ namespace pluginVerilog.Verilog
                     {
                         word.AddPrototypeError("duplicate task name");
                     }
+                    else if (word.CompletionContext != null)
+                    {
+                        // do not update building block tree @ code completion partial parse
+                    }
                     else
                     {
                         nameSpace.NamedElements.Add(function.Name, function);
@@ -454,7 +462,11 @@ namespace pluginVerilog.Verilog
                 }
                 else
                 {
-                    if (nameSpace.NamedElements.ContainsKey(function.Name) && nameSpace.NamedElements[function.Name] is Function)
+                    if (word.CompletionContext != null)
+                    {
+                        // do not update building block tree @ code completion partial parse
+                    }
+                    else if (nameSpace.NamedElements.ContainsKey(function.Name) && nameSpace.NamedElements[function.Name] is Function)
                     {
                         nameSpace.NamedElements.Replace(function.Name, function);
                     }

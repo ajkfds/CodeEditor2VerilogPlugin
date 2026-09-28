@@ -46,6 +46,10 @@ namespace pluginVerilog.Verilog.Items.Generate
                         {
                             word.AddPrototypeError("duplicated block name");
                         }
+                        else if (word.CompletionContext != null)
+                        {
+                            // do not update building block tree @ code completion partial parse
+                        }
                         else
                         {
                             generateBlock = new GenerateBlock(nameSpace.BuildingBlock, nameSpace)
@@ -72,6 +76,10 @@ namespace pluginVerilog.Verilog.Items.Generate
                             {
                                 word.AddError("duplicated block name");
                             }
+                        }
+                        else if (word.CompletionContext != null)
+                        {
+                            // do not update building block tree @ code completion partial parse
                         }
                         else
                         {
