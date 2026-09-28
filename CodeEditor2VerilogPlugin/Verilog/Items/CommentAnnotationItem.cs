@@ -305,8 +305,12 @@ namespace pluginVerilog.Verilog.Items
             // `// @scope TEST_RTL_MODULE TEST_RTL_MODULE_0`). Without this,
             // the VirtualScopeNameSpace would only be registered later in
             // VerilogFile.AcceptParsedDocumentAsync via ApplyCommentScopeReferences,
-            // and the in-flight parse would emit "unbound object" errors.
-            if (!word.Prototype && !string.IsNullOrEmpty(newEntryName))
+           // and the in-flight parse would emit "unbound object" errors.
+          // Skip during code completion partial parse: do not generate /
+          // register the VirtualScopeNameSpace into the (shared) namespace
+          // tree, and do not trigger the eager target-file parse or
+          // ReparseRequested from a completion context.
+            if (!word.Prototype && word.CompletionContext == null && !string.IsNullOrEmpty(newEntryName))
             {
                 // Always re-resolve the target. On the first parse this sets
                 // scopeRef.ResolvedBuildingBlock; on subsequent reparses (the
