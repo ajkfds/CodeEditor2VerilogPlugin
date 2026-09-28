@@ -142,6 +142,12 @@ namespace pluginVerilog.Verilog
                 // (via WordScanner) to udp / module instantiation parse inside the block
                 CodeEditor2.Controller.AppendLog("GenerateBlock.ParseAsync");
                 Verilog.Items.Generate.GenerateBlock.ParseAsync(word, NameSpace).GetAwaiter().GetResult();
+            }else if(documentRegion is Verilog.Items.GateInstantiation)
+            {
+                // partial parse of gate instantiation: propagate completionContext (via WordScanner)
+                // to gate keyword / terminal parse
+                CodeEditor2.Controller.AppendLog("GateInstantiation.Parse");
+                Verilog.Items.GateInstantiation.Parse(word, NameSpace);
             }
 
             appendMacro((acItem) => true);

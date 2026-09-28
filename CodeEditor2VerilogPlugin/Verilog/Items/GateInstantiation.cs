@@ -368,6 +368,13 @@ namespace pluginVerilog.Verilog.Items
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
+            // EOF just after gate keyword (e.g. "bufif1 |"): suggest instance name / terminal candidates
+            if (word.CompletionContext != null && word.Eof)
+            {
+                word.CompletionContext.AppendExpression();
+                return null;
+            }
+
             EnableGate ret = new EnableGate() { DefinitionReference = word.CrateWordReference(), Name = "", Project = word.Project };
 
             ret.DriveStrength = DriveStrength.ParseCreate(word, nameSpace as NameSpace);
@@ -421,6 +428,13 @@ namespace pluginVerilog.Verilog.Items
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
+            // EOF just after gate keyword (e.g. "and |"): suggest instance name / terminal candidates
+            if (word.CompletionContext != null && word.Eof)
+            {
+                word.CompletionContext.AppendExpression();
+                return null;
+            }
+
             NInputGate ret = new NInputGate() { DefinitionReference = word.CrateWordReference(), Name = "", Project = word.Project };
 
             ret.DriveStrength = DriveStrength.ParseCreate(word, nameSpace as NameSpace);
@@ -439,6 +453,13 @@ namespace pluginVerilog.Verilog.Items
                     return null;
                 }
                 word.MoveNext();
+
+                // EOF just after "(" (e.g. "and g0(|"): suggest terminal candidates
+                if (word.CompletionContext != null && word.Eof)
+                {
+                    word.CompletionContext.AppendExpression();
+                    return null;
+                }
 
                 while (!word.Eof)
                 {
@@ -476,6 +497,13 @@ namespace pluginVerilog.Verilog.Items
         {
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
+
+            // EOF just after gate keyword (e.g. "buf |"): suggest instance name / terminal candidates
+            if (word.CompletionContext != null && word.Eof)
+            {
+                word.CompletionContext.AppendExpression();
+                return null;
+            }
 
             NOutputGate ret = new NOutputGate() { DefinitionReference = word.CrateWordReference(), Name = "", Project = word.Project };
 
