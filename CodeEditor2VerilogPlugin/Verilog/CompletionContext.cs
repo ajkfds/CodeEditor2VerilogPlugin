@@ -148,6 +148,12 @@ namespace pluginVerilog.Verilog
                 // to gate keyword / terminal parse
                 CodeEditor2.Controller.AppendLog("GateInstantiation.Parse");
                 Verilog.Items.GateInstantiation.Parse(word, NameSpace);
+            }else if(documentRegion is Verilog.Items.ContinuousAssign)
+            {
+                // partial parse of continuous assign: propagate completionContext (via WordScanner)
+                // to LHS / RHS expression parse (A9)
+                CodeEditor2.Controller.AppendLog("ContinuousAssign.ParseCreate");
+                Verilog.Items.ContinuousAssign.ParseCreate(word, NameSpace, this);
             }
 
             appendMacro((acItem) => true);
@@ -185,6 +191,16 @@ namespace pluginVerilog.Verilog
             appendKeyword((acItem) =>
             {
                 if (keywords.Contains(acItem.Text)) return true;
+                return false;
+            });
+        }
+
+        // append DataObject (net / variable / parameter) autocomplete items only
+        // used for LHS positions such as "assign |" (A9)
+        public void AppendDataObjects()
+        {
+            appendNamedElements((acItem) => {
+                if (acItem.Type == Data.VerilogCommon.AutoCompleteItem.CompleteType.DataObject) return true;
                 return false;
             });
         }

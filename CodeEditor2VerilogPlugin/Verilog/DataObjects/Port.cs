@@ -227,6 +227,15 @@ namespace pluginVerilog.Verilog.DataObjects
                 PortAnnotation.ParsePostComment(word, nameSpace, definedPort);
                 if (word.Text != ",") return;
                 word.MoveNext();
+                // A10: "module x(input a, |" EOF -> next port direction/type keyword hint
+                if (word.Eof && word.CompletionContext != null)
+                {
+                    word.CompletionContext.AppendKeywords(new List<string> {
+                        "input", "output", "inout", "ref",
+                        "wire", "reg", "logic", "bit", "signed"
+                    });
+                    return;
+                }
                 PortAnnotation.ParsePostComment(word, nameSpace, definedPort);
                 while (!word.Eof)
                 {
@@ -341,6 +350,17 @@ namespace pluginVerilog.Verilog.DataObjects
              */
             definedPort = null;
 
+            // A10: port declaration input at EOF
+            // "(" just after "module x" / "," just after previous port declaration
+            if (word.Eof && word.CompletionContext != null && firstPort)
+            {
+                word.CompletionContext.AppendKeywords(new List<string> {
+                    "input", "output", "inout", "ref",
+                    "wire", "reg", "logic", "bit", "signed"
+                });
+                return true;
+            }
+
             BuildingBlock buildingBlock = nameSpace.BuildingBlock;
             DirectionEnum? direction = null;
             switch (word.Text)
@@ -361,6 +381,15 @@ namespace pluginVerilog.Verilog.DataObjects
             {
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 word.MoveNext();
+
+                // A10: "input |" EOF -> net/variable type keyword hint
+                if (word.Eof && word.CompletionContext != null)
+                {
+                    word.CompletionContext.AppendKeywords(new List<string> {
+                        "wire", "reg", "logic", "bit", "signed"
+                    });
+                    return true;
+                }
             }
 
             Net.NetTypeEnum? netType = Net.parseNetType(word, nameSpace);
