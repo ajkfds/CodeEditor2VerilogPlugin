@@ -232,6 +232,17 @@ namespace pluginVerilog.Verilog.Expressions
                 word.MoveNext();
             }
 
+            // member name autocomplete: "obj." followed by EOF (e.g. "obj." at caret)
+            // resolve the target element and append its members as autocomplete candidates
+            if (word.CompletionContext != null && wordClone.Eof &&
+                nameReference.Separators.Count > 0 &&
+                nameReference.Separators[nameReference.Separators.Count - 1] == ".")
+            {
+                (INamedElement? memberElement, INamedElement? memberTarget) = nameReference.GetElement(nameSpace);
+                INamedElement? memberRoot = memberTarget ?? memberElement;
+                if (memberRoot != null) word.CompletionContext.AppendSubElements(memberRoot);
+            }
+
             return nameReference;
         }
 

@@ -183,6 +183,40 @@ namespace pluginVerilog.Verilog
             });
         }
 
+        // append member (sub-element) autocomplete items of the given element
+        // used for "obj." + EOF member name completion (A5)
+        public void AppendSubElements(INamedElement element)
+        {
+            INamedElement? target = element;
+            if (target is DataObjects.Variables.Object objElement)
+            {
+                // Variables.Object is not a NameSpace; resolve its source class
+                BuildingBlocks.Class? sourceClass = objElement.GetSourceClass();
+                if (sourceClass == null) return;
+                target = sourceClass;
+            }
+
+            foreach (INamedElement subElement in target.NamedElements.Values)
+            {
+                if (CandidateWord != "" && !subElement.Name.StartsWith(CandidateWord)) continue;
+                if (subElement.Name.StartsWith("\0", StringComparison.Ordinal)) continue; // reject unnamed elements
+                if (AutoCompleteItems.Find(x => x.Text == subElement.Name) != null) continue; // reject duplicated elements
+
+                Data.VerilogCommon.AutoCompleteItem.CompleteType completeType = Data.VerilogCommon.AutoCompleteItem.CompleteType.Keyword;
+                if (subElement is NameSpace) completeType = Data.VerilogCommon.AutoCompleteItem.CompleteType.NameSpace;
+                if (subElement is Verilog.DataObjects.DataObject) completeType = Data.VerilogCommon.AutoCompleteItem.CompleteType.DataObject;
+
+                Data.VerilogCommon.AutoCompleteItem acItem = new Data.VerilogCommon.AutoCompleteItem(
+                    completeType,
+                    subElement.Name,
+                    CodeDrawStyle.ColorIndex(subElement.ColorType),
+                    Global.CodeDrawStyle.Color(subElement.ColorType),
+                    "CodeEditor2/Assets/Icons/tag.svg"
+                    );
+                AutoCompleteItems.Add(acItem);
+            }
+        }
+
         private void appendMacro(Func<Data.VerilogCommon.AutoCompleteItem, bool> filter)
         {
             if (parsedDocument.ProjectProperty == null) return;

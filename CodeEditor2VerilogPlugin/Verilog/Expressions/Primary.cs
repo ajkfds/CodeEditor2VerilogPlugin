@@ -423,6 +423,20 @@ number
             while (true)
             {
                 if (word.Eof) return primary;
+
+                // member name autocomplete: chained call "." followed by EOF
+                // (e.g. "obj.getObj()." at caret)
+                if (word.CompletionContext != null && word.Text == ".")
+                {
+                    FunctionCall? eofCall = primary as FunctionCall;
+                    if (eofCall != null)
+                    {
+                        BuildingBlocks.Class? eofReturnClass = eofCall.GetReturnClass();
+                        if (eofReturnClass != null) word.CompletionContext.AppendSubElements(eofReturnClass);
+                    }
+                    return primary;
+                }
+
                 if (word.Text != ".") return primary;
 
                 // the chained method name follows the dot
