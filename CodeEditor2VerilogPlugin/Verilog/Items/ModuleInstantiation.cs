@@ -338,50 +338,46 @@ namespace pluginVerilog.Verilog.Items
                     }
                 }
 
-                if (word.Prototype)
-                {
-                    moduleInstantiation.Prototype = true;
 
-                    if (moduleInstantiation.Name == null)
-                    {
-                        // 
-                    }
-                    else if (nameSpace.NamedElements.ContainsIBuldingBlockInstantiation(moduleInstantiation.Name))
-                    {   // duplicated
-                        word.AddPrototypeError("instance name duplicated");
-                    }
-                    else
-                    {
-                        nameSpace.NamedElements.Add(moduleInstantiation.Name, moduleInstantiation);
-                    }
+                // register instance to namespace
+                if(word.CompletionContext != null)
+                {
+                    // do not update module instantiation to namespace @ code completion partial parse
                 }
                 else
                 {
-                    if (moduleInstantiation.Name == null)
+                    if (word.Prototype)
                     {
-                        // 
-                    }
-                    else if (nameSpace.NamedElements.ContainsIBuldingBlockInstantiation(moduleInstantiation.Name))
-                    {   // duplicated
-                        nameSpace.NamedElements.Replace(moduleInstantiation.Name, moduleInstantiation);
-                        SetInstancedNamespaceNames(moduleInstantiation, nameSpace);
+                        moduleInstantiation.Prototype = true;
 
-                        //if (((IBuildingBlockInstantiation)nameSpace.NamedElements[moduleInstantiation.Name]).Prototype)
-                        //{
-                        //    ModuleInstantiation? mod = nameSpace.NamedElements[moduleInstantiation.Name] as ModuleInstantiation;
-                        //    if (mod != null)
-                        //    {
-                        //        moduleInstantiation = mod;
-                        //        moduleInstantiation.Prototype = false;
-                        //    }
-                        //}
-                        //else
-                        //{
-                        //}
+                        if (moduleInstantiation.Name == null)
+                        {
+                            // 
+                        }
+                        else if (nameSpace.NamedElements.ContainsIBuldingBlockInstantiation(moduleInstantiation.Name))
+                        {   // duplicated
+                            word.AddPrototypeError("instance name duplicated");
+                        }
+                        else
+                        {
+                            nameSpace.NamedElements.Add(moduleInstantiation.Name, moduleInstantiation);
+                        }
                     }
                     else
                     {
-                        nameSpace.NamedElements.Add(moduleInstantiation.Name, moduleInstantiation);
+                        if (moduleInstantiation.Name == null)
+                        {
+                            // 
+                        }
+                        else if (nameSpace.NamedElements.ContainsIBuldingBlockInstantiation(moduleInstantiation.Name))
+                        {   // duplicated
+                            nameSpace.NamedElements.Replace(moduleInstantiation.Name, moduleInstantiation);
+                            SetInstancedNamespaceNames(moduleInstantiation, nameSpace);
+                        }
+                        else
+                        {
+                            nameSpace.NamedElements.Add(moduleInstantiation.Name, moduleInstantiation);
+                        }
                     }
                 }
 
