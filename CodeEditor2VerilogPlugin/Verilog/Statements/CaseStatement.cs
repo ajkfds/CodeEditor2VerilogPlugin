@@ -81,6 +81,13 @@ namespace pluginVerilog.Verilog.Statements
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
+            // EOF just after case keyword: suggest case expression candidates
+            if (word.CompletionContext != null && word.Eof)
+            {
+                word.CompletionContext.AppendExpression();
+                return null;
+            }
+
             if (word.GetCharAt(0) == '(')
             {
                 word.MoveNext();
@@ -89,6 +96,14 @@ namespace pluginVerilog.Verilog.Statements
             {
                 word.AddError("( expected");
             }
+
+            // EOF just after "case(": suggest case expression candidates
+            if (word.CompletionContext != null && word.Eof)
+            {
+                word.CompletionContext.AppendExpression();
+                return null;
+            }
+
             caseStatement.Expression = Expressions.Expression.ParseCreate(word, nameSpace);
             if (word.GetCharAt(0) == ')')
             {
@@ -112,6 +127,14 @@ namespace pluginVerilog.Verilog.Statements
                 word.AddSystemVerilogError();
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 word.MoveNext();
+            }
+
+            // EOF at case item start (just after ")" ): suggest case item keywords and expression candidates
+            if (word.CompletionContext != null && word.Eof)
+            {
+                word.CompletionContext.AppendKeywords(new List<string> { "default", "if", "else", "case", "casez", "casex", "begin" });
+                word.CompletionContext.AppendExpression();
+                return null;
             }
 
             while (!word.Eof && word.Text != "endcase" && word.Text != "endmodule" && word.Text != "endfunction")
@@ -214,6 +237,13 @@ namespace pluginVerilog.Verilog.Statements
                 if (word.GetCharAt(0) == ':')
                 {
                     word.MoveNext();
+
+                    // EOF just after ":": suggest statement keywords
+                    if (word.CompletionContext != null && word.Eof)
+                    {
+                        word.CompletionContext.AppendKeywords(new List<string> { "if", "else", "case", "casez", "casex", "begin", "for", "while", "forever", "repeat" });
+                        return caseItem;
+                    }
                 }
                 else
                 {

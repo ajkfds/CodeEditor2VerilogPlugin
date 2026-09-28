@@ -94,6 +94,18 @@ namespace pluginVerilog.Verilog
                     CodeEditor2.Controller.AppendLog("AlwaysConstruct.ParseCreate");
                     Verilog.Items.AlwaysConstruct.ParseCreate(word, NameSpace);
                 }
+            }else if(documentRegion is Verilog.Statements.CaseStatement)
+            {
+                // partial parse of case statement: propagate completionContext (via WordScanner)
+                // to case expression / case item parse
+                CodeEditor2.Controller.AppendLog("CaseStatement.ParseCreate");
+                Verilog.Statements.CaseStatement.ParseCreate(word, NameSpace, null);
+            }else if(documentRegion is Verilog.Statements.ConditionalStatement)
+            {
+                // partial parse of if statement: propagate completionContext (via WordScanner)
+                // to condition expression / statement parse
+                CodeEditor2.Controller.AppendLog("ConditionalStatement.ParseCreate");
+                Verilog.Statements.ConditionalStatement.ParseCreate(word, NameSpace, null);
             }else if(documentRegion is NonBlockingAssignment)
             {
                 CodeEditor2.Controller.AppendLog("NonBlockingAssignment.ParseCreate");

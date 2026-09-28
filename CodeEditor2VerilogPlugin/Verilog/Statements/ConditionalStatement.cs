@@ -57,6 +57,13 @@ namespace pluginVerilog.Verilog.Statements
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext(); // if
 
+            // EOF just after "if": suggest condition expression candidates
+            if (word.CompletionContext != null && word.Eof)
+            {
+                word.CompletionContext.AppendExpression();
+                return null;
+            }
+
             ConditionalStatement conditionalStatement = new ConditionalStatement() { Name = "" };
             if (statement_label != null) { conditionalStatement.Name = statement_label; }
 
@@ -66,6 +73,13 @@ namespace pluginVerilog.Verilog.Statements
                 return null;
             }
             word.MoveNext(); // (
+
+            // EOF just after "if(": suggest condition expression candidates
+            if (word.CompletionContext != null && word.Eof)
+            {
+                word.CompletionContext.AppendExpression();
+                return null;
+            }
 
             Expressions.Expression? conditionExpression = Expressions.Expression.ParseCreate(word, nameSpace);
             if (conditionExpression == null)
@@ -105,6 +119,13 @@ namespace pluginVerilog.Verilog.Statements
                         return null;
                     }
                     word.MoveNext(); // (
+
+                    // EOF just after "else if(": suggest condition expression candidates
+                    if (word.CompletionContext != null && word.Eof)
+                    {
+                        word.CompletionContext.AppendExpression();
+                        return null;
+                    }
 
                     conditionExpression = Expressions.Expression.ParseCreate(word, nameSpace);
                     if (conditionExpression == null)
