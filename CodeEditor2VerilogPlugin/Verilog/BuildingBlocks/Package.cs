@@ -230,8 +230,10 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 break;
             }
 
-            if (!word.Prototype)
+            if (!word.Prototype && word.CompletionContext == null)
             {
+                // do not check use/driven @ code completion partial parse
+                // (reference lists are not updated during partial parse)
                 CheckVariablesUseAndDriven(word, module);
             }
 

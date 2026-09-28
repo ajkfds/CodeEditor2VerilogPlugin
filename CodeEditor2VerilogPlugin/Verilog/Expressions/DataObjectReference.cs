@@ -520,7 +520,13 @@ namespace pluginVerilog.Verilog.Expressions
             {
                 val.BitWidth = val.BitWidth * unPackedArray.Size;
             }
-            if (assigned)
+            if (word.CompletionContext != null)
+            {
+                // do not update reference lists @ code completion partial parse
+                // (val.Reference points into the partial-parse document, so
+                // adding it here would pollute the shared data object)
+            }
+            else if (assigned)
             {
                 if (!partial) originalObject.AssignedReferences.Add(val.Reference);
             }
@@ -534,7 +540,7 @@ namespace pluginVerilog.Verilog.Expressions
             // "unused" notices are not raised on the parent Struct.
             // The parent's AssignedMap is updated separately via
             // AssertAssigned() through val.StructParentObject.
-            if (val.StructParentObject != null && val.Reference != null)
+            if (word.CompletionContext == null && val.StructParentObject != null && val.Reference != null)
             {
                 val.StructParentObject.UsedReferences.Add(val.Reference);
             }
