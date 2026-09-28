@@ -58,6 +58,13 @@ namespace pluginVerilog.Verilog.Statements
         WordScanner word, NameSpace nameSpace
         )
         {
+            // EOF at LHS position (e.g. "x|"): suggest DataObject / function candidates
+            if (word.CompletionContext != null && word.Eof)
+            {
+                word.CompletionContext.AppendExpression();
+                return null;
+            }
+
             IndexReference expressionIref = word.CreateIndexReference();
             Expressions.Expression? expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace, false);
             if (expression == null) return null;
@@ -123,6 +130,13 @@ namespace pluginVerilog.Verilog.Statements
             if (word.Text == "new")
             {
                 return parseCreateClassNewAssignment(word, nameSpace, lExpression, expressionIref);
+            }
+
+            // EOF just after "=" (e.g. "x = |"): suggest expression candidates for RHS
+            if (word.CompletionContext != null && word.Eof)
+            {
+                word.CompletionContext.AppendExpression();
+                return null;
             }
 
             // delay or event control

@@ -54,6 +54,13 @@ namespace pluginVerilog.Verilog.Statements
         List<string>? clockDomains = null
         )
         {
+            // EOF at LHS position (e.g. "x|"): suggest DataObject / function candidates
+            if (word.CompletionContext != null && word.Eof)
+            {
+                word.CompletionContext.AppendExpression();
+                return null;
+            }
+
             IndexReference expressionIref = word.CreateIndexReference();
             Expressions.Expression? expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace, false);
             if (word.Text != "<=") return null;
@@ -82,6 +89,13 @@ namespace pluginVerilog.Verilog.Statements
             else if (word.GetCharAt(0) == '@')
             {
                 EventControl? eventControl = EventControl.ParseCreate(word, nameSpace);
+            }
+
+            // EOF just after "<=" (e.g. "x <= |"): suggest expression candidates for RHS
+            if (word.CompletionContext != null && word.Eof)
+            {
+                word.CompletionContext.AppendExpression();
+                return null;
             }
 
             Expressions.Expression? expression;
