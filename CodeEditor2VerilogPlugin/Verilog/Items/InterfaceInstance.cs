@@ -363,11 +363,36 @@ namespace pluginVerilog.Verilog.Items
                 }
                 word.MoveNext();
 
+                // (EOF just after instance "("): hint for the first port
+                if (word.CompletionContext != null && word.Eof)
+                {
+                    if (instancedInterface != null && instancedInterface.PortsList.Count != 0)
+                    {
+                        Port port = instancedInterface.PortsList[0];
+                        word.CompletionContext.CarletPopupItems.Add(
+                            new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                    }
+                    return true;
+                }
+
                 if (word.GetCharAt(0) == '.')
                 { // named parameter assignment
                     while (!word.Eof && word.Text == ".")
                     {
                         word.MoveNext();
+
+                        // (EOF just after "."): hint for this port
+                        if (word.CompletionContext != null && word.Eof)
+                        {
+                            if (instancedInterface != null && instancedInterface.PortsList.Count != 0)
+                            {
+                                Port port = instancedInterface.PortsList[0];
+                                word.CompletionContext.CarletPopupItems.Add(
+                                    new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                            }
+                            return true;
+                        }
+
                         string pinName = word.Text;
                         bool outPort = false;
                         word.Color(CodeDrawStyle.ColorType.Identifier);
@@ -399,6 +424,19 @@ namespace pluginVerilog.Verilog.Items
                         {
                             word.MoveNext();
                         }
+
+                        // (EOF just after ".pin("): hint for this port
+                        if (word.CompletionContext != null && word.Eof)
+                        {
+                            if (instancedInterface != null && instancedInterface.Ports.ContainsKey(pinName))
+                            {
+                                Port port = instancedInterface.Ports[pinName];
+                                word.CompletionContext.CarletPopupItems.Add(
+                                    new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                            }
+                            return true;
+                        }
+
                         if (outPort)
                         {
                             Expressions.Expression? expression = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace, false);
@@ -426,6 +464,19 @@ namespace pluginVerilog.Verilog.Items
                         else
                         {
                             Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
+
+                            // EOF just after the connection expression (e.g. "inst0(.pin(sig"): hint for this port
+                            if (word.CompletionContext != null && word.Eof)
+                            {
+                                if (instancedInterface != null && instancedInterface.Ports.ContainsKey(pinName))
+                                {
+                                    Port port = instancedInterface.Ports[pinName];
+                                    word.CompletionContext.CarletPopupItems.Add(
+                                        new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                                }
+                                return true;
+                            }
+
                             if (word.Prototype && expression != null && !interfaceInstance.PortConnection.ContainsKey(pinName)) interfaceInstance.PortConnection.Add(pinName, expression);
 
                             if (!word.Prototype)
@@ -447,6 +498,19 @@ namespace pluginVerilog.Verilog.Items
                                 }
                             }
                         }
+
+                        // EOF just after the out-port connection expression: hint for this port
+                        if (word.CompletionContext != null && word.Eof)
+                        {
+                            if (instancedInterface != null && instancedInterface.Ports.ContainsKey(pinName))
+                            {
+                                Port port = instancedInterface.Ports[pinName];
+                                word.CompletionContext.CarletPopupItems.Add(
+                                    new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                            }
+                            return true;
+                        }
+
                         if (word.Text != ")")
                         {
                             word.AddError(") expected");
@@ -470,6 +534,18 @@ namespace pluginVerilog.Verilog.Items
                     int i = 0;
                     while (!word.Eof && word.Text != ")")
                     {
+                        // (EOF just after "(" or ","): hint for the next ordered port
+                        if (word.CompletionContext != null && word.Eof)
+                        {
+                            if (instancedInterface != null && i < instancedInterface.PortsList.Count)
+                            {
+                                Port port = instancedInterface.PortsList[i];
+                                word.CompletionContext.CarletPopupItems.Add(
+                                    new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                            }
+                            return true;
+                        }
+
                         string pinName = "";
                         if (instancedInterface != null && i < instancedInterface.PortsList.Count)
                         {
@@ -482,6 +558,19 @@ namespace pluginVerilog.Verilog.Items
                             word.AddError("illegal port connection");
                             Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
                         }
+
+                        // EOF just after an expression (e.g. "inst0(clk"): hint for the current port
+                        if (word.CompletionContext != null && word.Eof)
+                        {
+                            if (instancedInterface != null && i < instancedInterface.PortsList.Count)
+                            {
+                                Port port = instancedInterface.PortsList[i];
+                                word.CompletionContext.CarletPopupItems.Add(
+                                    new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                            }
+                            return true;
+                        }
+
                         if (word.Text != ",")
                         {
                             break;

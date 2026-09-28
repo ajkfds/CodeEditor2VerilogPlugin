@@ -135,6 +135,11 @@ namespace pluginVerilog.Verilog.Items
 
         public static async Task<bool> ParseAsync(WordScanner word, NameSpace nameSpace)
         {
+            if (word.CompletionContext != null)
+            {
+                word.CompletionContext.AppendExpression();
+            }
+
             // program instantiation can be placed only in module, interface, or program
             BuildingBlock buildingBlock = nameSpace.BuildingBlock as BuildingBlock;
             if (buildingBlock == null) return false;
@@ -334,6 +339,18 @@ namespace pluginVerilog.Verilog.Items
             int i = 0;
             while (!word.Eof && word.Text != ")")
             {
+                // (EOF just after "(" or ","): hint for the next ordered port
+                if (word.CompletionContext != null && word.Eof)
+                {
+                    if (instancedProgram != null && i < instancedProgram.PortsList.Count)
+                    {
+                        Port port = instancedProgram.PortsList[i];
+                        word.CompletionContext.CarletPopupItems.Add(
+                            new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                    }
+                    return;
+                }
+
                 string portName = "";
                 if (instancedProgram != null && i < instancedProgram.PortsList.Count)
                 {
@@ -346,6 +363,19 @@ namespace pluginVerilog.Verilog.Items
                     if (instancedProgram != null) word.AddError("illegal port connection");
                     Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
                 }
+
+                // EOF just after an expression (e.g. "prog0(clk"): hint for the current port
+                if (word.CompletionContext != null && word.Eof)
+                {
+                    if (instancedProgram != null && i < instancedProgram.PortsList.Count)
+                    {
+                        Port port = instancedProgram.PortsList[i];
+                        word.CompletionContext.CarletPopupItems.Add(
+                            new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                    }
+                    return;
+                }
+
                 if (word.Text != ",")
                 {
                     break;
@@ -518,6 +548,15 @@ namespace pluginVerilog.Verilog.Items
             var startRef = word.GetReference();
             word.MoveNext();
 
+            // (EOF just after ".name("): hint for this port
+            if (word.CompletionContext != null && word.Eof)
+            {
+                Port? port = instancedProgram != null && instancedProgram.Ports.ContainsKey(portName) ? instancedProgram.Ports[portName] : null;
+                if (port != null) word.CompletionContext.CarletPopupItems.Add(
+                    new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                return;
+            }
+
             bool outPort = false;
             if (instancedProgram != null && instancedProgram.Ports.ContainsKey(portName))
             {
@@ -546,6 +585,15 @@ namespace pluginVerilog.Verilog.Items
             else
             {
                 expression = Expressions.Expression.ParseCreateAcceptImplicitNet(word, nameSpace, false);
+            }
+
+            // EOF just after the connection expression (e.g. ".clk(clk_in"): hint for this port
+            if (word.CompletionContext != null && word.Eof)
+            {
+                Port? port = instancedProgram != null && instancedProgram.Ports.ContainsKey(portName) ? instancedProgram.Ports[portName] : null;
+                if (port != null) word.CompletionContext.CarletPopupItems.Add(
+                    new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                return;
             }
 
             if (expression != null)
