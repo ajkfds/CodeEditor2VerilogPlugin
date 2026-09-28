@@ -339,6 +339,19 @@ namespace pluginVerilog.Verilog.Items
             output_terminal, input_terminal, input_terminal, ...
             */
 
+            // (EOF just after "(" ): hint for the output terminal (PortsList[0])
+            if (word.CompletionContext != null && word.Eof)
+            {
+                Port? port = null;
+                if (instancedUdp != null && instancedUdp.PortsList.Count > 0)
+                {
+                    port = instancedUdp.PortsList[0];
+                }
+                if (port != null) word.CompletionContext.CarletPopupItems.Add(
+                    new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                return;
+            }
+
             // First: output_terminal (net_lvalue). Use ParseCreateVariableLValue for assignment semantics.
             Expressions.Expression? output = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace, true);
             if (output == null)
@@ -355,6 +368,20 @@ namespace pluginVerilog.Verilog.Items
             while (!word.Eof && word.Text == ",")
             {
                 word.MoveNext();
+
+                // (EOF just after "," e.g. "udp0(out, "): hint for the next input terminal (PortsList[1 + inputIndex])
+                if (word.CompletionContext != null && word.Eof)
+                {
+                    Port? port = null;
+                    if (instancedUdp != null && instancedUdp.PortsList.Count > 1 + inputIndex)
+                    {
+                        port = instancedUdp.PortsList[1 + inputIndex];
+                    }
+                    if (port != null) word.CompletionContext.CarletPopupItems.Add(
+                        new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                    return;
+                }
+
                 Expressions.Expression? input = Expressions.Expression.ParseCreateAcceptImplicitNet(word, nameSpace, false);
                 if (input == null)
                 {
@@ -366,6 +393,19 @@ namespace pluginVerilog.Verilog.Items
                 }
 
                 inputIndex++;
+
+                // (EOF just after an expression, e.g. "udp0(out, in1"): hint for the current input terminal
+                if (word.CompletionContext != null && word.Eof)
+                {
+                    Port? port = null;
+                    if (instancedUdp != null && instancedUdp.PortsList.Count > 1 + inputIndex)
+                    {
+                        port = instancedUdp.PortsList[1 + inputIndex];
+                    }
+                    if (port != null) word.CompletionContext.CarletPopupItems.Add(
+                        new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                    return;
+                }
             }
 
             udpInstantiation.LastIndexReference = word.CreateIndexReference();

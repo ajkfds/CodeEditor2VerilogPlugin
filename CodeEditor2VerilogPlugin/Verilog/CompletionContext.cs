@@ -106,6 +106,12 @@ namespace pluginVerilog.Verilog
             {
                 CodeEditor2.Controller.AppendLog("SequentialBlock.ParseCreate");
                 Verilog.Statements.SequentialBlock.ParseCreate(word, NameSpace, null);
+            }else if(documentRegion is Verilog.Items.Generate.GenerateBlock)
+            {
+                // partial parse of generate block items: propagate completionContext
+                // (via WordScanner) to udp / module instantiation parse inside the block
+                CodeEditor2.Controller.AppendLog("GenerateBlock.ParseAsync");
+                Verilog.Items.Generate.GenerateBlock.ParseAsync(word, NameSpace).GetAwaiter().GetResult();
             }
 
             appendMacro((acItem) => true);
