@@ -156,19 +156,26 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
 
             // register with the parent module
-            bool added = parent.AddOrUpdateBuildingBlock(package.Name, package);
-            if (!added)
+            if (word.CompletionContext != null)
             {
-                package.NameReference.AddError("duplicated package name");
+                // do not update building block tree @ code completion partial parse
             }
-
-            // Also register in parent name space's NamedElements so that the
-            // package is reachable from expression parse and autocomplete as a
-            // sub-namespace entry. NamedElements.Add is a no-op if the same key
-            // already exists, so duplicate registration is safe.
-            if (parent != null && !string.IsNullOrEmpty(package.Name))
+            else
             {
-                parent.NamedElements.Add(package.Name, package);
+                bool added = parent.AddOrUpdateBuildingBlock(package.Name, package);
+                if (!added)
+                {
+                    package.NameReference.AddError("duplicated package name");
+                }
+
+                // Also register in parent name space's NamedElements so that the
+                // package is reachable from expression parse and autocomplete as a
+                // sub-namespace entry. NamedElements.Add is a no-op if the same key
+                // already exists, so duplicate registration is safe.
+                if (parent != null && !string.IsNullOrEmpty(package.Name))
+                {
+                    parent.NamedElements.Add(package.Name, package);
+                }
             }
 
             return package;

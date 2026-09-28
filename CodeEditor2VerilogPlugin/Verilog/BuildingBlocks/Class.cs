@@ -151,7 +151,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
             if (word.Prototype)
             {
-                if (!nameSpace.NamedElements.ContainsKey(class_.Name))
+                if (word.CompletionContext != null)
+                {
+                    // do not update building block tree @ code completion partial parse
+                }
+                else if (!nameSpace.NamedElements.ContainsKey(class_.Name))
                 {
                     nameSpace.NamedElements.Add(class_.Name, class_);
                 }
@@ -159,6 +163,10 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 {
                     word.AddError("duplicate");
                 }
+            }
+            else if (word.CompletionContext != null)
+            {
+                // do not update building block tree @ code completion partial parse
             }
             else
             {
