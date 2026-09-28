@@ -423,9 +423,13 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                 {
                     // skip
                 }
-                else if (word.Prototype)
+               else if (word.Prototype)
                 {
-                    if (nameSpace.NamedElements.ContainsKey(identifier))
+                    if (word.CompletionContext != null)
+                    {
+                        // do not update building block tree @ code completion partial parse
+                    }
+                    else if (nameSpace.NamedElements.ContainsKey(identifier))
                     {
                         word.AddError("name duplicated");
                     }
@@ -433,6 +437,10 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                     {
                         nameSpace.NamedElements.Add(constants.Name, constants);
                     }
+                }
+                else if (word.CompletionContext != null)
+                {
+                    // do not update building block tree @ code completion partial parse
                 }
                 else
                 {

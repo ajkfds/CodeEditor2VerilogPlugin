@@ -489,7 +489,11 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                 {
                     if (word.Prototype)
                     {
-                        if (nameSpace.NamedElements.ContainsKey(net.Name))
+                        if (word.CompletionContext != null)
+                        {
+                            // do not update building block tree @ code completion partial parse
+                        }
+                        else if (nameSpace.NamedElements.ContainsKey(net.Name))
                         {
                             BuildingBlocks.IModuleOrInterfaceOrProgram? portBlock = nameSpace.BuildingBlock as BuildingBlocks.IModuleOrInterfaceOrProgram;
                             if (portBlock != null && portBlock.Ports.ContainsKey(net.Name))
@@ -735,7 +739,11 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             // Add all interconnects to namespace
             foreach (var ic in interconnects)
             {
-                if (!nameSpace.NamedElements.ContainsKey(ic.Name))
+                if (word.CompletionContext != null)
+                {
+                    // do not update building block tree @ code completion partial parse
+                }
+                else if (!nameSpace.NamedElements.ContainsKey(ic.Name))
                 {
                     nameSpace.NamedElements.Add(ic.Name, ic);
                 }

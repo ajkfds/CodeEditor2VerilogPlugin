@@ -71,9 +71,13 @@ namespace pluginVerilog.Verilog.DataObjects
 
             if (word.Active)
             {
-                if (word.Prototype)
+               if (word.Prototype)
                 {
-                    if (nameSpace.NamedElements.ContainsKey(typeDef.Name))
+                    if (word.CompletionContext != null)
+                    {
+                        // do not update building block tree @ code completion partial parse
+                    }
+                    else if (nameSpace.NamedElements.ContainsKey(typeDef.Name))
                     {
                         //                            nameRef.AddError("duplicated name");
                     }
@@ -81,6 +85,10 @@ namespace pluginVerilog.Verilog.DataObjects
                     {
                         nameSpace.NamedElements.Add(typeDef.Name, typeDef);
                     }
+                }
+                else if (word.CompletionContext != null)
+                {
+                    // do not update building block tree @ code completion partial parse
                 }
                 else
                 {

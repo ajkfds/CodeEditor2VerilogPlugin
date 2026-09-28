@@ -434,7 +434,11 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
                 if (word.Prototype)
                 {
-                    if (!nameSpace.NamedElements.ContainsKey(variable.Name))
+                    if (word.CompletionContext != null)
+                    {
+                        // do not update building block tree @ code completion partial parse
+                    }
+                    else if (!nameSpace.NamedElements.ContainsKey(variable.Name))
                     {   // new variable
                         nameSpace.NamedElements.Add(variable.Name, variable);
                     }
@@ -475,9 +479,13 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                         //                        word.AddError("duplicate");
                     }
                 }
-                else
+               else
                 {
-                    if (!nameSpace.NamedElements.ContainsKey(variable.Name))
+                    if (word.CompletionContext != null)
+                    {
+                        // do not update building block tree @ code completion partial parse
+                    }
+                    else if (!nameSpace.NamedElements.ContainsKey(variable.Name))
                     {
                         nameSpace.NamedElements.Add(variable.Name, variable);
                         variable.Defined = true;
