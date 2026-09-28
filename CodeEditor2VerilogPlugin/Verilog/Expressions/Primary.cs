@@ -322,7 +322,11 @@ number
 
                     // function call on a class object : e.g. obj.myFunc(...)
                     // (Variables.Object is not a NameSpace, so the branch above cannot handle it)
-                    if (!lValue && element is Function && targetElement is DataObjects.Variables.Object objectVariable)
+                    // Note: statement-level calls (e.g. obj.myTask(); obj.myFunc(); ) reach here with
+                    // lValue == true via ParseCreateVariableLValue, so the lValue restriction must not
+                    // apply to class-object function calls. A function call can never be an lValue,
+                    // so accepting it here is safe.
+                    if (element is Function && targetElement is DataObjects.Variables.Object objectVariable)
                     {
                         BuildingBlocks.Class? sourceClass = objectVariable.GetSourceClass();
                         if (sourceClass != null)
