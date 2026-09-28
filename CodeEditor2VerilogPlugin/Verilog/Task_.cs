@@ -123,6 +123,15 @@ namespace pluginVerilog.Verilog
                     break;
             }
 
+            // A11: "task |" EOF -> lifetime keyword hint
+            if (word.Eof && word.CompletionContext != null)
+            {
+                word.CompletionContext.AppendKeywords(new List<string> {
+                    "automatic", "static"
+                });
+                return;
+            }
+
             if (!General.IsIdentifier(word.Text))
             {
                 word.AddError("illegal identifier name");

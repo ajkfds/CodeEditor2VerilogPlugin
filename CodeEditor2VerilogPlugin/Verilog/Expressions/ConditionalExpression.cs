@@ -28,6 +28,13 @@ namespace pluginVerilog.Verilog.Expressions
             if (word.GetCharAt(0) != '?') return null;
             word.MoveNext();
 
+            // A14: "cond ? |" EOF -> expression candidates
+            if (word.Eof && word.CompletionContext != null)
+            {
+                word.CompletionContext.AppendExpression();
+                return null;
+            }
+
             ConditionalExpression conditionalExpression = new ConditionalExpression();
             conditionalExpression.TrueExpression = Expression.ParseCreate(word, nameSpace);
             if (conditionalExpression.TrueExpression == null)
@@ -43,6 +50,13 @@ namespace pluginVerilog.Verilog.Expressions
             else
             {
                 word.MoveNext();
+            }
+
+            // A14: "cond ? a : |" EOF -> expression candidates
+            if (word.Eof && word.CompletionContext != null)
+            {
+                word.CompletionContext.AppendExpression();
+                return null;
             }
 
             conditionalExpression.FalseExpression = Expression.ParseCreate(word, nameSpace);

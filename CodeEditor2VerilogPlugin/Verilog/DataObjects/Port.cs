@@ -917,6 +917,15 @@ namespace pluginVerilog.Verilog.DataObjects
             portNameSpace.Ports.Clear();
             portNameSpace.PortsList.Clear();
 
+            // A11: "function f(|" / "task t(|" EOF -> tf port declaration keyword hint
+            if (word.Eof && word.CompletionContext != null)
+            {
+                word.CompletionContext.AppendKeywords(new List<string> {
+                    "input", "output", "inout", "ref",
+                    "wire", "reg", "logic", "bit", "signed", "var"
+                });
+                return;
+            }
 
             while (!word.Eof && word.Text != ")" && word.Text != "end")
             {
@@ -978,6 +987,15 @@ namespace pluginVerilog.Verilog.DataObjects
                     break;
                 default:
                     break;
+            }
+
+            // A11: "input |" EOF inside tf port list -> data type keyword hint
+            if (word.Eof && word.CompletionContext != null)
+            {
+                word.CompletionContext.AppendKeywords(new List<string> {
+                    "wire", "reg", "logic", "bit", "signed", "var"
+                });
+                return false;
             }
 
             // [ var ]
@@ -1173,6 +1191,15 @@ namespace pluginVerilog.Verilog.DataObjects
                     break;
                 default:
                     return false;
+            }
+
+            // A11: "input |" EOF inside tf port declaration -> data type keyword hint
+            if (word.Eof && word.CompletionContext != null)
+            {
+                word.CompletionContext.AppendKeywords(new List<string> {
+                    "wire", "reg", "logic", "bit", "signed", "var"
+                });
+                return true;
             }
 
             // ["var"]

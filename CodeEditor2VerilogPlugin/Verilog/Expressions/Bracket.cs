@@ -26,8 +26,15 @@ namespace pluginVerilog.Verilog.Expressions
             Bracket bracket = new Bracket();
             bracket.Reference = word.GetReference();
             word.MoveNext();
+
+            // A14: "(|" EOF -> expression candidates
             if (word.Eof)
             {
+                if (word.CompletionContext != null)
+                {
+                    word.CompletionContext.AppendExpression();
+                    return null;
+                }
                 word.AddError("illegal bracket");
                 return null;
             }

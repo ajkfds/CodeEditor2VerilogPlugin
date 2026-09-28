@@ -127,6 +127,16 @@ namespace pluginVerilog.Verilog
                     break;
             }
 
+           // A11: "function |" EOF -> lifetime / return type keyword hint
+            if (word.Eof && word.CompletionContext != null)
+            {
+                word.CompletionContext.AppendKeywords(new List<string> {
+                    "automatic", "static", "signed", "unsigned",
+                    "integer", "real", "realtime", "time", "void"
+                });
+                return;
+            }
+
 
             // function_data_type_or_implicit   ::= data_type_or_void | implicit_data_type;
             DataObject? retVal = null;

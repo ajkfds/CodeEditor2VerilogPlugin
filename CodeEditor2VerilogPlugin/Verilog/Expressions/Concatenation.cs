@@ -28,6 +28,13 @@ namespace pluginVerilog.Verilog.Expressions
             WordReference reference = word.GetReference();
             word.MoveNext(); // {
 
+            // A14: "{|" EOF -> expression candidates
+            if (word.Eof && word.CompletionContext != null)
+            {
+                word.CompletionContext.AppendExpression();
+                return null;
+            }
+
             // Check for empty unpacked array concatenation: { }
             if (word.GetCharAt(0) == '}')
             {
@@ -99,8 +106,14 @@ namespace pluginVerilog.Verilog.Expressions
                 }
                 word.MoveNext();
 
+                // A14: "{a, |" EOF -> expression candidates
                 if (word.Eof)
                 {
+                    if (word.CompletionContext != null)
+                    {
+                        word.CompletionContext.AppendExpression();
+                        return null;
+                    }
                     word.AddError("illegal concatenation");
                     return null;
                 }

@@ -142,6 +142,14 @@ namespace pluginVerilog.Verilog.Statements
             System.Diagnostics.Debug.Assert(word.Text == "@");
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
+
+            // A12: "always @|" EOF -> sensitivity list signal candidates
+            if (word.Eof && word.CompletionContext != null)
+            {
+                word.CompletionContext.AppendExpression();
+                return null;
+            }
+
             List<EventExpression> eventExpressions = new List<EventExpression>();
 
             if (word.GetCharAt(0) == '(')
@@ -250,6 +258,13 @@ namespace pluginVerilog.Verilog.Statements
 
         public static EventExpression? ParseCreateSingle(WordScanner word, NameSpace nameSpace, List<string>? clockDomains = null)
         {
+            // A12: "always @(clk or |" EOF -> sensitivity list signal candidates
+            if (word.Eof && word.CompletionContext != null)
+            {
+                word.CompletionContext.AppendExpression();
+                return null;
+            }
+
             EventExpression? eventExpression = new EventExpression();
             switch (word.Text)
             {

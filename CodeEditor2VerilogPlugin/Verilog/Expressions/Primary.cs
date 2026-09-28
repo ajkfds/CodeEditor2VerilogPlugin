@@ -152,6 +152,13 @@ number
             //if (word.Text == "srif") System.Diagnostics.Debugger.Break();
             // acceptRange = false is used for foreach(data[i])
 
+            // A13: EOF while parsing expression primary -> expression candidates
+            if (word.Eof && word.CompletionContext != null)
+            {
+                word.CompletionContext.AppendExpression();
+                return null;
+            }
+
             switch (word.WordType)
             {
                 case WordPointer.WordTypeEnum.Number:
