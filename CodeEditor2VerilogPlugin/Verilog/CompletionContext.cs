@@ -100,12 +100,30 @@ namespace pluginVerilog.Verilog
                 // to case expression / case item parse
                 CodeEditor2.Controller.AppendLog("CaseStatement.ParseCreate");
                 Verilog.Statements.CaseStatement.ParseCreate(word, NameSpace, null);
+            }else if(documentRegion is Verilog.Statements.WhileStatememt)
+            {
+                // partial parse of while statement: propagate completionContext (via WordScanner)
+                // to condition expression / statement parse
+                CodeEditor2.Controller.AppendLog("WhileStatememt.ParseCreate");
+                Verilog.Statements.WhileStatememt.ParseCreate(word, NameSpace, null);
+            }else if(documentRegion is Verilog.Statements.RepeatStatement)
+            {
+                // partial parse of repeat statement: propagate completionContext (via WordScanner)
+                // to condition expression / statement parse
+                CodeEditor2.Controller.AppendLog("RepeatStatement.ParseCreate");
+                Verilog.Statements.RepeatStatement.ParseCreate(word, NameSpace, null);
             }else if(documentRegion is Verilog.Statements.ConditionalStatement)
             {
                 // partial parse of if statement: propagate completionContext (via WordScanner)
                 // to condition expression / statement parse
                 CodeEditor2.Controller.AppendLog("ConditionalStatement.ParseCreate");
                 Verilog.Statements.ConditionalStatement.ParseCreate(word, NameSpace, null);
+            }else if(documentRegion is Verilog.Statements.ForStatememt)
+            {
+                // partial parse of for statement: propagate completionContext (via WordScanner)
+                // to for_initialization / expression parse
+                CodeEditor2.Controller.AppendLog("ForStatememt.ParseCreate");
+                Verilog.Statements.ForStatememt.ParseCreate(word, NameSpace, null);
             }else if(documentRegion is NonBlockingAssignment)
             {
                 CodeEditor2.Controller.AppendLog("NonBlockingAssignment.ParseCreate");

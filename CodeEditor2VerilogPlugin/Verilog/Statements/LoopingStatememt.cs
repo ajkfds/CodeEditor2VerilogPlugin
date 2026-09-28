@@ -183,6 +183,13 @@ namespace pluginVerilog.Verilog.Statements
             }
             word.MoveNext();
 
+            // EOF just after "repeat(": suggest expression candidates
+            if (word.CompletionContext != null && word.Eof)
+            {
+                word.CompletionContext.AppendExpression();
+                return null;
+            }
+
             repeatStatement.Expression = Expressions.Expression.ParseCreate(word, nameSpace);
 
             if (word.GetCharAt(0) != ')')
@@ -243,6 +250,13 @@ namespace pluginVerilog.Verilog.Statements
                 return null;
             }
             word.MoveNext();
+
+            // EOF just after "while(": suggest expression candidates
+            if (word.CompletionContext != null && word.Eof)
+            {
+                word.CompletionContext.AppendExpression();
+                return null;
+            }
 
             whileStatement.Expression = Expressions.Expression.ParseCreate(word, nameSpace);
 
@@ -345,6 +359,13 @@ namespace pluginVerilog.Verilog.Statements
                 return null;
             }
 
+            // EOF just after "for(": suggest variable declaration / expression candidates
+            if (word.CompletionContext != null && word.Eof)
+            {
+                word.CompletionContext.AppendExpression();
+                return null;
+            }
+
             // for_initialization
             if (!Verilog.DataObjects.Variables.Variable.ParseDeclaration(word, forStatement)) // define index parameter
             {
@@ -379,6 +400,13 @@ namespace pluginVerilog.Verilog.Statements
                 }
             }
 
+            // EOF just after for_initialization ";": suggest expression candidates
+            if (word.CompletionContext != null && word.Eof)
+            {
+                word.CompletionContext.AppendExpression();
+                return null;
+            }
+
             // expression
             forStatement.Expression = Expressions.Expression.ParseCreate(word, forStatement);
 
@@ -389,6 +417,13 @@ namespace pluginVerilog.Verilog.Statements
             else
             {
                 word.AddError("; expected");
+                return null;
+            }
+
+            // EOF just after for expression ";": suggest for_step candidates (expression)
+            if (word.CompletionContext != null && word.Eof)
+            {
+                word.CompletionContext.AppendExpression();
                 return null;
             }
 
