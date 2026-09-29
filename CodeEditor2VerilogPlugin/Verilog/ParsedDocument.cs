@@ -621,6 +621,13 @@ namespace pluginVerilog.Verilog
             {
                 NameSpace? subNameSpace = element as NameSpace;
                 if (subNameSpace == null) continue;
+                if (subNameSpace.BeginIndexReference == null) continue;
+                if (subNameSpace.LastIndexReference == null) continue;
+                // skip elements whose index hierarchy depth differs from the target:
+                // IndexReference comparison only inspects up to the shorter index list,
+                // so a nested (deeper) region falsely "contains" any later root-level position
+                if (subNameSpace.BeginIndexReference.Indexes.Count != targetIndexRef.Indexes.Count) continue;
+                if (subNameSpace.LastIndexReference.Indexes.Count != targetIndexRef.Indexes.Count) continue;
 
                 if (targetIndexRef.IsSmallerThan(subNameSpace.BeginIndexReference)) continue;
                 if (subNameSpace.LastIndexReference == null) continue;
@@ -639,8 +646,15 @@ namespace pluginVerilog.Verilog
             foreach (Items.IDocumentRegeion documentRegion in nameSpace.DocumentRegions)
             {
                 if (documentRegion.BeginIndexReference == null) continue;
-                if (targetIndexRef.IsSmallerThan(documentRegion.BeginIndexReference)) continue;
                 if (documentRegion.LastIndexReference == null) continue;
+                // skip regions whose index hierarchy depth differs from the target:
+                // IndexReference comparison only inspects up to the shorter index list,
+                // so a nested (deeper) region (e.g. always inside generate block) falsely
+                // "contains" any later root-level position and wins over the correct region
+                if (documentRegion.BeginIndexReference.Indexes.Count != targetIndexRef.Indexes.Count) continue;
+                if (documentRegion.LastIndexReference.Indexes.Count != targetIndexRef.Indexes.Count) continue;
+
+                if (targetIndexRef.IsSmallerThan(documentRegion.BeginIndexReference)) continue;
                 if (targetIndexRef.IsGreaterThan(documentRegion.LastIndexReference)) continue;
 
                 if(foundBegin != null && foundLast != null)
