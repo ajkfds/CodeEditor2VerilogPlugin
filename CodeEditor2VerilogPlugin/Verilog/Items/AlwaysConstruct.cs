@@ -49,6 +49,14 @@ namespace pluginVerilog.Verilog.Items
                 return null;
             }
             always.LastIndexReference = word.CreateIndexReferenceBefore();
+            // if the statement has its own region end (e.g. "end" of begin..end block),
+            // use it: word has already moved to the next token (e.g. "endmodule"),
+            // so CreateIndexReferenceBefore() would extend the always region over
+            // blank lines between "end" and the next item
+            if (always.Statement is Items.IDocumentRegeion statementRegion && statementRegion.LastIndexReference != null)
+            {
+                always.LastIndexReference = statementRegion.LastIndexReference;
+            }
             if (!word.Prototype && word.CompletionContext == null) nameSpace.DocumentRegions.Add(always);
             return always;
         }
