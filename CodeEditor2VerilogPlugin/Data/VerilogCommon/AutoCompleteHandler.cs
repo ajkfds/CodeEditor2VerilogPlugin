@@ -106,12 +106,13 @@ namespace pluginVerilog.Data.VerilogCommon
             string lineText = item.CodeDocument.CreateLineString(line).Substring(0, index - lineStartIndex);
             candidateStartIndex = lineStartIndex;
 
+            bool ret = true;
             { // pre carlet char check
                 if (index != 0)
                 {
                     char preChar = item.CodeDocument.GetCharAt(index - 1);
-                    if (preChar == ' ') return false;
-                    if (preChar == '\t') return false;
+                    if (preChar == ' ') ret = false;
+                    if (preChar == '\t') ret = false;
                 }
             }
 
@@ -247,7 +248,7 @@ namespace pluginVerilog.Data.VerilogCommon
                     if (preChar == '\t') break;
                     wordIndex--;
                 }
-                if (item.CodeDocument.GetCharAt(wordIndex) != '`') return true;
+                if (item.CodeDocument.GetCharAt(wordIndex) != '`') return ret;
 
                 int lastIndex = wordIndex;
                 while (lastIndex+1 < item.CodeDocument.Length)
@@ -263,7 +264,7 @@ namespace pluginVerilog.Data.VerilogCommon
                 candidateStartIndex = wordIndex;
             }
 
-            return true;
+            return ret;
         }
 
         private static void applyAutoInput(IVerilogRelatedFile item)
