@@ -134,15 +134,23 @@ namespace pluginVerilog.Verilog
                 Verilog.Statements.BlockingAssignment.ParseCreate(word, NameSpace);
             }else if(documentRegion is SequentialBlock)
             {
-                CodeEditor2.Controller.AppendLog("SequentialBlock.ParseCreate");
-                Verilog.Statements.SequentialBlock.ParseCreate(word, NameSpace, null);
-            }else if(documentRegion is Verilog.Items.Generate.GenerateBlock)
+                if(word.Text == "begin")
+                {
+                    CodeEditor2.Controller.AppendLog("SequentialBlock.ParseCreate");
+                    Verilog.Statements.SequentialBlock.ParseCreate(word, NameSpace, null);
+                }
+            }
+            else if(documentRegion is Verilog.Items.Generate.GenerateBlock)
             {
-                // partial parse of generate block items: propagate completionContext
-                // (via WordScanner) to udp / module instantiation parse inside the block
-                CodeEditor2.Controller.AppendLog("GenerateBlock.ParseAsync");
-                Verilog.Items.Generate.GenerateBlock.ParseAsync(word, NameSpace).GetAwaiter().GetResult();
-            }else if(documentRegion is Verilog.Items.GateInstantiation)
+                if (word.Text == "begin")
+                {
+                    // partial parse of generate block items: propagate completionContext
+                    // (via WordScanner) to udp / module instantiation parse inside the block
+                    CodeEditor2.Controller.AppendLog("GenerateBlock.ParseAsync");
+                    Verilog.Items.Generate.GenerateBlock.ParseAsync(word, NameSpace).GetAwaiter().GetResult();
+                }
+            }
+            else if(documentRegion is Verilog.Items.GateInstantiation)
             {
                 // partial parse of gate instantiation: propagate completionContext (via WordScanner)
                 // to gate keyword / terminal parse
@@ -150,10 +158,13 @@ namespace pluginVerilog.Verilog
                 Verilog.Items.GateInstantiation.Parse(word, NameSpace);
             }else if(documentRegion is Verilog.Items.ContinuousAssign)
             {
-                // partial parse of continuous assign: propagate completionContext (via WordScanner)
-                // to LHS / RHS expression parse (A9)
-                CodeEditor2.Controller.AppendLog("ContinuousAssign.ParseCreate");
-                Verilog.Items.ContinuousAssign.ParseCreate(word, NameSpace, this);
+                if (word.Text == "assign")
+                {
+                    // partial parse of continuous assign: propagate completionContext (via WordScanner)
+                    // to LHS / RHS expression parse (A9)
+                    CodeEditor2.Controller.AppendLog("ContinuousAssign.ParseCreate");
+                    Verilog.Items.ContinuousAssign.ParseCreate(word, NameSpace, this);
+                }
             }
 
             appendMacro((acItem) => true);
