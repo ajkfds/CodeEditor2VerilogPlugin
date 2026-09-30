@@ -79,21 +79,17 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 SourceName = class_.Name
             };
 
-            defineElements(val);
-
+            // Keep only the reference to the source class (SourceName + lazy
+            // NamedElements getter via GetSourceClass). Do not traverse/copy
+            // class members here: circular class references (e.g.
+            // class A { B b; } + class B { A a; } or a self reference such as
+            // class Node { Node next; }) would infinite-loop the traversal.
+            // Member Variable.Defined is already set during the class's own
+            // (real) parse, so per-object marking is unnecessary. Autocomplete
+            // and member hierarchy checks resolve members lazily through the
+            // NamedElements getter, which follows the reference.
             val.DataType = dataType;
             return val;
-        }
-
-        private static void defineElements(INamedElement namedElement)
-        {
-            foreach (INamedElement subElement in namedElement.NamedElements)
-            {
-                Variable? variable = subElement as Variable;
-                if (variable != null) variable.Defined = true;
-
-                defineElements(subElement);
-            }
         }
 
 
