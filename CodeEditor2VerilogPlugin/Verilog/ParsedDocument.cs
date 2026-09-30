@@ -141,6 +141,13 @@ namespace pluginVerilog.Verilog
         public List<string> ReferencedDefinitionNameSpace = new List<string>();
         public List<string> ReferencedPackageNamemeSpace = new List<string>();
 
+        // hierarchical instance paths referenced by bind directives
+        // (bind_target_instance / bind_target_instance_list).
+        // full path strings ("a.b.c") are registered so that hierarchy
+        // analysis (SimulationSetup / ParseHierarchy) can track bind targets
+        // that live inside instance hierarchies of this file.
+        public List<string> BindTargetInstancePaths = new List<string>();
+
         public Dictionary<string, Verilog.Expressions.Expression> ParameterOverrides = new Dictionary<string, Expressions.Expression>();
         public string? TargetBuildingBlockName = null;
 

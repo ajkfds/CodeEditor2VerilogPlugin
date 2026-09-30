@@ -161,6 +161,17 @@ namespace pluginVerilog.Verilog.Items
                 bind.TargetInstances.Add(targetScopeOrInstance);
             }
 
+            // register hierarchical instance paths for hierarchy analysis
+            // (SimulationSetup / ParseHierarchy): full paths of all
+            // bind_target_instance entries
+            foreach (string targetInstance in bind.TargetInstances)
+            {
+                if (targetInstance.Contains(".") && !word.RootParsedDocument.BindTargetInstancePaths.Contains(targetInstance))
+                {
+                    word.RootParsedDocument.BindTargetInstancePaths.Add(targetInstance);
+                }
+            }
+
             // bind_instantiation ::= program_instantiation | module_instantiation | interface_instantiation | checker_instantiation
             if (!General.IsSimpleIdentifier(word.Text))
             {
