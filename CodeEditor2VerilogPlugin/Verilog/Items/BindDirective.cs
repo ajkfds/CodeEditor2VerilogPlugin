@@ -177,20 +177,39 @@ namespace pluginVerilog.Verilog.Items
             if (instancedBuildingBlock != null)
             {
                 if (!word.RootParsedDocument.ReferencedDefinitionNameSpace.Contains(instantiationName)) word.RootParsedDocument.ReferencedDefinitionNameSpace.Add(instantiationName);
+
+                // bind_instantiation ::= program | module | interface | checker instantiation
+                if (!(instancedBuildingBlock is BuildingBlocks.Module ||
+                      instancedBuildingBlock is BuildingBlocks.Interface ||
+                      instancedBuildingBlock is BuildingBlocks.Program ||
+                      instancedBuildingBlock is BuildingBlocks.Checker))
+                {
+                    word.AddError("bind instantiation requires module / interface / program / checker");
+                }
             }
             else
             {
                 word.AddError("unfound instanced building block");
             }
 
-            // optional parameter value assignment # ( ... ) : contents are consumed without analysis
+            // optional parameter value assignment # ( ... )
+            Dictionary<string, Expression> parameterOverrides = new Dictionary<string, Expression>();
             if (word.Text == "#")
             {
-                word.MoveNext();
-                if (word.Text == "(")
+                if (nameSpace != null)
                 {
+                    // full analysis via ParameterValueAssignment (same as ModuleInstantiation)
+                    ParameterValueAssignment.ParseCreate(word, nameSpace, parameterOverrides, instancedBuildingBlock);
+                }
+                else
+                {
+                    // root-level (nameSpace == null) : consume without analysis
                     word.MoveNext();
-                    consumeParenBlock(word);
+                    if (word.Text == "(")
+                    {
+                        word.MoveNext();
+                        consumeParenBlock(word);
+                    }
                 }
             }
 
@@ -201,16 +220,29 @@ namespace pluginVerilog.Verilog.Items
                 {
                     SourceName = instantiationName
                 };
+                foreach (var kvp in parameterOverrides) bindItem.ParameterOverrides.Add(kvp.Key, kvp.Value);
 
                 if (General.IsSimpleIdentifier(word.Text))
                 {
                     bindItem.InstanceName = word.Text;
                     word.Color(CodeDrawStyle.ColorType.Identifier);
                     word.MoveNext();
+                    // optional instance array range [ ... ]
+                    if (word.Text == "[")
+                    {
+                        int bracketDepth = 1;
+                        word.MoveNext();
+                        while (!word.Eof && bracketDepth > 0)
+                        {
+                            if (word.Text == "[") bracketDepth++;
+                            else if (word.Text == "]") bracketDepth--;
+                            word.MoveNext();
+                        }
+                    }
                     if (word.Text == "(")
                     {
                         word.MoveNext();
-                        consumeParenBlock(word);
+                        parsePortConnections(word, nameSpace, instancedBuildingBlock, bindItem.PortConnections);
                     }
                 }
                 bind.BindItems.Add(bindItem);
@@ -247,6 +279,99 @@ namespace pluginVerilog.Verilog.Items
                 if (word.Text == "(") parenDepth++;
                 else if (word.Text == ")") parenDepth--;
                 word.MoveNext();
+            }
+        }
+
+        /// <summary>
+        /// parse port connections "( ... )" and record expressions into portConnections.
+        /// supports named (.port(expression)) / ordered (expression { , expression }) forms.
+        /// </summary>
+        private static void parsePortConnections(
+            WordScanner word,
+            NameSpace? nameSpace,
+            BuildingBlocks.BuildingBlock? instancedBuildingBlock,
+            Dictionary<string, Expression> portConnections
+            )
+        {
+            // (EOF just after "("): nothing to analyze
+            if (word.Eof) return;
+
+            if (word.Text == ".")
+            { // named port connection
+                while (!word.Eof && word.Text == ".")
+                {
+                    word.MoveNext();    // .
+                    if (word.Text == "*")
+                    { // wildcard: no per-port expression
+                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.MoveNext();
+                        if (word.Text == ",") word.MoveNext();
+                        continue;
+                    }
+                    if (!General.IsSimpleIdentifier(word.Text))
+                    {
+                        word.AddError("illegal port name");
+                        break;
+                    }
+                    string pinName = word.Text;
+                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.MoveNext();
+                    if (word.Text == "(")
+                    {
+                        word.MoveNext();
+                        if (word.Text != ")")
+                        {
+                            if (nameSpace != null)
+                            {
+                                Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
+                                if (expression != null && !portConnections.ContainsKey(pinName)) portConnections.Add(pinName, expression);
+                            }
+                            else
+                            {
+                                consumeParenBlock(word);
+                            }
+                        }
+                    }
+                    if (word.Text == ",")
+                    {
+                        word.MoveNext();
+                        continue;
+                    }
+                    break;
+                }
+            }
+            else
+            { // ordered port connection: expression { , expression }
+                int i = 0;
+                while (!word.Eof && word.Text != ")")
+                {
+                    if (word.Text != ",")
+                    {
+                        string pinName = null;
+                        IPortNameSpace? portNameSpace = instancedBuildingBlock as IPortNameSpace;
+                        if (portNameSpace != null && portNameSpace.PortsList != null && i < portNameSpace.PortsList.Count)
+                        {
+                            pinName = portNameSpace.PortsList[i].Name;
+                        }
+                        if (nameSpace != null)
+                        {
+                            Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
+                            if (expression != null && pinName != null && !portConnections.ContainsKey(pinName)) portConnections.Add(pinName, expression);
+                        }
+                        else
+                        {
+                            // root-level: consume expression tokens without analysis (nested parens safe)
+                            consumeParenBlock(word);
+                        }
+                        i++;
+                    }
+                    if (word.Text == ",")
+                    {
+                        word.MoveNext();
+                        continue;
+                    }
+                    break;
+                }
             }
         }
 
