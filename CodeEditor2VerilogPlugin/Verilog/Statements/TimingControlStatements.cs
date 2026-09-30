@@ -207,6 +207,7 @@ namespace pluginVerilog.Verilog.Statements
 
         public EventTypeEnum EventType { get; protected set; }
         public Expressions.Expression? Expression { get; protected set; }
+        public Expressions.Expression? IffExpression { get; protected set; }
 
         public enum EventTypeEnum
         {
@@ -295,6 +296,20 @@ namespace pluginVerilog.Verilog.Statements
                     if (clockDomains != null && eventExpression.Expression != null) addClockDomain(eventExpression.Expression, clockDomains);
                     break;
             }
+
+            // event_expression ::= [ edge_identifier ] expression [ "iff" expression ]
+            if (!word.Eof && word.Text == "iff")
+            {
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext();
+                eventExpression.IffExpression = Expressions.Expression.ParseCreate(word, nameSpace);
+                if (eventExpression.IffExpression == null)
+                {
+                    word.AddError("illegal event expression");
+                    return null;
+                }
+            }
+
             if (eventExpression.Expression == null)
             {
                 return null;
