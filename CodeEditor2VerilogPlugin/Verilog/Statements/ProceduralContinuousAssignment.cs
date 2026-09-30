@@ -5,6 +5,8 @@ namespace pluginVerilog.Verilog.Statements
     public class ProceduralContinuousAssignment : IStatement
     {
         protected ProceduralContinuousAssignment() { }
+        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
@@ -40,6 +42,7 @@ namespace pluginVerilog.Verilog.Statements
         {
 
             if (word.Text != "assign") System.Diagnostics.Debugger.Break();
+            IndexReference beginIndexReference = word.CreateIndexReference();
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
@@ -61,8 +64,9 @@ namespace pluginVerilog.Verilog.Statements
             }
 
             if (lvalue == null || value == null) return null;
-            ProceduralContinuousAssignment ret = new ProceduralContinuousAssignment() { LValue = lvalue, Value = value };
+            ProceduralContinuousAssignment ret = new ProceduralContinuousAssignment() { LValue = lvalue, Value = value, BeginIndexReference = beginIndexReference };
 
+            ret.LastIndexReference = word.CreateIndexReferenceBefore();
             lvalue.SyncContext.PropageteClockDomainFrom(value.SyncContext, equalPointer,nameSpace.BuildingBlock.SameSync);
             return ret;
         }

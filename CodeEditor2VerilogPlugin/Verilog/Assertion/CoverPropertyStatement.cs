@@ -27,7 +27,7 @@ namespace pluginVerilog.Verilog.Assertion
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext(); // property
 
-            CoverPropertyStatement coverPropertyStatement = new CoverPropertyStatement();
+            CoverPropertyStatement coverPropertyStatement = new CoverPropertyStatement() { BeginIndexReference = word.CreateIndexReference() };
 
             if (word.Eof || word.Text != "(")
             {
@@ -46,6 +46,7 @@ namespace pluginVerilog.Verilog.Assertion
             // cover property statement does not have action_block, only statement_or_null
             coverPropertyStatement.CoverStatement = Statements.Statements.ParseCreateStatementOrNull(word, nameSpace);
 
+            Statements.StatementRegionUtility.SetLastIndexReference(coverPropertyStatement, coverPropertyStatement.CoverStatement, word);
             return coverPropertyStatement;
         }
 
@@ -56,6 +57,9 @@ namespace pluginVerilog.Verilog.Assertion
             if (word.Text == ";") word.MoveNext();
             return statement;
         }
+
+        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; } = null;
 
         public Statements.IStatement? CoverStatement { get; set; }
         public PropertySpec? PropertySpec { get; set; }

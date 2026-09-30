@@ -368,11 +368,25 @@ namespace pluginVerilog.Verilog.Statements
                     if (expression != null && expression is Expressions.TaskReference)// Expressions.TaskReference)
                     {
                         Expressions.TaskReference taskReference = (Expressions.TaskReference)expression;
-                        return TaskEnable.ParseCreate(taskReference, word, nameSpace);
+                        return TaskEnable.ParseCreate(taskReference, word, nameSpace, expressionIref);
                     }
                     if (expression != null && expression is Expressions.FunctionCall)
                     {
                         Expressions.FunctionCall functionCall = (Expressions.FunctionCall)expression;
+                        if (functionCall.Function?.ReturnVariable == null)
+                        {
+                            VoidFunctionCall voidFunctionCall = VoidFunctionCall.Create(functionCall, expressionIref);
+                            voidFunctionCall.LastIndexReference = word.CreateIndexReferenceBefore();
+                            if (word.Text == ";")
+                            {
+                                word.MoveNext();
+                            }
+                            else
+                            {
+                                word.AddError("; missing");
+                            }
+                            return voidFunctionCall;
+                        }
                         if (word.Text == ";")
                         {
                             word.MoveNext();
@@ -381,11 +395,24 @@ namespace pluginVerilog.Verilog.Statements
                         {
                             word.AddError("; missing");
                         }
-                        if (functionCall.Function?.ReturnVariable == null) return VoidFunctionCall.Create(functionCall);
                     }
                     if (expression != null && expression is BuiltinMethodCall)
                     {
                         Expressions.BuiltinMethodCall methodCall = (Expressions.BuiltinMethodCall)expression;
+                        if (methodCall.BuiltInMethod.ReturnVariable == null)
+                        {
+                            VoidBuiltInMethodCall voidMethodCall = VoidBuiltInMethodCall.Create(methodCall, expressionIref);
+                            voidMethodCall.LastIndexReference = word.CreateIndexReferenceBefore();
+                            if (word.Text == ";")
+                            {
+                                word.MoveNext();
+                            }
+                            else
+                            {
+                                word.AddError("; missing");
+                            }
+                            return voidMethodCall;
+                        }
                         if (word.Text == ";")
                         {
                             word.MoveNext();
@@ -394,7 +421,6 @@ namespace pluginVerilog.Verilog.Statements
                         {
                             word.AddError("; missing");
                         }
-                        if (methodCall.BuiltInMethod.ReturnVariable == null) return VoidBuiltInMethodCall.Create(methodCall);
                     }
 
                     if (expression == null)
@@ -514,6 +540,27 @@ namespace pluginVerilog.Verilog.Statements
         public static IStatement? ParseCreateFunctionStatement(WordScanner word, NameSpace nameSpace)
         {
             return ParseCreateStatement(word, nameSpace, null, null);
+        }
+    }
+
+    /// <summary>
+    /// helper to set IndexReference (region) of statements
+    /// </summary>
+    internal static class StatementRegionUtility
+    {
+        /// <summary>
+        /// set LastIndexReference of a statement that ends with a sub-statement.
+        /// adopt the sub-statement's own region end (e.g. "end" of begin..end block) when it has one,
+        /// so that the region does not extend over blank lines between the sub-statement end and the next item.
+        /// (same rule as AlwaysConstruct: LastIndexReference of statement-final constructs adopts Statement's LastIndexReference)
+        /// </summary>
+        public static void SetLastIndexReference(IStatement statement, IStatement? subStatement, WordScanner word)
+        {
+            statement.LastIndexReference = word.CreateIndexReferenceBefore();
+            if (subStatement is Items.IDocumentRegeion subRegion && subRegion.LastIndexReference != null)
+            {
+                statement.LastIndexReference = subRegion.LastIndexReference;
+            }
         }
     }
 

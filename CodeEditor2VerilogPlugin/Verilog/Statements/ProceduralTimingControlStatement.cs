@@ -16,6 +16,8 @@ namespace pluginVerilog.Verilog.Statements
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
 
+        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; } = null;
         public DelayControl? DelayControl { get; protected set; }
         public EventControl? EventControl { get; protected set; }
         public IStatement? Statement { get; protected set; }
@@ -35,21 +37,25 @@ namespace pluginVerilog.Verilog.Statements
             {
                 case "#":
                     {
-                        ProceduralTimingControlStatement statement = new ProceduralTimingControlStatement() { Name = "" };
+                        ProceduralTimingControlStatement statement = new ProceduralTimingControlStatement() { Name = "", BeginIndexReference = word.CreateIndexReference() };
                         if (statement_label != null) { statement.Name = statement_label; }
 
                         statement.DelayControl = DelayControl.ParseCreate(word, nameSpace);
                         statement.Statement = Statements.ParseCreateStatementOrNull(word, nameSpace);
+                        // the statement ends with the sub-statement: adopt its region end
+                        StatementRegionUtility.SetLastIndexReference(statement, statement.Statement, word);
                         return statement;
                     }
                 case "@":
                     {
-                        ProceduralTimingControlStatement statement = new ProceduralTimingControlStatement() { Name = "" };
+                        ProceduralTimingControlStatement statement = new ProceduralTimingControlStatement() { Name = "", BeginIndexReference = word.CreateIndexReference() };
                         if (statement_label != null) { statement.Name = statement_label; }
 
                         if (clockDomains == null) clockDomains = new List<string>();
                         statement.EventControl = EventControl.ParseCreate(word, nameSpace, clockDomains);
                         statement.Statement = Statements.ParseCreateStatementOrNull(word, nameSpace, clockDomains);
+                        // the statement ends with the sub-statement: adopt its region end
+                        StatementRegionUtility.SetLastIndexReference(statement, statement.Statement, word);
                         return statement;
                     }
                 default:

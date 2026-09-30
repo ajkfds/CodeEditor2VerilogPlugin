@@ -5,6 +5,8 @@ namespace pluginVerilog.Verilog.Statements
 {
     public class VoidBuiltInMethodCall : IStatement
     {
+        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
@@ -22,9 +24,9 @@ namespace pluginVerilog.Verilog.Statements
         }
 
         public BuiltinMethodCall? BuiltinMethodCall { get; private set; } = null!; // Initialized in Create method
-        public static VoidBuiltInMethodCall Create(BuiltinMethodCall builtInMethodCall)
+        public static VoidBuiltInMethodCall Create(BuiltinMethodCall builtInMethodCall, IndexReference? beginIndexReference = null)
         {
-            VoidBuiltInMethodCall voidBuiltInMethodCall = new VoidBuiltInMethodCall();
+            VoidBuiltInMethodCall voidBuiltInMethodCall = new VoidBuiltInMethodCall() { BeginIndexReference = beginIndexReference! };
             voidBuiltInMethodCall.BuiltinMethodCall = builtInMethodCall;
             return voidBuiltInMethodCall;
         }

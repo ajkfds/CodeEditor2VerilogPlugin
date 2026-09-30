@@ -4,7 +4,7 @@ namespace pluginVerilog.Verilog.Statements.SystemTask
     {
         public static new SkipArguments ParseCreate(WordScanner word, NameSpace nameSpace)
         {
-            SkipArguments taskEnable = new SkipArguments();
+            SkipArguments taskEnable = new SkipArguments() { BeginIndexReference = word.CreateIndexReference() };
 
             word.Color(CodeDrawStyle.ColorType.Identifier);
             word.MoveNext();
@@ -32,6 +32,7 @@ namespace pluginVerilog.Verilog.Statements.SystemTask
                 }
             }
 
+            taskEnable.LastIndexReference = word.CreateIndexReferenceBefore();
             if (word.Text == ";") word.MoveNext();
             else word.AddError("; required");
 

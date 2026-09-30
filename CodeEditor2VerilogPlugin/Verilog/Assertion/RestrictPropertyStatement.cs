@@ -30,7 +30,7 @@ namespace pluginVerilog.Verilog.Assertion
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext(); // property
 
-            RestrictPropertyStatement restrictPropertyStatement = new RestrictPropertyStatement();
+            RestrictPropertyStatement restrictPropertyStatement = new RestrictPropertyStatement() { BeginIndexReference = word.CreateIndexReference() };
 
             if (word.Eof || word.Text != "(")
             {
@@ -46,6 +46,7 @@ namespace pluginVerilog.Verilog.Assertion
             }
             word.MoveNext();
 
+            restrictPropertyStatement.LastIndexReference = word.CreateIndexReferenceBefore();
             if (word.Text != ";")
             {
                 word.AddError("; expected");
@@ -65,6 +66,9 @@ namespace pluginVerilog.Verilog.Assertion
             if (word.Text == ";") word.MoveNext();
             return statement;
         }
+
+        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; } = null;
 
         public PropertySpec? PropertySpec { get; set; }
 

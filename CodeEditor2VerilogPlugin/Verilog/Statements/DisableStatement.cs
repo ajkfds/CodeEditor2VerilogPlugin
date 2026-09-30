@@ -6,6 +6,8 @@ namespace pluginVerilog.Verilog.Statements
     {
         protected DisableStatement() { }
 
+        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
@@ -29,13 +31,14 @@ namespace pluginVerilog.Verilog.Statements
         //                    | disable hierarchical_block_identifier;
         public static DisableStatement ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
-            DisableStatement disableStatement = new DisableStatement();
+            DisableStatement disableStatement = new DisableStatement() { BeginIndexReference = word.CreateIndexReference() };
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
             word.Color(CodeDrawStyle.ColorType.Identifier);
             word.MoveNext();
 
+            disableStatement.LastIndexReference = word.CreateIndexReferenceBefore();
             if (word.Text != ";")
             {
                 word.AddError("; required");

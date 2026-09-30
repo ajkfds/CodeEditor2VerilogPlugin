@@ -21,6 +21,8 @@ namespace pluginVerilog.Verilog.Statements
          */
 
 
+        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
@@ -39,20 +41,21 @@ namespace pluginVerilog.Verilog.Statements
         }
         public static TaskEnable? ParseCreate(WordScanner word, NameSpace nameSpace, NameSpace taskNameSpace)
         {
+            IndexReference beginIndexReference = word.CreateIndexReference();
             Expressions.TaskReference taskReference = Verilog.Expressions.TaskReference.ParseCreate(word, nameSpace, taskNameSpace);
-            return ParseCreate(taskReference, word, nameSpace);
+            return ParseCreate(taskReference, word, nameSpace, beginIndexReference);
         }
 
-        public static TaskEnable? ParseCreate(Expressions.TaskReference taskReference, WordScanner word, NameSpace nameSpace)
+        public static TaskEnable? ParseCreate(Expressions.TaskReference taskReference, WordScanner word, NameSpace nameSpace, IndexReference? beginIndexReference = null)
         {
 
             IPortNameSpace task = taskReference.Task;
-            return parseCreate(task, word, nameSpace);
+            return parseCreate(task, word, nameSpace, beginIndexReference);
         }
 
-        private static TaskEnable? parseCreate(IPortNameSpace task, WordScanner word, NameSpace nameSpace)
+        private static TaskEnable? parseCreate(IPortNameSpace task, WordScanner word, NameSpace nameSpace, IndexReference? beginIndexReference = null)
         {
-            TaskEnable taskEnable = new TaskEnable();
+            TaskEnable taskEnable = new TaskEnable() { BeginIndexReference = beginIndexReference ?? word.CreateIndexReference() };
             int portCount = 0;
 
             if (word.Text == "(")
@@ -147,6 +150,7 @@ namespace pluginVerilog.Verilog.Statements
                 if (task != null && task.Ports.Count != 0) word.AddError("missing ports.");
             }
 
+            taskEnable.LastIndexReference = word.CreateIndexReferenceBefore();
             if (word.Text == ";")
             {
                 word.MoveNext();

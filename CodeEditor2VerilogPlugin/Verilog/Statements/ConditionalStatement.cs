@@ -7,6 +7,8 @@ namespace pluginVerilog.Verilog.Statements
     public class ConditionalStatement : IStatement
     {
         protected ConditionalStatement() { }
+        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
@@ -54,6 +56,7 @@ namespace pluginVerilog.Verilog.Statements
         public static ConditionalStatement? ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label, List<string>? clockDomains = null)
         {
             System.Diagnostics.Debug.Assert(word.Text == "if");
+            IndexReference beginIndex = word.CreateIndexReference();
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext(); // if
 
@@ -64,7 +67,7 @@ namespace pluginVerilog.Verilog.Statements
                 return null;
             }
 
-            ConditionalStatement conditionalStatement = new ConditionalStatement() { Name = "" };
+            ConditionalStatement conditionalStatement = new ConditionalStatement() { Name = "", BeginIndexReference = beginIndex };
             if (statement_label != null) { conditionalStatement.Name = statement_label; }
 
             if (word.GetCharAt(0) != '(')
@@ -150,6 +153,9 @@ namespace pluginVerilog.Verilog.Statements
                     break;
                 }
             }
+            // the if/else chain ends with the last sub-statement: adopt its region end
+            // (e.g. "end" of a begin..end block) instead of the next token position
+            StatementRegionUtility.SetLastIndexReference(conditionalStatement, statement, word);
             return conditionalStatement;
         }
     }

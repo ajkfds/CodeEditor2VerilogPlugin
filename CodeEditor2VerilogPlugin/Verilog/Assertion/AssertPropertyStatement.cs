@@ -23,7 +23,7 @@ namespace pluginVerilog.Verilog.Assertion
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
-            AssertPropertyStatement assertPropertyStatement = new AssertPropertyStatement();
+            AssertPropertyStatement assertPropertyStatement = new AssertPropertyStatement() { BeginIndexReference = word.CreateIndexReference() };
 
             if (word.Eof || word.Text != "(") return exitTask(word, nameSpace, assertPropertyStatement);
             word.MoveNext();
@@ -52,6 +52,7 @@ namespace pluginVerilog.Verilog.Assertion
             word.MoveNext();
 
             assertPropertyStatement.ElseStatement = Statements.Statements.ParseCreateStatement(word, nameSpace);
+            Statements.StatementRegionUtility.SetLastIndexReference(assertPropertyStatement, assertPropertyStatement.ElseStatement ?? assertPropertyStatement.PassStatement, word);
             return assertPropertyStatement;
         }
         public Statements.IStatement? PassStatement { set; get; }
@@ -65,6 +66,9 @@ namespace pluginVerilog.Verilog.Assertion
         }
 
 
+
+        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; } = null;
 
         public string Name { get; set; } = "";
 

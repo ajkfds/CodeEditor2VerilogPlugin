@@ -6,6 +6,8 @@ namespace pluginVerilog.Verilog.Statements
 {
     public class VoidFunctionCall : IStatement
     {
+        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
@@ -23,16 +25,16 @@ namespace pluginVerilog.Verilog.Statements
         }
 
         public FunctionCall? FunctionCall { get; private set; } = null!; // Initialized in Create method
-        public static VoidFunctionCall Create(FunctionCall functionCall)
+        public static VoidFunctionCall Create(FunctionCall functionCall, IndexReference? beginIndexReference = null)
         {
-            VoidFunctionCall voidFunctionCall = new VoidFunctionCall();
+            VoidFunctionCall voidFunctionCall = new VoidFunctionCall() { BeginIndexReference = beginIndexReference! };
             voidFunctionCall.FunctionCall = functionCall;
             return voidFunctionCall;
         }
         public static VoidFunctionCall? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "void") throw new Exception();
-            VoidFunctionCall voidFunctionCall = new VoidFunctionCall();
+            VoidFunctionCall voidFunctionCall = new VoidFunctionCall() { BeginIndexReference = word.CreateIndexReference() };
             word.Color(CodeDrawStyle.ColorType.Identifier);
             word.MoveNext();
             if (word.Text != "'") throw new Exception();
@@ -54,6 +56,7 @@ namespace pluginVerilog.Verilog.Statements
             }
             word.MoveNext();
 
+            voidFunctionCall.LastIndexReference = word.CreateIndexReferenceBefore();
             if (word.Text == ";")
             {
                 word.MoveNext();

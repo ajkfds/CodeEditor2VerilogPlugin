@@ -6,6 +6,8 @@ namespace pluginVerilog.Verilog.Expressions
     public class IncOrDecExpression : IStatement
     {
         protected IncOrDecExpression() { }
+        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
@@ -28,6 +30,7 @@ namespace pluginVerilog.Verilog.Expressions
         {
             if (!word.SystemVerilog) return null;
             if (word.Text != "++" && word.Text != "--" && word.NextText != "++" && word.NextText != "--") return null;
+            IndexReference beginIndexReference = word.CreateIndexReference();
             // inc_or_dec_expression::=   inc_or_dec_operator { attribute_instance } variable_lvalue
             //                          | variable_lvalue { attribute_instance } inc_or_dec_operator
             // inc_or_dec_operator ::= ++ | --
@@ -106,7 +109,14 @@ namespace pluginVerilog.Verilog.Expressions
             {
                 return null;
             }
-            return new IncOrDecExpression() { WordReference = wref, Increment = increment, DataObjectReference = dataObjectReference };
+            return new IncOrDecExpression()
+            {
+                WordReference = wref,
+                Increment = increment,
+                DataObjectReference = dataObjectReference,
+                BeginIndexReference = beginIndexReference,
+                LastIndexReference = word.CreateIndexReferenceBefore()
+            };
         }
 
     }

@@ -4,6 +4,8 @@ namespace pluginVerilog.Verilog.Statements.SystemTask
 {
     public class SystemTask : IStatement
     {
+        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
@@ -22,7 +24,7 @@ namespace pluginVerilog.Verilog.Statements.SystemTask
         }
         public static SystemTask ParseCreate(WordScanner word, NameSpace nameSpace)
         {
-            SystemTask taskEnable = new SystemTask();
+            SystemTask taskEnable = new SystemTask() { BeginIndexReference = word.CreateIndexReference() };
 
             word.Color(CodeDrawStyle.ColorType.Identifier);
             word.MoveNext();
@@ -71,6 +73,7 @@ namespace pluginVerilog.Verilog.Statements.SystemTask
                 }
             }
 
+            taskEnable.LastIndexReference = word.CreateIndexReferenceBefore();
             if (word.Text == ";") word.MoveNext();
             else word.AddError("; required");
 

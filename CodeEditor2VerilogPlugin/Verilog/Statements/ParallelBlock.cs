@@ -20,6 +20,8 @@ namespace pluginVerilog.Verilog.Statements
     {
         protected ParallelBlock() { }
 
+        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
@@ -73,7 +75,7 @@ namespace pluginVerilog.Verilog.Statements
 
         private static ParallelBlock parseParallelBlock(WordScanner word, NameSpace nameSpace, IndexReference beginIndex)
         {
-            ParallelBlock sequentialBlock = new ParallelBlock();
+            ParallelBlock sequentialBlock = new ParallelBlock() { BeginIndexReference = beginIndex };
 
             while (!word.Eof && !join_families.Contains(word.Text))
             {
@@ -102,6 +104,7 @@ namespace pluginVerilog.Verilog.Statements
             }
 
             word.Color(CodeDrawStyle.ColorType.Keyword);
+            sequentialBlock.LastIndexReference = word.CreateIndexReference();
             word.MoveNext(); // end
 
             return sequentialBlock;
@@ -229,6 +232,8 @@ namespace pluginVerilog.Verilog.Statements
 
     public class NamedParallelBlock : Verilog.NameSpace, IStatement
     {
+        // BeginIndexReference / LastIndexReference are inherited from NameSpace,
+        // which satisfies IStatement / Items.IDocumentRegeion requirements
         public void DisposeSubReference()
         {
             foreach (IStatement statement in Statements)
@@ -260,6 +265,8 @@ namespace pluginVerilog.Verilog.Statements
     {
         protected DisableForkStatement() { }
 
+        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; } = "disable fork";
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
@@ -269,7 +276,7 @@ namespace pluginVerilog.Verilog.Statements
             if (word.Text != "disable") return null;
             if (word.NextText != "fork") return null;
 
-            DisableForkStatement statement = new DisableForkStatement();
+            DisableForkStatement statement = new DisableForkStatement() { BeginIndexReference = word.CreateIndexReference() };
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext(); // disable
 
@@ -277,6 +284,7 @@ namespace pluginVerilog.Verilog.Statements
             word.MoveNext(); // fork
 
             // Semicolon
+            statement.LastIndexReference = word.CreateIndexReferenceBefore();
             if (word.Text == ";")
             {
                 word.Color(CodeDrawStyle.ColorType.Keyword);

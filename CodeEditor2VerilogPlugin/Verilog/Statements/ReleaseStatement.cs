@@ -13,6 +13,8 @@ namespace pluginVerilog.Verilog.Statements
             | release variable_lvalue 
             | release net_lvalue
         */
+        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
@@ -35,14 +37,15 @@ namespace pluginVerilog.Verilog.Statements
         protected ReleaseStatement() { }
         public static ReleaseStatement ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
-            ReleaseStatement ret = new ReleaseStatement();
-
             if (word.Text != "release") System.Diagnostics.Debugger.Break();
+            IndexReference beginIndexReference = word.CreateIndexReference();
+            ReleaseStatement ret = new ReleaseStatement() { BeginIndexReference = beginIndexReference };
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
             ret.Value = Expressions.Expression.ParseCreate(word, nameSpace);
 
+            ret.LastIndexReference = word.CreateIndexReferenceBefore();
             if (word.Text != ";")
             {
                 word.AddError("; required");

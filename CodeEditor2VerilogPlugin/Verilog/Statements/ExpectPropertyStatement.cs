@@ -30,7 +30,7 @@ namespace pluginVerilog.Verilog.Statements
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext(); // expect
 
-            ExpectPropertyStatement expectPropertyStatement = new ExpectPropertyStatement();
+            ExpectPropertyStatement expectPropertyStatement = new ExpectPropertyStatement() { BeginIndexReference = word.CreateIndexReference() };
             if (statement_label != null)
             {
                 expectPropertyStatement.Name = statement_label;
@@ -62,6 +62,10 @@ namespace pluginVerilog.Verilog.Statements
                 expectPropertyStatement.ElseStatement = Statements.ParseCreateStatementOrNull(word, nameSpace);
             }
 
+            // the statement ends with the (last) sub-statement: adopt its region end
+            IStatement? lastStatement = expectPropertyStatement.ElseStatement ?? expectPropertyStatement.PassStatement;
+            StatementRegionUtility.SetLastIndexReference(expectPropertyStatement, lastStatement, word);
+
             return expectPropertyStatement;
         }
 
@@ -73,6 +77,8 @@ namespace pluginVerilog.Verilog.Statements
             return statement;
         }
 
+        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; } = null;
         public Assertion.PropertySpec? PropertySpec { get; set; }
         public IStatement? PassStatement { get; set; }
         public IStatement? ElseStatement { get; set; }

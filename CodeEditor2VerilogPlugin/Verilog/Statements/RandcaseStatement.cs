@@ -16,6 +16,8 @@ namespace pluginVerilog.Verilog.Statements
     public class RandcaseStatement : IStatement
     {
         protected RandcaseStatement() { }
+        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; } = "";
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
@@ -47,7 +49,7 @@ namespace pluginVerilog.Verilog.Statements
         {
             if (word.Text != "randcase") return null;
 
-            RandcaseStatement statement = new RandcaseStatement();
+            RandcaseStatement statement = new RandcaseStatement() { BeginIndexReference = word.CreateIndexReference() };
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
@@ -85,6 +87,7 @@ namespace pluginVerilog.Verilog.Statements
             }
 
             // endcase
+            statement.LastIndexReference = word.CreateIndexReference();
             if (word.Text == "endcase")
             {
                 word.Color(CodeDrawStyle.ColorType.Keyword);

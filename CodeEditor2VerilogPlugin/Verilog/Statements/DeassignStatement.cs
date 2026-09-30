@@ -5,6 +5,8 @@ namespace pluginVerilog.Verilog.Statements
     public class DeassignStatement : IStatement
     {
         protected DeassignStatement() { }
+        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
@@ -36,14 +38,15 @@ namespace pluginVerilog.Verilog.Statements
         }
         public static DeassignStatement ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
-            DeassignStatement ret = new DeassignStatement();
-
             if (word.Text != "deassign") System.Diagnostics.Debugger.Break();
+            IndexReference beginIndexReference = word.CreateIndexReference();
+            DeassignStatement ret = new DeassignStatement() { BeginIndexReference = beginIndexReference };
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
             ret.LValue = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace, false);
 
+            ret.LastIndexReference = word.CreateIndexReferenceBefore();
             if (word.Text != ";")
             {
                 word.AddError("; required");

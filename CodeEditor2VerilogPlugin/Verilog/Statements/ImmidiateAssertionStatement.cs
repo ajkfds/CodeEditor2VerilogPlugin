@@ -48,6 +48,8 @@ namespace pluginVerilog.Verilog.Statements
             [ statement ] [ else statement ]
         */
 
+        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
@@ -80,10 +82,11 @@ namespace pluginVerilog.Verilog.Statements
         public static ImmidiateAssertionStatement ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             System.Diagnostics.Debug.Assert(word.Text == "assert" || word.Text == "assume" || word.Text == "cover");
+            IndexReference beginIndexReference = word.CreateIndexReference();
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
-            ImmidiateAssertionStatement assertion = new ImmidiateAssertionStatement() { Name = "" };
+            ImmidiateAssertionStatement assertion = new ImmidiateAssertionStatement() { Name = "", BeginIndexReference = beginIndexReference };
             if (statement_label != null) { assertion.Name = statement_label; }
 
             // Check for deferred immediate assertion: #0 or final
@@ -144,7 +147,11 @@ namespace pluginVerilog.Verilog.Statements
 
                 IStatement? elseStatement = Statements.ParseCreateStatementOrNull(word, nameSpace);
                 assertion.ElseStatement = elseStatement;
+                statement = elseStatement ?? statement;
             }
+
+            // the statement ends with the (last) sub-statement: adopt its region end
+            StatementRegionUtility.SetLastIndexReference(assertion, statement, word);
 
             return assertion;
         }

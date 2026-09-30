@@ -13,6 +13,8 @@ namespace pluginVerilog.Verilog.Statements
             | release variable_lvalue 
             | release net_lvalue
         */
+        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
@@ -37,9 +39,9 @@ namespace pluginVerilog.Verilog.Statements
         }
         public static ForceStatement? ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
-            ForceStatement ret = new ForceStatement();
-
             if (word.Text != "force") System.Diagnostics.Debugger.Break();
+            IndexReference beginIndexReference = word.CreateIndexReference();
+            ForceStatement ret = new ForceStatement() { BeginIndexReference = beginIndexReference };
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
@@ -61,6 +63,7 @@ namespace pluginVerilog.Verilog.Statements
 
             ret.Value = Expressions.Expression.ParseCreate(word, nameSpace);
 
+            ret.LastIndexReference = word.CreateIndexReferenceBefore();
             if (word.Text != ";")
             {
                 word.AddError("; required");

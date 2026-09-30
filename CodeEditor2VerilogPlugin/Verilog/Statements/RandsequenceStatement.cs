@@ -58,6 +58,8 @@ namespace pluginVerilog.Verilog.Statements
     public class RandsequenceStatement : IStatement
     {
         protected RandsequenceStatement() { }
+        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; } = "";
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
@@ -155,7 +157,7 @@ namespace pluginVerilog.Verilog.Statements
         {
             if (word.Text != "randsequence") return null;
 
-            RandsequenceStatement statement = new RandsequenceStatement();
+            RandsequenceStatement statement = new RandsequenceStatement() { BeginIndexReference = word.CreateIndexReference() };
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
@@ -242,6 +244,7 @@ namespace pluginVerilog.Verilog.Statements
             }
 
             // endsequence
+            statement.LastIndexReference = word.CreateIndexReference();
             if (word.Text == "endsequence")
             {
                 word.Color(CodeDrawStyle.ColorType.Keyword);

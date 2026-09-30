@@ -7,6 +7,8 @@ namespace pluginVerilog.Verilog.Statements
 {
     public class WaitStatement : IStatement
     {
+        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; } = null;
         public void DisposeSubReference()
         {
             Expression?.DisposeSubReference(true);
@@ -46,6 +48,7 @@ namespace pluginVerilog.Verilog.Statements
 
             if (word.Text != "wait") throw new Exception();
 
+            IndexReference beginIndexReference = word.CreateIndexReference();
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
             if (word.Text == "fork")
@@ -57,7 +60,7 @@ namespace pluginVerilog.Verilog.Statements
                     return null;
                 }
                 word.MoveNext();
-                return new WaitStatement();
+                return new WaitStatement() { BeginIndexReference = beginIndexReference, LastIndexReference = word.CreateIndexReferenceBefore() };
             }
             if (word.Text != "(")
             {
@@ -66,7 +69,7 @@ namespace pluginVerilog.Verilog.Statements
             }
             word.MoveNext();
 
-            WaitStatement waitStatement = new WaitStatement();
+            WaitStatement waitStatement = new WaitStatement() { BeginIndexReference = beginIndexReference };
 
             Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
             if (expression == null) return null;
@@ -88,6 +91,9 @@ namespace pluginVerilog.Verilog.Statements
             IStatement? statement = Statements.ParseCreateStatement(word, nameSpace);
             waitStatement.Statement = statement;
 
+            // the statement ends with the sub-statement: adopt its region end
+            StatementRegionUtility.SetLastIndexReference(waitStatement, statement, word);
+
             if (word.Text != ";")
             {
                 word.AddError("expected ;");
@@ -103,6 +109,7 @@ namespace pluginVerilog.Verilog.Statements
         {
             // | "wait fork" ";"
             if (word.Text != "wait_fork") throw new Exception(); ;
+            IndexReference beginIndexReference = word.CreateIndexReference();
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
@@ -112,7 +119,7 @@ namespace pluginVerilog.Verilog.Statements
                 return null;
             }
             word.MoveNext();
-            return new WaitStatement();
+            return new WaitStatement() { BeginIndexReference = beginIndexReference, LastIndexReference = word.CreateIndexReferenceBefore() };
         }
 
         // wait_order "(" hierarchical_identifier { "," hierarchical_identifier } ")" action_block
@@ -120,6 +127,7 @@ namespace pluginVerilog.Verilog.Statements
         {
             // | "wait_order" "(" hierarchical_identifier { "," hierarchical_identifier } ")" action_block
             if (word.Text != "wait_order") throw new Exception();
+            IndexReference beginIndexReference = word.CreateIndexReference();
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
@@ -130,7 +138,7 @@ namespace pluginVerilog.Verilog.Statements
             }
             word.MoveNext();
 
-            WaitStatement waitOrderStatement = new WaitStatement();
+            WaitStatement waitOrderStatement = new WaitStatement() { BeginIndexReference = beginIndexReference };
             waitOrderStatement.Identifiers = new List<string>();
 
             // Parse first hierarchical_identifier
@@ -177,7 +185,11 @@ namespace pluginVerilog.Verilog.Statements
 
                 IStatement? elseStatement = Statements.ParseCreateStatementOrNull(word, nameSpace);
                 waitOrderStatement.ElseStatement = elseStatement;
+                statement = elseStatement ?? statement;
             }
+
+            // the statement ends with the (last) sub-statement: adopt its region end
+            StatementRegionUtility.SetLastIndexReference(waitOrderStatement, statement, word);
 
             return waitOrderStatement;
         }

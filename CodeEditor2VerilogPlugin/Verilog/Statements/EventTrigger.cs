@@ -6,6 +6,8 @@ namespace pluginVerilog.Verilog.Statements
     {
         protected EventTrigger() { }
 
+        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
@@ -29,7 +31,7 @@ namespace pluginVerilog.Verilog.Statements
         //                    | disable hierarchical_block_identifier;
         public static EventTrigger ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
-            EventTrigger eventTrigger = new EventTrigger();
+            EventTrigger eventTrigger = new EventTrigger() { BeginIndexReference = word.CreateIndexReference() };
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
@@ -54,6 +56,7 @@ namespace pluginVerilog.Verilog.Statements
                 word.SkipToKeyword(";");
             }
 
+            eventTrigger.LastIndexReference = word.CreateIndexReferenceBefore();
             if (word.Text != ";")
             {
                 word.AddError("; required");

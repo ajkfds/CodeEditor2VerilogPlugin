@@ -38,7 +38,7 @@ namespace pluginVerilog.Verilog.Assertion
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext(); // sequence
 
-            CoverSequenceStatement coverSequenceStatement = new CoverSequenceStatement();
+            CoverSequenceStatement coverSequenceStatement = new CoverSequenceStatement() { BeginIndexReference = word.CreateIndexReference() };
 
             if (word.Eof || word.Text != "(")
             {
@@ -102,6 +102,7 @@ namespace pluginVerilog.Verilog.Assertion
             // Parse statement_or_null (no action_block, just a single statement or null)
             coverSequenceStatement.CoverStatement = Statements.Statements.ParseCreateStatementOrNull(word, nameSpace);
 
+            Statements.StatementRegionUtility.SetLastIndexReference(coverSequenceStatement, coverSequenceStatement.CoverStatement, word);
             return coverSequenceStatement;
         }
 
@@ -112,6 +113,9 @@ namespace pluginVerilog.Verilog.Assertion
             if (word.Text == ";") word.MoveNext();
             return statement;
         }
+
+        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; } = null;
 
         public Statements.EventControl? EventControl { get; set; }
         public Expressions.Expression? DisableIffExpression { get; set; }

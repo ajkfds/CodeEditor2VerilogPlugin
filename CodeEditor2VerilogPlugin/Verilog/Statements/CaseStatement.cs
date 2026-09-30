@@ -12,6 +12,8 @@ namespace pluginVerilog.Verilog.Statements
         public bool IsInsideMode { get; set; } = false;
         public bool IsMatchesMode { get; set; } = false;
 
+        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
@@ -77,7 +79,8 @@ namespace pluginVerilog.Verilog.Statements
                     word.AddError("illegal case statement");
                     return null;
             }
-            CaseStatement caseStatement = new CaseStatement();
+            IndexReference beginIndex = word.CreateIndexReference();
+            CaseStatement caseStatement = new CaseStatement() { BeginIndexReference = beginIndex };
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
@@ -152,6 +155,7 @@ namespace pluginVerilog.Verilog.Statements
                 word.AddError("illegal case statement");
                 return null;
             }
+            caseStatement.LastIndexReference = word.CreateIndexReference();
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 

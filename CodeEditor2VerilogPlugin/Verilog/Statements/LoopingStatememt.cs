@@ -10,6 +10,8 @@ namespace pluginVerilog.Verilog.Statements
     public class ForeverStatement : IStatement
     {
         protected ForeverStatement() { }
+        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
@@ -49,11 +51,14 @@ namespace pluginVerilog.Verilog.Statements
 
         public static ForeverStatement ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
-            ForeverStatement foreverStatement = new ForeverStatement();
+            ForeverStatement foreverStatement = new ForeverStatement() { BeginIndexReference = word.CreateIndexReference() };
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
             foreverStatement.Statement = Statements.ParseCreateStatement(word, nameSpace);
+
+            // the statement ends with the sub-statement: adopt its region end
+            StatementRegionUtility.SetLastIndexReference(foreverStatement, foreverStatement.Statement, word);
 
             return foreverStatement;
         }
@@ -63,6 +68,8 @@ namespace pluginVerilog.Verilog.Statements
     {
         protected DoStatement() { }
 
+        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
@@ -92,7 +99,7 @@ namespace pluginVerilog.Verilog.Statements
             if (word.Text != "do") throw new Exception();
             if (!word.SystemVerilog) word.AddError("SystemVerilog expression");
 
-            DoStatement doStatement = new DoStatement();
+            DoStatement doStatement = new DoStatement() { BeginIndexReference = word.CreateIndexReference() };
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
@@ -125,6 +132,7 @@ namespace pluginVerilog.Verilog.Statements
             }
             word.MoveNext();
 
+            doStatement.LastIndexReference = word.CreateIndexReferenceBefore();
             if (word.Text == ";")
             {
                 word.MoveNext();
@@ -141,6 +149,8 @@ namespace pluginVerilog.Verilog.Statements
     {
         protected RepeatStatement() { }
 
+        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
@@ -172,7 +182,7 @@ namespace pluginVerilog.Verilog.Statements
         //                            | for (variable_assignment ; expression ; variable_assignment ) statement
         public static RepeatStatement ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
-            RepeatStatement repeatStatement = new RepeatStatement();
+            RepeatStatement repeatStatement = new RepeatStatement() { BeginIndexReference = word.CreateIndexReference() };
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
@@ -201,6 +211,9 @@ namespace pluginVerilog.Verilog.Statements
 
             repeatStatement.Statement = Statements.ParseCreateStatement(word, nameSpace);
 
+            // the statement ends with the sub-statement: adopt its region end
+            StatementRegionUtility.SetLastIndexReference(repeatStatement, repeatStatement.Statement, word);
+
             return repeatStatement;
         }
     }
@@ -209,6 +222,8 @@ namespace pluginVerilog.Verilog.Statements
     {
         protected WhileStatememt() { }
 
+        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
         public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
@@ -240,7 +255,7 @@ namespace pluginVerilog.Verilog.Statements
         //                            | for (variable_assignment ; expression ; variable_assignment ) statement
         public static WhileStatememt ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
-            WhileStatememt whileStatement = new WhileStatememt();
+            WhileStatememt whileStatement = new WhileStatememt() { BeginIndexReference = word.CreateIndexReference() };
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
@@ -268,6 +283,9 @@ namespace pluginVerilog.Verilog.Statements
             word.MoveNext();
 
             whileStatement.Statement = Statements.ParseCreateStatement(word, nameSpace);
+
+            // the statement ends with the sub-statement: adopt its region end
+            StatementRegionUtility.SetLastIndexReference(whileStatement, whileStatement.Statement, word);
 
             return whileStatement;
         }
@@ -452,6 +470,10 @@ namespace pluginVerilog.Verilog.Statements
 
 
             forStatement.Statement = Statements.ParseCreateStatement(word, forStatement);
+
+            // the statement ends with the sub-statement: adopt its region end
+            StatementRegionUtility.SetLastIndexReference(forStatement, forStatement.Statement, word);
+
             return forStatement;
         }
 
@@ -565,6 +587,9 @@ namespace pluginVerilog.Verilog.Statements
             word.MoveNext();
 
             foreachStatement.Statement = Statements.ParseCreateStatement(word, foreachStatement);
+
+            // the statement ends with the sub-statement: adopt its region end
+            StatementRegionUtility.SetLastIndexReference(foreachStatement, foreachStatement.Statement, word);
 
             return foreachStatement;
         }
