@@ -345,6 +345,21 @@ namespace pluginVerilog.Tool
                     EnqueueWork(newTask, workQueue, completeIds);
 
                 }
+
+                // bind directives do not create instance items in the file
+                // hierarchy, so the definition files of the bound building
+                // blocks (module / interface / program / checker recorded in
+                // ReferencedDefinitionNameSpace) are not reachable via the
+                // instance tree. Enqueue them explicitly so that changes in
+                // the bound definitions are reflected in this hierarchy pass.
+                foreach (string elementName in verilogFile.VerilogParsedDocument.ReferencedDefinitionNameSpace)
+                {
+                    pluginVerilog.ProjectProperty projectProperty = (ProjectProperty)verilogFile.Project.ProjectProperties[pluginVerilog.Plugin.StaticID];
+                    TextFile? vFile = projectProperty.DefinitionNameSpace.GetFile(elementName) as TextFile;
+                    if (vFile == null) continue;
+                    ParseTask newTask = new ParseTask(Id: vFile.ID, tarfgetTextFile: vFile);
+                    EnqueueWork(newTask, workQueue, completeIds);
+                }
             }
 
             // For @scope comment annotations, the referenced BuildingBlock may
