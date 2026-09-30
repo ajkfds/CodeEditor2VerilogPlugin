@@ -141,6 +141,8 @@ namespace pluginVerilog.Verilog.Expressions
                 {
                     word.AddWarning("bitwidth mismatch");
                 }
+
+                checkDataTypeCompatibility(word, expression, port.DataObject?.DataType, port.Name);
                 i++;
 
                 if (word.Text == ")") break;
@@ -242,6 +244,8 @@ namespace pluginVerilog.Verilog.Expressions
                     }
 
                     if (!expression.Constant) constantConnected = false;
+
+                    checkDataTypeCompatibility(word, expression, port.DataObject?.DataType, port.Name);
                 }
                 else
                 {
@@ -305,6 +309,71 @@ namespace pluginVerilog.Verilog.Expressions
             }
 
             return;
+        }
+
+        /// <summary>
+        /// Check type compatibility between the argument expression and the port's data type.
+        /// Only structural category mismatch (e.g. scalar vs struct/enum/class) is reported.
+        /// Scalar-to-scalar and same-category connections are accepted (bit width is checked separately).
+        /// </summary>
+        private static void checkDataTypeCompatibility(
+            WordScanner word,
+            Expressions.Expression expression,
+            DataObjects.DataTypes.IDataType? portDataType,
+            string portName
+            )
+        {
+            if (portDataType == null) return;
+            if (expression.Reference == null) return;
+
+            // resolve the connected expression's data type
+            DataObjects.DataTypes.IDataType? exprDataType;
+            if (expression is Expressions.DataObjectReference dataObjectReference)
+            {
+                // use the original data object's type (TargetDataObject is a deep clone, so
+                // reference equality of the underlying type instances cannot be relied on)
+                exprDataType = dataObjectReference.OrigainalDataObject?.DataType;
+            }
+            else
+            {
+                // number literals / constant expressions are scalar values; skip
+                return;
+            }
+            if (exprDataType == null) return;
+
+            // unwrap typedefs
+            if (portDataType is DataObjects.DataTypes.UserDefinedType portUdt) portDataType = portUdt.OriginalDataType;
+            if (exprDataType is DataObjects.DataTypes.UserDefinedType exprUdt) exprDataType = exprUdt.OriginalDataType;
+
+            if (portDataType.Type == exprDataType.Type) return;
+
+            // scalar integer types are mutually compatible (bit width is checked separately)
+            HashSet<DataObjects.DataTypes.DataTypeEnum> scalarTypes = new HashSet<DataObjects.DataTypes.DataTypeEnum>
+            {
+                DataObjects.DataTypes.DataTypeEnum.Bit,
+                DataObjects.DataTypes.DataTypeEnum.Logic,
+                DataObjects.DataTypes.DataTypeEnum.Reg,
+                DataObjects.DataTypes.DataTypeEnum.Byte,
+                DataObjects.DataTypes.DataTypeEnum.Shortint,
+                DataObjects.DataTypes.DataTypeEnum.Int,
+                DataObjects.DataTypes.DataTypeEnum.Longint,
+                DataObjects.DataTypes.DataTypeEnum.Integer,
+                DataObjects.DataTypes.DataTypeEnum.Time
+            };
+            if (scalarTypes.Contains(portDataType.Type) && scalarTypes.Contains(exprDataType.Type)) return;
+
+            // real types are mutually compatible
+            HashSet<DataObjects.DataTypes.DataTypeEnum> realTypes = new HashSet<DataObjects.DataTypes.DataTypeEnum>
+            {
+                DataObjects.DataTypes.DataTypeEnum.Shortreal,
+                DataObjects.DataTypes.DataTypeEnum.Real,
+                DataObjects.DataTypes.DataTypeEnum.Realtime
+            };
+            if (realTypes.Contains(portDataType.Type) && realTypes.Contains(exprDataType.Type)) return;
+
+            expression.Reference.AddWarning(
+                "type mismatch on argument " + portName + " : " + portDataType.Type + " <- " + exprDataType.Type
+                );
         }
 
         private static void parseUndefinedPort(WordScanner word, NameSpace usedNameSpace)
