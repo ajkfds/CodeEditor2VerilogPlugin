@@ -17,12 +17,13 @@ namespace pluginVerilog.Verilog.Snippets
         }
 
         private static readonly Regex PortPattern = new Regex(
-            @"^(?<direction>input|output)\s+" +
-            @"(?:(?<qualifiers>signed|wire|reg|automatic)\s+)*" +
-            @"(?:(?<type>\w+)\s+)?" +
-            @"(?<bitwidth>\[[^\[\]]*\])?\s*" +
+            @"^(?<direction>input|output)(?<ws1>\s+)" +
+            @"(?<qualifiers>(?:(?:signed|wire|reg|automatic)\s+)*)" +
+            @"(?:(?<type>\w+)(?<ws2>\s+))?" +
+            @"(?<bitwidth>\[[^\[\]]*\](?<ws3>\s+))?" +
             @"(?<name>\w+)" +
-            @"\s*[;,]?\s*" +
+            @"(?<sep>\s*[;,]?)" +
+            @"(?<wsBeforeComment>\s*)" +
             @"(?<comment>//[^\r\n]*)?$",
             RegexOptions.Compiled
         );
@@ -75,9 +76,12 @@ namespace pluginVerilog.Verilog.Snippets
                 if (match.Success)
                 {
                     string direction = match.Groups["direction"].Value;
-                    string qualifiers = match.Groups["qualifiers"].Value.Trim();
+                    string qualifiers = match.Groups["qualifiers"].Value; // preserve original whitespace
+                    string type = match.Groups["type"].Value;
                     string bitwidth = match.Groups["bitwidth"].Value;
                     string name = match.Groups["name"].Value;
+                    string sep = match.Groups["sep"].Value;
+                    string wsBeforeComment = match.Groups["wsBeforeComment"].Value;
                     string comment = match.Groups["comment"].Value;
 
                     // Invert direction
@@ -94,32 +98,38 @@ namespace pluginVerilog.Verilog.Snippets
                         newName = name.Substring(0, name.Length - 2) + "_I";
                     }
 
-                    // Build the new line
+                    // Rebuild the line preserving the original whitespace between elements
                     string indent = line.Substring(0, indentLength);
-                    string newLine = indent + newDirection + " ";
+                    string ws1 = match.Groups["ws1"].Value;
+                    string ws2 = match.Groups["ws2"].Value;
+                    string ws3 = match.Groups["ws3"].Value;
+
+                    string newLine = indent + newDirection + (ws1.Length > 0 ? ws1 : " ");
 
                     if (!string.IsNullOrEmpty(qualifiers))
                     {
-                        newLine += qualifiers + " ";
+                        newLine += qualifiers;
                     }
 
-                    newLine += bitwidth.Trim() + " " + newName;
+                    if (!string.IsNullOrEmpty(type))
+                    {
+                        newLine += type + (ws2.Length > 0 ? ws2 : " ");
+                    }
 
-                    // Preserve trailing separator (semicolon or comma)
-                    string trimmedEnd = trimmedContent.TrimEnd(' ', '\t');
-                    if (trimmedEnd.EndsWith(";"))
+                    if (!string.IsNullOrEmpty(bitwidth))
                     {
-                        newLine += ";";
+                        newLine += bitwidth + (ws3.Length > 0 ? ws3 : " ");
                     }
-                    else if (trimmedEnd.EndsWith(","))
-                    {
-                        newLine += ",";
-                    }
+
+                    newLine += newName;
+
+                    // Preserve trailing separator (semicolon or comma) with its original leading whitespace
+                    newLine += sep;
 
                     // Preserve comment
                     if (!string.IsNullOrEmpty(comment))
                     {
-                        newLine += " " + comment;
+                        newLine += wsBeforeComment + comment;
                     }
 
                     processedLines.Add(newLine);
