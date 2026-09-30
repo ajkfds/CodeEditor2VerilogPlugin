@@ -105,69 +105,179 @@ namespace pluginVerilog.Verilog.Items
                 Prototype = word.Prototype
             };
 
-            // instance name
-            Expression? targetExpression = Expressions.Expression.ParseCreate(word, nameSpace);
-            string target = word.Text;
-            BuildingBlocks.BuildingBlock? targetBuildingBlock = word.ProjectProperty.DefinitionNameSpace.Get(target);
-            if (targetBuildingBlock == null)
+            // parse bind_target_scope or bind_target_instance (hierarchical identifier)
+            // note: identifiers are consumed directly (not via Expression.ParseCreate) so that
+            // root-level parse (nameSpace == null) works without NullReferenceException
+            string targetScopeOrInstance = parseHierarchicalIdentifier(word);
+            if (targetScopeOrInstance == null)
             {
                 word.SkipToKeyword(";");
                 return true;
             }
 
-            BuildingBlocks.Class? @class = word.ProjectProperty.UnitNameSpace.Get(word.Text) as BuildingBlocks.Class;
-            if(@class != null)
+            // resolve target scope (module / interface identifier) in DefinitionNameSpace
+            string[] targetParts = targetScopeOrInstance.Split('.');
+            string targetTopName = targetParts[0];
+            BuildingBlocks.BuildingBlock? targetBuildingBlock = word.ProjectProperty.DefinitionNameSpace.Get(targetTopName) as BuildingBlocks.BuildingBlock;
+            if (targetBuildingBlock != null)
             {
-                targetBuildingBlock = @class as BuildingBlocks.BuildingBlock;
+                // bind target scope / target instance always refers to DefinitionNameSpace
+                // (module / interface / program / checker instantiation: class never appears)
+                if (!word.RootParsedDocument.ReferencedDefinitionNameSpace.Contains(targetTopName)) word.RootParsedDocument.ReferencedDefinitionNameSpace.Add(targetTopName);
             }
             else
             {
-                targetBuildingBlock = word.ProjectProperty.DefinitionNameSpace.Get(word.Text) as BuildingBlocks.BuildingBlock;
+                word.AddError("unfound bind target");
             }
-
-            if (targetBuildingBlock == null)
+            // bind_target_scope form: [":" bind_target_instance_list]
+            // bind_target_instance form: hierarchical_identifier (already includes "." path)
+            bind.TargetScope = targetTopName;
+            if (targetParts.Length == 1 && word.Text == ":")
             {
-                word.AddError("unfound");
+                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.MoveNext();
+                // bind_target_instance_list ::= bind_target_instance { , bind_target_instance }
+                while (true)
+                {
+                    string targetInstance = parseHierarchicalIdentifier(word);
+                    if (targetInstance == null)
+                    {
+                        word.SkipToKeyword(";");
+                        return true;
+                    }
+                    bind.TargetInstances.Add(targetInstance);
+                    if (word.Text == ",")
+                    {
+                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.MoveNext();
+                        continue;
+                    }
+                    break;
+                }
             }
             else
             {
-                if (!word.RootParsedDocument.ReferencedUnitNameSpace.Contains(targetBuildingBlock.Name)) word.RootParsedDocument.ReferencedUnitNameSpace.Add(targetBuildingBlock.Name);
+                // bind_target_instance form
+                bind.TargetInstances.Add(targetScopeOrInstance);
             }
-            word.Color(CodeDrawStyle.ColorType.Identifier);
-            word.MoveNext();
 
-            // 
+            // bind_instantiation ::= program_instantiation | module_instantiation | interface_instantiation | checker_instantiation
             if (!General.IsSimpleIdentifier(word.Text))
             {
                 word.AddError("illegal name");
+                word.SkipToKeyword(";");
+                return true;
             }
+
+            string instantiationName = word.Text;
             word.Color(CodeDrawStyle.ColorType.Identifier);
             word.MoveNext();
 
+            BuildingBlocks.BuildingBlock? instancedBuildingBlock = word.ProjectProperty.DefinitionNameSpace.Get(instantiationName) as BuildingBlocks.BuildingBlock;
+            if (instancedBuildingBlock != null)
             {
-
-                if (word.Text != "(")
-                {
-                    return true;
-                }
-                word.MoveNext();
-
-                if(word.Text != ")")
-                {
-                    return true;
-                }
-                word.MoveNext();
-
-                if (word.Text != ";")
-                {
-                    return true;
-                }
-                word.MoveNext();
-
+                if (!word.RootParsedDocument.ReferencedDefinitionNameSpace.Contains(instantiationName)) word.RootParsedDocument.ReferencedDefinitionNameSpace.Add(instantiationName);
+            }
+            else
+            {
+                word.AddError("unfound instanced building block");
             }
 
+            // optional parameter value assignment # ( ... ) : contents are consumed without analysis
+            if (word.Text == "#")
+            {
+                word.MoveNext();
+                if (word.Text == "(")
+                {
+                    word.MoveNext();
+                    consumeParenBlock(word);
+                }
+            }
+
+            // instance list: [ name_of_instance ( ... ) ] { , name_of_instance ( ... ) } ;
+            while (true)
+            {
+                BindItem bindItem = new BindItem()
+                {
+                    SourceName = instantiationName
+                };
+
+                if (General.IsSimpleIdentifier(word.Text))
+                {
+                    bindItem.InstanceName = word.Text;
+                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.MoveNext();
+                    if (word.Text == "(")
+                    {
+                        word.MoveNext();
+                        consumeParenBlock(word);
+                    }
+                }
+                bind.BindItems.Add(bindItem);
+
+                if (word.Text == ",")
+                {
+                    word.MoveNext();
+                    continue;
+                }
+                break;
+            }
+
+            if (word.Text != ";")
+            {
+                word.AddError("illegal name");
+                word.SkipToKeyword(";");
+                return true;
+            }
+            word.MoveNext();
+
+            bind.LastIndexReference = word.CreateIndexReferenceBefore();
             bindDirective = bind;
             return true;
+        }
+
+        /// <summary>
+        /// consume "( ... )" block including nested parentheses
+        /// </summary>
+        private static void consumeParenBlock(WordScanner word)
+        {
+            int parenDepth = 1;
+            while (!word.Eof && parenDepth > 0)
+            {
+                if (word.Text == "(") parenDepth++;
+                else if (word.Text == ")") parenDepth--;
+                word.MoveNext();
+            }
+        }
+
+        /// <summary>
+        /// parse hierarchical_identifier (identifier { . identifier }) and return it as string.
+        /// returns null if the first token is not a simple identifier
+        /// </summary>
+        private static string parseHierarchicalIdentifier(WordScanner word)
+        {
+            if (!General.IsSimpleIdentifier(word.Text))
+            {
+                if (word.Text != ";") word.AddError("illegal name");
+                return null;
+            }
+
+            string identifier = word.Text;
+            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.MoveNext();
+            while (word.Text == ".")
+            {
+                word.MoveNext();
+                if (!General.IsSimpleIdentifier(word.Text))
+                {
+                    word.AddError("illegal name");
+                    return identifier;
+                }
+                identifier = identifier + "." + word.Text;
+                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.MoveNext();
+            }
+            return identifier;
         }
 
     }
