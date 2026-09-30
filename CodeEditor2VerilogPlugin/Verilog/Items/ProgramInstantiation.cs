@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Items
 {
-    public class ProgramInstantiation : NamedItem, IBuildingBlockInstantiation, INamedElement
+    public class ProgramInstantiation : NamedItem, IBuildingBlockInstantiation, INamedElement, IDocumentRegeion
     {
         public NamedElements NamedElements { get; } = new NamedElements();
 
@@ -284,6 +284,8 @@ namespace pluginVerilog.Verilog.Items
                 }
                 word.MoveNext();
                 programInstantiation.LastIndexReference = word.CreateIndexReference();
+
+                if (!word.Prototype && word.CompletionContext == null) nameSpace.DocumentRegions.Add(programInstantiation);
 
                 if (!word.Prototype && word.Active && programInstantiation.BlockBeginIndexReference != null)
                 {

@@ -14,7 +14,7 @@ namespace pluginVerilog.Verilog.Items
     /// list_of_net_aliases ::= net_alias_item { , net_alias_item }
     /// net_alias_item ::= net_lvalue
     /// </summary>
-    public class NetAlias
+    public class NetAlias : IDocumentRegeion
     {
         protected NetAlias() { }
 
@@ -51,10 +51,14 @@ namespace pluginVerilog.Verilog.Items
             // net_alias_item ::= net_lvalue
 
 
+            List<Expression> lvalues = new List<Expression>();
+            Expression? aliasTo = null;
+
             // Parse net_lvalue
             Expression? lvalue = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace, true);
             if (lvalue != null)
             {
+                lvalues.Add(lvalue);
             }
             else
             {
@@ -86,6 +90,8 @@ namespace pluginVerilog.Verilog.Items
                     if (word.Text == ";") word.MoveNext();
                     return true;
                 }
+                if (aliasTo == null) aliasTo = aliasExpression;
+                lvalues.Add(aliasExpression);
             }
 
             // Semicolon
@@ -98,6 +104,16 @@ namespace pluginVerilog.Verilog.Items
             }
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
+
+            // register the region of the whole "alias ... ;" statement
+            NetAlias netAlias = new NetAlias()
+            {
+                BeginIndexReference = beginReference,
+                LastIndexReference = word.CreateIndexReferenceBefore()
+            };
+            foreach (Expression expr in lvalues) netAlias.NetLvalues.Add(expr);
+            netAlias.Expression = aliasTo;
+            if (!word.Prototype && word.CompletionContext == null) nameSpace.DocumentRegions.Add(netAlias);
 
             return true;
         }

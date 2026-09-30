@@ -9,7 +9,7 @@ using System.Text.Json.Serialization;
 
 namespace pluginVerilog.Verilog.Items
 {
-    public class InterfaceInstance : DataObject, IBuildingBlockInstantiation, INamedElement
+    public class InterfaceInstance : DataObject, IBuildingBlockInstantiation, INamedElement, IDocumentRegeion
     {
         internal InterfaceInstance() { }
         public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
@@ -588,6 +588,8 @@ namespace pluginVerilog.Verilog.Items
                 }
                 word.MoveNext();
                 interfaceInstance.LastIndexReference = word.CreateIndexReference();
+
+                if (!word.Prototype && word.CompletionContext == null) nameSpace.DocumentRegions.Add(interfaceInstance);
 
                 if (!word.Prototype && word.Active && interfaceInstance.BlockBeginIndexReference != null)
                 {

@@ -32,7 +32,7 @@ using System.Collections.Generic;
 
 namespace pluginVerilog.Verilog.Items
 {
-    public class BindDirective
+    public class BindDirective : IDocumentRegeion
     {
         public IndexReference BeginIndexReference { get; set; }
         public IndexReference? BlockBeginIndexReference { get; set; }
@@ -275,6 +275,7 @@ namespace pluginVerilog.Verilog.Items
             word.MoveNext();
 
             bind.LastIndexReference = word.CreateIndexReferenceBefore();
+            if (!word.Prototype && word.CompletionContext == null && nameSpace != null) nameSpace.DocumentRegions.Add(bind);
             bindDirective = bind;
             return true;
         }

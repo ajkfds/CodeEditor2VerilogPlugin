@@ -2,10 +2,13 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Items
 {
-    public class GateInstantiation : NamedItem
+    public class GateInstantiation : NamedItem, IDocumentRegeion
     {
         protected GateInstantiation() { }
         public DriveStrength? DriveStrength = null;
+
+        public IndexReference? BeginIndexReference { get; set; }
+        public IndexReference? LastIndexReference { get; set; }
 
         // gate_instantiation::=    cmos_switchtype                             [delay3]    cmos_switch_instance        { , cmos_switch_instance }; 
         //                          | enable_gatetype   [drive_strength]        [delay3]    enable_gate_instance        { , enable_gate_instance }; 
@@ -48,7 +51,13 @@ namespace pluginVerilog.Verilog.Items
 
         public static void Parse(WordScanner word, NameSpace nameSpace)
         {
+            IndexReference beginIndexReference = word.CreateIndexReference();
             GateInstantiation? gate = ParseCreate(word, nameSpace);
+            if (gate == null) return;
+            // register the region of the whole gate instantiation statement
+            gate.BeginIndexReference = beginIndexReference;
+            gate.LastIndexReference = word.CreateIndexReferenceBefore();
+            if (!word.Prototype && word.CompletionContext == null) nameSpace.DocumentRegions.Add(gate);
         }
         public static GateInstantiation? ParseCreate(WordScanner word, NameSpace nameSpace)
         {

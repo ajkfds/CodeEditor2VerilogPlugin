@@ -1,14 +1,17 @@
 namespace pluginVerilog.Verilog.Items
 {
-    public class ParameterOverride
+    public class ParameterOverride : IDocumentRegeion
     {
         protected ParameterOverride() { }
 
+        public IndexReference? BeginIndexReference { get; set; }
+        public IndexReference? LastIndexReference { get; set; }
 
         public static bool Parse(WordScanner word, NameSpace nameSpace)
         {
             //  always_construct::= always statement
             System.Diagnostics.Debug.Assert(word.Text == "defparam");
+            IndexReference beginIndexReference = word.CreateIndexReference();
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
@@ -35,6 +38,14 @@ namespace pluginVerilog.Verilog.Items
             {
                 word.AddError("; required");
             }
+
+            // register the region of the whole "defparam ... ;" statement
+            ParameterOverride parameterOverride = new ParameterOverride()
+            {
+                BeginIndexReference = beginIndexReference,
+                LastIndexReference = word.CreateIndexReferenceBefore()
+            };
+            if (!word.Prototype && word.CompletionContext == null) nameSpace.DocumentRegions.Add(parameterOverride);
             return true;
         }
     }

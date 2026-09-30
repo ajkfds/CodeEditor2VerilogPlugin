@@ -94,6 +94,54 @@ namespace pluginVerilog.Verilog
                     CodeEditor2.Controller.AppendLog("AlwaysConstruct.ParseCreate");
                     Verilog.Items.AlwaysConstruct.ParseCreate(word, NameSpace);
                 }
+            }else if(documentRegion is Verilog.Items.InitialConstruct)
+            {
+                // partial parse of "initial ..." statement: propagate completionContext to statements
+                if (word.Text == "initial")
+                {
+                    CodeEditor2.Controller.AppendLog("InitialConstruct.ParseCreate");
+                    Verilog.Items.InitialConstruct.ParseCreate(word, NameSpace);
+                }
+            }else if(documentRegion is Verilog.Items.FinalConstruct)
+            {
+                // partial parse of "final ..." statement: propagate completionContext to statements
+                if (word.Text == "final")
+                {
+                    CodeEditor2.Controller.AppendLog("FinalConstruct.ParseCreate");
+                    Verilog.Items.FinalConstruct.ParseCreate(word, NameSpace);
+                }
+            }else if(documentRegion is Verilog.Items.ProgramInstantiation)
+            {
+                #pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
+                CodeEditor2.Controller.AppendLog("ProgramInstantiation.ParseAsync");
+                Verilog.Items.ProgramInstantiation.ParseAsync(word, NameSpace).GetAwaiter().GetResult();
+                #pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
+            }else if(documentRegion is Verilog.Items.InterfaceInstance)
+            {
+                CodeEditor2.Controller.AppendLog("InterfaceInstance.Parse");
+                Verilog.Items.InterfaceInstance.Parse(word, NameSpace);
+            }else if(documentRegion is Verilog.Items.BindDirective)
+            {
+                if (word.Text == "bind")
+                {
+                    CodeEditor2.Controller.AppendLog("BindDirective.Parse");
+                    Verilog.Items.BindDirective? bindDirective;
+                    Verilog.Items.BindDirective.Parse(word, NameSpace, out bindDirective);
+                }
+            }else if(documentRegion is Verilog.Items.NetAlias)
+            {
+                if (word.Text == "alias")
+                {
+                    CodeEditor2.Controller.AppendLog("NetAlias.Parse");
+                    Verilog.Items.NetAlias.Parse(word, NameSpace);
+                }
+            }else if(documentRegion is Verilog.Items.ParameterOverride)
+            {
+                if (word.Text == "defparam")
+                {
+                    CodeEditor2.Controller.AppendLog("ParameterOverride.Parse");
+                    Verilog.Items.ParameterOverride.Parse(word, NameSpace);
+                }
             }else if(documentRegion is Verilog.Statements.CaseStatement)
             {
                 // partial parse of case statement: propagate completionContext (via WordScanner)

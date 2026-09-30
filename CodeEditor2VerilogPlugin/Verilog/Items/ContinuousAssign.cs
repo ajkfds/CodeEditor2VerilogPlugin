@@ -4,11 +4,14 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Items
 {
-    public class ContinuousAssign
+    public class ContinuousAssign : IDocumentRegeion
     {
         protected ContinuousAssign() { }
         public DriveStrength? DriveStrength;
         public Delay3? Delay3;
+
+        public required IndexReference BeginIndexReference { get; init; }
+        public IndexReference? LastIndexReference { get; set; } = null;
 
         public DataObjects.VariableAssignment? VariableAssignment { get; protected set; }
 
@@ -29,6 +32,7 @@ namespace pluginVerilog.Verilog.Items
             {
                 System.Diagnostics.Debugger.Break();
             }
+            IndexReference beginIndexReference = word.CreateIndexReference();
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
@@ -47,7 +51,7 @@ namespace pluginVerilog.Verilog.Items
 
             while (!word.Eof)
             {
-                ContinuousAssign continuousAssign = new ContinuousAssign();
+                ContinuousAssign continuousAssign = new ContinuousAssign() { BeginIndexReference = beginIndexReference };
                 continuousAssign.DriveStrength = driveStrength;
                 continuousAssign.Delay3 = delay3;
 
@@ -98,6 +102,18 @@ namespace pluginVerilog.Verilog.Items
             else
             {
             }
+
+            // register the region of the whole "assign ... ;" statement
+            IndexReference lastIndexReference = word.CreateIndexReferenceBefore();
+            foreach (ContinuousAssign continuousAssign in continuousAssigns)
+            {
+                continuousAssign.LastIndexReference = lastIndexReference;
+            }
+            if (!word.Prototype && word.CompletionContext == null && continuousAssigns.Count != 0)
+            {
+                nameSpace.DocumentRegions.Add(continuousAssigns[0]);
+            }
+
             return continuousAssigns;
         }
     }
