@@ -229,6 +229,22 @@ namespace pluginVerilog.Verilog
                 target = sourceClass;
             }
 
+            if (target is Verilog.Items.IBuildingBlockInstantiation instTarget)
+            {
+                // module / interface / program / udp instantiation: resolve the instanced
+                // building block (e.g. hierarchical reference "module_instance1." members)
+                BuildingBlock? instancedBuildingBlock = instTarget.GetInstancedBuildingBlock();
+                if (instancedBuildingBlock == null) return;
+                target = instancedBuildingBlock;
+            }
+
+            if (target is DataObjects.Variables.VirtualInterface virtualInterfaceTarget)
+            {
+                Verilog.BuildingBlocks.Interface? sourceInterface = virtualInterfaceTarget.GetSourceInterface();
+                if (sourceInterface == null) return;
+                target = sourceInterface;
+            }
+
             foreach (INamedElement subElement in target.NamedElements.Values)
             {
                 if (CandidateWord != "" && !subElement.Name.StartsWith(CandidateWord)) continue;

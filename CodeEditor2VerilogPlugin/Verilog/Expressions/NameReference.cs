@@ -239,7 +239,10 @@ namespace pluginVerilog.Verilog.Expressions
                 nameReference.Separators[nameReference.Separators.Count - 1] == ".")
             {
                 (INamedElement? memberElement, INamedElement? memberTarget) = nameReference.GetElement(nameSpace);
-                INamedElement? memberRoot = memberTarget ?? memberElement;
+                // prefer the resolved element itself (module instance / object / etc.)
+                // memberTarget is the name space containing the element; using it would
+                // show sibling elements instead of the instance's own members
+                INamedElement? memberRoot = memberElement ?? memberTarget;
                 if (memberRoot != null) word.CompletionContext.AppendSubElements(memberRoot);
             }
 
