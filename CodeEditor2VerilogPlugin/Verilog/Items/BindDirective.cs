@@ -115,22 +115,29 @@ namespace pluginVerilog.Verilog.Items
                 return true;
             }
 
-            // resolve target scope (module / interface identifier) in DefinitionNameSpace
+            // distinguish bind_target_scope form from bind_target_instance form
+            // bind_target_scope ::= module_identifier | interface_identifier  (definition name, followed by ":" list)
+            // bind_target_instance ::= hierarchical_identifier (instance path in the current hierarchy)
+            // note: only the bind_target_scope form refers to a definition name.
+            // for the bind_target_instance form (contains "." or no ":" follows), the identifier is
+            // an instance path and must NOT be resolved as a definition name.
             string[] targetParts = targetScopeOrInstance.Split('.');
             string targetTopName = targetParts[0];
-            BuildingBlocks.BuildingBlock? targetBuildingBlock = word.ProjectProperty.DefinitionNameSpace.Get(targetTopName) as BuildingBlocks.BuildingBlock;
-            if (targetBuildingBlock != null)
+            bool isTargetScopeForm = targetParts.Length == 1 && word.Text == ":";
+            if (isTargetScopeForm)
             {
-                // bind target scope / target instance always refers to DefinitionNameSpace
-                // (module / interface / program / checker instantiation: class never appears)
-                if (!word.RootParsedDocument.ReferencedDefinitionNameSpace.Contains(targetTopName)) word.RootParsedDocument.ReferencedDefinitionNameSpace.Add(targetTopName);
+                BuildingBlocks.BuildingBlock? targetBuildingBlock = word.ProjectProperty.DefinitionNameSpace.Get(targetTopName) as BuildingBlocks.BuildingBlock;
+                if (targetBuildingBlock != null)
+                {
+                    // bind_target_scope refers to DefinitionNameSpace
+                    // (module / interface identifier: class never appears)
+                    if (!word.RootParsedDocument.ReferencedDefinitionNameSpace.Contains(targetTopName)) word.RootParsedDocument.ReferencedDefinitionNameSpace.Add(targetTopName);
+                }
+                else
+                {
+                    word.AddError("unfound bind target");
+                }
             }
-            else
-            {
-                word.AddError("unfound bind target");
-            }
-            // bind_target_scope form: [":" bind_target_instance_list]
-            // bind_target_instance form: hierarchical_identifier (already includes "." path)
             bind.TargetScope = targetTopName;
             if (targetParts.Length == 1 && word.Text == ":")
             {
@@ -254,6 +261,7 @@ namespace pluginVerilog.Verilog.Items
                     {
                         word.MoveNext();
                         parsePortConnections(word, nameSpace, instancedBuildingBlock, bindItem.PortConnections);
+                        if (word.Text == ")") word.MoveNext();
                     }
                 }
                 bind.BindItems.Add(bindItem);
