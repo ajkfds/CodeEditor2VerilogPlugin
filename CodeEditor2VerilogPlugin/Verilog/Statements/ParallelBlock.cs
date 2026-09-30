@@ -56,12 +56,12 @@ namespace pluginVerilog.Verilog.Statements
         par_block               ::= fork [ : block_identifier { block_item_declaration } ] { statement } join
         seq_block          ::= begin[ : block_identifier { block_item_declaration } ] { statement } end  
         */
-        public static IStatement? ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
+        public static IStatement? ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label, string? blockIdentifier = null)
         {
             if (word.Text != "fork") throw new Exception();
             word.Color(CodeDrawStyle.ColorType.Keyword);
             IndexReference beginIndex = word.CreateIndexReference();
-            word.MoveNext(); // begin
+            word.MoveNext(); // fork
 
             if (word.Text == ":")
             {
@@ -69,6 +69,12 @@ namespace pluginVerilog.Verilog.Statements
             }
             else
             {
+                // statement label (name: fork) is carried as blockIdentifier
+                // (same rule as SequentialBlock.ParseCreate)
+                if (blockIdentifier != null)
+                {
+                    return parseNamedParallelBlock(word, nameSpace, beginIndex, blockIdentifier);
+                }
                 return parseParallelBlock(word, nameSpace, beginIndex);
             }
         }
@@ -113,25 +119,32 @@ namespace pluginVerilog.Verilog.Statements
         private static List<string> endKeyword = new List<string> { "endmodule", "endtask", "endtask", "endinterface", "endfunction" };
         private static List<string> join_families = new List<string> { "join", "join_any", "join_none" };
 
-        private static IStatement parseNamedParallelBlock(WordScanner word, NameSpace nameSpace, IndexReference beginIndex)
+        private static IStatement parseNamedParallelBlock(WordScanner word, NameSpace nameSpace, IndexReference beginIndex, string? blockIdentifier = null)
         {
             NamedParallelBlock namedBlock;
             string name = "";
 
-            word.MoveNext(); // :
-            if (!General.IsIdentifier(word.Text))
-            {
-                word.AddError("illegal ifdentifier name");
-                return parseParallelBlock(word, nameSpace, beginIndex);
+            if (blockIdentifier == null)
+            { // fork : name  form
+                word.MoveNext(); // :
+                if (!General.IsIdentifier(word.Text))
+                {
+                    word.AddError("illegal ifdentifier name");
+                    return parseParallelBlock(word, nameSpace, beginIndex);
+                }
+                name = word.Text;
+            }
+            else
+            { // name : fork  form (statement label, ":" already consumed)
+                name = blockIdentifier;
             }
 
             if (word.Prototype)
             { // protptype
-                if (nameSpace.NamedElements.ContainsKey(word.Text))
+                if (nameSpace.NamedElements.ContainsKey(name))
                 {
                     word.AddError("duplicated name");
-                    name = word.Text;
-                    word.MoveNext();
+                    if (blockIdentifier == null) word.MoveNext();
                     return parseParallelBlock(word, nameSpace, beginIndex);
                 }
                 else
@@ -140,7 +153,7 @@ namespace pluginVerilog.Verilog.Statements
                     {
                         BeginIndexReference = beginIndex,
                         DefinitionReference = word.CrateWordReference(),
-                        Name = word.Text,
+                        Name = name,
                         Parent = nameSpace,
                         Project = word.Project
                     };
@@ -149,10 +162,10 @@ namespace pluginVerilog.Verilog.Statements
             }
             else
             { // implementation
-                if (nameSpace.NamedElements.ContainsKey(word.Text) && nameSpace.NamedElements[word.Text] is NamedParallelBlock)
+                if (nameSpace.NamedElements.ContainsKey(name) && nameSpace.NamedElements[name] is NamedParallelBlock)
                 {
                     word.Color(CodeDrawStyle.ColorType.Identifier);
-                    namedBlock = (NamedParallelBlock)nameSpace.NamedElements[word.Text];
+                    namedBlock = (NamedParallelBlock)nameSpace.NamedElements[name];
                 }
                 else
                 {
@@ -160,14 +173,16 @@ namespace pluginVerilog.Verilog.Statements
                     {
                         BeginIndexReference = beginIndex,
                         DefinitionReference = word.CrateWordReference(),
-                        Name = word.Text,
+                        Name = name,
                         Parent = nameSpace,
                         Project = word.Project
                     };
                     nameSpace.NamedElements.Add(namedBlock.Name, namedBlock);
                 }
             }
-            word.MoveNext();
+            if (blockIdentifier == null) word.MoveNext(); // consume name (fork : name form)
+
+            if (!word.Prototype && word.CompletionContext == null) nameSpace.DocumentRegions.Add(namedBlock);
 
             while (!word.Eof && !join_families.Contains(word.Text))
             {
@@ -230,10 +245,11 @@ namespace pluginVerilog.Verilog.Statements
         }
     }
 
-    public class NamedParallelBlock : Verilog.NameSpace, IStatement
+    public class NamedParallelBlock : Verilog.NameSpace, IStatement, Items.IDocumentRegeion
     {
         // BeginIndexReference / LastIndexReference are inherited from NameSpace,
         // which satisfies IStatement / Items.IDocumentRegeion requirements
+        // (same rule as NamedSequentialBlock)
         public void DisposeSubReference()
         {
             foreach (IStatement statement in Statements)

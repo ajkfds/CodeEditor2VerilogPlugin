@@ -666,16 +666,42 @@ namespace pluginVerilog.Verilog.Expressions
                 }
                 index++;
             }
-            try
+            //try
+            //{
+            //    number.Value = Convert.ToInt32(sb.ToString(), 8);
+            //    number.Constant = true;
+            //}
+            //catch
+            //{
+
+            //}
+            string str = sb.ToString();
+
+            if (TryParseOctal(str, out int val))
             {
-                number.Value = Convert.ToInt32(sb.ToString(), 8);
+                number.Value = val;
                 number.Constant = true;
             }
-            catch
-            {
-
-            }
             word.MoveNext();
+            return true;
+        }
+
+        // 8進数文字列を安全に int に変換するヘルパーメソッド
+        static bool TryParseOctal(string s, out int result)
+        {
+            result = 0;
+            if (string.IsNullOrEmpty(s)) return false;
+
+            long acc = 0; // 溢れチェック用に long を使用
+            foreach (char c in s)
+            {
+                if (c < '0' || c > '7') return false; // 8進数以外（8, 9, 文字など）なら失敗
+
+                acc = (acc << 3) + (c - '0'); // 8倍して加算 (acc * 8 + val)
+                if (acc > int.MaxValue) return false; // int の最大値を超えたら失敗
+            }
+
+            result = (int)acc;
             return true;
         }
 

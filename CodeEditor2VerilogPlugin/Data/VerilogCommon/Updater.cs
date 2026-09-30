@@ -308,7 +308,7 @@ namespace pluginVerilog.Data.VerilogCommon
                         };
 
                         InterfaceInstance? instance = InterfaceInstance.Create(interfaceInstantiation, project);
-                        if (instance == null) throw new Exception();
+                        if (instance == null) continue;
 
                         newSubItems.Add(instance.Name, instance);
                     }
