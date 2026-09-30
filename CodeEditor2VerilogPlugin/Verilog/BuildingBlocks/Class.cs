@@ -305,7 +305,6 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 parseClassItems(word, nameSpace, parameterOverrides, null, class_);
             }
 
-            parseClassItems(word, nameSpace, parameterOverrides, null, class_);
             /*
             if (!word.CellDefine && !word.Prototype)
             {

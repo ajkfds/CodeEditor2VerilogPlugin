@@ -273,7 +273,9 @@ namespace pluginVerilog. Data
                 {
                     // Handle DataObject - check if it's a Class or InterfaceClass instance
                     DataObject dataObject = (DataObject)element;
-                    if (dataObject.DataType is ClassType)
+                    // Variables.Object holds BuildingBlocks.Class itself as DataType (not ClassType).
+                    // UserDefinedVariable holds UserDefinedType (typedef of class / interface class).
+                    if (dataObject.DataType is ClassType || dataObject.DataType is Class || dataObject.DataType is UserDefinedType)
                     {
                         appendClassInstance(file, dataObject, setup);
                     }
@@ -387,7 +389,8 @@ namespace pluginVerilog. Data
             {
                 if (userDefinedVariable.DataType is UserDefinedType userDefinedType)
                 {
-                    IVerilogRelatedFile? sourceFile = projectProperty.DefinitionNameSpace.GetFile(userDefinedType.Typedef.Name);
+                    // typedef is registered to UnitNameSpace (compilation-unit scope), not DefinitionNameSpace
+                    IVerilogRelatedFile? sourceFile = projectProperty.UnitNameSpace.GetFile(userDefinedType.Typedef.Name);
                     if (sourceFile == null) return;
 
                     if (sourceFile is pluginVerilog.Data.VerilogFile || sourceFile is SystemVerilogFile)

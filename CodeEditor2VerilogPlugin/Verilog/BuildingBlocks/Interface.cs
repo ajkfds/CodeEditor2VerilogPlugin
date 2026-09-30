@@ -233,7 +233,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
 
 
-            if (interface_.Parent != null)
+            if (word.CompletionContext != null)
+            {
+                // do not update building block tree @ code completion partial parse
+            }
+            else if (interface_.Parent != null)
             {
                 if (interface_.Parent.NamedElements.ContainsKey(interface_.Name))
                 {
