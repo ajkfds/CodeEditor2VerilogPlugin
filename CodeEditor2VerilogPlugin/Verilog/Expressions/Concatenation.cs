@@ -345,9 +345,10 @@ namespace pluginVerilog.Verilog.Expressions
                 word.SkipToKeyword("}");
                 return null;
             }
+            word.MoveNext(); // } of stream_concatenation
 
             streaming.Reference = WordReference.CreateReferenceRange(reference, word.GetReference());
-            word.MoveNext(); // }
+            word.MoveNext(); // } of streaming_concatenation
 
             return streaming;
         }
@@ -452,9 +453,10 @@ namespace pluginVerilog.Verilog.Expressions
                 word.SkipToKeyword("}");
                 return null;
             }
+            word.MoveNext(); // } of stream_concatenation
 
             streaming.Reference = WordReference.CreateReferenceRange(reference, word.GetReference());
-            word.MoveNext(); // }
+            word.MoveNext(); // } of streaming_concatenation
 
             return streaming;
         }
