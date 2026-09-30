@@ -198,6 +198,14 @@ namespace pluginVerilog.Data
                             continue;
                         }
 
+                        // interface class is defined at compilation-unit scope: register to UnitNameSpace (not DefinitionNameSpace)
+                        InterfaceClass? interfaceClass = element as InterfaceClass;
+                        if(interfaceClass != null)
+                        {
+                            ProjectProperty.UnitNameSpace.Register(interfaceClass.Name, interfaceClass, this);
+                            continue;
+                        }
+
                         BuildingBlock? buildingBlock = element as BuildingBlock;
                         if(buildingBlock != null) {
                             ProjectProperty.DefinitionNameSpace.Register(buildingBlock.Name, buildingBlock, this);

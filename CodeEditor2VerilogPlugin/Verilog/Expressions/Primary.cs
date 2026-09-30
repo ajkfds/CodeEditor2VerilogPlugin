@@ -491,7 +491,8 @@ number
             if (dataObjectReference.TargetDataObject is DataObjects.Variables.Object)
             {
                 obj = (DataObjects.Variables.Object)dataObjectReference.TargetDataObject;
-                if (!word.RootParsedDocument.ReferencedUnitNameSpace.Contains(obj.Name)) word.RootParsedDocument.ReferencedUnitNameSpace.Add(obj.Name);
+                // register the source class name (not the variable name) to UnitNameSpace reference list
+                if (!word.RootParsedDocument.ReferencedUnitNameSpace.Contains(obj.SourceName)) word.RootParsedDocument.ReferencedUnitNameSpace.Add(obj.SourceName);
             }
 
             return dataObjectReference;

@@ -278,6 +278,15 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 return interfaceClass;
             }
 
+            // interface class is registered to UnitNameSpace (compilation-unit scope)
+            InterfaceClass? unitInterfaceClass = word.ProjectProperty.UnitNameSpace.Get(word.Text) as InterfaceClass;
+            if (unitInterfaceClass != null)
+            {
+                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.MoveNext();
+                return unitInterfaceClass;
+            }
+
             //if (nameSpace.NamedElements.ContainsKey(word.Text))
             //{
             //    INamedElement namedElement = nameSpace.NamedElements[word.Text];
