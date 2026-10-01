@@ -164,8 +164,6 @@ namespace pluginVerilog.Verilog.Statements
 
                 // par_block 
                 case "fork":
-                    // pass blockIdentifier so that "name : fork ... join : name" creates a named block
-                    // (same rule as SequentialBlock)
                     return ParallelBlock.ParseCreate(word, nameSpace, statement_label, blockIdentifier);
 
                 // ## loop_statement 

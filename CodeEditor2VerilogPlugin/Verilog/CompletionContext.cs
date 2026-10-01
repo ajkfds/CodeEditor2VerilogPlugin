@@ -188,6 +188,16 @@ namespace pluginVerilog.Verilog
                     Verilog.Statements.SequentialBlock.ParseCreate(word, NameSpace, null);
                 }
             }
+            else if(documentRegion is ParallelBlock)
+            {
+                if(word.Text == "fork")
+                {
+                    // partial parse of parallel block: propagate completionContext (via WordScanner)
+                    // to statements inside the block
+                    CodeEditor2.Controller.AppendLog("ParallelBlock.ParseCreate");
+                    Verilog.Statements.ParallelBlock.ParseCreate(word, NameSpace, null);
+                }
+            }
             else if(documentRegion is Verilog.Items.Generate.GenerateBlock)
             {
                 if (word.Text == "begin")

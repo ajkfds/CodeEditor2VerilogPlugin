@@ -56,6 +56,8 @@ namespace pluginVerilog.Verilog.Statements
         par_block               ::= fork [ : block_identifier { block_item_declaration } ] { statement } join
         seq_block          ::= begin[ : block_identifier { block_item_declaration } ] { statement } end  
         */
+        // statement_label: "name : fork" form (label consumed by Statements.ParseCreateStatement)
+        // blockIdentifier: optional pre-consumed block identifier ("name : fork" via Statements.ParseCreateStatement blockIdentifier path)
         public static IStatement? ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label, string? blockIdentifier = null)
         {
             if (word.Text != "fork") throw new Exception();
@@ -63,19 +65,26 @@ namespace pluginVerilog.Verilog.Statements
             IndexReference beginIndex = word.CreateIndexReference();
             word.MoveNext(); // fork
 
+            // statement_label is treated as the block identifier (same rule as SequentialBlock)
+            if (blockIdentifier == null && statement_label != null)
+            {
+                blockIdentifier = statement_label;
+            }
+
             if (word.Text == ":")
             {
-                return parseNamedParallelBlock(word, nameSpace, beginIndex);
+                return parseNamedParallelBlock(word, nameSpace, beginIndex, blockIdentifier);
             }
             else
             {
-                // statement label (name: fork) is carried as blockIdentifier
-                // (same rule as SequentialBlock.ParseCreate)
                 if (blockIdentifier != null)
                 {
                     return parseNamedParallelBlock(word, nameSpace, beginIndex, blockIdentifier);
                 }
-                return parseParallelBlock(word, nameSpace, beginIndex);
+                else
+                {
+                    return parseParallelBlock(word, nameSpace, beginIndex);
+                }
             }
         }
 
@@ -119,13 +128,19 @@ namespace pluginVerilog.Verilog.Statements
         private static List<string> endKeyword = new List<string> { "endmodule", "endtask", "endtask", "endinterface", "endfunction" };
         private static List<string> join_families = new List<string> { "join", "join_any", "join_none" };
 
-        private static IStatement parseNamedParallelBlock(WordScanner word, NameSpace nameSpace, IndexReference beginIndex, string? blockIdentifier = null)
+        // blockIdentifier is not null for the "name : fork" form (identifier already consumed by Statements.ParseCreateStatement)
+        // and null for the "fork : name" form (identifier is consumed here)
+        private static IStatement parseNamedParallelBlock(WordScanner word, NameSpace nameSpace, IndexReference beginIndex, string? blockIdentifier)
         {
             NamedParallelBlock namedBlock;
-            string name = "";
+            string name;
 
-            if (blockIdentifier == null)
-            { // fork : name  form
+            if (blockIdentifier != null)
+            { // "name : fork" form: identifier already consumed
+                name = blockIdentifier;
+            }
+            else
+            { // "fork : name" form: consume the identifier here
                 word.MoveNext(); // :
                 if (!General.IsIdentifier(word.Text))
                 {
@@ -133,10 +148,6 @@ namespace pluginVerilog.Verilog.Statements
                     return parseParallelBlock(word, nameSpace, beginIndex);
                 }
                 name = word.Text;
-            }
-            else
-            { // name : fork  form (statement label, ":" already consumed)
-                name = blockIdentifier;
             }
 
             if (word.Prototype)
@@ -180,9 +191,7 @@ namespace pluginVerilog.Verilog.Statements
                     nameSpace.NamedElements.Add(namedBlock.Name, namedBlock);
                 }
             }
-            if (blockIdentifier == null) word.MoveNext(); // consume name (fork : name form)
-
-            if (!word.Prototype && word.CompletionContext == null) nameSpace.DocumentRegions.Add(namedBlock);
+            if (blockIdentifier == null) word.MoveNext();
 
             while (!word.Eof && !join_families.Contains(word.Text))
             {
@@ -240,6 +249,9 @@ namespace pluginVerilog.Verilog.Statements
                 nameSpace.NamedElements.Add(namedBlock.Name, namedBlock);
             }
 
+            // register as document region for autocomplete / hint partial parse (same rule as NamedSequentialBlock)
+            if (!word.Prototype && word.CompletionContext == null) nameSpace.DocumentRegions.Add(namedBlock);
+
             return namedBlock;
 
         }
@@ -249,7 +261,6 @@ namespace pluginVerilog.Verilog.Statements
     {
         // BeginIndexReference / LastIndexReference are inherited from NameSpace,
         // which satisfies IStatement / Items.IDocumentRegeion requirements
-        // (same rule as NamedSequentialBlock)
         public void DisposeSubReference()
         {
             foreach (IStatement statement in Statements)
