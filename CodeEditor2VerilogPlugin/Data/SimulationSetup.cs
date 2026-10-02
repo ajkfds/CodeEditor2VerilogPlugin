@@ -194,7 +194,16 @@ namespace pluginVerilog. Data
             {
                 Class? class_ = parsedDocument.ProjectProperty?.UnitNameSpace.GetFile(className) as Class;
                 if (parsedDocument.Project == null) continue;
-                if (class_ != null) appendClass(className, parsedDocument.Project, setup);
+                if (class_ != null)
+                {
+                    appendClass(className, parsedDocument.Project, setup, ids);
+                }
+                else
+                {
+                    // referenced class definition is missing: report as file shortage
+                    // so that simulation startup is refused later in Create()
+                    if (!setup.UnfoundModules.Contains(className)) setup.UnfoundModules.Add(className);
+                }
             }
 
             foreach (var ifile in parsedDocument. IncludeFiles. Values)
@@ -204,13 +213,38 @@ namespace pluginVerilog. Data
 
             foreach (string cFile in parsedDocument.ReferencedUnitNameSpace)
             {
-                appendClass(cFile, file.Project, setup);
+                appendClass(cFile, file.Project, setup, ids);
+            }
+
+            // bind directives / program / udp / interface references are registered
+            // to ReferencedDefinitionNameSpace during parse. Collect their definition
+            // files here; a missing definition is reported as file shortage.
+            foreach (string definitionName in parsedDocument.ReferencedDefinitionNameSpace)
+            {
+                ProjectProperty? projectProperty = file.ProjectProperty;
+                if (projectProperty == null) continue;
+                // external library modules are provided by external file paths, not project files
+                if (parsedDocument.ExternalRefrenceModules.Contains(definitionName)) continue;
+                if (projectProperty.ExtenralModuleLibraryPath.ContainsKey(definitionName)) continue;
+                if (projectProperty.ExtenralPrimitiveLibraryPath.ContainsKey(definitionName)) continue;
+                IVerilogRelatedFile? defFile = projectProperty.DefinitionNameSpace.GetFile(definitionName);
+                if (defFile != null)
+                {
+                    // recurse into the referenced definition file so that its own
+                    // module / class / package dependencies are collected as well
+                    searchHier(defFile, definitionName, ids, setup, path);
+                }
+                else if (!setup.UnfoundModules.Contains(definitionName))
+                {
+                    // referenced module/interface/program/udp definition file is missing
+                    setup.UnfoundModules.Add(definitionName);
+                }
             }
 
             // Process imported packages
             foreach (string packageName in parsedDocument. ImportedPackages)
             {
-                appendImportedPackage(packageName, file. Project, setup);
+                appendImportedPackage(packageName, file. Project, setup, ids);
             }
 
             if(!parsedDocument. Root. BuildingBlocks. TryGetValue(buildingBlockName,out BuildingBlock? buildingBlock))
@@ -269,6 +303,18 @@ namespace pluginVerilog. Data
                         if (subfile != null) searchHier(subfile, moduleInstantiation.SourceName, ids, setup, newPath);
                     }
                 }
+                else if (element is Verilog.Items.ProgramInstantiation)
+                {
+                    // program instantiation: collect the program definition file
+                    // (definition lookup failure is reported by searchHier via
+                    //  ReferencedDefinitionNameSpace, so nothing to do here)
+                }
+                else if (element is Verilog.Items.UdpInstantiation)
+                {
+                    // udp instantiation: collect the udp (primitive) definition file
+                    // (definition lookup failure is reported by searchHier via
+                    //  ReferencedDefinitionNameSpace, so nothing to do here)
+                }
                 else if (element is DataObject)
                 {
                     // Handle DataObject - check if it's a Class or InterfaceClass instance
@@ -282,6 +328,11 @@ namespace pluginVerilog. Data
                     else if (dataObject.DataType is InterfaceClass)
                     {
                         appendInterfaceClassInstance(file, dataObject, setup);
+                    }
+                    else if (dataObject is Verilog.DataObjects.Variables.VirtualInterface)
+                    {
+                        // virtual interface: collect the interface definition file
+                        appendVirtualInterfaceInstance(file, (Verilog.DataObjects.Variables.VirtualInterface)dataObject, setup);
                     }
                 }
             }
@@ -427,6 +478,37 @@ namespace pluginVerilog. Data
             }
         }
 
+        private static void appendVirtualInterfaceInstance(IVerilogRelatedFile file, Verilog.DataObjects.Variables.VirtualInterface virtualInterface, SimulationSetup setup)
+        {
+            // collect the interface definition file referenced by a virtual interface variable.
+            // missing interface definition is reported as file shortage so that simulation
+            // startup is refused later in Create()
+            Verilog.BuildingBlocks.Interface? sourceInterface = virtualInterface.GetSourceInterface();
+            if (sourceInterface == null)
+            {
+                Verilog.DataObjects.DataTypes.VirtualInterfaceType? dataType = virtualInterface.DataType as Verilog.DataObjects.DataTypes.VirtualInterfaceType;
+                string? interfaceName = dataType?.InterfaceIdentifier;
+                if (!string.IsNullOrEmpty(interfaceName) && !setup.UnfoundModules.Contains(interfaceName))
+                {
+                    setup.UnfoundModules.Add(interfaceName);
+                }
+                return;
+            }
+
+            ProjectProperty? declaringProjectProperty = file.ProjectProperty;
+            if (declaringProjectProperty == null) return;
+
+            IVerilogRelatedFile? interfaceFile = declaringProjectProperty.DefinitionNameSpace.GetFile(sourceInterface.Name);
+            if (interfaceFile == null)
+            {
+                if (!setup.UnfoundModules.Contains(sourceInterface.Name)) setup.UnfoundModules.Add(sourceInterface.Name);
+                return;
+            }
+
+            if (setup.Files.Contains(interfaceFile)) return;
+            setup.Files.Add(interfaceFile);
+        }
+
         private static void appendVerilogHeaderInstance(VerilogHeaderInstance file, SimulationSetup setup)
         {
             if (file. Project == setup. Project)
@@ -461,40 +543,49 @@ namespace pluginVerilog. Data
 
         }
 
-        private static void appendImportedPackage(string packageName, CodeEditor2. Data. Project project, SimulationSetup setup)
+        private static void appendImportedPackage(string packageName, CodeEditor2. Data. Project project, SimulationSetup setup, List<string> ids)
         {
             // Search for the package file in the project
             IVerilogRelatedFile? packageFile = findPackageFile(packageName, project, setup);
             if (packageFile == null) return;
 
             // Add to ImportFiles
-            if (packageFile. Project == setup. Project)
+            if (packageFile.Project == setup.Project)
             {
-                if (setup. ImportFiles. Contains(packageFile)) return;
-                setup. ImportFiles. Add(packageFile);
+                if (setup.ImportFiles.Contains(packageFile)) return;
+                setup.ImportFiles.Add(packageFile);
             }
             else
             {
                 // Handle external project reference
-                CodeEditor2. Data. Project extProject = packageFile. Project;
+                CodeEditor2.Data.Project extProject = packageFile.Project;
                 SimulationSetup pSetup;
-                if (!setup. ExternalProjectReferences. ContainsKey(extProject))
+                if (!setup.ExternalProjectReferences.ContainsKey(extProject))
                 {
                     pSetup = new SimulationSetup() { Project = extProject };
-                    setup. ExternalProjectReferences. Add(extProject, pSetup);
+                    setup.ExternalProjectReferences.Add(extProject, pSetup);
                 }
                 else
                 {
-                    pSetup = setup. ExternalProjectReferences[extProject];
+                    pSetup = setup.ExternalProjectReferences[extProject];
                 }
-                if (pSetup. ImportFiles. Contains(packageFile)) return;
-                pSetup. ImportFiles. Add(packageFile);
+                if (pSetup.ImportFiles.Contains(packageFile)) return;
+                pSetup.ImportFiles.Add(packageFile);
             }
+
+            // package file may itself reference other packages / classes: trace them
+            // (also reports missing references in the package as file shortage)
+            searchHier(packageFile, packageName, ids, setup, "");
         }
-        private static void appendClass(string  className, CodeEditor2.Data.Project project, SimulationSetup setup)
+        private static void appendClass(string  className, CodeEditor2.Data.Project project, SimulationSetup setup, List<string> ids)
         {
             IVerilogRelatedFile? classFile = findClassFile(className, project, setup);
-            if (classFile == null) return;
+            if (classFile == null)
+            {
+                // referenced class definition file is missing: report as file shortage
+                if (!setup.UnfoundModules.Contains(className)) setup.UnfoundModules.Add(className);
+                return;
+            }
 
             // Add to ImportFiles
             if (classFile.Project == setup.Project)
@@ -519,6 +610,10 @@ namespace pluginVerilog. Data
                 if (pSetup.ClassFiles.Contains(classFile)) return;
                 pSetup.ClassFiles.Add(classFile);
             }
+
+            // class file may itself reference other classes / packages: trace them
+            // (also reports missing references in the class file as file shortage)
+            searchHier(classFile, className, ids, setup, "");
         }
 
         private static IVerilogRelatedFile? findPackageFile(string packageName, CodeEditor2. Data. Project project, SimulationSetup setup)

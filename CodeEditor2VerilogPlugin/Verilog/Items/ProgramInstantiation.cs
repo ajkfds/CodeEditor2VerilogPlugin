@@ -153,6 +153,10 @@ namespace pluginVerilog.Verilog.Items
             string programName = word.Text;
             IndexReference beginIndexReference = word.CreateIndexReference();
 
+            // Register the referenced program name so that SimulationSetup can collect
+            // the program definition file (missing definition is reported as unfound there).
+            if (!word.RootParsedDocument.ReferencedDefinitionNameSpace.Contains(programName)) word.RootParsedDocument.ReferencedDefinitionNameSpace.Add(programName);
+
             // Get the instanced program
             Program? instancedProgram = word.ProjectProperty.DefinitionNameSpace.Get(programName) as Program;
             if (instancedProgram == null)
