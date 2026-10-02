@@ -426,7 +426,17 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         word.MoveNext();
                         while (!word.Eof)
                         {
-                            if (word.Text == "parameter") Verilog.DataObjects.Constants.Parameter.ParseCreateDeclarationForPort(word, class_, null);
+                            if (word.Text == "parameter")
+                            {
+                                IndexReference beforeParamRef = word.CreateIndexReference();
+                                Verilog.DataObjects.Constants.Parameter.ParseCreateDeclarationForPort(word, class_, null);
+                                if (beforeParamRef.IsSameAs(word.CreateIndexReference()))
+                                {   // error recovery: no progress on broken parameter declaration
+                                    // consume one token to keep the loop advancing
+                                    word.AddError("illegal parameter declaration");
+                                    word.MoveNext();
+                                }
+                            }
                             if (word.Text != ",")
                             {
                                 if (word.Text == ")") break;
@@ -694,7 +704,16 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     {
                         if (word.Text == "endclass") break;
                         word.AddError("illegal class item");
-                        word.MoveNext();
+                        // error recovery: skip to the end of the broken item,
+                        // stop at structural boundaries to keep the rest parseable
+                        if (!word.SkipToKeyword(";"))
+                        {
+                            word.MoveNext();
+                        }
+                        else
+                        {
+                            if (word.Text == ";") word.MoveNext();
+                        }
                     }
                 }
                 break;

@@ -293,6 +293,13 @@ namespace pluginVerilog
 
             // etc
             "pulldown","pullup",
+
+            // structural boundaries (used by SkipToKeyword / SkipToKeywords to keep
+            // error recovery from running past enclosing / sibling block ends)
+            "endclass","endinterface","endpackage","endprogram",
+            "endprimitive","endtable","endclocking","endspecify",
+            "endgenerate","endcase",
+            "join","join_any","join_none",
         };
 
     }

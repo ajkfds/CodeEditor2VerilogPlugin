@@ -97,7 +97,7 @@ namespace pluginVerilog.Verilog.Statements
             }
         }
 
-        private static List<string> endKeyword = new List<string> { "endmodule", "endtask", "endtask", "endinterface", "endfunction" };
+        private static List<string> endKeyword = new List<string> { "endmodule", "endtask", "endinterface", "endfunction", "endclass", "endcase", "endprimitive", "join", "join_any", "join_none", "else", "endpackage", "endprogram" };
         private static IStatement? parseCreateUnnamedSequentialBlock(WordScanner word, NameSpace nameSpace, IndexReference beginIndex, List<string>? clockDomains = null, CompletionContext? completionContext = null)
         {
             SequentialBlock sequentialBlock = new SequentialBlock() { BeginIndexReference = beginIndex };

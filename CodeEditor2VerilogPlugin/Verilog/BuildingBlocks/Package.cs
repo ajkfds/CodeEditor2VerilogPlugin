@@ -224,7 +224,16 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     {
                         if (word.Text == "endpackage") break;
                         word.AddError("illegal package item");
-                        word.MoveNext();
+                        // error recovery: skip to the end of the broken item,
+                        // stop at structural boundaries to keep the rest parseable
+                        if (!word.SkipToKeyword(";"))
+                        {
+                            word.MoveNext();
+                        }
+                        else
+                        {
+                            if (word.Text == ";") word.MoveNext();
+                        }
                     }
                 }
                 break;

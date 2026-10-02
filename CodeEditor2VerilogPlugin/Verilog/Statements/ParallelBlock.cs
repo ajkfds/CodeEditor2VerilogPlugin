@@ -125,7 +125,7 @@ namespace pluginVerilog.Verilog.Statements
             return sequentialBlock;
         }
 
-        private static List<string> endKeyword = new List<string> { "endmodule", "endtask", "endtask", "endinterface", "endfunction" };
+        private static List<string> endKeyword = new List<string> { "endmodule", "endtask", "endinterface", "endfunction", "endclass", "endcase", "endprimitive", "else", "endpackage", "endprogram" };
         private static List<string> join_families = new List<string> { "join", "join_any", "join_none" };
 
         // blockIdentifier is not null for the "name : fork" form (identifier already consumed by Statements.ParseCreateStatement)
