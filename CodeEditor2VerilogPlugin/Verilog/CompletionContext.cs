@@ -198,6 +198,26 @@ namespace pluginVerilog.Verilog
                     Verilog.Statements.ParallelBlock.ParseCreate(word, NameSpace, null);
                 }
             }
+            else if(documentRegion is Verilog.Statements.NamedSequentialBlock)
+            {
+                // NamedSequentialBlock ("begin : name") does not derive SequentialBlock;
+                // partial parse to propagate completionContext to statements inside the block
+                if(word.Text == "begin")
+                {
+                    CodeEditor2.Controller.AppendLog("SequentialBlock.ParseCreate (named)");
+                    Verilog.Statements.SequentialBlock.ParseCreate(word, NameSpace, null);
+                }
+            }
+            else if(documentRegion is Verilog.Statements.NamedParallelBlock)
+            {
+                // NamedParallelBlock ("fork : name" / "name : fork") does not derive ParallelBlock;
+                // partial parse to propagate completionContext to statements inside the block
+                if(word.Text == "fork")
+                {
+                    CodeEditor2.Controller.AppendLog("ParallelBlock.ParseCreate (named)");
+                    Verilog.Statements.ParallelBlock.ParseCreate(word, NameSpace, null);
+                }
+            }
             else if(documentRegion is Verilog.Items.Generate.GenerateBlock)
             {
                 if (word.Text == "begin")
