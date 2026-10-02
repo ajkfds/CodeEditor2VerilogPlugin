@@ -487,13 +487,64 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     word.Color(CodeDrawStyle.ColorType.Keyword);
                     word.MoveNext();
 
-                    if (!nameSpace.NamedElements.ContainsKey(word.Text) || !(nameSpace.NamedElements[word.Text] is Class))
+                    // class_type ::= [ "$unit" "." ] [ package_scope ] class_identifier
+                    // resolve through package scope (pkg::B) when "::" follows
+                    Class? baseClass = null;
+                    {
+                        // package_scope: ps_identifier :: or $unit .
+                        if (word.NextText == "::" || (word.Text == "$unit" && word.NextText == "."))
+                        {
+                            string scopeName = word.Text;
+                            word.Color(CodeDrawStyle.ColorType.Identifier);
+                            word.MoveNext();
+                            word.MoveNext(); // :: or .
+
+                            if (scopeName == "$unit")
+                            {
+                                INamedElement? unitElement = null;
+                                nameSpace.NamedElements.TryGetValue(word.Text, out unitElement);
+                                baseClass = unitElement as Class;
+                            }
+                            else
+                            {
+                                // resolve via package name space file
+                                var packageFile = word.ProjectProperty.PackageNameSpace.GetFile(scopeName);
+                                if (packageFile != null)
+                                {
+                                    INamedElement? pkgElement = null;
+                                    nameSpace.NamedElements.TryGetValue(word.Text, out pkgElement);
+                                    baseClass = pkgElement as Class;
+                                }
+                            }
+                        }
+                        else if (nameSpace.NamedElements.ContainsKey(word.Text) && nameSpace.NamedElements[word.Text] is Class)
+                        {
+                            baseClass = (Class)nameSpace.NamedElements[word.Text];
+                        }
+                        else
+                        {
+                            // cross-file class resolution via UnitNameSpace / Root building blocks
+                            INamedElement? element = null;
+                            var file = word.ProjectProperty.DefinitionNameSpace.GetFile(word.Text);
+                            if (file != null)
+                            {
+                                baseClass = word.ProjectProperty.DefinitionNameSpace.Get(word.Text) as Class;
+                            }
+                            if (baseClass == null)
+                            {
+                                // cross-file class resolution via DefinitionNameSpace / upward search
+                                BuildingBlock? upward = nameSpace.BuildingBlock.SearchBuildingBlockUpward(word.Text);
+                                baseClass = upward as Class;
+                            }
+                        }
+                    }
+
+                    if (baseClass == null)
                     {
                         word.AddError("illegal class_type");
                     }
                     else
                     {
-                        Class baseClass = (Class)nameSpace.NamedElements[word.Text];
                         class_.ExtendedClass = baseClass; // Store reference to extended class
                         word.Color(CodeDrawStyle.ColorType.Identifier);
                         word.MoveNext();

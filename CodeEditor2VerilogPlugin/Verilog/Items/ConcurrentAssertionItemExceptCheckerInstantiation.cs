@@ -60,6 +60,22 @@ namespace pluginVerilog.Verilog.Items
                 return ConcurrentAssertionStatementItem.ParseCoverSequence(word, nameSpace, blockIdentifier);
             }
 
+            // checker_instantiation ::= ps_checker_identifier name_of_instance ( [list_of_checker_port_connections] ) ;
+            // the checker identifier must resolve to a Checker building block
+            if (blockIdentifier == null && General.IsSimpleIdentifier(word.Text) && word.NextText == "(")
+            {
+                BuildingBlocks.Checker? checker = word.ProjectProperty.DefinitionNameSpace.Get(word.Text) as BuildingBlocks.Checker;
+                if (checker == null)
+                {
+                    BuildingBlocks.BuildingBlock? upperBlock = nameSpace.BuildingBlock.SearchBuildingBlockUpward(word.Text);
+                    checker = upperBlock as BuildingBlocks.Checker;
+                }
+                if (checker != null)
+                {
+                    return CheckerInstantiation.Parse(word, nameSpace, checker);
+                }
+            }
+
             if (blockIdentifier == null) return false;
             return true;
         }

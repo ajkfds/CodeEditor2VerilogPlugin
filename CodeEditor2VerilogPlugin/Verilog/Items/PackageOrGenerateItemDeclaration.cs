@@ -85,7 +85,7 @@ namespace pluginVerilog.Verilog.Items
                     break;
 
                 // checker_declaration
-                // TODO
+                // extern checker_declaration is handled by consuming "extern" below
 
                 // dpi_import_export
                 case "import":
@@ -94,6 +94,10 @@ namespace pluginVerilog.Verilog.Items
                     break;
                 // extern_constraint_declaration
                 // TODO
+                // extern declarations: extern module/interface header, extern_tf_declaration,
+                // extern_constraint_declaration, extern checker_declaration
+                case "extern":
+                    return ExternDeclaration.Parse(word, nameSpace);
 
                 // class_declaration
                 case "virtual":
@@ -139,7 +143,12 @@ namespace pluginVerilog.Verilog.Items
                     }
                     return true;
 
-                // overload_declaration
+                // overload_declaration ::= "function" binary_operator "with" function_identifier ;
+                if (word.Text == "function" && word.NextText != "(" && Items.OverloadDeclaration.IsBinaryOperator(word.NextText))
+                {
+                    OverloadDeclaration.Parse(word, nameSpace);
+                    return true;
+                }
 
                 // assertion_item_declaration
                 case "property":

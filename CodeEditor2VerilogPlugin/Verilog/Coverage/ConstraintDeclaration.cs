@@ -135,6 +135,9 @@ namespace pluginVerilog.Verilog.Coverage
                 word.MoveNext();
             }
 
+            // constraint_prototype ::= [ "static" ] "constraint" constraint_identifier ;
+            bool isPrototype = word.NextText == ";";
+
             if (word.Text != "constraint")
             {
                 return null;
@@ -159,6 +162,22 @@ namespace pluginVerilog.Verilog.Coverage
             };
             word.Color(CodeDrawStyle.ColorType.Identifier);
             word.MoveNext();
+
+            // constraint_prototype : consume the terminating ';' and return without a body
+            if (isPrototype)
+            {
+                if (word.Text == ";")
+                {
+                    word.MoveNext();
+                }
+                else
+                {
+                    word.AddError("; expected");
+                    word.SkipToKeyword(";");
+                    if (word.Text == ";") word.MoveNext();
+                }
+                return constraint;
+            }
 
             // Parse optional constraint_proto_block or single expression
             if (word.Text == "{")

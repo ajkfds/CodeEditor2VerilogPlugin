@@ -32,6 +32,10 @@ namespace pluginVerilog.Verilog.Items
             }
 
             // net_type_declaration
+            if (word.Text == "typedef" && word.NextText == "nettype")
+            {
+                return DataObjects.NetTypeDeclaration.Parse(word, nameSpace);
+            }
             return false;
         }
 

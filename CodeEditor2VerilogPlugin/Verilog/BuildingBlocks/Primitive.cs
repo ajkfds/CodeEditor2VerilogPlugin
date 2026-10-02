@@ -367,30 +367,57 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     word.Color(CodeDrawStyle.ColorType.Keyword);
                     word.MoveNext();
                 }
-                else if (word.Text == "output")
-                {
-                    // Output port declaration
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
-                    word.MoveNext();
-                    // Skip port name
-                    if (General.IsIdentifier(word.Text))
-                    {
-                        word.Color(CodeDrawStyle.ColorType.Variable);
-                        word.MoveNext();
-                    }
-                }
-                else if (word.Text == "input")
-                {
-                    // Input port declaration
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
-                    word.MoveNext();
-                    // Skip port name
-                    if (General.IsIdentifier(word.Text))
-                    {
-                        word.Color(CodeDrawStyle.ColorType.Variable);
-                        word.MoveNext();
-                    }
-                }
+               else if (word.Text == "output" || word.Text == "input")
+               {
+                   // primitive_port_declaration ::= output_declaration | input_declaration
+                   // output_declaration ::= "output" [reg] [range] list_of_port_identifiers ;
+                   // input_declaration ::= "input" [range] list_of_port_identifiers ;
+                   bool isOutput = word.Text == "output";
+                   word.Color(CodeDrawStyle.ColorType.Keyword);
+                   word.MoveNext();
+
+                   // optional "reg" for sequential UDP output
+                   if (isOutput && word.Text == "reg")
+                   {
+                       primitive.IsSequential = true;
+                       word.Color(CodeDrawStyle.ColorType.Keyword);
+                       word.MoveNext();
+                   }
+
+                   // optional range
+                   while (word.Text == "[")
+                   {
+                       DataObjects.Arrays.PackedArray? range = DataObjects.Arrays.PackedArray.ParseCreate(word, primitive);
+                       if (range == null) break;
+                   }
+
+                   // list_of_port_identifiers
+                   while (!word.Eof && General.IsIdentifier(word.Text))
+                   {
+                       string portName = word.Text;
+                       word.Color(CodeDrawStyle.ColorType.Variable);
+                       word.MoveNext();
+
+                       Port port = new Port()
+                       {
+                           Name = portName,
+                           Direction = isOutput ? Port.DirectionEnum.Output : Port.DirectionEnum.Input,
+                           DefinitionReference = word.CrateWordReference()
+                       };
+                       if (!primitive.Ports.ContainsKey(portName))
+                       {
+                           primitive.Ports.Add(portName, port);
+                           primitive.PortsList.Add(port);
+                       }
+
+                       if (word.Text == ",")
+                       {
+                           word.MoveNext();
+                           continue;
+                       }
+                       break;
+                   }
+               }
                 else if (word.Text == "reg")
                 {
                     // Sequential UDP output register
@@ -398,7 +425,20 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     word.MoveNext();
                     primitive.IsSequential = true;
                 }
-                else if (word.Text == ";")
+               else if (word.Text == "initial")
+               {
+                   // UDP initial statement: initial [ output_port_identifier = ] init_val ;
+                   // (init_val ::= 1'b0 | 1'b1 | 1'bx | 1'X | 1'B0 | ...)
+                   word.Color(CodeDrawStyle.ColorType.Keyword);
+                   word.MoveNext();
+
+                   while (!word.Eof && word.Text != ";")
+                   {
+                       word.MoveNext();
+                   }
+                   if (word.Text == ";") word.MoveNext();
+               }
+              else if (word.Text == ";")
                 {
                     // Skip semicolon
                     word.MoveNext();

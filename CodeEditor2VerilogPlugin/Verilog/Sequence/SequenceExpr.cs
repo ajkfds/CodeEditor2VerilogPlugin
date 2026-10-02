@@ -210,6 +210,21 @@ namespace pluginVerilog.Verilog.Sequence
 
             CycleDelayRange range = new CycleDelayRange();
 
+            // "##" constant_primary : e.g. ##1, ##2 (cycle_delay_range ::= "##" constant_primary)
+            if (word.Text != "[")
+            {
+                Expressions.Expression? primaryExpr = Expressions.Expression.ParseCreate(word, nameSpace);
+                if (primaryExpr == null)
+                {
+                    // bare "##" with no following value : treat as implicit one
+                    range.Type = CycleDelayRangeType.ImplicitOne;
+                    return range;
+                }
+                range.StartExpression = primaryExpr;
+                range.Type = CycleDelayRangeType.SingleValue;
+                return range;
+            }
+
             if (word.Text == "[")
             {
                 word.MoveNext();
@@ -446,6 +461,37 @@ namespace pluginVerilog.Verilog.Sequence
         private static SequenceRepetition? ParseBooleanAbbreviation(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "[") return null;
+            // Peek whether this bracket starts a repetition operator ([*], [+], [=...], [->...], [n:m] with '*').
+            // A plain index expression like [3] or [i] is NOT a boolean abbreviation.
+            // Since WordScanner cannot rewind, use a clone to probe ahead.
+            {
+                WordScanner probe = word.Clone(false);
+                probe.MoveNext(); // [
+                bool isRepetition = false;
+                if (probe.Text == "*" || probe.Text == "+" || probe.Text == "=" || probe.Text == "-")
+                {
+                    isRepetition = true;
+                }
+                else
+                {
+                    // [n : m] range form: constant_expression ':' constant_expression ']'
+                    // Only treat as repetition when a ':' range follows an expression and ']' terminates.
+                    int startIdx = probe.CreateIndexReference().Indexes[0];
+                    // scan a limited window for ':' ... ']'
+                    int limit = 64;
+                    int colonIdx = -1;
+                    int closeIdx = -1;
+                    while (limit-- > 0 && !probe.Eof)
+                    {
+                        if (probe.Text == ":") { colonIdx = probe.CreateIndexReference().Indexes[0]; }
+                        else if (probe.Text == "]") { closeIdx = probe.CreateIndexReference().Indexes[0]; break; }
+                        probe.MoveNext();
+                    }
+                    if (colonIdx >= 0 && closeIdx >= 0) isRepetition = true;
+                }
+                probe.Dispose();
+                if (!isRepetition) return null;
+            }
             word.MoveNext();
 
             if (word.Text == "*")
@@ -581,6 +627,17 @@ namespace pluginVerilog.Verilog.Sequence
         public static SequenceRepetition? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "[") return null;
+            // Only treat as repetition when the bracket actually starts a repetition
+            // operator. Probe ahead on a clone so that a failed parse does not consume
+            // the '[' (an index expression such as sig[i] must not be eaten here).
+            {
+                WordScanner probe = word.Clone(false);
+                probe.MoveNext(); // [
+                bool isRepetition =
+                    probe.Text == "*" || probe.Text == "+" || probe.Text == "=" || probe.Text == "-";
+                probe.Dispose();
+                if (!isRepetition) return null;
+            }
             word.MoveNext();
 
             if (word.Text == "*")

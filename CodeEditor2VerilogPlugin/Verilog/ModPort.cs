@@ -93,6 +93,10 @@ namespace pluginVerilog.Verilog
                     case "clocking":
                         if (!modport.parse_modport_clocking_declaration(word, nameSpace)) return false;
                         break;
+                    case "import":
+                    case "export":
+                        if (!modport.parse_modport_tf_ports_declaration(word, nameSpace)) return false;
+                        break;
                     case "input":
                     case "output":
                     case "inout":
@@ -119,6 +123,57 @@ namespace pluginVerilog.Verilog
             if (word.Text != "clocking") throw new Exception();
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
+
+            // clocking_identifier
+            if (!General.IsIdentifier(word.Text))
+            {
+                word.AddError("clocking identifier expected");
+                return false;
+            }
+            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.MoveNext();
+
+            return true;
+        }
+
+        //modport_tf_ports_declaration ::= import_export modport_tf_port { , modport_tf_port }
+        //modport_tf_port ::= method_prototype | tf_identifier
+        internal bool parse_modport_tf_ports_declaration(WordScanner word, NameSpace nameSpace)
+        {
+            // import_export keyword was consumed by caller switch; accept it here too when called directly
+            if (word.Text == "import" || word.Text == "export")
+            {
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext();
+            }
+
+            while (!word.Eof)
+            {
+                // method_prototype ::= task_prototype | function_prototype
+                if (word.Text == "task" || word.Text == "function")
+                {
+                    if (word.Text == "task") Task_.ParsePrototype(word, nameSpace);
+                    else Function.ParsePrototype(word, nameSpace);
+                }
+                else if (General.IsIdentifier(word.Text))
+                {
+                    // tf_identifier
+                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.MoveNext();
+                }
+                else
+                {
+                    word.AddError("illegal modport_tf_port");
+                    return false;
+                }
+
+                if (word.Text == ",")
+                {
+                    word.MoveNext();
+                    continue;
+                }
+                break;
+            }
 
             return true;
         }

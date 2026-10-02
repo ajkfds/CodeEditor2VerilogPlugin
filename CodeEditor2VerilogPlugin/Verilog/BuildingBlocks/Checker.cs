@@ -565,11 +565,13 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                     // checker_generate_item - loop/conditional generate
                     case "for":
+                        Verilog.Items.Generate.LoopGenerateConstruct.ParseAsync(word, checker).Wait();
+                        break;
                     case "if":
+                        Verilog.Items.Generate.IfGenerateConstruct.ParseAsync(word, checker).Wait();
+                        break;
                     case "case":
-                        word.AddError("generate constructs in checker not fully implemented");
-                        word.SkipToKeyword(";");
-                        if (word.Text == ";") word.MoveNext();
+                        Verilog.Items.Generate.CaseGenerateConstruct.ParseAsync(word, checker).Wait();
                         break;
 
                     // end of declaration

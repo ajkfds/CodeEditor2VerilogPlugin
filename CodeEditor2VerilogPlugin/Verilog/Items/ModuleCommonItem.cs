@@ -81,6 +81,12 @@ namespace pluginVerilog.Verilog.Items
                     //                    word.AddSystemVerilogError();
                     await Generate.LoopGenerateConstruct.ParseAsync(word, nameSpace);
                     return;
+                // case_generate_construct
+                case "case":
+                case "casex":
+                case "casez":
+                    await Generate.CaseGenerateConstruct.ParseAsync(word, nameSpace);
+                    return;
                 // conditional_generate_construct
                 case "if":
                     await Generate.IfGenerateConstruct.ParseAsync(word, nameSpace);

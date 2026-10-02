@@ -41,7 +41,7 @@ namespace pluginVerilog.Verilog
             {
 
             }
-            else if (word.Text == "\"" + "DPI-C" + "\"")
+            else if (word.Text == "\"" + "DPI" + "\"")
             {
 
             }

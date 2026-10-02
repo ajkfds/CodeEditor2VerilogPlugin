@@ -97,6 +97,35 @@ namespace pluginVerilog.Verilog.Coverage
             word.Color(CodeDrawStyle.ColorType.Identifier);
             word.MoveNext();
 
+            // [ "with" "function" "sample" "(" [ covergroup_range_list ] ")" ]
+            if (word.Text == "with" && word.NextText == "function")
+            {
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext(); // with
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext(); // function
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext(); // sample
+
+                if (word.Text == "(")
+                {
+                    word.MoveNext();
+                    while (!word.Eof && word.Text != ")")
+                    {
+                        Expression? expr = Expression.ParseCreate(word, nameSpace);
+                        if (expr != null)
+                        {
+                            covergroup.RangeList.Add(expr);
+                        }
+                        if (word.Text == ",")
+                        {
+                            word.MoveNext();
+                        }
+                    }
+                    if (word.Text == ")") word.MoveNext();
+                }
+            }
+
             // Parse optional range list (constructor arguments)
             if (word.Text == "(")
             {

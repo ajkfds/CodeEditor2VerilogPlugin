@@ -31,7 +31,18 @@ namespace pluginVerilog.Verilog.Items
                 return DataObjects.Typedef.ParseDeclaration(word, nameSpace);
             }
 
-            // TODO package_import_declaration
+            // package_import_declaration
+            if (word.Text == "import")
+            {
+                PackageImportDeclaration.Parse(word, nameSpace);
+                return true;
+            }
+
+            // net_type_declaration
+            if (word.Text == "typedef" && word.NextText == "nettype")
+            {
+                return DataObjects.NetTypeDeclaration.Parse(word, nameSpace);
+            }
 
             switch (word.Text)
             {
