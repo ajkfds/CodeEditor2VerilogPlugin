@@ -167,7 +167,7 @@ namespace pluginVerilog. Data
             ParsedDocument? parsedDocument = file.VerilogParsedDocument;
             if (parsedDocument == null) return;
 
-            appendFile(file, setup);
+            appendFile(file, setup, ids, path, buildingBlockName);
             
             foreach (string unfound in parsedDocument.UnfoundModules)
             {
@@ -339,7 +339,12 @@ namespace pluginVerilog. Data
         }
 
 
-        private static void appendFile(IVerilogRelatedFile file, SimulationSetup setup)
+        /// <summary>
+        /// append the given file to the appropriate list of the setup (or the
+        /// external project sub-setup), then recurse into external project files
+        /// so that their own dependencies are collected into the sub-setup.
+        /// </summary>
+        private static void appendFile(IVerilogRelatedFile file, SimulationSetup setup, List<string> ids, string path, string buildingBlockName)
         {
             if (file is pluginVerilog. Data. VerilogFile || file is SystemVerilogFile)
             {
@@ -376,6 +381,13 @@ namespace pluginVerilog. Data
                     }
                     if (pSetup. Files. Contains(sourceFile)) return;
                     pSetup. Files. Add(sourceFile);
+
+                    // recurse into the external project file so that its own
+                    // module / class / package dependencies are collected into the
+                    // external project sub-setup as well
+                    string newPath = instance.Name;
+                    if (path != "") newPath = path + "." + newPath;
+                    searchHier(sourceFile, instance.ModuleName, ids, pSetup, newPath);
                 }
                 return;
             }else if(file is InterfaceInstance)
@@ -407,6 +419,13 @@ namespace pluginVerilog. Data
                     }
                     if (pSetup.Files.Contains(sourceFile)) return;
                     pSetup.Files.Add(sourceFile);
+
+                    // recurse into the external project file so that its own
+                    // module / class / package dependencies are collected into the
+                    // external project sub-setup as well
+                    string newPath = instance.Name;
+                    if (path != "") newPath = path + "." + newPath;
+                    searchHier(sourceFile, instance.ModuleName, ids, pSetup, newPath);
                 }
                 return;
             }
