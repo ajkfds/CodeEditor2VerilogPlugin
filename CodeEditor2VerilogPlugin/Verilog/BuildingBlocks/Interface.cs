@@ -400,6 +400,8 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                 while (!word.Eof)
                 {
+                    if (word.Text == "endinterface") break;
+
                     await CommentAnnotationItem.ParseAsync(word, interface_);
 
                     IndexReference beforeRef = word.CreateIndexReference();

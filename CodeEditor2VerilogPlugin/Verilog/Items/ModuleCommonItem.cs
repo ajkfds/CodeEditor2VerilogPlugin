@@ -1,4 +1,5 @@
 using CodeEditor2.CodeEditor.CodeComplete;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Items
@@ -111,7 +112,18 @@ namespace pluginVerilog.Verilog.Items
             //        [block_identifier: ] concurrent_assertion_statement
             //      | checker_instantiation
             //      | deferred_immediate_assertion_item
-            if (General.IsSimpleIdentifier(word.Text) && word.NextText == ":")
+            // Do not treat structural end keywords as block identifiers.
+            // e.g. "endinterface : IF_BUS_X" must not be consumed as a labeled
+            // concurrent assertion (blockIdentifier = "endinterface"), which
+            // swallows the endinterface and breaks the interface parse.
+            List<string> endKeywords = new List<string> {
+                "endinterface", "endmodule", "endpackage", "endprogram",
+                "endchecker", "endclass", "endfunction", "endtask",
+                "endclocking", "endproperty", "endsequence", "endgroup",
+                "endprimitive", "endtable", "endconfig", "generate", "endgenerate"
+            };
+            if (General.IsSimpleIdentifier(word.Text) && word.NextText == ":"
+                && !endKeywords.Contains(word.Text))
             {
                 ConcurrentAssertionItemExceptCheckerInstantiation.Parse(word, nameSpace);
             }
