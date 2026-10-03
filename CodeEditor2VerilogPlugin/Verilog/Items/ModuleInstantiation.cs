@@ -542,14 +542,14 @@ namespace pluginVerilog.Verilog.Items
                 if (instancedModule != null && i < instancedModule.PortsList.Count)
                 {
                     pinName = instancedModule.PortsList[i].Name;
-                    Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
+                    Expressions.Expression? expression = Expressions.Expression.ParseCreateAcceptImplicitNet(word, nameSpace, false);
                     if (word.Prototype && expression != null && !moduleInstantiation.PortConnection.ContainsKey(pinName)) moduleInstantiation.PortConnection.Add(pinName, expression);
                 }
-                else
-                {
-                    if (instancedModule != null) word.AddError("illegal port connection");
-                    Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
-                }
+               else
+               {
+                   if (instancedModule != null) word.AddError("illegal port connection");
+                   Expressions.Expression? expression = Expressions.Expression.ParseCreateAcceptImplicitNet(word, nameSpace, false);
+               }
                 // (EOF just after an expression, e.g. "inst0(clk"): hint for the current port
                 if (word.CompletionContext != null && word.Eof)
                 {
