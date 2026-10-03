@@ -62,6 +62,60 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
         }
 
+        /// <summary>
+        /// Parse clocking skew: clocking_skew ::= edge_identifier [ delay_control ] | delay_control
+        /// delay_control ::= # integral_number [ time_unit ] | # ( mintypmax_expression )
+        /// Consumes the skew tokens if present. Returns the delay expression (or null).
+        /// </summary>
+        private static Expression? parseClockingSkew(WordScanner word, NameSpace nameSpace)
+        {
+            if (word.Text != "#" && word.Text != "##") return null;
+
+            bool cycleDelay = word.Text == "##";
+            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.MoveNext();
+
+            Expression? delayExpr = null;
+
+            if (word.Text == "(")
+            {
+                // # ( mintypmax_expression )
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext();
+                delayExpr = Expression.ParseCreate(word, nameSpace);
+                if (word.Text == ")")
+                {
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+                }
+                else
+                {
+                    word.AddError(") expected");
+                }
+            }
+            else if (!word.Eof)
+            {
+                // # integral_number [ time_unit ]  (tokenizer consumes "10ns" as a single word)
+                delayExpr = Expression.ParseCreate(word, nameSpace);
+                if (delayExpr == null && !General.IsIdentifier(word.Text))
+                {
+                    word.AddError("illegal clocking skew");
+                    word.MoveNext(); // progress guard
+                }
+            }
+            else
+            {
+                word.AddError("illegal clocking skew");
+            }
+
+            if (cycleDelay)
+            {
+                // ## cycle delay: value is number of clock cycles
+                word.Color(CodeDrawStyle.ColorType.Number);
+            }
+            return delayExpr;
+        }
+
         public static Clocking? ParseCreate(WordScanner word, NameSpace nameSpace, Attribute? attribute)
         {
             IndexReference beginReference = word.CreateIndexReference();
@@ -244,12 +298,18 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                             // Already handled at outer level, this is a nested direction
                             // Continue to parse the signals
                         }
+
+                        // Optional clocking_skew (e.g., input #10ns / input [edge] #2ns)
+                        parseClockingSkew(word, nameSpace);
                         break;
 
                     case "output":
                         direction = ClockingSignal.DirectionEnum.Output;
                         word.Color(CodeDrawStyle.ColorType.Keyword);
                         word.MoveNext();
+
+                        // Optional clocking_skew (e.g., output #5ns)
+                        parseClockingSkew(word, nameSpace);
                         break;
 
                     case "inout":
@@ -276,6 +336,12 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                     // Check for endclocking
                     if (word.Text == "endclocking")
+                    {
+                        break;
+                    }
+
+                    // Next clocking_direction starts a new clocking_item (e.g., "default input #1ns output #2ns;")
+                    if (word.Text == "input" || word.Text == "output" || word.Text == "inout")
                     {
                         break;
                     }
@@ -348,6 +414,13 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     {
                         break;
                     }
+                }
+
+
+                // List loop may break on the next clocking_direction item (no semicolon yet)
+                if (word.Text == "input" || word.Text == "output" || word.Text == "inout")
+                {
+                    continue;
                 }
 
                 // Semicolon
