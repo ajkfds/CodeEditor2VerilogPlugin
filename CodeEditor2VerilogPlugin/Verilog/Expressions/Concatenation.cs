@@ -290,23 +290,31 @@ namespace pluginVerilog.Verilog.Expressions
 
             // Parse optional slice_size
             // slice_size ::= simple_type | constant_expression
-            // Try to parse as data type (simple_type) first, then as expression
-            var dataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, null);
-            if (dataType != null)
+            // If the stream_concatenation open brace follows immediately, there is no slice_size.
+            if (word.GetCharAt(0) == '{')
             {
-                // It's a type, create a reference for it
-                var sliceExpr = new Expression();
-                sliceExpr.Reference = word.GetReference();
-                sliceExpr.Primary = new DataTypeReference() { IDataType = dataType };
-                streaming.SliceSize = sliceExpr;
+                // no slice_size
             }
             else
             {
-                // Try to parse as constant_expression
-                var sliceExp = Expression.ParseCreate(word, nameSpace);
-                if (sliceExp != null)
+                // Try to parse as data type (simple_type) first, then as expression
+                var dataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, null);
+                if (dataType != null)
                 {
-                    streaming.SliceSize = sliceExp;
+                    // It's a type, create a reference for it
+                    var sliceExpr = new Expression();
+                    sliceExpr.Reference = word.GetReference();
+                    sliceExpr.Primary = new DataTypeReference() { IDataType = dataType };
+                    streaming.SliceSize = sliceExpr;
+                }
+                else
+                {
+                    // Try to parse as constant_expression
+                    var sliceExp = Expression.ParseCreate(word, nameSpace);
+                    if (sliceExp != null)
+                    {
+                        streaming.SliceSize = sliceExp;
+                    }
                 }
             }
 
@@ -398,7 +406,8 @@ namespace pluginVerilog.Verilog.Expressions
             }
 
             // Parse optional slice_size (if firstExpression wasn't the slice_size)
-            if (streaming.SliceSize == null && word.Text != "{")
+            // If the stream_concatenation open brace follows immediately, there is no slice_size.
+            if (streaming.SliceSize == null && word.GetCharAt(0) != '{')
             {
                 var dataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, null);
                 if (dataType != null)
