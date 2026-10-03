@@ -344,9 +344,14 @@ number
                         }
                     }
 
-                    if ( (element is Verilog.BuiltInMethod) && targetElement is DataObjects.Variables.Object)
+                    if ( (element is Verilog.BuiltInMethod) && targetElement is DataObjects.DataObject)
                     {
-                        // built-in method call (e.g. handle.randomize(), obj.srandom(seed))
+                        // built-in method call on any data object
+                        // (e.g. handle.randomize(), obj.srandom(seed), stringVar.atoreal())
+                        // targetElement must be a DataObject because BuiltinMethodCall.ParseCreate
+                        // looks up the method in dataObject.NamedElements
+                        // (Variables.String / Variables.Enum provide built-in methods lazily
+                        //  via their DataType's AppendChiledNamedElements)
                         BuiltinMethodCall? methodCall = BuiltinMethodCall.ParseCreate(word, nameSpace, (DataObjects.DataObject)targetElement);
                         return methodCall;
                     }
