@@ -268,6 +268,79 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                 word.MoveNext();
             }
         }
+
+        public static void ParseCreateParamAssignmentsForPort(WordScanner word, IModuleOrInterfaceOrProgram module, DataObjects.DataTypes.IDataType? dataType)
+        {
+            /*
+            list_of_param_assignments ::= param_assignment { , param_assignment }
+            param_assignment ::= parameter_identifier { unpacked_dimension } [ = constant_param_expression ]
+
+            parameter_port_list without "parameter" keyword :
+                parameter_port_list ::= # ( list_of_param_assignments { , parameter_port_declaration } )
+                                      | # ( parameter_port_declaration { , parameter_port_declaration } )
+            */
+            while (!word.Eof)
+            {
+                if (!General.IsIdentifier(word.Text)) break;
+                string identifier = word.Text;
+                WordReference nameReference = word.GetReference();
+                word.Color(CodeDrawStyle.ColorType.Parameter);
+                word.MoveNext();
+
+                Expressions.Expression? expression = null;
+                if (word.Text == "=")
+                {
+                    word.MoveNext();
+                    expression = Expressions.Expression.ParseCreate(word, (NameSpace)module);
+                    if (expression == null) break;
+                }
+
+                if (word.Active)
+                {
+                    if (word.Prototype)
+                    {
+                        if (!module.NamedElements.ContainsKey(identifier))
+                        {
+                            DataObjects.DataTypes.IDataType? paramDataType = dataType;
+                            if (paramDataType == null && expression is Expressions.Number number)
+                            {
+                                if (number.NumberType == Expressions.Number.NumberTypeEnum.Real)
+                                {
+                                    paramDataType = DataTypes.RealType.Create(null);
+                                }
+                                else if (number.BitWidth != null)
+                                {
+                                    PackedArray packedArray = new PackedArray((int)number.BitWidth - 1, 0);
+                                    List<PackedArray> packedArrays = new List<PackedArray>() { packedArray };
+                                    paramDataType = DataTypes.LogicType.Create(number.Signed, packedArrays);
+                                }
+                                else
+                                {
+                                    PackedArray packedArray = new PackedArray(31, 0);
+                                    List<PackedArray> packedArrays = new List<PackedArray>() { packedArray };
+                                    paramDataType = DataTypes.LogicType.Create(number.Signed, packedArrays);
+                                }
+                            }
+                            Constants constants = new Parameter() { Name = identifier, Expression = expression, DefinedReference = nameReference };
+                            constants.ConstantType = ConstantTypeEnum.parameter;
+                            constants.DataType = paramDataType;
+                            module.NamedElements.Add(constants.Name, constants);
+                            module.PortParameterNameList.Add(identifier);
+                        }
+                    }
+                    else
+                    {
+                        if (module.NamedElements.ContainsKey(identifier))
+                        {
+                            Constants? constant = module.NamedElements[identifier] as Constants;
+                            if (constant != null) constant.Defined = true;
+                        }
+                    }
+                }
+                if (word.Text != ",") break;
+                word.MoveNext();
+            }
+        }
         public static void ParseCreateDeclaration(WordScanner word, NameSpace nameSpace, Attribute? attribute)
         {
             /*
