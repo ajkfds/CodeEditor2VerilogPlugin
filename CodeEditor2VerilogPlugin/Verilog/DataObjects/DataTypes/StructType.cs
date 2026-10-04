@@ -7,6 +7,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
     public class StructType : IDataType, IPartSelectableDataType
     {
+        protected StructType() { }
         public virtual DataTypeEnum Type
         {
             get
@@ -31,7 +32,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 return true;
             }
         }
-        public int? BitWidth
+        public virtual int? BitWidth
         {
             get
             {
@@ -53,6 +54,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         public bool Tagged = false;
         public bool Packed = false;
         public bool Signed = false;
+        public bool IsUnion = false;
 
         public Dictionary<string, Member> Members = new Dictionary<string, Member>();
 
@@ -72,9 +74,9 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             return label.CreateString();
         }
 
-        public void AppendTypeLabel(ColorLabel label)
+        public virtual void AppendTypeLabel(ColorLabel label)
         {
-            label.AppendText("struct", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+            label.AppendText(IsUnion ? "union" : "struct", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
             if (Packed) label.AppendText(" packed", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
             if (Signed) label.AppendText(" signed", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
             if (Members.Count != 0)
@@ -113,6 +115,12 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             word.MoveNext();
 
             StructType type = new StructType();
+            type.IsUnion = false;
+            return parseCommon(type, word, nameSpace);
+        }
+
+        protected static StructType? parseCommon(StructType type, WordScanner word, NameSpace nameSpace)
+        {
 
             if (word.Text == "tagged")
             {

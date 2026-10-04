@@ -190,6 +190,8 @@ namespace pluginVerilog.Verilog.DataObjects
                 //                    return .Create(dataType);
                 case DataTypeEnum.Struct:
                     return Struct.Create(name, dataType);
+                case DataTypeEnum.Union:
+                    return Struct.Create(name, dataType);
                 case DataTypeEnum.UserDefined:
                     return UserDefinedVariable.Create(name, dataType);
                     //        TypeReference

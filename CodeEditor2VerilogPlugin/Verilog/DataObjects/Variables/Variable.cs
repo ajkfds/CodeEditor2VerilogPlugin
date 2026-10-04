@@ -63,6 +63,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             {
                 //struct_union["packed"[signing]] { struct_union_member { struct_union_member } } { packed_dimension }
                 case DataTypeEnum.Struct:
+                case DataTypeEnum.Union:
                     return Struct.Create(name, dataType);
                 //integer_vector_type ::= "bit" | "logic" | "reg"
                 case DataTypeEnum.Logic:
