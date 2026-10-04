@@ -199,18 +199,51 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     // class
                     if (namedElement is BuildingBlocks.Class)
                     {
-                        IDataType classType = (BuildingBlocks.Class)namedElement;
+                        BuildingBlocks.Class classType = (BuildingBlocks.Class)namedElement;
                         word.Color(CodeDrawStyle.ColorType.Keyword);
                         word.MoveNext();
+
+                        // parameter_value_assignment : class_identifier # ( ... )
+                        // same pattern as module instantiation parameter override
+                        if (word.Text == "#" && word.GetCharAt(0) == '#')
+                        {
+                            Dictionary<string, Expressions.Expression> parameterOverrides = new Dictionary<string, Expressions.Expression>();
+                            Verilog.ParameterValueAssignment.ParseCreate(word, nameSpace, parameterOverrides, classType);
+                            // apply the overrides to the class definition's parameters (name-based resolution)
+                            // note: same override-exchange logic as parseClassItems
+                            if (!word.Prototype && parameterOverrides.Count != 0)
+                            {
+                                foreach (var vkp in parameterOverrides)
+                                {
+                                    if (classType.NamedElements.ContainsKey(vkp.Key) && classType.NamedElements[vkp.Key] is DataObjects.Constants.Constants)
+                                    {
+                                        DataObjects.Constants.Constants constants = (DataObjects.Constants.Constants)classType.NamedElements[vkp.Key];
+                                        if (constants.DefinedReference != null)
+                                        {
+                                            constants.DefinedReference.AddHint("override " + vkp.Value.Value.ToString());
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
                         return classType;
                     }
 
                     // interface class
                     if (namedElement is BuildingBlocks.InterfaceClass)
                     {
-                        IDataType interfaceClassType = (BuildingBlocks.InterfaceClass)namedElement;
+                        BuildingBlocks.InterfaceClass interfaceClassType = (BuildingBlocks.InterfaceClass)namedElement;
                         word.Color(CodeDrawStyle.ColorType.Keyword);
                         word.MoveNext();
+
+                        // parameter_value_assignment : interface_class_identifier # ( ... )
+                        if (word.Text == "#")
+                        {
+                            Dictionary<string, Expressions.Expression> parameterOverrides = new Dictionary<string, Expressions.Expression>();
+                            Verilog.ParameterValueAssignment.ParseCreate(word, nameSpace, parameterOverrides, interfaceClassType);
+                        }
+
                         return interfaceClassType;
                     }
                     // [class_scope | package_scope] type_identifier { packed_dimension }
@@ -256,6 +289,14 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             {
                 word.Color(CodeDrawStyle.ColorType.Identifier);
                 word.MoveNext();
+
+                // parameter_value_assignment : class_identifier # ( ... )
+                if (word.Text == "#")
+                {
+                    Dictionary<string, Expressions.Expression> parameterOverrides = new Dictionary<string, Expressions.Expression>();
+                    Verilog.ParameterValueAssignment.ParseCreate(word, nameSpace, parameterOverrides, @class);
+                }
+
                 return @class;
             }
 
@@ -275,6 +316,14 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 InterfaceClass interfaceClass = (InterfaceClass)buildingBlock;
                 word.Color(CodeDrawStyle.ColorType.Identifier);
                 word.MoveNext();
+
+                // parameter_value_assignment : interface_class_identifier # ( ... )
+                if (word.Text == "#")
+                {
+                    Dictionary<string, Expressions.Expression> parameterOverrides = new Dictionary<string, Expressions.Expression>();
+                    Verilog.ParameterValueAssignment.ParseCreate(word, nameSpace, parameterOverrides, interfaceClass);
+                }
+
                 return interfaceClass;
             }
 
