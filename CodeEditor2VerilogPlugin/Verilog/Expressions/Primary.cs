@@ -401,6 +401,22 @@ number
                     }
 
                     {
+                        // reference to a sequence / property declaration
+                        // (e.g. "@seq" in event_control: event_control ::= @ ps_or_hierarchical_sequence_identifier)
+                        if (element is Sequence.SequenceDeclaration || element is Property.PropertyDeclaration)
+                        {
+                            WordReference beginRef = word.GetReference();
+                            SequenceReference sequenceReference = new SequenceReference()
+                            {
+                                Reference = WordReference.CreateReferenceRange(beginRef, word.GetReference())
+                            };
+                            word.Color(CodeDrawStyle.ColorType.Identifier);
+                            word.MoveNext();
+                            return sequenceReference;
+                        }
+                    }
+
+                    {
                         if (element is NameSpace)
                         {
                             NameSpace space = (NameSpace)element;
