@@ -94,14 +94,19 @@ namespace pluginVerilog.Verilog.Statements
             // the statement ends with the sub-statement: adopt its region end
             StatementRegionUtility.SetLastIndexReference(waitStatement, statement, word);
 
-            if (word.Text != ";")
+            if (statement == null)
             {
-                word.AddError("expected ;");
+                // sub-statement parse failed: recover to ";" for error recovery
+                if (word.Text != ";")
+                {
+                    word.AddError("expected ;");
+                }
+                else
+                {
+                    word.MoveNext();
+                }
             }
-            else
-            {
-                word.MoveNext();
-            }
+            // when a sub-statement exists, it consumes its own ";" (e.g. procedural_timing_control_statement)
             return waitStatement;
         }
 
