@@ -280,6 +280,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         word.MoveNext();
                         while (!word.Eof)
                         {
+                            if (word.Text == ")") break;   // # ( )  : empty parameter_port_list
                             if (word.Text == "parameter")
                             {
                                 IndexReference beforeParamRef = word.CreateIndexReference();
@@ -290,6 +291,27 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                                     word.AddError("illegal parameter declaration");
                                     word.MoveNext();
                                 }
+                            }
+                            else if (General.IsIdentifier(word.Text))
+                            {   // parameter_port_declaration without "parameter" keyword
+                                //  parameter_port_list ::= # ( list_of_param_assignments { , parameter_port_declaration } )
+                                //                        | # ( parameter_port_declaration { , parameter_port_declaration } )
+                                //  parameter_port_declaration ::= data_type list_of_param_assignments (implicit type list_of_param_assignments)
+                                IndexReference beforeRef = word.CreateIndexReference();
+                                DataObjects.DataTypes.IDataType? dataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, program, null);
+                                if (beforeRef.IsSameAs(word.CreateIndexReference()))
+                                {   // no data type keyword consumed : implicit data type param_assignment list
+                                    DataObjects.Constants.Constants.ParseCreateParamAssignmentsForPort(word, program, null);
+                                }
+                                else
+                                {   // data_type list_of_param_assignments
+                                    DataObjects.Constants.Constants.ParseCreateParamAssignmentsForPort(word, program, dataType);
+                                }
+                            }
+                            else
+                            {
+                                word.AddError("illegal parameter port declaration");
+                                word.MoveNext();
                             }
                             if (word.Text != ",")
                             {

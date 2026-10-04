@@ -232,7 +232,28 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 # ( list_of_param_assignments { , parameter_port_declaration } )  
                 | # ( parameter_port_declaration { , parameter_port_declaration } )  
                 | #( )   
-             
+            
+            It shall be legal to omit the constant_param_expression from a param_assignment or the data_type from a type_as-signment only within a parameter_port_list.
+            However, it shall not be legal to omit them from localparam declara-tions in a parameter_port_list.
+
+            parameter_port_declaration ::=
+                parameter_declaration
+              | local_parameter_declaration
+              | data_type list_of_param_assignments
+              | type list_of_type_assignments
+
+            The parameter keyword can be omitted in a parameter port list. 
+            For example:
+            ```
+            class vector #(size = 1); // size is a parameter in a parameter port list logic [size-1:0] v;
+            endclass
+            ```
+            ```
+            interface simple_bus #(AWIDTH = 64, type T = word) // parameter port list 
+            (input logic clk) ; // port list
+            ...
+            endinterface
+            ```
              */
             bool virtial = false;
             if (word.Text == "virtual")
@@ -426,6 +447,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         word.MoveNext();
                         while (!word.Eof)
                         {
+                            if (word.Text == ")") break;   // # ( )  : empty parameter_port_list
                             if (word.Text == "parameter")
                             {
                                 IndexReference beforeParamRef = word.CreateIndexReference();
@@ -436,6 +458,27 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                                     word.AddError("illegal parameter declaration");
                                     word.MoveNext();
                                 }
+                            }
+                            else if (General.IsIdentifier(word.Text))
+                            {   // parameter_port_declaration without "parameter" keyword
+                                //  parameter_port_list ::= # ( list_of_param_assignments { , parameter_port_declaration } )
+                                //                        | # ( parameter_port_declaration { , parameter_port_declaration } )
+                                //  parameter_port_declaration ::= data_type list_of_param_assignments (implicit type list_of_param_assignments)
+                                IndexReference beforeRef = word.CreateIndexReference();
+                                DataObjects.DataTypes.IDataType? dataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, class_, null);
+                                if (beforeRef.IsSameAs(word.CreateIndexReference()))
+                                {   // no data type keyword consumed : implicit data type param_assignment list
+                                    DataObjects.Constants.Constants.ParseCreateParamAssignmentsForPort(word, class_, null);
+                                }
+                                else
+                                {   // data_type list_of_param_assignments
+                                    DataObjects.Constants.Constants.ParseCreateParamAssignmentsForPort(word, class_, dataType);
+                                }
+                            }
+                            else
+                            {
+                                word.AddError("illegal parameter port declaration");
+                                word.MoveNext();
                             }
                             if (word.Text != ",")
                             {
