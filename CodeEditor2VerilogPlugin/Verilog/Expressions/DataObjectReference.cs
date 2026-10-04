@@ -459,6 +459,35 @@ namespace pluginVerilog.Verilog.Expressions
             }
 
 
+            // index select of associative array / dynamic array / queue (e.g. arraya[ 0 ])
+            // these array kinds do not register their index dimension into UnpackedArrays,
+            // so the "[ index ]" usage needs an explicit parse path here.
+            while (word.Text == "[" && !word.Eof && acceptRange &&
+                   (val.TargetDataObject is DataObjects.Arrays.AssociativeArray ||
+                    val.TargetDataObject is DataObjects.Arrays.DynamicArray ||
+                    val.TargetDataObject is DataObjects.Arrays.Queue))
+            {
+                word.MoveNext(); // [
+
+                Expressions.Expression? indexExpression = Expressions.Expression.ParseCreate(word, nameSpace);
+                if (indexExpression == null)
+                {
+                    word.AddError("illegal index expression");
+                    word.SkipToKeywords(new List<string> { "]", ";" });
+                    if (word.Text == "]") word.MoveNext();
+                    break;
+                }
+                if (word.Text != "]")
+                {
+                    word.AddError("illegal index expression");
+                    word.SkipToKeywords(new List<string> { "]", ";" });
+                    if (word.Text == "]") word.MoveNext();
+                    break;
+                }
+                word.MoveNext(); // ]
+                partial = true;
+            }
+
             while (word.Text == "[" && !word.Eof && originalObject is DataObjects.Variables.String)
             {
                 RangeExpression? rangeExpression = RangeExpression.ParseCreate(word, nameSpace);
