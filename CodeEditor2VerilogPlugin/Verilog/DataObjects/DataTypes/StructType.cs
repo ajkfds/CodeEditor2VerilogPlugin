@@ -215,8 +215,11 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             }
 
             IDataType? dataType = null;
+            bool isVoid = false;
             if (word.Text == "void")
             {
+                // data_type_or_void ::= "void" (valid only in tagged union members)
+                isVoid = true;
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 word.MoveNext();
             }
@@ -244,6 +247,14 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 {
                     word.MoveNext();    // =
                     exp = Expressions.Expression.ParseCreate(word, nameSpace);
+                }
+
+                if (isVoid)
+                {
+                    // void member (tagged union): consume identifier, register nothing
+                    if (word.Text != ",") return true;
+                    word.MoveNext();
+                    continue;
                 }
 
                 if (dataType == null) return false;
