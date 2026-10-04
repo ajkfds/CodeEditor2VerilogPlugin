@@ -477,6 +477,24 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         {
             if (word.Text != "default") return false;
 
+            // Distinguish between
+            //   (1) default clocking clocking_identifier ;   (reference to an existing named clocking)
+            //   (2) clocking_declaration with the "default" keyword:
+            //         [ default ] clocking [ identifier ] clocking_event ; { items } endclocking
+            //       e.g. "default clocking @(posedge clk); ... endclocking"
+            // Use a cloned WordScanner probe to look ahead.
+            {
+                WordScanner probe = word.Clone(false);
+                probe.MoveNext(); // default
+                probe.MoveNext(); // clocking
+                bool referenceForm = General.IsIdentifier(probe.Text) && probe.NextText == ";";
+                if (!referenceForm)
+                {
+                    // declaration form: ParseCreate consumes "default" / "clocking" by itself
+                    return ParseCreate(word, nameSpace, null) != null;
+                }
+            }
+
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
