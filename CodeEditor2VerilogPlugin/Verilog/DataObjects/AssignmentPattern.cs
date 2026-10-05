@@ -226,6 +226,29 @@ namespace pluginVerilog.Verilog.DataObjects
                 WordReference keyReference = word.GetReference();
                 if (key == "default") word.Color(CodeDrawStyle.ColorType.Keyword);
 
+               // array_pattern_key ::= constant_expression | assignment_pattern_key
+               // bracket index key : e.g. '{[2]:1, [0]:0}
+               if (word.Text == "[")
+               {
+                   word.MoveNext();
+                   Expressions.Expression? indexExpression = Expressions.Expression.ParseCreate(word, nameSpace);
+                   if (indexExpression == null)
+                   {
+                       word.AddError("illegal array pattern key");
+                       word.SkipToKeyword("}");
+                       return assignmentPattern;
+                   }
+                   if (word.Text != "]")
+                   {
+                       word.AddError("] required");
+                       word.SkipToKeyword("}");
+                       return assignmentPattern;
+                   }
+                   word.MoveNext();
+                   key = "[" + indexExpression.CreateString() + "]";
+                   keyReference = WordReference.CreateReferenceRange(keyReference, word.GetReference());
+               }
+
                 word.MoveNext();
 
                 if (word.Text != ":")
