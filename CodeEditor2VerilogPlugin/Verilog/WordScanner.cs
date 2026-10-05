@@ -1213,6 +1213,12 @@ namespace pluginVerilog.Verilog
                 break;
             }
 
+            // consume closing parenthesis of macro call
+            if (wordPointer.Text == ")")
+            {
+                wordPointer.MoveNext();
+            }
+
             if (macro.Aurguments.Count != wordAssignment.Count)
             {
                 if (!SupressCompilerDerectiveError) wordPointer.AddError("macro arguments mismatch");
