@@ -166,7 +166,18 @@ number
                 case WordPointer.WordTypeEnum.Symbol:
                     if (word.GetCharAt(0) == '{')
                     {
-                        return Concatenation.ParseCreateConcatenationOrMultipleConcatenation(word, nameSpace, lValue, acceptImplicitNet);
+                        Primary? concatPrimary = Concatenation.ParseCreateConcatenationOrMultipleConcatenation(word, nameSpace, lValue, acceptImplicitNet);
+                        // concatenation [ [ range_expression ] ]  (SystemVerilog A.8.4 primary)
+                        // e.g. {b, c}[9:6]
+                        if (concatPrimary != null && acceptRange && word.Text == "[")
+                        {
+                            RangeExpression? rangeExpression = RangeExpression.ParseCreate(word, nameSpace);
+                            if (rangeExpression != null)
+                            {
+                                return new ConcatenationWithRange(concatPrimary, rangeExpression);
+                            }
+                        }
+                        return concatPrimary;
                     }
                     else if (word.GetCharAt(0) == '(')
                     {

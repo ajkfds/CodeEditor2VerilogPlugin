@@ -637,6 +637,43 @@ namespace pluginVerilog.Verilog.Expressions
         }
     }
 
+    /// <summary>
+    /// concatenation [ [ range_expression ] ]  (SystemVerilog A.8.4 primary)
+    /// e.g. {b, c}[9:6]
+    /// </summary>
+    public class ConcatenationWithRange : Primary
+    {
+        internal ConcatenationWithRange() { }
+        public ConcatenationWithRange(Primary primary, RangeExpression rangeExpression)
+        {
+            ConcatenationPrimary = primary;
+            RangeExpression = rangeExpression;
+            Constant = primary.Constant & rangeExpression.Constant;
+            if (rangeExpression.BitWidth > 0) BitWidth = rangeExpression.BitWidth;
+            Reference = primary.Reference;
+        }
+        public Primary ConcatenationPrimary;
+        public RangeExpression RangeExpression;
+
+        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        {
+            ConcatenationPrimary.AppendLabel(label);
+            RangeExpression.AppendLabel(label);
+        }
+        public override string CreateString()
+        {
+            return ConcatenationPrimary.CreateString() + RangeExpression.CreateString();
+        }
+        public override void AssertAssigned()
+        {
+            ConcatenationPrimary.AssertAssigned();
+        }
+        public override void AppendRefrencedDataObjects(List<Verilog.DataObjects.DataObject> referencedObjects)
+        {
+            ConcatenationPrimary.AppendRefrencedDataObjects(referencedObjects);
+        }
+    }
+
     public class MultipleConcatenation : Primary
     {
         internal MultipleConcatenation() { }
