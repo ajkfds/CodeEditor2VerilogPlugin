@@ -78,8 +78,14 @@ namespace pluginVerilog. Data
 
             List<IVerilogRelatedFile> targetClassFiles = setup.ClassFiles.ToList();
 
+            // defensive iteration cap: normally the loop terminates when no new
+            // class file is found; the cap guards against unexpected cycles
+            int classSearchLoopCount = 0;
             while (true)
             {
+                classSearchLoopCount++;
+                if (classSearchLoopCount > 1000) break;
+
                 List<IVerilogRelatedFile> newClassFiles = new List<IVerilogRelatedFile>();
 
                 foreach (IVerilogRelatedFile classFile in targetClassFiles)
@@ -93,13 +99,23 @@ namespace pluginVerilog. Data
                     foreach(string className in parsedDocument.ReferencedUnitNameSpace)
                     {
                         IVerilogRelatedFile? newfile = projectProperty.UnitNameSpace.GetFile(className);
-                        if(newfile !=null && !newClassFiles.Contains(newfile)) newClassFiles.Add(newfile);
+                        // exclude files already collected (in this batch or in
+                        // setup.ClassFiles). Without the setup.ClassFiles check,
+                        // circular class references (A -> B -> A) alternate the
+                        // batches forever and this while(true) loop never ends
+                        // (UI freeze / deadlock when invoked from the menu thread).
+                        if(newfile != null
+                            && !newClassFiles.Contains(newfile)
+                            && !setup.ClassFiles.Contains(newfile))
+                        {
+                            newClassFiles.Add(newfile);
+                        }
                     }
                 }
                 if (newClassFiles.Count == 0) break;
                 foreach(IVerilogRelatedFile file in newClassFiles)
                 {
-                    setup.ClassFiles.Add(file);
+                    if(!setup.ClassFiles.Contains(file)) setup.ClassFiles.Add(file);
                 }
 
                 targetClassFiles = newClassFiles;
