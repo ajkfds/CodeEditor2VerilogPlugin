@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace pluginVerilog.Verilog.DataObjects
 {
@@ -82,6 +83,87 @@ namespace pluginVerilog.Verilog.DataObjects
             return assignmentPattern;
         }
 
+        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        {
+            label.AppendText("'{", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Normal));
+            if (this is AssignmentPatternWithKey withKey)
+            {
+                bool first = true;
+                foreach (var keyExpression in withKey.KeyExpressions)
+                {
+                    if (!first) label.AppendText(", ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Normal));
+                    first = false;
+                    if (keyExpression.Key == "default") label.AppendText("default", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    else label.AppendText(keyExpression.Key, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Identifier));
+                    label.AppendText(" : ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Normal));
+                    keyExpression.Expression?.AppendLabel(label);
+                }
+            }
+            else if (this is AssignmentPatternWithoutKey withoutKey)
+            {
+                bool first = true;
+                foreach (var expression in withoutKey.Expressions)
+                {
+                    if (!first) label.AppendText(", ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Normal));
+                    first = false;
+                    expression?.AppendLabel(label);
+                }
+            }
+            label.AppendText("}", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Normal));
+        }
+
+        public override string CreateString()
+        {
+            StringBuilder sb = new StringBuilder();
+            AppendString(sb);
+            return sb.ToString();
+        }
+
+        public override void AppendString(StringBuilder stringBuilder)
+        {
+            stringBuilder.Append("'{");
+            if (this is AssignmentPatternWithKey withKey)
+            {
+                bool first = true;
+                foreach (var keyExpression in withKey.KeyExpressions)
+                {
+                    if (!first) stringBuilder.Append(", ");
+                    first = false;
+                    stringBuilder.Append(keyExpression.Key + " : ");
+                    keyExpression.Expression?.AppendString(stringBuilder);
+                }
+            }
+            else if (this is AssignmentPatternWithoutKey withoutKey)
+            {
+                bool first = true;
+                foreach (var expression in withoutKey.Expressions)
+                {
+                    if (!first) stringBuilder.Append(", ");
+                    first = false;
+                    expression?.AppendString(stringBuilder);
+                }
+            }
+            stringBuilder.Append("}");
+        }
+
+        public override void AppendRefrencedDataObjects(List<DataObject> referencedObjects)
+        {
+            if (this is AssignmentPatternWithKey withKey)
+            {
+                foreach (var keyExpression in withKey.KeyExpressions)
+                {
+                    keyExpression.Expression?.AppendRefrencedDataObjects(referencedObjects);
+                }
+            }
+            else if (this is AssignmentPatternWithoutKey withoutKey)
+            {
+                foreach (var expression in withoutKey.Expressions)
+                {
+                    expression?.AppendRefrencedDataObjects(referencedObjects);
+                }
+            }
+        }
+
     }
 
     public class AssignmentPatternWithKey : AssignmentPattern
@@ -141,7 +223,7 @@ namespace pluginVerilog.Verilog.DataObjects
 
     public class AssignmentPatternWithoutKey : AssignmentPattern
     {
-        List<Expressions.Expression> Expressions = new List<Expressions.Expression>();
+        public List<Expressions.Expression> Expressions = new List<Expressions.Expression>();
 
         public static AssignmentPatternWithoutKey parseCreate(WordScanner word, NameSpace nameSpace, bool patternMode = false)
         {
