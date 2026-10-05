@@ -305,6 +305,15 @@ number
 
                     if (element == null)
                     {
+                        // forward-referenced function call (e.g. localparam a = fun(3); before "function int fun(...)")
+                        // consume the identifier and argument list, and request re-parse so that the
+                        // function registered in a later part of the file resolves on the next pass.
+                        // without this, only the identifier is consumed and the remaining "(" causes
+                        // a misleading "; expected" error in the caller (e.g. Constants.ParseCreateDeclaration).
+                        if (word.NextText == "(")
+                        {
+                            return parseUndefinedFunction(word);
+                        }
                         WordReference beginRef = word.GetReference();
                         word.AddError("unfound object");
                         word.MoveNext();
