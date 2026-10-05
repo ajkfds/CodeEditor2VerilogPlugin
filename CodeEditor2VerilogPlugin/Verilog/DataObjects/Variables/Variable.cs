@@ -102,6 +102,10 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 case DataTypeEnum.Mailbox:
                     return Mailbox.Create(name, dataType);
 
+                // "semaphore" (IEEE 1800-2017 section 20.4)
+                case DataTypeEnum.Semaphore:
+                    return Semaphore.Create(name, dataType);
+
                 // "event" - event variables are simple data objects
                 case DataTypeEnum.Event:
                     return DataObjects.Variables.Event.Create(name, dataType);

@@ -374,7 +374,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                                 "endmodule", 
                                 "always", "assign", "initial",
                                 "function","task",
-                               "bit","logic","reg","byte","shortint","int","logint","integer","time","shortreal","real","realtime","struct","union","enum","string","chandle","mailbox","event","type",
+                             "bit","logic","reg","byte","shortint","int","logint","integer","time","shortreal","real","realtime","struct","union","enum","string","chandle","mailbox","semaphore","event","type",
                                 "genvar","string",
                                 "parameter","localparam"
                            });

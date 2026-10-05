@@ -177,6 +177,7 @@ namespace pluginVerilog
             "disable",
             "for",
             "wait",
+           "wait_order",
 
             // gate
             "bufif0","bufif1","notif0", "notif1",

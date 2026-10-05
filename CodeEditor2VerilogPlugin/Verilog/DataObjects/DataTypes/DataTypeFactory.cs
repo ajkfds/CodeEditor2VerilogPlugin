@@ -69,7 +69,8 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         Union,
         TypeReference,
         UserDefined,
-        Mailbox
+        Mailbox,
+        Semaphore
     }
 
     public static class DataTypeFactory
@@ -184,6 +185,10 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 // "mailbox" (IEEE 1800-2017 section 15)
                 case "mailbox":
                     return MailboxType.ParseCreate(word, nameSpace);
+
+                // "semaphore" (IEEE 1800-2017 section 20.4)
+                case "semaphore":
+                    return SemaphoreType.ParseCreate(word, nameSpace);
 
                 // "virtual" ["interface"] interface_identifier[parameter_value_assignment][ . modport_identifier] 
 
