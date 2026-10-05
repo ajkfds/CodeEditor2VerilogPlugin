@@ -488,7 +488,10 @@ namespace pluginVerilog.Verilog.Expressions
                 partial = true;
             }
 
-            while (word.Text == "[" && !word.Eof && originalObject is DataObjects.Variables.String)
+            // acceptRange check is required: ForeachStatement parses the array identifier
+            // with acceptRange=false and handles "[ loop_variables ]" itself
+            // (e.g. foreach(test[i]) on a string array must not consume "[i]" as bit-select)
+            while (word.Text == "[" && !word.Eof && acceptRange && originalObject is DataObjects.Variables.String)
             {
                 RangeExpression? rangeExpression = RangeExpression.ParseCreate(word, nameSpace);
                 if (rangeExpression is not SingleBitRangeExpression)
