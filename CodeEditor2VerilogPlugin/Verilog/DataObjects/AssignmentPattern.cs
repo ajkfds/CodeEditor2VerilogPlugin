@@ -146,6 +146,47 @@ namespace pluginVerilog.Verilog.DataObjects
             stringBuilder.Append("}");
         }
 
+    /// <summary>
+    /// repetition element of assignment pattern : '{ count { element } }
+    /// e.g. '{4{1'b0}}
+    /// </summary>
+    public class RepeatedExpression : Expressions.Expression
+    {
+        public required Expressions.Expression Count;
+        public required Expressions.Expression Element;
+
+        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        {
+            label.AppendText("'{", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Normal));
+            Count?.AppendLabel(label);
+            label.AppendText("{", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Normal));
+            Element?.AppendLabel(label);
+            label.AppendText("}", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Normal));
+        }
+
+        public override string CreateString()
+        {
+            StringBuilder sb = new StringBuilder();
+            AppendString(sb);
+            return sb.ToString();
+        }
+
+        public override void AppendString(StringBuilder stringBuilder)
+        {
+            stringBuilder.Append("'{");
+            Count?.AppendString(stringBuilder);
+            stringBuilder.Append("{");
+            Element?.AppendString(stringBuilder);
+            stringBuilder.Append("}");
+        }
+
+        public override void AppendRefrencedDataObjects(List<DataObject> referencedObjects)
+        {
+            Count?.AppendRefrencedDataObjects(referencedObjects);
+            Element?.AppendRefrencedDataObjects(referencedObjects);
+        }
+    }
+
         public override void AppendRefrencedDataObjects(List<DataObject> referencedObjects)
         {
             if (this is AssignmentPatternWithKey withKey)
@@ -243,6 +284,28 @@ namespace pluginVerilog.Verilog.DataObjects
                else
                {
                    expression = Verilog.Expressions.Expression.ParseCreate(word, nameSpace);
+               }
+
+               // assignment_pattern ::= '{ constant_expression { expression { , expression } } }
+               // repetition form : e.g. '{4{1'b0}} / '{N{default}}
+               if (!patternMode && expression != null && word.Text == "{")
+               {
+                   word.MoveNext();
+                   Expressions.Expression? count = Verilog.Expressions.Expression.ParseCreate(word, nameSpace);
+                   if (count == null)
+                   {
+                       word.AddError("illegal repetition constant expression");
+                       word.SkipToKeyword("}");
+                       return assignmentPattern;
+                   }
+                   if (word.Text != "}")
+                   {
+                       word.AddError("} required");
+                       word.SkipToKeyword("}");
+                       return assignmentPattern;
+                   }
+                   word.MoveNext();
+                   expression = new RepeatedExpression() { Count = count, Element = expression };
                }
 
                 if (expression == null)
