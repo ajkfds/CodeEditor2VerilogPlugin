@@ -70,6 +70,12 @@ namespace pluginVerilog. Data
             if (verilogFile. VerilogParsedDocument. Root == null) return null;
 
             setup.Project = verilogFile. Project;
+
+            // TopName selection rule: when the top file declares multiple
+            // building blocks (e.g. DUT + testbench in one file), the FIRST
+            // declared building block is used as the simulation top.
+            // This is intentional (documented behavior); a top-module selector
+            // UI is a possible future enhancement.
             BuildingBlock? buildingBlock = verilogFile. VerilogParsedDocument. Root. BuildingBlocks. Values. FirstOrDefault();
             if (buildingBlock == null) return null;
 
