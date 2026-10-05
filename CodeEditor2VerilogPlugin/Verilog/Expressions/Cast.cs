@@ -169,6 +169,19 @@ namespace pluginVerilog.Verilog.Expressions
             }
             word.MoveNext();
 
+            // assignment_pattern_expression ::= [ assignment_pattern_expression_type ] assignment_pattern
+            // e.g. int'{1, 2, 3} / type_t'{a:1, b:2}
+            if (word.Text == "{")
+            {
+                DataObjects.AssignmentPattern? assignmentPattern = DataObjects.AssignmentPattern.ParseCreate(word, nameSpace, false);
+                if (assignmentPattern == null)
+                {
+                    word.AddError("illegal assignment pattern");
+                    return null;
+                }
+                return new AssignmentPatternPrimary(assignmentPattern) { Reference = wordReference };
+            }
+
             if (word.Eof || word.Text != "(")
             {
                 word.AddError("illegal cast");
@@ -191,6 +204,19 @@ namespace pluginVerilog.Verilog.Expressions
             cast.BitWidth = exp1.BitWidth;
             cast.Value = exp1.Value;
             return cast;
+        }
+    }
+
+    /// <summary>
+    /// Primary wrapper for typed assignment pattern (e.g. int'{1, 2, 3} / type_t'{a:1, b:2})
+    /// assignment_pattern_expression ::= [ assignment_pattern_expression_type ] assignment_pattern
+    /// </summary>
+    public class AssignmentPatternPrimary : Primary
+    {
+        public DataObjects.AssignmentPattern AssignmentPattern;
+        public AssignmentPatternPrimary(DataObjects.AssignmentPattern assignmentPattern)
+        {
+            AssignmentPattern = assignmentPattern;
         }
     }
 }
