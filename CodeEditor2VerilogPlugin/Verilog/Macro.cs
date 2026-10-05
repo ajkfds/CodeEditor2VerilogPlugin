@@ -29,7 +29,23 @@ namespace pluginVerilog.Verilog
                 macro.Aurguments = new List<string>();
                 foreach (string argument in arguments)
                 {
-                    macro.Aurguments.Add(argument.Trim());
+                    string trimmed = argument.Trim();
+                    // formal argument with default value : formal_argument_identifier = default_text
+                    int equalsIndex = trimmed.IndexOf('=');
+                    if (equalsIndex >= 0)
+                    {
+                        string argName = trimmed.Substring(0, equalsIndex).Trim();
+                        string defaultValue = trimmed.Substring(equalsIndex + 1).Trim();
+                        macro.Aurguments.Add(argName);
+                        if (macro.ArgumentDefaults == null) macro.ArgumentDefaults = new List<string>();
+                        while (macro.ArgumentDefaults.Count < macro.Aurguments.Count - 1) macro.ArgumentDefaults.Add(null);
+                        macro.ArgumentDefaults.Add(defaultValue);
+                    }
+                    else
+                    {
+                        macro.Aurguments.Add(trimmed);
+                        if (macro.ArgumentDefaults != null) macro.ArgumentDefaults.Add(null);
+                    }
                 }
             }
 
@@ -42,7 +58,40 @@ namespace pluginVerilog.Verilog
 
         public string Name;
         public List<string> Aurguments = null;
+        public List<string> ArgumentDefaults = null;   // default value per argument (null = no default), same length as Aurguments when not null
         public string MacroText;
+
+        // replace whole-word occurrences only (formal argument identifier must not match inside other identifiers, e.g. "a" in "$display")
+        public static string ReplaceArgument(string text, string argumentName, string actualText)
+        {
+            if (string.IsNullOrEmpty(argumentName)) return text;
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            int i = 0;
+            while (i < text.Length)
+            {
+                if (System.Char.IsLetter(text[i]) || text[i] == '_' || text[i] == '$')
+                {
+                    int j = i;
+                    while (j < text.Length && (System.Char.IsLetterOrDigit(text[j]) || text[j] == '_' || text[j] == '$')) j++;
+                    string word = text.Substring(i, j - i);
+                    if (word == argumentName)
+                    {
+                        sb.Append(actualText);
+                    }
+                    else
+                    {
+                        sb.Append(word);
+                    }
+                    i = j;
+                }
+                else
+                {
+                    sb.Append(text[i]);
+                    i++;
+                }
+            }
+            return sb.ToString();
+        }
 
         public void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label, Dictionary<string, Macro> macros)
         {

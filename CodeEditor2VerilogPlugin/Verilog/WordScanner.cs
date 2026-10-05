@@ -1226,13 +1226,22 @@ namespace pluginVerilog.Verilog
             }
             else
             {
+                // two-phase replacement : first replace formal argument identifiers with placeholders,
+                // then replace placeholders with actual arguments (word-boundary replacement to avoid
+                // replacing identifiers embedded in other tokens, e.g. "a" inside "$display")
                 for (int i = 0; i < macro.Aurguments.Count; i++)
                 {
-                    macroText = macroText.Replace(macro.Aurguments[i], "\0" + i.ToString("X4"));
+                    macroText = Macro.ReplaceArgument(macroText, macro.Aurguments[i], "\0" + i.ToString("X4"));
                 }
                 for (int i = 0; i < macro.Aurguments.Count; i++)
                 {
-                    macroText = macroText.Replace("\0" + i.ToString("X4"), wordAssignment[i]);
+                    // empty actual argument with formal argument default value : use default
+                    string actual = wordAssignment[i];
+                    if (actual == "" && macro.ArgumentDefaults != null && i < macro.ArgumentDefaults.Count && macro.ArgumentDefaults[i] != null)
+                    {
+                        actual = macro.ArgumentDefaults[i];
+                    }
+                    macroText = macroText.Replace("\0" + i.ToString("X4"), actual);
                 }
             }
         }
