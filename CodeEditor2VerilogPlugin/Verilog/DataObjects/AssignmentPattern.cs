@@ -42,6 +42,15 @@ namespace pluginVerilog.Verilog.DataObjects
         }
         public static new AssignmentPattern ParseCreate(WordScanner word, NameSpace nameSpace, bool lValue)
         {
+            return ParseCreate(word, nameSpace, lValue, false);
+        }
+
+        /// <summary>
+        /// patternMode : accept pattern elements (".v" pattern variables / nested tagged patterns)
+        /// used in case ... matches patterns (SystemVerilog 12.6)
+        /// </summary>
+        public static AssignmentPattern ParseCreate(WordScanner word, NameSpace nameSpace, bool lValue, bool patternMode)
+        {
             AssignmentPattern assignmentPattern;
 
             if (word.Text != "'") throw new Exception();
@@ -55,11 +64,11 @@ namespace pluginVerilog.Verilog.DataObjects
                 {
                     word.AddError("assignment pattern cannot used for left side of assignment");
                 }
-                assignmentPattern = AssignmentPatternWithKey.parseCreate(word, nameSpace);
+                assignmentPattern = AssignmentPatternWithKey.parseCreate(word, nameSpace, patternMode);
             }
             else
             {
-                assignmentPattern = AssignmentPatternWithoutKey.parseCreate(word, nameSpace);
+                assignmentPattern = AssignmentPatternWithoutKey.parseCreate(word, nameSpace, patternMode);
             }
 
             if (word.Text == "}")
@@ -84,7 +93,7 @@ namespace pluginVerilog.Verilog.DataObjects
             public required WordReference KeyReference;
             public required Expressions.Expression Expression;
         }
-        public static AssignmentPatternWithKey parseCreate(WordScanner word, NameSpace nameSpace)
+        public static AssignmentPatternWithKey parseCreate(WordScanner word, NameSpace nameSpace, bool patternMode = false)
         {
             AssignmentPatternWithKey assignmentPattern = new AssignmentPatternWithKey();
 
@@ -104,6 +113,12 @@ namespace pluginVerilog.Verilog.DataObjects
                 word.MoveNext();
 
                 Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
+
+               if (expression == null && patternMode)
+               {
+                   // key : pattern_value form in case pattern (e.g. default : .v)
+                   expression = Verilog.Expressions.CasePatternParser.ParsePattern(word, nameSpace);
+               }
 
                 if (expression == null)
                 {
@@ -128,7 +143,7 @@ namespace pluginVerilog.Verilog.DataObjects
     {
         List<Expressions.Expression> Expressions = new List<Expressions.Expression>();
 
-        public static AssignmentPatternWithoutKey parseCreate(WordScanner word, NameSpace nameSpace)
+        public static AssignmentPatternWithoutKey parseCreate(WordScanner word, NameSpace nameSpace, bool patternMode = false)
         {
             AssignmentPatternWithoutKey assignmentPattern = new AssignmentPatternWithoutKey();
 
@@ -137,7 +152,16 @@ namespace pluginVerilog.Verilog.DataObjects
                 string key = word.Text;
                 WordReference keyReference = word.GetReference();
 
-                Expressions.Expression? expression = Verilog.Expressions.Expression.ParseCreate(word, nameSpace);
+                Expressions.Expression? expression = null;
+               if (patternMode)
+               {
+                   // case pattern element : .v (pattern variable) / tagged ... / constant expression
+                   expression = Verilog.Expressions.CasePatternParser.ParsePattern(word, nameSpace);
+               }
+               else
+               {
+                   expression = Verilog.Expressions.Expression.ParseCreate(word, nameSpace);
+               }
 
                 if (expression == null)
                 {

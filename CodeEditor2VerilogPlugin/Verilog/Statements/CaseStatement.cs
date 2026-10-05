@@ -120,7 +120,7 @@ namespace pluginVerilog.Verilog.Statements
             if (word.Text == "matches")
             {
                 caseStatement.IsMatchesMode = true;
-                word.AddSystemVerilogError();
+                // matches is a valid SystemVerilog keyword (case ... matches pattern matching)
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 word.MoveNext();
             }
@@ -142,7 +142,16 @@ namespace pluginVerilog.Verilog.Statements
 
             while (!word.Eof && word.Text != "endcase" && word.Text != "endmodule" && word.Text != "endfunction")
             {
-                CaseItem caseItem = CaseItem.ParseCreate(word, nameSpace, caseStatement.IsInsideMode);
+                CaseItem caseItem;
+               if (caseStatement.IsMatchesMode)
+               {
+                   // case_pattern_item ::= pattern [ &&& expression ] : statement_or_null
+                   caseItem = CaseItem.ParseCreatePattern(word, nameSpace);
+               }
+               else
+               {
+                   caseItem = CaseItem.ParseCreate(word, nameSpace, caseStatement.IsInsideMode);
+               }
                 if (caseItem == null)
                 {
                     break;
@@ -265,7 +274,64 @@ namespace pluginVerilog.Verilog.Statements
             /// open_value_range ::= value_range | expression
             /// value_range ::= expression | expression : expression
             /// </summary>
-            private static List<Expressions.Expression> ParseOpenRangeList(WordScanner word, NameSpace nameSpace)
+            /// <summary>
+           /// Parse a case_pattern_item (case ... matches mode).
+           /// case_pattern_item ::= pattern [ &&& expression ] : statement_or_null
+           /// pattern ::= constant_expression | assignment_pattern | tagged_pattern
+           /// </summary>
+           public static CaseItem ParseCreatePattern(WordScanner word, NameSpace nameSpace)
+           {
+               CaseItem caseItem = new CaseItem();
+
+               if (word.Text == "default")
+               {
+                   word.Color(CodeDrawStyle.ColorType.Keyword);
+                   word.MoveNext();
+                   if (word.GetCharAt(0) == ':')
+                   {
+                       word.MoveNext();
+                   }
+                   caseItem.Statement = Statements.ParseCreateStatementOrNull(word, nameSpace);
+                   return caseItem;
+               }
+
+               // pattern
+               Expressions.Expression? pattern = Verilog.Expressions.CasePatternParser.ParsePattern(word, nameSpace);
+               if (pattern == null)
+               {
+                   word.AddError("illegal case pattern");
+                   return null;
+               }
+               caseItem.Expressions.Add(pattern);
+
+               // [ &&& expression ] : guard expression
+               if (word.Text == "&&&")
+               {
+                   word.MoveNext();
+                   Expressions.Expression? guard = Verilog.Expressions.Expression.ParseCreate(word, nameSpace);
+                   if (guard == null)
+                   {
+                       word.AddError("illegal guard expression");
+                       return null;
+                   }
+                   caseItem.Expressions.Add(guard);
+               }
+
+               if (word.GetCharAt(0) == ':')
+               {
+                   word.MoveNext();
+               }
+               else
+               {
+                   word.AddError(": expected");
+                   return null;
+               }
+
+               caseItem.Statement = Statements.ParseCreateStatementOrNull(word, nameSpace);
+               return caseItem;
+           }
+
+           private static List<Expressions.Expression> ParseOpenRangeList(WordScanner word, NameSpace nameSpace)
             {
                 List<Expressions.Expression> expressions = new List<Expressions.Expression>();
 
