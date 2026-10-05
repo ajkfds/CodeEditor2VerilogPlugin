@@ -521,6 +521,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     case "wire":
                     case "tri":
                     case "string":
+                    case "mailbox":
                     case "event":
                     case "real":
                     case "realtime":

@@ -98,6 +98,10 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 case DataTypeEnum.Chandle:
                     return Chandle.Create(name, dataType);
 
+                // "mailbox" (IEEE 1800-2017 section 15)
+                case DataTypeEnum.Mailbox:
+                    return Mailbox.Create(name, dataType);
+
                 // "event" - event variables are simple data objects
                 case DataTypeEnum.Event:
                     return DataObjects.Variables.Event.Create(name, dataType);

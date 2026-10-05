@@ -68,7 +68,8 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         Struct,
         Union,
         TypeReference,
-        UserDefined
+        UserDefined,
+        Mailbox
     }
 
     public static class DataTypeFactory
@@ -179,6 +180,10 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     return StringType.ParseCreate(word, nameSpace);
                 case "chandle":
                     return Chandle.ParseCreate(word, nameSpace);
+
+                // "mailbox" (IEEE 1800-2017 section 15)
+                case "mailbox":
+                    return MailboxType.ParseCreate(word, nameSpace);
 
                 // "virtual" ["interface"] interface_identifier[parameter_value_assignment][ . modport_identifier] 
 

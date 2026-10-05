@@ -374,8 +374,9 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                                 "endmodule", 
                                 "always", "assign", "initial",
                                 "function","task",
-                               "bit","logic","reg","byte","shortint","int","logint","integer","time","shortreal","real","realtime","struct","union","enum","string","chandle","event","type",
-                               "genvar"
+                               "bit","logic","reg","byte","shortint","int","logint","integer","time","shortreal","real","realtime","struct","union","enum","string","chandle","mailbox","event","type",
+                                "genvar","string",
+                                "parameter","localparam"
                            });
                             word.CompletionContext.AppendModuleInstanceSnippets((ac) => true);
                             return;

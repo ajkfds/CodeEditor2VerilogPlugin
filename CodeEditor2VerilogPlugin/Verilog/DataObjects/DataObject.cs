@@ -194,6 +194,8 @@ namespace pluginVerilog.Verilog.DataObjects
                     return Struct.Create(name, dataType);
                 case DataTypeEnum.UserDefined:
                     return UserDefinedVariable.Create(name, dataType);
+                case DataTypeEnum.Mailbox:
+                    return Variables.Mailbox.Create(name, dataType);
                     //        TypeReference
 
             }
