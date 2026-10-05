@@ -299,10 +299,13 @@ namespace pluginVerilog. Data
                     if (nameSpace. BuildingBlock. Project. Name != moduleInstantiation. SourceProjectName)
                     {
                         string newPath = path + "." + moduleInstantiation. Name;
-                        setup. ExternalProjectEntryInstance. Add(
-                            newPath,
-                            CodeEditor2.Global.Projects[moduleInstantiation.SourceProjectName]
-                            );
+                        if (!setup. ExternalProjectEntryInstance. ContainsKey(newPath))
+                        {
+                            setup. ExternalProjectEntryInstance. Add(
+                                newPath,
+                                CodeEditor2.Global.Projects[moduleInstantiation.SourceProjectName]
+                                );
+                        }
                     }
                     if (file. Items. TryGetValue(moduleInstantiation. Name, out CodeEditor2. Data. Item? item))
                     {
@@ -311,6 +314,27 @@ namespace pluginVerilog. Data
 
                         var subfile = item as IVerilogRelatedFile;
                         if (subfile != null) searchHier(subfile, moduleInstantiation.SourceName, ids, setup, newPath);
+                    }
+                    else if (moduleInstantiation. InstanceRange != null)
+                    {
+                        // instance array: VerilogModuleInstance.CreateArray registers
+                        // each element to file.Items as "name[i]" while the
+                        // ModuleInstantiation itself is registered with the plain
+                        // name. Look up each array element so that (especially for
+                        // external project instances) the definition file and its
+                        // own dependencies are collected into the sub-setup.
+                        int count = moduleInstantiation. InstanceCount;
+                        for (int i = 0; i < count; i++)
+                        {
+                            string elementName = moduleInstantiation. Name + "[" + i. ToString() + "]";
+                            if (!file. Items. TryGetValue(elementName, out CodeEditor2. Data. Item? arrayItem)) continue;
+
+                            string newPath = elementName;
+                            if (path != "") newPath = path + "." + newPath;
+
+                            var subfile = arrayItem as IVerilogRelatedFile;
+                            if (subfile != null) searchHier(subfile, moduleInstantiation.SourceName, ids, setup, newPath);
+                        }
                     }
                 }
                 else if ((element is Verilog.Items.InterfaceInstance))
