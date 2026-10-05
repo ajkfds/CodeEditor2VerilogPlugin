@@ -224,6 +224,13 @@ number
                         return Cast.ParseCreate(word, nameSpace);
                     }
 
+                    // tagged_union_expression  (SystemVerilog A.8.4)
+                    // tagged_union_expression ::= tagged [ unique ] union_member_identifier [ ( expression ) ] { . union_member_identifier [ ( expression ) ] }
+                    if (word.Text == "tagged" && !(lValue))
+                    {
+                        return TaggedUnionExpression.ParseCreate(word, nameSpace);
+                    }
+
                     // keyword
                     if (General.ListOfKeywords.Contains(word.Text))
                     {
