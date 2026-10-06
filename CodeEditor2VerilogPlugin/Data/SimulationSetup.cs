@@ -77,6 +77,18 @@ namespace pluginVerilog. Data
             // This is intentional (documented behavior); a top-module selector
             // UI is a possible future enhancement.
             BuildingBlock? buildingBlock = verilogFile. VerilogParsedDocument. Root. BuildingBlocks. Values. FirstOrDefault();
+            // A file may declare classes (or other non-instantiable building blocks)
+            // before the top module. Classes are registered in Root.BuildingBlocks
+            // too, so skip them when selecting the simulation top; otherwise
+            // "class Packet" above "module MODULE5" made Packet the top and the
+            // simulation failed. Fall back to the first declared block only when
+            // no module/interface/program/checker exists (preserves previous
+            // behavior for single-block files).
+            if (buildingBlock is Class || buildingBlock is InterfaceClass || buildingBlock is Package)
+            {
+                buildingBlock = verilogFile. VerilogParsedDocument. Root. BuildingBlocks. Values. FirstOrDefault(
+                    bb => !(bb is Class) && !(bb is InterfaceClass) && !(bb is Package));
+            }
             if (buildingBlock == null) return null;
 
             setup.TopName = buildingBlock. Name;
@@ -223,7 +235,21 @@ namespace pluginVerilog. Data
 
             foreach (string className in parsedDocument.ReferencedUnitNameSpace)
             {
-                Class? class_ = parsedDocument.ProjectProperty?.UnitNameSpace.GetFile(className) as Class;
+                // UnitNameSpace.GetFile() returns the FILE that declares the class
+                // (not the Class building block itself), so resolve the Class from
+                // the file's parsed document (same rule as RegisterNameSpace.Get).
+                // Casting the file to Class always yielded null and every class
+                // reference (e.g. "Packet") was wrongly reported as unfound.
+                if (parsedDocument.Project == null) continue;
+                IVerilogRelatedFile? classFile = parsedDocument.ProjectProperty?.UnitNameSpace.GetFile(className);
+                Class? class_ = null;
+                if (classFile != null
+                    && classFile.VerilogParsedDocument != null
+                    && classFile.VerilogParsedDocument.Root != null
+                    && classFile.VerilogParsedDocument.Root.NamedElements.TryGetValue(className, out INamedElement? element))
+                {
+                    class_ = element as Class;
+                }
                 if (parsedDocument.Project == null) continue;
                 if (class_ != null)
                 {
