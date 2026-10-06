@@ -338,15 +338,17 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                     }
                 }
                 if (word.Text != ",") break;
-                word.MoveNext();
 
                 // parameter_port_list ::= # ( list_of_param_assignments { , parameter_port_declaration } )
                 // If the token after the comma starts a data_type, it is a new
                 // parameter_port_declaration (data_type list_of_param_assignments form),
                 // not a continuation of the param_assignment list.
-                // Leave the comma handling to the caller's parameter_port_list loop.
+                // Break WITHOUT consuming the comma so that the caller's parameter_port_list
+                // loop (which expects word.Text == ",") handles the comma and the new
+                // parameter_port_declaration.
                 // (ex: #(int N, int P) : "int" after "," must not be parsed as a parameter name)
-                if (startsWithDataType(word, module)) break;
+                if (nextStartsWithDataType(word, module)) break;
+                word.MoveNext();
             }
         }
 
@@ -358,14 +360,15 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
             "struct", "union", "enum", "string", "chandle", "event", "type"
         };
 
-        // returns true when the current token starts a data_type (built-in keyword or user-defined type identifier)
-        private static bool startsWithDataType(WordScanner word, IModuleOrInterfaceOrProgram module)
+        // returns true when the token after the current "," starts a data_type (built-in keyword or user-defined type identifier)
+        private static bool nextStartsWithDataType(WordScanner word, IModuleOrInterfaceOrProgram module)
         {
-            if (dataTypeStartKeywords.Contains(word.Text)) return true;
-            if (!General.IsIdentifier(word.Text)) return false;
+            if (dataTypeStartKeywords.Contains(word.NextText)) return true;
+            if (!General.IsIdentifier(word.NextText)) return false;
 
-            // probe with a clone to avoid consuming tokens / updating the building block tree
+            // probe with a clone (positioned on the token after the comma) to avoid consuming tokens / updating the building block tree
             WordScanner probe = word.Clone(false);
+            probe.MoveNext();
             IndexReference beforeRef = probe.CreateIndexReference();
             DataObjects.DataTypes.IDataType? dataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(probe, (NameSpace)module, null);
             probe.Dispose();
@@ -437,7 +440,11 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
-            IDataType? dataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, null);
+            IDataType? dataType = null;
+            if(word.NextText != "=")
+            {
+                dataType =  DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, null);
+            }
             if (dataType == null)
             {
                 bool? singed = null;
