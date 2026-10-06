@@ -185,7 +185,17 @@ namespace pluginVerilog. Data
 
         private static void searchHier(IVerilogRelatedFile file, string buildingBlockName, List<string> ids, SimulationSetup setup, string path)
         {
-            if (ids. Contains(file. ID)) return;
+            // visited guard: key is (file.ID + buildingBlockName) so that the same
+            // file can still be traversed for a different building block, but a
+            // cycle (module A <-> module B, circular class references, bind /
+            // definition cross references, external project cycles) terminates.
+            // Without this registration, ids stays empty forever and the guard
+            // below never triggers, causing infinite recursion (stack overflow
+            // / UI freeze when invoked from the menu thread).
+            string visitedKey = file.ID + ":" + buildingBlockName;
+            if (ids.Contains(visitedKey)) return;
+            ids.Add(visitedKey);
+
             ParsedDocument? parsedDocument = file.VerilogParsedDocument;
             if (parsedDocument == null) return;
 
