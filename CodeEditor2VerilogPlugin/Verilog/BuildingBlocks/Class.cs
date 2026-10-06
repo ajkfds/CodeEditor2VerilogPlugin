@@ -448,9 +448,21 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         while (!word.Eof)
                         {
                             if (word.Text == ")") break;   // # ( )  : empty parameter_port_list
-                            if (word.Text == "parameter")
-                            {
-                                IndexReference beforeParamRef = word.CreateIndexReference();
+                           if (word.Text == "type")
+                           {
+                               // parameter_port_declaration ::= "type" list_of_type_assignments
+                               // ex: class Foo #(type Int = int, type T2);
+                               IndexReference beforeTypeRef = word.CreateIndexReference();
+                               Verilog.DataObjects.Constants.Constants.ParseCreateTypeAssignmentsForPort(word, class_);
+                               if (beforeTypeRef.IsSameAs(word.CreateIndexReference()))
+                               {   // error recovery: no progress on broken type declaration
+                                   word.AddError("illegal type parameter declaration");
+                                   word.MoveNext();
+                               }
+                           }
+                           else if (word.Text == "parameter")
+                           {
+                               IndexReference beforeParamRef = word.CreateIndexReference();
                                 Verilog.DataObjects.Constants.Parameter.ParseCreateDeclarationForPort(word, class_, null);
                                 if (beforeParamRef.IsSameAs(word.CreateIndexReference()))
                                 {   // error recovery: no progress on broken parameter declaration
@@ -602,25 +614,14 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         word.Color(CodeDrawStyle.ColorType.Identifier);
                         word.MoveNext();
 
-                        // parameter_value_assignment (optional)
-                        // class_type can have parameter values like: base_class#(32, 8)
-                        if (word.Text == "#")
-                        {
-                            word.MoveNext();
-                            if (word.Text == "(")
-                            {
-                                word.MoveNext();
-                                if (word.Text != ")")
-                                {
-                                    // Parse parameter expressions
-                                    word.SkipToKeyword(")");
-                                }
-                                if (word.Text == ")")
-                                {
-                                    word.MoveNext();
-                                }
-                            }
-                        }
+                       // parameter_value_assignment (optional)
+                       // class_type can have parameter values like: base_class#(32, 8) or #((x,y,z)
+                       // parse with ParameterValueAssignment (named / ordered both supported)
+                       if (word.Text == "#")
+                       {
+                           Dictionary<string, Expressions.Expression> baseParameterOverrides = new Dictionary<string, Expressions.Expression>();
+                           Verilog.ParameterValueAssignment.ParseCreate(word, nameSpace, baseParameterOverrides, baseClass);
+                       }
 
                         Function? constructor = null;
                         if (baseClass != null)

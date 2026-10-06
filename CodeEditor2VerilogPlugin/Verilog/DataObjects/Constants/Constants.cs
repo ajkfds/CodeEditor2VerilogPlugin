@@ -352,6 +352,76 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
             }
         }
 
+        public static void ParseCreateTypeAssignmentsForPort(WordScanner word, IModuleOrInterfaceOrProgram module)
+        {
+            /*
+            parameter_port_declaration ::= "type" list_of_type_assignments
+            list_of_type_assignments ::= type_assignment { , type_assignment }
+            type_assignment ::= type_identifier [ = data_type ]
+
+            ex: class Foo #(type Int = int, type T2); endclass
+            The type parameter is registered as a Typedef so that later
+            "Int var;" declarations resolve through DataTypeFactory.
+            */
+            while (!word.Eof)
+            {
+                if (!General.IsIdentifier(word.Text)) break;
+                string identifier = word.Text;
+                WordReference nameReference = word.GetReference();
+                word.Color(CodeDrawStyle.ColorType.Parameter);
+                word.MoveNext();
+
+                IDataType? typeDataType = null;
+                if (word.Text == "=")
+                {
+                    word.MoveNext();
+                    typeDataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, (NameSpace)module, null);
+                    if (typeDataType == null)
+                    {
+                        word.AddError("data type expected");
+                        break;
+                    }
+                }
+
+                if (word.Active)
+                {
+                    if (word.Prototype)
+                    {
+                        if (!module.NamedElements.ContainsKey(identifier))
+                        {
+                            if (typeDataType == null)
+                            {
+                                // placeholder: unresolved until an actual data_type is known
+                                typeDataType = new DataObjects.DataTypes.TypeReference(null, null);
+                            }
+                            Typedef typeDef = new Typedef() { Name = identifier, VariableType = typeDataType };
+                            module.NamedElements.Add(identifier, typeDef);
+                            module.PortParameterNameList.Add(identifier);
+                        }
+                    }
+                    else
+                    {
+                        if (module.NamedElements.ContainsKey(identifier))
+                        {
+                            if (module.NamedElements[identifier] is Typedef)
+                            {
+                                // mark defined on re-parse (same pattern as param_assignment)
+                            }
+                        }
+                    }
+                }
+                if (word.Text != ",") break;
+
+                // "," can start another type_assignment or a new
+                // parameter_port_declaration (ex: "type A = int, int P = 2").
+                // If the token after the comma starts a data_type, break WITHOUT
+                // consuming the comma so that the caller's parameter_port_list
+                // loop handles it.
+                if (nextStartsWithDataType(word, module)) break;
+                word.MoveNext();
+            }
+        }
+
         private static readonly HashSet<string> dataTypeStartKeywords = new HashSet<string>()
         {
             "bit", "logic", "reg",
