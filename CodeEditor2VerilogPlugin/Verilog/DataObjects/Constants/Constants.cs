@@ -339,8 +339,40 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                 }
                 if (word.Text != ",") break;
                 word.MoveNext();
+
+                // parameter_port_list ::= # ( list_of_param_assignments { , parameter_port_declaration } )
+                // If the token after the comma starts a data_type, it is a new
+                // parameter_port_declaration (data_type list_of_param_assignments form),
+                // not a continuation of the param_assignment list.
+                // Leave the comma handling to the caller's parameter_port_list loop.
+                // (ex: #(int N, int P) : "int" after "," must not be parsed as a parameter name)
+                if (startsWithDataType(word, module)) break;
             }
         }
+
+        private static readonly HashSet<string> dataTypeStartKeywords = new HashSet<string>()
+        {
+            "bit", "logic", "reg",
+            "byte", "shortint", "int", "longint", "integer", "time",
+            "shortreal", "real", "realtime",
+            "struct", "union", "enum", "string", "chandle", "event", "type"
+        };
+
+        // returns true when the current token starts a data_type (built-in keyword or user-defined type identifier)
+        private static bool startsWithDataType(WordScanner word, IModuleOrInterfaceOrProgram module)
+        {
+            if (dataTypeStartKeywords.Contains(word.Text)) return true;
+            if (!General.IsIdentifier(word.Text)) return false;
+
+            // probe with a clone to avoid consuming tokens / updating the building block tree
+            WordScanner probe = word.Clone(false);
+            IndexReference beforeRef = probe.CreateIndexReference();
+            DataObjects.DataTypes.IDataType? dataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(probe, (NameSpace)module, null);
+            probe.Dispose();
+            if (dataType == null) return false;
+            return !beforeRef.IsSameAs(probe.CreateIndexReference());
+        }
+
         public static void ParseCreateDeclaration(WordScanner word, NameSpace nameSpace, Attribute? attribute)
         {
             /*
