@@ -362,7 +362,17 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
             ex: class Foo #(type Int = int, type T2); endclass
             The type parameter is registered as a Typedef so that later
             "Int var;" declarations resolve through DataTypeFactory.
+            Called with word positioned on the "type" keyword (callers do not
+            consume it), so consume the keyword here before parsing
+            list_of_type_assignments. Without this, "type" would be consumed
+            as the first type_identifier name (General.IsIdentifier does not
+            exclude keywords).
             */
+            if (word.Text == "type")
+            {
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext();
+            }
             while (!word.Eof)
             {
                 if (!General.IsIdentifier(word.Text)) break;
