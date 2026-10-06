@@ -304,11 +304,14 @@ namespace pluginVerilog.Verilog.Expressions
             {
                 DataObjects.Constants.Constants constants = (DataObjects.Constants.Constants)val.TargetDataObject;
                 val.Constant = true;
-                if (constants.Expression.Constant && constants.Expression.Value != null)
+                if (constants.Expression != null)
                 {
-                    val.Value = constants.Expression.Value;
+                    if (constants.Expression.Constant && constants.Expression.Value != null)
+                    {
+                        val.Value = constants.Expression.Value;
+                    }
+                    if (constants.Expression.Constant) val.BitWidth = constants.Expression.BitWidth;
                 }
-                if (constants.Expression.Constant) val.BitWidth = constants.Expression.BitWidth;
             }
 
             // エラーチェック
