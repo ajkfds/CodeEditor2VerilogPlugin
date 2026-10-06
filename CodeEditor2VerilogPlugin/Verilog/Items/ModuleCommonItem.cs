@@ -99,6 +99,7 @@ namespace pluginVerilog.Verilog.Items
                     return;
             }
 
+            if (General.ListOfKeywords.Contains(word.Text)) return;
 
             // interface_instantiation
             InterfaceInstance.Parse(word, nameSpace);

@@ -113,11 +113,12 @@ namespace pluginVerilog.Verilog.Items
         parameter_value_assignment ::= # ( [ list_of_parameter_assignments ] )
         hierarchical_instance ::= name_of_instance ( [ list_of_port_connections ] )
          */
-        public static bool Parse(WordScanner word, NameSpace nameSpace)
+        public static void Parse(WordScanner word, NameSpace nameSpace)
         {
+
             // interface instantiation can be placed only in module,or interface
             IModuleOrInterface? moduleOrInterface = nameSpace.BuildingBlock as IModuleOrInterface;
-            if (moduleOrInterface == null) return false;
+            if (moduleOrInterface == null) return;
 
             // create word reference to add message onto this name
             WordReference interfaceIdentifier = word.CrateWordReference();
@@ -127,7 +128,7 @@ namespace pluginVerilog.Verilog.Items
             Interface? instancedInterface = word.ProjectProperty.DefinitionNameSpace.Get(interfaceName) as Interface;
             if (!word.RootParsedDocument.ReferencedDefinitionNameSpace.Contains(interfaceName)) word.RootParsedDocument.ReferencedDefinitionNameSpace.Add(interfaceName);
 
-            if (instancedInterface == null) return false;   // this identifier is not interface name
+            if (instancedInterface == null) return;   // this identifier is not interface name
 
             IndexReference beginIndexReference = word.CreateIndexReference();
             word.MoveNext(); // interface name
@@ -139,7 +140,7 @@ namespace pluginVerilog.Verilog.Items
             {
                 interfaceIdentifier.AddError("illegal module item");
                 word.SkipToKeyword(";");
-                return true;
+                return;
             }
             interfaceIdentifier.Color(CodeDrawStyle.ColorType.Keyword);
 
@@ -154,7 +155,7 @@ namespace pluginVerilog.Verilog.Items
                 {
                     word.AddError("( expected");
                     word.SkipToKeyword(";");
-                    return true;
+                    return;
                 }
                 word.MoveNext();
 
@@ -266,7 +267,7 @@ namespace pluginVerilog.Verilog.Items
                 if (word.Text != ")")
                 {
                     word.AddError("( expected");
-                    return true;
+                    return;
                 }
                 word.MoveNext();
             }
@@ -281,7 +282,7 @@ namespace pluginVerilog.Verilog.Items
                 {
                     if (word.Prototype) word.AddError("illegal instance name");
                     word.SkipToKeyword("");
-                    return false;
+                    return;
                 }
 
                 InterfaceInstance interfaceInstance = new InterfaceInstance()
@@ -359,7 +360,7 @@ namespace pluginVerilog.Verilog.Items
                     word.AddError("( expected");
                     word.SkipToKeyword(";");
                     if (word.Text == ";") word.MoveNext();
-                    return true;
+                    return;
                 }
                 word.MoveNext();
 
@@ -372,7 +373,7 @@ namespace pluginVerilog.Verilog.Items
                         word.CompletionContext.CarletPopupItems.Add(
                             new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
                     }
-                    return true;
+                    return;
                 }
 
                 if (word.GetCharAt(0) == '.')
@@ -390,7 +391,7 @@ namespace pluginVerilog.Verilog.Items
                                 word.CompletionContext.CarletPopupItems.Add(
                                     new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
                             }
-                            return true;
+                            return;
                         }
 
                         string pinName = word.Text;
@@ -434,7 +435,7 @@ namespace pluginVerilog.Verilog.Items
                                 word.CompletionContext.CarletPopupItems.Add(
                                     new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
                             }
-                            return true;
+                            return;
                         }
 
                         if (outPort)
@@ -474,7 +475,7 @@ namespace pluginVerilog.Verilog.Items
                                     word.CompletionContext.CarletPopupItems.Add(
                                         new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
                                 }
-                                return true;
+                                return;
                             }
 
                             if (word.Prototype && expression != null && !interfaceInstance.PortConnection.ContainsKey(pinName)) interfaceInstance.PortConnection.Add(pinName, expression);
@@ -508,7 +509,7 @@ namespace pluginVerilog.Verilog.Items
                                 word.CompletionContext.CarletPopupItems.Add(
                                     new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
                             }
-                            return true;
+                            return;
                         }
 
                         if (word.Text != ")")
@@ -543,7 +544,7 @@ namespace pluginVerilog.Verilog.Items
                                 word.CompletionContext.CarletPopupItems.Add(
                                     new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
                             }
-                            return true;
+                            return;
                         }
 
                         string pinName = "";
@@ -568,7 +569,7 @@ namespace pluginVerilog.Verilog.Items
                                 word.CompletionContext.CarletPopupItems.Add(
                                     new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
                             }
-                            return true;
+                            return;
                         }
 
                         if (word.Text != ",")
@@ -584,7 +585,7 @@ namespace pluginVerilog.Verilog.Items
                 if (word.Text != ")")
                 {
                     word.AddError(") expected");
-                    return true;
+                    return;
                 }
                 word.MoveNext();
                 interfaceInstance.LastIndexReference = word.CreateIndexReference();
@@ -606,10 +607,10 @@ namespace pluginVerilog.Verilog.Items
             if (word.Text != ";")
             {
                 word.AddError("; expected");
-                return true;
+                return;
             }
             word.MoveNext();
-            return true;
+            return;
         }
 
         private static void copyItems(InterfaceInstance interfaceInstance, Interface? instancedInterface)
