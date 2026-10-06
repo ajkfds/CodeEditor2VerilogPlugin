@@ -200,12 +200,11 @@ namespace pluginVerilog. Data
             if (parsedDocument == null) return;
 
             appendFile(file, setup, ids, path, buildingBlockName);
-            
+
             foreach (string unfound in parsedDocument.UnfoundModules)
             {
-                CodeEditor2. Controller. AppendLog("unfound instance on " + file. RelativePath);
-                if (!setup.UnfoundModules.Contains(unfound)) setup.UnfoundModules.Add(unfound);
-
+                // register as "RelativePath:Name" (instance unfound on this file)
+                addUnfoundModule(setup, file, unfound);
             }
 
             foreach (string external in parsedDocument. ExternalRefrenceModules)
@@ -228,13 +227,13 @@ namespace pluginVerilog. Data
                 if (parsedDocument.Project == null) continue;
                 if (class_ != null)
                 {
-                    appendClass(className, parsedDocument.Project, setup, ids);
+                    appendClass(file, className, parsedDocument.Project, setup, ids);
                 }
                 else
                 {
                     // referenced class definition is missing: report as file shortage
                     // so that simulation startup is refused later in Create()
-                    if (!setup.UnfoundModules.Contains(className)) setup.UnfoundModules.Add(className);
+                    addUnfoundModule(setup, file, className);
                 }
             }
 
@@ -245,7 +244,7 @@ namespace pluginVerilog. Data
 
             foreach (string cFile in parsedDocument.ReferencedUnitNameSpace)
             {
-                appendClass(cFile, file.Project, setup, ids);
+                appendClass(file, cFile, file.Project, setup, ids);
             }
 
             // bind directives / program / udp / interface references are registered
@@ -266,10 +265,10 @@ namespace pluginVerilog. Data
                     // module / class / package dependencies are collected as well
                     searchHier(defFile, definitionName, ids, setup, path);
                 }
-                else if (!setup.UnfoundModules.Contains(definitionName))
+                else
                 {
                     // referenced module/interface/program/udp definition file is missing
-                    setup.UnfoundModules.Add(definitionName);
+                    addUnfoundModule(setup, file, definitionName);
                 }
             }
 
@@ -563,9 +562,9 @@ namespace pluginVerilog. Data
             {
                 Verilog.DataObjects.DataTypes.VirtualInterfaceType? dataType = virtualInterface.DataType as Verilog.DataObjects.DataTypes.VirtualInterfaceType;
                 string? interfaceName = dataType?.InterfaceIdentifier;
-                if (!string.IsNullOrEmpty(interfaceName) && !setup.UnfoundModules.Contains(interfaceName))
+                if (!string.IsNullOrEmpty(interfaceName))
                 {
-                    setup.UnfoundModules.Add(interfaceName);
+                    addUnfoundModule(setup, file, interfaceName);
                 }
                 return;
             }
@@ -576,7 +575,7 @@ namespace pluginVerilog. Data
             IVerilogRelatedFile? interfaceFile = declaringProjectProperty.DefinitionNameSpace.GetFile(sourceInterface.Name);
             if (interfaceFile == null)
             {
-                if (!setup.UnfoundModules.Contains(sourceInterface.Name)) setup.UnfoundModules.Add(sourceInterface.Name);
+                addUnfoundModule(setup, file, sourceInterface.Name);
                 return;
             }
 
@@ -652,13 +651,13 @@ namespace pluginVerilog. Data
             // (also reports missing references in the package as file shortage)
             searchHier(packageFile, packageName, ids, setup, "");
         }
-        private static void appendClass(string  className, CodeEditor2.Data.Project project, SimulationSetup setup, List<string> ids)
+        private static void appendClass(IVerilogRelatedFile referrer, string className, CodeEditor2.Data.Project project, SimulationSetup setup, List<string> ids)
         {
             IVerilogRelatedFile? classFile = findClassFile(className, project, setup);
             if (classFile == null)
             {
                 // referenced class definition file is missing: report as file shortage
-                if (!setup.UnfoundModules.Contains(className)) setup.UnfoundModules.Add(className);
+                addUnfoundModule(setup, referrer, className);
                 return;
             }
 
@@ -689,6 +688,18 @@ namespace pluginVerilog. Data
             // class file may itself reference other classes / packages: trace them
             // (also reports missing references in the class file as file shortage)
             searchHier(classFile, className, ids, setup, "");
+        }
+
+        /// <summary>
+        /// register an unfound reference as "RelativePath:Name" so that the
+        /// log shows where the missing definition/instance is referenced from.
+        /// </summary>
+        private static void addUnfoundModule(SimulationSetup setup, IVerilogRelatedFile file, string name)
+        {
+            string entry;
+            try { entry = file.RelativePath + ":" + name; }
+            catch { entry = file.ID + ":" + name; }
+            if (!setup.UnfoundModules.Contains(entry)) setup.UnfoundModules.Add(entry);
         }
 
         private static IVerilogRelatedFile? findPackageFile(string packageName, CodeEditor2. Data. Project project, SimulationSetup setup)
