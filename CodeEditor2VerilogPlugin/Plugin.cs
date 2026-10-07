@@ -168,6 +168,11 @@ namespace pluginVerilog
             }
             if (psetup == null) psetup = new pluginVerilog.ProjectProperty.Setup();
             project.ProjectProperties.Add(Id, new ProjectProperty(project, psetup));
+
+            // expose the parsed project through the UI-agnostic
+            // SystemVerilogCore seam so the LSP server (or any other tool)
+            // can consume the same adapter instances as the editor.
+            CoreBridge.VerilogSystemVerilogCore.Instance.Wrap(project, Id + ":" + project.Name);
         }
 
         private void MenuItem_CreateSnapShot_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)

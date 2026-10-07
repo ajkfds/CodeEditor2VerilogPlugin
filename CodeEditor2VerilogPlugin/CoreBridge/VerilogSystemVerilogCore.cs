@@ -17,6 +17,15 @@ namespace pluginVerilog.CoreBridge
     {
         private readonly ConcurrentDictionary<string, SystemVerilogProjectAdapter> _projects = new();
 
+        /// <summary>
+        /// Process-wide singleton so the editor (and any other host) can
+        /// register projects on the same core instance that an embedded
+        /// language server would use.
+        /// </summary>
+        public static VerilogSystemVerilogCore Instance { get; } = new VerilogSystemVerilogCore();
+
+        private VerilogSystemVerilogCore() { }
+
         public Task<ISystemVerilogProject> GetProjectAsync(string projectId, CancellationToken cancellationToken = default)
         {
             // In this first cut the language server hands us a synthetic
