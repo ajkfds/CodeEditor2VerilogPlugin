@@ -89,6 +89,14 @@ namespace pluginVerilog.CoreBridge
             }
         }
 
+        public IReadOnlyList<ISystemVerilogAutocompleteItem> AutocompleteItems
+        {
+            get
+            {
+                return AutocompleteAdapter.CreateMembers(BuildingBlock);
+            }
+        }
+
         internal static SystemVerilogBuildingBlockKind MapBuildingBlockKind(
             pluginVerilog.Verilog.BuildingBlocks.BuildingBlock block)
         {

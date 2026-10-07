@@ -122,6 +122,8 @@ namespace pluginVerilog.CoreBridge
             = new Dictionary<string, ISystemVerilogBuildingBlock>();
         public IReadOnlyList<ISystemVerilogNamedElement> Members { get; }
             = System.Array.Empty<ISystemVerilogNamedElement>();
+        public IReadOnlyList<ISystemVerilogAutocompleteItem> AutocompleteItems { get; }
+            = System.Array.Empty<ISystemVerilogAutocompleteItem>();
         public ISystemVerilogBuildingBlock? Owner => null;
         public SystemVerilogFileAdapter File { get; }
 
