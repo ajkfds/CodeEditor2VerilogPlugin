@@ -260,12 +260,17 @@ namespace pluginVerilog.Data
                 await acceptParameterizedParsedDocument(newParsedDocument);
             }
 
-            TextFile? currentTextFile = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync();
-            if (currentTextFile == this)
+            // Editor-dependent update must run only when the editor UI is
+            // alive (see VerilogFile.AcceptParsedDocumentAsync).
+            if (CodeEditor2.Global.UIThread != null)
             {
-                currentTextFile.CodeDocument?.CopyColorMarkFrom(parser.Document);
-                CodeEditor2.Controller.MessageView.Update(newParsedDocument);
-                CodeEditor2.Controller.CodeEditor.PostRefresh();
+                TextFile? currentTextFile = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync();
+                if (currentTextFile == this)
+                {
+                    currentTextFile.CodeDocument?.CopyColorMarkFrom(parser.Document);
+                    CodeEditor2.Controller.MessageView.Update(newParsedDocument);
+                    CodeEditor2.Controller.CodeEditor.PostRefresh();
+                }
             }
         }
 

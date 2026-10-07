@@ -238,12 +238,19 @@ namespace pluginVerilog.Data
                 }
             }
 
-            TextFile? currentTextFile = await Controller.CodeEditor.GetTextFileAsync();
-            if (currentTextFile == this)
+            // Editor-dependent update (color/message/refresh) must run only
+            // when the editor UI is alive. In UI-less hosts (LSP server,
+            // unit tests) the Avalonia Dispatcher does not exist and
+            // GetTextFileAsync would block forever.
+            if (CodeEditor2.Global.UIThread != null)
             {
-                currentTextFile.CodeDocument?.CopyColorMarkFrom(parser.Document);
-                CodeEditor2.Controller.MessageView.Update(newParsedDocument);
-                CodeEditor2.Controller.CodeEditor.PostRefresh();
+                TextFile? currentTextFile = await Controller.CodeEditor.GetTextFileAsync();
+                if (currentTextFile == this)
+                {
+                    currentTextFile.CodeDocument?.CopyColorMarkFrom(parser.Document);
+                    CodeEditor2.Controller.MessageView.Update(newParsedDocument);
+                    CodeEditor2.Controller.CodeEditor.PostRefresh();
+                }
             }
 
 
@@ -265,10 +272,17 @@ namespace pluginVerilog.Data
                 headerItems.Add(item.ID, vh);
             }
 
-            // get file selected in text editor
-            CodeEditor2.NavigatePanel.NavigatePanelNode? node = await CodeEditor2.Controller.NavigatePanel.GetSelectedNodeAsync();
-            CodeEditor2.Data.Item? currentItem = node?.Item;
-            CodeEditor2.Data.ITextFile? currentTextFile = await Controller.CodeEditor.GetTextFileAsync();
+            // get file selected in text editor (skip in UI-less hosts: the
+            // dispatcher does not exist and these calls would block forever)
+            CodeEditor2.NavigatePanel.NavigatePanelNode? node = null;
+            CodeEditor2.Data.Item? currentItem = null;
+            CodeEditor2.Data.ITextFile? currentTextFile = null;
+            if (CodeEditor2.Global.UIThread != null)
+            {
+                node = await CodeEditor2.Controller.NavigatePanel.GetSelectedNodeAsync();
+                currentItem = node?.Item;
+                currentTextFile = await Controller.CodeEditor.GetTextFileAsync();
+            }
 
             foreach (var includeFile in parsedDocument.IncludeFiles.Values)
             {
