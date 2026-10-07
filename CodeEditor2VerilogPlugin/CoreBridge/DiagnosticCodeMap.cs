@@ -13,7 +13,7 @@ namespace pluginVerilog.CoreBridge
     /// normalised slug of the message text. The slug uses a stable prefix
     /// so that client-side rule suppressions can be written against it.
     /// </summary>
-    internal static class DiagnosticCodeMap
+    public static class DiagnosticCodeMap
     {
         private const string Prefix = "verilog";
 
