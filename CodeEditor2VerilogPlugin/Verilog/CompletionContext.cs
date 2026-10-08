@@ -30,7 +30,14 @@ namespace pluginVerilog.Verilog
             this.parsedDocument = parsedDocument;
             this.index = index;
 
-            if (!Data.VerilogCommon.AutoComplete.GetAutoCompleteTarget(item, parsedDocument, index, out NameSpace, out NamedElement, out CandidateWord, out CandidateStartIndex))
+            // GetAutoCompleteTarget returns false e.g. when the caret is right after a
+            // space/tab (no dot context). Even in that case the namespace / candidate
+            // word are resolved by the call itself; do not abort the completion flow,
+            // otherwise the partial parse and the AppendAll fallback
+            // (appendItemsUpward -> instance / variable name candidates) never run and
+            // only keywords appear (candidates without a dot disappeared).
+            Data.VerilogCommon.AutoComplete.GetAutoCompleteTarget(item, parsedDocument, index, out NameSpace, out NamedElement, out CandidateWord, out CandidateStartIndex);
+            if (NameSpace == null && NamedElement == null)
             {
                 return;
             }

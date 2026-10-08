@@ -369,6 +369,12 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     {
                         if (word.CompletionContext != null)
                         {
+                           // do not clear items already appended by the partial parse
+                           // (e.g. expression candidates collected inside "assign dst = mysi"):
+                           // clearing here suppressed instance / variable name candidates
+                           // when typing an identifier without a dot
+                           if (word.CompletionContext.AutoCompleteItems.Count == 0)
+                           {
                             word.CompletionContext.AutoCompleteItems.Clear();
                             word.CompletionContext.AppendKeywords(new List<string> { 
                                 "endmodule", 
@@ -379,9 +385,10 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                                 "parameter","localparam"
                            });
                             word.CompletionContext.AppendModuleInstanceSnippets((ac) => true);
-                            return;
-                        }
-                        break;
+                           }
+                           return;
+                       }
+                       break;
                     }
 
 
