@@ -53,6 +53,20 @@ namespace pluginVerilog.Verilog
                 break;
             }
 
+            // hierarchical member access context (e.g. "MODULE0 inst0." / "obj0.mem" / "pkg::"):
+            // GetAutoCompleteTarget resolved the member target element (NamedElement) from the
+            // identifier chain before the caret. Append its sub-elements directly and skip the
+            // partial parse: the partial parse appends generic namespace items (with
+            // CandidateWord == "" they all match), which fills AutoCompleteItems and suppresses
+            // the AppendAll fallback in AutoComplete.GetAutoCompleteItems, so member candidates
+            // never appear right after the dot (they only appeared after typing one more
+            // character, when the CandidateWord filter emptied the generic items).
+            if (NamedElement != null)
+            {
+                AppendSubElements(NamedElement);
+                return;
+            }
+
             // partial parse
             int parseBlockIndex = 0;
 
