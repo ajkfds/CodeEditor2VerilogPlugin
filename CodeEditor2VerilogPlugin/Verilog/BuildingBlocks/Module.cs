@@ -380,8 +380,8 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                                 "endmodule", 
                                 "always", "assign", "initial",
                                 "function","task",
-                             "bit","logic","reg","byte","shortint","int","logint","integer","time","shortreal","real","realtime","struct","union","enum","string","chandle","mailbox","semaphore","event","type",
-                                "genvar","string",
+                                "bit","logic","reg","byte","shortint","int","logint","integer","time","shortreal","real","realtime","struct","union","enum","string","chandle","mailbox","semaphore","event","type",
+                                "genvar","string","wire","tri","triand","trior","tri0","tri1","uwire",
                                 "parameter","localparam"
                            });
                             word.CompletionContext.AppendModuleInstanceSnippets((ac) => true);
