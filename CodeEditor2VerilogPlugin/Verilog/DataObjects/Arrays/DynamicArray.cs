@@ -20,7 +20,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
             }
         }
 
-        NamedElements NamedElements { get; } = new NamedElements();
+        public override NamedElements NamedElements { get; } = new NamedElements();
         public static DynamicArray Create(DataObject dataObject)
         {
             return Create(dataObject, dataObject.Name);
@@ -30,18 +30,9 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
         {
             DynamicArray dynamicArray = new DynamicArray() { DataObject = dataObject, Name = name };
 
-            { // function int size();
-                List<Port> ports = new List<Port>();
-                Variables.Variable returnVal = DataObjects.Variables.Int.Create("size", DataTypes.IntType.Create(false));
-                BuiltInMethod builtInMethod = BuiltInMethod.Create("size", returnVal, ports);
-                dynamicArray.NamedElements.Add(builtInMethod.Name, builtInMethod);
-            }
-
-            { // function void delete();
-                List<Port> ports = new List<Port>();
-                BuiltInMethod builtInMethod = BuiltInMethod.Create("delete", null, ports);
-                dynamicArray.NamedElements.Add(builtInMethod.Name, builtInMethod);
-            }
+            ArrayMethods.AddSizeOrNum(dynamicArray.NamedElements, "size");          // function int size();
+            ArrayMethods.AddDelete(dynamicArray.NamedElements);                     // function void delete([input integer index]);
+            ArrayMethods.AppendArrayLocatorMethods(dynamicArray.NamedElements, dataObject);  // section 7.12
 
             return dynamicArray;
         }

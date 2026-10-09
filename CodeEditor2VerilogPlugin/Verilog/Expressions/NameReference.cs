@@ -165,6 +165,11 @@ namespace pluginVerilog.Verilog.Expressions
                 DataObjects.Variables.Variable? variable = namedElement as DataObjects.Variables.Variable;
                 if(variable != null) return searchElement(variable, index);
 
+                // array objects (queue / dynamic array / associative array) expose
+                // built-in methods (size, push_back, delete, ...) through NamedElements
+                DataObjects.DataObject? dataObjectElement = namedElement as DataObjects.DataObject;
+                if (dataObjectElement != null) return searchElement(dataObjectElement, index);
+
                 DataObjects.Nets.Net? net = namedElement as DataObjects.Nets.Net;
                 if(net != null)
                 {
