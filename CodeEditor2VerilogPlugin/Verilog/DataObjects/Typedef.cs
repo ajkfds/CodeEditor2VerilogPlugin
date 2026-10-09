@@ -46,6 +46,35 @@ namespace pluginVerilog.Verilog.DataObjects
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
+            // "typedef class A;" / "typedef interface class A;" forward declaration
+            // register nothing (real Class is registered by its own declaration).
+            // Registering a Typedef would conflict with the real Class name and
+            // degrade member resolution via UserDefinedType.
+            if (word.Text == "class" || (word.Text == "interface" && word.NextText == "class"))
+            {
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext();
+                if (word.Text == "class")
+                {
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+                }
+                if (General.IsIdentifier(word.Text))
+                {
+                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.MoveNext();
+                }
+                if (word.Text == ";")
+                {
+                    word.MoveNext();
+                }
+                else
+                {
+                    word.AddError("; expected");
+                    word.SkipToKeyword(";");
+                }
+                return true;
+            }
 
             word.AddSystemVerilogError();
 

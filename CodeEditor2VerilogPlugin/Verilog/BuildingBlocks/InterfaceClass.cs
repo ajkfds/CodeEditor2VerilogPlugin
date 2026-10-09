@@ -598,6 +598,35 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
+            // "typedef class A;" forward declaration: register nothing (real Class
+            // is registered by its own declaration), consume and end normally
+            // to suppress the false "data type expected" error.
+            if (word.Text == "class" || (word.Text == "interface" && word.NextText == "class"))
+            {
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext();
+                if (word.Text == "class")
+                {
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+                }
+                if (General.IsIdentifier(word.Text))
+                {
+                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.MoveNext();
+                }
+                if (word.Text == ";")
+                {
+                    word.MoveNext();
+                }
+                else
+                {
+                    word.AddError("; expected");
+                    word.SkipToKeyword(";");
+                }
+                return true;
+            }
+
             word.AddSystemVerilogError();
 
             // Parse data_type
