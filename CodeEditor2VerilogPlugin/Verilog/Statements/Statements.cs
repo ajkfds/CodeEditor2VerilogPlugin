@@ -137,6 +137,22 @@ namespace pluginVerilog.Verilog.Statements
                 word.MoveNext(); //:
             }
 
+            // block_item_declaration inside unnamed begin/fork blocks
+            // (BNF: par_block ::= fork [ : block_identifier { block_item_declaration } ] ...
+            //  but most simulators tolerate "automatic int k = i;" in unnamed blocks too;
+            //  without this branch, "automatic int k = i;" falls through and breaks the
+            //  remaining statements in the block)
+            if ((word.Text == "automatic" || word.Text == "static") &&
+                !General.ListOfStatementStopKeywords.Contains(word.NextText))
+            {
+                if (Items.BlockItemDeclaration.Parse(word, nameSpace))
+                {
+                    // continue parsing the next statement in the same block
+                    // (a declaration consumes only itself and must not break the statement loop)
+                    return ParseCreateStatement(word, nameSpace, blockIdentifier, clockDomains);
+                }
+            }
+
             switch (word.Text)
             {
                 case "(*":

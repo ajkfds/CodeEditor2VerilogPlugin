@@ -198,6 +198,8 @@ namespace pluginVerilog.Verilog.DataObjects
                    return Variables.Mailbox.Create(name, dataType);
                case DataTypeEnum.Semaphore:
                    return Variables.Semaphore.Create(name, dataType);
+               case DataTypeEnum.Process:
+                   return Variables.Process.Create(name, dataType);
                    //        TypeReference
 
             }

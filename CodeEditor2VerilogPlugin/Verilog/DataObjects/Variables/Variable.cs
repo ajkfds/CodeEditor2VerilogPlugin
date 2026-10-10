@@ -106,6 +106,10 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 case DataTypeEnum.Semaphore:
                     return Semaphore.Create(name, dataType);
 
+               // "process" built-in class (IEEE 1800-2017 section 9.7)
+               case DataTypeEnum.Process:
+                   return Process.Create(name, dataType);
+
                 // "event" - event variables are simple data objects
                 case DataTypeEnum.Event:
                     return DataObjects.Variables.Event.Create(name, dataType);

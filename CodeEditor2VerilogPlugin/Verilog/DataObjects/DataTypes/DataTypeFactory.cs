@@ -70,7 +70,8 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         TypeReference,
         UserDefined,
         Mailbox,
-        Semaphore
+        Semaphore,
+        Process
     }
 
     public static class DataTypeFactory
@@ -189,6 +190,10 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 // "semaphore" (IEEE 1800-2017 section 20.4)
                 case "semaphore":
                     return SemaphoreType.ParseCreate(word, nameSpace);
+
+               // "process" built-in class (IEEE 1800-2017 section 9.7)
+               case "process":
+                   return ProcessType.ParseCreate(word, nameSpace);
 
                 // "virtual" ["interface"] interface_identifier[parameter_value_assignment][ . modport_identifier] 
 

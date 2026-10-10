@@ -231,6 +231,15 @@ number
                         return TaggedUnionExpression.ParseCreate(word, nameSpace);
                     }
 
+                    // built-in "process" class static scope (IEEE 1800-2017 section 9.7)
+                    // e.g. process::self(), process::FINISHED
+                    // (the "process" identifier is not registered in user name spaces, so it
+                    //  would otherwise fall through to "unfound object")
+                    if (word.Text == "process" && word.NextText == "::")
+                    {
+                        return ProcessClassReference.ParseCreate(word, nameSpace);
+                    }
+
                     // keyword
                     if (General.ListOfKeywords.Contains(word.Text))
                     {
