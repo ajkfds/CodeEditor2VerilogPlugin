@@ -137,7 +137,6 @@ namespace pluginVerilog.Verilog
                 return;
             }
 
-
             // function_data_type_or_implicit   ::= data_type_or_void | implicit_data_type;
             DataObject? retVal = null;
             bool returnVoid = false;
@@ -192,13 +191,37 @@ namespace pluginVerilog.Verilog
                     break;
             }
 
-            if (!General.IsIdentifier(word.Text))
-            {
-                word.AddError("illegal identifier name");
-                return;
-            }
+           if (!General.IsIdentifier(word.Text))
+           {
+               word.AddError("illegal identifier name");
+               return;
+           }
 
-            Function function = new Function(nameSpace)
+           // class_scope of out-of-block method definition (BNF: function_data_type_or_implicit [class_scope] function_identifier)
+           // class_scope ::= class_type ::= [ package_scope ] class_identifier
+           string className = null;
+           if (word.NextText == "::")
+           {
+               className = word.Text;
+               var classElement = nameSpace.GetNamedElementUpward(className);
+               if (classElement == null) classElement = word.ProjectProperty.UnitNameSpace.Get(className);
+               BuildingBlocks.Class? outOfBlockClass = classElement as BuildingBlocks.Class;
+               word.Color(CodeDrawStyle.ColorType.Identifier);
+               word.MoveNext();    // class identifier
+               word.Color(CodeDrawStyle.ColorType.Keyword);
+               word.MoveNext();    // "::"
+               if (outOfBlockClass == null)
+               {
+                   word.AddError("unfound class scope");
+               }
+               else
+               {
+                   // out-of-block method definition: parse the body into the target class
+                   nameSpace = outOfBlockClass;
+               }
+           }
+
+           Function function = new Function(nameSpace)
             {
                 Name = word.Text,
                 Project = word.Project,

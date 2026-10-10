@@ -132,6 +132,31 @@ namespace pluginVerilog.Verilog
                 return;
             }
 
+            // class_scope of out-of-block method definition
+            // task_declaration ::= "task" [lifetime] task_body_declaration
+            // task_body_declaration ::= [interface_identifier. | class_scope] task_identifier ...
+            // class_scope ::= class_type ::= [ package_scope ] class_identifier
+            if (General.IsIdentifier(word.Text) && word.NextText == "::")
+            {
+                string className = word.Text;
+                var classElement = nameSpace.GetNamedElementUpward(className);
+                if (classElement == null) classElement = word.ProjectProperty.UnitNameSpace.Get(className);
+                BuildingBlocks.Class? outOfBlockClass = classElement as BuildingBlocks.Class;
+                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.MoveNext();    // class identifier
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext();    // "::"
+                if (outOfBlockClass == null)
+                {
+                    word.AddError("unfound class scope");
+                }
+                else
+                {
+                    // out-of-block method definition: parse the body into the target class
+                    nameSpace = outOfBlockClass;
+                }
+            }
+
             if (!General.IsIdentifier(word.Text))
             {
                 word.AddError("illegal identifier name");
