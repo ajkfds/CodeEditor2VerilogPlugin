@@ -450,6 +450,10 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                     else if (!nameSpace.NamedElements.ContainsKey(variable.Name))
                     {   // new variable
                         nameSpace.NamedElements.Add(variable.Name, variable);
+                        // class members are parsed in prototype mode; the member
+                        // must be marked Defined here, otherwise references through
+                        // class objects report "not defined here"
+                        variable.Defined = true;
                     }
                     else
                     {   // duplicated name
