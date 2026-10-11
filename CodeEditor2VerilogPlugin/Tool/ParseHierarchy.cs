@@ -276,9 +276,14 @@ namespace pluginVerilog.Tool
 
 
 
+            // Note: ReparseRequested is the only trigger for upward reparse.
+            // Do not use ErrorCount != 0 here: static unresolved diagnostics
+            // (macro-dependent identifiers, missing includes, ...) never go
+            // away by re-parsing, and treating them as "need reparse" causes
+            // an endless reparse cascade over the whole instance hierarchy
+            // every time the file is opened (very slow parse, UI lock).
             bool needReparse = false;
             if (verilogFile.ReparseRequested) needReparse = true;
-            if (verilogFile.VerilogParsedDocument != null && verilogFile.VerilogParsedDocument.ErrorCount != 0) needReparse = true;
 
             if (needReparse)
             {
