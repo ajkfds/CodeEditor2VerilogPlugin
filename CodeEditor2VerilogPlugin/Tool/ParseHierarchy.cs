@@ -32,29 +32,52 @@ namespace pluginVerilog.Tool
                 );
         }
 
-        private static CancellationTokenSource? cts = null;
+        // Running parse per target file. A new parse request cancels the ongoing
+        // parse of the SAME file only; parses of other files keep running
+        // in parallel (previously a single static cts cancelled any ongoing
+        // parse as soon as the next request arrived, which stopped e.g. a
+        // simulation-setup hierarchy parse started from SimulationSetup
+        // whenever another parse was posted).
+        private static readonly ConcurrentDictionary<string, CancellationTokenSource> runningParses
+            = new ConcurrentDictionary<string, CancellationTokenSource>();
+
+        // hierarchy parses of different files touch the same shared dependency
+        // files (DefinitionNameSpace / UnitNameSpace entries), so they are
+        // serialized: an ongoing parse is never cancelled by a newly posted
+        // parse; the new parse waits here until the previous one completes.
+        private static readonly SemaphoreSlim parseSemaphore = new SemaphoreSlim(1, 1);
+
         public static async Task ParseAsync(CodeEditor2.Data.TextFile textFile, ParseMode parseMode)
         {
-            if(cts != null)
+            // cancel the ongoing parse of the same file only (if any)
+            if (runningParses.TryRemove(textFile.Key, out CancellationTokenSource? oldCts))
             {
                 CodeEditor2.Controller.AppendLog("reparseTop : " + textFile.ID, Avalonia.Media.Colors.Red);
-                await cts.CancelAsync();
+                try { await oldCts.CancelAsync(); } catch (ObjectDisposedException) { }
+                try { oldCts.Dispose(); } catch (ObjectDisposedException) { }
             }
 
             CancellationTokenSource _cts = new CancellationTokenSource();
-            cts = _cts;
+            runningParses[textFile.Key] = _cts;
 
             try
             {
-                await ParseAsync(textFile, parseMode, _cts);
+                await parseSemaphore.WaitAsync();
+                try
+                {
+                    await ParseAsync(textFile, parseMode, _cts);
+                }
+                finally
+                {
+                    parseSemaphore.Release();
+                }
             }
             finally
             {
+                // remove only if the registered entry is still ours
+                ((ICollection<KeyValuePair<string, CancellationTokenSource>>)runningParses)
+                    .Remove(new KeyValuePair<string, CancellationTokenSource>(textFile.Key, _cts));
                 _cts.Dispose();
-                if (cts == _cts)
-                {
-                    cts = null;
-                }
             }
         }
 
