@@ -112,7 +112,9 @@ namespace pluginVerilog.NavigatePanel
                 if (pkg != null)
                 {
                     // post hier parse on background so the package body is up-to-date
-                    Tool.ParseHierarchy.PostParseAsync(pkg, Tool.ParseHierarchy.ParseMode.SearchReparseReqestedTree);
+                    // NavigatePanel node clicks share one cancel key: clicking
+                    // another node cancels the previous hierarchy parse
+                    Tool.ParseHierarchy.PostParseAsync(pkg, Tool.ParseHierarchy.ParseMode.SearchReparseReqestedTree, "NavigatePanel");
                 }
             }
             catch (Exception ex)

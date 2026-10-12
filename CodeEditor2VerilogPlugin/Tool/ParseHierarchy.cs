@@ -27,8 +27,22 @@ namespace pluginVerilog.Tool
 
         public static void PostParseAsync(CodeEditor2.Data.TextFile textFile, ParseMode parseMode)
         {
+            PostParseAsync(textFile, parseMode, textFile.Key);
+        }
+
+        /// <summary>
+        /// Post a hierarchy parse with an explicit cancellation key.
+        /// A new parse posted with the SAME cancelKey cancels the ongoing parse
+        /// of that key; parses posted with a different key keep running.
+        /// Use a shared key (e.g. "NavigatePanel") to make successive requests
+        /// (NavigatePanel node clicks) cancel the previous parse, and a unique
+        /// key (e.g. textFile.Key, used by SimulationSetup) to let parses of
+        /// different files run without stopping each other.
+        /// </summary>
+        public static void PostParseAsync(CodeEditor2.Data.TextFile textFile, ParseMode parseMode, string cancelKey)
+        {
             _ = Task.Run(
-                async() => { await ParseAsync(textFile, parseMode); }
+                async() => { await ParseAsync(textFile, parseMode, cancelKey); }
                 );
         }
 
@@ -49,8 +63,15 @@ namespace pluginVerilog.Tool
 
         public static async Task ParseAsync(CodeEditor2.Data.TextFile textFile, ParseMode parseMode)
         {
-            // cancel the ongoing parse of the same file only (if any)
-            if (runningParses.TryRemove(textFile.Key, out CancellationTokenSource? oldCts))
+            await ParseAsync(textFile, parseMode, textFile.Key);
+        }
+
+        public static async Task ParseAsync(CodeEditor2.Data.TextFile textFile, ParseMode parseMode, string cancelKey)
+        {
+            // cancel the ongoing parse registered under the same cancel key
+            // (same file for SimulationSetup; same issuing source, e.g.
+            // NavigatePanel clicks, for the shared "NavigatePanel" key)
+            if (runningParses.TryRemove(cancelKey, out CancellationTokenSource? oldCts))
             {
                 CodeEditor2.Controller.AppendLog("reparseTop : " + textFile.ID, Avalonia.Media.Colors.Red);
                 try { await oldCts.CancelAsync(); } catch (ObjectDisposedException) { }
@@ -58,7 +79,7 @@ namespace pluginVerilog.Tool
             }
 
             CancellationTokenSource _cts = new CancellationTokenSource();
-            runningParses[textFile.Key] = _cts;
+            runningParses[cancelKey] = _cts;
 
             try
             {
@@ -76,7 +97,7 @@ namespace pluginVerilog.Tool
             {
                 // remove only if the registered entry is still ours
                 ((ICollection<KeyValuePair<string, CancellationTokenSource>>)runningParses)
-                    .Remove(new KeyValuePair<string, CancellationTokenSource>(textFile.Key, _cts));
+                    .Remove(new KeyValuePair<string, CancellationTokenSource>(cancelKey, _cts));
                 _cts.Dispose();
             }
         }

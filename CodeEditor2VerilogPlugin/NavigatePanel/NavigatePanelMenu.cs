@@ -130,7 +130,9 @@ namespace pluginVerilog.NavigatePanel
                 Data.VerilogFile? verilogFile = item as Data.VerilogFile;
                 if (verilogFile != null)
                 {
-                    Tool.ParseHierarchy.PostParseAsync(verilogFile, Tool.ParseHierarchy.ParseMode.SearchReparseReqestedTree);
+                    // NavigatePanel node clicks share one cancel key: clicking
+                    // another node cancels the previous hierarchy parse
+                    Tool.ParseHierarchy.PostParseAsync(verilogFile, Tool.ParseHierarchy.ParseMode.SearchReparseReqestedTree, "NavigatePanel");
                 }
             }
         }
