@@ -283,6 +283,15 @@ namespace pluginVerilog.Tool
             token?.ThrowIfCancellationRequested();
 
 
+            // Mark the file dirty when its parsed document Version is older
+            // than the current CodeDocument Version (i.e. edited after the last
+            // parse). Without this, such a file would be skipped by the
+            // ReparseRequested check below even though its parse result is
+            // outdated. Edits made DURING a parse are handled by the Version
+            // check in AcceptParsedDocumentAsync and intentionally re-parse on
+            // a later pass.
+            verilogFile.CheckDirty();
+
             bool doParse = false;
             if (verilogFile.ReparseRequested) doParse = true;
             if (parseMode == ParseMode.ForceAllFiles) doParse = true;
