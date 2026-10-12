@@ -67,6 +67,26 @@ namespace pluginVerilog.Verilog.Items
 
         public static bool Parse(WordScanner word, NameSpace nameSpace,Attribute? attribute)
         {
+            // { method_qualifier } task_declaration / function_declaration
+            // method_qualifier ::= [ "pure" ] "virtual" | class_item_qualifier
+            // "virtual function ..." / "virtual task ..." must not be treated as a variable
+            // declaration (Variable.ParseDeclaration consumes "virtual" as a virtual interface
+            // qualifier and fails with "virtual interface type required" on "function"/"task")
+            if (word.Text == "virtual" && (word.NextText == "function" || word.NextText == "task"))
+            {
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext(); // virtual
+                if (word.Text == "function")
+                {
+                    Function.ParseFunctionOrConstructor(word, nameSpace);
+                }
+                else
+                {
+                    Task_.Parse(word, nameSpace);
+                }
+                return true;
+            }
+
             // { attribute_instance } class_property
             {
                 // { property_qualifier } data_declaration  
