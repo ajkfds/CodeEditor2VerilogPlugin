@@ -91,6 +91,18 @@ namespace pluginVerilog.Verilog.Statements
         {
             public string Name { get; set; } = "";
             public List<ProductionItem> Items { get; set; } = new List<ProductionItem>();
+            /// <summary>
+            /// Optional formal arguments (tf_port_list) of this production.
+            /// </summary>
+            public List<DataObjects.Port>? Ports { get; set; } = null;
+            /// <summary>
+            /// Optional return data type ("void" or data_type). Null = implicit (no type declared).
+            /// </summary>
+            public DataObjects.DataTypes.IDataType? ReturnType { get; set; } = null;
+            /// <summary>
+            /// True if the production declares "void" return type.
+            /// </summary>
+            public bool IsVoid { get; set; } = false;
         }
 
         public class ProductionItem
@@ -153,6 +165,118 @@ namespace pluginVerilog.Verilog.Statements
             public bool IsDefault { get; set; }
         }
 
+        /// <summary>
+        /// Built-in data type keywords accepted as a production return type.
+        /// </summary>
+        private static readonly HashSet<string> productionTypeKeywords = new HashSet<string>()
+        {
+            "bit", "logic", "reg",
+            "byte", "shortint", "int", "longint", "integer", "time",
+            "shortreal", "real", "realtime", "string"
+        };
+
+        /// <summary>
+        /// Register a production as a Function element in the namespace so that
+        /// production calls (e.g. add(10)) resolve through the existing function
+        /// call path. Formal arguments are parsed with ParseTfPortItems into the
+        /// Function's own namespace so that they are visible in the production body.
+        /// </summary>
+        private static Verilog.Function? registerProduction(WordScanner word, NameSpace nameSpace, Production production)
+        {
+            if (word.CompletionContext != null) return null;
+            if (word.Prototype) return null;
+
+            // create the Function with Project set (Function.Create does not set
+            // NamedItem.Project, which FunctionCall resolution requires)
+            Verilog.Function function = new Verilog.Function(nameSpace)
+            {
+                Name = production.Name,
+                Project = word.Project,
+                DefinitionReference = word.CrateWordReference()
+            };
+            if (production.ReturnType != null && !production.IsVoid)
+            {
+                // record the return type so that call sites can resolve the value
+                function.ReturnVariable = DataObjects.DataObject.Create(production.Name, production.ReturnType);
+            }
+            if (!nameSpace.NamedElements.ContainsKey(production.Name))
+            {
+                nameSpace.NamedElements.Add(production.Name, function);
+                return function;
+            }
+            // already registered (re-parse): reuse the existing element
+            INamedElement? existing = nameSpace.NamedElements[production.Name];
+            return existing as Verilog.Function;
+        }
+
+        /// <summary>
+        /// <summary>
+        /// Pre-scan the whole randsequence body and register production identifiers
+        /// before parsing the bodies, so that forward production references resolve.
+        /// Detection rules (heuristic, safe against common expressions):
+        ///   identifier ":" ...                      (no-argument production)
+        ///   typeKeyword identifier ( ...            (production with formal arguments)
+        /// </summary>
+        private static void preRegisterProductions(WordScanner word, NameSpace nameSpace)
+        {
+            if (word.CompletionContext != null) return;
+            if (word.Prototype) return;
+
+            WordScanner probe = word.Clone(true);
+            try
+            {
+                string prev = "";
+                while (!probe.Eof && probe.Text != "endsequence")
+                {
+                    string cur = probe.Text;
+                    string next = probe.NextText;
+                    if (General.IsIdentifier(cur) && !General.ListOfKeywords.Contains(cur) &&
+                        !nameSpace.NamedElements.ContainsKey(cur) &&
+                        (next == ":" || (next == "(" && (prev == "void" || productionTypeKeywords.Contains(prev)))))
+                    {
+                        Verilog.Function function = new Verilog.Function(nameSpace)
+                        {
+                            Name = cur,
+                            Project = word.Project,
+                            DefinitionReference = probe.CrateWordReference()
+                        };
+                        nameSpace.NamedElements.Add(cur, function);
+                    }
+                    prev = cur;
+                    probe.MoveNext();
+                }
+            }
+            finally
+            {
+                probe.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Fallback consumption of "( tf_port_list )" when the production cannot be
+        /// registered (prototype / completion context mode).
+        /// </summary>
+        private static void skipPortList(WordScanner word, NameSpace nameSpace)
+        {
+            while (!word.Eof && word.Text != ")" && word.Text != "endsequence")
+            {
+                if (word.Text == "(")
+                {
+                    // nested default value parentheses: skip balanced
+                    int depth = 1;
+                    word.MoveNext();
+                    while (!word.Eof && depth > 0)
+                    {
+                        if (word.Text == "(") depth++;
+                        else if (word.Text == ")") depth--;
+                        word.MoveNext();
+                    }
+                    continue;
+                }
+                word.MoveNext();
+            }
+        }
+
         public static RandsequenceStatement? ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             if (word.Text != "randsequence") return null;
@@ -160,6 +284,11 @@ namespace pluginVerilog.Verilog.Statements
             RandsequenceStatement statement = new RandsequenceStatement() { BeginIndexReference = word.CreateIndexReference() };
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
+
+            // pre-register production identifiers so that forward references
+            // (e.g. "main : first second;" before "first : ...;" is parsed)
+            // resolve within a single parse pass
+            preRegisterProductions(word, nameSpace);
 
             // Optional list of randselectors
             if (word.Text == "(")
@@ -199,22 +328,77 @@ namespace pluginVerilog.Verilog.Statements
             {
                 Production production = new Production();
 
-                // Production identifier
-                if (General.IsIdentifier(word.Text) && word.NextText != "(")
+                // [ data_type_or_void ] : optional return type of the production
+                // production ::= [ data_type_or_void ] production_identifier [ ( tf_port_list ) ] [ : ] production_body
+                // Only built-in type keywords are accepted here to avoid consuming
+                // adjacent production references (e.g. "first second" in a body).
+                DataObjects.DataTypes.IDataType? productionReturnType = null;
+                bool productionIsVoid = false;
+                if (word.Text == "void")
                 {
-                    production.Name = word.Text;
+                    productionIsVoid = true;
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+                }
+                else if (productionTypeKeywords.Contains(word.Text) && General.IsIdentifier(word.NextText))
+                {
+                    productionReturnType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, null);
+                }
+
+                // Production identifier
+                if (!General.IsIdentifier(word.Text)) break;
+
+                bool hasFormalArguments = word.NextText == "(";
+                production.Name = word.Text;
+                production.ReturnType = productionReturnType;
+                production.IsVoid = productionIsVoid;
+                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.MoveNext();
+
+                // register the production so that production calls (e.g. add(10))
+                // resolve through the existing function call path
+                // (forward references are resolved by re-parse)
+                Verilog.Function? prodFunc = registerProduction(word, nameSpace, production);
+
+                // ( tf_port_list ) : formal arguments of the production
+                if (hasFormalArguments && word.Text == "(")
+                {
+                    word.MoveNext();
+                    if (prodFunc != null)
+                    {
+                        DataObjects.Port.ParseTfPortItems(word, nameSpace, prodFunc);
+                        production.Ports = prodFunc.PortsList;
+                    }
+                    else
+                    {
+                        // fallback: consume the port list without registration
+                        skipPortList(word, nameSpace);
+                    }
+                    if (word.Text == ")")
+                    {
+                        word.MoveNext();
+                    }
+                    else
+                    {
+                        word.AddError(") required");
+                    }
+                }
+
+                // optional [ : ] before production_body
+                if (word.Text == ":")
+                {
                     word.Color(CodeDrawStyle.ColorType.Identifier);
                     word.MoveNext();
                 }
-                else
-                {
-                    break;
-                }
 
                 // Parse production items
+                // when the production has formal arguments, parse the body inside
+                // the production's own namespace so that the arguments are visible
+                // (e.g. void add(int y) : { x = x + y; })
+                NameSpace productionBodyNameSpace = (NameSpace?)prodFunc ?? nameSpace;
                 while (!word.Eof && word.Text != "endsequence" && word.Text != ":")
                 {
-                    var item = ParseProductionItem(word, nameSpace);
+                    var item = ParseProductionItem(word, productionBodyNameSpace);
                     if (item != null)
                     {
                         production.Items.Add(item);
@@ -313,6 +497,66 @@ namespace pluginVerilog.Verilog.Statements
                 {
                     word.MoveNext();
                     break;
+                }
+
+                // { statement block } : production body containing statements
+                // (e.g. first : { x = x + 20; }; / add(int y) : { x = x + y; };)
+                if (word.Text == "{")
+                {
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+                    while (!word.Eof && word.Text != "}")
+                    {
+                        if (word.Text == ";")
+                        {
+                            word.MoveNext();
+                            continue;
+                        }
+                        var statement = Statements.ParseCreateStatementOrNull(word, nameSpace);
+                        if (statement == null) word.MoveNext();
+                    }
+                    if (word.Text == "}")
+                    {
+                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.MoveNext();
+                    }
+                    // optional trailing ";" after the block
+                    if (word.Text == ";") word.MoveNext();
+                    continue;
+                }
+
+                // production call / production rule reference (e.g. "first", "add(10)")
+                // an identifier followed by end-of-item tokens is a production reference,
+                // not an expression
+                if (General.IsIdentifier(word.Text) && !General.ListOfKeywords.Contains(word.Text) &&
+                    (word.NextText == "(" || word.NextText == ";" || word.NextText == "," || word.NextText == "}" ||
+                     word.NextText == "endsequence" || word.NextText == ":" || General.IsIdentifier(word.NextText)))
+                {
+                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    if (word.NextText == "(")
+                    {
+                        // production call with arguments: consume "(" expressions ")".
+                        // port checking against the production's formal arguments is not
+                        // performed because the formal arguments may not be parsed yet
+                        // (forward reference within the same randsequence)
+                        word.MoveNext();
+                        while (!word.Eof && word.Text != ")")
+                        {
+                            if (word.Text == ",")
+                            {
+                                word.MoveNext();
+                                continue;
+                            }
+                            var arg = Expressions.Expression.ParseCreate(word, nameSpace);
+                            if (arg == null) word.MoveNext();
+                        }
+                        if (word.Text == ")") word.MoveNext();
+                    }
+                    else
+                    {
+                        word.MoveNext();
+                    }
+                    continue;
                 }
 
                 if (word.Text == ",")
