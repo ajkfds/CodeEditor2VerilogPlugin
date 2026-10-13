@@ -54,9 +54,17 @@ namespace pluginVerilog.Verilog.DataObjects
         {
             AssignmentPattern assignmentPattern;
 
-            if (word.Text != "'") throw new Exception();
-            word.MoveNext();
-            if (word.Text != "{") throw new Exception();
+            // Called either at "'{..." (identifier path) or at "{..." (after assignment_pattern_expression_type
+            // consumed by Cast.ParseCreate : e.g. int'{1, 2, 3} / type_t'{a:1, b:2})
+            if (word.Text == "'")
+            {
+                word.MoveNext();
+            }
+            if (word.Text != "{")
+            {
+                word.AddError("illegal assignment pattern");
+                return new AssignmentPatternWithoutKey();
+            }
             word.MoveNext();
 
             if (word.NextText == ":")
