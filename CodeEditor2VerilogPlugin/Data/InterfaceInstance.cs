@@ -3,6 +3,7 @@ using CodeEditor2.CodeEditor.CodeComplete;
 using CodeEditor2.CodeEditor.Parser;
 using CodeEditor2.CodeEditor.PopupHint;
 using CodeEditor2.CodeEditor.PopupMenu;
+using Avalonia.Threading;
 using CodeEditor2.Data;
 using System;
 using System.Collections.Generic;
@@ -275,7 +276,9 @@ namespace pluginVerilog.Data
                 // refresh the navigate panel node icon (error/warning badge, ...)
                 // after the parsed document is updated (same as
                 // VerilogHeaderInstance.AcceptParsedDocumentAsync).
-                NavigatePanelNode.UpdateVisual();
+                // Post (not Invoke) to avoid blocking this background parse
+                // thread on the UI thread.
+                Dispatcher.UIThread.Post(() => NavigatePanelNode.UpdateVisual());
             }
         }
 

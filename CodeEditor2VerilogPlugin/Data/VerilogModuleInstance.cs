@@ -571,9 +571,11 @@ namespace pluginVerilog.Data
             // after the parsed document is updated. Without this, the icon of a
             // deeply parsed VerilogModuleInstance stays stale until the node is
             // selected (same as VerilogHeaderInstance.AcceptParsedDocumentAsync).
+            // Post (not Invoke) to avoid blocking this background parse thread
+            // on the UI thread.
             if (CodeEditor2.Global.UIThread != null)
             {
-                NavigatePanelNode.UpdateVisual();
+                Dispatcher.UIThread.Post(() => NavigatePanelNode.UpdateVisual());
             }
         }
 
