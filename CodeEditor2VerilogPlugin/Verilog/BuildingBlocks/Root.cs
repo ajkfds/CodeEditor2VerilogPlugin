@@ -145,6 +145,13 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         break;
                     // interface_declaration
                     case "interface":
+                        if (word.NextText == "class")
+                        {
+                            // interface_class_declaration at root level
+                            // (interface_class_declaration ::= "interface" "class" ...)
+                            InterfaceClass.ParseDeclaration(word, parsedDocument.Root);
+                            break;
+                        }
                         await parseInterfaceAsync(word, parsedDocument, file);
                         break;
                     // program_declaration

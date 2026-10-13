@@ -13,7 +13,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 {
     public class Class : BuildingBlock, IModuleOrInterface, IModuleOrInterfaceOrCheckerOrClass, DataObjects.DataTypes.IDataType, IPortNameSpace
     {
-        protected Class() : base(null, null)
+        public Class() : base(null, null)
         {
             { //function int len();
                 List<Port> ports = new List<Port>();
@@ -570,17 +570,34 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                                 nameSpace.NamedElements.TryGetValue(word.Text, out unitElement);
                                 baseClass = unitElement as Class;
                             }
-                            else
-                            {
-                                // resolve via package name space file
-                                var packageFile = word.ProjectProperty.PackageNameSpace.GetFile(scopeName);
-                                if (packageFile != null)
-                                {
-                                    INamedElement? pkgElement = null;
-                                    nameSpace.NamedElements.TryGetValue(word.Text, out pkgElement);
-                                    baseClass = pkgElement as Class;
-                                }
-                            }
+                           else
+                           {
+                               // resolve via package name space file
+                               // (the package file's parsed Root.NamedElements holds
+                               //  its classes; the local nameSpace does not)
+                               var packageFile = word.ProjectProperty.PackageNameSpace.GetFile(scopeName);
+                               if (packageFile != null
+                                   && packageFile.VerilogParsedDocument != null
+                                   && packageFile.VerilogParsedDocument.Root != null)
+                               {
+                                   INamedElement? pkgElement = null;
+                                   packageFile.VerilogParsedDocument.Root.NamedElements.TryGetValue(word.Text, out pkgElement);
+                                   baseClass = pkgElement as Class;
+                               }
+                               if (baseClass == null)
+                               {
+                                   // same-file package: the package building block
+                                   // lives in this document's Root.BuildingBlocks
+                                   if (word.RootParsedDocument.Root != null
+                                       && word.RootParsedDocument.Root.BuildingBlocks.TryGetValue(scopeName, out BuildingBlock? localPackage)
+                                       && localPackage is Package)
+                                   {
+                                       INamedElement? pkgElement = null;
+                                       localPackage.NamedElements.TryGetValue(word.Text, out pkgElement);
+                                       baseClass = pkgElement as Class;
+                                   }
+                               }
+                           }
                         }
                         else if (nameSpace.NamedElements.ContainsKey(word.Text) && nameSpace.NamedElements[word.Text] is Class)
                         {
@@ -680,13 +697,91 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     while (!word.Eof)
                     {
                         // interface_class_type ::= ps_class_identifier [ parameter_value_assignment ]
-                        if (!nameSpace.NamedElements.ContainsKey(word.Text) || !(nameSpace.NamedElements[word.Text] is InterfaceClass))
+                        // resolution: package scope (Pkg::Bar) or local / cross-file
+                        if (word.NextText == "::")
+                        {
+                            string scopeName = word.Text;
+                            word.Color(CodeDrawStyle.ColorType.Identifier);
+                            word.MoveNext();
+                            word.MoveNext(); // ::
+
+                            var packageFile = word.ProjectProperty.PackageNameSpace.GetFile(scopeName);
+                            if (packageFile != null
+                                && packageFile.VerilogParsedDocument != null
+                                && packageFile.VerilogParsedDocument.Root != null
+                                && packageFile.VerilogParsedDocument.Root.NamedElements.TryGetValue(word.Text, out INamedElement? pkgElement)
+                                && pkgElement is InterfaceClass pkgIface)
+                            {
+                                word.Color(CodeDrawStyle.ColorType.Identifier);
+                                word.MoveNext();
+                                class_.ImplementedInterfaceClasses.Add(pkgIface);
+                                foreach (INamedElement namedElement in pkgIface.NamedElements.Values)
+                                {
+                                    if (!class_.NamedElements.ContainsKey(namedElement.Name))
+                                    {
+                                        class_.NamedElements.Add(namedElement.Name, namedElement);
+                                    }
+                                }
+                            }
+                            else if (word.RootParsedDocument.Root != null
+                                && word.RootParsedDocument.Root.BuildingBlocks.TryGetValue(scopeName, out BuildingBlock? localPackage)
+                                && localPackage is Package
+                                && localPackage.NamedElements.TryGetValue(word.Text, out INamedElement? localPkgElement)
+                                && localPkgElement is InterfaceClass localPkgIface)
+                            {
+                                // same-file package: the package building block
+                                // lives in this document's Root.BuildingBlocks
+                                word.Color(CodeDrawStyle.ColorType.Identifier);
+                                word.MoveNext();
+                                class_.ImplementedInterfaceClasses.Add(localPkgIface);
+                                foreach (INamedElement namedElement in localPkgIface.NamedElements.Values)
+                                {
+                                    if (!class_.NamedElements.ContainsKey(namedElement.Name))
+                                    {
+                                        class_.NamedElements.Add(namedElement.Name, namedElement);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                word.AddError("illegal interface_class_type");
+                            }
+
+                            if (word.Text == ",")
+                            {
+                                word.Color(CodeDrawStyle.ColorType.Keyword);
+                                word.MoveNext();
+                                continue;
+                            }
+                            break;
+                        }
+
+                        InterfaceClass? ifaceClass = null;
+                        if (nameSpace.NamedElements.ContainsKey(word.Text) && nameSpace.NamedElements[word.Text] is InterfaceClass localIface)
+                        {
+                            ifaceClass = localIface;
+                        }
+                        else
+                        {
+                            // cross-file resolution
+                            ifaceClass = word.ProjectProperty.DefinitionNameSpace.Get(word.Text) as InterfaceClass;
+                            if (ifaceClass == null)
+                            {
+                                ifaceClass = word.ProjectProperty.UnitNameSpace.Get(word.Text) as InterfaceClass;
+                            }
+                            if (ifaceClass == null)
+                            {
+                                BuildingBlock? upward = nameSpace.BuildingBlock.SearchBuildingBlockUpward(word.Text);
+                                ifaceClass = upward as InterfaceClass;
+                            }
+                        }
+                        if (ifaceClass == null)
                         {
                             word.AddError("illegal interface_class_type");
                         }
                         else
                         {
-                            InterfaceClass interfaceClass = (InterfaceClass)nameSpace.NamedElements[word.Text];
+                            InterfaceClass interfaceClass = ifaceClass;
                             word.Color(CodeDrawStyle.ColorType.Identifier);
                             word.MoveNext();
 

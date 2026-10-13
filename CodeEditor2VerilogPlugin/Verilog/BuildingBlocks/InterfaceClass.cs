@@ -11,7 +11,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 {
     public class InterfaceClass : BuildingBlock, IModuleOrInterface, IModuleOrInterfaceOrCheckerOrClass, DataObjects.DataTypes.IDataType, IPortNameSpace
     {
-        protected InterfaceClass() : base(null, null)
+        public InterfaceClass() : base(null, null)
         {
         }
 
@@ -309,7 +309,19 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         while (!word.Eof)
                         {
                             if (word.Text == ")") break;   // # ( )  : empty parameter_port_list
-                            if (word.Text == "parameter")
+                            if (word.Text == "type")
+                            {
+                                // parameter_port_declaration ::= "type" list_of_type_assignments
+                                // ex: interface class Foo #(type T = int);
+                                IndexReference beforeTypeRef = word.CreateIndexReference();
+                                Verilog.DataObjects.Constants.Constants.ParseCreateTypeAssignmentsForPort(word, interfaceClass);
+                                if (beforeTypeRef.IsSameAs(word.CreateIndexReference()))
+                                {   // error recovery: no progress on broken type declaration
+                                    word.AddError("illegal type parameter declaration");
+                                    word.MoveNext();
+                                }
+                            }
+                            else if (word.Text == "parameter")
                             {
                                 IndexReference beforeParamRef = word.CreateIndexReference();
                                 Verilog.DataObjects.Constants.Parameter.ParseCreateDeclarationForPort(word, interfaceClass, null);

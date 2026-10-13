@@ -354,6 +354,56 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 return unitInterfaceClass;
             }
 
+            // class / interface class defined at root level or inside another
+            // building block of the same file (class Parent chain does not
+            // reach the enclosing module, so an identifier inside a class body
+            // cannot resolve module-scope classes via GetNamedElementUpward;
+            // fall back to Root.BuildingBlocks and their NamedElements.
+            // Forward references are resolved by the second parse pass.)
+            {
+                BuildingBlock? rootElement = null;
+                if (word.RootParsedDocument.Root != null)
+                {
+                    word.RootParsedDocument.Root.BuildingBlocks.TryGetValue(word.Text, out rootElement);
+                    if (rootElement == null)
+                    {
+                        // search inside same-file building blocks (module-scope classes)
+                        foreach (BuildingBlock bb in word.RootParsedDocument.Root.BuildingBlocks.Values)
+                        {
+                            if (bb.NamedElements.TryGetValue(word.Text, out INamedElement? inner)
+                                && inner is BuildingBlock innerBb
+                                && (innerBb is Class || innerBb is InterfaceClass))
+                            {
+                                rootElement = innerBb;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (rootElement is Class rootClass)
+                {
+                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.MoveNext();
+                    if (word.Text == "#")
+                    {
+                        Dictionary<string, Expressions.Expression> parameterOverrides = new Dictionary<string, Expressions.Expression>();
+                        Verilog.ParameterValueAssignment.ParseCreate(word, nameSpace, parameterOverrides, rootClass);
+                    }
+                    return rootClass;
+                }
+                if (rootElement is InterfaceClass rootIfaceClass)
+                {
+                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.MoveNext();
+                    if (word.Text == "#")
+                    {
+                        Dictionary<string, Expressions.Expression> parameterOverrides = new Dictionary<string, Expressions.Expression>();
+                        Verilog.ParameterValueAssignment.ParseCreate(word, nameSpace, parameterOverrides, rootIfaceClass);
+                    }
+                    return rootIfaceClass;
+                }
+            }
+
             //if (nameSpace.NamedElements.ContainsKey(word.Text))
             //{
             //    INamedElement namedElement = nameSpace.NamedElements[word.Text];
