@@ -2,6 +2,10 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using pluginVerilog.Verilog;
+using pluginVerilog.Verilog.BuildingBlocks;
+using pluginVerilog.Verilog.Expressions;
+using pluginVerilog.Verilog.BuildingBlocks;
 
 namespace pluginVerilog.CoreBridge
 {
@@ -55,7 +59,58 @@ namespace pluginVerilog.CoreBridge
             // run the (UI-free) parse
             await parser.ParseAsync(cancellationToken ?? CancellationToken.None);
 
-            return parser.VerilogParsedDocument;
+            Verilog.ParsedDocument? parsedDocument = parser.VerilogParsedDocument;
+
+            // Store the result on the file so that lazy cross-object lookups
+            // (Variables.Object.GetSourceClass() reads source.ParsedDocument,
+            // etc.) can resolve class members in UI-less hosts (tests, LSP).
+            // Editor hosts re-accept the document through
+            // AcceptParsedDocumentAsync which overwrites this value.
+            if (parsedDocument != null)
+            {
+                // Register root-level elements into project namespaces, mirroring
+                // VerilogFile.AcceptParsedDocumentAsync (which is not executed in
+                // UI-less hosts). Without this, cross-object lookups such as
+                // Variables.Object.GetSourceClass() (UnitNameSpace.GetFile) cannot
+                // resolve class members and every member access reports
+                // "unfound object".
+                if (parsedDocument.Root != null)
+                {
+                    ProjectProperty projectProperty = file.ProjectProperty;
+                    foreach (var element in parsedDocument.Root.NamedElements.Values)
+                    {
+                        if (element is Package package)
+                        {
+                            projectProperty.PackageNameSpace.Register(package.Name, package, file);
+                            continue;
+                        }
+
+                        if (element is Class class_)
+                        {
+                            projectProperty.UnitNameSpace.Register(class_.Name, class_, file);
+                            continue;
+                        }
+
+                        if (element is InterfaceClass interfaceClass)
+                        {
+                            projectProperty.UnitNameSpace.Register(interfaceClass.Name, interfaceClass, file);
+                            continue;
+                        }
+
+                        if (element is BuildingBlock buildingBlock)
+                        {
+                            projectProperty.DefinitionNameSpace.Register(buildingBlock.Name, buildingBlock, file);
+                            continue;
+                        }
+
+                        projectProperty.UnitNameSpace.Register(element.Name, element, file);
+                    }
+                }
+
+                file.ParsedDocument = parsedDocument;
+            }
+
+            return parsedDocument;
         }
     }
 }

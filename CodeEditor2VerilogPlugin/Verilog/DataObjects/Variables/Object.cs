@@ -16,7 +16,19 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             ProjectProperty projectProperty = (ProjectProperty)Project.GetPluginProperty();
     
             Data.IVerilogRelatedFile? file = projectProperty.UnitNameSpace.GetFile(SourceName);
-            if (file == null) return null;
+            if (file == null)
+            {
+                // Classes defined inside a module / interface / class scope are
+                // not registered in UnitNameSpace (which only holds root-level
+                // classes). Resolve them through the defining name space using
+                // name-based upward search.
+                if (DefinedNameSpace != null)
+                {
+                    INamedElement? localElement = DefinedNameSpace.GetNamedElementUpward(SourceName);
+                    if (localElement is BuildingBlocks.Class localClass) return localClass;
+                }
+                return null;
+            }
             if (file is not Data.VerilogFile) return null;
 
             Data.VerilogFile source = (Data.VerilogFile)file;

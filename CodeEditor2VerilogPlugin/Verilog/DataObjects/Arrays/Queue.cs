@@ -1,3 +1,4 @@
+
 using pluginVerilog.Verilog.DataObjects.Variables;
 using System;
 using System.Collections.Generic;
@@ -15,23 +16,6 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
         public bool Constant { get; protected set; } = false;
 
         public Expressions.Expression? MaxSizeExpression { get; protected set; }
-
-        //public override bool CheckIndexRangeError(Expressions.Expression indexExpression)
-        //{
-        //    return false;
-        //}
-        //public override string CreateString()
-        //{
-        //    StringBuilder sb = new StringBuilder();
-        //    sb.Append("[ $");
-        //    if (MaxSizeExpression != null)
-        //    {
-        //        sb.Append(":");
-        //        sb.Append(MaxSizeExpression.CreateString());
-        //    }
-        //    sb.Append(" ]");
-        //    return sb.ToString();
-        //}
 
         public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
@@ -81,55 +65,14 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
         {
             Queue queue = new Queue() { DataObject = dataObject, Name = dataObject.Name, MaxSizeExpression = maxSizeExpression };
 
-            { // function int size();
-                List<Port> ports = new List<Port>();
-                Variable returnVal = DataObjects.Variables.Int.Create("size", DataTypes.IntType.Create(false));
-                BuiltInMethod builtInMethod = BuiltInMethod.Create("size", returnVal, ports);
-                queue.NamedElements.Add(builtInMethod.Name, builtInMethod);
-            }
-
-            { // function void insert(input integer index, input element_t item);
-                List<Port> ports = new List<Port>();
-                Port? port = Port.Create("index", null, Port.DirectionEnum.Input, DataObjects.Variables.Integer.Create("index", DataTypes.IntegerType.Create(false)));
-                if (port != null) ports.Add(port);
-                port = Port.Create("item", null, Port.DirectionEnum.Input, dataObject);
-                if (port != null) ports.Add(port);
-                BuiltInMethod builtInMethod = BuiltInMethod.Create("insert", null, ports);
-                queue.NamedElements.Add(builtInMethod.Name, builtInMethod);
-            }
-
-            { // function void delete([input integer index] );
-            }
-
-            //{ // function element_t pop_front();
-            //    List<Port> ports = new List<Port>();
-            //    Variable returnVal = dataObject;
-            //    BuiltInMethod builtInMethod = BuiltInMethod.Create("pop_front", returnVal, ports);
-            //    queue.NamedElements.Add(builtInMethod.Name, builtInMethod);
-            //}
-
-            //{ // function element_t pop_back();
-            //    List<Port> ports = new List<Port>();
-            //    BuiltInMethod builtInMethod = BuiltInMethod.Create("pop_back", null, ports);
-            //    queue.NamedElements.Add(builtInMethod.Name, builtInMethod);
-            //}
-
-            { // function void push_front(input element_t item);
-                List<Port> ports = new List<Port>();
-                Port? port = Port.Create("item", null, Port.DirectionEnum.Input, dataObject);
-                if (port != null) ports.Add(port);
-                BuiltInMethod builtInMethod = BuiltInMethod.Create("push_front", null, ports);
-                queue.NamedElements.Add(builtInMethod.Name, builtInMethod);
-            }
-
-            { // function void push_back(input element_t item);
-                List<Port> ports = new List<Port>();
-                Port? port = Port.Create("item", null, Port.DirectionEnum.Input, dataObject);
-                if (port != null) ports.Add(port);
-                BuiltInMethod builtInMethod = BuiltInMethod.Create("push_back", null, ports);
-                queue.NamedElements.Add(builtInMethod.Name, builtInMethod);
-            }
-
+            ArrayMethods.AddSizeOrNum(queue.NamedElements, "size");          // function int size();
+            ArrayMethods.AddDeleteWithOptionalIndex(queue.NamedElements);     // function void delete([input integer index]);
+            ArrayMethods.AddInsert(queue.NamedElements, dataObject);          // function void insert(input integer index, input element_t item);
+            ArrayMethods.AddPop(queue.NamedElements, "pop_front");            // function element_t pop_front();
+            ArrayMethods.AddPop(queue.NamedElements, "pop_back");             // function element_t pop_back();
+            ArrayMethods.AddPush(queue.NamedElements, "push_front", dataObject);  // function void push_front(input element_t item);
+            ArrayMethods.AddPush(queue.NamedElements, "push_back", dataObject);   // function void push_back(input element_t item);
+            ArrayMethods.AppendArrayLocatorMethods(queue.NamedElements, dataObject);  // section 7.12
 
             return queue;
         }
