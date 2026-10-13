@@ -297,6 +297,21 @@ namespace pluginVerilog.Verilog.Expressions
             else {
                 if (apostropheIndex + 1 == word.Length)
                 {
+                    // "'{" : start of an assignment pattern (e.g. '{1,2,3} in parameter/localparam initialization)
+                    // The leading "'" is tokenized as a standalone Number token (the following "{" is an operator),
+                    // and previously it fell into the cast path below causing an "illegal cast" error.
+                    if (word.NextText == "{")
+                    {
+                        word.Color(CodeDrawStyle.ColorType.Number);
+                        word.MoveNext(); // consume '
+                        DataObjects.AssignmentPattern? assignmentPattern = DataObjects.AssignmentPattern.ParseCreate(word, nameSpace, lValue);
+                        if (assignmentPattern == null) return null;
+                        return new AssignmentPatternPrimary(assignmentPattern)
+                        {
+                            Reference = WordReference.CreateReferenceRange(number.Reference, word.GetReference())
+                        };
+                    }
+
                     // cast
                     int value;
                     if (int.TryParse(sb.ToString(), out value))

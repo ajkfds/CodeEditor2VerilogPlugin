@@ -217,6 +217,31 @@ namespace pluginVerilog.Verilog.Expressions
         public AssignmentPatternPrimary(DataObjects.AssignmentPattern assignmentPattern)
         {
             AssignmentPattern = assignmentPattern;
+            // A parameter/constant initialized with an assignment pattern is constant
+            // when all of its element expressions are constant.
+            // (Without this, "parameter P = '{1,2,3};" would report "should be constant".)
+            Constant = isConstantPattern(assignmentPattern);
+        }
+
+        private static bool isConstantPattern(DataObjects.AssignmentPattern pattern)
+        {
+            if (pattern is DataObjects.AssignmentPatternWithKey withKey)
+            {
+                foreach (var keyExpression in withKey.KeyExpressions)
+                {
+                    if (keyExpression.Expression == null || !keyExpression.Expression.Constant) return false;
+                }
+                return true;
+            }
+            else if (pattern is DataObjects.AssignmentPatternWithoutKey withoutKey)
+            {
+                foreach (var expression in withoutKey.Expressions)
+                {
+                    if (expression == null || !expression.Constant) return false;
+                }
+                return true;
+            }
+            return false;
         }
     }
 }
