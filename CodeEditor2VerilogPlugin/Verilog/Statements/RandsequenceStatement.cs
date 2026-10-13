@@ -232,7 +232,7 @@ namespace pluginVerilog.Verilog.Statements
                     string next = probe.NextText;
                     if (General.IsIdentifier(cur) && !General.ListOfKeywords.Contains(cur) &&
                         !nameSpace.NamedElements.ContainsKey(cur) &&
-                        (next == ":" || (next == "(" && (prev == "void" || productionTypeKeywords.Contains(prev)))))
+                        (next == ":" || (next == "(" && (prev == "void" || productionTypeKeywords.Contains(prev) || prev == ":" || prev == ";"))))
                     {
                         Verilog.Function function = new Verilog.Function(nameSpace)
                         {
@@ -398,6 +398,30 @@ namespace pluginVerilog.Verilog.Statements
                 NameSpace productionBodyNameSpace = (NameSpace?)prodFunc ?? nameSpace;
                 while (!word.Eof && word.Text != "endsequence" && word.Text != ":")
                 {
+                    // stop when the next production header begins
+                    // production ::= [ data_type_or_void ] identifier [ ( ports ) ] body
+                    //  - "void identifier" / type keyword + identifier : new production
+                    //  - "identifier :" : new production (but "identifier := weight" is
+                    //    a rand select with a weight, not a production header)
+                    if (word.Text == "void" && General.IsIdentifier(word.NextText)) break;
+                    if (productionTypeKeywords.Contains(word.Text) && General.IsIdentifier(word.NextText)) break;
+                    if (General.IsSimpleIdentifier(word.Text) && !General.ListOfKeywords.Contains(word.Text) && word.NextText == ":")
+                    {
+                        WordScanner probe = word.Clone(true);
+                        bool isWeightAssign;
+                        try
+                        {
+                            probe.MoveNext(); // identifier
+                            probe.MoveNext(); // ":"
+                            isWeightAssign = probe.Text == "=";
+                        }
+                        finally
+                        {
+                            probe.Dispose();
+                        }
+                        if (!isWeightAssign) break;
+                    }
+
                     var item = ParseProductionItem(word, productionBodyNameSpace);
                     if (item != null)
                     {
@@ -488,6 +512,20 @@ namespace pluginVerilog.Verilog.Statements
                 case "randcase":
                     // Inline randcase
                     return ParseRandcaseProduction(word, nameSpace);
+
+                case "repeat":
+                    // repeat production (BNF: repeat production_statement)
+                    // "repeat ( expression ) production_item" : the following
+                    // production item is parsed by the loop below as usual
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext();
+                    if (word.Text == "(")
+                    {
+                        word.MoveNext();
+                        Expression.ParseCreate(word, nameSpace);
+                        if (word.Text == ")") word.MoveNext();
+                    }
+                    break;
             }
 
             // Parse rand selects
@@ -522,15 +560,20 @@ namespace pluginVerilog.Verilog.Statements
                     }
                     // optional trailing ";" after the block
                     if (word.Text == ";") word.MoveNext();
-                    continue;
+                    // the production body is complete: a following identifier+":"
+                    // is the next production header, not a production reference
+                    break;
                 }
 
                 // production call / production rule reference (e.g. "first", "add(10)")
                 // an identifier followed by end-of-item tokens is a production reference,
                 // not an expression
+                // note: NextText == ":" is excluded: an identifier followed by ":"
+                // starts the next production header (e.g. "first : { ... };" after
+                // "main : { ... };"), not a production reference
                 if (General.IsIdentifier(word.Text) && !General.ListOfKeywords.Contains(word.Text) &&
                     (word.NextText == "(" || word.NextText == ";" || word.NextText == "," || word.NextText == "}" ||
-                     word.NextText == "endsequence" || word.NextText == ":" || General.IsIdentifier(word.NextText)))
+                     word.NextText == "endsequence" || General.IsIdentifier(word.NextText)))
                 {
                     word.Color(CodeDrawStyle.ColorType.Identifier);
                     if (word.NextText == "(")
@@ -539,7 +582,8 @@ namespace pluginVerilog.Verilog.Statements
                         // port checking against the production's formal arguments is not
                         // performed because the formal arguments may not be parsed yet
                         // (forward reference within the same randsequence)
-                        word.MoveNext();
+                        word.MoveNext(); // production identifier
+                        word.MoveNext(); // "("
                         while (!word.Eof && word.Text != ")")
                         {
                             if (word.Text == ",")
@@ -573,23 +617,43 @@ namespace pluginVerilog.Verilog.Statements
                 }
 
                 RandSelectItem selectItem = new RandSelectItem();
-                selectItem.Expression = Expression.ParseCreate(word, nameSpace);
+                // rand select expression is parsed at Primary level so that the
+                // "|" separator of the next rand select is not consumed as a
+                // binary OR operator (e.g. "main : first := 1 | second := 0;")
+                selectItem.Expression = Expressions.Primary.ParseCreate(word, nameSpace);
                 if(selectItem.Expression == null)
                 {
-                    return null;
+                    // error recovery: consume one token instead of aborting the
+                    // whole production (an abort leaves the remaining items to be
+                    // parsed as module items and cascades errors)
+                    word.MoveNext();
+                    continue;
                 }
 
-                // Optional weight
+                // Optional weight: ": expression" or ":= expression"
+                // (the tokenizer splits ":=" into ":" and "=")
                 if (word.Text == ":")
                 {
                     word.MoveNext();
-                    selectItem.Weight = Expression.ParseCreate(word, nameSpace);
+                    if (word.Text == "=")
+                    {
+                       word.MoveNext(); // ":=" weight separator
+                   }
+                   // weight expression is parsed at Primary level for the same reason
+                   selectItem.Weight = Expressions.Primary.ParseCreate(word, nameSpace);
+                   if (selectItem.Weight == null) word.MoveNext();
                 }
 
                 item.SelectItems.Add(selectItem);
 
                 if (word.Text == ",")
                 {
+                    word.MoveNext();
+                }
+                else if (word.Text == "|")
+                {
+                    // rand select list separator used by common coding style
+                    // (e.g. "main : first := 1 | second := 0;")
                     word.MoveNext();
                 }
             }
@@ -756,7 +820,12 @@ namespace pluginVerilog.Verilog.Statements
 
         private static void ParseProductionBody(WordScanner word, NameSpace nameSpace, List<ProductionItem> items)
         {
-            while (!word.Eof && word.Text != "endsequence" && word.Text != "else" && word.Text != ":")
+            // "endcase" stops the body: case/randcase production item bodies must
+            // not run past the enclosing case construct (otherwise the following
+            // production headers are absorbed as case item bodies and the parse
+            // never progresses)
+            while (!word.Eof && word.Text != "endsequence" && word.Text != "else" && word.Text != ":" &&
+                   word.Text != "endcase")
             {
                 if (word.Text == ";")
                 {
