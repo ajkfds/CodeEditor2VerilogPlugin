@@ -566,6 +566,15 @@ namespace pluginVerilog.Data
             }
 
             await UpdateAsync(); // update navigate panel node and message view
+
+            // refresh the navigate panel node icon (error/warning badge, ...)
+            // after the parsed document is updated. Without this, the icon of a
+            // deeply parsed VerilogModuleInstance stays stale until the node is
+            // selected (same as VerilogHeaderInstance.AcceptParsedDocumentAsync).
+            if (CodeEditor2.Global.UIThread != null)
+            {
+                NavigatePanelNode.UpdateVisual();
+            }
         }
 
 

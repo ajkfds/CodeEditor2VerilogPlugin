@@ -271,6 +271,11 @@ namespace pluginVerilog.Data
                     CodeEditor2.Controller.MessageView.Update(newParsedDocument);
                     CodeEditor2.Controller.CodeEditor.PostRefresh();
                 }
+
+                // refresh the navigate panel node icon (error/warning badge, ...)
+                // after the parsed document is updated (same as
+                // VerilogHeaderInstance.AcceptParsedDocumentAsync).
+                NavigatePanelNode.UpdateVisual();
             }
         }
 
