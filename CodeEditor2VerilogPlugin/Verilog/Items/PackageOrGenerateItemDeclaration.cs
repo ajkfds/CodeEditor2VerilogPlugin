@@ -25,6 +25,17 @@ namespace pluginVerilog.Verilog.Items
          */
         public static bool Parse(WordScanner word, NameSpace nameSpace)
         {
+            // class_declaration ::= [ "virtual" ] "class" ...
+            // "virtual class ..." must not be treated as a variable declaration
+            // (Variable.ParseDeclaration consumes the leading "virtual" as a virtual
+            // interface qualifier and fails with "virtual interface type required"
+            // because the next token is the "class" keyword, not a type name).
+            if (word.Text == "virtual" && word.NextText == "class")
+            {
+                BuildingBlocks.Class.ParseDeclaration(word, nameSpace);
+                return true;
+            }
+
             // data_declaration
             if (DataDeclaration.Parse(word, nameSpace)) return true;
 

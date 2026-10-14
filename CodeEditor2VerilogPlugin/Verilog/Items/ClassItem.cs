@@ -87,6 +87,15 @@ namespace pluginVerilog.Verilog.Items
                 return true;
             }
 
+            // { attribute_instance } class_declaration (nested)
+            // "virtual class ..." (nested class_declaration) must not be treated
+            // as a virtual interface variable declaration.
+            if (word.Text == "virtual" && word.NextText == "class")
+            {
+                BuildingBlocks.Class.ParseCreate(word, nameSpace);
+                return true;
+            }
+
             // { attribute_instance } class_property
             {
                 // { property_qualifier } data_declaration  
