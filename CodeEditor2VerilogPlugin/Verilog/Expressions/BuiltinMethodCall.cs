@@ -12,6 +12,12 @@ namespace pluginVerilog.Verilog.Expressions
         public List<Expression> Expressions = new List<Expression>();
         public required string FunctionName { get; init; }
 
+        /// <summary>
+        /// The `with ( expression )` clause of an array locator / ordering method
+        /// call (IEEE 1800-2017 section 7.12), when one followed the call.
+        /// </summary>
+        public Expression? WithExpression { get; private set; }
+
         //        public required NameSpace DefinedNameSpace { init; get; }
 
         public required BuiltInMethod BuiltInMethod { init; get; }
@@ -40,6 +46,14 @@ namespace pluginVerilog.Verilog.Expressions
         }
 
         public static BuiltinMethodCall? ParseCreate(WordScanner word, NameSpace usedNameSpace, DataObjects.DataObject dataObject)
+        {
+            BuiltinMethodCall? methodCall = parseMethodCall(word, usedNameSpace, dataObject);
+            if (methodCall == null) return null;
+            parseWithClause(word, usedNameSpace, methodCall);
+            return methodCall;
+        }
+
+        private static BuiltinMethodCall? parseMethodCall(WordScanner word, NameSpace usedNameSpace, DataObjects.DataObject dataObject)
         {
             if (word.RootParsedDocument.ProjectProperty == null) throw new Exception();
 
@@ -150,6 +164,60 @@ namespace pluginVerilog.Verilog.Expressions
                 i++;
             }
             return methodCall;
+        }
+
+        /// <summary>
+        /// Parse the optional `with ( expression )` clause of an array locator /
+        /// ordering method call (IEEE 1800-2017 7.12): qs = s.find with ( item == "sad" );
+        /// </summary>
+        private static void parseWithClause(WordScanner word, NameSpace usedNameSpace, BuiltinMethodCall methodCall)
+        {
+            if (word.Text != "with") return;
+            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.MoveNext();
+
+            if (word.GetCharAt(0) != '(')
+            {
+                word.AddError("( required");
+                return;
+            }
+            word.MoveNext();
+
+            bindLocatorVariable(word, usedNameSpace);
+
+            Expression? expression = Expression.ParseCreate(word, usedNameSpace);
+            if (expression == null)
+            {
+                word.AddError("missed expression");
+                return;
+            }
+            if (word.GetCharAt(0) != ')')
+            {
+                word.AddError(") required");
+                return;
+            }
+            word.MoveNext();
+
+            methodCall.WithExpression = expression;
+            methodCall.Reference = WordReference.CreateReferenceRange(methodCall.Reference, word.GetReference());
+        }
+
+        /// <summary>
+        /// An array locator `with` clause references the implicit loop variable
+        /// `item`. Bind it in the enclosing name space before the clause's
+        /// expression is parsed so the comparison does not resolve as an
+        /// unfound object. PatternVariable.ParseCreate uses the same binding.
+        /// A prototype / partial parse discards its results, so it must not
+        /// pollute the shared name space with the synthetic loop variable.
+        /// </summary>
+        private static void bindLocatorVariable(WordScanner word, NameSpace? usedNameSpace)
+        {
+            if (usedNameSpace == null || word.Prototype || word.CompletionContext != null) return;
+            if (usedNameSpace.NamedElements.ContainsKey("item")) return;
+            DataObjects.DataTypes.IDataType dataType = DataObjects.DataTypes.StringType.Create(null);
+            DataObjects.DataObject dataObject = DataObjects.Variables.String.Create("item", dataType);
+            dataObject.Defined = true;
+            usedNameSpace.NamedElements.Add(dataObject.Name, dataObject);
         }
 
         /// <summary>
