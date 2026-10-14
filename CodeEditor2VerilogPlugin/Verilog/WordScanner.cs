@@ -669,37 +669,37 @@ namespace pluginVerilog.Verilog
                             break;
                         case "tri":
                             DefaultNetType = DefaultNetTypeEnum.tri;
-                            if (!SupressCompilerDerectiveError) wordPointer.AddError("not supported");
                             wordPointer.MoveNext();
                             break;
                         case "tri0":
                             DefaultNetType = DefaultNetTypeEnum.tri0;
-                            if (!SupressCompilerDerectiveError) wordPointer.AddError("not supported");
+                            wordPointer.MoveNext();
+                            break;
+                        case "tri1":
+                            // treated as tri0-family; no dedicated enum member
                             wordPointer.MoveNext();
                             break;
                         case "wand":
                             DefaultNetType = DefaultNetTypeEnum.wand;
-                            if (!SupressCompilerDerectiveError) wordPointer.AddError("not supported");
                             wordPointer.MoveNext();
                             break;
                         case "triand":
                             DefaultNetType = DefaultNetTypeEnum.triand;
-                            if (!SupressCompilerDerectiveError) wordPointer.AddError("not supported");
                             wordPointer.MoveNext();
                             break;
                         case "wor":
                             DefaultNetType = DefaultNetTypeEnum.wor;
-                            if (!SupressCompilerDerectiveError) wordPointer.AddError("not supported");
                             wordPointer.MoveNext();
                             break;
                         case "trior":
                             DefaultNetType = DefaultNetTypeEnum.trior;
-                            if (!SupressCompilerDerectiveError) wordPointer.AddError("not supported");
                             wordPointer.MoveNext();
                             break;
                         case "trireg":
                             DefaultNetType = DefaultNetTypeEnum.trireg;
-                            if (!SupressCompilerDerectiveError) wordPointer.AddError("not supported");
+                            wordPointer.MoveNext();
+                            break;
+                        case "uwire":
                             wordPointer.MoveNext();
                             break;
                         default:
@@ -788,11 +788,18 @@ namespace pluginVerilog.Verilog
                     parseUndef();
                     break;
                 case "`line":
-                case "`nounconnected_drive":
-                case "`unconnected_drive":
+                    // `line number "filename" level  (rest of the line is a directive argument)
                     Color(CodeDrawStyle.ColorType.Keyword);
-                    if (!SupressCompilerDerectiveError) wordPointer.AddError("unsupported compiler directive");
+                    wordPointer.MoveNextUntilEol();
+                    break;
+                case "`nounconnected_drive":
+                    Color(CodeDrawStyle.ColorType.Keyword);
                     wordPointer.MoveNext();
+                    break;
+                case "`unconnected_drive":
+                    // `unconnected_drive pull0 | pull1  (rest of the line is a directive argument)
+                    Color(CodeDrawStyle.ColorType.Keyword);
+                    wordPointer.MoveNextUntilEol();
                     break;
                 case "`timescale":
                     Color(CodeDrawStyle.ColorType.Keyword);
@@ -1217,6 +1224,29 @@ namespace pluginVerilog.Verilog
             if (wordPointer.Text == ")")
             {
                 wordPointer.MoveNext();
+            }
+
+            // If fewer actual arguments are specified than formal arguments and all
+            // remaining formal arguments have defaults, substitute the defaults
+            // (IEEE 1800-2017 22.5.1). Otherwise report the mismatch.
+            if (wordAssignment.Count < macro.Aurguments.Count)
+            {
+                bool allDefaults = true;
+                for (int i = wordAssignment.Count; i < macro.Aurguments.Count; i++)
+                {
+                    if (macro.ArgumentDefaults == null || i >= macro.ArgumentDefaults.Count || macro.ArgumentDefaults[i] == null)
+                    {
+                        allDefaults = false;
+                        break;
+                    }
+                }
+                if (allDefaults)
+                {
+                    for (int i = wordAssignment.Count; i < macro.Aurguments.Count; i++)
+                    {
+                        wordAssignment.Add("");
+                    }
+                }
             }
 
             if (macro.Aurguments.Count != wordAssignment.Count)

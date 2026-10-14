@@ -65,6 +65,8 @@ namespace pluginVerilog.Verilog
                 wordPointer.MoveNext();
 
                 if (wordPointer.Text != "=") return true;
+                // pragma_keyword = pragma_value : consume "=" then the value
+                wordPointer.MoveNext();
                 return parsePragmaValue(wordPointer);
             }
 
