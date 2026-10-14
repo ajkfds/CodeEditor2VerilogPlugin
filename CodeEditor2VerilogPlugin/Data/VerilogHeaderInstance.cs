@@ -91,7 +91,7 @@ namespace pluginVerilog.Data
         {
             ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
             CodeEditor2.Data.Item? fileItem = project.GetItem(relativePath);
-            VerilogHeaderFile? vhFile = fileItem as VerilogHeaderFile;
+            CodeEditor2.Data.TextFile? vhFile = fileItem as CodeEditor2.Data.TextFile;
 
             if (vhFile == null) return null;
 
@@ -206,11 +206,14 @@ namespace pluginVerilog.Data
             }
         }
 
-        private Data.VerilogHeaderFile? SourceVerilogFile
+        private CodeEditor2.Data.TextFile? SourceVerilogFile
         {
             get
             {
-                return SourceTextFile as VerilogHeaderFile;
+                // An include target may be a .svh (VerilogHeaderFile) or a plain
+                // .sv/.v file (VerilogFile). Both are TextFile; the include only
+                // needs the source CodeDocument.
+                return SourceTextFile;
             }
         }
 

@@ -42,6 +42,15 @@ namespace pluginVerilog.Verilog.Statements.SystemTask
 
                     while (!word.Eof)
                     {
+                        // empty actual argument: list_of_arguments allows omitted arguments
+                        // (IEEE 1800-2017 22.5.1 / A.2.1 e.g. $display(a,,b,,c);)
+                        if (word.Text == ",")
+                        {
+                            word.MoveNext();
+                            continue;
+                        }
+                        if (word.Text == ")") break;
+
                         Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
                         if (expression == null)
                         {

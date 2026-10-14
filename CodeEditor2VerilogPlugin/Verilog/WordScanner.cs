@@ -989,14 +989,9 @@ namespace pluginVerilog.Verilog
             string filePath = wordPointer.Text;
             filePath = filePath.Substring(1, filePath.Length - 2);
 
-            if (filePath.Contains('/') && System.IO.Path.DirectorySeparatorChar != '/')
-            {
-                filePath = filePath.Replace('/', System.IO.Path.DirectorySeparatorChar);
-            }
-            if (filePath.Contains('\\') && System.IO.Path.DirectorySeparatorChar != '\\')
-            {
-                filePath = filePath.Replace('\\', System.IO.Path.DirectorySeparatorChar);
-            }
+            // Project-relative paths use '/' as separator (VerilogFile.RelativePath).
+            // Normalize any backslash separators so lookups and path joins stay consistent.
+            filePath = filePath.Replace('\\', '/');
 
             // search in same folder with original verilog file
             Data.IVerilogRelatedFile rootFile;
@@ -1016,11 +1011,11 @@ namespace pluginVerilog.Verilog
             }
 
             {
-                string sameFolderPath = rootFile.RelativePath;
-                if (sameFolderPath.Contains(System.IO.Path.DirectorySeparatorChar))
+                string sameFolderPath = (rootFile.RelativePath ?? "").Replace('\\', '/');
+                int sameFolderLastSlash = sameFolderPath.LastIndexOf('/');
+                if (sameFolderLastSlash >= 0)
                 {
-                    sameFolderPath = sameFolderPath.Substring(0, sameFolderPath.LastIndexOf(System.IO.Path.DirectorySeparatorChar));
-                    sameFolderPath = sameFolderPath + System.IO.Path.DirectorySeparatorChar + filePath;
+                    sameFolderPath = sameFolderPath.Substring(0, sameFolderLastSlash + 1) + filePath;
                 }
                 else
                 {
@@ -1037,7 +1032,8 @@ namespace pluginVerilog.Verilog
                         {
                             var textFile = item as CodeEditor2.Data.TextFile;
                             if (textFile == null) throw new Exception();
-                            if (textFile.RelativePath == sameFolderPath)
+                            string textFileRelative = (textFile.RelativePath ?? "").Replace('\\', '/');
+                            if (textFileRelative == sameFolderPath)
                             {
                                 return true;
                             }
@@ -1062,10 +1058,18 @@ namespace pluginVerilog.Verilog
             if (wordPointer.ParsedDocument != null && wordPointer.ParsedDocument.Project != null)
             {
 
+                // Extract the file name portion so that a path including a
+                // directory prefix (e.g. "include_directory/defs.sv") matches a
+                // file registered with only its base name.
+                string filePathNameOnly = filePath;
+                int filePathSlash = filePath.LastIndexOf('/');
+                if (filePathSlash >= 0) filePathNameOnly = filePath.Substring(filePathSlash + 1);
+
                 CodeEditor2.Data.File? fFile = wordPointer.ParsedDocument.Project.SearchFile(
                     (f) =>
                     {
                         if (f.Name == filePath) return true;
+                        if (f.Name == filePathNameOnly) return true;
                         return false;
                     });
                 if (fFile != null)
@@ -1220,11 +1224,11 @@ namespace pluginVerilog.Verilog
                 break;
             }
 
-            // consume closing parenthesis of macro call
-            if (wordPointer.Text == ")")
-            {
-                wordPointer.MoveNext();
-            }
+            // NOTE: do NOT consume the closing parenthesis of the macro call here.
+            // parseMacro restores the original document via returnHierarchy(), which
+            // itself advances one token after restoring. Leaving wordPointer on ")"
+            // makes that advance land on the token following the macro call
+            // (e.g. "endmodule"), whereas consuming ")" here would skip it.
 
             // If fewer actual arguments are specified than formal arguments and all
             // remaining formal arguments have defaults, substitute the defaults
