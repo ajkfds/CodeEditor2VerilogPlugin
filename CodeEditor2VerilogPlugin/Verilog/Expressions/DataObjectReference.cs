@@ -462,32 +462,26 @@ namespace pluginVerilog.Verilog.Expressions
             }
 
 
-            // index select of associative array / dynamic array / queue (e.g. arraya[ 0 ])
-            // these array kinds do not register their index dimension into UnpackedArrays,
-            // so the "[ index ]" usage needs an explicit parse path here.
+            // index / range select of associative array / dynamic array / queue
+            // (e.g. arraya[ 0 ], q[$], q[0:$-1]) these array kinds do not register
+            // their index dimension into UnpackedArrays, so the "[ ... ]" usage
+            // needs an explicit parse path here. RangeExpression.ParseCreate handles
+            // both single index ([ expr ]) and range slice ([ e1 : e2 ] / [ e +: w ]
+            // / [ e -: w ]) forms.
             while (word.Text == "[" && !word.Eof && acceptRange &&
                    (val.TargetDataObject is DataObjects.Arrays.AssociativeArray ||
                     val.TargetDataObject is DataObjects.Arrays.DynamicArray ||
                     val.TargetDataObject is DataObjects.Arrays.Queue))
             {
-                word.MoveNext(); // [
-
-                Expressions.Expression? indexExpression = Expressions.Expression.ParseCreate(word, nameSpace);
-                if (indexExpression == null)
+                Expressions.RangeExpression? rangeExpression = Expressions.RangeExpression.ParseCreate(word, nameSpace);
+                if (rangeExpression == null)
                 {
                     word.AddError("illegal index expression");
                     word.SkipToKeywords(new List<string> { "]", ";" });
                     if (word.Text == "]") word.MoveNext();
                     break;
                 }
-                if (word.Text != "]")
-                {
-                    word.AddError("illegal index expression");
-                    word.SkipToKeywords(new List<string> { "]", ";" });
-                    if (word.Text == "]") word.MoveNext();
-                    break;
-                }
-                word.MoveNext(); // ]
+                val.RangesFromOriginal.Add(rangeExpression);
                 partial = true;
             }
 
