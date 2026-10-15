@@ -470,14 +470,22 @@ namespace pluginVerilog.Verilog.Items
                     return null;
                 }
 
-                while (!word.Eof)
+                // n_input_gate_instance ::= [name_of_gate_instance] (output_terminal, input_terminal { , input_terminal } )
+                // output_terminal is net_lvalue (accept implicit net), input terminals are expressions
+                Expressions.Expression? output_terminal = Expressions.Expression.ParseCreateAcceptImplicitNet(word, nameSpace as NameSpace, true);
+                if (word.Text == ",")
                 {
-                    Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace as NameSpace);
-                    if (word.Text != ",")
-                    {
-                        break;
-                    }
                     word.MoveNext();
+                    while (!word.Eof)
+                    {
+                        // input terminals also accept implicit nets
+                        Expressions.Expression? expression = Expressions.Expression.ParseCreateAcceptImplicitNet(word, nameSpace as NameSpace, true);
+                        if (word.Text != ",")
+                        {
+                            break;
+                        }
+                        word.MoveNext();
+                    }
                 }
                 if (word.Text != ")")
                 {

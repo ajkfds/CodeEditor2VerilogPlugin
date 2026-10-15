@@ -796,6 +796,15 @@ namespace pluginVerilog.Verilog
                     Color(CodeDrawStyle.ColorType.Keyword);
                     wordPointer.MoveNext();
                     break;
+                case "`begin_keywords":
+                    // `begin_keywords "version"  (directive argument on the same line)
+                    Color(CodeDrawStyle.ColorType.Keyword);
+                    wordPointer.MoveNextUntilEol();
+                    break;
+                case "`end_keywords":
+                    Color(CodeDrawStyle.ColorType.Keyword);
+                    wordPointer.MoveNext();
+                    break;
                 case "`unconnected_drive":
                     // `unconnected_drive pull0 | pull1  (rest of the line is a directive argument)
                     Color(CodeDrawStyle.ColorType.Keyword);
@@ -804,6 +813,16 @@ namespace pluginVerilog.Verilog
                 case "`timescale":
                     Color(CodeDrawStyle.ColorType.Keyword);
                     wordPointer.MoveNextUntilEol();
+                    break;
+                case "`__FILE__":
+                    // predefined macro `__FILE__ expands to the file name as a string literal
+                    Color(CodeDrawStyle.ColorType.Identifier);
+                    parsePredefinedFileMacro();
+                    break;
+                case "`__LINE__":
+                    // predefined macro `__LINE__ expands to the current line number
+                    Color(CodeDrawStyle.ColorType.Identifier);
+                    parsePredefinedLineMacro();
                     break;
                 default: // macro call
                     parseMacro();
@@ -964,12 +983,6 @@ namespace pluginVerilog.Verilog
         {
             Color(CodeDrawStyle.ColorType.Keyword);
             wordPointer.MoveNext();
-            if (wordPointer.WordType != WordPointer.WordTypeEnum.String || wordPointer.Text.Length <= 2)
-            {
-                if (!SupressCompilerDerectiveError) wordPointer.AddError("\" expected");
-                wordPointer.MoveNextUntilEol();
-                return;
-            }
 
             /*
             # double quotes     ("filename")
@@ -985,9 +998,57 @@ namespace pluginVerilog.Verilog
             `include nesting levels must accept > 15
              */
 
-            string quote = wordPointer.Text.Substring(0, 1);
-            string filePath = wordPointer.Text;
-            filePath = filePath.Substring(1, filePath.Length - 2);
+            string filePath = null;
+            if (wordPointer.WordType == WordPointer.WordTypeEnum.CompilerDirective)
+            {
+                // `include `macro(args) : expand the macro in place and use its text
+                // as the file name (IEEE 1800-2017 22.5.1)
+                string macroIdentifier = wordPointer.Text.Substring(1);
+                Macro macro = null;
+                if (RootParsedDocument.Macros.ContainsKey(macroIdentifier))
+                {
+                    macro = RootParsedDocument.Macros[macroIdentifier];
+                }
+                else if (RootParsedDocument.ProjectProperty.Macros.ContainsKey(macroIdentifier))
+                {
+                    macro = RootParsedDocument.ProjectProperty.Macros[macroIdentifier];
+                }
+                if (macro == null)
+                {
+                    if (!SupressCompilerDerectiveError) wordPointer.AddError("\" expected");
+                    wordPointer.MoveNextUntilEol();
+                    return;
+                }
+                string macroText = macro.MacroText;
+                if (macro.Aurguments != null)
+                {
+                    parseMacroArguments(macro, out macroText);
+                }
+                macroText = macroText.Replace("`\"", "\"").Replace("\"`", "\"").Replace("``", "").Trim();
+                // macro argument tokens are joined with spaces by parseMacroArguments
+                // (e.g. "dummy_include . sv"); a file path has no spaces so the
+                // separators are re-joined here
+                macroText = macroText.Replace(" ", "").Replace("\t", "");
+                if (wordPointer.Text == ")") wordPointer.MoveNext(); // closing parenthesis of the macro arguments
+                if (macroText.Length < 2 || !macroText.StartsWith("\"") || !macroText.EndsWith("\""))
+                {
+                    if (!SupressCompilerDerectiveError) wordPointer.AddError("\" expected");
+                    return;
+                }
+                filePath = macroText.Substring(1, macroText.Length - 2);
+            }
+            else
+            {
+                if (wordPointer.WordType != WordPointer.WordTypeEnum.String || wordPointer.Text.Length <= 2)
+                {
+                    if (!SupressCompilerDerectiveError) wordPointer.AddError("\" expected");
+                    wordPointer.MoveNextUntilEol();
+                    return;
+                }
+                string quote = wordPointer.Text.Substring(0, 1);
+                filePath = wordPointer.Text;
+                filePath = filePath.Substring(1, filePath.Length - 2);
+            }
 
             // Project-relative paths use '/' as separator (VerilogFile.RelativePath).
             // Normalize any backslash separators so lookups and path joins stay consistent.
@@ -1085,6 +1146,78 @@ namespace pluginVerilog.Verilog
             return;
         }
 
+        private void diveIntoText(string macroText)
+        {
+            // expand the given text as a new macro-expansion document and push the
+            // original scan position onto the hierarchy stock (same as parseMacro)
+            stock.Add(wordPointer);
+            CodeEditor.CodeDocument codeDocument = new CodeEditor.CodeDocument(macroText);
+            string key = "";
+            ParsedDocument newParsedDocument = new ParsedDocument(
+                (IVerilogRelatedFile)wordPointer.ParsedDocument.TextFile,
+                key,
+                null,
+                wordPointer.ParsedDocument.ParseMode);
+            WordPointer newPointer = new WordPointer(codeDocument, newParsedDocument, 0);
+
+            wordPointer = newPointer;
+
+            while (!wordPointer.Eof)
+            {
+                if (wordPointer.WordType == WordPointer.WordTypeEnum.Comment)
+                {
+                    wordPointer.MoveNext();
+                    if (wordPointer.Eof) break;
+                }
+                else if (wordPointer.WordType == WordPointer.WordTypeEnum.CompilerDirective)
+                {
+                    parseCompilerDirective();
+                    break;
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+
+        private void parsePredefinedFileMacro()
+        {
+            // `__FILE__ : predefined macro expanding to the file name string literal
+            // (IEEE 1800-2017 22.5.3). Not registered in RootParsedDocument.Macros so
+            // the expand-on-the-fly path is always taken.
+            string fileName = "";
+            if (stock.Count != 0)
+            {
+                fileName = stock[0].VerilogFile != null ? System.IO.Path.GetFileName(stock[0].VerilogFile.RelativePath ?? "") : "";
+            }
+            else
+            {
+                fileName = wordPointer.VerilogFile != null ? System.IO.Path.GetFileName(wordPointer.VerilogFile.RelativePath ?? "") : "";
+            }
+            diveIntoText("\"" + fileName + "\"");
+        }
+
+        private void parsePredefinedLineMacro()
+        {
+            // `__LINE__ : predefined macro expanding to the current line number
+            // (IEEE 1800-2017 22.5.3). Line numbers of the expansion site in the
+            // original document.
+            int line = 1;
+            string docText = wordPointer.Document.CreateString();
+            int index = wordPointer.Index;
+            if (stock.Count != 0)
+            {
+                index = stock.Last().Index;
+                docText = stock.Last().Document.CreateString();
+            }
+            for (int i = 0; i < index && i < docText.Length; i++)
+            {
+                if (docText[i] == '\n') line++;
+            }
+            diveIntoText(line.ToString());
+        }
+
         private void parseMacro()
         {
             Color(CodeDrawStyle.ColorType.Identifier);
@@ -1126,6 +1259,14 @@ namespace pluginVerilog.Verilog
             {
                 parseMacroArguments(macro, out macroText);
             }
+
+            // token pasting / stringification operators (IEEE 1800-2017 22.5.1)
+            //  `"..."`" : stringification - expand to a plain string literal
+            //  ``       : token pasting  - the tokens around it are joined, so the
+            //             operator itself disappears from the expanded text
+            macroText = macroText.Replace("`\"", "\"");
+            macroText = macroText.Replace("\"`", "\"");
+            macroText = macroText.Replace("``", "");
 
             if (macroText == "")
             {
