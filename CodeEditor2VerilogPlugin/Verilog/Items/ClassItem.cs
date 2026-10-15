@@ -118,6 +118,13 @@ namespace pluginVerilog.Verilog.Items
                 case "endclass":
                     return false;
 
+                // type_declaration (class_item ::= ... | type_declaration)
+                // e.g. "typedef enum {A, B} e_type;" inside a class. The enum
+                // constants are registered in the class namespace so that they
+                // resolve through a class object (test_obj.A).
+                case "typedef":
+                    return DataObjects.Typedef.ParseDeclaration(word, nameSpace);
+
                 // { attribute_instance }
                 case "(*":
                     Attribute attr = Attribute.ParseCreate(word, nameSpace);
