@@ -468,7 +468,7 @@ namespace pluginVerilog.Verilog.Sequence
                 WordScanner probe = word.Clone(false);
                 probe.MoveNext(); // [
                 bool isRepetition = false;
-                if (probe.Text == "*" || probe.Text == "+" || probe.Text == "=" || probe.Text == "-")
+                if (probe.Text == "*" || probe.Text == "+" || probe.Text == "=" || probe.Text == "-" || probe.Text == "->")
                 {
                     isRepetition = true;
                 }
@@ -503,6 +503,12 @@ namespace pluginVerilog.Verilog.Sequence
                     word.MoveNext();
                     return new SequenceRepetition(RepetitionType.Consecutive, null);
                 }
+                // [* const_or_range_expression]  e.g. [*2:10] / [*3]
+                if (TryParseRepetitionCountRange(word, nameSpace, out Expression? sStar, out Expression? eStar))
+                {
+                    return new SequenceRepetition { Type = RepetitionType.Consecutive, Count = sStar, EndCount = eStar };
+                }
+                RecoverRepetitionBracket(word);
             }
             else if (word.Text == "+")
             {
@@ -518,25 +524,26 @@ namespace pluginVerilog.Verilog.Sequence
             {
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 word.MoveNext();
-                Expression? count = Expression.ParseCreate(word, nameSpace);
-                if (word.Text == "]")
+                // [= const_or_range_expression]  e.g. [=2:10] / [=3]
+                if (TryParseRepetitionCountRange(word, nameSpace, out Expression? sEq, out Expression? eEq))
                 {
-                    word.MoveNext();
-                    return new SequenceRepetition(RepetitionType.NonConsecutive, count);
+                    return new SequenceRepetition { Type = RepetitionType.NonConsecutive, Count = sEq, EndCount = eEq };
                 }
+                RecoverRepetitionBracket(word);
             }
-            else if (word.Text == "-")
+            else if (word.Text == "-" || word.Text == "->")
             {
-                word.MoveNext();
-                if (word.Text == ">")
+                // "[->" is tokenized as a single "->" token; older paths may see "-" + ">".
+                if (word.Text == "-") word.MoveNext();
+                if (word.Text == ">" || word.Text == "->")
                 {
                     word.MoveNext();
-                    Expression? count = Expression.ParseCreate(word, nameSpace);
-                    if (word.Text == "]")
+                    // [-> const_or_range_expression]  e.g. [->2:10] / [->3]
+                    if (TryParseRepetitionCountRange(word, nameSpace, out Expression? sGoto, out Expression? eGoto))
                     {
-                        word.MoveNext();
-                        return new SequenceRepetition(RepetitionType.Goto, count);
+                        return new SequenceRepetition { Type = RepetitionType.Goto, Count = sGoto, EndCount = eGoto };
                     }
+                    RecoverRepetitionBracket(word);
                 }
             }
             else
@@ -558,6 +565,58 @@ namespace pluginVerilog.Verilog.Sequence
             // Restore position if parsing failed
             // Note: This is a simplified recovery - a full implementation would need better state management
             return null;
+        }
+
+        /// <summary>
+        /// Parse the "const_or_range_expression" part of a repetition operator that
+        /// follows the qualifier inside "[ ]". On entry <paramref name="word"/> points
+        /// just after the qualifier ('*' / '=' / '->' / '-') and before the range body.
+        /// Handles both "constant_expression" and "constant_expression : constant_expression"
+        /// (IEEE 1800-2017 16.9: [* const_or_range_expression] etc.). On success the
+        /// trailing ']' is consumed.
+        /// </summary>
+        internal static bool TryParseRepetitionCountRange(WordScanner word, NameSpace nameSpace, out Expression? startExpr, out Expression? endExpr)
+        {
+            startExpr = null;
+            endExpr = null;
+
+            Expression? first = Expression.ParseCreate(word, nameSpace);
+            if (first == null) return false;
+
+            if (word.Text == "]")
+            {
+                // single count: [*3] / [=3] / [->3]
+                word.MoveNext();
+                startExpr = first;
+                return true;
+            }
+
+            if (word.Text == ":")
+            {
+                word.MoveNext();
+                Expression? second = Expression.ParseCreate(word, nameSpace);
+                if (word.Text == "]")
+                {
+                    word.MoveNext();
+                    startExpr = first;
+                    endExpr = second;
+                    return true;
+                }
+            }
+
+            // Not a valid repetition body; report and let the caller recover.
+            word.AddError("illegal range");
+            return false;
+        }
+
+        /// <summary>
+        /// Error recovery helper: skip to the closing ']' of a repetition operator that
+        /// failed to parse so that the following tokens are not misinterpreted.
+        /// </summary>
+        internal static void RecoverRepetitionBracket(WordScanner word)
+        {
+            word.SkipToKeyword("]");
+            if (word.Text == "]") word.MoveNext();
         }
 
         public class CycleDelayRange
@@ -634,7 +693,7 @@ namespace pluginVerilog.Verilog.Sequence
                 WordScanner probe = word.Clone(false);
                 probe.MoveNext(); // [
                 bool isRepetition =
-                    probe.Text == "*" || probe.Text == "+" || probe.Text == "=" || probe.Text == "-";
+                    probe.Text == "*" || probe.Text == "+" || probe.Text == "=" || probe.Text == "-" || probe.Text == "->";
                 probe.Dispose();
                 if (!isRepetition) return null;
             }
@@ -649,6 +708,12 @@ namespace pluginVerilog.Verilog.Sequence
                     word.MoveNext();
                     return new SequenceRepetition { Type = RepetitionType.Consecutive };
                 }
+                // [* const_or_range_expression]  e.g. [*2:10] / [*3]
+                if (SequenceExpr.TryParseRepetitionCountRange(word, nameSpace, out Expression? sStar, out Expression? eStar))
+                {
+                    return new SequenceRepetition { Type = RepetitionType.Consecutive, Count = sStar, EndCount = eStar };
+                }
+                SequenceExpr.RecoverRepetitionBracket(word);
             }
             else if (word.Text == "+")
             {
@@ -664,25 +729,26 @@ namespace pluginVerilog.Verilog.Sequence
             {
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 word.MoveNext();
-                Expression? count = Expression.ParseCreate(word, nameSpace);
-                if (word.Text == "]")
+                // [= const_or_range_expression]  e.g. [=2:10] / [=3]
+                if (SequenceExpr.TryParseRepetitionCountRange(word, nameSpace, out Expression? sEq, out Expression? eEq))
                 {
-                    word.MoveNext();
-                    return new SequenceRepetition { Type = RepetitionType.NonConsecutive, Count = count };
+                    return new SequenceRepetition { Type = RepetitionType.NonConsecutive, Count = sEq, EndCount = eEq };
                 }
+                SequenceExpr.RecoverRepetitionBracket(word);
             }
-            else if (word.Text == "-")
+            else if (word.Text == "-" || word.Text == "->")
             {
-                word.MoveNext();
-                if (word.Text == ">")
+                // "[->" is tokenized as a single "->" token; older paths may see "-" + ">".
+                if (word.Text == "-") word.MoveNext();
+                if (word.Text == ">" || word.Text == "->")
                 {
                     word.MoveNext();
-                    Expression? count = Expression.ParseCreate(word, nameSpace);
-                    if (word.Text == "]")
+                    // [-> const_or_range_expression]  e.g. [->2:10] / [->3]
+                    if (SequenceExpr.TryParseRepetitionCountRange(word, nameSpace, out Expression? sGoto, out Expression? eGoto))
                     {
-                        word.MoveNext();
-                        return new SequenceRepetition { Type = RepetitionType.Goto, Count = count };
+                        return new SequenceRepetition { Type = RepetitionType.Goto, Count = sGoto, EndCount = eGoto };
                     }
+                    SequenceExpr.RecoverRepetitionBracket(word);
                 }
             }
             else

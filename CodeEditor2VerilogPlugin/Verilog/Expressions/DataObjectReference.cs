@@ -503,6 +503,18 @@ namespace pluginVerilog.Verilog.Expressions
 
             while (word.Text == "[" && !word.Eof && acceptRange)
             {
+                // Sequence/property repetition operators start with "[*", "[+",
+                // "[=" or "[->" (IEEE 1800-2017 16.9). These are NOT bit/part
+                // selects and must be left for the sequence parser (SequenceExpr)
+                // to consume. Peek the next token without consuming the "[".
+                {
+                    WordScanner probe = word.Clone(false);
+                    probe.MoveNext(); // [
+                    bool isSequenceRepetition =
+                        probe.Text == "*" || probe.Text == "+" || probe.Text == "=" || probe.Text == "-" || probe.Text == "->";
+                    probe.Dispose();
+                    if (isSequenceRepetition) break;
+                }
                 word.AddError("illegal range");
                 word.SkipToKeywords(new List<string> { "]", ";" });
                 if (word.Text == "]") word.MoveNext();
