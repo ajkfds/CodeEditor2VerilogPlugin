@@ -70,6 +70,8 @@ namespace pluginVerilog.Verilog.Items
                 case "wire":
                 case "wand":
                 case "wor":
+                // interconnect_declaration (IEEE 1800-2017 6.6.8)
+                case "interconnect":
                     Net.ParseDeclaration(word, nameSpace);
                     break;
                 //              struct_union["packed"[signing]] { struct_union_member { struct_union_member } }{ packed_dimension }
