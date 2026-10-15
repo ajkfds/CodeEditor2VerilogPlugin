@@ -72,7 +72,10 @@ namespace pluginVerilog.Verilog.Expressions
 
             if (word.GetCharAt(0) != '(')
             {
-                if (method != null && method.Ports.Count != 0)
+                // No argument list (e.g. "map.delete;"): legal when every
+                // argument is optional (has a default value), per the same
+                // rule as the "()" case below.
+                if (method != null && HasUnprovidedRequiredArgument(method, 0))
                 {
                     word.AddError("illegal function call");
                     return null;

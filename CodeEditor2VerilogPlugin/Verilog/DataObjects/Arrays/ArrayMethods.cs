@@ -45,6 +45,10 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
         {
             List<Port> ports = new List<Port>();
             Port? port = makePort("index", Port.DirectionEnum.Input, makeIntegerPortObject("index"));
+            // delete() / delete(index): the index argument is optional
+            // (IEEE 1800-2017 7.9.2). Mark it as having a default so that a
+            // bare "map.delete;" (no parentheses) is accepted.
+            if (port != null) port.DefaultArgument = Expressions.Expression.CreateTempExpression("0");
             if (port != null) ports.Add(port);
             addMethod(namedElements, "delete", ports);
         }
