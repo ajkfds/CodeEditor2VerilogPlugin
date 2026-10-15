@@ -238,6 +238,7 @@ namespace pluginVerilog.Verilog.Statements
                     return DeassignStatement.ParseCreate(word, nameSpace, statement_label);
                 // event_trigger 
                 case "->":
+                case "->>":
                     return EventTrigger.ParseCreate(word, nameSpace, statement_label);
                 case ";":
                     word.AddError("illegal module item");

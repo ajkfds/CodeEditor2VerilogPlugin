@@ -828,8 +828,17 @@ namespace pluginVerilog.Verilog
                     op3 == "|=>" ||
                     op3 == "#-#" ||
                     op3 == "#=#"
+                    
             )
             {
+                nextIndex = nextIndex + 3;
+                return;
+            }
+
+            // non-blocking event trigger "->>" (IEEE 1800-2017 15.5)
+            if (op3 == "->>")
+            {
+                wordType = WordTypeEnum.Text;
                 nextIndex = nextIndex + 3;
                 return;
             }
