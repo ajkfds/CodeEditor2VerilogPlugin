@@ -791,6 +791,10 @@ namespace pluginVerilog.Verilog
                     // `line number "filename" level  (rest of the line is a directive argument)
                     Color(CodeDrawStyle.ColorType.Keyword);
                     wordPointer.MoveNextUntilEol();
+                    // MoveNextUntilEol stops on the directive's argument text; advance
+                    // to the next token so the caller does not treat the argument line
+                    // as a module item (same pattern as parseUndef / parseDefine).
+                    wordPointer.MoveNext();
                     break;
                 case "`nounconnected_drive":
                     Color(CodeDrawStyle.ColorType.Keyword);
