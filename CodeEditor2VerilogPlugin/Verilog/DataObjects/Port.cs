@@ -1120,6 +1120,20 @@ namespace pluginVerilog.Verilog.DataObjects
                 }
             }
 
+            // The port was registered in portNameSpace.NamedElements before the
+            // variable_dimension loop with the base data type. When a queue /
+            // associative / dynamic array dimension replaced port.DataObject,
+            // re-register the new object and carry the Defined flag (set on the
+            // pre-dimension object) so that references like `driver[i]` resolve
+            // to the array object (otherwise the generic "[" handling reports
+            // "illegal range" / "not defined here").
+            if (port.DataObject != null && portNameSpace.NamedElements.ContainsKey(port.DataObject.Name))
+            {
+                if (!word.Prototype) port.DataObject.Defined = true;
+                portNameSpace.NamedElements.Remove(port.DataObject.Name);
+                portNameSpace.NamedElements.Add(port.DataObject.Name, port.DataObject);
+            }
+
             if (word.Text == "=")
             {
                 word.MoveNext();
@@ -1210,7 +1224,27 @@ namespace pluginVerilog.Verilog.DataObjects
             }
 
             // data_type_or_implicit
-            IDataType? dataType = DataTypeFactory.ParseCreate(word, nameSpace, null);
+            // BNF: tf_port_declaration ::= tf_port_direction [ var ] data_type_or_implicit
+            //                              list_of_tf_variable_identifiers ;
+            // The data_type is followed by at least one port identifier. When the
+            // identifier resolves to a user-defined type via name-based lookup
+            // (e.g. another file declared "class a"), the leading token of this
+            // declaration ("a" in "input a;") could be mistaken for a data_type,
+            // leaving no port identifier and producing "illegal port name". Probe
+            // first and only accept the data type when a port identifier follows.
+            IDataType? dataType = null;
+            {
+                WordScanner probe = word.Clone(false);
+                IndexReference beforeRef = probe.CreateIndexReference();
+                IDataType? probeType = DataTypeFactory.ParseCreate(probe, nameSpace, null);
+                bool consumed = probeType != null && !beforeRef.IsSameAs(probe.CreateIndexReference());
+                bool followedByIdentifier = General.IsIdentifier(probe.Text);
+                probe.Dispose();
+                if (consumed && followedByIdentifier)
+                {
+                    dataType = DataTypeFactory.ParseCreate(word, nameSpace, null);
+                }
+            }
 
             if (dataType == null)
             {
