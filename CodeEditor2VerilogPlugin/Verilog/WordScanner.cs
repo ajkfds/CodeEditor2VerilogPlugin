@@ -1218,6 +1218,26 @@ namespace pluginVerilog.Verilog
             diveIntoText(line.ToString());
         }
 
+        // IEEE 1800-2017 20.14 predefined coverage-control macros. The language
+        // predefines these names; they expand to the coverage control constants
+        // consumed by the $coverage_* system functions.
+        private static readonly Dictionary<string, string> predefinedMacros = new Dictionary<string, string>
+        {
+            { "SV_COV_START",     "0" },
+            { "SV_COV_STOP",      "1" },
+            { "SV_COV_RESET",     "2" },
+            { "SV_COV_CHECK",     "3" },
+            { "SV_COV_MODULE",    "10" },
+            { "SV_COV_HIER",      "11" },
+            { "SV_COV_ASSERTION", "20" },
+            { "SV_COV_FSM_STATE", "21" },
+            { "SV_COV_STATEMENT", "22" },
+            { "SV_COV_TOGGLE",    "23" },
+            { "SV_COV_OVERFLOW",  "-2" },
+            { "SV_COV_ERROR",     "-1" },
+            { "SV_COV_NOCOV",     "0" },
+        };
+
         private void parseMacro()
         {
             Color(CodeDrawStyle.ColorType.Identifier);
@@ -1231,6 +1251,11 @@ namespace pluginVerilog.Verilog
             else if (RootParsedDocument.ProjectProperty.Macros.ContainsKey(macroIdentifier))
             {
                 macro = RootParsedDocument.ProjectProperty.Macros[macroIdentifier];
+            }
+            else if (predefinedMacros.TryGetValue(macroIdentifier, out string? predefinedText))
+            {
+                // predefined coverage-control macro (IEEE 1800-2017 20.14)
+                macro = Macro.Create(macroIdentifier, predefinedText);
             }
             else
             {
