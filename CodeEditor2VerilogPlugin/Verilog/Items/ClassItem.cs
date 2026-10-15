@@ -163,6 +163,28 @@ namespace pluginVerilog.Verilog.Items
                         return true;
                     }
 
+                    // { method_qualifier } before method_prototype
+                    // method_qualifier ::= [ "pure" ] "virtual" | class_item_qualifier (static / protected / local)
+                    // e.g. "extern virtual task subtask(...)" / "extern protected task ..." / "extern local static task ..."
+                    while (true)
+                    {
+                        if (word.Text == "pure" && word.NextText == "virtual")
+                        {
+                            word.Color(CodeDrawStyle.ColorType.Keyword);
+                            word.MoveNext(); // pure
+                            word.Color(CodeDrawStyle.ColorType.Keyword);
+                            word.MoveNext(); // virtual
+                            continue;
+                        }
+                        if (word.Text == "virtual" || word.Text == "static" || word.Text == "protected" || word.Text == "local")
+                        {
+                            word.Color(CodeDrawStyle.ColorType.Keyword);
+                            word.MoveNext();
+                            continue;
+                        }
+                        break;
+                    }
+
                     // Handle other extern method prototypes
                     return MethodPrototype.ParseCreate(word, nameSpace);
 

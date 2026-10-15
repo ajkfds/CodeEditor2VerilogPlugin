@@ -518,6 +518,13 @@ namespace pluginVerilog.Verilog
             {
                 parse_function_items_ansi(word, nameSpace, function);
             }
+            else if (word.Text == ";")
+            {
+                // function_prototype ::= function data_type_or_void function_identifier [ ( [ tf_port_list ] ) ]
+                // tf_port_list is optional: "extern function void subroutine;" (no parentheses)
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext();
+            }
             else
             {
                 word.AddError("( required");
