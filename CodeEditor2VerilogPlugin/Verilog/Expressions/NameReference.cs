@@ -100,6 +100,12 @@ namespace pluginVerilog.Verilog.Expressions
                     baseNameSpace = nameSpace.BuildingBlock;
                     index++;
                     if (index >= Names.Count) return (baseNameSpace,baseNameSpace);
+                    // "this" resolved to the enclosing class; resolve the
+                    // following member (this.srandom, this.x) against the class
+                    // directly. Falling through to the general lookup below
+                    // would overwrite baseNameSpace and miss class members.
+                    name = Names[index];
+                    return searchElement(baseNameSpace, index);
                 }
                 else
                 {

@@ -47,18 +47,32 @@ namespace pluginVerilog.Verilog.Expressions
 
         public static BuiltinMethodCall? ParseCreate(WordScanner word, NameSpace usedNameSpace, DataObjects.DataObject dataObject)
         {
-            BuiltinMethodCall? methodCall = parseMethodCall(word, usedNameSpace, dataObject);
+            BuiltinMethodCall? methodCall = parseMethodCall(word, usedNameSpace, dataObject.NamedElements);
             if (methodCall == null) return null;
             parseWithClause(word, usedNameSpace, methodCall);
             return methodCall;
         }
 
-        private static BuiltinMethodCall? parseMethodCall(WordScanner word, NameSpace usedNameSpace, DataObjects.DataObject dataObject)
+        /// <summary>
+        /// Built-in method call whose owner is a Class (or other NameSpace that
+        /// registers built-in methods on its own NamedElements), e.g.
+        /// "this.srandom(seed)" inside a class. Unlike a DataObject owner the
+        /// class itself exposes the methods through NamedElements.
+        /// </summary>
+        public static BuiltinMethodCall? ParseCreate(WordScanner word, NameSpace usedNameSpace, NameSpace methodNameSpace)
+        {
+            BuiltinMethodCall? methodCall = parseMethodCall(word, usedNameSpace, methodNameSpace.NamedElements);
+            if (methodCall == null) return null;
+            parseWithClause(word, usedNameSpace, methodCall);
+            return methodCall;
+        }
+
+        private static BuiltinMethodCall? parseMethodCall(WordScanner word, NameSpace usedNameSpace, NamedElements namedElements)
         {
             if (word.RootParsedDocument.ProjectProperty == null) throw new Exception();
 
-            if (!dataObject.NamedElements.ContainsKey(word.Text)) return null;
-            INamedElement element = dataObject.NamedElements[word.Text];
+            if (!namedElements.ContainsKey(word.Text)) return null;
+            INamedElement element = namedElements[word.Text];
             if (element is not Verilog.BuiltInMethod) return null;
             var method = (Verilog.BuiltInMethod)element;
 

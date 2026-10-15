@@ -392,6 +392,15 @@ number
                         return methodCall;
                     }
 
+                    // built-in method call whose owner is a class NameSpace
+                    // (e.g. "this.srandom(seed)" — the class registers built-in
+                    //  methods such as srandom / randomize on its NamedElements)
+                    if (element is Verilog.BuiltInMethod && targetElement is NameSpace methodNameSpace)
+                    {
+                        BuiltinMethodCall? methodCall = BuiltinMethodCall.ParseCreate(word, nameSpace, methodNameSpace);
+                        return methodCall;
+                    }
+
                     if (element is DataObjects.Constants.Constants && targetNameSpace != null)
                     {
                         return ParameterReference.ParseCreate(word, targetNameSpace);
