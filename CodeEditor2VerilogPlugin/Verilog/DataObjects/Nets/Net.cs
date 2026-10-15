@@ -736,20 +736,54 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                 word.AddError("; expected");
             }
 
-            // Add all interconnects to namespace
+            // Add all interconnects to namespace.
+            // Modules are parsed in two passes (prototype -> real parse), so the
+            // registration must follow the same convention as regular net
+            // declarations (Net.ParseDeclaration): only add on the prototype
+            // pass, and on the real parse mark the existing entry as defined
+            // instead of reporting a duplicate.
             foreach (var ic in interconnects)
             {
                 if (word.CompletionContext != null)
                 {
                     // do not update building block tree @ code completion partial parse
                 }
-                else if (!nameSpace.NamedElements.ContainsKey(ic.Name))
+                else if (word.Prototype)
                 {
-                    nameSpace.NamedElements.Add(ic.Name, ic);
+                    if (nameSpace.NamedElements.ContainsKey(ic.Name))
+                    {
+                        // non-ansi style port definition may already provide this name
+                        BuildingBlocks.IModuleOrInterfaceOrProgram? portBlock = nameSpace.BuildingBlock as BuildingBlocks.IModuleOrInterfaceOrProgram;
+                        if (portBlock != null && portBlock.Ports.ContainsKey(ic.Name))
+                        {
+                            nameSpace.NamedElements.Replace(ic.Name, ic);
+                        }
+                        else
+                        {
+                            ic.DefinedReference?.AddError("duplicated net name");
+                        }
+                    }
+                    else
+                    {
+                        nameSpace.NamedElements.Add(ic.Name, ic);
+                    }
                 }
                 else
                 {
-                    ic.DefinedReference?.AddError("duplicated net name");
+                    // real parse: reuse the entry registered during the prototype pass
+                    if (nameSpace.NamedElements.ContainsKey(ic.Name)
+                        && nameSpace.NamedElements[ic.Name] is Interconnect existing)
+                    {
+                        existing.Defined = true;
+                    }
+                    else if (nameSpace.NamedElements.ContainsKey(ic.Name))
+                    {
+                        ic.DefinedReference?.AddError("duplicated net name");
+                    }
+                    else
+                    {
+                        nameSpace.NamedElements.Add(ic.Name, ic);
+                    }
                 }
             }
 
