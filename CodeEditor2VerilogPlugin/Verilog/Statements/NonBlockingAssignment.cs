@@ -82,14 +82,9 @@ namespace pluginVerilog.Verilog.Statements
             }
             word.MoveNext();    // <=
 
-            if (word.GetCharAt(0) == '#')
-            {
-                DelayControl? delayControl = DelayControl.ParseCreate(word, nameSpace);
-            }
-            else if (word.GetCharAt(0) == '@')
-            {
-                EventControl? eventControl = EventControl.ParseCreate(word, nameSpace);
-            }
+            // delay_or_event_control ::= delay_control | event_control
+            //                         | repeat ( expression ) event_control
+            BlockingAssignment.ParseDelayOrEventControl(word, nameSpace);
 
             // EOF just after "<=" (e.g. "x <= |"): suggest expression candidates for RHS
             if (word.CompletionContext != null && word.Eof)

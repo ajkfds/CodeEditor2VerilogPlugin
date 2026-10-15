@@ -118,14 +118,9 @@ namespace pluginVerilog.Verilog.Statements
 
             word.MoveNext();    // <=
 
-            if (word.GetCharAt(0) == '#')
-            {
-                DelayControl delayControl = DelayControl.ParseCreate(word, nameSpace);
-            }
-            else if (word.GetCharAt(0) == '@')
-            {
-                EventControl eventControl = EventControl.ParseCreate(word, nameSpace);
-            }
+            // delay_or_event_control ::= delay_control | event_control
+            //                         | repeat ( expression ) event_control
+            ParseDelayOrEventControl(word, nameSpace);
 
             if (word.Text == "new")
             {
@@ -211,6 +206,49 @@ namespace pluginVerilog.Verilog.Statements
             else
             {
                 return null;
+            }
+        }
+
+        /// <summary>
+        /// Parse the optional delay_or_event_control on the RHS of an assignment
+        /// (IEEE 1800-2017 A.6.5):
+        ///   delay_or_event_control ::= delay_control
+        ///                            | event_control
+        ///                            | repeat ( expression ) event_control
+        /// </summary>
+        internal static void ParseDelayOrEventControl(WordScanner word, NameSpace nameSpace)
+        {
+            if (word.GetCharAt(0) == '#')
+            {
+                DelayControl? delayControl = DelayControl.ParseCreate(word, nameSpace);
+            }
+            else if (word.GetCharAt(0) == '@')
+            {
+                EventControl? eventControl = EventControl.ParseCreate(word, nameSpace);
+            }
+            else if (word.Text == "repeat" && word.NextText == "(")
+            {
+                // repeat ( expression ) event_control
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext(); // repeat
+                word.MoveNext(); // (
+                Expressions.Expression? repeatCount = Expressions.Expression.ParseCreate(word, nameSpace);
+                if (repeatCount == null)
+                {
+                    word.AddError("illegal repeat control");
+                    return;
+                }
+                if (word.Text != ")")
+                {
+                    word.AddError(") expected");
+                    return;
+                }
+                word.MoveNext(); // )
+                // event_control (@ ...) is required after repeat(expression)
+                if (word.GetCharAt(0) == '@')
+                {
+                    EventControl? eventControl = EventControl.ParseCreate(word, nameSpace);
+                }
             }
         }
 
