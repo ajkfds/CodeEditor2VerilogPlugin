@@ -195,7 +195,10 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                case "process":
                    return ProcessType.ParseCreate(word, nameSpace);
 
-                // "virtual" ["interface"] interface_identifier[parameter_value_assignment][ . modport_identifier] 
+                // "virtual" ["interface"] interface_identifier[parameter_value_assignment][ . modport_identifier]
+                // (e.g. a "type" parameter default: class Foo #(type IFType = virtual x_if); )
+                case "virtual":
+                    return parseVirtualInterfaceType(word, nameSpace);
 
                 // "event"
                 case "event":
@@ -572,6 +575,71 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 return UserDefinedType.Create(memberTypedef, packedArrays);
             }
             return null;
+        }
+
+        /// <summary>
+        /// Parse "virtual" ["interface"] interface_identifier
+        /// [parameter_value_assignment] [ "." modport_identifier] as a data type.
+        /// Used e.g. as the default of a type parameter:
+        ///   class Foo #(type IFType = virtual x_if);
+        ///   class Foo #(type IFType = virtual interface x_if);
+        /// Resolves to the declared interface when available; otherwise consumes
+        /// the tokens and returns an unresolved placeholder (TypeReference).
+        /// </summary>
+        private static IDataType? parseVirtualInterfaceType(WordScanner word, NameSpace nameSpace)
+        {
+            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.MoveNext(); // virtual
+
+            if (word.Text == "interface")
+            {
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext(); // interface
+            }
+
+            if (!General.IsIdentifier(word.Text))
+            {
+                word.AddError("interface identifier expected");
+                return null;
+            }
+
+            string interfaceName = word.Text;
+            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.MoveNext();
+
+            // optional parameter_value_assignment ( # ( ... ) )
+            if (word.Text == "#")
+            {
+                Dictionary<string, Expressions.Expression> parameterOverrides = new Dictionary<string, Expressions.Expression>();
+                Verilog.ParameterValueAssignment.ParseCreate(word, nameSpace, parameterOverrides, null);
+            }
+
+            // optional "." modport_identifier
+            if (word.Text == ".")
+            {
+                word.MoveNext();
+                if (General.IsIdentifier(word.Text))
+                {
+                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.MoveNext();
+                }
+            }
+
+            // resolve the interface if declared; otherwise keep an unresolved placeholder
+            INamedElement? namedElement = nameSpace.GetNamedElementUpward(interfaceName);
+            if (namedElement is BuildingBlocks.Interface interface_)
+            {
+                return interface_;
+            }
+            BuildingBlock? buildingBlock = word.ProjectProperty.DefinitionNameSpace.Get(interfaceName) as BuildingBlock;
+            if (buildingBlock is BuildingBlocks.Interface interfaceFromDefinition)
+            {
+                return interfaceFromDefinition;
+            }
+
+            // unresolved entity: use an empty type reference placeholder (same
+            // fallback as an omitted type parameter default in Constants.cs)
+            return new TypeReference(null, null);
         }
 
         private static IDataType? parseTypeReference(WordScanner word, NameSpace nameSpace)
