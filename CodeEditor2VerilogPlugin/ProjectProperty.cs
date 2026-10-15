@@ -310,6 +310,33 @@ namespace pluginVerilog
             //Formatting data to a string (21.3.3)
             {"$sformat",null },
 
+            // File I/O tasks / functions usable as statements (21.3)
+            // ($fread / $fgets / $fscanf / $sscanf / $fpos / $ftell / etc.
+            //  are also registered in SystemFunctions for expression use; they
+            //  need a task entry as well when called as a statement.)
+            {"$fread",null },
+            {"$fgets",null },
+            {"$fscanf",null },
+            {"$sscanf",null },
+            {"$fgetc",null },
+            {"$fpos",null },
+            {"$ftell",null },
+            {"$ferror",null },
+            {"$rewind",null },
+            {"$fseek",null },
+            {"$fopen",null },
+
+            // VCD dump ports tasks (21.7)
+            {"$dumpports",null },
+            {"$dumpportslimit",null },
+            {"$dumpportsoff",null },
+            {"$dumpportson",null },
+            {"$dumpportsflush",null },
+            {"$dumpportsall",null },
+
+            // Cast task (6.24.2)
+            {"$cast",null },
+
             // undefined in systemverilog standard
         };
         /*
@@ -459,6 +486,11 @@ namespace pluginVerilog
             {"$sformatf",null },
             // I/O error status(21.3.7)
             {"$feof",null },
+
+            // Command line input (21.6): $test$plusargs / $value$plusargs are
+            // also usable in expressions, e.g. if ($test$plusargs("TEST")) ...
+            {"$test$plusargs",null },
+            {"$value$plusargs",null },
 
         };
 
