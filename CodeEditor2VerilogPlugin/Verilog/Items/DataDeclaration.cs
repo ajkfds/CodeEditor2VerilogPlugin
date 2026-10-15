@@ -18,6 +18,16 @@ namespace pluginVerilog.Verilog.Items
             // [ const ] [ var ] [ lifetime ] data_type_or_implicit list_of_variable_decl_assignments ;
             if (DataObjects.Variables.Variable.ParseDeclaration(word, nameSpace)) return true;
 
+            // net_type_declaration
+            //   "typedef" "nettype" ... ;  (type_declaration ::= "typedef" net_type_declaration)
+            //   "nettype" ... ;            (net_type_declaration)
+            // These must be handled before the generic "typedef" branch below,
+            // otherwise "typedef nettype" would be consumed by Typedef.ParseDeclaration.
+            if (word.Text == "nettype" || (word.Text == "typedef" && word.NextText == "nettype"))
+            {
+                return DataObjects.NetTypeDeclaration.Parse(word, nameSpace);
+            }
+
             // type_declaration
             if (word.Text == "typedef")
             {
@@ -31,11 +41,6 @@ namespace pluginVerilog.Verilog.Items
                 return true;
             }
 
-            // net_type_declaration
-            if (word.Text == "typedef" && word.NextText == "nettype")
-            {
-                return DataObjects.NetTypeDeclaration.Parse(word, nameSpace);
-            }
             return false;
         }
 
