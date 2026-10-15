@@ -179,6 +179,36 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             return val;
         }
 
+        private static readonly HashSet<string> dataTypeStartKeywords = new HashSet<string>()
+        {
+            "bit", "logic", "reg",
+            "byte", "shortint", "int", "longint", "integer", "time",
+            "shortreal", "real", "realtime",
+            "struct", "union", "enum", "string", "chandle", "event", "var",
+            "signed", "unsigned", "["
+        };
+
+        /// <summary>
+        /// Returns true when the token after the current "," starts a new
+        /// data_type declaration (for_initialization allows
+        /// "for (int a=0, bit b=1; ...)" where each for_variable_declaration
+        /// has its own data type). Probes with a clone to avoid consuming
+        /// tokens or updating the building block tree.
+        /// </summary>
+        private static bool NextStartsWithDataType(WordScanner word, NameSpace nameSpace)
+        {
+            if (dataTypeStartKeywords.Contains(word.NextText)) return true;
+            if (!General.IsIdentifier(word.NextText)) return false;
+
+            WordScanner probe = word.Clone(false);
+            probe.MoveNext(); // move to the token after ","
+            IndexReference beforeRef = probe.CreateIndexReference();
+            IDataType? dataType = DataTypeFactory.ParseCreate(probe, nameSpace, null);
+            probe.Dispose();
+            if (dataType == null) return false;
+            return !beforeRef.IsSameAs(probe.CreateIndexReference());
+        }
+
         public static bool ParseDeclaration(WordScanner word, NameSpace nameSpace)
         {
             return ParseDeclaration(word, nameSpace, null);
@@ -525,6 +555,24 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
                 if (word.Text == ",")
                 {
+                    // for_initialization allows a fresh for_variable_declaration
+                    // after a comma, each with its own data type:
+                    //   for (int a=0, bit b=1; ...)
+                    // When the token after the comma starts a new data_type,
+                    // consume the comma, re-parse the data type, and continue the
+                    // declaration list with the new type.
+                    if (nameSpace is Statements.ForStatememt && NextStartsWithDataType(word, nameSpace))
+                    {
+                        word.MoveNext(); // ,
+                        IDataType? forDataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, null);
+                        if (forDataType == null)
+                        {
+                            word.AddError("illegal for_initialization");
+                            return true;
+                        }
+                        dataType = forDataType;
+                        continue;
+                    }
                     word.MoveNext();
                     CommentAnnotation.DataObjectAnnotaion.ParsePostComment(word, nameSpace, variable);
                 }
