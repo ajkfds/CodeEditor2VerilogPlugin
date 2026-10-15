@@ -482,7 +482,19 @@ namespace pluginVerilog.Verilog
                 {
                     if (nameSpace.NamedElements.ContainsKey(function.Name) && nameSpace.NamedElements[function.Name] is Function)
                     {
-                        word.AddPrototypeError("duplicate task name");
+                        // A method that implements an interface class method (copied
+                        // into the class NamedElements by the "implements" handling)
+                        // may be redeclared (e.g. "pure virtual function void world();"
+                        // overriding the interface method). Treat it as an override
+                        // rather than a duplicate.
+                        if (IsInheritedFromImplementedInterface(nameSpace, function.Name))
+                        {
+                            nameSpace.NamedElements.Replace(function.Name, function);
+                        }
+                        else
+                        {
+                            word.AddPrototypeError("duplicate task name");
+                        }
                     }
                     else if (word.CompletionContext != null)
                     {
@@ -531,6 +543,23 @@ namespace pluginVerilog.Verilog
             }
 
             return;
+        }
+
+        /// <summary>
+        /// Returns true when <paramref name="methodName"/> is a method inherited
+        /// from an interface class that <paramref name="nameSpace"/> implements.
+        /// Such a method is copied into the class NamedElements by the
+        /// "implements" handling (Class.cs), so a later redeclaration (partial
+        /// implementation / override) must not be reported as a duplicate.
+        /// </summary>
+        private static bool IsInheritedFromImplementedInterface(NameSpace nameSpace, string methodName)
+        {
+            if (!(nameSpace is BuildingBlocks.Class @class)) return false;
+            foreach (BuildingBlocks.InterfaceClass iface in @class.ImplementedInterfaceClasses)
+            {
+                if (iface.NamedElements.ContainsKey(methodName)) return true;
+            }
+            return false;
         }
 
 
