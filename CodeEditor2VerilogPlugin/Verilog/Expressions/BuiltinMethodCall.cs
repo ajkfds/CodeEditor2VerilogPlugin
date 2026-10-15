@@ -93,7 +93,10 @@ namespace pluginVerilog.Verilog.Expressions
 
             if (word.Text == ")")
             {
-                if (method != null && method.Ports.Count != 0)
+                // IEEE 1800-2017 e.g. "function enum next( int unsigned N = 1 )":
+                // when every remaining argument has a default value, calling the
+                // method with no arguments (next() / prev()) is legal.
+                if (method != null && HasUnprovidedRequiredArgument(method, 0))
                 {
                     word.AddError("too few arguments");
                 }
@@ -143,7 +146,10 @@ namespace pluginVerilog.Verilog.Expressions
 
                 if (word.Text == ")")
                 {
-                    if (method != null && i < method.Ports.Count - 1)
+                    // i arguments were provided; the remaining ports are the ones
+                    // from index (i + 1). Report only when a remaining port has no
+                    // default value (IEEE 1800-2017 default-argument semantics).
+                    if (method != null && HasUnprovidedRequiredArgument(method, i + 1))
                     {
                         word.AddError("too few arguments");
                     }
@@ -164,6 +170,21 @@ namespace pluginVerilog.Verilog.Expressions
                 i++;
             }
             return methodCall;
+        }
+
+        /// <summary>
+        /// Returns true when at least one argument from <paramref name="startIndex"/>
+        /// onward has no default value, i.e. the call is missing a required argument.
+        /// Ports that carry a DefaultArgument (IEEE 1800-2017 default-argument
+        /// semantics, e.g. "function enum next( int unsigned N = 1 )") may be omitted.
+        /// </summary>
+        private static bool HasUnprovidedRequiredArgument(BuiltInMethod method, int startIndex)
+        {
+            for (int k = startIndex; k < method.PortsList.Count; k++)
+            {
+                if (method.PortsList[k].DefaultArgument == null) return true;
+            }
+            return false;
         }
 
         /// <summary>
