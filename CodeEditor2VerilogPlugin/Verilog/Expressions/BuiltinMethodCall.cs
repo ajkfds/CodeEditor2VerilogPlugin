@@ -292,6 +292,20 @@ namespace pluginVerilog.Verilog.Expressions
             DataObjects.DataTypes.IDataType dataType = DataObjects.DataTypes.StringType.Create(null);
             DataObjects.DataObject dataObject = DataObjects.Variables.String.Create("item", dataType);
             dataObject.Defined = true;
+
+            // iterator index querying methods (IEEE 1800-2017 7.12.4):
+            // item.index / item.first / item.last / item.prev / item.next.
+            // The synthetic loop variable is registered as a String, whose
+            // NamedElements is built lazily; adding these methods here lets
+            // "item.index" resolve inside the locator with-clause.
+            List<DataObjects.Port> indexMethodPorts = new List<DataObjects.Port>();
+            DataObjects.Variables.Variable indexReturn = DataObjects.Variables.Int.Create("index", DataObjects.DataTypes.IntType.Create(false));
+            dataObject.NamedElements.Add("index", BuiltInMethod.Create("index", indexReturn, indexMethodPorts));
+            dataObject.NamedElements.Add("first", BuiltInMethod.Create("first", indexReturn, indexMethodPorts));
+            dataObject.NamedElements.Add("last", BuiltInMethod.Create("last", indexReturn, indexMethodPorts));
+            dataObject.NamedElements.Add("next", BuiltInMethod.Create("next", indexReturn, indexMethodPorts));
+            dataObject.NamedElements.Add("prev", BuiltInMethod.Create("prev", indexReturn, indexMethodPorts));
+
             usedNameSpace.NamedElements.Add(dataObject.Name, dataObject);
         }
 
