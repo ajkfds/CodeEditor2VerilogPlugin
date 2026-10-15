@@ -159,10 +159,32 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
             word.MoveNext();
 
-            PackedArray? range = null;
+            // enum_name_declaration ::=
+            //   enum_identifier [ [ integral_number [ : integral_number ] ] ] [ = constant_expression ]
+            // Both the single index form (e.g. "step[10]") and the range form
+            // (e.g. "step[3:0]") are legal here. PackedArray.ParseCreate requires
+            // ':' (range only), so handle the single index case explicitly.
             if (word.Text == "[")
             {
-                range = PackedArray.ParseCreate(word, nameSpace);
+                word.MoveNext(); // [
+                if (word.Text != "]")
+                {
+                    Expression? first = Expression.ParseCreate(word, nameSpace, false);
+                    if (word.Text == ":")
+                    {
+                        word.MoveNext();
+                        Expression? second = Expression.ParseCreate(word, nameSpace, false);
+                    }
+                    // else: single integral_number (repetition count)
+                }
+                if (word.Text == "]")
+                {
+                    word.MoveNext();
+                }
+                else
+                {
+                    word.AddError("] expected");
+                }
             }
 
             Expressions.Expression? exp = null;
