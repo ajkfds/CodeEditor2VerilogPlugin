@@ -312,6 +312,8 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             }
 
             // class_type
+            // resolve class by name (this section is reached for identifiers that
+            // were not resolved by the immediate name-space search above)
             Class? @class = word.ProjectProperty.UnitNameSpace.Get(word.Text) as Class;
             if (@class != null)
             {
@@ -377,9 +379,19 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     word.RootParsedDocument.Root.BuildingBlocks.TryGetValue(word.Text, out rootElement);
                     if (rootElement == null)
                     {
-                        // search inside same-file building blocks (module-scope classes)
+                        // search inside same-file building blocks (module-scope classes).
+                        // Nested classes / interface classes are registered both in the
+                        // enclosing block's NamedElements and in its BuildingBlocks, so
+                        // check both (the BuildingBlocks table also covers classes
+                        // declared later in the same file — forward declarations).
                         foreach (BuildingBlock bb in word.RootParsedDocument.Root.BuildingBlocks.Values)
                         {
+                            if (bb.BuildingBlocks.TryGetValue(word.Text, out BuildingBlock? innerBlock)
+                                && (innerBlock is Class || innerBlock is InterfaceClass))
+                            {
+                                rootElement = innerBlock;
+                                break;
+                            }
                             if (bb.NamedElements.TryGetValue(word.Text, out INamedElement? inner)
                                 && inner is BuildingBlock innerBb
                                 && (innerBb is Class || innerBb is InterfaceClass))
@@ -411,6 +423,52 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                         Verilog.ParameterValueAssignment.ParseCreate(word, nameSpace, parameterOverrides, rootIfaceClass);
                     }
                     return rootIfaceClass;
+                }
+            }
+
+            // Same-file module-scope class referenced from within a class body:
+            // a class's Parent points at the file Root (for symbol registration),
+            // not at the enclosing module, so module-scope sibling classes are
+            // not reachable via GetNamedElementUpward. Walk the lexical scope via
+            // Class.DeclaringNameSpace (and the enclosing building blocks) and
+            // search each block's BuildingBlocks / NamedElements. This also
+            // covers classes declared later in the same file (forward
+            // references resolved by the enclosing module's prototype pass).
+            {
+                NameSpace? ns = nameSpace;
+                while (ns != null)
+                {
+                    BuildingBlock? bb = ns.BuildingBlock;
+                    if (bb != null)
+                    {
+                        if (bb.BuildingBlocks.TryGetValue(word.Text, out BuildingBlock? scoped)
+                            && scoped is Class scopedClass)
+                        {
+                            word.Color(CodeDrawStyle.ColorType.Identifier);
+                            word.MoveNext();
+                            if (word.Text == "#")
+                            {
+                                Dictionary<string, Expressions.Expression> parameterOverrides = new Dictionary<string, Expressions.Expression>();
+                                Verilog.ParameterValueAssignment.ParseCreate(word, nameSpace, parameterOverrides, scopedClass);
+                            }
+                            return scopedClass;
+                        }
+                        if (bb.NamedElements.TryGetValue(word.Text, out INamedElement? namedInner)
+                            && namedInner is Class namedClass)
+                        {
+                            word.Color(CodeDrawStyle.ColorType.Identifier);
+                            word.MoveNext();
+                            if (word.Text == "#")
+                            {
+                                Dictionary<string, Expressions.Expression> parameterOverrides = new Dictionary<string, Expressions.Expression>();
+                                Verilog.ParameterValueAssignment.ParseCreate(word, nameSpace, parameterOverrides, namedClass);
+                            }
+                            return namedClass;
+                        }
+                    }
+                    // Prefer the lexical declaring scope for classes (Parent points
+                    // at the file Root); fall back to Parent otherwise.
+                    ns = (ns as Class)?.DeclaringNameSpace ?? ns.Parent;
                 }
             }
 

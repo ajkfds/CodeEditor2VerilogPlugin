@@ -92,6 +92,17 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         public bool IsVirtual { get; set; }
         public virtual bool PartSelectable { get { return false; } }
 
+        /// <summary>
+        /// The name space in which this class was declared (the enclosing module
+        /// for a module-scope class, the file Root for a root-level class).
+        /// Unlike <see cref="NameSpace.Parent"/> (which points at the file Root
+        /// for symbol registration), this preserves the lexical scope so that a
+        /// class body can resolve sibling classes declared in the same module by
+        /// name (mutual / forward references such as
+        /// "class C1 { C2 c; } class C2 { C1 c; }").
+        /// </summary>
+        public NameSpace? DeclaringNameSpace { get; set; } = null;
+
         public virtual List<DataObjects.Arrays.PackedArray> PackedDimensions { get; protected set; } = new List<DataObjects.Arrays.PackedArray>();
 
         // IModuleOrInterfaceOrProgram
@@ -298,7 +309,8 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 Name = word.Text,
                 Parent = word.RootParsedDocument.Root,
                 Project = word.Project,
-                IsVirtual = virtial
+                IsVirtual = virtial,
+                DeclaringNameSpace = nameSpace
             };
             class_.NameReference = word.GetReference();
             class_.BuildingBlock = class_;
