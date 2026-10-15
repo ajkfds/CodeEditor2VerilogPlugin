@@ -171,7 +171,14 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     word.AddError("illegal ;");
                 }
 
-                if (General.ListOfKeywords.Contains(word.Text)) break;
+                // Stop only on structural end keywords; type keywords such as
+                // "reg" / "logic" legitimately start the next member and must not
+                // terminate the struct body.
+                if (word.Text == "endmodule" || word.Text == "endpackage"
+                    || word.Text == "endinterface" || word.Text == "endclass"
+                    || word.Text == "endprogram" || word.Text == "endfunction"
+                    || word.Text == "endtask" || word.Text == "endgenerate"
+                    || word.Text == "endcase" || word.Text == "endchecker") break;
                 if (word.CreateIndexReference().IsSameAs(iref))
                 {
                     word.MoveNext();

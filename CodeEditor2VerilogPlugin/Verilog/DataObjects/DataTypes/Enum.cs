@@ -97,9 +97,19 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     type.BaseType = IntegerAtomType.ParseCreate(word, nameSpace);
                     break;
                 default:
-                    // In the absence of a data type declaration, the default data type shall be int.
-                    // Any other data type used with enumerated types shall require an explicit data type declaration.
-                    type.BaseType = IntType.Create(false);
+                    // enum_base_type ::= type_identifier [ packed_dimension ]
+                    // (a typedef / user-defined integer type used as the base type,
+                    //  e.g. "typedef enum num_t { ... } e;")
+                    if (word.Text != "{" && General.IsIdentifier(word.Text))
+                    {
+                        type.BaseType = DataTypeFactory.ParseCreate(word, nameSpace, null);
+                    }
+                    if (type.BaseType == null)
+                    {
+                        // In the absence of a data type declaration, the default data type shall be int.
+                        // Any other data type used with enumerated types shall require an explicit data type declaration.
+                        type.BaseType = IntType.Create(false);
+                    }
                     break;
             }
 

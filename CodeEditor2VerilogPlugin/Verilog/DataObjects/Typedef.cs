@@ -76,6 +76,32 @@ namespace pluginVerilog.Verilog.DataObjects
                 return true;
             }
 
+            // forward declarations
+            //   typedef_identifier ;                    (forward typedef)
+            //   typedef enum/struct/union identifier ;  (forward type declaration)
+            if (word.Text == "enum" || word.Text == "struct" || word.Text == "union")
+            {
+                WordScanner probe = word.Clone(true);
+                probe.MoveNext(); // enum / struct / union
+                if (General.IsSimpleIdentifier(probe.Text) && probe.NextText == ";")
+                {
+                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.MoveNext(); // keyword
+                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.MoveNext(); // identifier
+                    word.MoveNext(); // ;
+                    return true;
+                }
+            }
+            else if (General.IsSimpleIdentifier(word.Text) && word.NextText == ";")
+            {
+                // forward typedef: "typedef identifier ;"
+                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.MoveNext(); // identifier
+                word.MoveNext(); // ;
+                return true;
+            }
+
             word.AddSystemVerilogError();
 
             IDataType? iDataType = DataTypeFactory.ParseCreate(word, nameSpace, null);
@@ -96,6 +122,20 @@ namespace pluginVerilog.Verilog.DataObjects
             word.Color(CodeDrawStyle.ColorType.Identifier);
             Typedef typeDef = new Typedef() { Name = word.Text, VariableType = iDataType };
             word.MoveNext();
+
+            // { variable_dimension } : unpacked / associative / queue / dynamic dimensions
+            // (e.g. "typedef reg quartet[3:0];", "typedef data_t arr [k:0][j:0];")
+            while (word.Text == "[" && !word.Eof)
+            {
+                int depth = 0;
+                while (!word.Eof)
+                {
+                    if (word.Text == "[") depth++;
+                    else if (word.Text == "]") depth--;
+                    word.MoveNext();
+                    if (depth == 0) break;
+                }
+            }
 
 
             if (word.Active)

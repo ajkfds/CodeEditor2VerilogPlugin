@@ -210,6 +210,13 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     return parseTypeReference(word, nameSpace);
             }
 
+            // [package_scope] type_identifier  (e.g. "typedef some_package::some_type myalias;")
+            if (word.NextText == "::" && General.IsIdentifier(word.Text))
+            {
+                IDataType? scoped = parsePackageScopeType(word, nameSpace);
+                if (scoped != null) return scoped;
+            }
+
             {
                 INamedElement? namedElement = nameSpace.GetNamedElementUpward(word.Text);
                 if (namedElement != null)
@@ -502,6 +509,69 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 }
             }
             return dType;
+        }
+
+        /// <summary>
+        /// Parse "[package_scope] type_identifier" where package_scope is "pkg::".
+        /// Resolves the type inside the referenced package (same-file or cross-file)
+        /// and returns a UserDefinedType / IDataType for the resolved type identifier.
+        /// Returns null when the scope identifier is not a package or the member is
+        /// not a type (caller falls through to other resolution paths).
+        /// </summary>
+        private static IDataType? parsePackageScopeType(WordScanner word, NameSpace nameSpace)
+        {
+            string packageName = word.Text;
+
+            // resolve the package: same-file Root.BuildingBlocks, then PackageNameSpace
+            BuildingBlocks.Package? package = null;
+            if (word.RootParsedDocument.Root != null
+                && word.RootParsedDocument.Root.BuildingBlocks.TryGetValue(packageName, out BuildingBlock? localPackage)
+                && localPackage is BuildingBlocks.Package pkg)
+            {
+                package = pkg;
+            }
+            if (package == null)
+            {
+                var packageFile = word.ProjectProperty.PackageNameSpace.GetFile(packageName);
+                if (packageFile != null
+                    && packageFile.VerilogParsedDocument != null
+                    && packageFile.VerilogParsedDocument.Root != null)
+                {
+                    var element = packageFile.VerilogParsedDocument.Root.NamedElements;
+                    if (element.TryGetValue(packageName, out INamedElement? pkgElement)
+                        && pkgElement is BuildingBlocks.Package pf)
+                    {
+                        package = pf;
+                    }
+                }
+            }
+            if (package == null) return null;
+
+            // consume "pkg" "::"
+            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.MoveNext(); // pkg
+            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.MoveNext(); // ::
+
+            if (!General.IsIdentifier(word.Text)) return null;
+
+            INamedElement? member = null;
+            package.NamedElements.TryGetValue(word.Text, out member);
+            if (member is Typedef memberTypedef)
+            {
+                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.MoveNext();
+
+                List<PackedArray> packedArrays = new List<PackedArray>();
+                while (word.Text == "[")
+                {
+                    PackedArray? range = PackedArray.ParseCreate(word, nameSpace);
+                    if (word.Eof || range == null) return null;
+                    packedArrays.Add(range);
+                }
+                return UserDefinedType.Create(memberTypedef, packedArrays);
+            }
+            return null;
         }
 
         private static IDataType? parseTypeReference(WordScanner word, NameSpace nameSpace)
