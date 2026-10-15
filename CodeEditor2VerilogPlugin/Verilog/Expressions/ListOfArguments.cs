@@ -384,6 +384,30 @@ namespace pluginVerilog.Verilog.Expressions
                 word.MoveNext();
                 return;
             }
+
+            // System functions such as $bits / $typename / $isunbounded accept a
+            // data_type argument (e.g. $bits(int), $typename(my_type)). The data
+            // type is not an expression, so try parsing it first and consume it
+            // without requiring expression resolution.
+            {
+                WordScanner probe = word.Clone(false);
+                IndexReference beforeRef = probe.CreateIndexReference();
+                DataObjects.DataTypes.IDataType? probeType =
+                    DataObjects.DataTypes.DataTypeFactory.ParseCreate(probe, usedNameSpace, null);
+                bool consumed = probeType != null && !beforeRef.IsSameAs(probe.CreateIndexReference());
+                probe.Dispose();
+                if (consumed)
+                {
+                    DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, usedNameSpace, null);
+                    if (word.Text == ",") { word.MoveNext(); return; }
+                    if (word.Text == ")") return;
+                    if (word.Text == ".") return;
+                    word.AddError("illegal argument");
+                    word.SkipToKeyword(";");
+                    return;
+                }
+            }
+
             Expression? expression = Expression.ParseCreate(word, usedNameSpace);
             if (word.Text == ",")
             {
