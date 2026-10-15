@@ -560,6 +560,24 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                 WordReference nameReference = word.GetReference();
                 word.MoveNext();
 
+                // param_assignment ::= parameter_identifier { unpacked_dimension } [ = constant_param_expression ]
+                // Unpacked dimensions (e.g. "parameter logic [31:0] p [3:0] = ...")
+                // are part of the parameter declaration and are stored on the
+                // Constants DataObject (DataObject carries UnpackedArrays).
+                List<UnPackedArray> paramUnpackedArrays = new List<UnPackedArray>();
+                while (word.Text == "[" && !word.Eof)
+                {
+                    IArray? array = DataObjects.Arrays.VariableArray.ParseCreate(null, word, nameSpace);
+                    if (array is UnPackedArray unPackedArray)
+                    {
+                        paramUnpackedArrays.Add(unPackedArray);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
                 if (word.Text != "=") break;
                 word.MoveNext();
 
@@ -610,6 +628,12 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                     }
                 }
                 constants.DataType = dataType;
+
+                // store the parameter's unpacked dimensions on the Constants DataObject
+                foreach (UnPackedArray unPackedArray in paramUnpackedArrays)
+                {
+                    constants.UnpackedArrays.Add(unPackedArray);
+                }
 
                 if (!word.Active)
                 {
