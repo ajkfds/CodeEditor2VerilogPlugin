@@ -27,6 +27,11 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                     INamedElement? localElement = DefinedNameSpace.GetNamedElementUpward(SourceName);
                     if (localElement is BuildingBlocks.Class localClass) return localClass;
                 }
+                // Fallback: the object was created from a Class data type
+                // (e.g. the implicit "super" object references its base class,
+                // which may be declared inside a module scope). Return it
+                // directly when name-based resolution cannot reach it.
+                if (DataType is BuildingBlocks.Class dtClass) return dtClass;
                 return null;
             }
             if (file is not Data.VerilogFile) return null;
