@@ -195,7 +195,16 @@ namespace pluginVerilog.Verilog.Expressions
             {
                 if (!General.IsSimpleIdentifier(wordClone.Text))
                 {
-                    break;
+                    // After a "." separator the member / method name may itself be a
+                    // keyword (e.g. the unpacked array reduction methods "and"/"or"/
+                    // "xor": b.or / b.and / b.xor). Accept such a keyword here so the
+                    // built-in method resolves via NamedElements (IEEE 1800-2017 7.12.3).
+                    if (!(nameReference.Separators.Count > 0 &&
+                          nameReference.Separators[nameReference.Separators.Count - 1] == "." &&
+                          General.IsIdentifier(wordClone.Text)))
+                    {
+                        break;
+                    }
                 }
 
                 nameReference.Names.Add(wordClone.Text);
