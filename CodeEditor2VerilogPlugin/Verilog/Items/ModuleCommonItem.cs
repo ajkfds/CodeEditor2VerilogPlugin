@@ -40,7 +40,13 @@ namespace pluginVerilog.Verilog.Items
             switch (word.Text)
             {
                 // assertion_item
+                //  deferred_immediate_assertion_item / concurrent_assertion_item
+                //  (deferred immediate form is legal at module level: "assert #0",
+                //   "assert final", "assume #0", "cover final", ...)
                 case "assert":
+                case "assume":
+                case "cover":
+                case "restrict":
                     //assertion_item::=
                     //        [block_identifier: ] concurrent_assertion_statement
                     //      | checker_instantiation

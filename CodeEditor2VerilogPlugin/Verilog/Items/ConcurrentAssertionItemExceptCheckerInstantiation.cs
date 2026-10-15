@@ -60,6 +60,19 @@ namespace pluginVerilog.Verilog.Items
                 return ConcurrentAssertionStatementItem.ParseCoverSequence(word, nameSpace, blockIdentifier);
             }
 
+            // Handle deferred immediate assertion item (assert/assume/cover #0 or final)
+            //   deferred_immediate_assertion_item ::= [block_identifier :] deferred_immediate_assertion_statement
+            //   deferred_immediate_assertion_statement ::= assert #0 ( expression ) action_block
+            //                                            | assert final ( expression ) action_block
+            //                                            | assume #0 (...) / assume final (...)
+            //                                            | cover  #0 (...) / cover  final (...)
+            if ((word.Text == "assert" || word.Text == "assume" || word.Text == "cover")
+                && (word.NextText == "#" || word.NextText == "final"))
+            {
+                Statements.ImmidiateAssertionStatement.ParseCreate(word, nameSpace, blockIdentifier);
+                return true;
+            }
+
             // checker_instantiation ::= ps_checker_identifier name_of_instance ( [list_of_checker_port_connections] ) ;
             // the checker identifier must resolve to a Checker building block
             if (blockIdentifier == null && General.IsSimpleIdentifier(word.Text) && word.NextText == "(")
