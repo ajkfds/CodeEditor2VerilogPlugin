@@ -268,6 +268,12 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                                     word.MoveNext();
                                 }
                             }
+                            else if (word.Text == "type")
+                            {
+                                // parameter_port_declaration ::= "type" list_of_type_assignments
+                                // (e.g. module top #(type T = real); )
+                                Verilog.DataObjects.Constants.Constants.ParseCreateTypeAssignmentsForPort(word, module);
+                            }
                             else if (General.IsIdentifier(word.Text))
                             {   // parameter_port_declaration without "parameter" keyword
                                 //  parameter_port_list ::= # ( list_of_param_assignments { , parameter_port_declaration } )
