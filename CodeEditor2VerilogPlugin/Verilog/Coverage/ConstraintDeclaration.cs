@@ -135,9 +135,6 @@ namespace pluginVerilog.Verilog.Coverage
                 word.MoveNext();
             }
 
-            // constraint_prototype ::= [ "static" ] "constraint" constraint_identifier ;
-            bool isPrototype = word.NextText == ";";
-
             if (word.Text != "constraint")
             {
                 return null;
@@ -145,6 +142,20 @@ namespace pluginVerilog.Verilog.Coverage
 
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
+
+            // extern_constraint_declaration ::=
+            //   constraint class_identifier :: constraint_identifier { ... }
+            // (the out-of-block constraint definition, e.g. "constraint a::c { b == 0; }")
+            if (General.IsIdentifier(word.Text) && word.NextText == "::")
+            {
+                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.MoveNext(); // class_identifier
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext(); // ::
+            }
+
+            // constraint_prototype ::= [ "static" ] "constraint" constraint_identifier ;
+            bool isPrototype = word.NextText == ";";
 
             // constraint_identifier
             if (!General.IsIdentifier(word.Text))
@@ -297,6 +308,15 @@ namespace pluginVerilog.Verilog.Coverage
             item.Type = ConstraintItem.ItemType.Expression;
             item.Expression = Expression.ParseCreate(word, nameSpace);
 
+            // expression_or_dist ::= expression [ "dist" { dist_list } ]
+            // dist_list ::= dist_item { , dist_item }
+            // dist_item ::= value_range [ dist_weight ]
+            // dist_weight ::= ":=" expression | ":/" expression
+            if (word.Text == "dist")
+            {
+                skipDistList(word);
+            }
+
             if (item.Expression == null) return null;
             // Optional semicolon
             if (word.Text == ";")
@@ -427,13 +447,37 @@ namespace pluginVerilog.Verilog.Coverage
                     word.MoveNext();
                 }
 
-                // Optional loop variables
+                // foreach ( array_identifier [ loop_variables ] )
+                //   e.g. foreach ( B [ i ] ) or foreach ( B [ i, j ] )
+                if (word.Text == "[")
+                {
+                    word.MoveNext();
+                    while (!word.Eof && word.Text != "]")
+                    {
+                        if (General.IsIdentifier(word.Text))
+                        {
+                            item.LoopVariables.Add(word.Text);
+                            bindLoopVariable(nameSpace, word.Text);
+                            word.Color(CodeDrawStyle.ColorType.Identifier);
+                            word.MoveNext();
+                        }
+                        else
+                        {
+                            word.MoveNext();
+                        }
+                        if (word.Text == ",") word.MoveNext();
+                    }
+                    if (word.Text == "]") word.MoveNext();
+                }
+
+                // Optional loop variables (legacy comma form)
                 while (word.Text == "," && General.IsIdentifier(word.NextText))
                 {
                     word.MoveNext(); // comma
                     if (General.IsIdentifier(word.Text))
                     {
                         item.LoopVariables.Add(word.Text);
+                        bindLoopVariable(nameSpace, word.Text);
                         word.Color(CodeDrawStyle.ColorType.Identifier);
                         word.MoveNext();
                     }
@@ -463,6 +507,54 @@ namespace pluginVerilog.Verilog.Coverage
             }
 
             return item;
+        }
+
+        /// <summary>
+        /// Skip a distribution list after "dist": "{ dist_item { , dist_item } }".
+        /// dist_item ::= value_range [ dist_weight ]
+        /// dist_weight ::= ":=" expression | ":/" expression
+        /// </summary>
+        private static void skipDistList(WordScanner word)
+        {
+            if (word.Text != "dist") return;
+            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.MoveNext();
+            if (word.Text != "{") return;
+            int depth = 0;
+            while (!word.Eof)
+            {
+                if (word.Text == "{") depth++;
+                else if (word.Text == "}")
+                {
+                    depth--;
+                    if (depth == 0)
+                    {
+                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.MoveNext();
+                        return;
+                    }
+                }
+                word.MoveNext();
+            }
+        }
+
+        /// <summary>
+        /// A foreach constraint loop variable (foreach ( B [ i ] ) B[i] == 5;)
+        /// is referenced inside the constraint body. Bind it in the enclosing
+        /// name space so the reference resolves instead of "unfound object".
+        /// Prototype / partial parses discard their results, so they must not
+        /// pollute the shared name space.
+        /// </summary>
+        private static void bindLoopVariable(NameSpace nameSpace, string name)
+        {
+            if (nameSpace == null) return;
+            if (nameSpace.NamedElements.ContainsKey(name)) return;
+            DataObjects.DataTypes.IDataType dataType =
+                DataObjects.DataTypes.IntType.Create(false);
+            DataObjects.DataObject dataObject =
+                DataObjects.Variables.Int.Create(name, dataType);
+            dataObject.Defined = true;
+            nameSpace.NamedElements.Add(dataObject.Name, dataObject);
         }
 
         private static ConstraintItem ParseDisableIffConstraint(WordScanner word, NameSpace nameSpace, ConstraintItem item)

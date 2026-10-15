@@ -173,8 +173,37 @@ namespace pluginVerilog.Verilog.Expressions
         private static void parseWithClause(WordScanner word, NameSpace usedNameSpace, BuiltinMethodCall methodCall)
         {
             if (word.Text != "with") return;
+            bool isRandomize = (methodCall.FunctionName == "randomize");
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
+
+            // randomize() with { constraint_block }
+            // (randomize_call ::= "randomize" ... [ "with" [ "(" identifier_list ")" ] constraint_block ])
+            if (isRandomize && word.Text == "{")
+            {
+                skipConstraintBlock(word);
+                methodCall.Reference = WordReference.CreateReferenceRange(methodCall.Reference, word.GetReference());
+                return;
+            }
+
+            // randomize() with ( identifier_list ) { constraint_block }
+            if (isRandomize && word.Text == "(")
+            {
+                word.MoveNext();
+                // skip identifier_list (or "null")
+                int guard = 0;
+                while (!word.Eof && word.Text != ")" && word.Text != ";" && guard++ < 1000)
+                {
+                    word.MoveNext();
+                }
+                if (word.Text == ")") word.MoveNext();
+                if (word.Text == "{")
+                {
+                    skipConstraintBlock(word);
+                }
+                methodCall.Reference = WordReference.CreateReferenceRange(methodCall.Reference, word.GetReference());
+                return;
+            }
 
             if (word.GetCharAt(0) != '(')
             {
@@ -200,6 +229,31 @@ namespace pluginVerilog.Verilog.Expressions
 
             methodCall.WithExpression = expression;
             methodCall.Reference = WordReference.CreateReferenceRange(methodCall.Reference, word.GetReference());
+        }
+
+        /// <summary>
+        /// Skip a randomize() inline constraint block: "{ { constraint_set_item } }".
+        /// The nested braces / bracket groups are consumed by matching bracket depth.
+        /// </summary>
+        private static void skipConstraintBlock(WordScanner word)
+        {
+            if (word.Text != "{") return;
+            int depth = 0;
+            while (!word.Eof)
+            {
+                if (word.Text == "{") depth++;
+                else if (word.Text == "}")
+                {
+                    depth--;
+                    if (depth == 0)
+                    {
+                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.MoveNext();
+                        return;
+                    }
+                }
+                word.MoveNext();
+            }
         }
 
         /// <summary>

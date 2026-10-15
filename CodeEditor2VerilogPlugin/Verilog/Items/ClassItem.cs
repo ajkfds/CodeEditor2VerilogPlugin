@@ -163,6 +163,14 @@ namespace pluginVerilog.Verilog.Items
                         return true;
                     }
 
+                    // Handle "extern constraint c;" - extern constraint prototype
+                    // (class_item ::= "extern" constraint_prototype)
+                    if (word.Text == "constraint")
+                    {
+                        Coverage.ConstraintDeclaration.ParseCreate(word, nameSpace);
+                        return true;
+                    }
+
                     // { method_qualifier } before method_prototype
                     // method_qualifier ::= [ "pure" ] "virtual" | class_item_qualifier (static / protected / local)
                     // e.g. "extern virtual task subtask(...)" / "extern protected task ..." / "extern local static task ..."

@@ -171,6 +171,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     case "package":
                         await parsePackageAsync(word, parsedDocument, file);
                         break;
+                    // extern_constraint_declaration
+                    //   (constraint class_identifier :: constraint_identifier { ... })
+                    case "constraint":
+                        Coverage.ConstraintDeclaration.ParseCreate(word, root);
+                        break;
                     default:
                         // package_item
                         Verilog.Items.PackageItem.Parse(word, root);
