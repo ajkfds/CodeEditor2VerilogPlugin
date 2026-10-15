@@ -136,6 +136,20 @@ namespace pluginVerilog.Verilog.Expressions
                     Class? @class = nameSpace.ProjectProperty.UnitNameSpace.Get(name) as Class;
                     if (@class != null) baseNameSpace = @class;
                 }
+                if (baseNameSpace == null)
+                {
+                    // same-file building block (module / interface / program / checker):
+                    // a hierarchical reference such as "top.e" may name a module that is
+                    // declared later in the same file. Those modules are registered in the
+                    // current file's Root.BuildingBlocks and resolved here when the
+                    // DefinitionNameSpace (cross-file) lookup misses (e.g. forward
+                    // reference / single-file parse where the module is not yet registered).
+                    var localRoot = nameSpace.BuildingBlock?.File?.VerilogParsedDocument?.Root;
+                    if (localRoot != null && localRoot.BuildingBlocks.TryGetValue(name, out BuildingBlock? localBlock))
+                    {
+                        baseNameSpace = localBlock;
+                    }
+                }
                 index++;
                 if (index >= Names.Count) return (baseNameSpace,baseNameSpace);
                 if(baseNameSpace == null) return (null, null);
