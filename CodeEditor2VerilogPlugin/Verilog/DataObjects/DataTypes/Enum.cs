@@ -205,6 +205,13 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 EnumConstants constants = EnumConstants.Create(item.Identifier, enum_.BaseType, wordReference, Expressions.Expression.CreateTempExpression(index.ToString()));
                 if (word.Prototype)
                 {
+                    // Mark as defined during the prototype pass as well: a class
+                    // declared inside a module is parsed (prototype -> real), but
+                    // the real-parse class result is discarded and the prototype
+                    // version is kept. Without Defined=true here, an enum constant
+                    // referenced through a class object (test_obj.C) reports
+                    // "not defined here". (Same convention as variables.)
+                    constants.Defined = true;
                     if (!nameSpace.NamedElements.ContainsKey(constants.Name))
                     {
                         nameSpace.NamedElements.Add(constants.Name, constants);
