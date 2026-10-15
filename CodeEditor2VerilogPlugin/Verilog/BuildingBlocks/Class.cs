@@ -417,6 +417,31 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 | # ( parameter_port_declaration { , parameter_port_declaration } )  
                 | #( )   
         */
+        /// <summary>
+        /// Skip an optional parameter_value_assignment "#( ... )" that may follow
+        /// an interface_class_type, e.g. "implements Package::Bar#(1, 2)".
+        /// Positions at the token after the closing ")".
+        /// </summary>
+        private static void SkipParameterValueAssignment(WordScanner word)
+        {
+            if (word.Text != "#") return;
+            word.MoveNext();
+            if (word.Text != "(") return;
+            int depth = 0;
+            while (!word.Eof)
+            {
+                if (word.Text == "(") depth++;
+                else if (word.Text == ")")
+                {
+                    depth--;
+                    word.MoveNext();
+                    if (depth <= 0) break;
+                    continue;
+                }
+                word.MoveNext();
+            }
+        }
+
         protected static void parseClassItems(
             WordScanner word,
             NameSpace nameSpace,
@@ -714,6 +739,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                             {
                                 word.Color(CodeDrawStyle.ColorType.Identifier);
                                 word.MoveNext();
+                                SkipParameterValueAssignment(word);
                                 class_.ImplementedInterfaceClasses.Add(pkgIface);
                                 foreach (INamedElement namedElement in pkgIface.NamedElements.Values)
                                 {
@@ -733,6 +759,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                                 // lives in this document's Root.BuildingBlocks
                                 word.Color(CodeDrawStyle.ColorType.Identifier);
                                 word.MoveNext();
+                                SkipParameterValueAssignment(word);
                                 class_.ImplementedInterfaceClasses.Add(localPkgIface);
                                 foreach (INamedElement namedElement in localPkgIface.NamedElements.Values)
                                 {
