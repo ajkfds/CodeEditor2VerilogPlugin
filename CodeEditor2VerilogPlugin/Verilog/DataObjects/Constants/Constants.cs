@@ -583,7 +583,13 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
 
                 Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
                 if (expression == null) break;
-                if (!expression.Constant && expression.Reference != null)
+                // A forward-referenced constant function call (e.g.
+                // "localparam a = fun(3);" before "function int fun(...)")
+                // is parsed as UnfoundObjectReference with ReparseRequested;
+                // it resolves to a constant function on the next pass, so the
+                // "should be constant" error must not be reported here.
+                if (!expression.Constant && expression.Reference != null
+                    && expression is not Expressions.UnfoundObjectReference)
                 {
                     expression.Reference.AddError("should be constant");
                 }
