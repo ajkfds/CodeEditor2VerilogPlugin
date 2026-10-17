@@ -606,7 +606,12 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     }
                 }
             }
-            if (package == null) return null;
+            if (package == null)
+            {
+                // not a package scope: try interface class scope resolution
+                // (e.g. "ihello::int_t" in "hello(ihello::int_t val)")
+                return parseInterfaceClassScopeType(word, nameSpace, packageName);
+            }
 
             // consume "pkg" "::"
             word.Color(CodeDrawStyle.ColorType.Identifier);
@@ -618,6 +623,93 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
             INamedElement? member = null;
             package.NamedElements.TryGetValue(word.Text, out member);
+            if (member is Typedef memberTypedef)
+            {
+                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.MoveNext();
+
+                List<PackedArray> packedArrays = new List<PackedArray>();
+                while (word.Text == "[")
+                {
+                    PackedArray? range = PackedArray.ParseCreate(word, nameSpace);
+                    if (word.Eof || range == null) return null;
+                    packedArrays.Add(range);
+                }
+                return UserDefinedType.Create(memberTypedef, packedArrays);
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Parse "[interface_class_identifier] :: type_identifier" where the
+        /// scope is an interface class (e.g. "ihello::int_t"). The typedef
+        /// must be a member of the interface class (interface_class_item
+        /// type_declaration). Returns null when the identifier is not an
+        /// interface class or the member is not a type.
+        /// </summary>
+        private static IDataType? parseInterfaceClassScopeType(WordScanner word, NameSpace nameSpace, string interfaceClassName)
+        {
+            InterfaceClass? interfaceClass = null;
+
+            INamedElement? namedElement = nameSpace.GetNamedElementUpward(interfaceClassName);
+            if (namedElement is InterfaceClass ic) interfaceClass = ic;
+
+            // a class's Parent points at the file Root (for symbol registration),
+            // not at the enclosing module, so an interface class declared in the
+            // module scope is not reachable via GetNamedElementUpward from
+            // inside a class body. Walk the lexical scope via
+            // Class.DeclaringNameSpace (same pattern as the class resolution
+            // fallback in ParseCreate).
+            if (interfaceClass == null)
+            {
+                NameSpace? ns = nameSpace;
+                while (ns != null)
+                {
+                    BuildingBlock? bb = ns.BuildingBlock;
+                    if (bb != null
+                        && bb.NamedElements.TryGetValue(interfaceClassName, out INamedElement? inner)
+                        && inner is InterfaceClass icFromScope)
+                    {
+                        interfaceClass = icFromScope;
+                        break;
+                    }
+                    ns = (ns as Class)?.DeclaringNameSpace ?? ns.Parent;
+                }
+            }
+
+            if (interfaceClass == null && word.RootParsedDocument.Root != null)
+            {
+                if (word.RootParsedDocument.Root.BuildingBlocks.TryGetValue(interfaceClassName, out BuildingBlock? bb)
+                    && bb is InterfaceClass icFromRoot)
+                {
+                    interfaceClass = icFromRoot;
+                }
+                else
+                {
+                    foreach (BuildingBlock block in word.RootParsedDocument.Root.BuildingBlocks.Values)
+                    {
+                        if (block.NamedElements.TryGetValue(interfaceClassName, out INamedElement? inner)
+                            && inner is InterfaceClass icFromInner)
+                        {
+                            interfaceClass = icFromInner;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (interfaceClass == null) return null;
+
+            // consume "iface" "::"
+            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.MoveNext(); // iface
+            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.MoveNext(); // ::
+
+            if (!General.IsIdentifier(word.Text)) return null;
+
+            INamedElement? member = null;
+            interfaceClass.NamedElements.TryGetValue(word.Text, out member);
             if (member is Typedef memberTypedef)
             {
                 word.Color(CodeDrawStyle.ColorType.Identifier);

@@ -121,6 +121,12 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
                 case DataTypeEnum.Interface:
                     return VirtualInterface.Create(name, dataType);
+
+                // interface class variable ("ihello iobj;") — a handle whose
+                // member resolution follows the interface class via the
+                // lazy NamedElements getter (same pattern as UserDefinedVariable).
+                case DataTypeEnum.InterfaceClass:
+                    return InterfaceClassVariable.Create(name, dataType);
                 default:
                     if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
                     return null;
@@ -304,9 +310,15 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 if (!word.RootParsedDocument.ReferencedUnitNameSpace.Contains(class_.Name)) word.RootParsedDocument.ReferencedUnitNameSpace.Add(class_.Name);
             }
 
-            if(dataType is InterfaceClass)
+            if(dataType is InterfaceClass interfaceClassType)
             {
-                return pointerMoved;
+                // "ihello iobj;" / "itest it_ref;" — a variable whose type is an
+                // interface class. This is a variable declaration, not an
+                // interface/module instantiation, so it must not fall through to
+                // InterfaceInstance.Parse (which reports "unfound module").
+                // Register the type reference for the simulation setup and
+                // continue to the generic variable declaration loop below.
+                if (!word.RootParsedDocument.ReferencedUnitNameSpace.Contains(interfaceClassType.Name)) word.RootParsedDocument.ReferencedUnitNameSpace.Add(interfaceClassType.Name);
             }
 
             List<DataObject> vars = new List<DataObject>();

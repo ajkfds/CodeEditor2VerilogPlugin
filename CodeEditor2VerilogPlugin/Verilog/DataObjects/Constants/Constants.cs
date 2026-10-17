@@ -418,6 +418,17 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                                 // mark defined on re-parse (same pattern as param_assignment)
                             }
                         }
+                        else if (typeDataType != null)
+                        {
+                            // The prototype pass may not have registered the type
+                            // parameter (e.g. when parsing an interface class body
+                            // whose prototype word has Active == false). Register
+                            // it on the real pass so that method prototypes like
+                            // "pure virtual function void fn1(T a);" resolve T.
+                            Typedef typeDef = new Typedef() { Name = identifier, VariableType = typeDataType };
+                            module.NamedElements.Add(identifier, typeDef);
+                            module.PortParameterNameList.Add(identifier);
+                        }
                     }
                 }
                 if (word.Text != ",") break;

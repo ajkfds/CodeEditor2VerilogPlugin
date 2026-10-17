@@ -676,6 +676,17 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 }
             }
 
+            // register the typedef into the interface class namespace so that
+            // method prototypes referencing it (e.g.
+            // "pure virtual function void hello(int_t val);") can resolve it.
+            if (word.Active && word.CompletionContext == null)
+            {
+                if (!interfaceClass.NamedElements.ContainsKey(typeDef.Name))
+                {
+                    interfaceClass.NamedElements.Add(typeDef.Name, typeDef);
+                }
+            }
+
             if (word.Text == ";")
             {
                 word.MoveNext();
