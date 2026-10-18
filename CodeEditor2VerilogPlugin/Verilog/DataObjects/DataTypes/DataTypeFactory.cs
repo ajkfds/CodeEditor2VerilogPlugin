@@ -628,6 +628,15 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 word.Color(CodeDrawStyle.ColorType.Identifier);
                 word.MoveNext();
 
+                // parameter_value_assignment on the package-scope type parameter
+                // e.g. "mypkg::GlueType#(...)" : consume the override so it does
+                // not remain and produce "too many parameters" downstream.
+                if (word.Text == "#")
+                {
+                    Dictionary<string, Expressions.Expression> parameterOverrides = new Dictionary<string, Expressions.Expression>();
+                    Verilog.ParameterValueAssignment.ParseCreate(word, nameSpace, parameterOverrides, null);
+                }
+
                 List<PackedArray> packedArrays = new List<PackedArray>();
                 while (word.Text == "[")
                 {
@@ -636,6 +645,34 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     packedArrays.Add(range);
                 }
                 return UserDefinedType.Create(memberTypedef, packedArrays);
+            }
+
+            // package-scope class_type: "pkg::ClassName" possibly with a
+            // parameter_value_assignment (e.g. "mypkg::ModuleType#(N+M)").
+            // Consume the class identifier and the optional "#(...)" override,
+            // then return an opaque user-defined placeholder (the class itself
+            // is resolved by name elsewhere; the value here is only used as a
+            // type_assignment default for a "parameter type T = pkg::Cls;"
+            // declaration).
+            if (member is BuildingBlocks.Class)
+            {
+                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.MoveNext();
+
+                if (word.Text == "#")
+                {
+                    Dictionary<string, Expressions.Expression> parameterOverrides = new Dictionary<string, Expressions.Expression>();
+                    Verilog.ParameterValueAssignment.ParseCreate(word, nameSpace, parameterOverrides, null);
+                }
+
+                List<PackedArray> packedArrays2 = new List<PackedArray>();
+                while (word.Text == "[")
+                {
+                    PackedArray? range = PackedArray.ParseCreate(word, nameSpace);
+                    if (word.Eof || range == null) return null;
+                    packedArrays2.Add(range);
+                }
+                return new TypeReference(null, null);
             }
             return null;
         }
