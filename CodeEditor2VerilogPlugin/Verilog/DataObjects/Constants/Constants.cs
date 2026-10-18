@@ -345,6 +345,13 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                             constants.ConstantType = ConstantTypeEnum.parameter;
                             constants.DataType = paramDataType;
                             module.NamedElements.Add(constants.Name, constants);
+                            // module-scope class members are parsed in prototype
+                            // mode; the real-parse result is discarded, so the
+                            // surviving prototype object must be marked Defined
+                            // here, otherwise a class parameter port reference
+                            // (e.g. "class test_cls #(int t = 12); ... a = def - t;")
+                            // reports "unfound object".
+                            constants.Defined = true;
                             module.PortParameterNameList.Add(identifier);
                         }
                     }
