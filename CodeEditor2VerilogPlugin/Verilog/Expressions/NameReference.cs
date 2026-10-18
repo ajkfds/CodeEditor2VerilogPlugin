@@ -198,8 +198,37 @@ namespace pluginVerilog.Verilog.Expressions
 
                 return (null,null);
             }
+
+            // Array element member access (e.g. "process job[]; job[1].await();").
+            // A queue / dynamic array / associative array exposes its own
+            // manipulation methods (size, push_back, delete, ...) but not the
+            // members of its element data type. Fall back to the element
+            // DataObject's NamedElements so that "job[1].await()" / "job[i].status"
+            // resolve against the element type (IEEE 1800-2017 7.8).
+            DataObjects.DataObject? arrayObject = nameSpace as DataObjects.DataObject;
+            if (arrayObject != null)
+            {
+                DataObjects.DataObject? elementDataObject = GetArrayElementDataObject(arrayObject);
+                if (elementDataObject != null && elementDataObject.NamedElements.ContainsKey(name))
+                {
+                    return searchElement(elementDataObject, index);
+                }
+            }
+
             WordReferences[index].AddError("unfound object");
             return (null, null);
+        }
+
+        /// <summary>
+        /// Returns the element DataObject wrapped by a queue / dynamic array /
+        /// associative array, or null when the DataObject is not such an array.
+        /// </summary>
+        private static DataObjects.DataObject? GetArrayElementDataObject(DataObjects.DataObject dataObject)
+        {
+            if (dataObject is DataObjects.Arrays.DynamicArray dynamicArray) return dynamicArray.DataObject;
+            if (dataObject is DataObjects.Arrays.Queue queue) return queue.DataObject;
+            if (dataObject is DataObjects.Arrays.AssociativeArray associativeArray) return associativeArray.DataObject;
+            return null;
         }
 
 
