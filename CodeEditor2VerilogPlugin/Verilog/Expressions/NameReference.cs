@@ -321,6 +321,28 @@ namespace pluginVerilog.Verilog.Expressions
                     nameReference.Ranges.Add(null);
                 }
 
+                // parameter_value_assignment on a class_scope : "ClassName#(...)::member"
+                // (IEEE 1800-2017 8.25.1 parametrized class scope resolution).
+                // The "#(...)" belongs to the preceding identifier, so consume it
+                // here before the "::" separator is processed.
+                if (wordClone.Text == "#" && wordClone.NextText == "(")
+                {
+                    wordClone.Color(CodeDrawStyle.ColorType.Keyword);
+                    wordClone.MoveNext(); // #
+                    wordClone.MoveNext(); // (
+                    int depth = 0;
+                    while (!wordClone.Eof)
+                    {
+                        if (wordClone.Text == "(") depth++;
+                        else if (wordClone.Text == ")")
+                        {
+                            if (depth == 0) { wordClone.MoveNext(); break; }
+                            depth--;
+                        }
+                        wordClone.MoveNext();
+                    }
+                }
+
                 if (wordClone.Eof) break;
                 if (wordClone.Text == "." || wordClone.Text == "::")
                 {
