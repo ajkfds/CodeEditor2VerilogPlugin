@@ -551,6 +551,7 @@ namespace pluginVerilog.Verilog.Expressions
                 || word.GetCharAt(index) == 'X'
                 || word.GetCharAt(index) == 'z'
                 || word.GetCharAt(index) == 'Z'
+                || word.GetCharAt(index) == '?'
                 )
             {
                 index++;
