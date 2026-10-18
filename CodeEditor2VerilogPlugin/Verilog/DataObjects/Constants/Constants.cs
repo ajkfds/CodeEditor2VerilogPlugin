@@ -155,6 +155,17 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 
+            // parameter/localparam type list_of_type_assignments
+            // (IEEE 1800-2017 6.20.2 / A.2.1.1)
+            //   parameter_declaration ::= "parameter" "type" list_of_type_assignments
+            // A "type" keyword that is NOT followed by "(" is the type-parameter
+            // form (e.g. "parameter type T = int"), not a "type(...)" reference.
+            if (word.Text == "type" && word.NextText != "(")
+            {
+                ParseCreateTypeAssignmentsForPort(word, module);
+                return;
+            }
+
             DataObjects.DataTypes.IDataType? dataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, (NameSpace)module, null);
             if (dataType == null)
             {

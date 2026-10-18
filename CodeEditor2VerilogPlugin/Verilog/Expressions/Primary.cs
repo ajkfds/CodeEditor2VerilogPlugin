@@ -224,6 +224,18 @@ number
                         return Cast.ParseCreate(word, nameSpace);
                     }
 
+                    // type operator / type reference (IEEE 1800-2017 6.23)
+                    // type_reference ::= "type" "(" expression ")" | "type" "(" data_type ")"
+                    // e.g. type(T), type(logic[11:0]), type(a+b)
+                    if (word.Text == "type" && word.NextText == "(")
+                    {
+                        IDataType? typeRef = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, null);
+                        if (typeRef != null)
+                        {
+                            return new DataTypeReference { IDataType = typeRef };
+                        }
+                    }
+
                     // tagged_union_expression  (SystemVerilog A.8.4)
                     // tagged_union_expression ::= tagged [ unique ] union_member_identifier [ ( expression ) ] { . union_member_identifier [ ( expression ) ] }
                     if (word.Text == "tagged" && !(lValue))

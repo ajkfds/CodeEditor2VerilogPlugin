@@ -154,6 +154,13 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 {
                     return Create(name, referencedType);
                 }
+
+                // Unresolved type_reference (e.g. "var type(a+b) c;" — the
+                // expression's type cannot be determined statically here).
+                // The reference is still a legal variable declaration, so
+                // register a placeholder variable that carries the
+                // TypeReference rather than failing the declaration.
+                return new Variable() { Name = name, DataType = dataType };
             }
             return UserDefinedVariable.Create(name, dataType);
         }

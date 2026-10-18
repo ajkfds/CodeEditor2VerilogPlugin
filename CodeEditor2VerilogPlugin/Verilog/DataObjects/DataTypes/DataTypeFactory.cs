@@ -807,7 +807,29 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             }
             word.MoveNext(); // (
 
-            IDataType? dtype = ParseCreate(word, nameSpace, null);
+            // data_type probe: ParseCreate may consume tokens before failing
+            // (e.g. "type(a+b)" where "a" happens to resolve as a type name
+            // in another file), which would corrupt the token position for
+            // the expression fallback below. Probe with a clone first and only
+            // treat the content as a data_type when the probe consumed tokens
+            // AND landed exactly on ")" (a full data_type covers the whole
+            // parenthesis content; "a" in "a+b" stops at "+").
+            IDataType? dtype = null;
+            {
+                WordScanner dataTypeProbe = word.Clone(false);
+                IndexReference beforeProbeRef = dataTypeProbe.CreateIndexReference();
+                IDataType? probed = ParseCreate(dataTypeProbe, nameSpace, null);
+                bool isDataType = probed != null
+                    && !beforeProbeRef.IsSameAs(dataTypeProbe.CreateIndexReference())
+                    && dataTypeProbe.Text == ")";
+                dataTypeProbe.Dispose();
+                if (isDataType)
+                {
+                    dtype = ParseCreate(word, nameSpace, null);
+                }
+            }
+
+            TypeReference typeReference;
             if (dtype == null)
             {
                 Expressions.Expression? ex = Expressions.Expression.ParseCreate(word, nameSpace);
@@ -816,17 +838,25 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     word.AddError("expression or data_type required");
                     return null;
                 }
-                else
-                {
-                    // Create TypeReference for expression-based type reference
-                    return TypeReference.CreateForExpression(ex);
-                }
+                // Create TypeReference for expression-based type reference
+                typeReference = TypeReference.CreateForExpression(ex);
             }
             else
             {
                 // Create TypeReference for data type
-                return TypeReference.CreateForDataType(dtype);
+                typeReference = TypeReference.CreateForDataType(dtype);
             }
+
+            // close parenthesis : ")" (IEEE 1800-2017 6.23 type_reference)
+            if (word.Text == ")")
+            {
+                word.MoveNext(); // )
+            }
+            else
+            {
+                word.AddError(") required");
+            }
+            return typeReference;
         }
     }
 }
