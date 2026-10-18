@@ -312,6 +312,15 @@ namespace pluginVerilog.Verilog.Expressions
                     primaries.RemoveAt(primaries.Count - 1);
                     primaries.Add(primary);
                 }
+                else if (item is MatchesOperator mop)
+                {
+                    if (primaries.Count < 1) return null;
+
+                    Primary operand = primaries[primaries.Count - 1];
+                    Primary primary = mop.Operate(operand, word.Prototype);
+                    primaries.RemoveAt(primaries.Count - 1);
+                    primaries.Add(primary);
+                }
                 else if (item is IncDecOperator idop)
                 {
                     if (primaries.Count < 1) return null;
@@ -530,6 +539,18 @@ namespace pluginVerilog.Verilog.Expressions
             }
             if (word.Eof) return true;
 
+            if (word.Text == "inside")
+            {
+                InsideOperator? insideOperator = InsideOperator.ParseCreate(word, nameSpace);
+                if (insideOperator != null) Primaries.Add(insideOperator);
+            }
+
+            // SystemVerilog 12.6: expression matches pattern (binary, higher precedence than ?:)
+            if (word.Text == "matches")
+            {
+                MatchesOperator? matchesOperator = MatchesOperator.ParseCreate(word, nameSpace);
+                if (matchesOperator != null) Primaries.Add(matchesOperator);
+            }
 
             if (word.GetCharAt(0) == '?')
             {
@@ -561,12 +582,6 @@ namespace pluginVerilog.Verilog.Expressions
                     }
                     Primaries.Add(TenaryOperator.Create());
                 } while (false);
-            }
-
-            if (word.Text == "inside")
-            {
-                InsideOperator? insideOperator = InsideOperator.ParseCreate(word, nameSpace);
-                if (insideOperator != null) Primaries.Add(insideOperator);
             }
 
             BinaryOperator? binaryOperator = BinaryOperator.ParseCreate(word);

@@ -95,6 +95,10 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
                 associativeArray.NamedElements.Add(builtInMethod.Name, builtInMethod);
             }
 
+            // function void delete( [input index] );  (IEEE 1800-2017 7.9.2)
+            // map.delete(idx) removes one entry, map.delete removes every entry.
+            ArrayMethods.AddDeleteWithOptionalIndex(associativeArray.NamedElements);
+
             return associativeArray;
         }
         /*

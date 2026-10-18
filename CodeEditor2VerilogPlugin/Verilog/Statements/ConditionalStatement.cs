@@ -136,6 +136,7 @@ namespace pluginVerilog.Verilog.Statements
                         word.AddError("illegal conditional expression");
                         return null;
                     }
+
                     if (word.GetCharAt(0) != ')')
                     {
                         word.AddError("( expected");
