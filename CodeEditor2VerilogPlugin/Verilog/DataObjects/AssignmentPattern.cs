@@ -318,16 +318,32 @@ namespace pluginVerilog.Verilog.DataObjects
                }
 
                // assignment_pattern ::= '{ constant_expression { expression { , expression } } }
-               // repetition form : e.g. '{4{1'b0}} / '{N{default}}
+               // repetition form : e.g. '{4{1'b0}} / '{N{default}} / '{2{'{3{4, 5}}}}
+               // the constant_expression before "{" is the repeat count, and the
+               // braced list holds one or more (possibly nested assignment
+               // pattern) elements.
                if (!patternMode && expression != null && word.Text == "{")
                {
                    word.MoveNext();
-                   Expressions.Expression? count = Verilog.Expressions.Expression.ParseCreate(word, nameSpace);
-                   if (count == null)
+                   Expressions.Expression count = expression;
+                   Expressions.Expression? element = Verilog.Expressions.Expression.ParseCreate(word, nameSpace);
+                   if (element == null)
                    {
-                       word.AddError("illegal repetition constant expression");
+                       word.AddError("illegal repetition element expression");
                        word.SkipToKeyword("}");
                        return assignmentPattern;
+                   }
+                   // allow a comma separated element list inside the repetition
+                   while (!word.Eof && word.GetCharAt(0) == ',')
+                   {
+                       word.MoveNext();
+                       Expressions.Expression? extra = Verilog.Expressions.Expression.ParseCreate(word, nameSpace);
+                       if (extra == null)
+                       {
+                           word.AddError("illegal repetition element expression");
+                           word.SkipToKeyword("}");
+                           return assignmentPattern;
+                       }
                    }
                    if (word.Text != "}")
                    {
@@ -336,7 +352,7 @@ namespace pluginVerilog.Verilog.DataObjects
                        return assignmentPattern;
                    }
                    word.MoveNext();
-                   expression = new RepeatedExpression() { Count = count, Element = expression };
+                   expression = new RepeatedExpression() { Count = count, Element = element };
                }
 
                 if (expression == null)
