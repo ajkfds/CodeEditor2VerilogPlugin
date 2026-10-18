@@ -262,6 +262,15 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
 
                             module.NamedElements.Add(constants.Name, constants);
 
+                            // module-scope class members are parsed in prototype
+                            // mode; the real-parse result is discarded, so the
+                            // surviving prototype object must be marked Defined
+                            // here, otherwise a parameter port
+                            // (e.g. "class test_cls #(parameter a = 12);") reports
+                            // "not defined here" through a class object member
+                            // access such as "test_obj.a".
+                            constants.Defined = true;
+
                             module.PortParameterNameList.Add(identifier);
                         }
                     }
