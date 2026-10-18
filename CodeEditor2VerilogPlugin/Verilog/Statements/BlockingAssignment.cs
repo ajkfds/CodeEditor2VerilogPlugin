@@ -140,10 +140,16 @@ namespace pluginVerilog.Verilog.Statements
 
             if (word.Text == "'" && word.NextText == "{")
             {
-                Expressions.AssignmentPattern assignmentPattern = Expressions.AssignmentPattern.ParseCreate(word, nameSpace, false) as Expressions.AssignmentPattern;
+                // use the DataObjects.AssignmentPattern implementation (nested
+                // repetition / keyed / comma list); Expressions.AssignmentPattern
+                // is a legacy stub that only handled the first element and is the
+                // cause of "'; expected'" on nested patterns (e.g. '{2{'{3{...}}}).
                 BlockingAssignment assignment = new BlockingAssignment() { BeginIndexReference=expressionIref};
                 assignment.LValue = lExpression;
+                assignment.Expression = DataObjects.AssignmentPattern.ParseCreate(word, nameSpace, false, false);
                 if (Assigned != null) Assigned(word, nameSpace, assignment);
+                assignment.LastIndexReference = word.CreateIndexReferenceBefore();
+                if (!word.Prototype && word.CompletionContext == null) nameSpace.DocumentRegions.Add(assignment);
                 return assignment;
             }
             else

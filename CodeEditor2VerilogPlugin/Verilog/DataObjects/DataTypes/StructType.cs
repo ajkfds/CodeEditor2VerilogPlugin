@@ -245,8 +245,46 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 List<PackedArray> dimensions = new List<PackedArray>();
                 if (word.Text == "[")
                 {
-                    var packedArray = PackedArray.ParseCreate(word, nameSpace);
-                    if (packedArray != null) dimensions.Add(packedArray);
+                    // struct_union_member ::= data_type_or_void
+                    //   list_of_variable_decl_assignments ;
+                    //   variable_decl_assignment ::=
+                    //     variable_identifier { variable_dimension }
+                    // The dimension after a member identifier is a
+                    // variable_dimension (unpacked / associative / queue), not a
+                    // packed range. A simple "[N]" (e.g. "int b[4];") is an
+                    // unpacked dimension; only "[m:n]" is a packed range. Accept
+                    // both so "int a, b[4];" parses (previously PackedArray
+                    // required ":" and reported ": expected").
+                    WordScanner probe = word.Clone(false);
+                    probe.MoveNext(); // [
+                    bool hasColon = false;
+                    int depth = 0;
+                    while (!probe.Eof)
+                    {
+                        if (probe.Text == "[") depth++;
+                        else if (probe.Text == "]")
+                        {
+                            if (depth == 0) break;
+                            depth--;
+                        }
+                        else if (probe.Text == ":" && depth == 0) { hasColon = true; break; }
+                        probe.MoveNext();
+                    }
+                    probe.Dispose();
+
+                    if (hasColon)
+                    {
+                        var packedArray = PackedArray.ParseCreate(word, nameSpace);
+                        if (packedArray != null) dimensions.Add(packedArray);
+                    }
+                    else
+                    {
+                        // unpacked dimension "[expr]" (accept and consume)
+                        word.MoveNext(); // [
+                        Expressions.Expression? dimExpr = Expressions.Expression.ParseCreate(word, nameSpace);
+                        if (word.Text == "]") word.MoveNext();
+                        else word.AddError("] expected");
+                    }
                 }
 
                 Expressions.Expression? exp = null;
