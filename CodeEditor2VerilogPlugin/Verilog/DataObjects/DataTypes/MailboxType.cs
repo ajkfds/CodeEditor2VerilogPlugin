@@ -45,12 +45,50 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             MailboxType mailboxType = new MailboxType();
             return mailboxType;
         }
+
+        /// <summary>
+        /// Element (message) data type of a parameterized mailbox
+        /// ("mailbox #( string ) m;"), or null for an untyped mailbox.
+        /// </summary>
+        public IDataType? ElementType { get; protected set; } = null;
+
         public static MailboxType ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             MailboxType dType = new MailboxType();
             if (word.Text != "mailbox") throw new Exception();
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
+
+            // parameter_value_assignment : mailbox #( data_type )
+            // IEEE 1800-2017 15.4: mailbox is a parameterized class whose
+            // message (element) type is given as "#( type )".
+            if (word.Text == "#")
+            {
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext(); // #
+                if (word.Text == "(")
+                {
+                    word.MoveNext(); // (
+                    IDataType? elementType = DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, null);
+                    if (elementType != null)
+                    {
+                        dType.ElementType = elementType;
+                    }
+                    if (word.Text == ")")
+                    {
+                        word.MoveNext(); // )
+                    }
+                    else
+                    {
+                        word.AddError(") required");
+                    }
+                }
+                else
+                {
+                    word.AddError("( required");
+                }
+            }
+
             return dType;
         }
        public bool IsVector { get { return false; } }
