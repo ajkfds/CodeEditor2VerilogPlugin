@@ -337,6 +337,20 @@ namespace pluginVerilog
             // Cast task (6.24.2)
             {"$cast",null },
 
+            // Coverage control tasks (20.14)
+            // ($coverage_control / $coverage_get / $coverage_save etc. are
+            //  registered in SystemFunctions for expression use; a statement
+            //  position call such as `$coverage_control(...)` as a task needs a
+            //  task entry as well.)
+            {"$coverage_control",null },
+            {"$coverage_get_max",null },
+            {"$coverage_get",null },
+            {"$coverage_merge",null },
+            {"$coverage_save",null },
+            {"$get_coverage",null },
+            {"$set_coverage_db_name",null },
+            {"$load_coverage_db",null },
+
             // undefined in systemverilog standard
         };
         /*

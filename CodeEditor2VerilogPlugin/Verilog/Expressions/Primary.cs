@@ -200,6 +200,13 @@ number
                     {
                         return Null.ParseCreate(word, nameSpace);
                     }
+                    // top-level scope reference: $root.a.b.c (IEEE 1800-2017 23.8)
+                    if (word.Text == "$root")
+                    {
+                        RootReference? rootRef = RootReference.ParseCreate(word, nameSpace);
+                        if (rootRef != null) return rootRef;
+                    }
+
                     // dollar primitive
                     if (word.Text == "$")
                     {
