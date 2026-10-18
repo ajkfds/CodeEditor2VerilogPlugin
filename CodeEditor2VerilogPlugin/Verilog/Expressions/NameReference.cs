@@ -21,9 +21,29 @@ namespace pluginVerilog.Verilog.Expressions
         private List<List<Verilog.Expressions.RangeExpression>?> Ranges = new List<List<Expressions.RangeExpression>?>();
         private List<WordReference> WordReferences = new List<WordReference>();
 
+        /// <summary>
+        /// escaped identifiers (e.g. "\cpu3") may also be referenced by their
+        /// non-escaped name (IEEE 1800-2017 5.6.1). Returns true when either the
+        /// raw name or its escaped / non-escaped counterpart is a key of the
+        /// name space's NamedElements.
+        /// </summary>
+        private static bool ContainsNamedElement(INamedElement nameSpace, string name)
+        {
+            if (nameSpace.NamedElements.ContainsKey(name)) return true;
+            if (name.Length > 0 && name[0] == '\\')
+            {
+                if (nameSpace.NamedElements.ContainsKey(name.Substring(1))) return true;
+            }
+            else
+            {
+                if (nameSpace.NamedElements.ContainsKey("\\" + name)) return true;
+            }
+            return false;
+        }
+
         private NameSpace? searchNameSpaceUpward(string name,NameSpace nameSpace)
         {
-            if (nameSpace.NamedElements.ContainsKey(name))
+            if (ContainsNamedElement(nameSpace, name))
             {
                 return nameSpace;
             }
@@ -37,7 +57,7 @@ namespace pluginVerilog.Verilog.Expressions
 
         private NameSpace? searchNameSpaceDownward(string name, NameSpace nameSpace)
         {
-            if (nameSpace.NamedElements.ContainsKey(name))
+            if (ContainsNamedElement(nameSpace, name))
             {
                 return nameSpace;
             }
@@ -158,13 +178,35 @@ namespace pluginVerilog.Verilog.Expressions
             return searchElement(baseNameSpace, index);
         }
 
+        /// <summary>
+        /// Resolves a name against NamedElements, tolerating the escaped /
+        /// non-escaped alias (e.g. element registered as "\cpu3" but referenced
+        /// as "cpu3", or vice versa; IEEE 1800-2017 5.6.1).
+        /// </summary>
+        private static INamedElement? GetNamedElement(INamedElement nameSpace, string name)
+        {
+            if (nameSpace.NamedElements.ContainsKey(name)) return nameSpace.NamedElements[name];
+            if (name.Length > 0 && name[0] == '\\')
+            {
+                string alt = name.Substring(1);
+                if (nameSpace.NamedElements.ContainsKey(alt)) return nameSpace.NamedElements[alt];
+            }
+            else
+            {
+                string alt = "\\" + name;
+                if (nameSpace.NamedElements.ContainsKey(alt)) return nameSpace.NamedElements[alt];
+            }
+            return null;
+        }
+
         private (INamedElement?, INamedElement?) searchElement(INamedElement nameSpace,int index)
         {
             string name = Names[index];
 
-            if (nameSpace.NamedElements.ContainsKey(name))
+            INamedElement? resolvedElement = GetNamedElement(nameSpace, name);
+            if (resolvedElement != null)
             {
-                INamedElement namedElement = nameSpace.NamedElements[name];
+                INamedElement namedElement = resolvedElement;
                 index++;
                 if (index >= Names.Count) return (namedElement, nameSpace);
                 NameSpace? subNameSpace = namedElement as NameSpace;
