@@ -252,6 +252,13 @@ number
                         return ProcessClassReference.ParseCreate(word, nameSpace);
                     }
 
+                    // std::randomize( ... ) [ with { constraint_block } ] (IEEE 1800-2017 18.12)
+                    if (word.Text == "std" && word.NextText == "::")
+                    {
+                        StdRandomizeCall? stdRandomize = StdRandomizeCall.ParseCreate(word, nameSpace);
+                        if (stdRandomize != null) return stdRandomize;
+                    }
+
                     // keyword
                     if (General.ListOfKeywords.Contains(word.Text))
                     {
