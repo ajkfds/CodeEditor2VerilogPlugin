@@ -680,6 +680,12 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                     else
                     {
                         nameSpace.NamedElements.Add(constants.Name, constants);
+                        // module-scope class members are parsed in prototype mode and
+                        // the real-parse result is discarded, so the surviving prototype
+                        // object must be marked Defined here; otherwise references through
+                        // a class scope (e.g. "par_cls#()::b") report "not defined here"
+                        // (same convention as variables / enum constants).
+                        constants.Defined = true;
                     }
                 }
                 else if (word.CompletionContext != null)
