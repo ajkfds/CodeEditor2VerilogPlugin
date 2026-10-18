@@ -383,6 +383,15 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 // create assigned map if variable_dimension is generated only from unpackedarrays
                 if (unpackedArrays != null)
                 {
+                    // a fixed-size unpacked array exposes the section 7.12 array
+                    // manipulation methods (sum / product / find / ...) exactly
+                    // like queue / dynamic / associative arrays (IEEE 1800-2017 7.12)
+                    if (unpackedArrays.Count != 0)
+                    {
+                        Arrays.ArrayMethods.AppendArrayLocatorMethods(variable.NamedElements, variable);
+                        Arrays.ArrayMethods.AddSizeOrNum(variable.NamedElements, "size");
+                    }
+
                     if (dataType is IntegerAtomType)
                     {
                         if (dataType.BitWidth == null) throw new Exception();
