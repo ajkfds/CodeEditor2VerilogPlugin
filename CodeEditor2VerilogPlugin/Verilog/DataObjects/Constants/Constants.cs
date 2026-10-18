@@ -463,6 +463,84 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
             }
         }
 
+        /// <summary>
+        /// parameter/localparam type list_of_type_assignments inside a class /
+        /// name space (ClassItem path). Registers each type_identifier as a
+        /// Typedef on the given name space (same convention as
+        /// ParseCreateTypeAssignmentsForPort but for the class-item form, which
+        /// receives a NameSpace instead of an IModuleOrInterfaceOrProgram).
+        /// word is positioned on the "type" keyword.
+        /// </summary>
+        public static void ParseCreateTypeAssignments(WordScanner word, NameSpace nameSpace)
+        {
+            if (word.Text == "type")
+            {
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext();
+            }
+            while (!word.Eof)
+            {
+                if (!General.IsIdentifier(word.Text)) break;
+                string identifier = word.Text;
+                WordReference nameReference = word.GetReference();
+                word.Color(CodeDrawStyle.ColorType.Parameter);
+                word.MoveNext();
+
+                IDataType? typeDataType = null;
+                if (word.Text == "=")
+                {
+                    word.MoveNext();
+                    typeDataType = DataObjects.DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, null);
+                    if (typeDataType == null)
+                    {
+                        word.AddError("data type expected");
+                        break;
+                    }
+                }
+
+                if (word.Active)
+                {
+                    if (word.CompletionContext != null)
+                    {
+                        // do not update building block tree @ code completion partial parse
+                    }
+                    else if (word.Prototype)
+                    {
+                        if (!nameSpace.NamedElements.ContainsKey(identifier))
+                        {
+                            if (typeDataType == null)
+                            {
+                                typeDataType = new DataObjects.DataTypes.TypeReference(null, null);
+                            }
+                            Typedef typeDef = new Typedef() { Name = identifier, VariableType = typeDataType };
+                            nameSpace.NamedElements.Add(identifier, typeDef);
+                        }
+                    }
+                    else
+                    {
+                        if (!nameSpace.NamedElements.ContainsKey(identifier) && typeDataType != null)
+                        {
+                            Typedef typeDef = new Typedef() { Name = identifier, VariableType = typeDataType };
+                            nameSpace.NamedElements.Add(identifier, typeDef);
+                        }
+                    }
+                }
+                if (word.Text != ",") break;
+                word.MoveNext();
+            }
+
+            if (word.Text == ";")
+            {
+                word.MoveNext();
+            }
+            else
+            {
+                word.AddError("; expected");
+                word.SkipToKeyword(";");
+                if (word.Text == ";") word.MoveNext();
+            }
+        }
+
         private static readonly HashSet<string> dataTypeStartKeywords = new HashSet<string>()
         {
             "bit", "logic", "reg",
@@ -550,6 +628,18 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
 
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
+
+            // parameter/localparam type list_of_type_assignments
+            // (IEEE 1800-2017 6.20.2 / A.2.1.1)
+            //   parameter_declaration   ::= "parameter" "type" list_of_type_assignments
+            //   local_parameter_declaration ::= "localparam" "type" list_of_type_assignments
+            // A "type" keyword that is NOT followed by "(" is the type-parameter
+            // form (e.g. "parameter type AT = int"), not a "type(...)" reference.
+            if (word.Text == "type" && word.NextText != "(")
+            {
+                ParseCreateTypeAssignments(word, nameSpace);
+                return;
+            }
 
             IDataType? dataType = null;
             if(word.NextText != "=")
