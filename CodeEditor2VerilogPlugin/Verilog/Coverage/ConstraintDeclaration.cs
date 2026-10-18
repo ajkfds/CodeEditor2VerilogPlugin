@@ -146,12 +146,23 @@ namespace pluginVerilog.Verilog.Coverage
             // extern_constraint_declaration ::=
             //   constraint class_identifier :: constraint_identifier { ... }
             // (the out-of-block constraint definition, e.g. "constraint a::c { b == 0; }")
+            // the constraint body is resolved against the named class, so switch
+            // the parse name space to it for the block (otherwise class members
+            // such as "b" report "unfound object").
             if (General.IsIdentifier(word.Text) && word.NextText == "::")
             {
+                string className = word.Text;
                 word.Color(CodeDrawStyle.ColorType.Identifier);
                 word.MoveNext(); // class_identifier
                 word.Color(CodeDrawStyle.ColorType.Keyword);
                 word.MoveNext(); // ::
+
+                INamedElement? classElement = nameSpace.GetNamedElementUpward(className);
+                if (classElement == null) classElement = word.ProjectProperty.UnitNameSpace.Get(className);
+                if (classElement is BuildingBlocks.Class outOfBlockClass)
+                {
+                    nameSpace = outOfBlockClass;
+                }
             }
 
             // constraint_prototype ::= [ "static" ] "constraint" constraint_identifier ;
