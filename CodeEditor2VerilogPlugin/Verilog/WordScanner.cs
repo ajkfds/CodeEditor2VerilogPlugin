@@ -40,7 +40,16 @@ namespace pluginVerilog.Verilog
         public DefaultNetTypeEnum DefaultNetType = WordScanner.DefaultNetTypeEnum.none;
         public CancellationToken? CancellationToken { get; set; }
 
-        public CompletionContext CompletionContext { get; set; } = null;
+        public CompletionContext? CompletionContext { get; set; } = null;
+
+        public bool IsPartialParse
+        {
+            get
+            {
+                if (CompletionContext == null) return true;
+                return false;
+            }
+        }
         public int IndexReferenceOffset
         {
             get { return wordPointer.IndexReferenceOffset; }
@@ -251,6 +260,7 @@ namespace pluginVerilog.Verilog
             if (ReadOnly) return;
             if (RootParsedDocument.SystemVerilog) return;
             if (systemVerilogError) return;
+            if (IsPartialParse) return;
             AddError("SystemVerilog Description");
         }
 
@@ -259,6 +269,7 @@ namespace pluginVerilog.Verilog
             if (ReadOnly) return;
             if (SupressCompilerDerectiveError) return;
             if (prototype) return;
+            if (IsPartialParse) return;
             wordPointer.AddError(message);
         }
 
@@ -267,6 +278,7 @@ namespace pluginVerilog.Verilog
             if (ReadOnly) return;
             if (SupressCompilerDerectiveError) return;
             if (prototype) return;
+            if (IsPartialParse) return;
             wordPointer.AddWarning(message);
         }
 
@@ -274,6 +286,7 @@ namespace pluginVerilog.Verilog
         {
             if (ReadOnly) return;
             if (SupressCompilerDerectiveError) return;
+            if (IsPartialParse) return;
             //            if (prototype) return;
             wordPointer.AddError(message);
         }
@@ -282,6 +295,7 @@ namespace pluginVerilog.Verilog
         {
             if (ReadOnly) return;
             if (SupressCompilerDerectiveError) return;
+            if (IsPartialParse) return;
             //            if (prototype) return;
             wordPointer.AddWarning(message);
         }
@@ -291,6 +305,7 @@ namespace pluginVerilog.Verilog
             if (ReadOnly) return;
             if (SupressCompilerDerectiveError) return;
             if (prototype) return;
+            if (IsPartialParse) return;
             wordPointer.AddNotice(message);
         }
         public void AddHint(string message)
@@ -298,6 +313,7 @@ namespace pluginVerilog.Verilog
             if (ReadOnly) return;
             if (SupressCompilerDerectiveError) return;
             if (prototype) return;
+            if (IsPartialParse) return;
             wordPointer.AddHint(message);
         }
 
@@ -305,23 +321,27 @@ namespace pluginVerilog.Verilog
         {
             if (ReadOnly) return;
             if (SupressCompilerDerectiveError) return;
+            if (IsPartialParse) return;
             ApplyPrototypeRule(rule, "");
         }
         public void ApplyPrototypeRule(Rule rule, string message)
         {
             if (SupressCompilerDerectiveError) return;
             //            if (!prototype) System.Diagnostics.Debugger.Break();
+            if (IsPartialParse) return;
             applyRule(rule, message);
         }
         public void ApplyRule(Rule rule)
         {
             if (SupressCompilerDerectiveError) return;
+            if (IsPartialParse) return;
             ApplyRule(rule, "");
         }
         public void ApplyRule(Rule rule, string message)
         {
             if (SupressCompilerDerectiveError) return;
             if (prototype) return;
+            if (IsPartialParse) return;
             applyRule(rule, message);
         }
         private void applyRule(Rule rule, string message)
