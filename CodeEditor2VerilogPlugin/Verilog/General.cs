@@ -41,7 +41,7 @@ namespace pluginVerilog
         {
             // identifier::= simple_identifier | escaped_identifier
             if (value.Length < 1) return false;
-            if (value[0] == System.IO.Path.DirectorySeparatorChar) return true;  // escaped identifier
+            if (value[0] == '\\') return true;  // escaped identifier
 
             // simple identifier
             int index = 0;
@@ -62,7 +62,7 @@ namespace pluginVerilog
         {
             // escaped_identifier ::= \{Any_ASCII_character_except_white_space} white_space 
             if (value.Length <= 2) return false;
-            if (value[0] != System.IO.Path.DirectorySeparatorChar) return false;
+            if (value[0] != '\\') return false;
             return true;
         }
 
