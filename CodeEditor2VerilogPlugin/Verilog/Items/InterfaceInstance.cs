@@ -136,7 +136,14 @@ namespace pluginVerilog.Verilog.Items
             IndexReference blockBeginIndexReference = word.CreateIndexReference();
 
             string next = word.NextText;
-            if (word.Text != "#" && next != "(" && next != ";" && General.IsIdentifier(word.Text))
+            // interface_instantiation ::= interface_identifier [ parameter_value_assignment ] hierarchical_instance ...
+            // Same check as ModuleInstantiation / ProgramInstantiation: an instance name
+            // must be an identifier followed by "(" / "[" / ";". Requiring the *current*
+            // token to be an identifier hides errors when the token after the interface
+            // name is not an identifier at all (e.g. "AAAAAA.BBBB").
+            bool validInstanceStart = General.IsIdentifier(word.Text) &&
+                (next == "(" || next == "[" || next == ";");
+            if (word.Text != "#" && !validInstanceStart)
             {
                 interfaceIdentifier.AddError("illegal module item");
                 word.SkipToKeyword(";");

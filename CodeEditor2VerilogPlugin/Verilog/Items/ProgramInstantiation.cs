@@ -173,7 +173,14 @@ namespace pluginVerilog.Verilog.Items
             IndexReference blockBeginIndexReference = word.CreateIndexReference();
 
             string next = word.NextText;
-            if (word.Text != "#" && next != "(" && next != ";" && General.IsIdentifier(word.Text))
+            // program_instantiation ::= program_identifier [ parameter_value_assignment ] hierarchical_instance ...
+            // After the program identifier, the next token must be either "#" (parameter_value_assignment)
+            // or an instance name (identifier) followed by "(" / "[" / ";". See ModuleInstantiation for
+            // the equivalent check: requiring the *current* token to be an identifier hides errors when
+            // the token after the name is not an identifier at all (e.g. "AAAAAA.BBBB").
+            bool validInstanceStart = General.IsIdentifier(word.Text) &&
+                (next == "(" || next == "[" || next == ";");
+            if (word.Text != "#" && !validInstanceStart)
             {
                 programIdentifier.AddError("illegal program item");
                 word.SkipToKeyword(";");

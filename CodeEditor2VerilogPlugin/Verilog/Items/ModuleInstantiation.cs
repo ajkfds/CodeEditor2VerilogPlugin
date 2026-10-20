@@ -255,7 +255,19 @@ namespace pluginVerilog.Verilog.Items
 
 
             string next = word.NextText;
-            if (word.Text != "#" && next != "(" && next != ";" && next != "[" && General.IsIdentifier(word.Text))
+            // module_instantiation ::= module_identifier [ parameter_value_assignment ] hierarchical_instance ...
+            // After the module identifier, the next token must be either
+            //   - "#"  (parameter_value_assignment), or
+            //   - an instance name (identifier) followed by "(" / "[" / ";".
+            // Any other token is illegal. Previously the check required that the *current*
+            // token be an identifier (`General.IsIdentifier(word.Text)`), so when the token
+            // after the module name was not an identifier at all (e.g. the "." of a stray
+            // "AAAAAA.BBBB" left in the module body) the condition evaluated to false and the
+            // stray tokens were silently swallowed by the SkipToKeyword(";") inside the loop
+            // below, hiding the error. Require the token to actually start an instance here.
+            bool validInstanceStart = General.IsIdentifier(word.Text) &&
+                (next == "(" || next == "[" || next == ";");
+            if (word.Text != "#" && !validInstanceStart)
             {
                 moduleIdentifier.AddError("illegal module item");
                 word.SkipToKeyword(";");
