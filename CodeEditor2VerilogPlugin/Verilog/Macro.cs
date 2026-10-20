@@ -61,6 +61,12 @@ namespace pluginVerilog.Verilog
         public List<string> ArgumentDefaults = null;   // default value per argument (null = no default), same length as Aurguments when not null
         public string MacroText;
 
+        // source document index of the `define directive that created this macro.
+        // used to distinguish a genuine redefinition (different source location)
+        // from the same directive being re-processed by recheckWord (probe /
+        // Clone side effects), which must not report a duplicate.
+        public int DefineIndex = -1;
+
         // replace whole-word occurrences only (formal argument identifier must not match inside other identifiers, e.g. "a" in "$display")
         public static string ReplaceArgument(string text, string argumentName, string actualText)
         {

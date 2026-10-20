@@ -27,12 +27,31 @@ namespace pluginVerilog.Verilog
             bool systemVerilog, bool supressCompilerDirectiveError,
             bool prototype, int indexReferenceOffset = 0
             )
+            : this(document, parsedDocument, systemVerilog, supressCompilerDirectiveError,
+                   prototype, indexReferenceOffset, false)
+        {
+        }
+
+        /// <summary>
+        /// Constructor used by <see cref="Clone"/>: <paramref name="suppressInitialDirective"/>
+        /// skips the initial recheckWord() so that compiler directives at index 0
+        /// are not processed a second time. The clone replaces wordPointer right
+        /// after construction; processing the leading `define / `undef here would
+        /// run them on the shared ParsedDocument.Macros table again and produce
+        /// spurious "duplicate macro name" errors.
+        /// </summary>
+        internal WordScanner(
+            CodeEditor.CodeDocument document, Verilog.ParsedDocument parsedDocument,
+            bool systemVerilog, bool supressCompilerDirectiveError,
+            bool prototype, int indexReferenceOffset,
+            bool suppressInitialDirective
+            )
         {
             RootParsedDocument = parsedDocument;
             wordPointer = new WordPointer(document, parsedDocument,indexReferenceOffset);
             SupressCompilerDerectiveError = supressCompilerDirectiveError;
             this.prototype = prototype;
-            recheckWord();
+            if (!suppressInitialDirective) recheckWord();
             this.systemVerilog = systemVerilog;
         }
         public bool SupressCompilerDerectiveError { get; set; } = false;
@@ -187,7 +206,7 @@ namespace pluginVerilog.Verilog
         static System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
         public WordScanner Clone(bool supressError)
         {
-            WordScanner ret = new WordScanner(wordPointer.Document, RootParsedDocument, systemVerilog, supressError, prototype);
+            WordScanner ret = new WordScanner(wordPointer.Document, RootParsedDocument, systemVerilog, supressError, prototype, 0, true);
             ret.wordPointer = wordPointer.Clone();
             ret.nonGeneratedCount = nonGeneratedCount;
             ret.prototype = prototype;
@@ -983,13 +1002,31 @@ namespace pluginVerilog.Verilog
             }
 
             Macro macro = Macro.Create(identifier, macroText);
+            macro.DefineIndex = index;
             if (!General.IsIdentifier(macro.Name))
             {
                 if (!SupressCompilerDerectiveError) wordRef.AddError("illegal macro identifier");
             }
             else if (RootParsedDocument.Macros.ContainsKey(macro.Name))
             {
-                if (!SupressCompilerDerectiveError&!prototype) wordRef.AddError("duplicate macro name");
+                // recheckWord() processes compiler directives as a side effect
+                // (NextText probe, MoveNext, the WordScanner.Clone constructor),
+                // so the same `define directive can be processed more than once.
+                // Only report a genuine redefinition, i.e. when the directive
+                // being processed is located strictly after the definition that
+                // is already registered. Re-processing an earlier (or the same)
+                // directive must not report a duplicate. On a genuine
+                // redefinition the entry is replaced so that re-processing the
+                // newer directive does not report a second error.
+                Macro existing = RootParsedDocument.Macros[macro.Name];
+                if (index > existing.DefineIndex)
+                {
+                    if (!SupressCompilerDerectiveError & !prototype)
+                    {
+                        wordRef.AddError("duplicate macro name");
+                    }
+                    RootParsedDocument.Macros[macro.Name] = macro;
+                }
             }
             else
             {
