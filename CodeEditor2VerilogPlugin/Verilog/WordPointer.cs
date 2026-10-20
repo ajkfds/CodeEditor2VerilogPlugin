@@ -169,6 +169,8 @@ namespace pluginVerilog.Verilog
                 commentSkippedPrev = false;
                 index = Document.Length;
                 nextIndex = Document.Length;
+                length = 0;
+                wordType = WordTypeEnum.Eof;
                 return;
             }
 
@@ -178,6 +180,8 @@ namespace pluginVerilog.Verilog
             if (Eof)
             {
                 commentSkippedPrev = false;
+                length = 0;
+                wordType = WordTypeEnum.Eof;
                 return;
             }
 

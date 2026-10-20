@@ -1023,7 +1023,8 @@ namespace pluginVerilog.Verilog
              */
 
             string filePath = null;
-            if (wordPointer.WordType == WordPointer.WordTypeEnum.CompilerDirective)
+            if (wordPointer.WordType == WordPointer.WordTypeEnum.CompilerDirective
+                && wordPointer.Text.Length > 1)
             {
                 // `include `macro(args) : expand the macro in place and use its text
                 // as the file name (IEEE 1800-2017 22.5.1)
@@ -1265,6 +1266,12 @@ namespace pluginVerilog.Verilog
         private void parseMacro()
         {
             Color(CodeDrawStyle.ColorType.Identifier);
+            if (wordPointer.Text.Length <= 1)
+            {
+                if (!SupressCompilerDerectiveError) wordPointer.AddError("unsupported macro call");
+                wordPointer.MoveNext();
+                return;
+            }
             string macroIdentifier = wordPointer.Text.Substring(1);
 
             Macro macro;
