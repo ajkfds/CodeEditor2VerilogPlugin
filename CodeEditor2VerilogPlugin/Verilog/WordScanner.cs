@@ -42,12 +42,17 @@ namespace pluginVerilog.Verilog
 
         public CompletionContext? CompletionContext { get; set; } = null;
 
+        /// <summary>
+        /// True while parsing a partial (autocomplete) document region: the
+        /// partial parse runs with a CompletionContext attached (see
+        /// Verilog.CompletionContext). Errors / warnings must not be reported
+        /// during that parse, they belong to the full parse only.
+        /// </summary>
         public bool IsPartialParse
         {
             get
             {
-                if (CompletionContext == null) return true;
-                return false;
+                return CompletionContext != null;
             }
         }
         public int IndexReferenceOffset
