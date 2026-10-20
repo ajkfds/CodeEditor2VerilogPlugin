@@ -74,8 +74,14 @@ namespace pluginVerilog.Tool
             if (runningParses.TryRemove(cancelKey, out CancellationTokenSource? oldCts))
             {
                 CodeEditor2.Controller.AppendLog("reparseTop : " + textFile.ID, Avalonia.Media.Colors.Red);
-                try { await oldCts.CancelAsync(); } catch (ObjectDisposedException) { }
-                try { oldCts.Dispose(); } catch (ObjectDisposedException) { }
+                // Only request cancellation here. The CTS is owned by the
+                // ParseAsync invocation that created it, which disposes it in
+                // its own finally block. Disposing it from this thread while
+                // the previous parse's worker threads are still using
+                // oldCts.Token causes ObjectDisposedException
+                // ("The CancellationTokenSource has been disposed.") inside
+                // Task.Delay / ThrowIfCancellationRequested.
+                try { oldCts.Cancel(); } catch (ObjectDisposedException) { }
             }
 
             CancellationTokenSource _cts = new CancellationTokenSource();
@@ -172,7 +178,19 @@ namespace pluginVerilog.Tool
                             {
                                 if (token != null)
                                 {
-                                    await Task.Delay(10, (System.Threading.CancellationToken)token);
+                                    try
+                                    {
+                                        await Task.Delay(10, (System.Threading.CancellationToken)token);
+                                    }
+                                    catch (ObjectDisposedException)
+                                    {
+                                        // The CTS backing the token was disposed
+                                        // while this worker was still running
+                                        // (e.g. a newer parse with the same
+                                        // cancelKey cancelled this one). Treat
+                                        // it as cancellation and stop the worker.
+                                        break;
+                                    }
                                 }
                                 else
                                 {
