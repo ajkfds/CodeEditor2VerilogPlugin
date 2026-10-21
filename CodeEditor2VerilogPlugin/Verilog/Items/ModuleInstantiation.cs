@@ -244,9 +244,23 @@ namespace pluginVerilog.Verilog.Items
                 else
                 {
                     word.AddError("unfound module");
-                    word.RootParsedDocument.ReparseRequested = true;
-                    if (!word.RootParsedDocument.UnfoundModules.Contains(moduleName)) word.RootParsedDocument.UnfoundModules.Add(moduleName);
-                    CodeEditor2.Controller.AppendLog("## unfound " + moduleName + " at " + buildingBlock.Name, Avalonia.Media.Colors.Orange);
+                    // Record the unfound reference only on a real (non-prototype),
+                    // non-partial, active parse pass. During the prototype pass the
+                    // sibling (forward-referenced) module definitions are not yet
+                    // registered, so every such module would be wrongly recorded as
+                    // unfound. In a non-generated generate branch (e.g. a
+                    // parameter-driven "generate if" that disables the instance) the
+                    // instantiated module is not required at all. In both cases the
+                    // stale entry stayed in ParsedDocument.UnfoundModules (the Add is
+                    // de-duplicated but never cleared on a later real pass) and
+                    // SimulationSetup.searchHier reported the disabled module as a
+                    // missing module file.
+                    if (!word.Prototype && !word.IsPartialParse && word.Active)
+                    {
+                        word.RootParsedDocument.ReparseRequested = true;
+                        if (!word.RootParsedDocument.UnfoundModules.Contains(moduleName)) word.RootParsedDocument.UnfoundModules.Add(moduleName);
+                        CodeEditor2.Controller.AppendLog("## unfound " + moduleName + " at " + buildingBlock.Name, Avalonia.Media.Colors.Orange);
+                    }
                 }
             }
 
