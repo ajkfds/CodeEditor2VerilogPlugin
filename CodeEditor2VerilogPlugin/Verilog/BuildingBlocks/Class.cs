@@ -429,6 +429,14 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 class_.NamedElements.Add("new", function);
             }
 
+            // A non-virtual (concrete) class that extends a virtual class with a
+            // pure constraint shall implement that constraint. A virtual class
+            // itself is not required to (IEEE 1800-2017 18.5.2).
+            if (class_ != null && !word.Prototype && word.CompletionContext == null)
+            {
+                checkPureConstraintsImplemented(word, class_);
+                checkInterfaceClassMethodNameConflict(word, class_);
+            }
 
             bool added = nameSpace.BuildingBlock.AddOrUpdateBuildingBlock(class_.Name, class_);
             if (!added && word.Prototype)
@@ -437,6 +445,144 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
 
             return class_;
+        }
+
+        /// <summary>
+        /// A pure constraint declared in a virtual (abstract) base class shall be
+        /// implemented (redeclared with a body) by every non-virtual derived
+        /// class (IEEE 1800-2017 18.5.2). Reports each unimplemented pure
+        /// constraint inherited through the extends chain.
+        /// </summary>
+        private static void checkPureConstraintsImplemented(WordScanner word, Class class_)
+        {
+            if (class_.IsVirtual) return;
+
+            Class? current = class_.ExtendedClass;
+            HashSet<string> checkedNames = new HashSet<string>();
+            while (current != null)
+            {
+                foreach (INamedElement element in current.NamedElements.Values)
+                {
+                    if (element is not Coverage.ConstraintDeclaration pureConstraint) continue;
+                    if (!pureConstraint.IsPure) continue;
+                    if (!checkedNames.Add(pureConstraint.Name)) continue;
+
+                    // the derived class implements the constraint by redeclaring
+                    // a non-pure constraint of the same name (a pure redeclaration
+                    // does not satisfy the requirement).
+                    bool implemented = class_.NamedElements.ContainsKey(pureConstraint.Name)
+                        && class_.NamedElements[pureConstraint.Name] is Coverage.ConstraintDeclaration impl
+                        && !impl.IsPure;
+                    if (!implemented)
+                    {
+                        class_.NameReference?.AddError(
+                            "pure constraint '" + pureConstraint.Name + "' must be implemented by non-virtual class");
+                    }
+                }
+                current = current.ExtendedClass;
+            }
+        }
+
+        /// <summary>
+        /// When a class implements several interface classes that declare the
+        /// same method name, the derived class must resolve the conflict with a
+        /// single method that matches every prototype. When the prototypes differ
+        /// (e.g. "void hello()" vs "int hello()"), a single method cannot satisfy
+        /// both, so the name conflict is unresolved and it is an error
+        /// (IEEE 1800-2017 8.26.6.1).
+        /// </summary>
+        private static void checkInterfaceClassMethodNameConflict(WordScanner word, Class class_)
+        {
+            if (class_.ImplementedInterfaceClasses.Count < 2) return;
+
+            // collect method signatures per name across the implemented
+            // interface classes (including their extended interface classes).
+            Dictionary<string, string> firstSignature = new Dictionary<string, string>();
+            Dictionary<string, string> firstOwner = new Dictionary<string, string>();
+            foreach (InterfaceClass iface in class_.ImplementedInterfaceClasses)
+            {
+                foreach (InterfaceClass currentIface in EnumerateInterfaceClassAndBases(iface))
+                {
+                    foreach (INamedElement element in currentIface.NamedElements.Values)
+                    {
+                        if (element is not Function && element is not Task_) continue;
+                        string name = element.Name;
+                        string signature = buildMethodSignature(element);
+                        if (!firstSignature.ContainsKey(name))
+                        {
+                            firstSignature[name] = signature;
+                            firstOwner[name] = currentIface.Name;
+                            continue;
+                        }
+                        if (firstSignature[name] != signature)
+                        {
+                            if (class_.NameReference != null)
+                            {
+                                class_.NameReference.AddError(
+                                    "unresolved interface class method name conflict: '"
+                                    + name + "' declared differently in "
+                                    + firstOwner[name] + " and " + currentIface.Name);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Enumerates an interface class and every interface class it extends
+        /// (breadth-first, cycle-safe).
+        /// </summary>
+        private static IEnumerable<InterfaceClass> EnumerateInterfaceClassAndBases(InterfaceClass iface)
+        {
+            HashSet<InterfaceClass> visited = new HashSet<InterfaceClass>();
+            Queue<InterfaceClass> queue = new Queue<InterfaceClass>();
+            queue.Enqueue(iface);
+            while (queue.Count > 0)
+            {
+                InterfaceClass current = queue.Dequeue();
+                if (!visited.Add(current)) continue;
+                yield return current;
+                foreach (InterfaceClass baseIface in current.ExtendedInterfaceClasses)
+                {
+                    queue.Enqueue(baseIface);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Builds a comparable signature (method kind + return type + port types
+        /// / directions) for a function / task prototype so that two prototypes
+        /// with the same name can be compared.
+        /// </summary>
+        private static string buildMethodSignature(INamedElement element)
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            if (element is Task_)
+            {
+                sb.Append("task ");
+            }
+            else if (element is Function function)
+            {
+                sb.Append("function ");
+                sb.Append(function.ReturnVariable?.DataType?.CreateString() ?? "void");
+                sb.Append(" ");
+            }
+
+            IPortNameSpace? portNameSpace = element as IPortNameSpace;
+            if (portNameSpace != null)
+            {
+                sb.Append("(");
+                foreach (DataObjects.Port port in portNameSpace.PortsList)
+                {
+                    sb.Append(port.Direction.ToString());
+                    sb.Append(" ");
+                    sb.Append(port.DataObject?.DataType?.CreateString() ?? "");
+                    sb.Append(", ");
+                }
+                sb.Append(")");
+            }
+            return sb.ToString();
         }
 
         /*

@@ -321,9 +321,10 @@ namespace pluginVerilog.Verilog.Statements
             bool isDynamicArrayNew = word.Text == "new" && word.NextText == "[";
 
             // If not dynamic array new, try to resolve class reference
+            BuildingBlocks.Class? class_ = null;
             if (!isDynamicArrayNew)
             {
-                BuildingBlocks.Class? class_ = word.ProjectProperty.UnitNameSpace.Get(word.Text) as BuildingBlocks.Class;
+                class_ = word.ProjectProperty.UnitNameSpace.Get(word.Text) as BuildingBlocks.Class;
                 if (class_ != null)
                 {
                     word.Color(CodeDrawStyle.ColorType.Identifier);
@@ -350,6 +351,15 @@ namespace pluginVerilog.Verilog.Statements
             }
 
             if (word.Text != "new") return null;
+
+            // It shall be illegal to instantiate an abstract class (IEEE
+            // 1800-2017 8.21). A class declared "virtual" is abstract and cannot
+            // be constructed ("base_cls obj = new;" is an error), while a
+            // derived non-virtual class may be.
+            if (class_ != null && class_.IsVirtual)
+            {
+                word.AddError("an abstract class shall not be instantiated");
+            }
 
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();

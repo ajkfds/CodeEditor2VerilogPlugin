@@ -25,6 +25,41 @@ namespace pluginVerilog.Verilog
             function_prototype ::= function data_type_or_void function_identifier [ ( [ tf_port_list ] ) ]
              */
             if (word.Eof | word.Text != "pure") return false;
+
+            // "pure constraint c;" : a pure constraint declaration
+            // (IEEE 1800-2017 18.5.2). Parse the constraint_prototype and
+            // register it as pure so that a non-virtual derived class that
+            // fails to implement it can be reported.
+            if (word.NextText == "constraint")
+            {
+                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.MoveNext(); // pure
+                Coverage.ConstraintDeclaration? pureConstraint =
+                    Coverage.ConstraintDeclaration.ParseCreate(word, nameSpace);
+                if (pureConstraint != null)
+                {
+                    pureConstraint.IsPure = true;
+                    if (!word.Prototype && !string.IsNullOrEmpty(pureConstraint.Name))
+                    {
+                        if (!nameSpace.NamedElements.ContainsKey(pureConstraint.Name))
+                        {
+                            nameSpace.NamedElements.Add(pureConstraint.Name, pureConstraint);
+                        }
+                    }
+                }
+                return true;
+            }
+
+            // Pure virtual methods can only be declared in a virtual (abstract)
+            // class (IEEE 1800-2017 8.3 / 8.21). A pure method in a non-virtual
+            // class is illegal.
+            if (nameSpace.BuildingBlock is BuildingBlocks.Class declaringClass
+                && !declaringClass.IsVirtual
+                && !word.Prototype)
+            {
+                word.AddError("pure virtual methods can only be declared in a virtual class");
+            }
+
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 

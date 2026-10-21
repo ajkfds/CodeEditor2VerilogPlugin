@@ -54,6 +54,13 @@ namespace pluginVerilog.Verilog.Coverage
         public bool IsStatic { get; set; }
 
         /// <summary>
+        /// Whether this is a pure constraint ("pure constraint c;"). A pure
+        /// constraint is declared in a virtual (abstract) class and shall be
+        /// implemented by a non-virtual derived class (IEEE 1800-2017 18.5.2).
+        /// </summary>
+        public bool IsPure { get; set; }
+
+        /// <summary>
         /// Constraint items (expressions, if-else, foreach, etc.)
         /// </summary>
         public List<ConstraintItem> Items { get; set; } = new List<ConstraintItem>();
