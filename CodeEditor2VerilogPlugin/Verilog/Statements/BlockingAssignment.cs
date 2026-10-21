@@ -209,6 +209,12 @@ namespace pluginVerilog.Verilog.Statements
             if (!word.Prototype && word.CompletionContext == null && lExpression != null)
             {
                 markProceduralAssignment(lExpression);
+                // it shall be illegal to procedurally assign to a net
+                // (IEEE 1800-2017 10.3 / Table 10-1)
+                if (assignmentOperator == "=")
+                {
+                    checkProceduralNetAssignment(word, lExpression);
+                }
             }
 
             if (lExpression != null)
@@ -255,6 +261,24 @@ namespace pluginVerilog.Verilog.Statements
             {
                 equalPointer.AddError("an integer literal cannot be assigned to an enum variable without a cast");
             }
+        }
+
+        /// <summary>
+        /// A net shall not be procedurally assigned from a procedural context
+        /// (always / initial / task / function); only a "net" variable declared
+        /// with a variable type may be assigned procedurally (IEEE 1800-2017
+        /// 10.3 / Table 10-1).
+        /// </summary>
+        private static void checkProceduralNetAssignment(WordScanner word, Expressions.Expression lExpression)
+        {
+            // The lvalue must resolve to a DataObject that is a net. Non-ANSI
+            // ports declared as "output q;" plus a matching "logic q;" are
+            // re-registered as a variable (the port's DataObject is replaced by
+            // the variable declaration), so the resolved element here is the
+            // current declaration; a plain "wire w;" stays a Net.
+            DataObject? dataObject = Items.ContinuousAssign.getAssignedDataObject(lExpression);
+            if (dataObject is not DataObjects.Nets.Net) return;
+            lExpression.Reference.AddError("it shall be illegal to procedurally assign to a net");
         }
 
         /// <summary>
