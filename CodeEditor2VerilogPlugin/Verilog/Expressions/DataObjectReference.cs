@@ -249,6 +249,21 @@ namespace pluginVerilog.Verilog.Expressions
         // escaped / non-escaped alias. An escaped identifier such as "\cpu3"
         // may be referenced by its non-escaped name "cpu3" (and vice versa)
         // per IEEE 1800-2017 5.6.1.
+        /// <summary>
+        /// True when the data object holds a real (floating point) value, which
+        /// cannot be bit / part selected (IEEE 1800-2017 6.12).
+        /// </summary>
+        private static bool isRealVariable(DataObjects.DataObject dataObject)
+        {
+            DataObjects.DataTypes.IDataType? dataType = dataObject.DataType;
+            if (dataType == null) return false;
+            if (dataType is DataObjects.DataTypes.UserDefinedType userDefinedType)
+            {
+                dataType = userDefinedType.OriginalDataType;
+            }
+            return dataType is DataObjects.DataTypes.RealType;
+        }
+
         private static DataObjects.DataObject? GetDataObject(INamedElement owner, string name)
         {
             if (owner.NamedElements.ContainsDataObject(name))
@@ -512,6 +527,16 @@ namespace pluginVerilog.Verilog.Expressions
                 }
                 val.RangesFromOriginal.Add(rangeExpression);
                 partial = true;
+            }
+
+            // It is illegal to bit / part select a real variable
+            // (IEEE 1800-2017 6.12). handle it before the generic range
+            // handling so that the report is explicit.
+            if (word.Text == "[" && !word.Eof && acceptRange && isRealVariable(originalObject))
+            {
+                word.AddError("illegal bit select on real type");
+                word.SkipToKeywords(new List<string> { "]", ";" });
+                if (word.Text == "]") word.MoveNext();
             }
 
             // acceptRange check is required: ForeachStatement parses the array identifier
