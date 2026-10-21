@@ -132,6 +132,13 @@ namespace pluginVerilog.Verilog.Statements
             assignment.LValue = lExpression;
             assignment.Expression = expression;
 
+            // a procedural assignment shall not be mixed with a continuous
+            // assignment to the same variable (IEEE 1800-2017 6.5)
+            if (!word.Prototype && word.CompletionContext == null && lExpression != null)
+            {
+                markProceduralAssignment(word, lExpression);
+            }
+
             if (!word.Prototype && clockDomains != null && lExpression != null)
             {
                 List<DataObject> dataObjects = new List<DataObject>();
@@ -160,6 +167,23 @@ namespace pluginVerilog.Verilog.Statements
             assignment.LastIndexReference = word.CreateIndexReferenceBefore();
             if (!word.Prototype &&word.CompletionContext == null) nameSpace.DocumentRegions.Add(assignment);
             return assignment;
+        }
+
+        /// <summary>
+        /// Marks the assigned data object as procedurally assigned and reports
+        /// the conflict when it is also the target of a continuous assignment
+        /// (IEEE 1800-2017 6.5).
+        /// </summary>
+        private static void markProceduralAssignment(WordScanner word, Expressions.Expression lExpression)
+        {
+            DataObject? dataObject = Items.ContinuousAssign.getAssignedDataObject(lExpression);
+            if (dataObject == null) return;
+            if (dataObject.ContinuousAssigned)
+            {
+                lExpression.Reference.AddError(
+                    "'" + dataObject.Name + "' is assigned by both a continuous and a procedural assignment");
+            }
+            dataObject.ProceduralAssigned = true;
         }
     }
 

@@ -284,6 +284,22 @@ namespace pluginVerilog.Verilog.DataObjects
 
         public ArraysBoolMap? AssignedMap = null;
 
+        /// <summary>
+        /// True once the data object has been the target of a continuous
+        /// assignment ("assign v = ...") outside a procedural context. It shall
+        /// be an error to have multiple continuous assignments to the same
+        /// variable or net, or to mix continuous and procedural assignments
+        /// (IEEE 1800-2017 6.5 / 10.3).
+        /// </summary>
+        public bool ContinuousAssigned = false;
+
+        /// <summary>
+        /// True once the data object has been the target of a procedural
+        /// assignment (blocking / nonblocking) inside an always / initial /
+        /// task / function block (IEEE 1800-2017 6.5 / 10.3).
+        /// </summary>
+        public bool ProceduralAssigned = false;
+
         public SyncContext SyncContext { get; } = new SyncContext();
 
         public virtual string CreateTypeString()

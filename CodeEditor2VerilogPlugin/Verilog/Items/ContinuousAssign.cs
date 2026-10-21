@@ -23,6 +23,40 @@ namespace pluginVerilog.Verilog.Items
             return true;
         }
 
+        /// <summary>
+        /// Reports an error when a data object is the target of more than one
+        /// continuous assignment, or of both a continuous and a procedural
+        /// assignment (IEEE 1800-2017 6.5). A variable may be driven
+        /// continuously by at most one assignment, and continuous assignments
+        /// shall not be mixed with procedural assignments to the same variable.
+        /// </summary>
+        private static void checkContinuousAssignmentConflict(WordScanner word, Expressions.Expression netLValue)
+        {
+            DataObjects.DataObject? dataObject = getAssignedDataObject(netLValue);
+            if (dataObject == null) return;
+
+            if (dataObject.ProceduralAssigned)
+            {
+                netLValue.Reference.AddError(
+                    "'" + dataObject.Name + "' is assigned by both a continuous and a procedural assignment");
+            }
+            else if (dataObject.ContinuousAssigned)
+            {
+                netLValue.Reference.AddError(
+                    "'" + dataObject.Name + "' has multiple continuous assignments");
+            }
+            dataObject.ContinuousAssigned = true;
+        }
+
+        internal static DataObjects.DataObject? getAssignedDataObject(Expressions.Expression expression)
+        {
+            if (expression is Expressions.DataObjectReference dataObjectReference)
+            {
+                return dataObjectReference.OrigainalDataObject;
+            }
+            return null;
+        }
+
         public static List<ContinuousAssign> ParseCreate(WordScanner word, NameSpace nameSpace, CompletionContext? completionContext = null)
         {
             // continuous_assign::= assign[drive_strength][delay3] list_of_net_assignments;
@@ -65,6 +99,13 @@ namespace pluginVerilog.Verilog.Items
                 {
                     continuousAssign.VariableAssignment = assignment;
                     assignment.NetLValue.AssertAssigned();
+                    // It shall be an error to have multiple continuous
+                    // assignments, or a mixture of continuous and procedural
+                    // assignments, to the same variable (IEEE 1800-2017 6.5).
+                    if (!word.Prototype && word.CompletionContext == null)
+                    {
+                        checkContinuousAssignmentConflict(word, assignment.NetLValue);
+                    }
                 }
                 else
                 {
