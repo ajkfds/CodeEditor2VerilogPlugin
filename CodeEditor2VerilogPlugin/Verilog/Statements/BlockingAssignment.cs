@@ -1,5 +1,6 @@
 using CodeEditor2.CodeEditor.CodeComplete;
 using pluginVerilog.Verilog.DataObjects;
+using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.Expressions;
 using System;
 using System.Collections.Generic;
@@ -114,7 +115,7 @@ namespace pluginVerilog.Verilog.Statements
                     throw new Exception();
             }
             WordReference equalPointer = word.CrateWordReference();
-
+            string assignmentOperator = word.Text;
 
             word.MoveNext();    // <=
 
@@ -198,6 +199,11 @@ namespace pluginVerilog.Verilog.Statements
                 lExpression.SyncContext.PropageteClockDomainFrom(expression.SyncContext, equalPointer, nameSpace.BuildingBlock.SameSync);
             }
 
+            if (!word.Prototype && word.CompletionContext == null && lExpression != null && expression != null)
+            {
+                checkEnumAssignment(equalPointer, assignmentOperator, lExpression, expression);
+            }
+
             if (lExpression != null)
             {
                 BlockingAssignment assignment = new BlockingAssignment() { BeginIndexReference=expressionIref};
@@ -213,6 +219,54 @@ namespace pluginVerilog.Verilog.Statements
             {
                 return null;
             }
+        }
+
+        /// <summary>
+        /// Enum variables enforce strict type checking (IEEE 1800-2017 6.19.3):
+        ///   - a plain integer literal cannot be assigned to an enum variable
+        ///     (an explicit cast is required), and
+        ///   - the assignment / arithmetic assignment operators (+=, -=, ...)
+        ///     are not applicable to enum operands. The ++ / -- operators are
+        ///     legal (they walk the enum items).
+        /// </summary>
+        private static void checkEnumAssignment(
+            WordReference equalPointer, string assignmentOperator,
+            Expressions.Expression lExpression, Expressions.Expression expression)
+        {
+            DataObject? lValueObject = getAssignedEnumVariable(lExpression);
+            if (lValueObject == null) return;
+
+            if (assignmentOperator != "=")
+            {
+                equalPointer.AddError("assignment operator is not applicable to an enum variable");
+                return;
+            }
+
+            // "val = 1;" : an integer literal requires an explicit cast to the
+            // enum type (val = e'(1);)
+            if (expression is Expressions.Number number && number.Constant && !(expression is Expressions.Cast))
+            {
+                equalPointer.AddError("an integer literal cannot be assigned to an enum variable without a cast");
+            }
+        }
+
+        /// <summary>
+        /// Returns the referenced DataObject when the lvalue is (a select of) an
+        /// enum variable, otherwise null.
+        /// </summary>
+        private static DataObject? getAssignedEnumVariable(Expressions.Expression lExpression)
+        {
+            if (lExpression is not Expressions.DataObjectReference dataObjectReference) return null;
+            DataObject? dataObject = dataObjectReference.OrigainalDataObject;
+            if (dataObject == null) return null;
+
+            DataObjects.DataTypes.IDataType? dataType = dataObject.DataType;
+            if (dataType is DataObjects.DataTypes.UserDefinedType userDefinedType)
+            {
+                dataType = userDefinedType.OriginalDataType;
+            }
+            if (dataType is DataObjects.DataTypes.Enum) return dataObject;
+            return null;
         }
 
         /// <summary>

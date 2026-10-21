@@ -486,6 +486,28 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
         }
 
         /// <summary>
+        /// Reports an error when the given constant expression references a
+        /// specparam. A specparam is local to the specify block, so it shall not
+        /// be used to assign a parameter / localparam
+        /// (IEEE 1800-2017 6.20.5).
+        /// </summary>
+        private static void checkSpecparamReference(Expressions.Expression expression)
+        {
+            if (expression.Reference == null) return;
+
+            List<DataObjects.DataObject> referencedObjects = new List<DataObjects.DataObject>();
+            expression.AppendRefrencedDataObjects(referencedObjects);
+            foreach (DataObjects.DataObject referencedObject in referencedObjects)
+            {
+                if (referencedObject is Specparam)
+                {
+                    expression.Reference.AddError("a specparam shall not be used to assign a parameter");
+                    return;
+                }
+            }
+        }
+
+        /// <summary>
         /// parameter/localparam type list_of_type_assignments inside a class /
         /// name space (ClassItem path). Registers each type_identifier as a
         /// Typedef on the given name space (same convention as
@@ -737,6 +759,13 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                     expression.Reference.AddError("should be constant");
                 }
 
+                // A specparam is a specify-block local parameter and shall not
+                // be used to assign a parameter / localparam
+                // (IEEE 1800-2017 6.20.5).
+                if (constantType != ConstantTypeEnum.specparam)
+                {
+                    checkSpecparamReference(expression);
+                }
 
                 Constants constants;
                 switch (constantType)

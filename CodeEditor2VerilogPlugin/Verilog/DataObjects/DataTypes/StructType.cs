@@ -195,6 +195,25 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             return type;
         }
 
+        /// <summary>
+        /// Members of packed structures shall not be assigned individual default
+        /// member values. The same restriction applies to every member of an
+        /// unpacked structure that contains a union (IEEE 1800-2017 7.2.2).
+        /// </summary>
+        private static bool isMemberDefaultValueIllegal(StructType struct_)
+        {
+            if (struct_.Packed) return true;
+            if (struct_.IsUnion) return false;
+            foreach (Member member in struct_.Members.Values)
+            {
+                IDataType memberType = member.DatType;
+                if (memberType is UnionType) return true;
+                if (memberType is UserDefinedType userDefinedType
+                    && userDefinedType.OriginalDataType is UnionType) return true;
+            }
+            return false;
+        }
+
         private static bool parseMembers(StructType struct_, WordScanner word, NameSpace nameSpace)
         {
             /*
@@ -239,6 +258,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             {
                 if (!General.IsSimpleIdentifier(word.Text)) return false;
                 string identifier = word.Text;
+                WordReference memberReference = word.GetReference();
                 if (dataType != null) word.Color(dataType.ColorType);
                 word.MoveNext();
 
@@ -306,6 +326,16 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 {
                     word.MoveNext();    // =
                     exp = Expressions.Expression.ParseCreate(word, nameSpace);
+                }
+
+                // Members of packed structures shall not be assigned individual
+                // default member values (IEEE 1800-2017 7.2.2). The same
+                // restriction applies to all members of an unpacked structure
+                // that contains a union.
+                if (exp != null && !word.Prototype && isMemberDefaultValueIllegal(struct_))
+                {
+                    memberReference.AddError(
+                        "members of packed structures shall not be assigned individual default member values");
                 }
 
                 if (isVoid)

@@ -264,6 +264,36 @@ namespace pluginVerilog.Verilog.Expressions
             return dataType is DataObjects.DataTypes.RealType;
         }
 
+        /// <summary>
+        /// True when the expression is a reference to a real variable (used to
+        /// reject a real value as an index, IEEE 1800-2017 6.12).
+        /// </summary>
+        private static bool isRealExpression(Expressions.Expression? expression)
+        {
+            if (expression is not DataObjectReference dataObjectReference) return false;
+            DataObjects.DataObject? dataObject = dataObjectReference.OrigainalDataObject;
+            if (dataObject == null) return false;
+            return isRealVariable(dataObject);
+        }
+
+        /// <summary>
+        /// Reports an error when the index expression inside "[ ... ]" is a real
+        /// value. The tokens are parsed with a probe so that the normal range
+        /// parse afterwards is unaffected.
+        /// </summary>
+        private static void reportRealIndexOperand(WordScanner word, NameSpace nameSpace)
+        {
+            WordScanner probe = word.Clone(false);
+            probe.MoveNext(); // [
+            Expressions.Expression? indexExpression = Expressions.Expression.ParseCreate(probe, nameSpace);
+            bool isReal = isRealExpression(indexExpression);
+            probe.Dispose();
+            if (isReal)
+            {
+                word.AddError("a real value shall not be used as an index");
+            }
+        }
+
         private static DataObjects.DataObject? GetDataObject(INamedElement owner, string name)
         {
             if (owner.NamedElements.ContainsDataObject(name))
@@ -461,6 +491,9 @@ namespace pluginVerilog.Verilog.Expressions
                     }
                     if (ival.PackedDimensions.Count <= packedArrayIndex) break;
 
+                    // a real value cannot be used as an index (IEEE 1800-2017 6.12)
+                    if (!word.Prototype) reportRealIndexOperand(word, nameSpace);
+
                     RangeExpression? rangeExpression = RangeExpression.ParseCreate(word, nameSpace);
                     if (rangeExpression == null) return null;
                     partial = true;
@@ -538,6 +571,7 @@ namespace pluginVerilog.Verilog.Expressions
                 word.SkipToKeywords(new List<string> { "]", ";" });
                 if (word.Text == "]") word.MoveNext();
             }
+
 
             // acceptRange check is required: ForeachStatement parses the array identifier
             // with acceptRange=false and handles "[ loop_variables ]" itself

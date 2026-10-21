@@ -166,12 +166,32 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         }
 
         /// <summary>
+        /// Returns the source text spanned by the expression. CreateString() is
+        /// not implemented for every primary (e.g. multiple concatenation
+        /// "{32{1'bx}}"), so the original source text is used when available.
+        /// </summary>
+        private static string getExpressionSourceText(Expression expression)
+        {
+            WordReference? reference = expression.Reference;
+            if (reference != null)
+            {
+                CodeEditor.CodeDocument? document = reference.Document;
+                if (document != null && reference.Index >= 0 && reference.Length > 0)
+                {
+                    string text = document.CreateString(reference.Index, reference.Length);
+                    if (!string.IsNullOrEmpty(text)) return text;
+                }
+            }
+            return expression.CreateString() ?? "";
+        }
+
+        /// <summary>
         /// True when the constant expression contains an x / z digit
         /// (e.g. "2'bxx", "{32{1'bx}}").
         /// </summary>
         private static bool containsXOrZ(Expression expression)
         {
-            string text = expression.CreateString();
+            string text = getExpressionSourceText(expression);
             if (string.IsNullOrEmpty(text)) return false;
             foreach (char ch in text)
             {
@@ -232,19 +252,40 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 exp = Expressions.Expression.ParseCreate(word, nameSpace);
             }
 
-            // Enumeration names with x or z assignments are a syntax error when
-            // the enum has no explicit data type or an explicit 2-state base
-            // type (IEEE 1800-2017 6.19.2). Track it so that an unassigned name
-            // following such an item is reported as well.
+            // An enumeration name with an x or z assignment is a syntax error
+            // when the enum has no explicit data type or an explicit 2-state base
+            // type (IEEE 1800-2017 6.19.2).
             if (exp != null && !isFourStateBaseType(enum_.BaseType) && containsXOrZ(exp))
             {
-                wordReference.AddError("enum name shall not have an x or z value with a 2-state base type");
+                if (!word.Prototype) wordReference.AddError("enum name shall not have an x or z value with a 2-state base type");
             }
-            else if (exp == null && containsXOrZItem && !isFourStateBaseType(enum_.BaseType))
+
+            // An unassigned enumerated name that follows an enum name with an x
+            // or z assignment is a syntax error, regardless of the base type
+            // (IEEE 1800-2017 6.19.2).
+            if (exp == null && containsXOrZItem)
             {
-                wordReference.AddError("enum name following an x or z value shall also have a 2-state compatible value");
+                if (!word.Prototype) wordReference.AddError("enum name following an x or z value shall also have an explicit value");
             }
-            containsXOrZItem = exp != null && !isFourStateBaseType(enum_.BaseType) && containsXOrZ(exp);
+            containsXOrZItem = exp != null && containsXOrZ(exp);
+
+            // If the integer value expression is a sized literal constant, its
+            // size shall equal the size of the enum base type, even when the
+            // value is within the representable range (IEEE 1800-2017 6.19.2).
+            // Only built-in integer base types are checked: the width of a
+            // user-defined (typedef) base type is resolved lazily and is not
+            // reliable at this point.
+            if (exp is Number number && number.BitWidth != null
+                && enum_.BitWidth != null
+                && enum_.BaseType != null
+                && enum_.BaseType is not UserDefinedType)
+            {
+                if (!word.Prototype && number.BitWidth != enum_.BitWidth)
+                {
+                    wordReference.AddError("size of the enum value shall match the enum base type size ("
+                        + number.BitWidth + " != " + enum_.BitWidth + ")");
+                }
+            }
 
             if (exp != null)
             {

@@ -75,6 +75,7 @@ namespace pluginVerilog.Verilog.Expressions
                 if (word.Text != "]") return exitWithError(word, nameSpace);
                 RangeExpression range = new RelativeMinusRangeExpression(exp1, exp2);
                 range.WordReference = WordReference.CreateReferenceRange(rangeWordRef, word.CrateWordReference());
+                checkZeroWidthRange(range, word);
                 word.MoveNext();
                 return range;
             }
@@ -86,10 +87,31 @@ namespace pluginVerilog.Verilog.Expressions
                 if (word.Text != "]") return exitWithError(word, nameSpace);
                 RangeExpression range = new RelativePlusRangeExpression(exp1, exp2);
                 range.WordReference = WordReference.CreateReferenceRange(rangeWordRef, word.CrateWordReference());
+                checkZeroWidthRange(range, word);
                 word.MoveNext();
                 return range;
             }
             return exitWithError(word, nameSpace);
+        }
+
+        /// <summary>
+        /// Indexed part-select widths (+: / -:) shall be constant and greater
+        /// than zero (IEEE 1800-2017 11.5.1 / 7.4.3). A zero width slice selects
+        /// no element at all and is illegal.
+        /// </summary>
+        private static void checkZeroWidthRange(RangeExpression range, WordScanner word)
+        {
+            if (word.Prototype) return;
+            if (range is not RelativePlusRangeExpression && range is not RelativeMinusRangeExpression) return;
+
+            Expression? widthExpression = range is RelativePlusRangeExpression plus
+                ? plus.WidthExpression
+                : ((RelativeMinusRangeExpression)range).WidthExpression;
+            if (widthExpression == null) return;
+            if (widthExpression.Constant && widthExpression.Value != null && (int)widthExpression.Value <= 0)
+            {
+                widthExpression.Reference?.AddError("indexed part-select width shall be greater than zero");
+            }
         }
 
         private static RangeExpression? exitWithError(WordScanner word, NameSpace nameSpace)

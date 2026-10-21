@@ -546,6 +546,15 @@ namespace pluginVerilog.Verilog.Expressions
                 index = 0;
             }
 
+            // A based number shall not carry a sign in its value part: the sign
+            // is a separate unary operator ("-8'd6" is legal, "8'd-6" is not)
+            // (IEEE 1800-2017 5.7.1).
+            if (word.GetCharAt(index) == '-' || word.GetCharAt(index) == '+')
+            {
+                word.AddError("illegal negative value in a based number (use -8'd6)");
+                return false;
+            }
+
             if (
                 word.GetCharAt(index) == 'x'
                 || word.GetCharAt(index) == 'X'
