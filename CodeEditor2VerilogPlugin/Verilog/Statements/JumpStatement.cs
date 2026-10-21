@@ -43,6 +43,14 @@ namespace pluginVerilog.Verilog.Statements
                 return jumpStatement;
             }
 
+            // "A function declared as void shall not contain a return statement
+            // that includes an expression" (IEEE 1800-2017 13.4.1). A function's
+            // return variable is null exactly when the function is declared void.
+            if (nameSpace is Verilog.Function enclosingFunction && enclosingFunction.ReturnVariable == null)
+            {
+                word.AddError("void function shall not return a value");
+            }
+
             jumpStatement.Expression = Expressions.Expression.ParseCreate(word, nameSpace);
 
             jumpStatement.LastIndexReference = word.CreateIndexReferenceBefore();
