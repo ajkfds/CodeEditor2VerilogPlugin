@@ -174,7 +174,18 @@ namespace pluginVerilog.Verilog.Items
                     // (class_item ::= "extern" constraint_prototype)
                     if (word.Text == "constraint")
                     {
-                        Coverage.ConstraintDeclaration.ParseCreate(word, nameSpace);
+                        var externConstraint = Coverage.ConstraintDeclaration.ParseCreate(word, nameSpace);
+                        if (externConstraint != null)
+                        {
+                            externConstraint.IsExtern = true;
+                            // register so that the out-of-block definition and the
+                            // "needs to be defined" check (18.5.1) can find it
+                            if (!word.Prototype && !string.IsNullOrEmpty(externConstraint.Name) &&
+                                !nameSpace.NamedElements.ContainsKey(externConstraint.Name))
+                            {
+                                nameSpace.NamedElements.Add(externConstraint.Name, externConstraint);
+                            }
+                        }
                         return true;
                     }
 

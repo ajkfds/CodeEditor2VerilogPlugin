@@ -61,6 +61,36 @@ namespace pluginVerilog.Verilog.Coverage
         public bool IsPure { get; set; }
 
         /// <summary>
+        /// Whether this is an explicit external constraint prototype
+        /// ("extern constraint c;"). It shall be defined outside the class body
+        /// by an out-of-block "constraint class::c { ... }" declaration;
+        /// otherwise it is an error (IEEE 1800-2017 18.5.1).
+        /// </summary>
+        public bool IsExtern { get; set; }
+
+        /// <summary>
+        /// True once the out-of-block definition of an external constraint has
+        /// been parsed. Used to detect an unimplemented extern declaration.
+        /// </summary>
+        public bool IsExternImplemented { get; set; }
+
+        /// <summary>
+        /// Reference to the constraint identifier, used for error reporting.
+        /// </summary>
+        public WordReference? Reference { get; set; }
+
+        /// <summary>
+        /// Reports that an explicit external constraint prototype has no
+        /// out-of-block definition (IEEE 1800-2017 18.5.1).
+        /// </summary>
+        public void AddExternNotDefinedError()
+        {
+            WordReference? reference = Reference;
+            if (reference == null) return;
+            reference.AddError("extern constraint '" + Name + "' is not defined");
+        }
+
+        /// <summary>
         /// Constraint items (expressions, if-else, foreach, etc.)
         /// </summary>
         public List<ConstraintItem> Items { get; set; } = new List<ConstraintItem>();
@@ -156,6 +186,7 @@ namespace pluginVerilog.Verilog.Coverage
             // the constraint body is resolved against the named class, so switch
             // the parse name space to it for the block (otherwise class members
             // such as "b" report "unfound object").
+            bool isOutOfBlockDefinition = false;
             if (General.IsIdentifier(word.Text) && word.NextText == "::")
             {
                 string className = word.Text;
@@ -169,6 +200,7 @@ namespace pluginVerilog.Verilog.Coverage
                 if (classElement is BuildingBlocks.Class outOfBlockClass)
                 {
                     nameSpace = outOfBlockClass;
+                    isOutOfBlockDefinition = true;
                 }
             }
 
@@ -187,10 +219,23 @@ namespace pluginVerilog.Verilog.Coverage
             ConstraintDeclaration constraint = new ConstraintDeclaration
             {
                 Name = word.Text,
-                IsStatic = isStatic
+                IsStatic = isStatic,
+                Reference = word.CrateWordReference()
             };
             word.Color(CodeDrawStyle.ColorType.Identifier);
             word.MoveNext();
+
+            // out-of-block definition: mark the matching extern prototype as
+            // implemented so the "extern constraint needs to be defined" check
+            // (18.5.1) does not fire for it
+            if (isOutOfBlockDefinition && !isPrototype && nameSpace != null)
+            {
+                if (nameSpace.NamedElements.ContainsKey(constraint.Name) &&
+                    nameSpace.NamedElements[constraint.Name] is ConstraintDeclaration proto)
+                {
+                    proto.IsExternImplemented = true;
+                }
+            }
 
             // constraint_prototype : consume the terminating ';' and return without a body
             if (isPrototype)

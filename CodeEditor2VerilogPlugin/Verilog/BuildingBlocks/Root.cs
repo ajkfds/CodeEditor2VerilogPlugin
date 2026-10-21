@@ -136,6 +136,35 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
         }
 
+        /// <summary>
+        /// Verifies that each "extern constraint c;" declared in a class body is
+        /// defined by an out-of-block "constraint class::c { ... }" declaration
+        /// (IEEE 1800-2017 18.5.1). Reports the class-body prototype when its
+        /// definition is missing.
+        /// </summary>
+        private static void checkExternConstraintsImplemented(WordScanner word, ParsedDocument parsedDocument)
+        {
+            if (word.Prototype) return;
+            if (word.CompletionContext != null) return;
+            checkExternConstraintsInNameSpace(parsedDocument.Root);
+        }
+
+        private static void checkExternConstraintsInNameSpace(NameSpace nameSpace)
+        {
+            foreach (INamedElement element in nameSpace.NamedElements.Values)
+            {
+                if (element is Coverage.ConstraintDeclaration constraint &&
+                    constraint.IsExtern && !constraint.IsExternImplemented)
+                {
+                    constraint.AddExternNotDefinedError();
+                }
+                if (element is BuildingBlocks.Class class_)
+                {
+                    checkExternConstraintsInNameSpace(class_);
+                }
+            }
+        }
+
         public static async System.Threading.Tasks.Task<Root> ParseCreateAsync(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
         {
             Root root = new Root()
@@ -214,6 +243,14 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             // 1800-2017 6.18). Checked here so that forward declarations that
             // precede their definition still resolve.
             checkForwardTypedefs(word, parsedDocument);
+
+            // An explicit external constraint ("extern constraint c;") declared
+            // in a class body shall be defined outside the class by an
+            // out-of-block "constraint class::c { ... }" declaration; otherwise
+            // it is an error (IEEE 1800-2017 18.5.1). Checked here so that the
+            // out-of-block definitions (which follow the class body) have been
+            // parsed already.
+            checkExternConstraintsImplemented(word, parsedDocument);
 
             switch (parsedDocument.ParseMode)
             {
