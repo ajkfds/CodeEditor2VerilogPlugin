@@ -121,9 +121,10 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             word.MoveNext(); // "{"
 
             int index = 0;
+            bool containsXOrZItem = false;
             while (!word.Eof | word.Text != "}")
             {
-                if (!parseItem(type, word, nameSpace, ref index)) break;
+                if (!parseItem(type, word, nameSpace, ref index, ref containsXOrZItem)) break;
 
                 if (word.Text == ",")
                 {
@@ -142,7 +143,44 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             return type;
         }
 
-        private static bool parseItem(Enum enum_, WordScanner word, NameSpace nameSpace, ref int index)
+        /// <summary>
+        /// True when the enum base type can represent x / z. The default (int)
+        /// and the 4-state types (logic / reg / integer / time) can; the 2-state
+        /// types (bit / byte / shortint / int / longint) cannot.
+        /// </summary>
+        private static bool isFourStateBaseType(IDataType? baseType)
+        {
+            if (baseType == null) return true; // no explicit base type = int (4-state)
+            DataTypeEnum type = baseType.Type;
+            switch (type)
+            {
+                case DataTypeEnum.Bit:
+                case DataTypeEnum.Byte:
+                case DataTypeEnum.Shortint:
+                case DataTypeEnum.Int:
+                case DataTypeEnum.Longint:
+                    return false;
+                default:
+                    return true;
+            }
+        }
+
+        /// <summary>
+        /// True when the constant expression contains an x / z digit
+        /// (e.g. "2'bxx", "{32{1'bx}}").
+        /// </summary>
+        private static bool containsXOrZ(Expression expression)
+        {
+            string text = expression.CreateString();
+            if (string.IsNullOrEmpty(text)) return false;
+            foreach (char ch in text)
+            {
+                if (ch == 'x' || ch == 'X' || ch == 'z' || ch == 'Z' || ch == '?') return true;
+            }
+            return false;
+        }
+
+        private static bool parseItem(Enum enum_, WordScanner word, NameSpace nameSpace, ref int index, ref bool containsXOrZItem)
         {
             /*
             enum_name_declaration::=
@@ -193,6 +231,20 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 word.MoveNext();    // =
                 exp = Expressions.Expression.ParseCreate(word, nameSpace);
             }
+
+            // Enumeration names with x or z assignments are a syntax error when
+            // the enum has no explicit data type or an explicit 2-state base
+            // type (IEEE 1800-2017 6.19.2). Track it so that an unassigned name
+            // following such an item is reported as well.
+            if (exp != null && !isFourStateBaseType(enum_.BaseType) && containsXOrZ(exp))
+            {
+                wordReference.AddError("enum name shall not have an x or z value with a 2-state base type");
+            }
+            else if (exp == null && containsXOrZItem && !isFourStateBaseType(enum_.BaseType))
+            {
+                wordReference.AddError("enum name following an x or z value shall also have a 2-state compatible value");
+            }
+            containsXOrZItem = exp != null && !isFourStateBaseType(enum_.BaseType) && containsXOrZ(exp);
 
             if (exp != null)
             {

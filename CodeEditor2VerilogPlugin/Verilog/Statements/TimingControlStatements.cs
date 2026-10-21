@@ -314,7 +314,39 @@ namespace pluginVerilog.Verilog.Statements
             {
                 return null;
             }
+
+            // It is illegal to use edge event controls on a real data type
+            // (IEEE 1800-2017 6.12: real variables have no edges).
+            if (eventExpression.EventType != EventTypeEnum.Both)
+            {
+                foreach (DataObjects.DataObject dataObject in getReferencedDataObjects(eventExpression.Expression))
+                {
+                    if (isRealType(dataObject))
+                    {
+                        word.AddError("illegal edge event control on real type");
+                        break;
+                    }
+                }
+            }
             return eventExpression;
+        }
+
+        private static List<DataObjects.DataObject> getReferencedDataObjects(Expressions.Expression expression)
+        {
+            List<DataObjects.DataObject> referencedObjects = new List<DataObjects.DataObject>();
+            expression.AppendRefrencedDataObjects(referencedObjects);
+            return referencedObjects;
+        }
+
+        private static bool isRealType(DataObjects.DataObject dataObject)
+        {
+            DataObjects.DataTypes.IDataType? dataType = dataObject.DataType;
+            if (dataType == null) return false;
+            if (dataType is DataObjects.DataTypes.UserDefinedType userDefinedType)
+            {
+                dataType = userDefinedType.OriginalDataType;
+            }
+            return dataType is DataObjects.DataTypes.RealType;
         }
 
         private static void addClockDomain(Expressions.Expression expression, List<string> clockDomains)
