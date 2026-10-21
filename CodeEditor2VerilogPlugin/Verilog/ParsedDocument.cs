@@ -148,6 +148,23 @@ namespace pluginVerilog.Verilog
         // that live inside instance hierarchies of this file.
         public List<string> BindTargetInstancePaths = new List<string>();
 
+        /// <summary>
+        /// A forward typedef declaration ("typedef identifier ;") seen while
+        /// parsing. The actual data type definition shall be resolved within the
+        /// same local scope; it is an error when the type_identifier does not
+        /// resolve to a data type (IEEE 1800-2017 6.18). Resolved once the whole
+        /// file has been parsed (a forward typedef may precede its definition).
+        /// </summary>
+        public class ForwardTypedefDeclaration
+        {
+            public required string Name { get; init; }
+            public required WordReference Reference { get; init; }
+            public required NameSpace DeclaringNameSpace { get; init; }
+        }
+
+        [JsonIgnore]
+        public List<ForwardTypedefDeclaration> ForwardTypedefs { get; } = new List<ForwardTypedefDeclaration>();
+
         public Dictionary<string, Verilog.Expressions.Expression> ParameterOverrides = new Dictionary<string, Expressions.Expression>();
         public string? TargetBuildingBlockName = null;
 

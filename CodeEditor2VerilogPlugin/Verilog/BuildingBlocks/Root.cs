@@ -115,6 +115,27 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             return null;
         }
 
+        /// <summary>
+        /// Verifies that each forward typedef declaration resolved to a data
+        /// type in the same local scope (IEEE 1800-2017 6.18).
+        /// </summary>
+        private static void checkForwardTypedefs(WordScanner word, ParsedDocument parsedDocument)
+        {
+            if (parsedDocument.ForwardTypedefs.Count == 0) return;
+            foreach (ParsedDocument.ForwardTypedefDeclaration forwardTypedef in parsedDocument.ForwardTypedefs)
+            {
+                NameSpace nameSpace = forwardTypedef.DeclaringNameSpace;
+                if (nameSpace == null) continue;
+                INamedElement? element = nameSpace.GetNamedElementUpward(forwardTypedef.Name);
+                // a Typedef / Class / InterfaceClass is a valid data type
+                if (element is DataObjects.Typedef) continue;
+                if (element is BuildingBlocks.Class) continue;
+                if (element is BuildingBlocks.InterfaceClass) continue;
+                forwardTypedef.Reference.AddError(
+                    "forward typedef '" + forwardTypedef.Name + "' does not resolve to a data type");
+            }
+        }
+
         public static async System.Threading.Tasks.Task<Root> ParseCreateAsync(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
         {
             Root root = new Root()
@@ -186,6 +207,13 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     word.MoveNext();
                 }
             }
+
+            // A forward typedef declaration ("typedef identifier ;") must have a
+            // matching data type definition in the same local scope; otherwise
+            // the type_identifier does not resolve to a data type (IEEE
+            // 1800-2017 6.18). Checked here so that forward declarations that
+            // precede their definition still resolve.
+            checkForwardTypedefs(word, parsedDocument);
 
             switch (parsedDocument.ParseMode)
             {

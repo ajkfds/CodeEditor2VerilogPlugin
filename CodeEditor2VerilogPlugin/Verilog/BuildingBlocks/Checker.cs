@@ -189,7 +189,17 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
 
             // Parse checker items
-            parseCheckerItems(word, checker);
+            // the checker body is a design element: some compiler directives
+            // (e.g. `resetall) are illegal inside of it (IEEE 1800-2017 22.3)
+            word.EnterDesignElement();
+            try
+            {
+                parseCheckerItems(word, checker);
+            }
+            finally
+            {
+                word.ExitDesignElement();
+            }
 
             // endchecker keyword
             if (word.Text == "endchecker")

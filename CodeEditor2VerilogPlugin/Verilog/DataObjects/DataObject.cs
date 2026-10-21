@@ -100,6 +100,19 @@ namespace pluginVerilog.Verilog.DataObjects
         public bool Defined = false;
         public virtual NamedElements NamedElements { get; } = new NamedElements();
 
+        /// <summary>
+        /// Random qualifier of the declaration (IEEE 1800-2017 18.4):
+        /// "rand" / "randc" / null. Only "randc" restricts the constraints
+        /// that may be applied to the variable (18.5.4 dist, 18.5.10 solve
+        /// before, 18.5.14 soft).
+        /// </summary>
+        public string? RandomQualifier { get; set; } = null;
+
+        public bool IsRandc
+        {
+            get { return RandomQualifier == "randc"; }
+        }
+
         public virtual AutocompleteItem CreateAutoCompleteItem()
         {
             return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(

@@ -261,6 +261,31 @@ namespace pluginVerilog.Verilog
                 {
                     // do not update building block tree @ code completion partial parse
                 }
+                else if (word.Prototype
+                         && nameSpace.BuildingBlock.NamedElements.ContainsKey(function.Name)
+                         && nameSpace.BuildingBlock.NamedElements[function.Name] is BuiltInMethod)
+                {
+                    // A root-level class is parsed twice (prototype pass then real
+                    // pass) into the SAME Class instance (see Class.ParseCreate).
+                    // Replacing the implicit built-in method here would hide it from
+                    // the real pass, which is the pass that reports diagnostics.
+                    // Keep the built-in method so the real pass can detect the
+                    // override (IEEE 1800-2017 18.6.3 / 18.8 / 18.9).
+                }
+                else if (nameSpace.BuildingBlock.NamedElements.ContainsKey(function.Name)
+                         && nameSpace.BuildingBlock.NamedElements[function.Name] is BuiltInMethod)
+                {
+                    // The randomization / mode methods (randomize, srandom,
+                    // rand_mode, constraint_mode, get_randstate) are implicit
+                    // built-in methods of a class and shall not be overridden
+                    // (IEEE 1800-2017 18.6.3 / 18.8 / 18.9). pre_randomize /
+                    // post_randomize are user callbacks and may be redefined.
+                    if (BuildingBlocks.Class.IsNonOverridableBuiltInMethod(function.Name))
+                    {
+                        word.AddError("built-in method '" + function.Name + "' cannot be overridden");
+                    }
+                    nameSpace.BuildingBlock.NamedElements.Replace(function.Name, function);
+                }
                 else if (nameSpace.BuildingBlock.NamedElements.ContainsKey(function.Name) && nameSpace.BuildingBlock.NamedElements[function.Name] is Function)
                 {
                     nameSpace.BuildingBlock.NamedElements.Replace(function.Name, function);

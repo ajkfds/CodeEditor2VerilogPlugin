@@ -283,6 +283,52 @@ namespace pluginVerilog.Verilog.Coverage
             return constraint;
         }
 
+        /// <summary>
+        /// Returns true when <paramref name="expression"/> references a randc
+        /// variable (IEEE 1800-2017 18.4). randc variables are solved before
+        /// any other random variable, so several constraint forms are illegal
+        /// on them (dist / soft / solve before).
+        /// </summary>
+        private static bool ReferencesRandcVariable(Expression? expression, NameSpace nameSpace)
+        {
+            if (expression == null || nameSpace == null) return false;
+            if (IsRandcVariable(nameSpace, GetSingleIdentifier(expression))) return true;
+            List<DataObjects.DataObject> referencedObjects = new List<DataObjects.DataObject>();
+            expression.AppendRefrencedDataObjects(referencedObjects);
+            foreach (DataObjects.DataObject dataObject in referencedObjects)
+            {
+                if (dataObject == null) continue;
+                if (dataObject.IsRandc) return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Returns true when the identifier resolves to a randc variable in the
+        /// constraint scope. Used for solve-before lists which are recorded as
+        /// plain names.
+        /// </summary>
+        private static bool IsRandcVariable(NameSpace nameSpace, string identifier)
+        {
+            if (nameSpace == null || string.IsNullOrEmpty(identifier)) return false;
+            INamedElement? element = nameSpace.GetNamedElementUpward(identifier);
+            DataObjects.DataObject? dataObject = element as DataObjects.DataObject;
+            return dataObject != null && dataObject.IsRandc;
+        }
+
+        /// <summary>
+        /// Returns the plain identifier when the expression is a single
+        /// identifier reference (e.g. "b" in "b dist {...}" / "soft b > 4").
+        /// </summary>
+        private static string? GetSingleIdentifier(Expression? expression)
+        {
+            if (expression is not Expressions.DataObjectReference dataObjectReference) return null;
+            if (dataObjectReference.RangesFromOriginal.Count != 0) return null;
+            string? name = dataObjectReference.TargetDataObject?.Name;
+            if (string.IsNullOrEmpty(name)) return null;
+            return name;
+        }
+
         private static ConstraintItem? ParseConstraintItem(WordScanner word, NameSpace nameSpace)
         {
             ConstraintItem item = new ConstraintItem();
@@ -293,6 +339,13 @@ namespace pluginVerilog.Verilog.Coverage
                     item.IsSoft = true;
                     word.Color(CodeDrawStyle.ColorType.Keyword);
                     word.MoveNext();
+                    // Soft constraints may only be applied to rand variables;
+                    // they shall not be specified for randc variables
+                    // (IEEE 1800-2017 18.5.14).
+                    if (General.IsIdentifier(word.Text) && IsRandcVariable(nameSpace, word.Text))
+                    {
+                        word.AddError("a soft constraint shall not be applied to a randc variable");
+                    }
                     // Fall through to expression parsing
                     break;
 
@@ -332,6 +385,12 @@ namespace pluginVerilog.Verilog.Coverage
             // dist_weight ::= ":=" expression | ":/" expression
             if (word.Text == "dist")
             {
+                // distribution shall not be applied to randc variables
+                // (IEEE 1800-2017 18.5.4)
+                if (ReferencesRandcVariable(item.Expression, nameSpace))
+                {
+                    word.AddError("dist shall not be applied to a randc variable");
+                }
                 skipDistList(word);
             }
 
@@ -646,6 +705,13 @@ namespace pluginVerilog.Verilog.Coverage
 
                 while (General.IsIdentifier(word.Text))
                 {
+                    // randc variables are always solved before any other
+                    // random variable, so they shall not be listed after
+                    // "solve ... before" (IEEE 1800-2017 18.5.10).
+                    if (IsRandcVariable(nameSpace, word.Text))
+                    {
+                        word.AddError("a randc variable shall not be used with solve before");
+                    }
                     item.BeforeVariables.Add(word.Text);
                     word.Color(CodeDrawStyle.ColorType.Identifier);
                     word.MoveNext();

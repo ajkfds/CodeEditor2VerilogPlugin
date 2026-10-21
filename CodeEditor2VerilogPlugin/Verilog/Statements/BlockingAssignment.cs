@@ -346,6 +346,16 @@ namespace pluginVerilog.Verilog.Statements
                             DataObjects.Variables.Object? obj = (DataObjects.Variables.Object)dref.TargetDataObject;
                             class_ = obj.GetSourceClass();
                         }
+                        else if (dref.TargetDataObject is DataObjects.Variables.InterfaceClassVariable)
+                        {
+                            // An interface class cannot be instantiated (IEEE
+                            // 1800-2017 8.26.5); only a concrete class that
+                            // implements it may be.
+                            if (!word.Prototype && word.CompletionContext == null)
+                            {
+                                word.AddError("an interface class shall not be instantiated");
+                            }
+                        }
                     }
                 }
             }

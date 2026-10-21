@@ -270,6 +270,17 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         }
         public static bool ParseDeclaration(WordScanner word, NameSpace nameSpace,Action<DataObject>? declared)
         {
+            return ParseDeclaration(word, nameSpace, declared, null);
+        }
+
+        /// <summary>
+        /// Parse a data_declaration.
+        /// <paramref name="randomQualifier"/> carries the already consumed
+        /// class_property random_qualifier ("rand" / "randc") so that the
+        /// declared DataObjects remember it (IEEE 1800-2017 18.4).
+        /// </summary>
+        public static bool ParseDeclaration(WordScanner word, NameSpace nameSpace, Action<DataObject>? declared, string? randomQualifier)
+        {
             // data_declaration::=    [ "const" ] ["var"] [lifetime] data_type_or_implicit list_of_variable_decl_assignments;
             //                      | type_declaration
             //                      | package_import_declaration11
@@ -385,6 +396,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 variable.DefinedNameSpace = nameSpace;
                 if (variable == null) return true;
                 variable.DefinedReference = word.GetReference();
+                if (randomQualifier != null) variable.RandomQualifier = randomQualifier;
 
                 word.Color(variable.ColorType);
                 word.MoveNext();
@@ -614,6 +626,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                         if (preDefined != null)
                         {
                             preDefined.Defined = true;
+                            if (randomQualifier != null) preDefined.RandomQualifier = randomQualifier;
                             variable = preDefined;
                         }
                     }

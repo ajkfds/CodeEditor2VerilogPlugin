@@ -175,28 +175,38 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 macroKeep.Add(kvpair.Key, kvpair.Value);
             }
 
-            if (!word.CellDefine && !protoType)
+            // the interface body is a design element: some compiler directives
+            // (e.g. `resetall) are illegal inside of it (IEEE 1800-2017 22.3)
+            word.EnterDesignElement();
+            try
             {
-                // protptype parse
-                word.Prototype = true;
-                WordScanner prototypeWord = word.Clone(false);
-                word.Prototype = false;
-                // document頭の`* parseによるColor付けを避けるため、prototype modeにしてからCloneする必要がある。
+                if (!word.CellDefine && !protoType)
+                {
+                    // protptype parse
+                    word.Prototype = true;
+                    WordScanner prototypeWord = word.Clone(false);
+                    word.Prototype = false;
+                    // document頭の`* parseによるColor付けを避けるため、prototype modeにしてからCloneする必要がある。
 
-                await parseInterfaceItems(prototypeWord, parameterOverrides, null, interface_);
-                prototypeWord.Dispose();
+                    await parseInterfaceItems(prototypeWord, parameterOverrides, null, interface_);
+                    prototypeWord.Dispose();
 
-                // parse
-                word.RootParsedDocument.Macros = macroKeep;
-//                word = word.Clone(false);
-                await parseInterfaceItems(word, parameterOverrides, null, interface_);
+                    // parse
+                    word.RootParsedDocument.Macros = macroKeep;
+//                    word = word.Clone(false);
+                    await parseInterfaceItems(word, parameterOverrides, null, interface_);
+                }
+                else
+                {
+                    // parse prototype only
+                    word.Prototype = true;
+                    await parseInterfaceItems(word, parameterOverrides, null, interface_);
+                    word.Prototype = false;
+                }
             }
-            else
+            finally
             {
-                // parse prototype only
-                word.Prototype = true;
-                await parseInterfaceItems(word, parameterOverrides, null, interface_);
-                word.Prototype = false;
+                word.ExitDesignElement();
             }
 
 

@@ -136,28 +136,38 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             word.MoveNext();
             module.BlockBeginIndexReference = word.CreateIndexReference();
 
-            if (!word.CellDefine && !protoType)
+            // the module body is a design element: some compiler directives
+            // (e.g. `resetall) are illegal inside of it (IEEE 1800-2017 22.3)
+            word.EnterDesignElement();
+            try
             {
-                // prototype parse
-                word.Prototype = true;
-                WordScanner prototypeWord = word.Clone(false);
-                word.Prototype = false;
-                // document頭の`* parseによるColor付けを避けるため、prototype modeにしてからCloneする必要がある。
+                if (!word.CellDefine && !protoType)
+                {
+                    // prototype parse
+                    word.Prototype = true;
+                    WordScanner prototypeWord = word.Clone(false);
+                    word.Prototype = false;
+                    // document頭の`* parseによるColor付けを避けるため、prototype modeにしてからCloneする必要がある。
 
-                await parseModuleAsync(prototypeWord, parameterOverrides, null, module );
-                prototypeWord.Dispose();
-                word.CheckCancelToken();
+                    await parseModuleAsync(prototypeWord, parameterOverrides, null, module );
+                    prototypeWord.Dispose();
+                    word.CheckCancelToken();
 
-                // parse
-                word.RootParsedDocument.Macros = macroKeep;
-                await parseModuleAsync(word, parameterOverrides, null, module );
+                    // parse
+                    word.RootParsedDocument.Macros = macroKeep;
+                    await parseModuleAsync(word, parameterOverrides, null, module );
+                }
+                else
+                {
+                    // parse prototype only
+                    word.Prototype = true;
+                    await parseModuleAsync(word, parameterOverrides, null, module );
+                    word.Prototype = false;
+                }
             }
-            else
+            finally
             {
-                // parse prototype only
-                word.Prototype = true;
-                await parseModuleAsync(word, parameterOverrides, null, module );
-                word.Prototype = false;
+                word.ExitDesignElement();
             }
 
             // endmodule keyword

@@ -235,7 +235,17 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
 
             // Parse optional declarations (reg, etc.) and table
-            await parsePrimitiveBody(word, primitive);
+            // the primitive body is a design element: some compiler directives
+            // (e.g. `resetall) are illegal inside of it (IEEE 1800-2017 22.3)
+            word.EnterDesignElement();
+            try
+            {
+                await parsePrimitiveBody(word, primitive);
+            }
+            finally
+            {
+                word.ExitDesignElement();
+            }
 
             // endprimitive keyword
             if (word.Text == "endprimitive")

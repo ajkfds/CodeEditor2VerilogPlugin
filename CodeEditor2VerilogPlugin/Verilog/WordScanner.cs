@@ -187,6 +187,29 @@ namespace pluginVerilog.Verilog
             get { return systemVerilog; }
         }
 
+        /// <summary>
+        /// Nesting depth of design elements (module / interface / program /
+        /// package / checker / primitive / class) currently being parsed.
+        /// Some compiler directives are only legal outside of a design element,
+        /// e.g. `resetall (IEEE 1800-2017 22.3).
+        /// </summary>
+        private int designElementDepth = 0;
+
+        public bool InDesignElement
+        {
+            get { return designElementDepth > 0; }
+        }
+
+        public void EnterDesignElement()
+        {
+            designElementDepth++;
+        }
+
+        public void ExitDesignElement()
+        {
+            if (designElementDepth > 0) designElementDepth--;
+        }
+
         public void StartNonGenerated()
         {
             nonGeneratedCount++;
@@ -210,6 +233,7 @@ namespace pluginVerilog.Verilog
             ret.wordPointer = wordPointer.Clone();
             ret.nonGeneratedCount = nonGeneratedCount;
             ret.prototype = prototype;
+            ret.designElementDepth = designElementDepth;
             foreach (var wp in stock)
             {
                 ret.stock.Add(wp.Clone());
@@ -667,6 +691,22 @@ namespace pluginVerilog.Verilog
         }
         private List<ifdefEnum> ifDefList = new List<ifdefEnum>();
 
+        /// <summary>
+        /// Compiler directive names. These are considered predefined macro names,
+        /// so it is illegal to redefine one of them as a macro name with `define
+        /// (IEEE 1800-2017 22.5.1).
+        /// </summary>
+        private static readonly HashSet<string> compilerDirectiveNames = new HashSet<string>
+        {
+            "define", "undef", "undefineall",
+            "ifdef", "ifndef", "elsif", "else", "endif",
+            "include", "resetall", "timescale", "default_nettype",
+            "unconnected_drive", "nounconnected_drive",
+            "celldefine", "endcelldefine", "line", "pragma",
+            "begin_keywords", "end_keywords",
+            "__FILE__", "__LINE__"
+        };
+
         private void parseCompilerDirective()
         {
             switch (wordPointer.Text)
@@ -687,6 +727,13 @@ namespace pluginVerilog.Verilog
                     break;
                 case "`resetall":
                     Color(CodeDrawStyle.ColorType.Keyword);
+                    // `resetall shall not be specified within a design element
+                    // (IEEE 1800-2017 22.3). AddError already suppresses the
+                    // report on prototype / partial (autocomplete) parses.
+                    if (InDesignElement)
+                    {
+                        AddError("`resetall shall not be specified within a design element");
+                    }
                     wordPointer.MoveNext();
                     break;
                 case "`undefineall":
@@ -1035,6 +1082,16 @@ namespace pluginVerilog.Verilog
             if (!General.IsIdentifier(macro.Name))
             {
                 if (!SupressCompilerDerectiveError) wordRef.AddError("illegal macro identifier");
+            }
+            else if (compilerDirectiveNames.Contains(macro.Name))
+            {
+                // All compiler directives are considered predefined macro names;
+                // it shall be illegal to redefine a compiler directive as a macro
+                // name (IEEE 1800-2017 22.5.1).
+                if (!SupressCompilerDerectiveError && !prototype)
+                {
+                    wordRef.AddError("a compiler directive shall not be redefined as a macro name");
+                }
             }
             else if (RootParsedDocument.Macros.ContainsKey(macro.Name))
             {

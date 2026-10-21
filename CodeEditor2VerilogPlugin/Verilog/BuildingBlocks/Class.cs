@@ -80,6 +80,29 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
 
         }
+        /// <summary>
+        /// Returns true when <paramref name="methodName"/> is one of the class
+        /// built-in methods that shall not be overridden by user code (IEEE
+        /// 1800-2017 18.6.3 / 18.8 / 18.9): randomize / srandom / rand_mode /
+        /// constraint_mode / get_randstate. pre_randomize / post_randomize are
+        /// user callbacks and are therefore overridable.
+        /// The list matches the implicit methods registered by the constructor.
+        /// </summary>
+        public static bool IsNonOverridableBuiltInMethod(string methodName)
+        {
+            switch (methodName)
+            {
+                case "randomize":
+                case "srandom":
+                case "rand_mode":
+                case "constraint_mode":
+                case "get_randstate":
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
         public bool Packable
         {
             get { return false; }
@@ -340,24 +363,34 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             if (word.CellDefine) class_.cellDefine = true;
             word.MoveNext();
 
-            if (nameSpace.BuildingBlock is Root)
+            // the class body is a design element: some compiler directives
+            // (e.g. `resetall) are illegal inside of it (IEEE 1800-2017 22.3)
+            word.EnterDesignElement();
+            try
             {
-                // prototype parse
-                word.Prototype = true;
-                WordScanner prototypeWord = word.Clone(false);
-                word.Prototype = false;
-                // document頭の`* parseによるColor付けを避けるため、prototype modeにしてからCloneする必要がある。
+                if (nameSpace.BuildingBlock is Root)
+                {
+                    // prototype parse
+                    word.Prototype = true;
+                    WordScanner prototypeWord = word.Clone(false);
+                    word.Prototype = false;
+                    // document頭の`* parseによるColor付けを避けるため、prototype modeにしてからCloneする必要がある。
 
-                parseClassItems(prototypeWord, nameSpace, parameterOverrides, null, class_);
-                prototypeWord.Dispose();
+                    parseClassItems(prototypeWord, nameSpace, parameterOverrides, null, class_);
+                    prototypeWord.Dispose();
 
-                // parse
-                word.RootParsedDocument.Macros = macroKeep;
-                parseClassItems(word, nameSpace, parameterOverrides, null, class_);
+                    // parse
+                    word.RootParsedDocument.Macros = macroKeep;
+                    parseClassItems(word, nameSpace, parameterOverrides, null, class_);
+                }
+                else
+                {
+                    parseClassItems(word, nameSpace, parameterOverrides, null, class_);
+                }
             }
-            else
+            finally
             {
-                parseClassItems(word, nameSpace, parameterOverrides, null, class_);
+                word.ExitDesignElement();
             }
 
             /*

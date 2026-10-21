@@ -96,7 +96,22 @@ namespace pluginVerilog.Verilog.DataObjects
             else if (General.IsSimpleIdentifier(word.Text) && word.NextText == ";")
             {
                 // forward typedef: "typedef identifier ;"
+                // The actual data type definition shall be resolved within the
+                // same local scope; it is an error when the type_identifier does
+                // not resolve to a data type (IEEE 1800-2017 6.18). The check is
+                // deferred until the whole file has been parsed, because a
+                // forward typedef may precede its definition.
                 word.Color(CodeDrawStyle.ColorType.Identifier);
+                if (!word.Prototype && word.CompletionContext == null)
+                {
+                    word.RootParsedDocument.ForwardTypedefs.Add(
+                        new ParsedDocument.ForwardTypedefDeclaration()
+                        {
+                            Name = word.Text,
+                            Reference = word.GetReference(),
+                            DeclaringNameSpace = nameSpace
+                        });
+                }
                 word.MoveNext(); // identifier
                 word.MoveNext(); // ;
                 return true;

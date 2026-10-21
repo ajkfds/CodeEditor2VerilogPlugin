@@ -258,6 +258,24 @@ namespace pluginVerilog.Verilog.Items
 
                 case "rand":
                 case "randc":
+                    {
+                        // random_qualifier (IEEE 1800-2017 18.4): keep it on the
+                        // declared members so constraint checks (18.5.4 dist /
+                        // 18.5.10 solve before / 18.5.14 soft) can reject
+                        // constraint forms that are not allowed on randc.
+                        string randomQualifier = word.Text;
+                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.MoveNext();
+                        // class_item_qualifier may follow (rand static / rand local ...)
+                        while (word.Text == "static" || word.Text == "protected" || word.Text == "local")
+                        {
+                            word.Color(CodeDrawStyle.ColorType.Keyword);
+                            word.MoveNext();
+                        }
+                        if (DataObjects.Variables.Variable.ParseDeclaration(word, nameSpace, null, randomQualifier)) return true;
+                        Parse(word, nameSpace);
+                        return true;
+                    }
                 case "static":
                 case "protected":
                 case "local":

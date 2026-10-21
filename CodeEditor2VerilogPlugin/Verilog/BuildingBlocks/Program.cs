@@ -132,28 +132,37 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             word.MoveNext();
 
 
-            if (!word.CellDefine && !protoType)
+            // the program body is a design element: some compiler directives
+            // (e.g. `resetall) are illegal inside of it (IEEE 1800-2017 22.3)
+            word.EnterDesignElement();
+            try
             {
-                // prototype parse
-                word.Prototype = true;
-                WordScanner prototypeWord = word.Clone(false);
-                word.Prototype = false;
-                // document頭の`* parseによるColor付けを避けるため、prototype modeにしてからCloneする必要がある。
+                if (!word.CellDefine && !protoType)
+                {
+                    // prototype parse
+                    word.Prototype = true;
+                    WordScanner prototypeWord = word.Clone(false);
+                    word.Prototype = false;
+                    // document頭の`* parseによるColor付けを避けるため、prototype modeにしてからCloneする必要がある。
 
+                    await parseProgramItemsAsync(prototypeWord, parameterOverrides, null, program);
+                    prototypeWord.Dispose();
 
-                await parseProgramItemsAsync(prototypeWord, parameterOverrides, null, program);
-                prototypeWord.Dispose();
-
-                // parse
-                word.RootParsedDocument.Macros = macroKeep;
-                await parseProgramItemsAsync(word, parameterOverrides, null, program);
+                    // parse
+                    word.RootParsedDocument.Macros = macroKeep;
+                    await parseProgramItemsAsync(word, parameterOverrides, null, program);
+                }
+                else
+                {
+                    // parse prototype only
+                    word.Prototype = true;
+                    await parseProgramItemsAsync(word, parameterOverrides, null, program);
+                    word.Prototype = false;
+                }
             }
-            else
+            finally
             {
-                // parse prototype only
-                word.Prototype = true;
-                await parseProgramItemsAsync(word, parameterOverrides, null, program);
-                word.Prototype = false;
+                word.ExitDesignElement();
             }
 
             // endprogram keyword
