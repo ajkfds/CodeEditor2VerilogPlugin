@@ -277,6 +277,20 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                         var packedArray = PackedArray.ParseCreate(word, nameSpace);
                         if (packedArray != null) dimensions.Add(packedArray);
                     }
+                    else if (word.NextText == "*")
+                    {
+                        // unsized_dimension "[*]" (associative array declared
+                        // inside a struct member, IEEE 1800-2017 A.2.5:
+                        // variable_dimension ::= unsized_dimension | ...).
+                        // "int I[*];" previously fell into the expression
+                        // branch and reported "] expected" because "*" is not
+                        // an expression. Consume "[", "*", "]" as a dimension.
+                        word.MoveNext(); // [
+                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.MoveNext(); // *
+                        if (word.Text == "]") word.MoveNext();
+                        else word.AddError("] expected");
+                    }
                     else
                     {
                         // unpacked dimension "[expr]" (accept and consume)

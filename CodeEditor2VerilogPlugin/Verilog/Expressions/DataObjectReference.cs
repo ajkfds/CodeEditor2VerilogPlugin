@@ -245,6 +245,35 @@ namespace pluginVerilog.Verilog.Expressions
         //    return parseCreate(word, nameSpace, owner, assigned, false);
         //}
 
+        // Resolves a DataObject registered under a name, tolerating the
+        // escaped / non-escaped alias. An escaped identifier such as "\cpu3"
+        // may be referenced by its non-escaped name "cpu3" (and vice versa)
+        // per IEEE 1800-2017 5.6.1.
+        private static DataObjects.DataObject? GetDataObject(INamedElement owner, string name)
+        {
+            if (owner.NamedElements.ContainsDataObject(name))
+            {
+                return (DataObjects.DataObject)owner.NamedElements[name];
+            }
+            if (name.Length > 0 && name[0] == '\\')
+            {
+                string alt = name.Substring(1);
+                if (alt.Length > 0 && owner.NamedElements.ContainsDataObject(alt))
+                {
+                    return (DataObjects.DataObject)owner.NamedElements[alt];
+                }
+            }
+            else
+            {
+                string alt = "\\" + name;
+                if (owner.NamedElements.ContainsDataObject(alt))
+                {
+                    return (DataObjects.DataObject)owner.NamedElements[alt];
+                }
+            }
+            return null;
+        }
+
         /// <summary>
         /// Parse and Create DataObject Reference
         /// </summary>
@@ -258,8 +287,8 @@ namespace pluginVerilog.Verilog.Expressions
         /// <exception cref="Exception"></exception>
         public static DataObjectReference? ParseCreate(WordScanner word, NameSpace nameSpace, INamedElement owner, bool assigned, bool acceptRange = true, string? nameSpacePath = null)
         {
-            if (!owner.NamedElements.ContainsDataObject(word.Text)) return null;
-            DataObjects.DataObject originalDataObject = (DataObjects.DataObject)owner.NamedElements[word.Text];
+            DataObjects.DataObject? originalDataObject = GetDataObject(owner, word.Text);
+            if (originalDataObject == null) return null;
 
             DataObjectReference val = new DataObjectReference()
             {

@@ -832,17 +832,42 @@ namespace pluginVerilog.Verilog
                     parseUndef();
                     break;
                 case "`line":
-                    // `line number "filename" level  (rest of the line is a directive argument)
+                    // `line number "filename" level
+                    //   number : positive integer (new line number)
+                    //   filename : string literal
+                    //   level : 0, 1 or 2
+                    // (IEEE 1800-2017 22.12). Each argument is validated so an
+                    // illegal form is reported instead of silently consumed.
                     Color(CodeDrawStyle.ColorType.Keyword);
+                    // MoveNextUntilEol stops on the directive's argument text
+                    // (the whole rest of the line), which parseLineDirective
+                    // then tokenizes and validates.
                     wordPointer.MoveNextUntilEol();
-                    // MoveNextUntilEol stops on the directive's argument text; advance
-                    // to the next token so the caller does not treat the argument line
-                    // as a module item (same pattern as parseUndef / parseDefine).
+                    parseLineDirective();
+                    // advance to the next token so the caller does not treat the
+                    // argument line as a module item (same pattern as
+                    // parseUndef / parseDefine).
                     wordPointer.MoveNext();
                     break;
                 case "`nounconnected_drive":
+                    // `nounconnected_drive takes no argument (IEEE 1800-2017 22.9);
+                    // "`nounconnected_drive pull0" is illegal. The argument text
+                    // (if any) is the remainder of the same line.
+                    // `nounconnected_drive takes no argument (IEEE 1800-2017 22.9).
+                    // The argument, if any, must be on the same line; checking the
+                    // next token's line avoids misreading a following token.
+                    // `nounconnected_drive takes no argument (IEEE 1800-2017 22.9).
+                    // The argument, if any, is on the same line; the following
+                    // token on a new line must not be treated as one.
                     Color(CodeDrawStyle.ColorType.Keyword);
-                    wordPointer.MoveNext();
+                    {
+                        int newlineIndex = getLineEndIndex(wordPointer.Index + wordPointer.Length);
+                        wordPointer.MoveNext();
+                        if (!wordPointer.Eof && wordPointer.Index < newlineIndex)
+                        {
+                            wordPointer.AddError("illegal nounconnected_drive argument");
+                        }
+                    }
                     break;
                 case "`begin_keywords":
                     // `begin_keywords "version"  (directive argument on the same line)
@@ -854,13 +879,17 @@ namespace pluginVerilog.Verilog
                     wordPointer.MoveNext();
                     break;
                 case "`unconnected_drive":
-                    // `unconnected_drive pull0 | pull1  (rest of the line is a directive argument)
+                    // `unconnected_drive pull0 | pull1 (IEEE 1800-2017 22.9).
+                    // Only pull0 / pull1 are legal arguments.
                     Color(CodeDrawStyle.ColorType.Keyword);
                     wordPointer.MoveNextUntilEol();
+                    validateUnconnectedDriveArgument();
                     break;
                 case "`timescale":
+                    // `timescale <time_unit> / <time_precision> (IEEE 1800-2017 22.7)
                     Color(CodeDrawStyle.ColorType.Keyword);
                     wordPointer.MoveNextUntilEol();
+                    validateTimescaleDirective();
                     break;
                 case "`__FILE__":
                     // predefined macro `__FILE__ expands to the file name as a string literal
@@ -1246,6 +1275,156 @@ namespace pluginVerilog.Verilog
                     break;
                 }
             }
+        }
+
+        /// <summary>
+        /// Returns the index of the line terminator at or after <paramref name="index"/>
+        /// (or the document length when the line has no terminator).
+        /// </summary>
+        private int getLineEndIndex(int index)
+        {
+            CodeEditor2.CodeEditor.CodeDocument document = wordPointer.Document;
+            int position = index;
+            while (position < document.Length)
+            {
+                char ch = document.GetCharAt(position);
+                if (ch == '\n' || ch == '\r') return position;
+                position++;
+            }
+            return document.Length;
+        }
+
+        /// <summary>
+        /// Splits the current MoveNextUntilEol token (a whole directive line)
+        /// into whitespace separated argument tokens.
+        /// </summary>
+        private List<string> getDirectiveLineTokens()
+        {
+            var tokens = new List<string>();
+            string line = wordPointer.Text;
+            if (string.IsNullOrEmpty(line)) return tokens;
+            line = line.Replace('\t', ' ');
+            foreach (string token in line.Split(new[] { ' ' }, System.StringSplitOptions.RemoveEmptyEntries))
+            {
+                tokens.Add(token);
+            }
+            return tokens;
+        }
+
+        /// <summary>
+        /// Validates `line number "filename" level (IEEE 1800-2017 22.12).
+        /// Signed values are kept intact (the minus sign is part of the
+        /// number, e.g. "-12"), so the whole line is tokenized directly.
+        /// </summary>
+        private void parseLineDirective()
+        {
+            List<string> tokens = getDirectiveLineTokens();
+            if (tokens.Count < 2)
+            {
+                wordPointer.AddError("illegal line directive: filename expected");
+                return;
+            }
+
+            // number : positive integer
+            if (!int.TryParse(tokens[0], out int number) || number <= 0)
+            {
+                wordPointer.AddError("illegal line directive: number shall be a positive integer");
+            }
+
+            // filename : string literal
+            if (tokens[1].Length < 2 || tokens[1][0] != '"' || tokens[1][tokens[1].Length - 1] != '"')
+            {
+                wordPointer.AddError("illegal line directive: filename shall be a string literal");
+            }
+
+            // level : 0, 1 or 2 (required)
+            if (tokens.Count < 3)
+            {
+                wordPointer.AddError("illegal line directive: level expected");
+            }
+            else if (tokens[2] != "0" && tokens[2] != "1" && tokens[2] != "2")
+            {
+                wordPointer.AddError("illegal line directive: level shall be 0, 1 or 2");
+            }
+        }
+
+        /// <summary>
+        /// Validates `unconnected_drive pull0|pull1 (IEEE 1800-2017 22.9).
+        /// </summary>
+        private void validateUnconnectedDriveArgument()
+        {
+            List<string> tokens = getDirectiveLineTokens();
+            if (tokens.Count != 1 || (tokens[0] != "pull0" && tokens[0] != "pull1"))
+            {
+                wordPointer.AddError("illegal unconnected_drive argument: pull0 or pull1 expected");
+            }
+        }
+
+        private static readonly string[] timescaleUnits = new[] { "s", "ms", "us", "ns", "ps", "fs" };
+
+        /// <summary>
+        /// Validates `timescale <time_unit> / <time_precision> (IEEE 1800-2017 22.7).
+        /// The unit magnitude shall be 1, 10 or 100 and the precision shall be
+        /// at least as precise as the unit.
+        /// </summary>
+        private void validateTimescaleDirective()
+        {
+            // "`timescale 1 ns / 1 ps" tokenizes as [1][ns][/][1][ps]
+            // (a space is allowed between the magnitude and the time unit);
+            // "`timescale 100ps/10ps" is a single [100ps/10ps] token.
+            List<string> tokens = getDirectiveLineTokens();
+            string unitText;
+            string precisionText;
+            if (tokens.Count == 1 && tokens[0].Contains('/'))
+            {
+                int slash = tokens[0].IndexOf('/');
+                unitText = tokens[0].Substring(0, slash);
+                precisionText = tokens[0].Substring(slash + 1);
+            }
+            else if (tokens.Count == 5 && tokens[2] == "/")
+            {
+                unitText = tokens[0] + tokens[1];
+                precisionText = tokens[3] + tokens[4];
+            }
+            else
+            {
+                wordPointer.AddError("illegal timescale directive: <unit> / <precision> expected");
+                return;
+            }
+
+            if (!tryParseTimescale(unitText, out int unitMagnitude, out int unitIndex))
+            {
+                wordPointer.AddError("illegal timescale argument: 1, 10 or 100 with a time unit expected");
+                return;
+            }
+            if (!tryParseTimescale(precisionText, out int precisionMagnitude, out int precisionIndex))
+            {
+                wordPointer.AddError("illegal timescale argument: 1, 10 or 100 with a time unit expected");
+                return;
+            }
+
+            // precision shall not be a longer unit of time than the unit
+            if (precisionIndex < unitIndex ||
+                (precisionIndex == unitIndex && precisionMagnitude > unitMagnitude))
+            {
+                wordPointer.AddError("illegal timescale: precision shall be at least as precise as time_unit");
+            }
+        }
+
+        private static bool tryParseTimescale(string text, out int magnitude, out int unitIndex)
+        {
+            magnitude = 0;
+            unitIndex = -1;
+            if (string.IsNullOrEmpty(text)) return false;
+
+            int index = 0;
+            while (index < text.Length && char.IsDigit(text[index])) index++;
+            if (index == 0) return false;
+            if (!int.TryParse(text.Substring(0, index), out magnitude)) return false;
+            if (magnitude != 1 && magnitude != 10 && magnitude != 100) return false;
+
+            unitIndex = System.Array.IndexOf(timescaleUnits, text.Substring(index));
+            return unitIndex >= 0;
         }
 
         private void parsePredefinedFileMacro()

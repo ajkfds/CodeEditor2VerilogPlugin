@@ -185,6 +185,28 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 {
                     nameSpace.NamedElements.Add(class_.Name, class_);
                 }
+                else if (nameSpace.NamedElements[class_.Name] is Class prototypeClass
+                         && !ReferenceEquals(prototypeClass, class_))
+                {
+                    // A class declared inside a module / interface is parsed
+                    // twice: the enclosing building block's prototype pass
+                    // registers the prototype Class instance and the real pass
+                    // produces a fresh Class instance. Only the prototype
+                    // instance survives in nameSpace.NamedElements, while the
+                    // real instance is the one registered as the building
+                    // block (and used as the name space of the class body).
+                    // Parameter ports / type parameters registered only by the
+                    // prototype pass (e.g. "class c #(int t = 12);") are
+                    // therefore missing from the real instance, which makes a
+                    // member / method body referencing them report
+                    // "unfound object". Carry over the prototype elements that
+                    // the real parse did not (re)create.
+                    foreach (INamedElement prototypeElement in prototypeClass.NamedElements)
+                    {
+                        if (class_.NamedElements.ContainsKey(prototypeElement.Name)) continue;
+                        class_.NamedElements.Add(prototypeElement.Name, prototypeElement);
+                    }
+                }
             }
         }
 
@@ -875,6 +897,24 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     word.AddError("; expected");
                 }
 
+
+                // A class declared inside a module / interface is parsed once per
+                // enclosing building block pass. Parameter ports / type
+                // parameters may have been registered by an earlier pass on a
+                // different Class instance with the same name (e.g. the module's
+                // prototype pass). Carry them over before the body is parsed so
+                // that method bodies referencing them resolve.
+                if (!ReferenceEquals(nameSpace.NamedElements, class_.NamedElements)
+                    && nameSpace.NamedElements.ContainsKey(class_.Name)
+                    && nameSpace.NamedElements[class_.Name] is Class earlierClass
+                    && !ReferenceEquals(earlierClass, class_))
+                {
+                    foreach (INamedElement earlierElement in earlierClass.NamedElements)
+                    {
+                        if (class_.NamedElements.ContainsKey(earlierElement.Name)) continue;
+                        class_.NamedElements.Add(earlierElement.Name, earlierElement);
+                    }
+                }
 
                 while (!word.Eof)
                 {

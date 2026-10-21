@@ -65,6 +65,22 @@ namespace pluginVerilog.Verilog.Property
             
             while (!word.Eof)
             {
+                // Property binary operators ("and" / "or" / "iff" / "until" /
+                // "implies" / ...) must be checked before the sequence expression
+                // parse. "iff" is not a SystemVerilog keyword, so
+                // SequenceExpr / DistExpression would otherwise consume it as a
+                // plain identifier expression and report "unfound object"
+                // (e.g. "assert property (@(posedge clk) a iff b)").
+                if (propertyExpr.SubExpressions.Count != 0)
+                {
+                    var leadingBinaryOp = ParseBinaryOperator(word);
+                    if (leadingBinaryOp != null)
+                    {
+                        propertyExpr.SubExpressions.Add(leadingBinaryOp);
+                        continue;
+                    }
+                }
+
                 // Parse sequence expression (base case)
                 var sequenceExpr = SequenceExpr.ParseCreate(word, nameSpace);
                 if (sequenceExpr != null)

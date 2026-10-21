@@ -281,6 +281,21 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                             Constants? constant = module.NamedElements[identifier] as Constants;
                             if (constant != null) constant.Defined = true;
                         }
+                        else
+                        {
+                            // real-parse pass of a class declared inside a module
+                            // creates a fresh Class instance (only root-scope
+                            // classes reuse the prototype object), so the
+                            // parameter port parsed here is not registered yet.
+                            // Register it; otherwise a member / method body
+                            // referencing the parameter reports "unfound object".
+                            Constants constants = new Parameter() { Name = identifier, Expression = expression, DefinedReference = nameReference };
+                            constants.ConstantType = ConstantTypeEnum.parameter;
+                            constants.DataType = dataType;
+                            constants.Defined = true;
+                            module.NamedElements.Add(constants.Name, constants);
+                            module.PortParameterNameList.Add(identifier);
+                        }
                     }
                 }
                 if (word.Text != ",") break;

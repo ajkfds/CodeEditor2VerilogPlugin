@@ -28,9 +28,22 @@ namespace pluginVerilog.Verilog
         {
             if (wordPointer.Text != "`pragma") throw new Exception();
             wordPointer.Color(CodeDrawStyle.ColorType.Keyword);
+            // pragma_name must be on the same line as the `pragma directive.
+            // Remember where the line ends before advancing so that the first
+            // token of the following line is not mistaken for a pragma_name
+            // (e.g. a bare "`pragma" followed by "wire x;" on the next line).
+            int newlineIndex = wordPointer.Index + wordPointer.Length;
+            while (newlineIndex < wordPointer.Document.Length)
+            {
+                char ch = wordPointer.Document.GetCharAt(newlineIndex);
+                if (ch == '\n' || ch == '\r') break;
+                newlineIndex++;
+            }
             wordPointer.MoveNext();
 
-            if (General.IsIdentifier(wordPointer.Text))
+            if (!wordPointer.Eof
+                && wordPointer.Index < newlineIndex
+                && General.IsIdentifier(wordPointer.Text))
             {   // pragma_name
                 wordPointer.Color(CodeDrawStyle.ColorType.Identifier);
                 wordPointer.MoveNext();

@@ -58,6 +58,19 @@ namespace pluginVerilog.Verilog.Sequence
             
             while (!word.Eof)
             {
+                // Stop before a property-level binary operator. "and"/"or" are
+                // legal sequence operators, but "iff"/"implies"/"until" family
+                // belong to property_expr (IEEE 1800-2017 A.2.10). "iff" is not
+                // a SystemVerilog keyword, so it would otherwise be consumed by
+                // DistExpression as a plain identifier ("unfound object").
+                if (sequenceExpr.SubExpressions.Count != 0 &&
+                    (word.Text == "iff" || word.Text == "implies" ||
+                     word.Text == "until" || word.Text == "s_until" ||
+                     word.Text == "until_with" || word.Text == "s_until_with"))
+                {
+                    break;
+                }
+
                 // Check for clocking event first (e.g., @clk)
                 if (word.Text == "@")
                 {
