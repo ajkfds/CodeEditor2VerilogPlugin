@@ -210,6 +210,28 @@ namespace pluginVerilog.Verilog
             if (designElementDepth > 0) designElementDepth--;
         }
 
+        /// <summary>
+        /// Nesting depth of fork ... join parallel blocks currently being parsed.
+        /// A return / break / continue statement is illegal when it would jump
+        /// out of a fork block (IEEE 1800-2017 9.3.3).
+        /// </summary>
+        private int forkDepth = 0;
+
+        public bool InFork
+        {
+            get { return forkDepth > 0; }
+        }
+
+        public void EnterFork()
+        {
+            forkDepth++;
+        }
+
+        public void ExitFork()
+        {
+            if (forkDepth > 0) forkDepth--;
+        }
+
         public void StartNonGenerated()
         {
             nonGeneratedCount++;
@@ -234,6 +256,7 @@ namespace pluginVerilog.Verilog
             ret.nonGeneratedCount = nonGeneratedCount;
             ret.prototype = prototype;
             ret.designElementDepth = designElementDepth;
+            ret.forkDepth = forkDepth;
             foreach (var wp in stock)
             {
                 ret.stock.Add(wp.Clone());

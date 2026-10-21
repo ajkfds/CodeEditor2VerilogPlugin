@@ -33,6 +33,13 @@ namespace pluginVerilog.Verilog.Statements
         {
             if (word.Text != "return") System.Diagnostics.Debugger.Break();
             ReturnStatement jumpStatement = new ReturnStatement() { BeginIndexReference = word.CreateIndexReference() };
+
+            // return shall not be used within a fork-join block (IEEE 1800-2017 9.3.3)
+            if (word.InFork)
+            {
+                word.AddError("return shall not be used within a fork-join block");
+            }
+
             word.Color(CodeDrawStyle.ColorType.Keyword);
             word.MoveNext();
 

@@ -92,11 +92,19 @@ namespace pluginVerilog.Verilog.Statements
         {
             ParallelBlock sequentialBlock = new ParallelBlock() { BeginIndexReference = beginIndex };
 
-            while (!word.Eof && !join_families.Contains(word.Text))
+            word.EnterFork();
+            try
             {
-                IStatement? statement = Verilog.Statements.Statements.ParseCreateStatement(word, nameSpace);
-                if (statement == null) break;
-                sequentialBlock.Statements.Add(statement);
+                while (!word.Eof && !join_families.Contains(word.Text))
+                {
+                    IStatement? statement = Verilog.Statements.Statements.ParseCreateStatement(word, nameSpace);
+                    if (statement == null) break;
+                    sequentialBlock.Statements.Add(statement);
+                }
+            }
+            finally
+            {
+                word.ExitFork();
             }
             if (!join_families.Contains(word.Text))
             {
@@ -118,11 +126,27 @@ namespace pluginVerilog.Verilog.Statements
                     break;
             }
 
+            reportIllegalJoinInFunction(word, nameSpace, sequentialBlock.JoinType);
+
             word.Color(CodeDrawStyle.ColorType.Keyword);
             sequentialBlock.LastIndexReference = word.CreateIndexReference();
             word.MoveNext(); // end
 
             return sequentialBlock;
+        }
+
+        /// <summary>
+        /// Only fork...join_none is permitted inside a function
+        /// (IEEE 1800-2017 13.4.4). fork...join / fork...join_any inside a
+        /// function is an error.
+        /// </summary>
+        private static void reportIllegalJoinInFunction(WordScanner word, NameSpace nameSpace, JoinVariant joinType)
+        {
+            if (joinType == JoinVariant.JoinNone) return;
+            if (nameSpace is Verilog.Function)
+            {
+                word.AddError("only fork-join_none is permitted inside a function");
+            }
         }
 
         private static List<string> endKeyword = new List<string> { "endmodule", "endtask", "endinterface", "endfunction", "endclass", "endcase", "endprimitive", "else", "endpackage", "endprogram" };
@@ -193,12 +217,20 @@ namespace pluginVerilog.Verilog.Statements
             }
             if (blockIdentifier == null) word.MoveNext();
 
-            while (!word.Eof && !join_families.Contains(word.Text))
+            word.EnterFork();
+            try
             {
-                IStatement? statement = null;
-                statement = Verilog.Statements.Statements.ParseCreateStatement(word, namedBlock);
-                if (statement == null) break;
-                namedBlock.Statements.Add(statement);
+                while (!word.Eof && !join_families.Contains(word.Text))
+                {
+                    IStatement? statement = null;
+                    statement = Verilog.Statements.Statements.ParseCreateStatement(word, namedBlock);
+                    if (statement == null) break;
+                    namedBlock.Statements.Add(statement);
+                }
+            }
+            finally
+            {
+                word.ExitFork();
             }
 
             if (!join_families.Contains(word.Text))
@@ -221,6 +253,8 @@ namespace pluginVerilog.Verilog.Statements
                     namedBlock.JoinType = JoinVariant.JoinNone;
                     break;
             }
+
+            reportIllegalJoinInFunction(word, nameSpace, namedBlock.JoinType);
 
             word.Color(CodeDrawStyle.ColorType.Keyword);
             namedBlock.LastIndexReference = word.CreateIndexReference();
