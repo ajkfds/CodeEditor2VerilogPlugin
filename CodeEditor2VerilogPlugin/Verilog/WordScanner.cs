@@ -1449,28 +1449,26 @@ namespace pluginVerilog.Verilog
         /// </summary>
         private void validateTimescaleDirective()
         {
-            // "`timescale 1 ns / 1 ps" tokenizes as [1][ns][/][1][ps]
-            // (a space is allowed between the magnitude and the time unit);
-            // "`timescale 100ps/10ps" is a single [100ps/10ps] token.
+            // Whitespace is allowed anywhere between the magnitude, the time
+            // unit, the slash and the precision. All of the following are legal
+            // and mean the same thing:
+            //     `timescale 1ns/10ps
+            //     `timescale 1ns / 10ps
+            //     `timescale 1 ns / 10 ps
+            //     `timescale 1ns/ 10ps
+            //     `timescale 1ns /10ps
+            // Therefore the tokens are re-joined with no separator and then
+            // split on the single mandatory '/'.
             List<string> tokens = getDirectiveLineTokens();
-            string unitText;
-            string precisionText;
-            if (tokens.Count == 1 && tokens[0].Contains('/'))
-            {
-                int slash = tokens[0].IndexOf('/');
-                unitText = tokens[0].Substring(0, slash);
-                precisionText = tokens[0].Substring(slash + 1);
-            }
-            else if (tokens.Count == 5 && tokens[2] == "/")
-            {
-                unitText = tokens[0] + tokens[1];
-                precisionText = tokens[3] + tokens[4];
-            }
-            else
+            string joined = string.Concat(tokens);
+            int slash = joined.IndexOf('/');
+            if (slash < 0 || joined.IndexOf('/', slash + 1) >= 0)
             {
                 wordPointer.AddError("illegal timescale directive: <unit> / <precision> expected");
                 return;
             }
+            string unitText = joined.Substring(0, slash);
+            string precisionText = joined.Substring(slash + 1);
 
             if (!tryParseTimescale(unitText, out int unitMagnitude, out int unitIndex))
             {
