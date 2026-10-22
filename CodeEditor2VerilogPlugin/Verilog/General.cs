@@ -147,6 +147,10 @@ namespace pluginVerilog
         public static List<string> ListOfKeywords =
         new List<string> {
             "module", "endmodule",
+            "class", "endclass",
+            "interface", "endinterface",
+            "package", "endpackage",
+            "program", "endprogram",
             
             // module items
             "always",
