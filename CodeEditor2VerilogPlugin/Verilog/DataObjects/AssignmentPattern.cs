@@ -18,6 +18,10 @@ namespace pluginVerilog.Verilog.DataObjects
         array_pattern_key ::= constant_expression | assignment_pattern_key
         
         assignment_pattern_key ::= simple_type | "default"
+        */
+
+        /*
+        constant_assignment_pattern_expression ::= assignment_pattern_expression
 
         assignment_pattern_expression ::=
             [ assignment_pattern_expression_type ] assignment_pattern
@@ -28,10 +32,36 @@ namespace pluginVerilog.Verilog.DataObjects
             | integer_atom_type
             | type_reference
 
-        constant_assignment_pattern_expression ::= assignment_pattern_expression
-         
         simple_type ::= integer_type | non_integer_type | ps_type_identifier | ps_parameter_identifier
-         */
+        */
+
+        /* Expression left-side values
+        
+        net_lvalue ::=
+            ps_or_hierarchical_net_identifier constant_select
+            | { net_lvalue { , net_lvalue } }
+            | [ assignment_pattern_expression_type ] assignment_pattern_net_lvalue
+        
+        variable_lvalue ::=
+            [ implicit_class_handle . | package_scope ] hierarchical_variable_identifier select46
+            | { variable_lvalue { , variable_lvalue } }
+            | [ assignment_pattern_expression_type ] assignment_pattern_variable_lvalue
+            | streaming_concatenation
+
+        nonrange_variable_lvalue ::=
+            [ implicit_class_handle . | package_scope ] hierarchical_variable_identifier nonrange_select  
+        
+        assignment_pattern_variable_lvalue ::=
+            '{ variable_lvalue {, variable_lvalue } }
+
+        左辺（Lvalue）として使用する際の重要な制約ルール
+        代入パターンを左辺で使用する場合、IEEE Std 1800-2017 では以下の制約が定められています。
+        位置指定表記（Positional Notation）が必須:
+        左辺では、member:value や default: などのキー指定構文は使用できず、要素の並び順による位置指定表記（'{a, b, c}）のみが許可されます。
+        ビットストリーム型とビット数の一致:
+        左辺の各要素（a, b, c）は、右辺（または指定された型）の対応する要素と代入互換性があり、かつ同じビット数を持つ bit-stream data type である必要があります。
+        */
+
 
         protected AssignmentPattern()
         {
