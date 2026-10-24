@@ -301,10 +301,21 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
             else
             {
-                if (word.Prototype)
+//                if (word.Prototype)
                 {
-                    word.AddPrototypeError("duplicated module name");
+                    if (module.DefinitionReference != null)
+                    {
+                        module.DefinitionReference.AddError("duplicated module name");
+                    }
+                    else
+                    {
+                        word.AddError("duplicated module name");
+                    }
                 }
+                //if (word.Prototype)
+                //{
+                //    word.AddPrototypeError("duplicated module name");
+                //}
                 // If not prototype, the update is already done by AddOrUpdateBuildingBlock
             }
             // Note: ReparseRequested for ParseMode is now set only once at the end of ParseCreate based on ParseMode
@@ -375,7 +386,17 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
             else
             {
-                word.AddError("duplicated module name");
+                if (word.Prototype)
+                {
+                    if (program.DefinitionReference != null)
+                    {
+                        program.DefinitionReference.AddError("duplicated program name");
+                    }
+                    else
+                    {
+                        word.AddError("duplicated package name");
+                    }
+                }
             }
             // Note: ReparseRequested for ParseMode is now set only once at the end of ParseCreate based on ParseMode
         }
