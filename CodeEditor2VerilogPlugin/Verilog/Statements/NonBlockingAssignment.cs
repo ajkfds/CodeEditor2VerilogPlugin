@@ -95,9 +95,15 @@ namespace pluginVerilog.Verilog.Statements
 
             Expressions.Expression? expression;
 
+            DataObjects.AssignmentPattern? assignmentPattern = null;
             if (word.Text == "'" && word.NextText == "{")
             {
-                expression = Expressions.AssignmentPattern.ParseCreate(word, nameSpace, false);
+                // use the DataObjects.AssignmentPattern implementation (nested
+                // repetition / keyed / comma list) instead of the legacy
+                // Expressions.AssignmentPattern stub, and validate it against the
+                // resolved left-hand-side type.
+                assignmentPattern = DataObjects.AssignmentPattern.ParseCreate(word, nameSpace, false, false);
+                expression = assignmentPattern;
             }
             else
             {
@@ -125,6 +131,12 @@ namespace pluginVerilog.Verilog.Statements
                         expression.Reference
                         );
                     wordReference.AddWarning("bit width mismatch " + lExpression.BitWidth + " <- " + expression.BitWidth);
+                }
+
+                if (assignmentPattern != null && word.CompletionContext == null && lExpression != null)
+                {
+                    // detailed syntax check against the resolved left-hand-side type
+                    assignmentPattern.CheckPattern(word, Items.ContinuousAssign.getAssignedDataObject(lExpression));
                 }
             }
 

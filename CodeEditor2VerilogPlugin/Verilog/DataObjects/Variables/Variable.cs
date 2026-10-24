@@ -533,6 +533,8 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                             {
                                 assigned = true;
                                 checkStructArrayAssignmentPattern(word, variable, exp);
+                                // detailed syntax check against the declared type
+                                (exp as AssignmentPattern)?.CheckPattern(word, variable);
                             }
                         }
                         else

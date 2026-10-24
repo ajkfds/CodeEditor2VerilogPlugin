@@ -243,6 +243,190 @@ namespace pluginVerilog.Verilog.DataObjects
             }
         }
 
+        /// <summary>
+        /// Right-hand-side detailed check of the assignment pattern against the
+        /// resolved left-hand-side data object / data type
+        /// (IEEE 1800-2017 10.9, 7.9.11, 7.2.2, 5.10):
+        ///   - a positional pattern for a structure supplies one element per member,
+        ///   - a keyed pattern uses structure member names (or "default"),
+        ///   - a pattern for an array supplies one element per array element; an
+        ///     associative array pattern uses index / "default" keys, and
+        ///   - a scalar / vector target accepts only a single element.
+        /// Called by the right-hand-side users (blocking / nonblocking assignment,
+        /// variable declaration) with the resolved LHS data object.
+        /// </summary>
+        public void CheckPattern(WordScanner word, DataObject? lhs)
+        {
+            if (word.Prototype || word.CompletionContext != null) return;
+            if (lhs == null) return;
+
+            DataTypes.IDataType? lhsType = lhs.DataType;
+            int guard = 0;
+            while (lhsType is DataTypes.UserDefinedType userDefinedType && guard++ < 32)
+            {
+                lhsType = userDefinedType.OriginalDataType;
+            }
+
+            bool hasUnpackedArray = lhs.UnpackedArrays.Count != 0;
+            bool isAssociativeArray = lhs is Arrays.AssociativeArray;
+            bool isDynamicArray = lhs is Arrays.DynamicArray;
+            bool isQueue = lhs is Arrays.Queue;
+
+            // structure (or union) target, not an array of structures
+            if (lhsType is DataTypes.StructType structType && !hasUnpackedArray)
+            {
+                if (this is AssignmentPatternWithKey structWithKey)
+                {
+                    checkStructurePatternKeys(structWithKey, structType);
+                }
+                else if (this is AssignmentPatternWithoutKey structWithoutKey)
+                {
+                    if (!containsRepetition(structWithoutKey.Expressions)
+                        && structWithoutKey.Expressions.Count != structType.Members.Count)
+                    {
+                        addPatternError(word,
+                            "assignment pattern element count (" + structWithoutKey.Expressions.Count +
+                            ") does not match the structure member count (" + structType.Members.Count + ")");
+                    }
+                }
+                return;
+            }
+
+            // unpacked array / associative array / dynamic array / queue target
+            if (hasUnpackedArray || isAssociativeArray || isDynamicArray || isQueue)
+            {
+                if (this is AssignmentPatternWithKey)
+                {
+                    // A keyed array pattern may use constant_expression index keys
+                    // or assignment_pattern_key ("default" / simple_type)
+                    // (IEEE 1800-2017 10.9), so the keys are not restrited here.
+                }
+                else if (this is AssignmentPatternWithoutKey arrayWithoutKey)
+                {
+                    if (containsRepetition(arrayWithoutKey.Expressions)) return;
+
+                    if (isAssociativeArray)
+                    {
+                        // an associative array assignment pattern is built from
+                        // index / "default" keys, not from positional elements
+                        // (IEEE 1800-2017 7.9.11)
+                        if (arrayWithoutKey.Expressions.Count != 0)
+                        {
+                            addPatternError(word,
+                                "an associative array assignment pattern requires a 'default' or index key");
+                        }
+                        return;
+                    }
+
+                    int? size = null;
+                    if (hasUnpackedArray) size = lhs.UnpackedArrays[0].Size;
+                    else if (lhs is Arrays.Queue queue) size = queue.Size;
+
+                    // an array of structures is validated by the caller
+                    // (Variable.checkStructArrayAssignmentPattern) so that the
+                    // C-like flattened form reports a single diagnostic
+                    bool elementIsStruct = lhsType is DataTypes.StructType;
+                    if (size != null && !elementIsStruct && arrayWithoutKey.Expressions.Count != size)
+                    {
+                        addPatternError(word,
+                            "assignment pattern element count (" + arrayWithoutKey.Expressions.Count +
+                            ") does not match the array size (" + size + ")");
+                    }
+                }
+                return;
+            }
+
+            // scalar / vector target
+            if (this is AssignmentPatternWithoutKey scalarWithoutKey)
+            {
+                if (!containsRepetition(scalarWithoutKey.Expressions) && scalarWithoutKey.Expressions.Count > 1)
+                {
+                    addPatternError(word,
+                        "too many elements in an assignment pattern for a scalar / vector type");
+                }
+            }
+            else if (this is AssignmentPatternWithKey scalarWithKey)
+            {
+                foreach (var keyExpression in scalarWithKey.KeyExpressions)
+                {
+                    if (!IsStructurePatternKeyCandidate(keyExpression.Key)) continue;
+                    keyExpression.KeyReference.AddError(
+                        "illegal assignment pattern key for a scalar / vector type");
+                    break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// assignment_pattern_key ::= simple_type | "default"
+        /// simple_type ::= integer_type | non_integer_type | ps_type_identifier
+        ///               | ps_parameter_identifier
+        /// These keys name a data type rather than a structure member.
+        /// </summary>
+        private static readonly HashSet<string> simpleTypeKeywords = new HashSet<string>()
+        {
+            // integer_vector_type
+            "bit", "logic", "reg",
+            // integer_atom_type
+            "byte", "shortint", "int", "longint", "integer", "time",
+            // non_integer_type
+            "shortreal", "real", "realtime",
+        };
+
+        /// <summary>
+        /// True when the pattern key is a plain member identifier that may serve
+        /// as a structure_pattern_key (member_identifier). Number / bracket index
+        /// keys, "default" and the assignment_pattern_key simple types
+        /// ("int", "bit", ...) are not member identifiers
+        /// (IEEE 1800-2017 10.9).
+        /// </summary>
+        private static bool IsStructurePatternKeyCandidate(string key)
+        {
+            if (key == "default") return false;
+            if (!General.IsSimpleIdentifier(key)) return false;
+            if (General.ListOfKeywords.Contains(key)) return false;
+            if (simpleTypeKeywords.Contains(key)) return false;
+            return true;
+        }
+
+        /// <summary>
+        /// Returns true when the element list contains a repetition form
+        /// ('{ count { element } }), whose element count is intentionally not
+        /// fixed (IEEE 1800-2017 10.9).
+        /// </summary>
+        private static bool containsRepetition(List<Expressions.Expression> expressions)
+        {
+            foreach (Expressions.Expression expression in expressions)
+            {
+                if (expression is RepeatedExpression) return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// A structure_pattern_key shall be a member_identifier or an
+        /// assignment_pattern_key ("default" / simple_type)
+        /// (IEEE 1800-2017 10.9.1).
+        /// </summary>
+        private static void checkStructurePatternKeys(AssignmentPatternWithKey withKey, DataTypes.StructType structType)
+        {
+            foreach (var keyExpression in withKey.KeyExpressions)
+            {
+                // only plain member identifiers are checked; array index keys,
+                // "default" and assignment_pattern_key simple types are legal
+                if (!IsStructurePatternKeyCandidate(keyExpression.Key)) continue;
+                if (structType.Members.ContainsKey(keyExpression.Key)) continue;
+                keyExpression.KeyReference.AddError(
+                    "'" + keyExpression.Key + "' is not a member of the structure type");
+            }
+        }
+
+        private void addPatternError(WordScanner word, string message)
+        {
+            if (Reference != null) Reference.AddError(message);
+            else word.AddError(message);
+        }
+
     }
 
     public class AssignmentPatternWithKey : AssignmentPattern
