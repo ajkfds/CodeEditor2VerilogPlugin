@@ -51,9 +51,6 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             )
         {
             /*
-             * 
-             * 
-            
             package_declaration ::= 
                 { attribute_instance } "package" [ lifetime ] package_identifier ; 
                 [ timeunits_declaration ] { { attribute_instance } package_item } 
