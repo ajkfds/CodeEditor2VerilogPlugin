@@ -145,13 +145,17 @@ namespace pluginVerilog.Verilog.Statements
                 // repetition / keyed / comma list); Expressions.AssignmentPattern
                 // is a legacy stub that only handled the first element and is the
                 // cause of "'; expected'" on nested patterns (e.g. '{2{'{3{...}}}).
+                // The resolved left-hand-side data object is handed over to the
+                // parse so that the detailed syntax check against it is performed
+                // while parsing (not as a later pass).
                 DataObjects.AssignmentPattern? pattern =
-                    DataObjects.AssignmentPattern.ParseCreate(word, nameSpace, false, false);
-                if (!word.Prototype && word.CompletionContext == null)
-                {
-                    // detailed syntax check against the resolved left-hand-side type
-                    pattern?.CheckPattern(word, Items.ContinuousAssign.getAssignedDataObject(lExpression));
-                }
+                    DataObjects.AssignmentPattern.ParseCreate(
+                        word,
+                        nameSpace,
+                        false,
+                        false,
+                        Items.ContinuousAssign.getAssignedDataObject(lExpression)
+                        );
                 BlockingAssignment assignment = new BlockingAssignment() { BeginIndexReference=expressionIref};
                 assignment.LValue = lExpression;
                 assignment.Expression = pattern;

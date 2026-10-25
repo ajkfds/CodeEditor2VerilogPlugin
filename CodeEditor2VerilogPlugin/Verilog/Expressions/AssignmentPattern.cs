@@ -58,11 +58,6 @@ namespace pluginVerilog.Verilog.Expressions
 
             return assignmentPattern;
         }
-
-        public void CheckPattern()
-        {
-
-        }
     }
 
     public class AssignmentPatternWithKeys : AssignmentPattern

@@ -82,7 +82,23 @@ namespace pluginVerilog.Verilog.DataObjects
         /// </summary>
         public static AssignmentPattern ParseCreate(WordScanner word, NameSpace nameSpace, bool lValue, bool patternMode)
         {
+            return ParseCreate(word, nameSpace, lValue, patternMode, null);
+        }
+
+        /// <summary>
+        /// Parse an assignment pattern.
+        /// <paramref name="lhs"/> is the (already resolved) data object of the
+        /// assignment target. The detailed syntax check against it is performed
+        /// here, while parsing, so that the check is part of the parse instead of
+        /// a separate pass over the finished pattern
+        /// (IEEE 1800-2017 10.9, 7.9.11, 7.2.2, 5.10).
+        /// Pass null when no target data object is available at parse time
+        /// (typed pattern via cast, case pattern, nested pattern, ...).
+        /// </summary>
+        public static AssignmentPattern ParseCreate(WordScanner word, NameSpace nameSpace, bool lValue, bool patternMode, DataObject? lhs)
+        {
             AssignmentPattern assignmentPattern;
+            WordReference beginReference = word.GetReference();
 
             // Called either at "'{..." (identifier path) or at "{..." (after assignment_pattern_expression_type
             // consumed by Cast.ParseCreate : e.g. int'{1, 2, 3} / type_t'{a:1, b:2})
@@ -112,12 +128,25 @@ namespace pluginVerilog.Verilog.DataObjects
 
             if (word.Text == "}")
             {
+                // whole pattern range ("'{ ... }"), used as the diagnostic
+                // position of the detailed check below
+                assignmentPattern.Reference = WordReference.CreateReferenceRange(beginReference, word.GetReference());
                 word.MoveNext();
             }
             else
             {
                 word.AddError("} required");
             }
+
+            // detailed check against the assignment target, performed here while
+            // parsing (not as a later pass over the finished pattern).
+            // Nested patterns are parsed without a lhs (null) and are therefore
+            // validated only through their outermost pattern.
+            if (!patternMode)
+            {
+                assignmentPattern.CheckPattern(word, lhs);
+            }
+
             return assignmentPattern;
         }
 
@@ -244,18 +273,20 @@ namespace pluginVerilog.Verilog.DataObjects
         }
 
         /// <summary>
-        /// Right-hand-side detailed check of the assignment pattern against the
-        /// resolved left-hand-side data object / data type
+        /// Detailed check of the assignment pattern against the resolved
+        /// assignment target data object / data type
         /// (IEEE 1800-2017 10.9, 7.9.11, 7.2.2, 5.10):
         ///   - a positional pattern for a structure supplies one element per member,
         ///   - a keyed pattern uses structure member names (or "default"),
         ///   - a pattern for an array supplies one element per array element; an
         ///     associative array pattern uses index / "default" keys, and
         ///   - a scalar / vector target accepts only a single element.
-        /// Called by the right-hand-side users (blocking / nonblocking assignment,
-        /// variable declaration) with the resolved LHS data object.
+        /// This is called from <see cref="ParseCreate(WordScanner, NameSpace, bool, bool, DataObject?)"/>
+        /// while the pattern is being parsed, with the already resolved target
+        /// data object (blocking / nonblocking assignment target, declared
+        /// variable). It is not a post-parse pass over the finished pattern.
         /// </summary>
-        public void CheckPattern(WordScanner word, DataObject? lhs)
+        private void CheckPattern(WordScanner word, DataObject? lhs)
         {
             if (word.Prototype || word.CompletionContext != null) return;
             if (lhs == null) return;
@@ -318,15 +349,27 @@ namespace pluginVerilog.Verilog.DataObjects
                         return;
                     }
 
+                    // An array of structures requires a (nested) assignment
+                    // pattern per element. The C-like flattened form
+                    // ("ms_t ms[1:0] = '{0, 0, 1, 1};") supplies more elements
+                    // than a single structure has members and is illegal
+                    // (IEEE 1800-2017 5.10 / 10.9).
+                    if (lhsType is DataTypes.StructType structElementType && hasUnpackedArray)
+                    {
+                        int memberCount = getFlattenedMemberCount(structElementType);
+                        if (arrayWithoutKey.Expressions.Count > memberCount)
+                        {
+                            addPatternError(word,
+                                "an array of structs shall be assigned with a nested assignment pattern per element");
+                        }
+                        return;
+                    }
+
                     int? size = null;
                     if (hasUnpackedArray) size = lhs.UnpackedArrays[0].Size;
                     else if (lhs is Arrays.Queue queue) size = queue.Size;
 
-                    // an array of structures is validated by the caller
-                    // (Variable.checkStructArrayAssignmentPattern) so that the
-                    // C-like flattened form reports a single diagnostic
-                    bool elementIsStruct = lhsType is DataTypes.StructType;
-                    if (size != null && !elementIsStruct && arrayWithoutKey.Expressions.Count != size)
+                    if (size != null && arrayWithoutKey.Expressions.Count != size)
                     {
                         addPatternError(word,
                             "assignment pattern element count (" + arrayWithoutKey.Expressions.Count +
@@ -387,6 +430,22 @@ namespace pluginVerilog.Verilog.DataObjects
             if (General.ListOfKeywords.Contains(key)) return false;
             if (simpleTypeKeywords.Contains(key)) return false;
             return true;
+        }
+
+        /// <summary>
+        /// Number of members of a structure, counting the members of directly
+        /// nested structures (the C-like flattened element count of a struct).
+        /// </summary>
+        private static int getFlattenedMemberCount(DataTypes.StructType structType)
+        {
+            int memberCount = 0;
+            foreach (DataTypes.StructType.Member member in structType.Members.Values)
+            {
+                memberCount += member.DatType is DataTypes.StructType nested
+                    ? nested.Members.Count
+                    : 1;
+            }
+            return memberCount;
         }
 
         /// <summary>

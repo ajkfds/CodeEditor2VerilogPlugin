@@ -222,48 +222,6 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             return !beforeRef.IsSameAs(probe.CreateIndexReference());
         }
 
-        /// <summary>
-        /// A plain (positional) assignment pattern may only supply one element
-        /// per array element / struct member. The C-like flattened form
-        /// ("ms_t ms[1:0] = '{0, 0, 1, 1};" for a struct array) is illegal
-        /// (IEEE 1800-2017 5.10 / 10.9): an array of structs requires a nested
-        /// assignment pattern per element.
-        /// </summary>
-        private static void checkStructArrayAssignmentPattern(
-            WordScanner word, DataObject variable, Expressions.Expression assignmentPattern)
-        {
-            if (word.Prototype || word.CompletionContext != null) return;
-
-            IDataType? elementType = variable.DataType;
-            if (elementType is DataTypes.UserDefinedType userDefinedType)
-            {
-                elementType = userDefinedType.OriginalDataType;
-            }
-            if (elementType is not DataTypes.StructType structType) return;
-            if (variable.UnpackedArrays.Count == 0) return;
-            if (assignmentPattern is not AssignmentPatternWithoutKey withoutKey) return;
-
-            // count the members of the (nested) struct
-            int memberCount = 0;
-            foreach (DataTypes.StructType.Member member in structType.Members.Values)
-            {
-                memberCount += member.DatType is DataTypes.StructType nested
-                    ? nested.Members.Count
-                    : 1;
-            }
-            if (withoutKey.Expressions.Count <= memberCount) return;
-
-            WordReference? reference = assignmentPattern.Reference;
-            if (reference != null)
-            {
-                reference.AddError("an array of structs shall be assigned with a nested assignment pattern per element");
-            }
-            else
-            {
-                word.AddError("an array of structs shall be assigned with a nested assignment pattern per element");
-            }
-        }
-
         public static bool ParseDeclaration(WordScanner word, NameSpace nameSpace)
         {
             return ParseDeclaration(word, nameSpace, null);
@@ -523,7 +481,10 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                         Expressions.Expression? exp;
                         if (word.Text == "'" && word.NextText == "{")
                         {
-                            exp = AssignmentPattern.ParseCreate(word, nameSpace, false);
+                            // the declared variable is handed over to the parse, so the
+                            // detailed syntax check against the declared type is done
+                            // while parsing the pattern
+                            exp = AssignmentPattern.ParseCreate(word, nameSpace, false, false, variable);
                             if (exp == null)
                             {
                                 word.AddError("illegal assignment pattern.");
@@ -532,9 +493,6 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                             else
                             {
                                 assigned = true;
-                                checkStructArrayAssignmentPattern(word, variable, exp);
-                                // detailed syntax check against the declared type
-                                (exp as AssignmentPattern)?.CheckPattern(word, variable);
                             }
                         }
                         else

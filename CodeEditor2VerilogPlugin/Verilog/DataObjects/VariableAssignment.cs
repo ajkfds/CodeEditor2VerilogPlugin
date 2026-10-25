@@ -40,7 +40,26 @@ namespace pluginVerilog.Verilog.DataObjects
             WordReference equalPointer = word.CrateWordReference();
             word.MoveNext();
 
-            Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace, completionContext);
+            Expressions.Expression? expression;
+
+            if (word.Text == "'" && word.NextText == "{")
+            {
+                // the resolved left-hand-side data object is handed over to the
+                // parse, so the detailed syntax check against its data type is
+                // performed while parsing the assignment pattern
+                // (IEEE 1800-2017 10.9)
+                expression = AssignmentPattern.ParseCreate(
+                    word,
+                    nameSpace,
+                    false,
+                    false,
+                    Items.ContinuousAssign.getAssignedDataObject(lExpression)
+                    );
+            }
+            else
+            {
+                expression = Expressions.Expression.ParseCreate(word, nameSpace, completionContext);
+            }
 
             if (expression == null) return null;
             variableAssign.Expression = expression;
