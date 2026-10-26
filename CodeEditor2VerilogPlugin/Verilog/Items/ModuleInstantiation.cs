@@ -95,7 +95,13 @@ namespace pluginVerilog.Verilog.Items
             if (portRef == null) return;
 
             string portName = portRef.Name;
-            Module? originalModule = ProjectProperty.DefinitionNameSpace.Get(SourceName) as Module;
+            // Resolve in the project that defines the module (the "@project"
+            // target when specified); the local project's DefinitionNameSpace
+            // does not contain a cross-project module.
+            Project sourceProject = GetInstancedBuildingBlockProject();
+            ProjectProperty? sourceProjectProperty = sourceProject.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+            if (sourceProjectProperty == null) return;
+            Module? originalModule = sourceProjectProperty.DefinitionNameSpace.Get(SourceName) as Module;
             if (originalModule == null) return;
             if (!originalModule.Ports.ContainsKey(portName)) return;
             Verilog.DataObjects.Port port = originalModule.Ports[portName];
@@ -200,6 +206,11 @@ namespace pluginVerilog.Verilog.Items
             if (General.ListOfKeywords.Contains(word.Text)) return;
 
             Project sourceProject = word.Project;
+            // ProjectProperty used to resolve the instantiated module.
+            // It is swapped to the "@project" target project below, so that all
+            // later lookups (parameter-overridden module / its source file) are
+            // performed against the project that actually defines the module.
+            ProjectProperty sourceProjectProperty = word.ProjectProperty;
 
             var moduleIdentifier = word.CrateWordReference();
             string moduleName = word.Text;
@@ -227,16 +238,29 @@ namespace pluginVerilog.Verilog.Items
                         if (!CodeEditor2.Global.Projects.ContainsKey(comment.Text)) break;
 
                         sourceProject = CodeEditor2.Global.Projects[comment.Text];
-                        instancedModule = ((ProjectProperty)sourceProject.GetPluginProperty()).DefinitionNameSpace.Get(moduleName) as Module;
+                        // Resolve against the target project: the module (and the
+                        // parameter-overridden instance below) lives in that project's
+                        // DefinitionNameSpace. Keeping the local project property here
+                        // made GetInstancedBuildingBlock / GetFile return null, which
+                        // reported a bogus "not parsed yet." error even though the
+                        // module was definable via "@project".
+                        ProjectProperty? targetProjectProperty = sourceProject.GetPluginProperty();
+                        if (targetProjectProperty == null) break;
+                        sourceProjectProperty = targetProjectProperty;
+                        instancedModule = sourceProjectProperty.DefinitionNameSpace.Get(moduleName) as Module;
 
-                        word.RootParsedDocument.ReparseRequested = true;
+                        // A reparse is only required when the target module is not
+                        // resolvable yet (its project has not been parsed). When it
+                        // resolved right away, requesting a reparse on every pass made
+                        // each edit re-run the whole instance hierarchy.
+                        if (instancedModule == null) word.RootParsedDocument.ReparseRequested = true;
                         break;
                     }
                 }
             }
             if (instancedModule == null)
             {
-                if (word.ProjectProperty.ExtenralModuleLibraryPath.ContainsKey(moduleName))
+                if (sourceProjectProperty.ExtenralModuleLibraryPath.ContainsKey(moduleName))
                 {
                     word.AddHint("external library");
                     if (!word.RootParsedDocument.ExternalRefrenceModules.Contains(moduleName)) word.RootParsedDocument.ExternalRefrenceModules.Add(moduleName);
@@ -326,19 +350,27 @@ namespace pluginVerilog.Verilog.Items
                 moduleInstantiation.BlockBeginIndexReference = blockBeginIndexReference;
 
                 // swap to parameter overrided module
-                if (instancedModule != null)
+                // Note: keep the loop variable intact. Reassigning instancedModule
+                // here would make a failed lookup of the first instance prevent the
+                // resolution of the remaining instances in the same statement
+                // (inst0(...), inst1(...)).
+                Module? effectiveModule = instancedModule;
+                if (effectiveModule != null)
                 {
                     if (parameterOverrides.Count != 0)
                     {
-                        instancedModule = word.ProjectProperty.GetInstancedBuildingBlock(moduleInstantiation) as Module;
+                        // use the project that defines the instantiated module (the
+                        // "@project" target when specified), otherwise its
+                        // parameter-overridden parsed document cannot be found.
+                        effectiveModule = sourceProjectProperty.GetInstancedBuildingBlock(moduleInstantiation) as Module;
                     }
 
-                    VerilogFile? baseFile = word.ProjectProperty.DefinitionNameSpace.GetFile(moduleName) as VerilogFile;
+                    VerilogFile? baseFile = sourceProjectProperty.DefinitionNameSpace.GetFile(moduleName) as VerilogFile;
 
                     if (word.RootParsedDocument.ParseMode == CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.EditParse)
                     { // editparse時処理
 
-                        if (instancedModule == null && baseFile != null)
+                        if (effectiveModule == null && baseFile != null)
                         {
                             VerilogModuleInstance? instance = VerilogModuleInstance.Create(moduleInstantiation);
                             var baseParser = instance?.CreateDocumentParser(CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.SingleHierParse, word.CancellationToken);
@@ -353,14 +385,24 @@ namespace pluginVerilog.Verilog.Items
                                 }
                             }
 
-                            instancedModule = word.ProjectProperty.GetInstancedBuildingBlock(moduleInstantiation) as Module;
+                            effectiveModule = sourceProjectProperty.GetInstancedBuildingBlock(moduleInstantiation) as Module;
                         }
                     }
 
 
-                    if (instancedModule == null)
+                    if (effectiveModule == null)
                     {
-                        word.AddError("not parsed yet.");
+                        // The parameter-overridden parse result is not available yet
+                        // (base parse of the instantiated module has not run). This is
+                        // a transient state resolved by the hierarchy reparse, so only
+                        // trigger a reparse instead of surfacing an error to the user.
+                        // Also skip it during the prototype pass / partial (autocomplete)
+                        // parse and for non-generated generate branches, where the error
+                        // would be meaningless.
+                        if (!word.Prototype && !word.IsPartialParse && word.Active)
+                        {
+                            word.RootParsedDocument.ReparseRequested = true;
+                        }
                     }
                 }
 
@@ -425,7 +467,7 @@ namespace pluginVerilog.Verilog.Items
                 }
                 word.MoveNext();
 
-                parseListOfPortConnections(word, nameSpace, instancedModule, moduleInstantiation, moduleIdentifier);
+                parseListOfPortConnections(word, nameSpace, effectiveModule, moduleInstantiation, moduleIdentifier);
 
                 if (word.Text != ")")
                 {
@@ -440,7 +482,7 @@ namespace pluginVerilog.Verilog.Items
                 {
                     word.AppendBlock(moduleInstantiation.BlockBeginIndexReference, moduleInstantiation.LastIndexReference);
                 }
-                SyncCheck(word, nameSpace, moduleInstantiation);
+                SyncCheck(word, nameSpace, moduleInstantiation, sourceProjectProperty);
                 if (word.Text != ",") break;
                 word.MoveNext();
 
@@ -466,11 +508,14 @@ namespace pluginVerilog.Verilog.Items
 
 
 
-        private static void SyncCheck(WordScanner word, NameSpace nameSpace, ModuleInstantiation moduleInstantiation)
+        private static void SyncCheck(WordScanner word, NameSpace nameSpace, ModuleInstantiation moduleInstantiation, ProjectProperty sourceProjectProperty)
         {
             if (word.Prototype) return;
 
-            Module? instancedModule = word.ProjectProperty.GetInstancedBuildingBlock(moduleInstantiation) as Module;
+            // Resolve the instantiated module in the project that defines it
+            // (the "@project" target when specified). Using the local project
+            // property silently skipped the sync check for cross-project instances.
+            Module? instancedModule = sourceProjectProperty.GetInstancedBuildingBlock(moduleInstantiation) as Module;
             if (instancedModule == null) return;
 
             foreach (var kvp in moduleInstantiation.PortConnection)

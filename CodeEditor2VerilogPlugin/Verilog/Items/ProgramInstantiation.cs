@@ -74,7 +74,13 @@ namespace pluginVerilog.Verilog.Items
             if (portRef == null) return;
 
             string portName = portRef.Name;
-            Program? originalProgram = ProjectProperty.DefinitionNameSpace.Get(SourceName) as Program;
+            // Resolve in the project that defines the program (the "@project"
+            // target when specified); the local project's DefinitionNameSpace
+            // does not contain a cross-project program.
+            Project sourceProject = GetInstancedBuildingBlockProject();
+            ProjectProperty? sourceProjectProperty = sourceProject.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+            if (sourceProjectProperty == null) return;
+            Program? originalProgram = sourceProjectProperty.DefinitionNameSpace.Get(SourceName) as Program;
             if (originalProgram == null) return;
             if (!originalProgram.Ports.ContainsKey(portName)) return;
             Verilog.DataObjects.Port port = originalProgram.Ports[portName];
@@ -230,7 +236,16 @@ namespace pluginVerilog.Verilog.Items
 
                     if (instancedProgram == null)
                     {
-                        word.AddError("not parsed yet.");
+                        // The parameter-overridden parse result is not available yet
+                        // (base parse of the instantiated program has not run). This is
+                        // a transient state resolved by the hierarchy reparse, so only
+                        // trigger a reparse instead of surfacing an error to the user.
+                        // Also skip it during the prototype pass / partial (autocomplete)
+                        // parse and for non-generated generate branches.
+                        if (!word.Prototype && !word.IsPartialParse && word.Active)
+                        {
+                            word.RootParsedDocument.ReparseRequested = true;
+                        }
                     }
                 }
 
