@@ -1377,18 +1377,84 @@ namespace pluginVerilog.Verilog
         /// <summary>
         /// Splits the current MoveNextUntilEol token (a whole directive line)
         /// into whitespace separated argument tokens.
+        /// Comments on the directive line are removed first: a compiler
+        /// directive ends at the end of the line (IEEE 1800-2017 22.4), so a
+        /// trailing comment belongs to the line's text but is just whitespace
+        /// for the directive arguments.
+        ///     `timescale 1ns / 1ps // comment
+        ///     `timescale 1ns / 1ps /* comment */
         /// </summary>
         private List<string> getDirectiveLineTokens()
         {
             var tokens = new List<string>();
             string line = wordPointer.Text;
             if (string.IsNullOrEmpty(line)) return tokens;
+            line = removeDirectiveLineComments(line);
             line = line.Replace('\t', ' ');
             foreach (string token in line.Split(new[] { ' ' }, System.StringSplitOptions.RemoveEmptyEntries))
             {
                 tokens.Add(token);
             }
             return tokens;
+        }
+
+        /// <summary>
+        /// Removes the comments contained in a directive line.
+        /// A "//" comment discards the rest of the line and a "/* ... *&#47;"
+        /// comment is replaced by a single space so that the surrounding
+        /// tokens are not glued together. Text inside a string literal is kept
+        /// as is (the file name of `line may contain "//", e.g.
+        /// `line 5 "//foo" 0).
+        /// </summary>
+        private static string removeDirectiveLineComments(string line)
+        {
+            StringBuilder sb = new StringBuilder(line.Length);
+            int index = 0;
+            while (index < line.Length)
+            {
+                char ch = line[index];
+
+                if (ch == '"')
+                {   // string literal : copy it verbatim (escapes included)
+                    sb.Append(ch);
+                    index++;
+                    while (index < line.Length)
+                    {
+                        char literalChar = line[index];
+                        sb.Append(literalChar);
+                        index++;
+                        if (literalChar == '\\' && index < line.Length)
+                        {   // escaped character
+                            sb.Append(line[index]);
+                            index++;
+                            continue;
+                        }
+                        if (literalChar == '"') break;
+                    }
+                    continue;
+                }
+
+                if (ch == '/' && index + 1 < line.Length && line[index + 1] == '/')
+                {   // line comment : the rest of the line is a comment
+                    break;
+                }
+
+                if (ch == '/' && index + 1 < line.Length && line[index + 1] == '*')
+                {   // block comment : replace it with a token separator
+                    index += 2;
+                    while (index + 1 < line.Length && !(line[index] == '*' && line[index + 1] == '/'))
+                    {
+                        index++;
+                    }
+                    index = (index + 1 < line.Length) ? index + 2 : line.Length;
+                    sb.Append(' ');
+                    continue;
+                }
+
+                sb.Append(ch);
+                index++;
+            }
+            return sb.ToString();
         }
 
         /// <summary>
