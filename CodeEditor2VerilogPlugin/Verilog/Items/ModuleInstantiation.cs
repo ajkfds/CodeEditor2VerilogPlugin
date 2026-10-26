@@ -218,7 +218,14 @@ namespace pluginVerilog.Verilog.Items
 
             // instance対象となるmoduleを取得する
             Module? instancedModule = word.ProjectProperty.DefinitionNameSpace.Get(moduleName) as Module;
-            if(!word.RootParsedDocument.ReferencedDefinitionNameSpace.Contains(moduleName)) word.RootParsedDocument.ReferencedDefinitionNameSpace.Add(moduleName);
+            word.RootParsedDocument.AddReferencedDefinitionNameSpace(moduleName, word.Project.Name);
+
+            // True when a valid "// @project <name>" comment selects the project
+            // that owns the module. The module is then defined OUTSIDE this
+            // project, so "not registered in the local DefinitionNameSpace yet"
+            // is a transient state (the target project has not been parsed) and
+            // must not be reported as an unfound module.
+            bool crossProjectReference = false;
 
             string moduleComment = word.GetNextComment();
             {
@@ -249,6 +256,14 @@ namespace pluginVerilog.Verilog.Items
                         sourceProjectProperty = targetProjectProperty;
                         instancedModule = sourceProjectProperty.DefinitionNameSpace.Get(moduleName) as Module;
 
+                        // Re-record the reference against the project that actually
+                        // owns the module. Hierarchy analysis (SimulationSetup) looks
+                        // the definition up in DefinitionNameSpace; without the owner
+                        // project it searched the local project, could not find a
+                        // cross-project module and reported it as "unfound".
+                        word.RootParsedDocument.AddReferencedDefinitionNameSpace(moduleName, sourceProject.Name);
+                        crossProjectReference = true;
+
                         // A reparse is only required when the target module is not
                         // resolvable yet (its project has not been parsed). When it
                         // resolved right away, requesting a reparse on every pass made
@@ -264,6 +279,17 @@ namespace pluginVerilog.Verilog.Items
                 {
                     word.AddHint("external library");
                     if (!word.RootParsedDocument.ExternalRefrenceModules.Contains(moduleName)) word.RootParsedDocument.ExternalRefrenceModules.Add(moduleName);
+                }
+                else if (crossProjectReference)
+                {
+                    // "// @project <name>" was accepted but the module is not
+                    // resolvable yet (the target project has not been parsed).
+                    // This is a transient state resolved by the hierarchy
+                    // reparse, so do not report it as an unfound module.
+                    if (!word.Prototype && !word.IsPartialParse && word.Active)
+                    {
+                        word.RootParsedDocument.ReparseRequested = true;
+                    }
                 }
                 else
                 {
@@ -282,8 +308,11 @@ namespace pluginVerilog.Verilog.Items
                     if (!word.Prototype && !word.IsPartialParse && word.Active)
                     {
                         word.RootParsedDocument.ReparseRequested = true;
-                        if (!word.RootParsedDocument.UnfoundModules.Contains(moduleName)) word.RootParsedDocument.UnfoundModules.Add(moduleName);
-                        CodeEditor2.Controller.AppendLog("## unfound " + moduleName + " at " + buildingBlock.Name, Avalonia.Media.Colors.Orange);
+                        if (!word.RootParsedDocument.UnfoundModules.Contains(moduleName))
+                        {
+                            word.RootParsedDocument.UnfoundModules.Add(moduleName);
+                            CodeEditor2.Controller.AppendLog("## unfound " + moduleName + " at " + buildingBlock.Name, Avalonia.Media.Colors.Orange);
+                        }
                     }
                 }
             }

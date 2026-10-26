@@ -131,7 +131,7 @@ namespace pluginVerilog.Verilog.Items
                 {
                     // bind_target_scope refers to DefinitionNameSpace
                     // (module / interface identifier: class never appears)
-                    if (!word.RootParsedDocument.ReferencedDefinitionNameSpace.Contains(targetTopName)) word.RootParsedDocument.ReferencedDefinitionNameSpace.Add(targetTopName);
+                    word.RootParsedDocument.AddReferencedDefinitionNameSpace(targetTopName, word.Project.Name);
                 }
                 else
                 {
@@ -194,7 +194,7 @@ namespace pluginVerilog.Verilog.Items
             BuildingBlocks.BuildingBlock? instancedBuildingBlock = word.ProjectProperty.DefinitionNameSpace.Get(instantiationName) as BuildingBlocks.BuildingBlock;
             if (instancedBuildingBlock != null)
             {
-                if (!word.RootParsedDocument.ReferencedDefinitionNameSpace.Contains(instantiationName)) word.RootParsedDocument.ReferencedDefinitionNameSpace.Add(instantiationName);
+                word.RootParsedDocument.AddReferencedDefinitionNameSpace(instantiationName, word.Project.Name);
 
                 // bind_instantiation ::= program | module | interface | checker instantiation
                 if (!(instancedBuildingBlock is BuildingBlocks.Module ||

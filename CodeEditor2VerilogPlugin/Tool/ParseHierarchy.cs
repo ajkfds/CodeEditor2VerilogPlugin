@@ -430,8 +430,34 @@ namespace pluginVerilog.Tool
                 // the bound definitions are reflected in this hierarchy pass.
                 foreach (string elementName in verilogFile.VerilogParsedDocument.ReferencedDefinitionNameSpace)
                 {
-                    pluginVerilog.ProjectProperty projectProperty = (ProjectProperty)verilogFile.Project.ProjectProperties[pluginVerilog.Plugin.StaticID];
-                    TextFile? vFile = projectProperty.DefinitionNameSpace.GetFile(elementName) as TextFile;
+                    // Resolve in the project that owns the definition: a module
+                    // instanced with "// @project <name>" lives in that project's
+                    // DefinitionNameSpace, so a lookup in this file's project
+                    // silently skipped it and the external definition was never
+                    // re-parsed in this hierarchy pass.
+                    Verilog.ParsedDocument vParsedDocument = verilogFile.VerilogParsedDocument;
+                    CodeEditor2.Data.Project ownerProject = verilogFile.Project;
+                    TextFile? vFile = null;
+
+                    pluginVerilog.ProjectProperty? localProperty = ownerProject.ProjectProperties[pluginVerilog.Plugin.StaticID] as ProjectProperty;
+                    if (localProperty != null)
+                    {
+                        vFile = localProperty.DefinitionNameSpace.GetFile(elementName) as TextFile;
+                    }
+                    if (vFile == null)
+                    {
+                        // cross-project ("// @project <name>") definition
+                        foreach (string ownerProjectName in vParsedDocument.GetReferencedDefinitionNameSpaceProjects(elementName))
+                        {
+                            if (!CodeEditor2.Global.Projects.TryGetValue(ownerProjectName, out CodeEditor2.Data.Project? gotProject)) continue;
+                            if (gotProject == null) continue;
+                            pluginVerilog.ProjectProperty? crossProperty = gotProject.ProjectProperties[pluginVerilog.Plugin.StaticID] as ProjectProperty;
+                            if (crossProperty == null) continue;
+                            vFile = crossProperty.DefinitionNameSpace.GetFile(elementName) as TextFile;
+                            if (vFile == null) continue;
+                            break;
+                        }
+                    }
                     if (vFile == null) continue;
                     ParseTask newTask = new ParseTask(Id: vFile.ID, tarfgetTextFile: vFile);
                     EnqueueWork(newTask, workQueue, completeIds);

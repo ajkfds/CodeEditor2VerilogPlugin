@@ -161,7 +161,7 @@ namespace pluginVerilog.Verilog.Items
 
             // Register the referenced program name so that SimulationSetup can collect
             // the program definition file (missing definition is reported as unfound there).
-            if (!word.RootParsedDocument.ReferencedDefinitionNameSpace.Contains(programName)) word.RootParsedDocument.ReferencedDefinitionNameSpace.Add(programName);
+            word.RootParsedDocument.AddReferencedDefinitionNameSpace(programName, word.Project.Name);
 
             // Get the instanced program
             Program? instancedProgram = word.ProjectProperty.DefinitionNameSpace.Get(programName) as Program;
