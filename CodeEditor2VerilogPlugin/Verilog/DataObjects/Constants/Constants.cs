@@ -10,7 +10,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
     // parameter, localparam, and specparam.
     public class Constants : DataObject, IPartSelectableDataObject
     {
-        public required Expressions.Expression Expression { get; set; }
+        public Expressions.Expression? Expression { get; set; } = null;
         public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Parameter; } }
 
         public enum ConstantTypeEnum
@@ -743,10 +743,71 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                     }
                 }
 
+                Constants constants;
+                switch (constantType)
+                {
+                    case ConstantTypeEnum.localparam:
+                        constants = new Localparam() { Name = identifier, DefinedReference = nameReference, Expression = null };
+                        break;
+                    case ConstantTypeEnum.parameter:
+                        constants = new Parameter() { Name = identifier, DefinedReference = nameReference, Expression = null };
+                        break;
+                    case ConstantTypeEnum.specparam:
+                        constants = new Specparam() { Name = identifier, DefinedReference = nameReference, Expression = null };
+                        break;
+                    default:
+                        System.Diagnostics.Debugger.Break();
+                        return;
+                }
+                constants.ConstantType = constantType;
+                constants.DataType = dataType;
+
+
+
                 if (word.Text != "=") break;
                 word.MoveNext();
 
-                Expressions.Expression? expression = Expressions.Expression.ParseCreate(word, nameSpace);
+                Expressions.Expression? expression = null;
+
+                if (word.Text == "'" && word.NextText == "{")
+                {
+                    // the declared variable is handed over to the parse, so the
+                    // detailed syntax check against the declared type is done
+                    // while parsing the pattern
+                    expression = AssignmentPattern.ParseCreate(word, nameSpace, false, false,constants);
+                    if (expression == null)
+                    {
+                           word.AddError("illegal assignment pattern.");
+                    }
+                    //    else
+                    //    {
+                    //        assigned = true;
+                    //    }
+                }
+                else
+                {
+                    expression = Expressions.Expression.ParseCreate(word, nameSpace);
+                    if (expression == null)
+                    {
+                        word.AddError("expression required.");
+                    //       word.SkipToKeyword(";");
+                    //        if (word.Text == ";") word.MoveNext();
+                    //        return true;
+                    }
+                    //    else
+                    //    {
+                    //        assigned = true;
+                    //        variable.AssignedReferences.Add(variable.DefinedReference);
+                    //        if (variable.BitWidth != expression.BitWidth && !word.Prototype && expression.BitWidth != null && expression.Reference != null && !word.Prototype)
+                    //        {
+                    //            expression.Reference.AddWarning("Bitwidth mismatch " + variable.BitWidth.ToString() + " = " + expression.BitWidth.ToString());
+                    //        }
+                    //    }
+                }
+
+
+
+
                 if (expression == null) break;
                 // A forward-referenced constant function call (e.g.
                 // "localparam a = fun(3);" before "function int fun(...)")
@@ -754,7 +815,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                 // it resolves to a constant function on the next pass, so the
                 // "should be constant" error must not be reported here.
                 if (!expression.Constant && expression.Reference != null
-                    && expression is not Expressions.UnfoundObjectReference)
+                    && expression is not Expressions.UnfoundObjectReference && !word.Prototype)
                 {
                     expression.Reference.AddError("should be constant");
                 }
@@ -767,24 +828,9 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                     checkSpecparamReference(expression);
                 }
 
-                Constants constants;
-                switch (constantType)
-                {
-                    case ConstantTypeEnum.localparam:
-                        constants = new Localparam() { Name = identifier, DefinedReference = nameReference, Expression = expression };
-                        break;
-                    case ConstantTypeEnum.parameter:
-                        constants = new Parameter() { Name = identifier, DefinedReference = nameReference, Expression = expression };
-                        break;
-                    case ConstantTypeEnum.specparam:
-                        constants = new Specparam() { Name = identifier, DefinedReference = nameReference, Expression = expression };
-                        break;
-                    default:
-                        System.Diagnostics.Debugger.Break();
-                        return;
-                }
 
-                constants.ConstantType = constantType;
+                constants.Expression = expression;
+
                 if (dataType == null && expression is Expressions.Number)
                 {
                     Expressions.Number number = (Expressions.Number)expression;
@@ -805,7 +851,6 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                         dataType = DataTypes.LogicType.Create(number.Signed, packedArrays);
                     }
                 }
-                constants.DataType = dataType;
 
                 // store the parameter's unpacked dimensions on the Constants DataObject
                 foreach (UnPackedArray unPackedArray in paramUnpackedArrays)

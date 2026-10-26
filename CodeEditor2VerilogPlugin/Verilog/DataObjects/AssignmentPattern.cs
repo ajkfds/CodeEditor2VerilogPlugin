@@ -298,6 +298,7 @@ namespace pluginVerilog.Verilog.DataObjects
                 lhsType = userDefinedType.OriginalDataType;
             }
 
+
             bool hasUnpackedArray = lhs.UnpackedArrays.Count != 0;
             bool isAssociativeArray = lhs is Arrays.AssociativeArray;
             bool isDynamicArray = lhs is Arrays.DynamicArray;
@@ -500,6 +501,7 @@ namespace pluginVerilog.Verilog.DataObjects
         public static AssignmentPatternWithKey parseCreate(WordScanner word, NameSpace nameSpace, bool patternMode = false)
         {
             AssignmentPatternWithKey assignmentPattern = new AssignmentPatternWithKey();
+            assignmentPattern.Constant = true;
 
             while (!word.Eof & word.Text != "}")
             {
@@ -556,6 +558,7 @@ namespace pluginVerilog.Verilog.DataObjects
                 KeyExpression keyExpression = new KeyExpression() { Key = key, KeyReference = keyReference, Expression = expression };
 
                 assignmentPattern.KeyExpressions.Add(keyExpression);
+                if (keyExpression != null && keyExpression.Expression != null && !keyExpression.Expression.Constant) assignmentPattern.Constant = false;
 
                 if (word.Text != ",") break;
                 word.MoveNext();
@@ -573,6 +576,7 @@ namespace pluginVerilog.Verilog.DataObjects
         public static AssignmentPatternWithoutKey parseCreate(WordScanner word, NameSpace nameSpace, bool patternMode = false)
         {
             AssignmentPatternWithoutKey assignmentPattern = new AssignmentPatternWithoutKey();
+            assignmentPattern.Constant = true;
 
             while (!word.Eof & word.Text != "}")
             {
@@ -600,6 +604,7 @@ namespace pluginVerilog.Verilog.DataObjects
                    word.MoveNext();
                    Expressions.Expression count = expression;
                    Expressions.Expression? element = Verilog.Expressions.Expression.ParseCreate(word, nameSpace);
+
                    if (element == null)
                    {
                        word.AddError("illegal repetition element expression");
@@ -636,6 +641,7 @@ namespace pluginVerilog.Verilog.DataObjects
                 }
 
                 assignmentPattern.Expressions.Add(expression);
+                if (expression != null && !expression.Constant) assignmentPattern.Constant = false;
 
                 if (word.Text != ",") break;
                 word.MoveNext();
