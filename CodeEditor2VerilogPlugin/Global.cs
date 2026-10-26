@@ -13,17 +13,6 @@ namespace pluginVerilog
         public static class Icons
         {
             public static IImage Exclamation = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap("CodeEditor2/Assets/Icons/questionPaper.svg");
-            //    public static IconImage Exclamation = new IconImage(Properties.Resources.exclamation);
-            //    public static IconImage ExclamationBox = new IconImage(Properties.Resources.exclamationBox);
-            //    public static IconImage Play = new IconImage(Properties.Resources.play);
-            //    public static IconImage Pause = new IconImage(Properties.Resources.pause);
-            //    public static IconImage Verilog = new IconImage(Properties.Resources.verilog);
-            //    public static IconImage VerilogHeader = new IconImage(Properties.Resources.verilogHeader);
-            //    public static IconImage SystemVerilog = new IconImage(Properties.Resources.systemVerilog);
-            //    public static IconImage SystemVerilogHeader = new IconImage(Properties.Resources.systemVerilogHeader);
-            //    public static IconImage IcarusVerilog = new IconImage(Properties.Resources.icarusVerilog);
-            //    public static IconImage NewBadge = new IconImage(Properties.Resources.newBadge);
-            //    public static IconImage MedalBadge = new IconImage(Properties.Resources.medalBadge);
         }
 
         public static Avalonia.Media.Color Color_Verilog = Avalonia.Media.Color.FromRgb(124, 140, 140);
@@ -44,8 +33,6 @@ namespace pluginVerilog
                     {
                         Data.VerilogFile? vFile = file as Data.VerilogFile;
                         if (vFile == null) continue;
-
-//                        sw.Write(vFile.DebugInfo());
                     }
                 }
 
