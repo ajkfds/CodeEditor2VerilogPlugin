@@ -874,7 +874,7 @@ namespace pluginVerilog.Verilog.Items
                 }
             }
 
-            if (word.CompletionContext != null && word.Eof)
+            if (word.CompletionContext != null && word.Eof && instancedModule!=null && instancedModule.Ports.ContainsKey(pinName))
             {
                 Port? port = instancedModule?.Ports[pinName];
                 if(port !=null) word.CompletionContext.CarletPopupItems.Add(new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
@@ -1050,24 +1050,6 @@ namespace pluginVerilog.Verilog.Items
         }
 
 
-        //private static void checkOutputPortConnection(Module? instancedModule, Expressions.Expression? expression, string pinName)
-        //{
-        //    if (instancedModule != null && expression != null && expression.BitWidth != null && instancedModule.Ports.ContainsKey(pinName))
-        //    {
-        //        if (instancedModule.Ports[pinName].Range == null)
-        //        {
-        //            if (expression.BitWidth != null && expression.Reference != null && expression.BitWidth != 1)
-        //            {
-        //                expression.Reference.AddWarning("bit width mismatch 1 vs " + expression.BitWidth);
-        //            }
-
-        //        }
-        //        else if (instancedModule.Ports[pinName].Range.BitWidth != expression.BitWidth && expression.Reference != null)
-        //        {
-        //            expression.Reference.AddWarning("bit width mismatch " + instancedModule.Ports[pinName].Range.BitWidth + " vs " + expression.BitWidth);
-        //        }
-        //    }
-        //}
 
         private static void checkPortConnection(ProjectProperty projectProperty, Module? instancedModule, ModuleInstantiation moduleInstantiation, Expressions.Expression? expression, string pinName, bool output)
         {
