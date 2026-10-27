@@ -150,26 +150,33 @@ namespace pluginVerilog.Verilog
         // failed, and reported a perfectly valid cross-project module as
         // "unfound".
         //
-        // Only cross-project references are stored here; references resolved
-        // inside this document's own project (the common case) stay absent so
-        // that the map never has to be updated when a name is both declared
-        // locally and instanced from another project.
+        // ALL owners are stored here, including this document's own project
+        // (the "plain" reference). Consumers must decide whether a cross-project
+        // owner takes precedence over the local project, so the local owner has
+        // to be distinguishable from "no local reference at all":
+        //
+        //   /* top.sv */
+        //   MOD mod0 (...);                    // local project's MOD
+        //   // @project other
+        //   MOD mod1 (...);                    // other project's MOD
+        //
+        // Both owners are recorded for "MOD" here. Recording only the
+        // cross-project owner made the local instance look unresolvable, and
+        // recording only the local owner (previous behaviour) silently
+        // collected the wrong definition for the "@project" instance.
         // A name may be instanced from several projects, hence the list.
         public Dictionary<string, List<string>> ReferencedDefinitionNameSpaceProjects = new Dictionary<string, List<string>>();
 
         /// <summary>
         /// Record a definition name referenced by this document together with the
         /// project that owns the definition.
-        /// The owner is recorded only when it differs from this document's
-        /// project (i.e. "// @project <name>" cross-project references).
+        /// projectName normally is this document's own project; it is the
+        /// "// @project <name>" target for cross-project references.
         /// </summary>
         public void AddReferencedDefinitionNameSpace(string definitionName, string? projectName)
         {
             if (!ReferencedDefinitionNameSpace.Contains(definitionName)) ReferencedDefinitionNameSpace.Add(definitionName);
             if (projectName == null) return;
-
-            CodeEditor2.Data.Project? ownProject = Project;
-            if (ownProject != null && ownProject.Name == projectName) return;
 
             if (!ReferencedDefinitionNameSpaceProjects.TryGetValue(definitionName, out List<string>? projects))
             {
@@ -180,8 +187,9 @@ namespace pluginVerilog.Verilog
         }
 
         /// <summary>
-        /// Project names that own the given referenced definition name. Empty when
-        /// the reference is resolved inside this document's own project.
+        /// Project names that own the given referenced definition name
+        /// (this document's own project included). Empty when the reference was
+        /// recorded without an owner project.
         /// </summary>
         public List<string> GetReferencedDefinitionNameSpaceProjects(string definitionName)
         {

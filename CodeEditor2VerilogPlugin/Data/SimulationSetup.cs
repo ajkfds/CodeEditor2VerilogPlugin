@@ -21,7 +21,7 @@ namespace pluginVerilog. Data
         protected SimulationSetup() { }
 
         public string TopName;
-        public VerilogFile TopFile;
+        public List<VerilogFile> TopFiles = new List<VerilogFile>();
         public List<IVerilogRelatedFile> Files = new List<IVerilogRelatedFile>();
 
         public List<IVerilogRelatedFile> IncludeFiles = new List<IVerilogRelatedFile>();
@@ -51,7 +51,7 @@ namespace pluginVerilog. Data
         public CodeEditor2. Data. Project Project;
 
         public Dictionary<CodeEditor2. Data. Project, SimulationSetup> ExternalProjectReferences = new Dictionary<Project, SimulationSetup>();
-        public Dictionary<string, CodeEditor2. Data. Project> ExternalProjectEntryInstance = new Dictionary<string, Project>();
+        public Dictionary<string, CodeEditor2.Data.Project> ExternalProjectEntryInstance = new Dictionary<string, Project>();
 
         /// <summary>
         /// シミュレーションに渡すファイル一覧 (このプロジェクト + 参照している
@@ -135,7 +135,7 @@ namespace pluginVerilog. Data
         public static SimulationSetup? Create(pluginVerilog. Data. VerilogFile verilogFile)
         {
             SimulationSetup setup = new SimulationSetup();
-            setup.TopFile = verilogFile;
+            setup.TopFiles.Add(verilogFile);
 
             List<string> ids = new List<string>();
 
@@ -414,80 +414,57 @@ namespace pluginVerilog. Data
             // only against the local project reported a valid cross-project
             // module as "unfound" and aborted the simulation startup. The parse
             // result therefore records the owner project of cross-project
-            // references (ParsedDocument.ReferencedDefinitionNameSpaceProjects)
-            // and the lookup falls back to that project.
+            // references (ParsedDocument.ReferencedDefinitionNameSpaceProjects).
+            //
+            // The lookup MUST use the recorded owner project, NOT the local
+            // project. A "// @project <name>" instance explicitly asks for the
+            // building block of the referenced project, so a same-named
+            // definition declared in the local project is a DIFFERENT building
+            // block and must never be collected in its place. (Resolving the
+            // local DefinitionNameSpace first collected the wrong file and the
+            // wrong dependencies whenever both projects declared a definition
+            // with the same name.)
             foreach (string definitionName in parsedDocument.ReferencedDefinitionNameSpace)
             {
-                // local project first: a definition declared in this project must
-                // be collected from this project even when the same name is also
-                // instanced from another project.
                 CodeEditor2.Data.Project? localProject = parsedDocument.Project;
                 if (localProject == null) continue;
-                ProjectProperty? localProperty = localProject.ProjectProperties[Plugin.StaticID] as ProjectProperty;
-                if (localProperty == null) continue;
-                // external library modules are provided by external file paths, not project files
-                if (parsedDocument.ExternalRefrenceModules.Contains(definitionName)) continue;
-                if (localProperty.ExtenralModuleLibraryPath.ContainsKey(definitionName)) continue;
-                if (localProperty.ExtenralPrimitiveLibraryPath.ContainsKey(definitionName)) continue;
 
-                CodeEditor2.Data.Project ownerProject = localProject;
-                IVerilogRelatedFile? defFile = localProperty.DefinitionNameSpace.GetFile(definitionName);
-
-                if (defFile == null)
+                // Each recorded owner project is resolved independently; the
+                // local project is only one of them. A name referenced both
+                // without a comment (local project) and with "// @project <name>"
+                // therefore collects both definition files.
+                List<CodeEditor2.Data.Project> owners = getReferencedDefinitionProjects(parsedDocument, definitionName);
+                if (owners.Count == 0)
                 {
-                    // not declared in this project: retry in every project that
-                    // owns a cross-project ("// @project <name>") reference
-                    foreach (CodeEditor2.Data.Project crossProject in getReferencedDefinitionProjects(parsedDocument, definitionName))
-                    {
-                        if (crossProject == localProject) continue;
-
-                        ProjectProperty? crossProperty = crossProject.ProjectProperties[Plugin.StaticID] as ProjectProperty;
-                        if (crossProperty == null) continue;
-                        // the cross-project module may also be provided by that
-                        // project's external library path instead of a project file
-                        if (crossProperty.ExtenralModuleLibraryPath.ContainsKey(definitionName)) continue;
-                        if (crossProperty.ExtenralPrimitiveLibraryPath.ContainsKey(definitionName)) continue;
-
-                        IVerilogRelatedFile? crossFile = crossProperty.DefinitionNameSpace.GetFile(definitionName);
-                        if (crossFile == null) continue;
-
-                        ownerProject = crossProject;
-                        defFile = crossFile;
-                        break;
-                    }
+                    // reference recorded without an owner project (parse result
+                    // produced before owners were recorded): resolve it in this
+                    // document's own project
+                    owners.Add(localProject);
                 }
 
-                if (defFile != null)
+                bool resolved = false;
+                foreach (CodeEditor2.Data.Project ownerProject in owners)
                 {
-                    if (ownerProject == setup.Project)
-                    {
-                        // recurse into the referenced definition file so that its own
-                        // module / class / package dependencies are collected as well
-                        searchHier(defFile, definitionName, ids, setup, path);
-                    }
-                    else
-                    {
-                        // cross-project definition: the definition file belongs to
-                        // that project's sub-setup so that the simulation backend
-                        // receives it as a source of the external project.
-                        SimulationSetup ownerSetup = getExternalProjectSetup(setup, ownerProject);
-                        if (!ownerSetup.Files.Contains(defFile)) ownerSetup.Files.Add(defFile);
+                    ProjectProperty? ownerProperty = ownerProject.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+                    if (ownerProperty == null) continue;
 
-                        // Its own dependencies must be collected through the
-                        // INSTANCE (parameter overrides applied) by
-                        // appendExternalProjectDependencies, which runs later from
-                        // the instance tree. Walking the base parse here would
-                        // collect the modules selected by the DEFAULT parameter
-                        // values and report modules of the non-selected
-                        // "generate if" branch as unfound. Only fall back to the
-                        // base parse when no instance item exists for it.
-                        if (!hasInstantiationItem(file, definitionName))
-                        {
-                            searchHier(defFile, definitionName, ids, ownerSetup, path);
-                        }
-                    }
+                    // external library modules are provided by external file
+                    // paths, not project files
+                    if (ownerProperty.ExtenralModuleLibraryPath.ContainsKey(definitionName)) { resolved = true; continue; }
+                    if (ownerProperty.ExtenralPrimitiveLibraryPath.ContainsKey(definitionName)) { resolved = true; continue; }
+
+                    IVerilogRelatedFile? defFile = ownerProperty.DefinitionNameSpace.GetFile(definitionName);
+                    if (defFile == null) continue;
+
+                    // A "// @project <name>" reference MUST be collected from that
+                    // project even when this document's own project declares a
+                    // definition with the same name: the comment explicitly
+                    // selects the referenced project's building block.
+                    appendReferencedDefinition(defFile, ownerProject, definitionName, file, ids, setup, path);
+                    resolved = true;
                 }
-                else
+
+                if (!resolved)
                 {
                     // referenced module/interface/program/udp definition file is missing
                     addUnfoundModule(setup, file, definitionName);
@@ -649,7 +626,7 @@ namespace pluginVerilog. Data
                     {
                         pSetup = new SimulationSetup() { Project = project };
                         setup. ExternalProjectReferences. Add(project, pSetup);
-                        pSetup. TopFile = instance. SourceVerilogFile;
+                        pSetup. TopFiles.Add(instance. SourceVerilogFile);
                         pSetup. TopName = instance. ModuleName;
                     }
                     else
@@ -688,7 +665,7 @@ namespace pluginVerilog. Data
                     {
                         pSetup = new SimulationSetup() { Project = project };
                         setup.ExternalProjectReferences.Add(project, pSetup);
-                        pSetup.TopFile = instance.SourceVerilogFile;
+                        pSetup.TopFiles.Add(instance.SourceVerilogFile);
                         pSetup.TopName = instance.ModuleName;
                     }
                     else
@@ -954,6 +931,52 @@ namespace pluginVerilog. Data
         }
 
         /// <summary>
+        /// Collect the definition file of a referenced building block that is
+        /// owned by the given project (the "// @project <name>" target or this
+        /// document's own project).
+        ///
+        /// A definition owned by another project always goes to that project's
+        /// sub-setup so that the simulation backend receives it as a source of
+        /// the external project. A definition owned by the top project of the
+        /// setup is traversed in place instead.
+        /// </summary>
+        private static void appendReferencedDefinition(
+            IVerilogRelatedFile defFile,
+            CodeEditor2.Data.Project ownerProject,
+            string definitionName,
+            IVerilogRelatedFile referrer,
+            List<string> ids,
+            SimulationSetup setup,
+            string path)
+        {
+            if (ownerProject == setup.Project)
+            {
+                // recurse into the referenced definition file so that its own
+                // module / class / package dependencies are collected as well
+                searchHier(defFile, definitionName, ids, setup, path);
+                return;
+            }
+
+            // cross-project definition: the definition file belongs to that
+            // project's sub-setup so that the simulation backend receives it as
+            // a source of the external project.
+            SimulationSetup ownerSetup = getExternalProjectSetup(setup, ownerProject);
+            if (!ownerSetup.Files.Contains(defFile)) ownerSetup.Files.Add(defFile);
+
+            // Its own dependencies must be collected through the INSTANCE
+            // (parameter overrides applied) by appendExternalProjectDependencies,
+            // which runs later from the instance tree. Walking the base parse
+            // here would collect the modules selected by the DEFAULT parameter
+            // values and report modules of the non-selected "generate if" branch
+            // as unfound. Only fall back to the base parse when no instance item
+            // exists for it.
+            if (!hasInstantiationItem(referrer, definitionName))
+            {
+                searchHier(defFile, definitionName, ids, ownerSetup, path);
+            }
+        }
+
+        /// <summary>
         /// Get (or create) the sub-setup that collects the files of the given
         /// external project. Creating it here keeps the "one sub-setup per
         /// external project" invariant that the simulation backends rely on.
@@ -1014,13 +1037,23 @@ namespace pluginVerilog. Data
         }
 
         /// <summary>
+        /// Names of the projects that own the given referenced definition, as
+        /// recorded by the parse ("// @project <name>" targets and, for plain
+        /// references, this document's own project).
+        /// </summary>
+        private static List<string> getReferencedDefinitionProjectNames(ParsedDocument parsedDocument, string definitionName)
+        {
+            return parsedDocument.GetReferencedDefinitionNameSpaceProjects(definitionName);
+        }
+
+        /// <summary>
         /// Projects that own the given referenced definition name, as recorded by
         /// the parse for cross-project ("// @project <name>") references.
         /// </summary>
         private static List<CodeEditor2.Data.Project> getReferencedDefinitionProjects(ParsedDocument parsedDocument, string definitionName)
         {
             List<CodeEditor2.Data.Project> results = new List<CodeEditor2.Data.Project>();
-            foreach (string projectName in parsedDocument.GetReferencedDefinitionNameSpaceProjects(definitionName))
+            foreach (string projectName in getReferencedDefinitionProjectNames(parsedDocument, definitionName))
             {
                 if (CodeEditor2.Global.Projects.TryGetValue(projectName, out CodeEditor2.Data.Project? project)
                     && project != null)

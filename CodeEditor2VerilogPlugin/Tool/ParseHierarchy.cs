@@ -430,37 +430,34 @@ namespace pluginVerilog.Tool
                 // the bound definitions are reflected in this hierarchy pass.
                 foreach (string elementName in verilogFile.VerilogParsedDocument.ReferencedDefinitionNameSpace)
                 {
-                    // Resolve in the project that owns the definition: a module
-                    // instanced with "// @project <name>" lives in that project's
-                    // DefinitionNameSpace, so a lookup in this file's project
-                    // silently skipped it and the external definition was never
-                    // re-parsed in this hierarchy pass.
+                    // Resolve in EVERY project that owns the definition. A
+                    // module instanced with "// @project <name>" lives in that
+                    // project's DefinitionNameSpace, so a lookup in this file's
+                    // project skipped it and the external definition was never
+                    // re-parsed in this hierarchy pass. Conversely a
+                    // "// @project <name>" instance must be resolved in the
+                    // referenced project even when this file's own project
+                    // declares a definition with the same name (the referenced
+                    // project's building block is the one actually instanced).
                     Verilog.ParsedDocument vParsedDocument = verilogFile.VerilogParsedDocument;
-                    CodeEditor2.Data.Project ownerProject = verilogFile.Project;
-                    TextFile? vFile = null;
+                    CodeEditor2.Data.Project localProject = verilogFile.Project;
 
-                    pluginVerilog.ProjectProperty? localProperty = ownerProject.ProjectProperties[pluginVerilog.Plugin.StaticID] as ProjectProperty;
-                    if (localProperty != null)
+                    // copy: the returned list is the parsed document's own
+                    // storage and must not be modified here
+                    List<string> ownerProjectNames = new List<string>(vParsedDocument.GetReferencedDefinitionNameSpaceProjects(elementName));
+                    if (ownerProjectNames.Count == 0) ownerProjectNames.Add(localProject.Name);
+
+                    foreach (string ownerProjectName in ownerProjectNames)
                     {
-                        vFile = localProperty.DefinitionNameSpace.GetFile(elementName) as TextFile;
+                        if (!CodeEditor2.Global.Projects.TryGetValue(ownerProjectName, out CodeEditor2.Data.Project? ownerProject)) continue;
+                        if (ownerProject == null) continue;
+                        pluginVerilog.ProjectProperty? ownerProperty = ownerProject.ProjectProperties[pluginVerilog.Plugin.StaticID] as ProjectProperty;
+                        if (ownerProperty == null) continue;
+                        TextFile? ownerFile = ownerProperty.DefinitionNameSpace.GetFile(elementName) as TextFile;
+                        if (ownerFile == null) continue;
+                        ParseTask newTask = new ParseTask(Id: ownerFile.ID, tarfgetTextFile: ownerFile);
+                        EnqueueWork(newTask, workQueue, completeIds);
                     }
-                    if (vFile == null)
-                    {
-                        // cross-project ("// @project <name>") definition
-                        foreach (string ownerProjectName in vParsedDocument.GetReferencedDefinitionNameSpaceProjects(elementName))
-                        {
-                            if (!CodeEditor2.Global.Projects.TryGetValue(ownerProjectName, out CodeEditor2.Data.Project? gotProject)) continue;
-                            if (gotProject == null) continue;
-                            pluginVerilog.ProjectProperty? crossProperty = gotProject.ProjectProperties[pluginVerilog.Plugin.StaticID] as ProjectProperty;
-                            if (crossProperty == null) continue;
-                            vFile = crossProperty.DefinitionNameSpace.GetFile(elementName) as TextFile;
-                            if (vFile == null) continue;
-                            break;
-                        }
-                    }
-                    if (vFile == null) continue;
-                    ParseTask newTask = new ParseTask(Id: vFile.ID, tarfgetTextFile: vFile);
-                    EnqueueWork(newTask, workQueue, completeIds);
                 }
             }
 

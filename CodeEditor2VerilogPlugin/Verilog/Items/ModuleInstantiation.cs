@@ -218,7 +218,14 @@ namespace pluginVerilog.Verilog.Items
 
             // instance対象となるmoduleを取得する
             Module? instancedModule = word.ProjectProperty.DefinitionNameSpace.Get(moduleName) as Module;
-            word.RootParsedDocument.AddReferencedDefinitionNameSpace(moduleName, word.Project.Name);
+            // NOTE: the referenced definition name is registered to the parsed
+            // document only AFTER the "// @project <name>" comment was scanned
+            // (see below). A cross-project instance must be recorded with the
+            // referenced project as its ONLY owner: the local project's
+            // definition of the same name is a different building block, and
+            // hierarchy analysis (SimulationSetup) collects every recorded
+            // owner, so registering the local project as well made the wrong
+            // file / dependencies show up in the simulation setup.
 
             // True when a valid "// @project <name>" comment selects the project
             // that owns the module. The module is then defined OUTSIDE this
@@ -273,6 +280,14 @@ namespace pluginVerilog.Verilog.Items
                     }
                 }
             }
+            if (!crossProjectReference)
+            {
+                // plain (same-project) reference: this document's project owns
+                // the definition. Cross-project instances are registered above
+                // with the referenced project only.
+                word.RootParsedDocument.AddReferencedDefinitionNameSpace(moduleName, word.Project.Name);
+            }
+
             if (instancedModule == null)
             {
                 if (sourceProjectProperty.ExtenralModuleLibraryPath.ContainsKey(moduleName))
