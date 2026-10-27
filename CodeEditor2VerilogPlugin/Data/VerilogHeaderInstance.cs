@@ -312,7 +312,11 @@ namespace pluginVerilog.Data
         public override async System.Threading.Tasks.Task SaveAsync()
         {
             if (SourceTextFile == null) return;
-            await SourceTextFile.SaveAsync();
+
+            // Save through the source file and refresh this instance's navigate panel
+            // node (the source file's SaveAsync only refreshes its own node, which
+            // left this node's dirty badge stale after Save).
+            await SaveSourceTextFileAsync();
         }
 
         public new Verilog.ParsedDocument? VerilogParsedDocument

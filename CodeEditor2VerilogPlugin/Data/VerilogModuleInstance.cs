@@ -451,14 +451,12 @@ namespace pluginVerilog.Data
 
         public override async System.Threading.Tasks.Task SaveAsync()
         {
-            CodeEditor2.CodeEditor.CodeDocument? codeDoc;
-            CodeEditor2.Data.TextFile? sourceTextFile;
-            codeDoc = CodeDocument;
-            sourceTextFile = SourceTextFile;
+            if (CodeDocument == null) return;
 
-            if (codeDoc == null) return;
-            if (sourceTextFile == null) return;
-            await sourceTextFile.SaveAsync();
+            // Save through the source file and refresh this instance's navigate panel
+            // node (the source file's SaveAsync only refreshes its own node, which
+            // left this node's dirty badge stale after Save).
+            await SaveSourceTextFileAsync();
         }
 
 

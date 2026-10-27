@@ -56,6 +56,41 @@ namespace pluginVerilog.Data
             }
         }
 
+        /// <summary>
+        /// Saves the source text file that owns this instance's CodeDocument and
+        /// then refreshes this instance's navigate panel node.
+        /// </summary>
+        /// <remarks>
+        /// An instance file (module / interface / imported package / header
+        /// instance) shares the source file's CodeDocument and delegates saving to
+        /// the source file. <see cref="CodeEditor2.Data.TextFile.SaveAsync"/>
+        /// refreshes only the navigate panel node of the file it was called on (the
+        /// source file), so the instance node kept showing the previous icon — the
+        /// dirty (shine) badge stayed visible after Save until the node was
+        /// re-selected. Refresh the instance node explicitly here.
+        /// </remarks>
+        protected async Task SaveSourceTextFileAsync()
+        {
+            CodeEditor2.Data.TextFile? source = SourceTextFile;
+            if (source == null) return;
+
+            await source.SaveAsync();
+
+            // The node is repainted on the UI thread. Saves normally originate from
+            // the UI thread (Ctrl+S / File menu) but keep a fallback for callers on
+            // a background thread, matching the other instance node updates.
+            CodeEditor2.NavigatePanel.NavigatePanelNode? node = NavigatePanelNode;
+            if (node == null) return;
+            if (Avalonia.Threading.Dispatcher.UIThread.CheckAccess())
+            {
+                node.UpdateVisual();
+            }
+            else
+            {
+                Avalonia.Threading.Dispatcher.UIThread.Post(() => node.UpdateVisual());
+            }
+        }
+
         public override void PostStatusCheck()
         {
             CodeEditor2.Data.TextFile? source = SourceTextFile;
