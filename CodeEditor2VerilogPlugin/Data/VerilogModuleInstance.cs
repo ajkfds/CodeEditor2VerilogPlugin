@@ -11,6 +11,7 @@ using pluginVerilog.Verilog.Items;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -427,31 +428,6 @@ namespace pluginVerilog.Data
             CodeEditor2.CodeEditor.ParsedDocument? parsedDoc = null;
             vParsedDoc = VerilogParsedDocument;
             parsedDoc = ParsedDocument;
-
-            //if (vParsedDoc != null)
-            //{
-            //    // Atomically read parameter overrides while holding read lock
-            //    Dictionary<string, Verilog.Expressions.Expression> parameterOverrides;
-            //    textFileLock.EnterReadLock();
-            //    try
-            //    {
-            //        parameterOverrides = _parameterOverrides;
-            //    }
-            //    finally
-            //    {
-            //        textFileLock.ExitReadLock();
-            //    }
-
-            //    if (parsedDoc != null && parameterOverrides.Count != 0)
-            //    {
-            //        foreach (var incFile in vParsedDoc.IncludeFiles.Values)
-            //        {
-            //            incFile.Dispose();
-            //        }
-            //    }
-            //}
-
-            //ParsedDocument = null;
         }
 
         public Data.VerilogFile SourceVerilogFile
@@ -510,25 +486,6 @@ namespace pluginVerilog.Data
 
             {
                 source.RegisterInstanceParsedDocument(key, newParsedDocument, this);
-                //                await acceptParameterizedParsedDocumentAsync(newParsedDocument);
-                // copy include files
-
-
-                //if (oldParsedDocument == null)
-                //{
-                //    await UpdateAsync();
-                //    return;
-                //}
-
-                //Verilog.ParsedDocument? vParsedDocument = newParsedDocument as Verilog.ParsedDocument;
-                //if (vParsedDocument != null)
-               // {
-               //     ReparseRequested = vParsedDocument.ReparseRequested;
-                //}
-
-                //await VerilogFile.updateIncludeFilesAsync(oldParsedDocument, Items);
-
-
             }
 
             if (source.ParsedDocument != null)// && source.ParsedDocument.Version != newParsedDocument.Version)
@@ -557,28 +514,39 @@ namespace pluginVerilog.Data
 
             _parsedDocument = newParsedDocument;
 
-            TextFile? textFile = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync();
-            if (textFile == this)
+            Dispatcher.UIThread.Post(() =>
             {
-                textFile.CodeDocument?.CopyColorMarkFrom(parser.Document);
-                CodeEditor2.Controller.MessageView.Update(newParsedDocument);
-                CodeEditor2.Controller.CodeEditor.PostRefresh();
-            }
-
-            await UpdateAsync(); // update navigate panel node and message view
-
-            // refresh the navigate panel node icon (error/warning badge, ...)
-            // after the parsed document is updated. Without this, the icon of a
-            // deeply parsed VerilogModuleInstance stays stale until the node is
-            // selected (same as VerilogHeaderInstance.AcceptParsedDocumentAsync).
-            // Post (not Invoke) to avoid blocking this background parse thread
-            // on the UI thread.
-            if (CodeEditor2.Global.UIThread != null)
-            {
-                Dispatcher.UIThread.Post(() => NavigatePanelNode.UpdateVisual());
-            }
+                _ = postUpdateAsync(newParsedDocument);
+            });
         }
 
+        private async Task postUpdateAsync(Verilog.ParsedDocument newParsedDocument)
+        {
+            try
+            {
+                TextFile? textFile = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync();
+                if (textFile == this)
+                {
+                    if(CodeDocument!=null) textFile.CodeDocument?.CopyColorMarkFrom(newParsedDocument.CodeDocument);
+                    if(ParsedDocument != null) CodeEditor2.Controller.MessageView.Update(newParsedDocument);
+                    CodeEditor2.Controller.CodeEditor.PostRefresh();
+                }
+
+                await UpdateAsync(); // update navigate panel node and message view
+
+                // refresh the navigate panel node icon (error/warning badge, ...)
+                // after the parsed document is updated. Without this, the icon of a
+                // deeply parsed VerilogModuleInstance stays stale until the node is
+                // selected (same as VerilogHeaderInstance.AcceptParsedDocumentAsync).
+                // Post (not Invoke) to avoid blocking this background parse thread
+                // on the UI thread.
+                NavigatePanelNode.UpdateVisual();
+            }
+            catch (Exception ex)
+            {
+                CodeEditor2.Controller.AppendLog(ex);
+            }
+        }
 
 
         public override ProjectProperty ProjectProperty

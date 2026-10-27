@@ -9,6 +9,7 @@ using CodeEditor2.Data;
 using pluginVerilog.CodeEditor;
 using pluginVerilog.Verilog;
 using pluginVerilog.Verilog.BuildingBlocks;
+using pluginVerilog.Verilog.Statements;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -238,11 +239,12 @@ namespace pluginVerilog.Data
                 }
             }
 
+
             // Editor-dependent update (color/message/refresh) must run only
             // when the editor UI is alive. In UI-less hosts (LSP server,
             // unit tests) the Avalonia Dispatcher does not exist and
             // GetTextFileAsync would block forever.
-            if (CodeEditor2.Global.UIThread != null)
+            if (!Dispatcher.UIThread.CheckAccess())
             {
                 TextFile? currentTextFile = await Controller.CodeEditor.GetTextFileAsync();
                 if (currentTextFile == this)
@@ -253,12 +255,21 @@ namespace pluginVerilog.Data
                 }
             }
 
-
             await updateIncludeFilesAsync(newParsedDocument, Items);
             
             // CodeEditor & NavigateNode & Messgae update will done in UpdateAsync
             await UpdateAsync();
         }
+
+        private void update(Verilog.ParsedDocument? newParsedDocument)
+        {
+            if (!Dispatcher.UIThread.CheckAccess())
+            {
+
+            }
+
+        }
+
 
 
         internal static async System.Threading.Tasks.Task updateIncludeFilesAsync(Verilog.ParsedDocument parsedDocument, ItemList items)
@@ -277,7 +288,7 @@ namespace pluginVerilog.Data
             CodeEditor2.NavigatePanel.NavigatePanelNode? node = null;
             CodeEditor2.Data.Item? currentItem = null;
             CodeEditor2.Data.ITextFile? currentTextFile = null;
-            if (CodeEditor2.Global.UIThread != null)
+            if (!Dispatcher.UIThread.CheckAccess())
             {
                 node = await CodeEditor2.Controller.NavigatePanel.GetSelectedNodeAsync();
                 currentItem = node?.Item;

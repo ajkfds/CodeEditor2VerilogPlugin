@@ -137,11 +137,6 @@ namespace pluginVerilog.Verilog.DataObjects
             else
             {
                 word.AddError("} required");
-
-                if(word.Eof && word.IsPartialParse)
-                {
-
-                }
             }
 
             // detailed check against the assignment target, performed here while
@@ -280,7 +275,26 @@ namespace pluginVerilog.Verilog.DataObjects
 
         private void AddAutoCompleteCantidates(WordScanner word, DataObject? lhs)
         {
+            if (!word.Eof) return;
+            if (word.CompletionContext == null) return;
 
+            // do not clear items already appended by the partial parse
+            // (e.g. expression candidates collected inside "assign dst = mysi"):
+            // clearing here suppressed instance / variable name candidates
+            // when typing an identifier without a dot
+            if (word.CompletionContext.AutoCompleteItems.Count == 0)
+            {
+                word.CompletionContext.AutoCompleteItems.Clear();
+                word.CompletionContext.AppendKeywords(new List<string> {
+                        "endmodule",
+                        "always", "assign", "initial",
+                        "function","task",
+                        "bit","logic","reg","byte","shortint","int","logint","integer","time","shortreal","real","realtime","struct","union","enum","string","chandle","mailbox","semaphore","process","event","type",
+                        "genvar","string","wire","tri","triand","trior","tri0","tri1","uwire",
+                        "parameter","localparam"
+                    });
+                word.CompletionContext.AppendModuleInstanceSnippets((ac) => true);
+            }
         }
 
 

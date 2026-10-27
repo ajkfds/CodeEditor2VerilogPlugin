@@ -263,23 +263,20 @@ namespace pluginVerilog.Data
 
             // Editor-dependent update must run only when the editor UI is
             // alive (see VerilogFile.AcceptParsedDocumentAsync).
-            if (CodeEditor2.Global.UIThread != null)
+            TextFile? currentTextFile = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync();
+            if (currentTextFile == this)
             {
-                TextFile? currentTextFile = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync();
-                if (currentTextFile == this)
-                {
-                    currentTextFile.CodeDocument?.CopyColorMarkFrom(parser.Document);
-                    CodeEditor2.Controller.MessageView.Update(newParsedDocument);
-                    CodeEditor2.Controller.CodeEditor.PostRefresh();
-                }
-
-                // refresh the navigate panel node icon (error/warning badge, ...)
-                // after the parsed document is updated (same as
-                // VerilogHeaderInstance.AcceptParsedDocumentAsync).
-                // Post (not Invoke) to avoid blocking this background parse
-                // thread on the UI thread.
-                Dispatcher.UIThread.Post(() => NavigatePanelNode.UpdateVisual());
+                currentTextFile.CodeDocument?.CopyColorMarkFrom(parser.Document);
+                CodeEditor2.Controller.MessageView.Update(newParsedDocument);
+                CodeEditor2.Controller.CodeEditor.PostRefresh();
             }
+
+            // refresh the navigate panel node icon (error/warning badge, ...)
+            // after the parsed document is updated (same as
+            // VerilogHeaderInstance.AcceptParsedDocumentAsync).
+            // Post (not Invoke) to avoid blocking this background parse
+            // thread on the UI thread.
+            Dispatcher.UIThread.Post(() => NavigatePanelNode.UpdateVisual());
         }
 
         private async System.Threading.Tasks.Task acceptParameterizedParsedDocument(ParsedDocument newParsedDocument)

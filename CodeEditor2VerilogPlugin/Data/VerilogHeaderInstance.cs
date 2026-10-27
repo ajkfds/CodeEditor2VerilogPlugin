@@ -1,4 +1,4 @@
-//using CodeEditor2.CodeEditor;
+using Avalonia.Threading;
 using CodeEditor2.CodeEditor.CodeComplete;
 using CodeEditor2.CodeEditor.Parser;
 using CodeEditor2.CodeEditor.PopupHint;
@@ -333,23 +333,7 @@ namespace pluginVerilog.Data
                 textFile.CodeDocument?.CopyColorMarkFrom(parser.Document);
                 CodeEditor2.Controller.CodeEditor.PostRefresh();
             }
-            //{
-            //    Data.VerilogFile source = SourceVerilogFile;
-            //    if (source == null) return;
-            //    source.RegisterInstanceParsedDocument(ParameterId, newParsedDocument, this);
-            //}
-
-            //Data.VerilogFile source = SourceVerilogFile;
-            //if (source == null) return;
-
-            //if (ParameterOverrides.Count == 0)
-            //{
-            //    source.AcceptParsedDocument(newParsedDocument);
-
-
-            //            ReparseRequested = VerilogParsedDocument.ReparseRequested;
             await UpdateAsync();
-
             NavigatePanelNode.UpdateVisual();
         }
 
