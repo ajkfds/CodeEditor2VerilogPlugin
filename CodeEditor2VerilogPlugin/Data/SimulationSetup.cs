@@ -50,17 +50,104 @@ namespace pluginVerilog. Data
 
         public CodeEditor2. Data. Project Project;
 
-        public Dictionary<CodeEditor2. Data. Project, SimulationSetup> ExternalProjectReferences = new Dictionary<Project, SimulationSetup>();
-        public Dictionary<string, CodeEditor2.Data.Project> ExternalProjectEntryInstance = new Dictionary<string, Project>();
+        /// <summary>
+        /// このセットアップ自身のルート (トップ) セットアップ。
+        /// ルートは自分自身を指す。ProjectSetups はルートだけが実体を持ち、
+        /// サブセットアップは同じ Dictionary を共有する。
+        /// </summary>
+        public SimulationSetup RootSetup = null!;
 
         /// <summary>
-        /// シミュレーションに渡すファイル一覧 (このプロジェクト + 参照している
-        /// 外部プロジェクトのサブセットアップ) を依存順で返す。
+        /// 「1 プロジェクトにつき 1 つの SimulationSetup」を保証する共有レジストリ。
         ///
-        /// 外部プロジェクトのファイルは ExternalProjectReferences (サブセットアップ)
-        /// にのみ入るため、Files だけを列挙するシミュレーション backend では
-        /// 外部プロジェクトを instance した設計がコンパイルできない。
-        /// backend はこのメソッド経由で全ファイルを取得すること。
+        /// ルートセットアップ (Create) が自分自身を登録して生成し、外部プロジェクトの
+        /// サブセットアップはすべて同じインスタンスを共有する。以前はサブセットアップを
+        /// 参照元 setup ごとに生成していたため、同じプロジェクトを複数の箇所から
+        /// 参照すると同一プロジェクトのファイル一覧が複数に分裂し、
+        /// UnfoundModules / RequiredForwardDeclarations / ClassFiles などが
+        /// セットアップごとにずれていた。
+        /// </summary>
+        public Dictionary<CodeEditor2. Data. Project, SimulationSetup> ProjectSetups = new Dictionary<Project, SimulationSetup>();
+
+        /// <summary>
+        /// このプロジェクトのセットアップをプロジェクトから取得する。
+        /// 未登録なら null (ProjectSetups はルートで共有されている)。
+        /// </summary>
+        public SimulationSetup? GetProjectSetup(CodeEditor2.Data.Project project)
+        {
+            if (ProjectSetups.TryGetValue(project, out SimulationSetup? setup)) return setup;
+            return null;
+        }
+
+        /// <summary>
+        /// セットアップ木に含まれる全プロジェクトのセットアップ (ルート自身を含む)。
+        /// プロジェクトごとに 1 インスタンスだけが返る。
+        /// </summary>
+        public List<SimulationSetup> GetAllProjectSetups()
+        {
+            return new List<SimulationSetup>(ProjectSetups.Values);
+        }
+
+        /// <summary>
+        /// セットアップ木に含まれる全プロジェクトの外部プロジェクト instance 情報を
+        /// まとめて返す (プロジェクトごとの ExternalProjectEntryInstance を集約)。
+        /// </summary>
+        public List<ExternalProjectEntryInstanceInfo> GetAllExternalProjectEntryInstances()
+        {
+            List<ExternalProjectEntryInstanceInfo> results = new List<ExternalProjectEntryInstanceInfo>();
+            foreach (SimulationSetup projectSetup in ProjectSetups.Values)
+            {
+                foreach (ExternalProjectEntryInstanceInfo instance in projectSetup.ExternalProjectEntryInstance.Values)
+                {
+                    if (results.Contains(instance)) continue;
+                    results.Add(instance);
+                }
+            }
+            return results;
+        }
+
+        /// <summary>
+        /// このセットアップが参照している外部プロジェクトのサブセットアップ。
+        /// 参照の向き (どのプロジェクトがどのプロジェクトを参照しているか) を表すだけで、
+        /// 実体は ProjectSetups が保持する唯一のインスタンスを指す。
+        /// </summary>
+        public Dictionary<CodeEditor2. Data. Project, SimulationSetup> ExternalProjectReferences = new Dictionary<Project, SimulationSetup>();
+
+        /// <summary>
+        /// 外部プロジェクトの building block を instance している箇所。
+        /// key: instance path ("top.u_sub.u_leaf")、value: その instance の情報。
+        ///
+        /// 以前は key (instance path) → Project だけを保持していたため、
+        /// 「この instance path がどの module を instance しているか」が
+        /// 分からなかった ("// @project <name>" の instance 先 module 名など)。
+        /// </summary>
+        public Dictionary<string, ExternalProjectEntryInstanceInfo> ExternalProjectEntryInstance = new Dictionary<string, ExternalProjectEntryInstanceInfo>();
+
+        /// <summary>
+        /// 外部プロジェクトを instance している 1 箇所分の情報。
+        /// </summary>
+        public class ExternalProjectEntryInstanceInfo
+        {
+            /// <summary>instance path ("top.u_sub.u_leaf")</summary>
+            public required string InstancePath { get; set; }
+            /// <summary>instance している module / interface 名</summary>
+            public required string ModuleName { get; set; }
+            /// <summary>その module を定義しているプロジェクト</summary>
+            public required CodeEditor2.Data.Project Project { get; set; }
+        }
+
+        /// <summary>
+        /// シミュレーションに渡すファイル一覧を依存順で返す。
+        ///
+        /// 外部プロジェクトのファイルはそのプロジェクト専用のセットアップ
+        /// (ProjectSetups / ExternalProjectReferences) にのみ入るため、Files だけを
+        /// 列挙するシミュレーション backend では外部プロジェクトを instance した
+        /// 設計がコンパイルできない。backend はこのメソッド経由で全ファイルを
+        /// 取得すること。
+        ///
+        /// 参照している外部プロジェクトは「インスタンス元より先」に並べる
+        /// (依存順)。プロジェクトごとに 1 セットアップなので、同じプロジェクトを
+        /// 複数箇所から参照していてもファイルは重複しない。
         /// </summary>
         public List<IVerilogRelatedFile> GetAllFiles()
         {
@@ -76,9 +163,9 @@ namespace pluginVerilog. Data
 
             // referenced (external) projects must be compiled first: their
             // modules are instantiated from this project's sources
-            foreach (var kvp in setup.ExternalProjectReferences)
+            foreach (SimulationSetup referenced in setup.ExternalProjectReferences.Values)
             {
-                collectAllFiles(kvp.Value, results, visited);
+                collectAllFiles(referenced, results, visited);
             }
             foreach (IVerilogRelatedFile file in setup.Files)
             {
@@ -134,15 +221,19 @@ namespace pluginVerilog. Data
         }
         public static SimulationSetup? Create(pluginVerilog. Data. VerilogFile verilogFile)
         {
+            if (verilogFile.VerilogParsedDocument == null) return null;
+            if (verilogFile.VerilogParsedDocument.Root == null) return null;
+
+            // one SimulationSetup per project: the ROOT setup registers itself
+            // in the shared registry so that every external project sub-setup
+            // reuses exactly one instance per project.
             SimulationSetup setup = new SimulationSetup();
+            setup.Project = verilogFile.Project;
+            setup.RootSetup = setup;
+            setup.ProjectSetups.Add(setup.Project, setup);
             setup.TopFiles.Add(verilogFile);
 
             List<string> ids = new List<string>();
-
-            if (verilogFile. VerilogParsedDocument == null) return null;
-            if (verilogFile. VerilogParsedDocument. Root == null) return null;
-
-            setup.Project = verilogFile. Project;
 
             // TopName selection rule: when the top file declares multiple
             // building blocks (e.g. DUT + testbench in one file), the FIRST
@@ -506,13 +597,14 @@ namespace pluginVerilog. Data
                     ModuleInstantiation moduleInstantiation = (ModuleInstantiation) element;
                     if (nameSpace.BuildingBlock.Project.Name != moduleInstantiation.SourceProjectName)
                     {
+                        // external project instance: record the instance path
+                        // together with the instanced module name and the project
+                        // that defines it. The path alone could not tell which
+                        // module is instanced at that point.
                         string newPath = path + "." + moduleInstantiation.Name;
-                        if (!setup.ExternalProjectEntryInstance.ContainsKey(newPath))
+                        if (CodeEditor2.Global.Projects.TryGetValue(moduleInstantiation.SourceProjectName, out CodeEditor2.Data.Project? sourceProject))
                         {
-                            if (CodeEditor2.Global.Projects.TryGetValue(moduleInstantiation.SourceProjectName, out CodeEditor2.Data.Project? sourceProject))
-                            {
-                                setup.ExternalProjectEntryInstance.Add(newPath, sourceProject);
-                            }
+                            addExternalProjectEntryInstance(setup, newPath, moduleInstantiation.SourceName, sourceProject);
                         }
                     }
                     if (file. Items. TryGetValue(moduleInstantiation. Name, out CodeEditor2. Data. Item? item))
@@ -620,20 +712,17 @@ namespace pluginVerilog. Data
                 }
                 else
                 {
-                    CodeEditor2. Data. Project project = sourceFile. Project;
-                    SimulationSetup pSetup;
-                    if (!setup. ExternalProjectReferences. ContainsKey(project))
-                    {
-                        pSetup = new SimulationSetup() { Project = project };
-                        setup. ExternalProjectReferences. Add(project, pSetup);
-                        pSetup. TopFiles.Add(instance. SourceVerilogFile);
-                        pSetup. TopName = instance. ModuleName;
-                    }
-                    else
-                    {
-                        pSetup = setup. ExternalProjectReferences[project];
-                    }
+                    CodeEditor2. Data. Project project = sourceFile.Project;
+                    // one setup per project: the instance is shared through the
+                    // root registry, only the reference edge is per setup.
+                    SimulationSetup pSetup = getExternalProjectSetup(setup, project);
+                    if (pSetup.TopFiles.Count == 0) pSetup.TopFiles.Add(instance.SourceVerilogFile);
+                    if (string.IsNullOrEmpty(pSetup.TopName)) pSetup.TopName = instance.ModuleName;
                     if (!pSetup.Files.Contains(sourceFile)) pSetup.Files.Add(sourceFile);
+
+                    // remember the instance path together with the instanced
+                    // module name and its owning project
+                    addExternalProjectEntryInstance(setup, path, instance.ModuleName, project);
 
                     // recurse into the external project instance so that its own
                     // module / class / package dependencies are collected into the
@@ -660,19 +749,13 @@ namespace pluginVerilog. Data
                 else
                 {
                     CodeEditor2.Data.Project project = sourceFile.Project;
-                    SimulationSetup pSetup;
-                    if (!setup.ExternalProjectReferences.ContainsKey(project))
-                    {
-                        pSetup = new SimulationSetup() { Project = project };
-                        setup.ExternalProjectReferences.Add(project, pSetup);
-                        pSetup.TopFiles.Add(instance.SourceVerilogFile);
-                        pSetup.TopName = instance.ModuleName;
-                    }
-                    else
-                    {
-                        pSetup = setup.ExternalProjectReferences[project];
-                    }
+                    // same reasoning as the module instance above
+                    SimulationSetup pSetup = getExternalProjectSetup(setup, project);
+                    if (pSetup.TopFiles.Count == 0) pSetup.TopFiles.Add(instance.SourceVerilogFile);
+                    if (string.IsNullOrEmpty(pSetup.TopName)) pSetup.TopName = instance.ModuleName;
                     if (!pSetup.Files.Contains(sourceFile)) pSetup.Files.Add(sourceFile);
+
+                    addExternalProjectEntryInstance(setup, path, instance.ModuleName, project);
 
                     // recurse into the external project instance (same reasoning
                     // as the module instance above: several parameterized
@@ -844,16 +927,7 @@ namespace pluginVerilog. Data
             else
             {
                 CodeEditor2. Data. Project project = file. Project;
-                SimulationSetup pSetup;
-                if (!setup. ExternalProjectReferences. ContainsKey(project))
-                {
-                    pSetup = new SimulationSetup() { Project = project };
-                    setup. ExternalProjectReferences. Add(project, pSetup);
-                }
-                else
-                {
-                    pSetup = setup. ExternalProjectReferences[project];
-                }
+                SimulationSetup pSetup = getExternalProjectSetup(setup, project);
                 if (pSetup. IncludeFiles. Contains(file)) return;
                 pSetup. IncludeFiles. Add(file);
                 string? path = System. IO. Path. GetDirectoryName(file. Project. GetAbsolutePath(file. RelativePath));
@@ -977,17 +1051,66 @@ namespace pluginVerilog. Data
         }
 
         /// <summary>
-        /// Get (or create) the sub-setup that collects the files of the given
-        /// external project. Creating it here keeps the "one sub-setup per
-        /// external project" invariant that the simulation backends rely on.
+        /// Get (or create) the setup that collects the files of the given
+        /// external project, and register it as a reference of "setup".
+        ///
+        /// The setup instance itself is unique per project: it is looked up in
+        /// the shared ProjectSetups registry, so every referencing project (and
+        /// every reference path) uses the same instance. This keeps the
+        /// "1 SimulationSetup per project" invariant the simulation backends
+        /// rely on. Only the reference edge is added per referencing setup.
         /// </summary>
         private static SimulationSetup getExternalProjectSetup(SimulationSetup setup, CodeEditor2.Data.Project project)
         {
-            if (setup.ExternalProjectReferences.TryGetValue(project, out SimulationSetup? existing)) return existing;
-
-            SimulationSetup subSetup = new SimulationSetup() { Project = project };
-            setup.ExternalProjectReferences.Add(project, subSetup);
+            SimulationSetup subSetup = getOrCreateProjectSetup(setup, project);
+            if (!setup.ExternalProjectReferences.ContainsKey(project))
+            {
+                setup.ExternalProjectReferences.Add(project, subSetup);
+            }
             return subSetup;
+        }
+
+        /// <summary>
+        /// Get (or create) the unique setup instance of the given project.
+        ///
+        /// The registry always lives on the ROOT setup (the one created by
+        /// Create), so that sub-setups created from nested calls share it:
+        /// a sub-setup does not own a registry of its own.
+        /// </summary>
+        private static SimulationSetup getOrCreateProjectSetup(SimulationSetup setup, CodeEditor2.Data.Project project)
+        {
+            SimulationSetup root = setup.RootSetup ?? setup;
+            if (root.ProjectSetups.TryGetValue(project, out SimulationSetup? existing)) return existing;
+
+            SimulationSetup projectSetup = new SimulationSetup()
+            {
+                Project = project,
+                RootSetup = root,
+                ProjectSetups = root.ProjectSetups
+            };
+            root.ProjectSetups.Add(project, projectSetup);
+            return projectSetup;
+        }
+
+        /// <summary>
+        /// Register an external project instance (instance path + module name +
+        /// owning project) so that the entry point of the external project is
+        /// identifiable from the setup tree.
+        /// </summary>
+        private static void addExternalProjectEntryInstance(
+            SimulationSetup setup,
+            string instancePath,
+            string moduleName,
+            CodeEditor2.Data.Project project)
+        {
+            if (setup.ExternalProjectEntryInstance.ContainsKey(instancePath)) return;
+
+            setup.ExternalProjectEntryInstance.Add(instancePath, new ExternalProjectEntryInstanceInfo()
+            {
+                InstancePath = instancePath,
+                ModuleName = moduleName,
+                Project = project
+            });
         }
 
         /// <summary>
