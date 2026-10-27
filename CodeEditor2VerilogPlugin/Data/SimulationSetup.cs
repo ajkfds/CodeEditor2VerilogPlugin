@@ -16,19 +16,78 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog. Data
 {
+    /// <summary>
+    /// シミュレーション (コンパイル) に渡すソース一式を、プロジェクト単位に集めたもの。
+    ///
+    /// 2 つの役割を持つ。
+    /// 1. モジュール名が衝突する複数の module instance を区別して扱うための情報を保持する
+    ///    (同名 module でも instance ごとに parameter override が異なるため、
+    ///     instance 単位で依存を辿る必要がある。→ ExternalProjectEntryInstance /
+    ///     UnfoundModules などは instance path 付きで記録する)。
+    /// 2. プロジェクトごとの分割コンパイルを行い、外部プロジェクトをライブラリとして
+    ///    参照するための情報を保持する (→ ExternalProjectReferences / ProjectSetups /
+    ///     ExternalLibraryPathList)。
+    ///
+    /// 1 プロジェクトにつき 1 インスタンス。共有レジストリ ProjectSetups が
+    /// プロジェクト → セットアップの対応を保持し、外部プロジェクト参照は
+    /// ExternalProjectReferences が「参照している」方向だけを保持する。
+    /// </summary>
     public class SimulationSetup
     {
         protected SimulationSetup() { }
 
+        /// <summary>
+        /// このセットアップのシミュレーション対象 (トップ) building block 名。
+        /// ルートではトップファイル内で最初に宣言された module / interface など、
+        /// 外部プロジェクトのセットアップではそのプロジェクトで最初に instance
+        /// された building block 名が入る。
+        /// </summary>
         public string TopName;
+
+        /// <summary>
+        /// トップ (シミュレーションの起点) となるソースファイル。
+        /// ルートではシミュレーション実行対象のファイル 1 つ。
+        /// 外部プロジェクトのセットアップでは、そのプロジェクトが最初に
+        /// instance されたときのソースファイル。
+        /// </summary>
         public List<VerilogFile> TopFiles = new List<VerilogFile>();
+
+        /// <summary>
+        /// このプロジェクトのコンパイル対象ソースファイル (依存順)。
+        ///
+        /// instance 先のファイルは、そのプロジェクトのセットアップ側の Files に
+        /// 入る (他プロジェクトのファイルはここには入らない)。VerilogModuleInstance
+        /// のような instance ファイルではなく、その実体のソースファイルが入る。
+        /// 同じファイルを parameter 違いで複数回 instance しても 1 回だけ登録される。
+        /// </summary>
         public List<IVerilogRelatedFile> Files = new List<IVerilogRelatedFile>();
 
+        /// <summary>
+        /// `include で取り込まれるヘッダファイル (このプロジェクト所有分)。
+        /// コンパイル対象のファイル一覧とは別管理で、backend は
+        /// IncludePaths と併せて include 探索に使う。
+        /// </summary>
         public List<IVerilogRelatedFile> IncludeFiles = new List<IVerilogRelatedFile>();
+
+        /// <summary>
+        /// include 探索ディレクトリ (+incdir)。IncludeFiles の存在する
+        /// ディレクトリが登録される。外部プロジェクト分はそのプロジェクトの
+        /// セットアップ側に登録される。
+        /// </summary>
         public List<string> IncludePaths = new List<string>();
 
+        /// <summary>
+        /// import される package の定義ファイル (このプロジェクト所有分)。
+        /// package はコンパイル順序に制約があるため Files とは別に保持し、
+        /// backend は Files より先に渡す。
+        /// </summary>
         public List<IVerilogRelatedFile> ImportFiles = new List<IVerilogRelatedFile>();
 
+        /// <summary>
+        /// 参照される class の定義ファイル (このプロジェクト所有分)。
+        /// class は宣言順・継承関係に依存するため Files とは別に保持し、
+        /// 依存関係に基づいて整列したうえで backend に渡す。
+        /// </summary>
         public List<IVerilogRelatedFile> ClassFiles = new List<IVerilogRelatedFile>();
 
         /// <summary>
@@ -45,9 +104,37 @@ namespace pluginVerilog. Data
         public Dictionary<IVerilogRelatedFile, string> RequiredForwardDeclarations = new Dictionary<IVerilogRelatedFile, string>();
 
 
+        /// <summary>
+        /// 外部ライブラリとして参照するモジュール / primitive のソースパス。
+        ///
+        /// プロジェクト外のライブラリ (ExtenralModuleLibraryPath /
+        /// ExtenralPrimitiveLibraryPath) で提供されるモジュールは、プロジェクトの
+        /// ソースファイルとしては収集されない。代わりにこのリストにライブラリの
+        /// ファイルパスが入り、backend は分割コンパイル時にライブラリとして
+        /// 渡す。外部プロジェクトのセットアップにも同じ情報が入りうるため、
+        /// backend は GetAllProjectSetups() 経由で全プロジェクト分を集約して使う。
+        /// </summary>
         public List<string> ExternalLibraryPathList = new List<string>();
+
+        /// <summary>
+        /// 参照先の定義ファイルが見つからなかったもの (ファイル欠落)。
+        /// エントリは "RelativePath:Name" 形式で、どのファイルのどの参照が
+        /// 解決できなかったのかが分かる形で記録する。
+        ///
+        /// モジュール名が衝突する複数 instance を扱うため、同名 module でも
+        /// instance ごとに解決結果が異なりうる。そのためセットアップ単位で
+        /// 記録し、collectUnfoundModules() がプロジェクト名を前置して集約する。
+        /// 1 件でもあれば Create() は null を返し simulation 起動は拒否される。
+        /// </summary>
         public List<string> UnfoundModules = new List<string>();
 
+        /// <summary>
+        /// このセットアップが担当するプロジェクト。
+        /// ルートではシミュレーション実行対象のプロジェクト、サブセットアップでは
+        /// その外部プロジェクト。Files / IncludePaths などはすべてこのプロジェクトを
+        /// 基準に収集される (プロジェクトを跨ぐファイルは各プロジェクトの
+        /// セットアップ側に入る)。
+        /// </summary>
         public CodeEditor2. Data. Project Project;
 
         /// <summary>
@@ -70,8 +157,11 @@ namespace pluginVerilog. Data
         public Dictionary<CodeEditor2. Data. Project, SimulationSetup> ProjectSetups = new Dictionary<Project, SimulationSetup>();
 
         /// <summary>
-        /// このプロジェクトのセットアップをプロジェクトから取得する。
-        /// 未登録なら null (ProjectSetups はルートで共有されている)。
+        /// 指定プロジェクトのセットアップを取得する。
+        ///
+        /// 未登録 (このセットアップ木がまだそのプロジェクトを参照していない) なら
+        /// null。ProjectSetups はルートで共有されているため、どのセットアップから
+        /// 呼んでも同じ結果になる。
         /// </summary>
         public SimulationSetup? GetProjectSetup(CodeEditor2.Data.Project project)
         {
@@ -82,6 +172,11 @@ namespace pluginVerilog. Data
         /// <summary>
         /// セットアップ木に含まれる全プロジェクトのセットアップ (ルート自身を含む)。
         /// プロジェクトごとに 1 インスタンスだけが返る。
+        ///
+        /// 分割コンパイルを行う backend は、この一覧をプロジェクト単位の
+        /// コンパイル単位として使う (Files / IncludePaths / UnfoundModules などは
+        /// それぞれのセットアップが持つ)。依存順に並べたい場合は
+        /// GetAllFiles() / GetAllIncludePaths() を使うこと。
         /// </summary>
         public List<SimulationSetup> GetAllProjectSetups()
         {
@@ -91,6 +186,10 @@ namespace pluginVerilog. Data
         /// <summary>
         /// セットアップ木に含まれる全プロジェクトの外部プロジェクト instance 情報を
         /// まとめて返す (プロジェクトごとの ExternalProjectEntryInstance を集約)。
+        ///
+        /// どのプロジェクトのセットアップからでも同じ一覧が返る
+        /// (ProjectSetups はルートで共有されている)。instance path をキーに
+        /// しているため、同名 module の複数 instance もすべて含まれる。
         /// </summary>
         public List<ExternalProjectEntryInstanceInfo> GetAllExternalProjectEntryInstances()
         {
@@ -107,9 +206,18 @@ namespace pluginVerilog. Data
         }
 
         /// <summary>
-        /// このセットアップが参照している外部プロジェクトのサブセットアップ。
-        /// 参照の向き (どのプロジェクトがどのプロジェクトを参照しているか) を表すだけで、
-        /// 実体は ProjectSetups が保持する唯一のインスタンスを指す。
+        /// このプロジェクトが参照している外部プロジェクトのセットアップ。
+        /// key: 参照先プロジェクト、value: そのプロジェクトのセットアップ。
+        ///
+        /// プロジェクトごとの分割コンパイルを行い、外部プロジェクトをライブラリとして
+        /// 参照するための情報。参照の向き (どのプロジェクトがどのプロジェクトを
+        /// 参照しているか) だけを表し、セットアップの実体は ProjectSetups が保持する
+        /// 唯一のインスタンスを指す (同じ外部プロジェクトを複数箇所から参照しても
+        /// セットアップは 1 つ)。
+        ///
+        /// backend は GetAllFiles() / GetAllIncludePaths() を使えば、この参照を
+        /// 再帰的に辿った全プロジェクト分のファイル / include パスを取得できる
+        /// (参照先が先に並ぶ = 依存順)。
         /// </summary>
         public Dictionary<CodeEditor2. Data. Project, SimulationSetup> ExternalProjectReferences = new Dictionary<Project, SimulationSetup>();
 
@@ -117,22 +225,49 @@ namespace pluginVerilog. Data
         /// 外部プロジェクトの building block を instance している箇所。
         /// key: instance path ("top.u_sub.u_leaf")、value: その instance の情報。
         ///
-        /// 以前は key (instance path) → Project だけを保持していたため、
-        /// 「この instance path がどの module を instance しているか」が
-        /// 分からなかった ("// @project <name>" の instance 先 module 名など)。
+        /// モジュール名が衝突する複数の module instance を区別するための情報。
+        /// instance path をキーにすることで、同じ module 名を複数箇所で
+        /// instance していても 1 件ずつ独立して保持できる。
+        /// 分割コンパイルでは、この情報から外部プロジェクトのセットアップ
+        /// (ExternalProjectReferences) とその entry module を辿る。
+        ///
+        /// この辞書はセットアップ (= 1 プロジェクト) ごとに存在するため、
+        /// セットアップ木全体の情報が必要な場合は
+        /// GetAllExternalProjectEntryInstances() で集約して取得する。
         /// </summary>
         public Dictionary<string, ExternalProjectEntryInstanceInfo> ExternalProjectEntryInstance = new Dictionary<string, ExternalProjectEntryInstanceInfo>();
 
         /// <summary>
-        /// 外部プロジェクトを instance している 1 箇所分の情報。
+        /// 外部プロジェクトの module / interface を instance している 1 箇所分の情報。
+        ///
+        /// 同一の module 名が複数の instance path で使われていても (module 名が
+        /// 衝突していても)、instance path ごとに「どの module を」「どの
+        /// プロジェクトから」instance しているかを特定できるようにするための情報。
+        /// 分割コンパイルでは、この情報から外部プロジェクトのセットアップ
+        /// (ExternalProjectReferences) とその entry module を辿る。
         /// </summary>
         public class ExternalProjectEntryInstanceInfo
         {
-            /// <summary>instance path ("top.u_sub.u_leaf")</summary>
+            /// <summary>
+            /// 階層 instance path ("top.u_sub.u_leaf")。
+            /// ExternalProjectEntryInstance の key と同じ値。ルートのトップ名から
+            /// 辿った位置を表すため、同名 module の複数 instance を区別できる。
+            /// </summary>
             public required string InstancePath { get; set; }
-            /// <summary>instance している module / interface 名</summary>
+
+            /// <summary>
+            /// その instance path で instance している module / interface 名
+            /// (parameter override 前の定義名)。instance path だけでは分からなかった
+            /// 「何を instance しているか」を保持する。
+            /// </summary>
             public required string ModuleName { get; set; }
-            /// <summary>その module を定義しているプロジェクト</summary>
+
+            /// <summary>
+            /// ModuleName を定義している (所有している) プロジェクト。
+            /// "// @project &lt;name&gt;" 指定時はその参照先プロジェクトになる。
+            /// 分割コンパイル時のライブラリ境界 (どのプロジェクトのビルド成果物を
+            /// 参照するか) を決めるのに使う。
+            /// </summary>
             public required CodeEditor2.Data.Project Project { get; set; }
         }
 
