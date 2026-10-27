@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Typography.WebFont;
 
 namespace pluginVerilog.Verilog.DataObjects
 {
@@ -126,16 +127,21 @@ namespace pluginVerilog.Verilog.DataObjects
                 assignmentPattern = AssignmentPatternWithoutKey.parseCreate(word, nameSpace, patternMode);
             }
 
+            assignmentPattern.Reference = WordReference.CreateReferenceRange(beginReference, word.GetReference());
             if (word.Text == "}")
             {
                 // whole pattern range ("'{ ... }"), used as the diagnostic
                 // position of the detailed check below
-                assignmentPattern.Reference = WordReference.CreateReferenceRange(beginReference, word.GetReference());
                 word.MoveNext();
             }
             else
             {
                 word.AddError("} required");
+
+                if(word.Eof && word.IsPartialParse)
+                {
+
+                }
             }
 
             // detailed check against the assignment target, performed here while
@@ -271,6 +277,12 @@ namespace pluginVerilog.Verilog.DataObjects
                 }
             }
         }
+
+        private void AddAutoCompleteCantidates(WordScanner word, DataObject? lhs)
+        {
+
+        }
+
 
         /// <summary>
         /// Detailed check of the assignment pattern against the resolved
@@ -475,7 +487,11 @@ namespace pluginVerilog.Verilog.DataObjects
                 // only plain member identifiers are checked; array index keys,
                 // "default" and assignment_pattern_key simple types are legal
                 if (!IsStructurePatternKeyCandidate(keyExpression.Key)) continue;
-                if (structType.Members.ContainsKey(keyExpression.Key)) continue;
+                if (structType.Members.ContainsKey(keyExpression.Key))
+                {
+                    keyExpression.KeyReference.Color(CodeDrawStyle.ColorType.Identifier);
+                    continue;
+                }
                 keyExpression.KeyReference.AddError(
                     "'" + keyExpression.Key + "' is not a member of the structure type");
             }
