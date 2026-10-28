@@ -558,6 +558,40 @@ namespace pluginVerilog. Data
             if (ids.Contains(visitedKey)) return;
             ids.Add(visitedKey);
 
+            // Everything BELOW an "@project <name>" instance belongs to the
+            // referenced project. When the file we are about to walk is owned by
+            // a project different from the setup that reached it, switch to that
+            // project's (shared) sub-setup and record the crossing instance.
+            //
+            // Previously the traversal kept the referencing project's setup for
+            // the whole subtree: appendFile() already routed each individual file
+            // to its owning project's setup (it decides by sourceFile.Project),
+            // but the SETUP CONTEXT stayed the referencing one. As a result the
+            // nested instances/objects under the "@project" instance recorded
+            // their unfound modules, class / package files and entry instances
+            // against the referencing (local) project — i.e. the referenced
+            // project name was not applied to the lower-level objects. Normalizing
+            // the setup here covers every recursion site (module / interface /
+            // array / class / package), because they all funnel through searchHier.
+            if (file.Project != setup.Project)
+            {
+                // record the crossing on the REFERENCING setup (setup is still the
+                // referencing project's setup here), then continue as the target.
+                addExternalProjectEntryInstance(setup, path, buildingBlockName, file.Project);
+                setup = getExternalProjectSetup(setup, file.Project);
+
+                // keep the sub-setup's entry information (TopName / TopFiles) as
+                // documented. With the setup switched before appendFile, the
+                // external-project branch of appendFile is not reached for this
+                // entry any more, so set them here (first crossing wins, a shared
+                // sub-setup must not be overwritten by later references).
+                VerilogFile? topFile = file as VerilogFile;
+                if (topFile == null && file is VerilogModuleInstance moduleInstance) topFile = moduleInstance.SourceVerilogFile;
+                if (topFile == null && file is InterfaceInstance interfaceInstance) topFile = interfaceInstance.SourceVerilogFile;
+                if (topFile != null && setup.TopFiles.Count == 0) setup.TopFiles.Add(topFile);
+                if (string.IsNullOrEmpty(setup.TopName)) setup.TopName = buildingBlockName;
+            }
+
             ParsedDocument? parsedDocument = file.VerilogParsedDocument;
             if (parsedDocument == null) return;
 
