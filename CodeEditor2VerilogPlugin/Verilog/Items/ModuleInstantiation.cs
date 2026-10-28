@@ -263,12 +263,6 @@ namespace pluginVerilog.Verilog.Items
                         sourceProjectProperty = targetProjectProperty;
                         instancedModule = sourceProjectProperty.DefinitionNameSpace.Get(moduleName) as Module;
 
-                        // Re-record the reference against the project that actually
-                        // owns the module. Hierarchy analysis (SimulationSetup) looks
-                        // the definition up in DefinitionNameSpace; without the owner
-                        // project it searched the local project, could not find a
-                        // cross-project module and reported it as "unfound".
-                        word.RootParsedDocument.AddReferencedDefinitionNameSpace(moduleName, sourceProject.Name);
                         crossProjectReference = true;
 
                         // A reparse is only required when the target module is not
@@ -279,13 +273,6 @@ namespace pluginVerilog.Verilog.Items
                         break;
                     }
                 }
-            }
-            if (!crossProjectReference)
-            {
-                // plain (same-project) reference: this document's project owns
-                // the definition. Cross-project instances are registered above
-                // with the referenced project only.
-                word.RootParsedDocument.AddReferencedDefinitionNameSpace(moduleName, word.Project.Name);
             }
 
             if (instancedModule == null)

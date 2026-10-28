@@ -428,8 +428,12 @@ namespace pluginVerilog.Tool
                 // ReferencedDefinitionNameSpace) are not reachable via the
                 // instance tree. Enqueue them explicitly so that changes in
                 // the bound definitions are reflected in this hierarchy pass.
-                foreach (string elementName in verilogFile.VerilogParsedDocument.ReferencedDefinitionNameSpace)
+                
+                foreach ((string,string) element in verilogFile.VerilogParsedDocument.ReferencedDefinitionNameSpaceAndProjects)
                 {
+                    string elementName = element.Item1;
+                    string ownerProjectName = element.Item2;
+
                     // Resolve in EVERY project that owns the definition. A
                     // module instanced with "// @project <name>" lives in that
                     // project's DefinitionNameSpace, so a lookup in this file's
@@ -439,25 +443,15 @@ namespace pluginVerilog.Tool
                     // referenced project even when this file's own project
                     // declares a definition with the same name (the referenced
                     // project's building block is the one actually instanced).
-                    Verilog.ParsedDocument vParsedDocument = verilogFile.VerilogParsedDocument;
-                    CodeEditor2.Data.Project localProject = verilogFile.Project;
 
-                    // copy: the returned list is the parsed document's own
-                    // storage and must not be modified here
-                    List<string> ownerProjectNames = new List<string>(vParsedDocument.GetReferencedDefinitionNameSpaceProjects(elementName));
-                    if (ownerProjectNames.Count == 0) ownerProjectNames.Add(localProject.Name);
-
-                    foreach (string ownerProjectName in ownerProjectNames)
-                    {
-                        if (!CodeEditor2.Global.Projects.TryGetValue(ownerProjectName, out CodeEditor2.Data.Project? ownerProject)) continue;
-                        if (ownerProject == null) continue;
-                        pluginVerilog.ProjectProperty? ownerProperty = ownerProject.ProjectProperties[pluginVerilog.Plugin.StaticID] as ProjectProperty;
-                        if (ownerProperty == null) continue;
-                        TextFile? ownerFile = ownerProperty.DefinitionNameSpace.GetFile(elementName) as TextFile;
-                        if (ownerFile == null) continue;
-                        ParseTask newTask = new ParseTask(Id: ownerFile.ID, tarfgetTextFile: ownerFile);
-                        EnqueueWork(newTask, workQueue, completeIds);
-                    }
+                    if (!CodeEditor2.Global.Projects.TryGetValue(ownerProjectName, out CodeEditor2.Data.Project? ownerProject)) continue;
+                    if (ownerProject == null) continue;
+                    pluginVerilog.ProjectProperty? ownerProperty = ownerProject.ProjectProperties[pluginVerilog.Plugin.StaticID] as ProjectProperty;
+                    if (ownerProperty == null) continue;
+                    TextFile? ownerFile = ownerProperty.DefinitionNameSpace.GetFile(elementName) as TextFile;
+                    if (ownerFile == null) continue;
+                    ParseTask newTask = new ParseTask(Id: ownerFile.ID, tarfgetTextFile: ownerFile);
+                    EnqueueWork(newTask, workQueue, completeIds);
                 }
             }
 

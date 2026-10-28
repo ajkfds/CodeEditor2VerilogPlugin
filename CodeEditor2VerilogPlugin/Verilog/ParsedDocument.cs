@@ -138,64 +138,11 @@ namespace pluginVerilog.Verilog
         public List<string> ImportedPackages = new List<string>();
 
         public List<string> ReferencedUnitNameSpace = new List<string>();
-        public List<string> ReferencedDefinitionNameSpace = new List<string>();
         public List<string> ReferencedPackageNamemeSpace = new List<string>();
 
-        // Owner project name of the cross-project ("// @project <name>") references
-        // recorded in ReferencedDefinitionNameSpace.
-        // A definition name alone cannot tell which project's DefinitionNameSpace
-        // has to be searched: a module instanced from another project is not
-        // registered in the local project's DefinitionNameSpace, so hierarchy
-        // analysis (SimulationSetup) resolved it against the local project,
-        // failed, and reported a perfectly valid cross-project module as
-        // "unfound".
-        //
-        // ALL owners are stored here, including this document's own project
-        // (the "plain" reference). Consumers must decide whether a cross-project
-        // owner takes precedence over the local project, so the local owner has
-        // to be distinguishable from "no local reference at all":
-        //
-        //   /* top.sv */
-        //   MOD mod0 (...);                    // local project's MOD
-        //   // @project other
-        //   MOD mod1 (...);                    // other project's MOD
-        //
-        // Both owners are recorded for "MOD" here. Recording only the
-        // cross-project owner made the local instance look unresolvable, and
-        // recording only the local owner (previous behaviour) silently
-        // collected the wrong definition for the "@project" instance.
-        // A name may be instanced from several projects, hence the list.
-        public Dictionary<string, List<string>> ReferencedDefinitionNameSpaceProjects = new Dictionary<string, List<string>>();
+        public List<(string,string)> ReferencedDefinitionNameSpaceAndProjects = new List<(string, string)>();
 
-        /// <summary>
-        /// Record a definition name referenced by this document together with the
-        /// project that owns the definition.
-        /// projectName normally is this document's own project; it is the
-        /// "// @project <name>" target for cross-project references.
-        /// </summary>
-        public void AddReferencedDefinitionNameSpace(string definitionName, string? projectName)
-        {
-            if (!ReferencedDefinitionNameSpace.Contains(definitionName)) ReferencedDefinitionNameSpace.Add(definitionName);
-            if (projectName == null) return;
 
-            if (!ReferencedDefinitionNameSpaceProjects.TryGetValue(definitionName, out List<string>? projects))
-            {
-                projects = new List<string>();
-                ReferencedDefinitionNameSpaceProjects.Add(definitionName, projects);
-            }
-            if (!projects.Contains(projectName)) projects.Add(projectName);
-        }
-
-        /// <summary>
-        /// Project names that own the given referenced definition name
-        /// (this document's own project included). Empty when the reference was
-        /// recorded without an owner project.
-        /// </summary>
-        public List<string> GetReferencedDefinitionNameSpaceProjects(string definitionName)
-        {
-            if (!ReferencedDefinitionNameSpaceProjects.TryGetValue(definitionName, out List<string>? projects)) return new List<string>();
-            return projects;
-        }
 
         // hierarchical instance paths referenced by bind directives
         // (bind_target_instance / bind_target_instance_list).

@@ -159,9 +159,6 @@ namespace pluginVerilog.Verilog.Items
             string programName = word.Text;
             IndexReference beginIndexReference = word.CreateIndexReference();
 
-            // Register the referenced program name so that SimulationSetup can collect
-            // the program definition file (missing definition is reported as unfound there).
-            word.RootParsedDocument.AddReferencedDefinitionNameSpace(programName, word.Project.Name);
 
             // Get the instanced program
             Program? instancedProgram = word.ProjectProperty.DefinitionNameSpace.Get(programName) as Program;
@@ -173,6 +170,12 @@ namespace pluginVerilog.Verilog.Items
                 //word.RootParsedDocument.ReparseRequested = true;
                 //if (!word.RootParsedDocument.UnfoundModules.Contains(programName)) word.RootParsedDocument.UnfoundModules.Add(programName);
                 //CodeEditor2.Controller.AppendLog("## unfound " + programName + " at " + buildingBlock.Name, Avalonia.Media.Colors.Orange);
+            }
+            // Register the referenced program name so that SimulationSetup can collect
+            // the program definition file (missing definition is reported as unfound there).
+            if (!word.RootParsedDocument.ReferencedDefinitionNameSpaceAndProjects.Contains((programName, word.Project.Name)))
+            {
+                word.RootParsedDocument.ReferencedDefinitionNameSpaceAndProjects.Add((programName, word.Project.Name));
             }
 
             word.MoveNext();
