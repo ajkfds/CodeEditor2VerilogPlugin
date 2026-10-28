@@ -904,7 +904,7 @@ namespace pluginVerilog.Verilog.Items
                 expression = Expressions.Expression.ParseCreateAcceptImplicitNet(word, nameSpace, false);
             }
 
-            if (word.CompletionContext != null && word.Eof)
+            if (word.CompletionContext != null && word.Eof && instancedModule != null && instancedModule.Ports.ContainsKey(pinName))
             {
                 Port? port = instancedModule?.Ports[pinName];
                 if (port != null) word.CompletionContext.CarletPopupItems.Add(new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
