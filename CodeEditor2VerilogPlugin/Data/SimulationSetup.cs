@@ -368,7 +368,8 @@ namespace pluginVerilog. Data
             setup.ProjectSetups.Add(setup.Project, setup);
             setup.TopFiles.Add(verilogFile);
 
-            List<string> ids = new List<string>();
+            // traversal bookkeeping: cycle guard + memo of fully walked subtrees
+            SearchTraversal traversal = new SearchTraversal();
 
             // TopName selection rule: when the top file declares multiple
             // building blocks (e.g. DUT + testbench in one file), the FIRST
@@ -391,7 +392,7 @@ namespace pluginVerilog. Data
             if (buildingBlock == null) return null;
 
             setup.TopName = buildingBlock. Name;
-            searchHier(verilogFile, setup. TopName, ids, setup, setup.TopName);
+            searchHier(verilogFile, setup. TopName, traversal, setup, setup.TopName);
 
             List<IVerilogRelatedFile> targetClassFiles = setup.ClassFiles.ToList();
 
@@ -539,25 +540,139 @@ namespace pluginVerilog. Data
             }
         }
 
-        private static void searchHier(IVerilogRelatedFile file, string buildingBlockName, List<string> ids, SimulationSetup setup, string path)
+        /// <summary>
+        /// Bookkeeping for one hierarchy traversal (one <see cref="Create"/>
+        /// call).
+        ///
+        /// <see cref="Path"/> holds the (project, file, building block) triples
+        /// of the calls that are currently ACTIVE, i.e. the current recursion
+        /// path. It is a cycle guard: an entry is pushed when a call starts and
+        /// popped when it returns, so a genuine cycle terminates while a later
+        /// sibling subtree that instantiates the same building block is still
+        /// walked (and can record its own instance paths).
+        ///
+        /// <see cref="CleanSubtrees"/> remembers subtrees that were completely
+        /// walked WITHOUT recording any external project instance (see
+        /// <see cref="SimulationSetup.ExternalProjectEntryInstance"/>). Every
+        /// other piece of collected information (source / include / class /
+        /// package file lists, external library paths, project reference edges,
+        /// unfound references) is de-duplicated and therefore independent of the
+        /// instance path a subtree was reached from, so such a subtree does not
+        /// have to be walked again for another instance path. Without this memo
+        /// the path-based cycle guard above would re-walk shared, purely local
+        /// sub-hierarchies once per instance and could blow up exponentially.
+        /// </summary>
+        private sealed class SearchTraversal
         {
-            // visited guard: key is (project + file.ID + buildingBlockName) so
-            // that the same file can still be traversed for a different building
-            // block, but a cycle (module A <-> module B, circular class
-            // references, bind / definition cross references, external project
-            // cycles) terminates.
-            // The project name is part of the key because RelativePath (and thus
-            // the ID of a plain VerilogFile) is only unique inside one project:
-            // two projects may contain "src/top.sv", and without the prefix the
-            // second project's file was skipped as already visited, dropping the
-            // external project's sources from the setup.
-            // Without this registration, ids stays empty forever and the guard
-            // below never triggers, causing infinite recursion (stack overflow
-            // / UI freeze when invoked from the menu thread).
-            string visitedKey = getProjectName(file) + ":" + file.ID + ":" + buildingBlockName;
-            if (ids.Contains(visitedKey)) return;
-            ids.Add(visitedKey);
+            /// <summary>Active recursion path (cycle guard).</summary>
+            public readonly List<string> Path = new List<string>();
 
+            /// <summary>Fully walked, path independent subtrees (memo).</summary>
+            public readonly HashSet<string> CleanSubtrees = new HashSet<string>(StringComparer.Ordinal);
+        }
+
+        /// <summary>
+        /// Defensive limit for <see cref="searchHier"/> recursion depth.
+        ///
+        /// Path.Count equals the current recursion depth (an entry is pushed for
+        /// every active call), so it doubles as a depth budget. It only matters
+        /// for pathological, parameter-driven self-referential hierarchies that
+        /// never repeat a (project, file, building block) triple exactly (i.e.
+        /// the cycle guard cannot stop them): the instance tree of such a
+        /// design is infinite because every level is parsed with different
+        /// parameters.
+        /// </summary>
+        private const int MaxSearchHierDepth = 512;
+
+        /// <summary>
+        /// Total number of recorded external project entry instances of the whole
+        /// setup tree. Used to detect whether a subtree walk recorded an
+        /// instance-path dependent result (see
+        /// <see cref="SearchTraversal.CleanSubtrees"/>).
+        /// </summary>
+        private static int countExternalEntryInstances(SimulationSetup setup)
+        {
+            SimulationSetup root = setup.RootSetup ?? setup;
+            int count = 0;
+            foreach (SimulationSetup projectSetup in root.ProjectSetups.Values)
+            {
+                count += projectSetup.ExternalProjectEntryInstance.Count;
+            }
+            return count;
+        }
+
+        /// <summary>
+        /// Walk one building block of one file and collect everything the
+        /// simulation backend needs (source / include / package / class files,
+        /// external library paths, external project edges and entry instances,
+        /// unfound references).
+        ///
+        /// This is the recursion wrapper. It owns the "already on the current
+        /// recursion path" bookkeeping and delegates the actual work to
+        /// <see cref="searchHierCore"/>.
+        ///
+        /// The visited guard used to be global for the whole traversal: once a
+        /// (project, file.ID, building block) triple was visited, every later
+        /// occurrence was skipped. That silently dropped information whenever
+        /// two DIFFERENT instance subtrees of the same project instantiated the
+        /// same external project building block (project A's "top.u_d.**" and
+        /// "top.u_e.**" both referencing project B): only the first subtree was
+        /// walked, so the second subtree's external entry instances (and the
+        /// external crossings nested deeper below it) were never recorded —
+        /// the per-instance information the setup exists for. The guard is
+        /// therefore a cycle guard only: an entry is registered while the call
+        /// is active and removed when it returns, so genuine cycles (module
+        /// A <-> B, circular class references, bind / definition cross
+        /// references, external project cycles, self instancing modules) still
+        /// terminate while sibling subtrees are all traversed.
+        ///
+        /// The key contains the project name because RelativePath (and thus the
+        /// ID of a plain VerilogFile) is only unique inside one project: two
+        /// projects may contain "src/top.sv".
+        /// </summary>
+        private static void searchHier(IVerilogRelatedFile file, string buildingBlockName, SearchTraversal traversal, SimulationSetup setup, string path)
+        {
+            // Key = (project that reached this file) > (project that owns it) :
+            // file : building block.
+            //
+            // Both projects are needed. The file part is obvious (it identifies
+            // the walked building block). The REFERRING project is needed as
+            // well: whether this call records an "@project" crossing entry
+            // depends on setup.Project, so the same file must not be reused as
+            // "already walked" by a referrer with a different project.
+            string visitedKey = getSetupProjectName(setup) + ">" + getProjectName(file) + ":" + file.ID + ":" + buildingBlockName;
+            if (traversal.Path.Contains(visitedKey)) return;      // cycle on this path
+            if (traversal.CleanSubtrees.Contains(visitedKey)) return; // already fully walked
+            if (traversal.Path.Count >= MaxSearchHierDepth) return;
+
+            int entryInstancesBefore = countExternalEntryInstances(setup);
+
+            traversal.Path.Add(visitedKey);
+            try
+            {
+                searchHierCore(file, buildingBlockName, traversal, setup, path);
+            }
+            finally
+            {
+                // pop: the key is only "visited" along the current path. A later
+                // sibling subtree that instantiates the same building block must
+                // be walked again so that its own instance paths are recorded.
+                traversal.Path.Remove(visitedKey);
+            }
+
+            // Memoize only when the walk produced no instance-path dependent
+            // information (no new external entry instance). Everything else a
+            // walk collects is de-duplicated and path independent, so a subtree
+            // without new entry instances can be skipped for later instance
+            // paths without losing anything.
+            if (countExternalEntryInstances(setup) == entryInstancesBefore)
+            {
+                traversal.CleanSubtrees.Add(visitedKey);
+            }
+        }
+
+        private static void searchHierCore(IVerilogRelatedFile file, string buildingBlockName, SearchTraversal traversal, SimulationSetup setup, string path)
+        {
             // Everything BELOW an "@project <name>" instance belongs to the
             // referenced project. When the file we are about to walk is owned by
             // a project different from the setup that reached it, switch to that
@@ -595,7 +710,7 @@ namespace pluginVerilog. Data
             ParsedDocument? parsedDocument = file.VerilogParsedDocument;
             if (parsedDocument == null) return;
 
-            appendFile(file, setup, ids, path, buildingBlockName);
+            appendFile(file, setup, traversal, path, buildingBlockName);
 
             foreach (string unfound in parsedDocument.UnfoundModules)
             {
@@ -645,7 +760,7 @@ namespace pluginVerilog. Data
                 if (parsedDocument.Project == null) continue;
                 if (class_ != null)
                 {
-                    appendClass(file, className, parsedDocument.Project, setup, ids);
+                    appendClass(file, className, parsedDocument.Project, setup, traversal);
                 }
                 else
                 {
@@ -662,7 +777,7 @@ namespace pluginVerilog. Data
 
             foreach (string cFile in parsedDocument.ReferencedUnitNameSpace)
             {
-                appendClass(file, cFile, file.Project, setup, ids);
+                appendClass(file, cFile, file.Project, setup, traversal);
             }
 
             // module / interface / program / udp references are registered to
@@ -720,7 +835,7 @@ namespace pluginVerilog. Data
                     // project even when this document's own project declares a
                     // definition with the same name: the comment explicitly
                     // selects the referenced project's building block.
-                    appendReferencedDefinition(defFile, ownerProject, definitionName, file, ids, setup, path);
+                    appendReferencedDefinition(defFile, ownerProject, definitionName, file, traversal, setup, path);
                     resolved = true;
                 }
 
@@ -734,7 +849,7 @@ namespace pluginVerilog. Data
             // Process imported packages
             foreach (string packageName in parsedDocument. ImportedPackages)
             {
-                appendImportedPackage(packageName, file. Project, setup, ids);
+                appendImportedPackage(packageName, file. Project, setup, traversal);
             }
 
             if(!parsedDocument. Root. BuildingBlocks. TryGetValue(buildingBlockName,out BuildingBlock? buildingBlock))
@@ -742,10 +857,10 @@ namespace pluginVerilog. Data
                 return;
             }
 
-            searchNameSpace(file, ids, buildingBlock, setup, path);
+            searchNameSpace(file, traversal, buildingBlock, setup, path);
         }
 
-        private static void searchNameSpace(IVerilogRelatedFile file, List<string> ids, NameSpace nameSpace, SimulationSetup setup, string path)
+        private static void searchNameSpace(IVerilogRelatedFile file, SearchTraversal traversal, NameSpace nameSpace, SimulationSetup setup, string path)
         {
             foreach (INamedElement element in nameSpace.NamedElements.Values)
             {
@@ -759,7 +874,7 @@ namespace pluginVerilog. Data
                 {
                     NameSpace subNameSpace = (NameSpace) element;
                     string newPath = path + "." + subNameSpace. Name;
-                    searchNameSpace(file, ids, subNameSpace, setup, newPath);
+                    searchNameSpace(file, traversal, subNameSpace, setup, newPath);
                 }
                 else if (element is ModuleInstantiation)
                 {
@@ -782,7 +897,7 @@ namespace pluginVerilog. Data
                         if (path != "") newPath = path + "." + newPath;
 
                         var subfile = item as IVerilogRelatedFile;
-                        if (subfile != null) searchHier(subfile, moduleInstantiation.SourceName, ids, setup, newPath);
+                        if (subfile != null) searchHier(subfile, moduleInstantiation.SourceName, traversal, setup, newPath);
                     }
                     else if (moduleInstantiation. InstanceRange != null)
                     {
@@ -802,7 +917,7 @@ namespace pluginVerilog. Data
                             if (path != "") newPath = path + "." + newPath;
 
                             var subfile = arrayItem as IVerilogRelatedFile;
-                            if (subfile != null) searchHier(subfile, moduleInstantiation.SourceName, ids, setup, newPath);
+                            if (subfile != null) searchHier(subfile, moduleInstantiation.SourceName, traversal, setup, newPath);
                         }
                     }
                 }
@@ -815,7 +930,7 @@ namespace pluginVerilog. Data
                         if (path != "") newPath = path + "." + newPath;
 
                         var subfile = item as IVerilogRelatedFile;
-                        if (subfile != null) searchHier(subfile, moduleInstantiation.SourceName, ids, setup, newPath);
+                        if (subfile != null) searchHier(subfile, moduleInstantiation.SourceName, traversal, setup, newPath);
                     }
                 }
                 else if (element is Verilog.Items.ProgramInstantiation)
@@ -859,7 +974,7 @@ namespace pluginVerilog. Data
         /// external project sub-setup), then recurse into external project files
         /// so that their own dependencies are collected into the sub-setup.
         /// </summary>
-        private static void appendFile(IVerilogRelatedFile file, SimulationSetup setup, List<string> ids, string path, string buildingBlockName)
+        private static void appendFile(IVerilogRelatedFile file, SimulationSetup setup, SearchTraversal traversal, string path, string buildingBlockName)
         {
             if (file is pluginVerilog. Data. VerilogFile || file is SystemVerilogFile)
             {
@@ -900,7 +1015,7 @@ namespace pluginVerilog. Data
                     // The same external file may be instantiated several times
                     // with different parameter overrides, and each instance has
                     // its own parsed document (hence its own dependencies).
-                    appendExternalProjectDependencies(instance, sourceFile, pSetup, ids, path);
+                    appendExternalProjectDependencies(instance, sourceFile, pSetup, traversal, path);
                 }
                 return;
             }else if(file is InterfaceInstance)
@@ -929,7 +1044,7 @@ namespace pluginVerilog. Data
                     // recurse into the external project instance (same reasoning
                     // as the module instance above: several parameterized
                     // instances of one file have different dependencies).
-                    appendExternalProjectDependencies(instance, sourceFile, pSetup, ids, path);
+                    appendExternalProjectDependencies(instance, sourceFile, pSetup, traversal, path);
                 }
                 return;
             }
@@ -957,7 +1072,7 @@ namespace pluginVerilog. Data
             CodeEditor2.Data.Item instance,
             IVerilogRelatedFile sourceFile,
             SimulationSetup subSetup,
-            List<string> ids,
+            SearchTraversal traversal,
             string path)
         {
             string buildingBlockName = getInstantiatedBuildingBlockName(instance, sourceFile);
@@ -967,13 +1082,13 @@ namespace pluginVerilog. Data
             {
                 string instancePath = instance.Name;
                 if (path != "") instancePath = path + "." + instancePath;
-                searchHier(instanceFile, buildingBlockName, ids, subSetup, instancePath);
+                searchHier(instanceFile, buildingBlockName, traversal, subSetup, instancePath);
                 return;
             }
 
             // the instance has not been parsed yet: fall back to the base parse
             // of the source file so that at least its own dependencies are found
-            searchHier(sourceFile, buildingBlockName, ids, subSetup, path);
+            searchHier(sourceFile, buildingBlockName, traversal, subSetup, path);
         }
 
         /// <summary>
@@ -1107,7 +1222,7 @@ namespace pluginVerilog. Data
 
         }
 
-        private static void appendImportedPackage(string packageName, CodeEditor2. Data. Project project, SimulationSetup setup, List<string> ids)
+        private static void appendImportedPackage(string packageName, CodeEditor2. Data. Project project, SimulationSetup setup, SearchTraversal traversal)
         {
             // Search for the package file in the project
             IVerilogRelatedFile? packageFile = findPackageFile(packageName, project, setup);
@@ -1137,9 +1252,9 @@ namespace pluginVerilog. Data
 
             // package file may itself reference other packages / classes: trace them
             // (also reports missing references in the package as file shortage)
-            searchHier(packageFile, packageName, ids, ownerSetup, "");
+            searchHier(packageFile, packageName, traversal, ownerSetup, "");
         }
-        private static void appendClass(IVerilogRelatedFile referrer, string className, CodeEditor2.Data.Project project, SimulationSetup setup, List<string> ids)
+        private static void appendClass(IVerilogRelatedFile referrer, string className, CodeEditor2.Data.Project project, SimulationSetup setup, SearchTraversal traversal)
         {
             IVerilogRelatedFile? classFile = findClassFile(className, project, setup);
             if (classFile == null)
@@ -1170,7 +1285,7 @@ namespace pluginVerilog. Data
 
             // class file may itself reference other classes / packages: trace them
             // (also reports missing references in the class file as file shortage)
-            searchHier(classFile, className, ids, ownerSetup, "");
+            searchHier(classFile, className, traversal, ownerSetup, "");
         }
 
         /// <summary>
@@ -1188,7 +1303,7 @@ namespace pluginVerilog. Data
             CodeEditor2.Data.Project ownerProject,
             string definitionName,
             IVerilogRelatedFile referrer,
-            List<string> ids,
+            SearchTraversal traversal,
             SimulationSetup setup,
             string path)
         {
@@ -1196,7 +1311,7 @@ namespace pluginVerilog. Data
             {
                 // recurse into the referenced definition file so that its own
                 // module / class / package dependencies are collected as well
-                searchHier(defFile, definitionName, ids, setup, path);
+                searchHier(defFile, definitionName, traversal, setup, path);
                 return;
             }
 
@@ -1215,7 +1330,7 @@ namespace pluginVerilog. Data
             // exists for it.
             if (!hasInstantiationItem(referrer, definitionName))
             {
-                searchHier(defFile, definitionName, ids, ownerSetup, path);
+                searchHier(defFile, definitionName, traversal, ownerSetup, path);
             }
         }
 
@@ -1354,6 +1469,18 @@ namespace pluginVerilog. Data
                 }
             }
             return results;
+        }
+
+        /// <summary>
+        /// Project name of the setup that is currently doing the traversal
+        /// (i.e. the project whose sources are being expanded). Part of the
+        /// visited key of <see cref="searchHier"/>: two different setups may
+        /// reach the same file and one of them crosses a project boundary while
+        /// the other does not.
+        /// </summary>
+        private static string getSetupProjectName(SimulationSetup setup)
+        {
+            return setup.Project?.Name ?? "";
         }
 
         /// <summary>
