@@ -569,6 +569,13 @@ namespace pluginVerilog. Data
 
             /// <summary>Fully walked, path independent subtrees (memo).</summary>
             public readonly HashSet<string> CleanSubtrees = new HashSet<string>(StringComparer.Ordinal);
+
+            /// <summary>
+            /// Set when <see cref="MaxSearchHierDepth"/> cut a walk short. A
+            /// truncated walk did not collect everything, so it must not be
+            /// memoized as a clean subtree.
+            /// </summary>
+            public bool Truncated = false;
         }
 
         /// <summary>
@@ -643,9 +650,23 @@ namespace pluginVerilog. Data
             string visitedKey = getSetupProjectName(setup) + ">" + getProjectName(file) + ":" + file.ID + ":" + buildingBlockName;
             if (traversal.Path.Contains(visitedKey)) return;      // cycle on this path
             if (traversal.CleanSubtrees.Contains(visitedKey)) return; // already fully walked
-            if (traversal.Path.Count >= MaxSearchHierDepth) return;
+            if (traversal.Path.Count >= MaxSearchHierDepth)
+            {
+                // Depth budget exhausted: the subtree below is not collected, so
+                // do not let any enclosing call memoize its own (incomplete) walk.
+                traversal.Truncated = true;
+                return;
+            }
 
             int entryInstancesBefore = countExternalEntryInstances(setup);
+
+            // The flag is scoped to this call: it is cleared on entry, reflects
+            // only what happened inside this call (or its descendants), and is
+            // merged back into the enclosed state so that an enclosing call is
+            // also prevented from memoizing an incomplete walk.
+            bool enclosingTruncated = traversal.Truncated;
+            traversal.Truncated = false;
+            bool truncated;
 
             traversal.Path.Add(visitedKey);
             try
@@ -658,6 +679,10 @@ namespace pluginVerilog. Data
                 // sibling subtree that instantiates the same building block must
                 // be walked again so that its own instance paths are recorded.
                 traversal.Path.Remove(visitedKey);
+                // The depth limit cut this walk short, so it was not fully
+                // traversed and must never be memoized as complete.
+                truncated = traversal.Truncated;
+                traversal.Truncated = truncated || enclosingTruncated;
             }
 
             // Memoize only when the walk produced no instance-path dependent
@@ -665,7 +690,7 @@ namespace pluginVerilog. Data
             // walk collects is de-duplicated and path independent, so a subtree
             // without new entry instances can be skipped for later instance
             // paths without losing anything.
-            if (countExternalEntryInstances(setup) == entryInstancesBefore)
+            if (!truncated && countExternalEntryInstances(setup) == entryInstancesBefore)
             {
                 traversal.CleanSubtrees.Add(visitedKey);
             }
