@@ -762,7 +762,17 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                 constants.ConstantType = constantType;
                 constants.DataType = dataType;
 
-
+                // store the parameter's unpacked dimensions on the Constants
+                // DataObject *before* the initializer is parsed: the assignment
+                // pattern check (AssignmentPattern.CheckPattern) inspects the
+                // declared data object to decide between an array / structure /
+                // scalar pattern, so "parameter logic [31:0] p [3:0] = '{1,2,3,4};"
+                // must already carry its unpacked dimensions when the pattern is
+                // parsed (IEEE 1800-2017 6.20.2 / 10.9).
+                foreach (UnPackedArray unPackedArray in paramUnpackedArrays)
+                {
+                    constants.UnpackedArrays.Add(unPackedArray);
+                }
 
                 if (word.Text != "=") break;
                 word.MoveNext();
@@ -850,12 +860,6 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                         List<PackedArray> packedArrays = new List<PackedArray>() { packedArray };
                         dataType = DataTypes.LogicType.Create(number.Signed, packedArrays);
                     }
-                }
-
-                // store the parameter's unpacked dimensions on the Constants DataObject
-                foreach (UnPackedArray unPackedArray in paramUnpackedArrays)
-                {
-                    constants.UnpackedArrays.Add(unPackedArray);
                 }
 
                 if (!word.Active)
