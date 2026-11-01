@@ -657,7 +657,13 @@ namespace pluginVerilog.Verilog.Expressions
             }
             else if (assigned)
             {
-                if (!partial) originalObject.AssignedReferences.Add(val.Reference);
+                // bit / part select への代入 ("assign a[0] = ...") も
+                // AssignedReferences に記録する。以前は partial を除外して
+                // いたが、読み出し側 (else 分岐) は partial でも
+                // UsedReferences に記録しており非対称だった。除外すると
+                // 右クリックの "assigned" 参照ジャンプ / LSP references に
+                // bit-select への代入箇所が現れない。
+                originalObject.AssignedReferences.Add(val.Reference);
             }
             else
             {
