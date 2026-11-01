@@ -2,6 +2,7 @@ using CodeEditor2.CodeEditor.CodeComplete;
 using CodeEditor2.CodeEditor.Parser;
 using CodeEditor2.CodeEditor.PopupHint;
 using pluginVerilog.CodeEditor;
+using pluginVerilog.Data;
 using pluginVerilog.FileTypes;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
@@ -135,14 +136,23 @@ namespace pluginVerilog.Verilog
         public Dictionary<string, Data.VerilogHeaderInstance> IncludeFiles = new Dictionary<string, Data.VerilogHeaderInstance>();
         [JsonIgnore]
         public Dictionary<string, Macro> Macros = new Dictionary<string, Macro>();
+        
         public List<string> ImportedPackages = new List<string>();
 
         public List<string> ReferencedUnitNameSpace = new List<string>();
         public List<string> ReferencedPackageNamemeSpace = new List<string>();
-
         public List<(string,string)> ReferencedDefinitionNameSpaceAndProjects = new List<(string, string)>();
 
 
+        public Dictionary<string, VerilogRelatedFileReference> DefinitionNameSpaceRefs = new Dictionary<string, VerilogRelatedFileReference>();
+
+        
+        /*
+        public List<string> DefinitionNamespaceIds = new List<string>();
+        public List<string> UnitNamespaceIds = new List<string>();
+        public List<string> PackageNamespaceIds = new List<string>();
+        public List<string> ImportedPackageIds = new List<string>();
+        */
 
         // hierarchical instance paths referenced by bind directives
         // (bind_target_instance / bind_target_instance_list).
@@ -728,9 +738,9 @@ namespace pluginVerilog.Verilog
                 IBuildingBlockInstantiation instantiation = (IBuildingBlockInstantiation)buildingBlock.NamedElements[hier[0]];
                 NameSpace? bBlock = ProjectProperty.GetInstancedBuildingBlock(instantiation);
 
-                if (instantiation is InterfaceInstance)
+                if (instantiation is Verilog.Items.InterfaceInstance)
                 {
-                    InterfaceInstance? interfaceInstantiation = instantiation as InterfaceInstance;
+                    Verilog.Items.InterfaceInstance? interfaceInstantiation = instantiation as Verilog.Items.InterfaceInstance;
                     if (interfaceInstantiation == null) throw new Exception();
                 }
 

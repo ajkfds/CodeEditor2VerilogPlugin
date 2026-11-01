@@ -3,6 +3,14 @@
 
 module test_rtl_named_blocks();
     
+
+wire clk;   // @sync:clock
+reg aa;
+int bbb;
+
+
+
+
     logic a = 0;
     logic b = 0;
     logic c = 0;

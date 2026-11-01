@@ -11,6 +11,12 @@ logic [3:0]	aa;
 logic bb;
 } aaa;
 
+assign  aaa = 1'b0;
+
+MODULE1 aa();
+
+// MODULE1 aaa();
+
 
 endmodule
 

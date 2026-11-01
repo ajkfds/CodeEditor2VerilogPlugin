@@ -289,6 +289,12 @@ namespace pluginVerilog.Data
             // ReferencedDefinitionNameSpaceProjects during parse. Collect their definition
             // files here; a missing definition is reported as file shortage.
 
+            //foreach(var reference in parsedDocument.DefinitionNameSpaceRefs.Values)
+            //{
+                
+
+            //}
+
             foreach ((string,string) definitionNameAndProject in parsedDocument.ReferencedDefinitionNameSpaceAndProjects )
             {
                 string definitionName = definitionNameAndProject.Item1;

@@ -50,8 +50,6 @@ namespace pluginVerilog.Data
                 Data.VerilogFile? vFile = file as Data.VerilogFile;
                 if (vFile == null) throw new Exception();
 
-                //                vFile.RegisterModuleInstance(fileItem);
-
                 if (vFile.SystemVerilog) fileItem.SystemVerilog = true;
             }
             return fileItem;
@@ -261,6 +259,7 @@ namespace pluginVerilog.Data
             else
             {
                 source.RegisterInstanceParsedDocument(ModuleName + ":" + ParameterId, newParsedDocument, this);
+                source.RegisterInstanceFile(this);
                 await acceptParameterizedParsedDocument(newParsedDocument);
             }
 

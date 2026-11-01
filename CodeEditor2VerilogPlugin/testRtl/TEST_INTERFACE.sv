@@ -4,4 +4,7 @@ interface TEST_INTERFACE(
 input	VALID_I
 );
 
+
+MODULE1 mod();
+
 endinterface

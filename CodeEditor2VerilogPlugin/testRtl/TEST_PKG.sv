@@ -7,5 +7,6 @@ logic		VALD;
 logic [7:0]	DATA;
 } GBUS;
 
+
 endpackage
 

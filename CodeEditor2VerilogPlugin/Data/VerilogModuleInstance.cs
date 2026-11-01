@@ -482,9 +482,8 @@ namespace pluginVerilog.Data
 
             Verilog.ParsedDocument? oldParsedDocument = VerilogParsedDocument;
 
-            {
-                source.RegisterInstanceParsedDocument(key, newParsedDocument, this);
-            }
+            source.RegisterInstanceParsedDocument(key, newParsedDocument, this);
+            source.RegisterInstanceFile(this);
 
             if (source.ParsedDocument != null)// && source.ParsedDocument.Version != newParsedDocument.Version)
             {
