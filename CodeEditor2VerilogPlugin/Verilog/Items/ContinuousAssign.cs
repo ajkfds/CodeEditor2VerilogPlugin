@@ -39,13 +39,66 @@ namespace pluginVerilog.Verilog.Items
             {
                 netLValue.Reference.AddError(
                     "'" + dataObject.Name + "' is assigned by both a continuous and a procedural assignment");
+                dataObject.ContinuousAssigned = true;
+                markContinuousAssignedRange(netLValue, dataObject);
+                return;
             }
-            else if (dataObject.ContinuousAssigned)
+
+            if (isContinuousAssignmentOverlapped(netLValue, dataObject))
             {
                 netLValue.Reference.AddError(
                     "'" + dataObject.Name + "' has multiple continuous assignments");
             }
             dataObject.ContinuousAssigned = true;
+        }
+
+        /// <summary>
+        /// 連続代入の lvalue がドライブするビット範囲を「連続代入済み範囲」に
+        /// 登録し、既にドライブ済みのビットと重なっていた場合に true を返す。
+        /// 同じビットを複数の連続代入でドライブするのは違反だが、bit-select /
+        /// part-select が互いに素な複数の連続代入
+        /// ("assign a[0] = ...; assign a[1] = ...;") は合法であるため、
+        /// DataObject 単位ではなくビット範囲単位で重複を判定する
+        /// (IEEE 1800-2017 6.5)。
+        /// 範囲が定数に解決できない場合や AssignedMap を持たない DataObject では
+        /// 従来どおり「2 回目以降の連続代入は違反」として扱う。
+        /// </summary>
+        private static bool isContinuousAssignmentOverlapped(
+            Expressions.Expression netLValue, DataObjects.DataObject dataObject)
+        {
+            if (dataObject.AssignedMap == null) return dataObject.ContinuousAssigned;
+
+            if (netLValue is not Expressions.DataObjectReference dataObjectReference) return dataObject.ContinuousAssigned;
+
+            // 連続代入済み範囲マップは、対象 DataObject の AssignedMap と同じ
+            // 次元構成で遅延生成する (ArraysBoolMap.Clone は次元 / サイズのみを
+            // 引き継いだ空のマップを作る)。
+            dataObject.ContinuousAssignedMap ??= dataObject.AssignedMap.Clone();
+
+            if (!dataObject.ContinuousAssignedMap.TryResolveRange(
+                    dataObjectReference.RangesFromOriginal, out long start, out long last))
+            {
+                return dataObject.ContinuousAssigned;
+            }
+            return dataObject.ContinuousAssignedMap.AssertWithOverlapCheck(start, last);
+        }
+
+        /// <summary>
+        /// 連続代入されたビット範囲を連続代入済み範囲マップに登録する
+        /// (既に違反として報告済みの経路で、後続の判定を重複報告にしないための
+        /// 記録用 helper)。
+        /// </summary>
+        private static void markContinuousAssignedRange(
+            Expressions.Expression netLValue, DataObjects.DataObject dataObject)
+        {
+            if (dataObject.AssignedMap == null) return;
+            if (netLValue is not Expressions.DataObjectReference dataObjectReference) return;
+            dataObject.ContinuousAssignedMap ??= dataObject.AssignedMap.Clone();
+            if (dataObject.ContinuousAssignedMap.TryResolveRange(
+                    dataObjectReference.RangesFromOriginal, out long start, out long last))
+            {
+                dataObject.ContinuousAssignedMap.AssertWithOverlapCheck(start, last);
+            }
         }
 
         internal static DataObjects.DataObject? getAssignedDataObject(Expressions.Expression expression)

@@ -294,6 +294,15 @@ namespace pluginVerilog.Verilog.DataObjects
         public bool ContinuousAssigned = false;
 
         /// <summary>
+        /// 連続代入で既にドライブ済みのビット範囲。bit-select / part-select が
+        /// 互いに素な複数の連続代入 (assign a[0] = ...; assign a[1] = ...;) を
+        /// 誤ってエラーにしないため、AssignedMap (undriven 判定用) とは別に
+        /// 連続代入されたビットだけを記録する。初回の連続代入時に
+        /// AssignedMap と同じ次元構成で遅延生成する。
+        /// </summary>
+        public ArraysBoolMap? ContinuousAssignedMap = null;
+
+        /// <summary>
         /// True once the data object has been the target of a procedural
         /// assignment (blocking / nonblocking) inside an always / initial /
         /// task / function block (IEEE 1800-2017 6.5 / 10.3).

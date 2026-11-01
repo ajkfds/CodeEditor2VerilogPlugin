@@ -74,8 +74,23 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
         public void Assert(List<RangeExpression> rangeExpressions)
         {
             if (mapRanges == null) return;
-            long start = 0;
-            long last = size - 1;
+            if (!TryResolveRange(rangeExpressions, out long start, out long last)) return;
+            addRange(start, last);
+        }
+
+        /// <summary>
+        /// range expression の並び (bit-select / part-select) をこのマップの
+        /// フラットなビット範囲 [start, last] に変換する。選択が無ければ
+        /// マップ全体。インデックスが定数に解決できない場合は false を返す
+        /// (範囲不明を呼び出し元に伝えるため、Assert では「何もしない」と
+        /// 同じ扱いになる)。
+        /// </summary>
+        public bool TryResolveRange(List<RangeExpression> rangeExpressions, out long start, out long last)
+        {
+            start = 0;
+            last = size - 1;
+            if (dimensions.Count == 0) return false;
+
             int dimension = dimensions.Count - 1;
             int dsize = size;
 
@@ -87,7 +102,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
                 if (rangeExpression is SingleBitRangeExpression)
                 {
                     SingleBitRangeExpression singleBitRangeExpression = (SingleBitRangeExpression)rangeExpression;
-                    if (singleBitRangeExpression.BitIndex == null) return;
+                    if (singleBitRangeExpression.BitIndex == null) return false;
                     start = start + dsize * (long)singleBitRangeExpression.BitIndex;
                     last = start + dsize - 1;
                     dimension--;
@@ -95,8 +110,8 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
                 else if (rangeExpression is AbsoluteRangeExpression)
                 {
                     AbsoluteRangeExpression absoluteRangeExpression = (AbsoluteRangeExpression)rangeExpression;
-                    if (absoluteRangeExpression.MaxBitIndex == null) return;
-                    if (absoluteRangeExpression.MinBitIndex == null) return;
+                    if (absoluteRangeExpression.MaxBitIndex == null) return false;
+                    if (absoluteRangeExpression.MinBitIndex == null) return false;
                     start = start + dsize * (long)absoluteRangeExpression.MinBitIndex;
                     last = start + dsize * ((long)absoluteRangeExpression.MaxBitIndex - (long)absoluteRangeExpression.MinBitIndex);
                     dimension--;
@@ -106,7 +121,30 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
                     //throw new Exception();
                 }
             }
+            return true;
+        }
+
+        /// <summary>
+        /// 指定ビット範囲をマップ済みにし、既にマップ済みだった (= 同じビットを
+        /// 二重にドライブしている) かどうかを返す。連続代入の多重ドライブ判定
+        /// (IEEE 1800-2017 6.5) で、bit-select / part-select が互いに素な
+        /// 複数の連続代入を誤検出しないために使用する。
+        /// </summary>
+        public bool AssertWithOverlapCheck(long start, long last)
+        {
+            if (mapRanges == null) return false;
+
+            bool overlapped = false;
+            foreach (mapRange range in mapRanges)
+            {
+                if (range.Start <= last && start <= range.Last)
+                {
+                    overlapped = true;
+                    break;
+                }
+            }
             addRange(start, last);
+            return overlapped;
         }
 
         /// <summary>
