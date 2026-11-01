@@ -16,9 +16,63 @@ namespace pluginVerilog.Data
     public class InterfaceInstance : InstanceTextFile, IVerilogRelatedFile
     {
 
-        public required string ModuleName { set; get; }
+        private string _moduleName = "";
+        public required string ModuleName
+        {
+            set
+            {
+                textFileLock.EnterWriteLock();
+                try
+                {
+                    _moduleName = value;
+                }
+                finally
+                {
+                    textFileLock.ExitWriteLock();
+                }
+            }
+            get
+            {
+                textFileLock.EnterReadLock();
+                try
+                {
+                    return _moduleName;
+                }
+                finally
+                {
+                    textFileLock.ExitReadLock();
+                }
+            }
+        }
 
-        public required Dictionary<string, Verilog.Expressions.Expression> ParameterOverrides;
+        private Dictionary<string, Verilog.Expressions.Expression> _parameterOverrides = new Dictionary<string, Verilog.Expressions.Expression>();
+        public required Dictionary<string, Verilog.Expressions.Expression> ParameterOverrides
+        {
+            set
+            {
+                textFileLock.EnterWriteLock();
+                try
+                {
+                    _parameterOverrides = value;
+                }
+                finally
+                {
+                    textFileLock.ExitWriteLock();
+                }
+            }
+            get
+            {
+                textFileLock.EnterReadLock();
+                try
+                {
+                    return _parameterOverrides;
+                }
+                finally
+                {
+                    textFileLock.ExitReadLock();
+                }
+            }
+        }
 
         public InterfaceInstance(CodeEditor2.Data.TextFile sourceTextFile) : base(sourceTextFile)
         {
@@ -59,16 +113,41 @@ namespace pluginVerilog.Data
         {
             get
             {
-                if (ParameterId == "")
-                {
-                    return RelativePath + ":" + ModuleName;
-                }
-                else
-                {
-                    return RelativePath + ":" + ModuleName + ":" + ParameterId;
-                }
+                return _getKey();
+            }
+            //get
+            //{
+            //    if (ParameterId == "")
+            //    {
+            //        return Project.Name+ RelativePath + ":" + ModuleName;
+            //    }
+            //    else
+            //    {
+            //        return RelativePath + ":" + ModuleName + ":" + ParameterId;
+            //    }
+            //}
+        }
+        public override string Key
+        {
+            get
+            {
+                return _getKey();
             }
         }
+        private string _getKey()
+        {
+            textFileLock.EnterReadLock();
+            try
+            {
+                // Read both values atomically within the same lock acquisition
+                return Verilog.ParsedDocument.KeyGenerator(this, _moduleName, _parameterOverrides);
+            }
+            finally
+            {
+                textFileLock.ExitReadLock();
+            }
+        }
+
         public override bool ReparseRequested
         {
             get
@@ -95,38 +174,42 @@ namespace pluginVerilog.Data
                 ReparseRequested = true;
             }
         }
+        protected WeakReference<Verilog.Items.InterfaceInstance> weakInstantiating;
 
         public bool ReplaceBy(
             Verilog.Items.InterfaceInstance moduleInstantiation,
             CodeEditor2.Data.Project project
             )
         {
+            System.Diagnostics.Debug.Print("### VerilogModuleInstance ReplaceBy " + ID);
             ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
             if (projectProperty == null) throw new Exception();
 
             Data.IVerilogRelatedFile? ivFile = projectProperty.DefinitionNameSpace.GetFile(moduleInstantiation.SourceName);
             if (ivFile == null) return false;
 
-            File? file = ivFile as File;
+            CodeEditor2.Data.File? file;
+            file = ivFile as CodeEditor2.Data.File;
+
             if (file == null) return false;
 
             if (!IsSameAs(file)) return false;
             if (Project != project) return false;
             if (ModuleName != moduleInstantiation.SourceName) return false;
 
-            if (ParameterId != moduleInstantiation.OverrideParameterID) return false;
+            string instanceKey = Verilog.ParsedDocument.KeyGenerator(ivFile, moduleInstantiation.SourceName, moduleInstantiation.ParameterOverrides);
+            if (Key != instanceKey) return false;
 
             // re-register
             //disposeItems();
 
             ParameterOverrides = moduleInstantiation.ParameterOverrides;
-
             if (file is Data.VerilogFile)
             {
                 Data.VerilogFile? vFile = file as Data.VerilogFile;
                 if (vFile == null) return false;
-                //vFile.RegisterModuleInstance(this);
             }
+            weakInstantiating = new WeakReference<Verilog.Items.InterfaceInstance>(moduleInstantiation);
 
             return true;
         }
@@ -160,21 +243,6 @@ namespace pluginVerilog.Data
             //            SourceVerilogFile.RemoveModuleInstance(this);
         }
 
-        public string ParameterId
-        {
-            get
-            {
-                StringBuilder sb = new StringBuilder();
-                foreach (var kvp in ParameterOverrides)
-                {
-                    sb.Append(kvp.Key);
-                    sb.Append("=");
-                    sb.Append(kvp.Value.Value.ToString());
-                    sb.Append(",");
-                }
-                return sb.ToString();
-            }
-        }
 
         public Data.VerilogFile SourceVerilogFile
         {
@@ -199,30 +267,19 @@ namespace pluginVerilog.Data
         {
             get
             {
-                if (ParameterOverrides.Count == 0)
-                {
-                    Data.VerilogFile file = SourceVerilogFile;
-                    if (file == null) return null;
-                    return file.ParsedDocument;
-                }
-                else
-                {
-                    Data.VerilogFile source = SourceVerilogFile;
-                    return source.GetInstancedParsedDocument(ParameterId);
-                }
+                Data.VerilogFile source = SourceVerilogFile;
+                ParsedDocument? parsedDocument = source.GetInstancedParsedDocument(_getKey());
+
+                // 取得するたびに保持しているparsedDocumentを最新のものに置き換える。
+                // 不要なparsedDocumentのGC回収を促進するため。
+                _parsedDocument = parsedDocument;
+                return parsedDocument;
             }
             set
             {
-                if (ParameterOverrides.Count == 0)
-                {
-                    Data.VerilogFile file = SourceVerilogFile;
-                    file.ParsedDocument = value;
-                }
-                else
-                {
-                    Data.VerilogFile source = SourceVerilogFile;
-                    if(value!=null) source.RegisterInstanceParsedDocument(ParameterId, value, this);
-                }
+                // ModuleInstanceで保持する。instanceが消えないようにするために。
+                _parsedDocument = value;
+                // Sourceへの登録はAcceptParseDocument側で行う
             }
         }
         public override async Task SaveAsync()
@@ -246,101 +303,111 @@ namespace pluginVerilog.Data
 
         public override async Task AcceptParsedDocumentAsync(CodeEditor2.CodeEditor.Parser.DocumentParser parser)
         {
-            CodeEditor2.CodeEditor.ParsedDocument? newParsedDocument = parser.ParsedDocument;
+            if (Plugin.StopParse) return;
+
+            Verilog.ParsedDocument? newParsedDocument = parser.ParsedDocument as Verilog.ParsedDocument;
             if (newParsedDocument == null) return;
 
             Data.VerilogFile source = SourceVerilogFile;
             if (source == null) return;
 
-            if (ParameterOverrides.Count == 0)
+            string key = _getKey();
+
+            Verilog.ParsedDocument? oldParsedDocument = VerilogParsedDocument;
+
+            source.RegisterInstanceParsedDocument(key, newParsedDocument, this);
+            source.RegisterInstanceFile(this);
+
+            if (source.ParsedDocument != null)// && source.ParsedDocument.Version != newParsedDocument.Version)
             {
-                await source.AcceptParsedDocumentAsync(parser);
+                Verilog.ParsedDocument vParsedDocument = (Verilog.ParsedDocument)newParsedDocument;
+                Verilog.ParsedDocument sourceParsedDocument = (Verilog.ParsedDocument)source.ParsedDocument;
+                if (sourceParsedDocument.Root != null && sourceParsedDocument.Root.BuildingBlocks.Count == 1)
+                {
+                    await source.AcceptParsedDocumentAsync(parser);
+                }
+                else
+                {
+                    source.ReparseRequested = true;
+                }
             }
-            else
             {
-                source.RegisterInstanceParsedDocument(ModuleName + ":" + ParameterId, newParsedDocument, this);
-                source.RegisterInstanceFile(this);
-                await acceptParameterizedParsedDocument(newParsedDocument);
+                Verilog.ParsedDocument? vParsedDocument = ParsedDocument as Verilog.ParsedDocument;
+
+                if (vParsedDocument != null)
+                {
+                    ReparseRequested = vParsedDocument.ReparseRequested;
+                }
             }
 
-            // Editor-dependent update must run only when the editor UI is
-            // alive (see VerilogFile.AcceptParsedDocumentAsync).
-            TextFile? currentTextFile = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync();
-            if (currentTextFile == this)
-            {
-                currentTextFile.CodeDocument?.CopyColorMarkFrom(parser.Document);
-                CodeEditor2.Controller.MessageView.Update(newParsedDocument);
-                CodeEditor2.Controller.CodeEditor.PostRefresh();
-            }
 
-            // refresh the navigate panel node icon (error/warning badge, ...)
-            // after the parsed document is updated (same as
-            // VerilogHeaderInstance.AcceptParsedDocumentAsync).
-            // Post (not Invoke) to avoid blocking this background parse
-            // thread on the UI thread.
-            Dispatcher.UIThread.Post(() => NavigatePanelNode.UpdateVisual());
+
+            _parsedDocument = newParsedDocument;
+
+            Dispatcher.UIThread.Post(() =>
+            {
+                _ = postUpdateAsync(newParsedDocument);
+            });
+            //CodeEditor2.CodeEditor.ParsedDocument? newParsedDocument = parser.ParsedDocument;
+            //if (newParsedDocument == null) return;
+
+            //Data.VerilogFile source = SourceVerilogFile;
+            //if (source == null) return;
+
+            //if (ParameterOverrides.Count == 0)
+            //{
+            //    await source.AcceptParsedDocumentAsync(parser);
+            //}
+            //else
+            //{
+            //    source.RegisterInstanceParsedDocument(ModuleName + ":" + ParameterId, newParsedDocument, this);
+            //    source.RegisterInstanceFile(this);
+            //    await acceptParameterizedParsedDocument(newParsedDocument);
+            //}
+
+            //// Editor-dependent update must run only when the editor UI is
+            //// alive (see VerilogFile.AcceptParsedDocumentAsync).
+            //TextFile? currentTextFile = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync();
+            //if (currentTextFile == this)
+            //{
+            //    currentTextFile.CodeDocument?.CopyColorMarkFrom(parser.Document);
+            //    CodeEditor2.Controller.MessageView.Update(newParsedDocument);
+            //    CodeEditor2.Controller.CodeEditor.PostRefresh();
+            //}
+
+            //// refresh the navigate panel node icon (error/warning badge, ...)
+            //// after the parsed document is updated (same as
+            //// VerilogHeaderInstance.AcceptParsedDocumentAsync).
+            //// Post (not Invoke) to avoid blocking this background parse
+            //// thread on the UI thread.
+            //Dispatcher.UIThread.Post(() => NavigatePanelNode.UpdateVisual());
         }
-
-        private async System.Threading.Tasks.Task acceptParameterizedParsedDocument(ParsedDocument newParsedDocument)
+        private async Task postUpdateAsync(Verilog.ParsedDocument newParsedDocument)
         {
-            ParsedDocument? oldParsedDocument = ParsedDocument;
-            if (oldParsedDocument != null) oldParsedDocument.Dispose();
-
-            // copy include files
-
-            ParsedDocument = newParsedDocument;
-
-            if (VerilogParsedDocument == null)
+            try
             {
-                await UpdateAsync();
-                return;
+                TextFile? textFile = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync();
+                if (textFile == this)
+                {
+                    if (CodeDocument != null) textFile.CodeDocument?.CopyColorMarkFrom(newParsedDocument.CodeDocument);
+                    if (ParsedDocument != null) CodeEditor2.Controller.MessageView.Update(newParsedDocument);
+                    CodeEditor2.Controller.CodeEditor.PostRefresh();
+                }
+
+                await UpdateAsync(); // update navigate panel node and message view
+
+                // refresh the navigate panel node icon (error/warning badge, ...)
+                // after the parsed document is updated. Without this, the icon of a
+                // deeply parsed VerilogModuleInstance stays stale until the node is
+                // selected (same as VerilogHeaderInstance.AcceptParsedDocumentAsync).
+                // Post (not Invoke) to avoid blocking this background parse thread
+                // on the UI thread.
+                NavigatePanelNode.UpdateVisual();
             }
-
-            // Register New Building Block
-            //foreach (BuildingBlock buildingBlock in VerilogParsedDocument.Root.BuldingBlocks.Values)
-            //{
-            //    if (ProjectProperty.HasRegisteredBuildingBlock(buildingBlock.Name))
-            //    {   // swap building block
-            //        BuildingBlock? module = buildingBlock as Module;
-            //        if (module == null) continue;
-
-            //        BuildingBlock? registeredModule = ProjectProperty.GetBuildingBlock(module.Name) as Module;
-            //        if (registeredModule == null) continue;
-            //        if (registeredModule.File == null) continue;
-            //        if (registeredModule.File.RelativePath == module.File.RelativePath) continue;
-
-            //        continue;
-            //    }
-
-            //    // register new parsedDocument
-            //    ProjectProperty.RegisterBuildingBlock(buildingBlock.Name, buildingBlock, this);
-            //}
-
-            Verilog.ParsedDocument? vParsedDocument = ParsedDocument as Verilog.ParsedDocument;
-            if (vParsedDocument != null)
+            catch (Exception ex)
             {
-                ReparseRequested = vParsedDocument.ReparseRequested;
+                CodeEditor2.Controller.AppendLog(ex);
             }
-
-            await VerilogFile.updateIncludeFilesAsync(VerilogParsedDocument, Items);
-
-            //Dictionary<string, Data.VerilogHeaderInstance> headerItems = new Dictionary<string, VerilogHeaderInstance>();
-            //foreach (var item in Items.Values)
-            //{
-            //    Data.VerilogHeaderInstance? vh = item as Data.VerilogHeaderInstance;
-            //    if (vh == null) continue;
-            //    headerItems.Add(item.ID, vh);
-            //}
-
-            //foreach (var includeFile in VerilogParsedDocument.IncludeFiles.Values)
-            //{
-            //    if (!headerItems.ContainsKey(includeFile.ID)) continue;
-            //    Data.VerilogHeaderInstance item = headerItems[includeFile.ID];
-            //    item.CodeDocument.CopyColorMarkFrom(includeFile.VerilogParsedDocument.CodeDocument);
-            //}
-
-            await UpdateAsync(); // eliminated here
-            System.Diagnostics.Debug.Print("### Verilog File Parsed " + ID);
         }
 
 

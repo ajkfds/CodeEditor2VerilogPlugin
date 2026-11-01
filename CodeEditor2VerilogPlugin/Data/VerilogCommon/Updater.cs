@@ -387,7 +387,7 @@ namespace pluginVerilog.Data.VerilogCommon
                                 interfaceInstantiation != null &&
                                 interfaceInstance != null &&
                                 interfaceInstantiation.SourceName == interfaceInstance.ModuleName &&
-                                instanceKey == interfaceInstance.ParameterId
+                                instanceKey == interfaceInstance.Key
                                 )
                             {
                                 alreadyExist = true;

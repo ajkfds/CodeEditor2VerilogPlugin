@@ -13,6 +13,7 @@ using System.Linq;
 using System.Reflection.Metadata;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading;
 
 namespace pluginVerilog.Verilog
 {
@@ -69,6 +70,9 @@ namespace pluginVerilog.Verilog
             )
         {
             StringBuilder sb = new StringBuilder();
+            sb.Append(verilogRelatedFile.Project.Name);
+            sb.Append(System.IO.Path.DirectorySeparatorChar);
+
             sb.Append(verilogRelatedFile.RelativePath);
             if (moduleName == null) return sb.ToString(); // base Parse
 
