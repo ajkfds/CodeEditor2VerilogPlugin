@@ -61,7 +61,10 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
             }
         }
 
-        public override int? BitWidth { get { return Expression.BitWidth; } }
+        // A parameter may be declared without an initializer
+        // ("parameter STRUCT_BUS aaa;"), in which case Expression is null and
+        // the width is taken from the declared data type.
+        public override int? BitWidth { get { return Expression != null ? Expression.BitWidth : DataType?.BitWidth; } }
 
         public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {
@@ -76,9 +79,11 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
 
             label.AppendText(Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Parameter));
 
-            label.AppendText(" = ");
-
-            if (Expression != null) Expression.AppendLabel(label);
+            if (Expression != null)
+            {
+                label.AppendText(" = ");
+                Expression.AppendLabel(label);
+            }
         }
 
         public override bool PartSelectable { get { return true; } }
@@ -794,12 +799,22 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                     constants.UnpackedArrays.Add(unPackedArray);
                 }
 
-                if (word.Text != "=") break;
-                word.MoveNext();
-
+                // param_assignment ::= parameter_identifier { unpacked_dimension }
+                //                       [ = constant_param_expression ]
+                // The initializer is optional (e.g. "parameter STRUCT_BUS aaa;").
+                // The parameter must still be registered on the name space without
+                // one, otherwise a member access through the declared data type
+                // ("aaa.AA") reports "unfound object". Only the initializer
+                // dependent checks below are skipped when "=" is absent.
                 Expressions.Expression? expression = null;
+                bool hasInitializer = word.Text == "=";
+                if (hasInitializer) word.MoveNext();
 
-                if (word.Text == "'" && word.NextText == "{")
+                if (!hasInitializer)
+                {
+                    // no initializer - parse nothing, register the parameter as declared
+                }
+                else if (word.Text == "'" && word.NextText == "{")
                 {
                     // the declared variable is handed over to the parse, so the
                     // detailed syntax check against the declared type is done
@@ -838,26 +853,31 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
 
 
 
-                if (expression == null) break;
-                // A forward-referenced constant function call (e.g.
-                // "localparam a = fun(3);" before "function int fun(...)")
-                // is parsed as UnfoundObjectReference with ReparseRequested;
-                // it resolves to a constant function on the next pass, so the
-                // "should be constant" error must not be reported here.
-                if (!expression.Constant && expression.Reference != null
-                    && expression is not Expressions.UnfoundObjectReference && !word.Prototype)
-                {
-                    expression.Reference.AddError("should be constant");
-                }
+                // an initializer is optional; only the expression dependent
+                // checks below require one
+                if (hasInitializer && expression == null) break;
 
-                // A specparam is a specify-block local parameter and shall not
-                // be used to assign a parameter / localparam
-                // (IEEE 1800-2017 6.20.5).
-                if (constantType != ConstantTypeEnum.specparam)
+                if (expression != null)
                 {
-                    checkSpecparamReference(expression);
-                }
+                    // A forward-referenced constant function call (e.g.
+                    // "localparam a = fun(3);" before "function int fun(...)")
+                    // is parsed as UnfoundObjectReference with ReparseRequested;
+                    // it resolves to a constant function on the next pass, so the
+                    // "should be constant" error must not be reported here.
+                    if (!expression.Constant && expression.Reference != null
+                        && expression is not Expressions.UnfoundObjectReference && !word.Prototype)
+                    {
+                        expression.Reference.AddError("should be constant");
+                    }
 
+                    // A specparam is a specify-block local parameter and shall not
+                    // be used to assign a parameter / localparam
+                    // (IEEE 1800-2017 6.20.5).
+                    if (constantType != ConstantTypeEnum.specparam)
+                    {
+                        checkSpecparamReference(expression);
+                    }
+                }
 
                 constants.Expression = expression;
 
