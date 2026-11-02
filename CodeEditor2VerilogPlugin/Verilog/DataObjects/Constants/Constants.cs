@@ -13,6 +13,26 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
         public Expressions.Expression? Expression { get; set; } = null;
         public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Parameter; } }
 
+        // A parameter / localparam may be declared with a struct / union / user
+        // defined type (e.g. "parameter my_struct_t p = '{...};"). Its members
+        // must be resolvable through the parameter reference ("p.member"), so
+        // the child named elements are built lazily from the declared DataType
+        // (same convention as UserDefinedVariable / Struct). Without this the
+        // base DataObject.NamedElements (always empty) is used and member access
+        // reports "unfound object".
+        private NamedElements? namedElements = null;
+        public override NamedElements NamedElements
+        {
+            get
+            {
+                if (namedElements != null) return namedElements;
+                namedElements = new NamedElements();
+                if (DataType == null) return namedElements;
+                DataType.AppendChiledNamedElements(namedElements);
+                return namedElements;
+            }
+        }
+
         public enum ConstantTypeEnum
         {
             parameter,
