@@ -17,13 +17,6 @@ namespace pluginVerilog.Data
         public required string ProjectName { get; set; }
         public required string RelativeFilePath { get; set; }
 
-        public string ExtendedID
-        {
-            get
-            {
-                return ProjectName + ":" + ID;
-            }
-        }
         public IVerilogRelatedFile? GetTargetFile()
         {
             CodeEditor2.Data.Project? project;
@@ -31,8 +24,6 @@ namespace pluginVerilog.Data
 
             Data.IVerilogRelatedFile? file = project.GetItemHierarchy(RelativeFilePath) as IVerilogRelatedFile;
             if (file == null) return null;
-
-            
 
             return null;
         }

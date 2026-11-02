@@ -184,11 +184,11 @@ namespace pluginVerilog.NavigatePanel
                 Data.VerilogModuleInstance instance = (Data.VerilogModuleInstance)Item;
                 if (instance.NameSpaceString != "")
                 {
-                    Text = instance.NameSpaceString+"."+ instance.Name + " - " + instance.ModuleName;
+                    Text = instance.NameSpaceString+"."+ instance.Name + " - " + instance.InstanceName;
                 }
                 else
                 {
-                    Text = instance.Name + " - " + instance.ModuleName;
+                    Text = instance.Name + " - " + instance.InstanceName;
                 }
             }
 

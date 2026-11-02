@@ -71,14 +71,14 @@ namespace pluginVerilog.Data.VerilogCommon
             {
                 string? moduleName = null;
                 InterfaceInstance? verilogModuleInstance = item as InterfaceInstance;
-                moduleName = verilogModuleInstance?.ModuleName;
+                moduleName = verilogModuleInstance?.InstanceName;
                 addSubItemsSingleBuldingBlock(item, moduleName, newSubItems, parent, project);
             }
             else if (item is VerilogModuleInstance)
             {
                 string? moduleName = null;
                 VerilogModuleInstance? verilogModuleInstance = item as VerilogModuleInstance;
-                moduleName = verilogModuleInstance?.ModuleName;
+                moduleName = verilogModuleInstance?.InstanceName;
                 addSubItemsSingleBuldingBlock(item, moduleName, newSubItems, parent, project);
             }
             else if (item is ImportedPackage)
@@ -232,7 +232,7 @@ namespace pluginVerilog.Data.VerilogCommon
                         VerilogModuleInstance? oldItem = subItem as VerilogModuleInstance;
                         Module module = (Module)buldingBlockKvp.Value;
 
-                        if (oldItem != null && module != null && oldItem.Name == module.Name && oldItem.ModuleName == module.Name)
+                        if (oldItem != null && module != null && oldItem.Name == module.Name && oldItem.InstanceName == module.Name)
                         {
                             alreadyExist = true;
                             newSubItems.Add(oldItem.Name, oldItem);
@@ -243,7 +243,7 @@ namespace pluginVerilog.Data.VerilogCommon
                         InterfaceInstance? oldItem = subItem as InterfaceInstance;
                         Interface iface = (Interface)buldingBlockKvp.Value;
 
-                        if (oldItem != null && iface != null && oldItem.Name == iface.Name && oldItem.ModuleName == iface.Name)
+                        if (oldItem != null && iface != null && oldItem.Name == iface.Name && oldItem.InstanceName == iface.Name)
                         {
                             alreadyExist = true;
                             newSubItems.Add(oldItem.Name, oldItem);
@@ -271,7 +271,7 @@ namespace pluginVerilog.Data.VerilogCommon
 
                         VerilogModuleInstance? instance = VerilogModuleInstance.Create(moduleInstantiation);
                         if (instance == null) throw new Exception();
-                        instance.ModuleName = module.Name;
+                        instance.InstanceName = module.Name;
 
                         // Handle instance arrays
                         if (moduleInstantiation.InstanceRange != null)
@@ -361,7 +361,7 @@ namespace pluginVerilog.Data.VerilogCommon
                                 if (
                                     moduleInstantiation != null &&
                                     moduleInstance != null &&
-                                    moduleInstantiation.SourceName == moduleInstance.ModuleName &&
+                                    moduleInstantiation.SourceName == moduleInstance.InstanceName &&
                                     instanceKey == moduleInstance.Key
                                     )
                                 {
@@ -386,7 +386,7 @@ namespace pluginVerilog.Data.VerilogCommon
                             if (
                                 interfaceInstantiation != null &&
                                 interfaceInstance != null &&
-                                interfaceInstantiation.SourceName == interfaceInstance.ModuleName &&
+                                interfaceInstantiation.SourceName == interfaceInstance.InstanceName &&
                                 instanceKey == interfaceInstance.Key
                                 )
                             {

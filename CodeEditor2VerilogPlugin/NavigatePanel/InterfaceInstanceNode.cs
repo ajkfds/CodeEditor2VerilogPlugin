@@ -154,7 +154,7 @@ namespace pluginVerilog.NavigatePanel
             }
 
             Data.InterfaceInstance instance = Item as Data.InterfaceInstance;
-            Text = instance.Name + " - " + instance.ModuleName;
+            Text = instance.Name + " - " + instance.InstanceName;
 
 
             List<CodeEditor2.Data.Item> targetDataItems = new List<CodeEditor2.Data.Item>();

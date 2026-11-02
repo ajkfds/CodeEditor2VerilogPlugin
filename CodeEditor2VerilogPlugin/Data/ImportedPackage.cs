@@ -103,6 +103,8 @@ namespace pluginVerilog.Data
                 Project = project,
                 RelativePath = file.RelativePath,
                 Name = packageName,
+                InstanceName = packageName,
+                ParameterOverrides = new Dictionary<string, Verilog.Expressions.Expression>()
             };
 
             if (file is Data.VerilogFile vFile && vFile.SystemVerilog)
@@ -160,17 +162,6 @@ namespace pluginVerilog.Data
             }
         }
 
-        public override void CheckDirty()
-        {
-            VerilogDocument? vParsedDocument = VerilogParsedDocument;
-            if (vParsedDocument == null) return;
-            CodeEditor2.CodeEditor.CodeDocument? codeDocument = CodeDocument;
-            if (codeDocument == null) return;
-            if (codeDocument.Version != vParsedDocument.Version)
-            {
-                ReparseRequested = true;
-            }
-        }
 
         public override string ID
         {
@@ -180,37 +171,8 @@ namespace pluginVerilog.Data
             }
         }
 
-        public bool ReplaceBy(ImportedPackage other)
-        {
-            if (other == null) return false;
 
-            CodeEditor2.Data.TextFile? otherFile = other.SourceTextFile;
-            if (otherFile == null) return false;
-            if (SourceTextFile == null) return false;
-            if (!SourceTextFile.IsSameAs(otherFile)) return false;
-            if (Project != other.Project) return false;
-            if (PackageName != other.PackageName) return false;
 
-            // Re-use source file reference. ParsedDocument is owned by the source.
-            return true;
-        }
-
-        public override Task<CodeEditor2.CodeEditor.CodeDocument> GetCodeDocumentAsync()
-        {
-            Data.VerilogFile? vFile = SourceVerilogFile;
-            if (vFile == null) throw new Exception();
-            return vFile.GetCodeDocumentAsync();
-        }
-
-        public override CodeEditor2.CodeEditor.CodeDocument? CodeDocument
-        {
-            get
-            {
-                Data.VerilogFile? vFile = SourceVerilogFile;
-                if (vFile == null) return null;
-                return vFile.CodeDocument;
-            }
-        }
 
         public override void Dispose()
         {
@@ -222,13 +184,6 @@ namespace pluginVerilog.Data
             // ParsedDocument is owned by the source file; nothing to do here.
         }
 
-        public Data.VerilogFile? SourceVerilogFile
-        {
-            get
-            {
-                return SourceTextFile as Data.VerilogFile;
-            }
-        }
 
 
         public override void Close()
@@ -251,13 +206,6 @@ namespace pluginVerilog.Data
         }
 
 
-        public override VerilogDocument? VerilogParsedDocument
-        {
-            get
-            {
-                return ParsedDocument as VerilogDocument; // no lock is needed. ParsedDocument property is thread safe
-            }
-        }
 
         public override async Task AcceptParsedDocumentAsync(CodeEditor2.CodeEditor.Parser.DocumentParser parser)
         {

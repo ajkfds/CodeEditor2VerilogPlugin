@@ -389,7 +389,7 @@ namespace pluginVerilog.Verilog
             if (vParsedDoc?.Root == null) return null;
 
             // Get the module's namespace
-            var moduleName = instance.ModuleName;
+            var moduleName = instance.InstanceName;
             if (vParsedDoc.Root.BuildingBlocks.TryGetValue(moduleName, out var module))
             {
                 return module.GetNamedElementUpward(name, out foundNameSpace);
@@ -444,7 +444,7 @@ namespace pluginVerilog.Verilog
             if (vParsedDoc?.Root == null) return;
 
             // Get the module's namespace
-            var moduleName = instance.ModuleName;
+            var moduleName = instance.InstanceName;
             if (vParsedDoc.Root.BuildingBlocks.TryGetValue(moduleName, out var module))
             {
                 module.AppendAutoCompleteItem(items);

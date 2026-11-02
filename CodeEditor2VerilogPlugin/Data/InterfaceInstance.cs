@@ -16,64 +16,6 @@ namespace pluginVerilog.Data
     public class InterfaceInstance : InstanceTextFile, IVerilogRelatedFile
     {
 
-        private string _moduleName = "";
-        public required string ModuleName
-        {
-            set
-            {
-                textFileLock.EnterWriteLock();
-                try
-                {
-                    _moduleName = value;
-                }
-                finally
-                {
-                    textFileLock.ExitWriteLock();
-                }
-            }
-            get
-            {
-                textFileLock.EnterReadLock();
-                try
-                {
-                    return _moduleName;
-                }
-                finally
-                {
-                    textFileLock.ExitReadLock();
-                }
-            }
-        }
-
-        private Dictionary<string, Verilog.Expressions.Expression> _parameterOverrides = new Dictionary<string, Verilog.Expressions.Expression>();
-        public required Dictionary<string, Verilog.Expressions.Expression> ParameterOverrides
-        {
-            set
-            {
-                textFileLock.EnterWriteLock();
-                try
-                {
-                    _parameterOverrides = value;
-                }
-                finally
-                {
-                    textFileLock.ExitWriteLock();
-                }
-            }
-            get
-            {
-                textFileLock.EnterReadLock();
-                try
-                {
-                    return _parameterOverrides;
-                }
-                finally
-                {
-                    textFileLock.ExitReadLock();
-                }
-            }
-        }
-
         public InterfaceInstance(CodeEditor2.Data.TextFile sourceTextFile) : base(sourceTextFile)
         {
 
@@ -92,7 +34,7 @@ namespace pluginVerilog.Data
             if (textFile == null) throw new Exception();
             InterfaceInstance fileItem = new InterfaceInstance(textFile)
             {
-                ModuleName = moduleInstantiation.SourceName,
+                InstanceName = moduleInstantiation.SourceName,
                 ParameterOverrides = moduleInstantiation.ParameterOverrides,
                 Project = project,
                 RelativePath = file.RelativePath,
@@ -115,112 +57,10 @@ namespace pluginVerilog.Data
             {
                 return _getKey();
             }
-            //get
-            //{
-            //    if (ParameterId == "")
-            //    {
-            //        return Project.Name+ RelativePath + ":" + ModuleName;
-            //    }
-            //    else
-            //    {
-            //        return RelativePath + ":" + ModuleName + ":" + ParameterId;
-            //    }
-            //}
-        }
-        public override string Key
-        {
-            get
-            {
-                return _getKey();
-            }
-        }
-        private string _getKey()
-        {
-            textFileLock.EnterReadLock();
-            try
-            {
-                // Read both values atomically within the same lock acquisition
-                return Verilog.ParsedDocument.KeyGenerator(this, _moduleName, _parameterOverrides);
-            }
-            finally
-            {
-                textFileLock.ExitReadLock();
-            }
         }
 
-        public override bool ReparseRequested
-        {
-            get
-            {
-                Verilog.ParsedDocument? vParsedDocument = VerilogParsedDocument;
-                if (vParsedDocument == null) return true;
-                return vParsedDocument.ReparseRequested;
-            }
-            set
-            {
-                Verilog.ParsedDocument? vParsedDocument = VerilogParsedDocument;
-                if (vParsedDocument == null) return;
-                vParsedDocument.ReparseRequested = value;
-            }
-        }
-        public void CheckDirty()
-        {
-            pluginVerilog.Verilog.ParsedDocument? vParsedDocument = VerilogParsedDocument;
-            if (vParsedDocument == null) return;
-            CodeEditor2.CodeEditor.CodeDocument? codeDocument = CodeDocument;
-            if (codeDocument == null) return;
-            if (codeDocument.Version != vParsedDocument.Version)
-            {
-                ReparseRequested = true;
-            }
-        }
         protected WeakReference<Verilog.Items.InterfaceInstance> weakInstantiating;
 
-        public bool ReplaceBy(
-            Verilog.Items.InterfaceInstance moduleInstantiation,
-            CodeEditor2.Data.Project project
-            )
-        {
-            System.Diagnostics.Debug.Print("### VerilogModuleInstance ReplaceBy " + ID);
-            ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
-            if (projectProperty == null) throw new Exception();
-
-            Data.IVerilogRelatedFile? ivFile = projectProperty.DefinitionNameSpace.GetFile(moduleInstantiation.SourceName);
-            if (ivFile == null) return false;
-
-            CodeEditor2.Data.File? file;
-            file = ivFile as CodeEditor2.Data.File;
-
-            if (file == null) return false;
-
-            if (!IsSameAs(file)) return false;
-            if (Project != project) return false;
-            if (ModuleName != moduleInstantiation.SourceName) return false;
-
-            string instanceKey = Verilog.ParsedDocument.KeyGenerator(ivFile, moduleInstantiation.SourceName, moduleInstantiation.ParameterOverrides);
-            if (Key != instanceKey) return false;
-
-            // re-register
-            //disposeItems();
-
-            ParameterOverrides = moduleInstantiation.ParameterOverrides;
-            if (file is Data.VerilogFile)
-            {
-                Data.VerilogFile? vFile = file as Data.VerilogFile;
-                if (vFile == null) return false;
-            }
-            weakInstantiating = new WeakReference<Verilog.Items.InterfaceInstance>(moduleInstantiation);
-
-            return true;
-        }
-
-        public override CodeEditor2.CodeEditor.CodeDocument CodeDocument
-        {
-            get
-            {
-                return SourceVerilogFile.CodeDocument;
-            }
-        }
         public override void Dispose()
         {
             disposeItems();
@@ -244,15 +84,6 @@ namespace pluginVerilog.Data
         }
 
 
-        public Data.VerilogFile SourceVerilogFile
-        {
-            get
-            {
-                Data.VerilogFile? vFile = SourceTextFile as VerilogFile;
-                if (vFile == null) throw new Exception();
-                return vFile;
-            }
-        }
 
 
 
@@ -293,13 +124,6 @@ namespace pluginVerilog.Data
         }
 
 
-        public Verilog.ParsedDocument? VerilogParsedDocument
-        {
-            get
-            {
-                return ParsedDocument as Verilog.ParsedDocument;
-            }
-        }
 
         public override async Task AcceptParsedDocumentAsync(CodeEditor2.CodeEditor.Parser.DocumentParser parser)
         {
@@ -440,7 +264,7 @@ namespace pluginVerilog.Data
         public override DocumentParser CreateDocumentParser(DocumentParser.ParseModeEnum parseMode, System.Threading.CancellationToken? token)
         {
             //            return new Parser.VerilogParser(this, ModuleName, ParameterOverrides, parseMode);
-            return new Parser.VerilogParser(this.SourceVerilogFile, ModuleName, ParameterOverrides, parseMode, token);
+            return new Parser.VerilogParser(this.SourceVerilogFile, InstanceName, ParameterOverrides, parseMode, token);
         }
 
         private readonly SemaphoreSlim _updateSemaphore = new SemaphoreSlim(1, 1);

@@ -38,18 +38,18 @@ namespace pluginVerilog.Verilog
             }
         }
 
-        private ParsedDocument(Data.IVerilogRelatedFile file, string key, IndexReference? indexReference) : base((CodeEditor2.Data.TextFile)file, key, long.MaxValue, DocumentParser.ParseModeEnum.LoadParse)
-        {
-            if (file is SystemVerilogFile || file is SystemVerilogHeaderFile) SystemVerilog = true;
+        //private ParsedDocument(Data.IVerilogRelatedFile file, string key, IndexReference? indexReference) : base((CodeEditor2.Data.TextFile)file, key, long.MaxValue, DocumentParser.ParseModeEnum.LoadParse)
+        //{
+        //    if (file is SystemVerilogFile || file is SystemVerilogHeaderFile) SystemVerilog = true;
 
-            System.Diagnostics.Debug.Print("## parsed " + key);
-            if (file == null)
-            {
-                System.Diagnostics.Debug.Print("## parsed null " + key);
-            }
-        }
+        //    System.Diagnostics.Debug.Print("## parsed " + key);
+        //    if (file == null)
+        //    {
+        //        System.Diagnostics.Debug.Print("## parsed null " + key);
+        //    }
+        //}
 
-        private static CodeDocument getCodeDocument(Data.IVerilogRelatedFile file)
+        private static CodeDocument? getCodeDocument(Data.IVerilogRelatedFile file)
         {
             if (file == null) return null; // foe illeagal jon constructor 
             CodeDocument? codeDocument = file.CodeDocument as CodeDocument;

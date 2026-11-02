@@ -15,6 +15,9 @@ namespace pluginVerilog.Data
 {
     public class VerilogHeaderInstance : InstanceTextFile, IVerilogRelatedFile
     {
+        protected VerilogHeaderInstance(CodeEditor2.Data.TextFile sourceTextFile) : base(sourceTextFile)
+        {
+        }
 
         private string _id = string.Empty;
         public override string ID
@@ -45,40 +48,8 @@ namespace pluginVerilog.Data
             }
         }
 
-        private string _moduleName = string.Empty;
-        public string ModuleName
-        {
-            get
-            {
-                textFileLock.EnterReadLock();
-                try
-                {
-                    return _moduleName;
-                }
-                finally
-                {
-                    textFileLock.ExitReadLock();
-                }
-            }
-            set
-            {
-                textFileLock.EnterWriteLock();
-                try
-                {
-                    _moduleName = value;
-                }
-                finally
-                {
-                    textFileLock.ExitWriteLock();
-                }
-            }
-        }
-
 
         // ------------------------
-        protected VerilogHeaderInstance(CodeEditor2.Data.TextFile sourceTextFile) : base(sourceTextFile)
-        {
-        }
 
 
         public static VerilogHeaderInstance? Create(
@@ -109,6 +80,8 @@ namespace pluginVerilog.Data
                 Name = name,
                 Project = project,
                 RelativePath = relativePath,
+                InstanceName = name,
+                ParameterOverrides= new Dictionary<string, Verilog.Expressions.Expression>()
             };
             instance.CopyCodeDocumentFrom(vhFile);
 
