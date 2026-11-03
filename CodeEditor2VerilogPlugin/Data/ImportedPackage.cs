@@ -252,7 +252,7 @@ namespace pluginVerilog.Data
                 textFileLock.ExitReadLock();
             }
 
-            return new Parser.VerilogParser(this, packageName, null, parseMode, token);
+            return new Parser.VerilogParser(this, packageName, new Dictionary<string, Verilog.Expressions.Expression>(), parseMode, token);
         }
 
 
