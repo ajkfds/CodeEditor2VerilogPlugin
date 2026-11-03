@@ -173,10 +173,11 @@ namespace pluginVerilog.Verilog.Items
             }
             // Register the referenced program name so that SimulationSetup can collect
             // the program definition file (missing definition is reported as unfound there).
-            if (!word.RootParsedDocument.ReferencedDefinitionNameSpaceAndProjects.Contains((programName, word.Project.Name)))
+            if (instancedProgram.File != null && !word.RootParsedDocument.DefinitionNameSpaceRefs.ContainsKey(instancedProgram.File.ID))
             {
-                word.RootParsedDocument.ReferencedDefinitionNameSpaceAndProjects.Add((programName, word.Project.Name));
+                word.RootParsedDocument.DefinitionNameSpaceRefs.Add(instancedProgram.File.ID, new Data.VerilogRelatedFileReference(instancedProgram.File));
             }
+
 
             word.MoveNext();
             IndexReference blockBeginIndexReference = word.CreateIndexReference();

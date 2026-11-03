@@ -131,9 +131,9 @@ namespace pluginVerilog.Verilog.Items
                 {
                     // bind_target_scope refers to DefinitionNameSpace
                     // (module / interface identifier: class never appears)
-                    if (!word.RootParsedDocument.ReferencedDefinitionNameSpaceAndProjects.Contains((targetTopName, word.Project.Name)))
+                    if (targetBuildingBlock.File != null && !word.RootParsedDocument.DefinitionNameSpaceRefs.ContainsKey(targetBuildingBlock.File.ID))
                     {
-                        word.RootParsedDocument.ReferencedDefinitionNameSpaceAndProjects.Add((targetTopName, word.Project.Name));
+                        word.RootParsedDocument.DefinitionNameSpaceRefs.Add(targetBuildingBlock.File.ID, new Data.VerilogRelatedFileReference(targetBuildingBlock.File));
                     }
                 }
                 else
@@ -197,9 +197,9 @@ namespace pluginVerilog.Verilog.Items
             BuildingBlocks.BuildingBlock? instancedBuildingBlock = word.ProjectProperty.DefinitionNameSpace.Get(instantiationName) as BuildingBlocks.BuildingBlock;
             if (instancedBuildingBlock != null)
             {
-                if (!word.RootParsedDocument.ReferencedDefinitionNameSpaceAndProjects.Contains((instantiationName, word.Project.Name)))
+                if (instancedBuildingBlock.File != null && !word.RootParsedDocument.DefinitionNameSpaceRefs.ContainsKey(instancedBuildingBlock.File.ID))
                 {
-                    word.RootParsedDocument.ReferencedDefinitionNameSpaceAndProjects.Add((instantiationName, word.Project.Name));
+                    word.RootParsedDocument.DefinitionNameSpaceRefs.Add(instancedBuildingBlock.File.ID, new Data.VerilogRelatedFileReference(instancedBuildingBlock.File));
                 }
 
                 // bind_instantiation ::= program | module | interface | checker instantiation

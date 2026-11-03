@@ -429,10 +429,8 @@ namespace pluginVerilog.Tool
                 // instance tree. Enqueue them explicitly so that changes in
                 // the bound definitions are reflected in this hierarchy pass.
                 
-                foreach ((string,string) element in verilogFile.VerilogParsedDocument.ReferencedDefinitionNameSpaceAndProjects)
+                foreach (VerilogRelatedFileReference fileRef in verilogFile.VerilogParsedDocument.DefinitionNameSpaceRefs.Values)
                 {
-                    string elementName = element.Item1;
-                    string ownerProjectName = element.Item2;
 
                     // Resolve in EVERY project that owns the definition. A
                     // module instanced with "// @project <name>" lives in that
@@ -444,13 +442,9 @@ namespace pluginVerilog.Tool
                     // declares a definition with the same name (the referenced
                     // project's building block is the one actually instanced).
 
-                    if (!CodeEditor2.Global.Projects.TryGetValue(ownerProjectName, out CodeEditor2.Data.Project? ownerProject)) continue;
-                    if (ownerProject == null) continue;
-                    pluginVerilog.ProjectProperty? ownerProperty = ownerProject.ProjectProperties[pluginVerilog.Plugin.StaticID] as ProjectProperty;
-                    if (ownerProperty == null) continue;
-                    TextFile? ownerFile = ownerProperty.DefinitionNameSpace.GetFile(elementName) as TextFile;
-                    if (ownerFile == null) continue;
-                    ParseTask newTask = new ParseTask(Id: ownerFile.ID, tarfgetTextFile: ownerFile);
+                    TextFile? file = fileRef.GetTargetFile() as TextFile;
+                    if(file == null) continue;
+                    ParseTask newTask = new ParseTask(Id: file.ID, tarfgetTextFile: file);
                     EnqueueWork(newTask, workQueue, completeIds);
                 }
             }

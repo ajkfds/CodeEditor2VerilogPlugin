@@ -13,9 +13,9 @@ namespace pluginVerilog.Data
             ProjectName = file.Project.Name;
             RelativeFilePath = file.RelativePath;
         }
-        public required string ID { set; get; }
-        public required string ProjectName { get; set; }
-        public required string RelativeFilePath { get; set; }
+        public string ID { set; get; }
+        public string ProjectName { get; set; }
+        public string RelativeFilePath { get; set; }
 
         public IVerilogRelatedFile? GetTargetFile()
         {

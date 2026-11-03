@@ -145,8 +145,6 @@ namespace pluginVerilog.Verilog
 
         public List<string> ReferencedUnitNameSpace = new List<string>();
         public List<string> ReferencedPackageNamemeSpace = new List<string>();
-        public List<(string,string)> ReferencedDefinitionNameSpaceAndProjects = new List<(string, string)>();
-
 
         public Dictionary<string, VerilogRelatedFileReference> DefinitionNameSpaceRefs = new Dictionary<string, VerilogRelatedFileReference>();
 

@@ -175,9 +175,9 @@ namespace pluginVerilog.Verilog.Items
 
             // instance target udp
             Primitive? instancedUdp = word.ProjectProperty.DefinitionNameSpace.Get(udpName) as Primitive;
-            if (!word.RootParsedDocument.ReferencedDefinitionNameSpaceAndProjects.Contains((udpName, word.Project.Name)))
+            if (instancedUdp != null && instancedUdp.File != null && !word.RootParsedDocument.DefinitionNameSpaceRefs.ContainsKey(instancedUdp.File.ID))
             {
-                word.RootParsedDocument.ReferencedDefinitionNameSpaceAndProjects.Add((udpName, word.Project.Name));
+                word.RootParsedDocument.DefinitionNameSpaceRefs.Add(instancedUdp.File.ID, new Data.VerilogRelatedFileReference(instancedUdp.File));
             }
 
             if (instancedUdp == null)

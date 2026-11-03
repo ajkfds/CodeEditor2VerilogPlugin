@@ -128,9 +128,9 @@ namespace pluginVerilog.Verilog.Items
             Interface? instancedInterface = word.ProjectProperty.DefinitionNameSpace.Get(interfaceName) as Interface;
             if (instancedInterface == null) return;   // this identifier is not interface name
 
-            if (!word.RootParsedDocument.ReferencedDefinitionNameSpaceAndProjects.Contains((interfaceName, word.Project.Name)))
+            if (instancedInterface.File != null && !word.RootParsedDocument.DefinitionNameSpaceRefs.ContainsKey(instancedInterface.File.ID))
             {
-                word.RootParsedDocument.ReferencedDefinitionNameSpaceAndProjects.Add((interfaceName, word.Project.Name));
+                word.RootParsedDocument.DefinitionNameSpaceRefs.Add(instancedInterface.File.ID, new Data.VerilogRelatedFileReference(instancedInterface.File));
             }
 
 

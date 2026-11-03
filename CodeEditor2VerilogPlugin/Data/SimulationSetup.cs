@@ -295,10 +295,9 @@ namespace pluginVerilog.Data
 
             //}
 
-            foreach ((string,string) definitionNameAndProject in parsedDocument.ReferencedDefinitionNameSpaceAndProjects )
+            foreach (VerilogRelatedFileReference verilogRelatedFileReference in parsedDocument.DefinitionNameSpaceRefs.Values )
             {
-                string definitionName = definitionNameAndProject.Item1;
-                string projectName = definitionNameAndProject.Item2;
+                string projectName = verilogRelatedFileReference.ProjectName;
 
                 if (!CodeEditor2.Global.Projects.ContainsKey(projectName))
                 {
@@ -311,9 +310,7 @@ namespace pluginVerilog.Data
                 ProjectProperty? localProperty = localProject.ProjectProperties[Plugin.StaticID] as ProjectProperty;
                 if (localProperty == null) continue;
 
-                if (localProperty.ExtenralModuleLibraryPath.ContainsKey(definitionName)) continue;
-                if (localProperty.ExtenralPrimitiveLibraryPath.ContainsKey(definitionName)) continue;
-                IVerilogRelatedFile? defFile = localProperty.DefinitionNameSpace.GetFile(definitionName);
+                IVerilogRelatedFile? defFile = verilogRelatedFileReference.GetTargetFile();
                 if (defFile != null && !setup.Files.Contains(defFile))
                 {
                     setup.Files.Add(defFile);
