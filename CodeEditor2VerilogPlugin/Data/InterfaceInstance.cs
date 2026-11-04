@@ -61,6 +61,19 @@ namespace pluginVerilog.Data
 
         protected WeakReference<Verilog.Items.InterfaceInstance> weakInstantiating;
 
+        /// <summary>
+        /// The interface instantiation this instance was created from (null for
+        /// instances built without one). Mirrors
+        /// <see cref="VerilogModuleInstance.GetParentInstanciatiation"/> so hosts
+        /// (e.g. the LSP RTL hierarchy) can inspect the instantiating item.
+        /// </summary>
+        public Verilog.Items.InterfaceInstance? GetParentInstanciatiation()
+        {
+            if (weakInstantiating == null) return null;
+            weakInstantiating.TryGetTarget(out var interfaceInstantiation);
+            return interfaceInstantiation;
+        }
+
         public override void Dispose()
         {
             disposeItems();
