@@ -48,6 +48,14 @@ namespace pluginVerilog.Data
 
                 if (vFile.SystemVerilog) fileItem.SystemVerilog = true;
             }
+            // Keep a weak reference to the instantiating item so the host (the
+            // LSP RTL hierarchy) can inspect what this instance was created from
+            // (its begin position and its instantiated building block). The
+            // module instance path (VerilogModuleInstance.Create) does the same;
+            // without it InterfaceInstance.GetParentInstanciatiation() returned
+            // null and the hierarchy could not tell an interface instance was
+            // expandable.
+            fileItem.weakInstantiating = new WeakReference<Verilog.Items.InterfaceInstance>(moduleInstantiation);
             return fileItem;
         }
 
