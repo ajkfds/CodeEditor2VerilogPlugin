@@ -388,6 +388,25 @@ namespace pluginVerilog.Data
             }
         }
 
+        /// <summary>
+        /// Drops every per-instance parse result this file produced for its
+        /// instances (module / interface instances keyed by module name +
+        /// parameter overrides).
+        /// </summary>
+        /// <remarks>
+        /// An instance caches the ParsedDocument parsed from its source file.
+        /// When the source file's text changes, the cached results are stale:
+        /// they were produced from the old text and the instance would keep
+        /// showing the previous instantiations under every parent that
+        /// expands it. A UI-less host (LSP server) has no editor re-parse loop
+        /// to notice this, so it must invalidate the cache explicitly after it
+        /// re-parses the source file.
+        /// </remarks>
+        public void ClearInstancedParsedDocuments()
+        {
+            instancedParsedDocumentRefs.Clear();
+        }
+
         #endregion
 
 
