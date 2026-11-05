@@ -189,6 +189,24 @@ namespace pluginVerilog.Data
 
             _parsedDocument = newParsedDocument;
 
+            // Build the child items (nested module / interface instances,
+            // imported packages, include files) BEFORE returning.
+            //
+            // ParseHierarchy.parseDownwardAsync walks verilogFile.Items right
+            // after AcceptParsedDocumentAsync returns in order to enqueue the
+            // next hierarchy level. When the whole update was posted to the UI
+            // thread (fire-and-forget) the children were not built yet, so the
+            // downward search read an empty Items list and stopped after the
+            // first level (the hierarchy parse "finished immediately").
+            //
+            // UpdateAsync itself is UI-free: VerilogCommon.Updater runs on a
+            // background thread and TextFile.UpdateAsync only *posts* the
+            // visual refresh, so awaiting it here does not touch the editor
+            // from this parse thread.
+            await UpdateAsync();
+
+            // Editor-only refresh (color marks / message view / node icon) must
+            // run on the UI thread.
             Dispatcher.UIThread.Post(() =>
             {
                 _ = postUpdateAsync(newParsedDocument);
@@ -239,7 +257,8 @@ namespace pluginVerilog.Data
                     CodeEditor2.Controller.CodeEditor.PostRefresh();
                 }
 
-                await UpdateAsync(); // update navigate panel node and message view
+                // NOTE: the Items update (UpdateAsync) is already awaited by
+                // AcceptParsedDocumentAsync before this UI-thread refresh runs.
 
                 // refresh the navigate panel node icon (error/warning badge, ...)
                 // after the parsed document is updated. Without this, the icon of a
