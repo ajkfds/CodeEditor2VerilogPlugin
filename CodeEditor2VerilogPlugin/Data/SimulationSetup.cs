@@ -226,11 +226,27 @@ namespace pluginVerilog.Data
 
 //            appendFile(file, ref setup, ids, path, buildingBlockName);
 
+            // Report the unresolved instantiations of this file, but do NOT
+            // stop the traversal here.
+            //
+            // ParsedDocument.UnfoundModules is de-duplicated on Add but never
+            // cleared when the module later resolves (e.g. a forward reference
+            // resolved by the second parse pass, or an instance inside a
+            // non-generated "generate if" branch). Returning early therefore
+            // dropped the WHOLE subtree of any file that ever recorded an
+            // unfound module, even though the NavigatePanel (Updater) expands
+            // the resolved instances of that same file. That is why modules
+            // visible in the NavigatePanel were missing from the setup.
+            //
+            // The unresolved names are still surfaced (log + UnfoundModules)
+            // so a genuinely missing definition is not silently ignored.
             foreach (string unfound in parsedDocument.UnfoundModules)
             {
                 CodeEditor2.Controller.AppendLog("unfound " + unfound, Avalonia.Media.Colors.Red);
-                setup.Failed = false;
-                return;
+                string entry;
+                try { entry = file.RelativePath + ":" + unfound; }
+                catch { entry = file.ID + ":" + unfound; }
+                if (!setup.UnfoundModules.Contains(entry)) setup.UnfoundModules.Add(entry);
             }
 
             foreach (string external in parsedDocument.ExternalRefrenceModules)
@@ -380,54 +396,78 @@ namespace pluginVerilog.Data
                     }
                     else
                     {
+                        string newPath = moduleInstantiation.Name;
+                        if (path != "") newPath = path + "." + newPath;
+
+                        // Resolve the instantiated module's source file.
+                        //
+                        // file.Items only holds the internal instantiations when the
+                        // source file declares exactly ONE building block
+                        // (Updater.addSubItemsSingleBuldingBlock). For a file with
+                        // several building blocks (e.g. a module plus a package, or a
+                        // module plus a testbench module) file.Items holds one instance
+                        // per building block and the internal instantiations live in
+                        // those instances' Items. Looking the instance up in
+                        // file.Items therefore failed and the module (and its whole
+                        // subtree) was missing from the setup even though the
+                        // NavigatePanel could expand it.
+                        //
+                        // Prefer the instance item when it is present (it carries the
+                        // parameter-overridden parse), then the instance-array
+                        // elements ("name[i]"), and finally resolve the definition
+                        // file directly from the DefinitionNameSpace.
+                        VerilogFile? sourceFile = null;
                         if (file.Items.TryGetValue(moduleInstantiation.Name, out CodeEditor2.Data.Item? item))
                         {
-                            string newPath = moduleInstantiation.Name;
-                            if (path != "") newPath = path + "." + newPath;
-
-                            var subfile = item as IVerilogRelatedFile;
-                            VerilogModuleInstance? instance = subfile as VerilogModuleInstance;
-                            VerilogFile? sourceFile = instance?.SourceVerilogFile;
-                            if (sourceFile != null)
-                            {
-                                if (!setup.Files.Contains(sourceFile)) setup.Files.Add(sourceFile);
-                                searchHier(sourceFile, moduleInstantiation.SourceName, ids, setup, newPath);
-                            }
+                            sourceFile = (item as VerilogModuleInstance)?.SourceVerilogFile;
                         }
-                        else if (moduleInstantiation.InstanceRange != null)
+                        if (sourceFile == null && moduleInstantiation.InstanceRange != null)
                         {
                             // instance array: VerilogModuleInstance.CreateArray registers
                             // each element to file.Items as "name[i]" while the
                             // ModuleInstantiation itself is registered with the plain
-                            // name. Look up each array element so that (especially for
-                            // external project instances) the definition file and its
-                            // own dependencies are collected into the sub-setup.
+                            // name.
                             int count = moduleInstantiation.InstanceCount;
                             for (int i = 0; i < count; i++)
                             {
                                 string elementName = moduleInstantiation.Name + "[" + i.ToString() + "]";
                                 if (!file.Items.TryGetValue(elementName, out CodeEditor2.Data.Item? arrayItem)) continue;
-
-                                string newPath = elementName;
-                                if (path != "") newPath = path + "." + newPath;
-
-                                var subfile = arrayItem as IVerilogRelatedFile;
-                                if (subfile != null) searchHier(subfile, moduleInstantiation.SourceName, ids, setup, newPath);
+                                sourceFile = (arrayItem as VerilogModuleInstance)?.SourceVerilogFile;
+                                if (sourceFile != null) break;
                             }
+                        }
+                        if (sourceFile == null)
+                        {
+                            sourceFile = file.ProjectProperty?.DefinitionNameSpace.GetFile(moduleInstantiation.SourceName) as VerilogFile;
+                        }
+
+                        if (sourceFile != null)
+                        {
+                            if (!setup.Files.Contains(sourceFile)) setup.Files.Add(sourceFile);
+                            searchHier(sourceFile, moduleInstantiation.SourceName, ids, setup, newPath);
                         }
                     }
                 }
                 else if ((element is Verilog.Items.InterfaceInstance))
                 {
                     Verilog.Items.InterfaceInstance moduleInstantiation = (Verilog.Items.InterfaceInstance)element;
+                    string newPath = moduleInstantiation.Name;
+                    if (path != "") newPath = path + "." + newPath;
+
+                    // Same reasoning as the module instantiation branch above:
+                    // file.Items only holds the internal instantiations when the
+                    // source file declares exactly one building block, so fall back
+                    // to resolving the interface definition file directly.
+                    IVerilogRelatedFile? subfile = null;
                     if (file.Items.TryGetValue(moduleInstantiation.Name, out CodeEditor2.Data.Item? item))
                     {
-                        string newPath = moduleInstantiation.Name;
-                        if (path != "") newPath = path + "." + newPath;
-
-                        var subfile = item as IVerilogRelatedFile;
-                        if (subfile != null) searchHier(subfile, moduleInstantiation.SourceName, ids, setup, newPath);
+                        subfile = item as IVerilogRelatedFile;
                     }
+                    if (subfile == null)
+                    {
+                        subfile = file.ProjectProperty?.DefinitionNameSpace.GetFile(moduleInstantiation.SourceName);
+                    }
+                    if (subfile != null) searchHier(subfile, moduleInstantiation.SourceName, ids, setup, newPath);
                 }
                 else if (element is Verilog.Items.ProgramInstantiation)
                 {
