@@ -19,6 +19,18 @@ namespace pluginVerilog.CoreBridge
             /// <summary>LSP CompletionItemKind value.</summary>
             public int Kind { get; init; }
             public string Detail { get; init; } = "";
+
+            /// <summary>
+            /// Text actually inserted when the entry is accepted. Null means
+            /// "insert <see cref="Text"/> as-is" (plain text).
+            /// </summary>
+            public string? InsertText { get; init; }
+
+            /// <summary>
+            /// LSP InsertTextFormat: 1 = PlainText, 2 = Snippet.
+            /// Only meaningful when <see cref="InsertText"/> is set.
+            /// </summary>
+            public int InsertTextFormat { get; init; } = 1;
         }
 
         /// <summary>
@@ -98,9 +110,86 @@ namespace pluginVerilog.CoreBridge
                     detail = acItem.Type.ToString();
                 }
 
-                entries.Add(new CompletionEntry { Text = text, Kind = kind, Detail = detail });
+                CompletionEntry entry = new CompletionEntry { Text = text, Kind = kind, Detail = detail };
+
+                // Block keywords expand to a full block (begin ... end etc.) as a
+                // VS Code snippet, mirroring the editor's BeginAutoCompleteItem /
+                // CaseAutocompleteItem / ... ApplyAsync behaviour. Without this the
+                // LSP host only inserts the bare keyword.
+                string? snippet = BuildBlockSnippet(text, codeDocument, index);
+                if (snippet != null)
+                {
+                    entry = new CompletionEntry
+                    {
+                        Text = text,
+                        Kind = kind,
+                        Detail = detail,
+                        InsertText = snippet,
+                        InsertTextFormat = 2, // Snippet
+                    };
+                }
+
+                entries.Add(entry);
             }
             return entries;
+        }
+
+        /// <summary>
+        /// Builds a VS Code snippet body for block-opening keywords, or null when
+        /// the keyword has no block expansion. The indentation of the line the
+        /// caret sits on is reused for the closing keyword.
+        /// </summary>
+        private static string? BuildBlockSnippet(
+            string keyword,
+            CodeEditor2.CodeEditor.CodeDocument codeDocument,
+            int index)
+        {
+            string indent = GetLineIndent(codeDocument, index);
+            string inner = indent + "\t";
+
+            switch (keyword)
+            {
+                case "begin":
+                    return "begin\n" + inner + "$0\n" + indent + "end";
+                case "fork":
+                    return "fork\n" + inner + "$0\n" + indent + "join";
+                case "case":
+                    return "case (${1})\n" + inner + "$0\n" + indent + "endcase";
+                case "casex":
+                    return "casex (${1})\n" + inner + "$0\n" + indent + "endcase";
+                case "casez":
+                    return "casez (${1})\n" + inner + "$0\n" + indent + "endcase";
+                case "generate":
+                    return "generate\n" + inner + "$0\n" + indent + "endgenerate";
+                case "module":
+                    return "module ${1:name};\n" + inner + "$0\n" + indent + "endmodule";
+                case "interface":
+                    return "interface ${1:name};\n" + inner + "$0\n" + indent + "endinterface";
+                case "function":
+                    return "function ${1:type} ${2:name};\n" + inner + "$0\n" + indent + "endfunction";
+                case "task":
+                    return "task ${1:name};\n" + inner + "$0\n" + indent + "endtask";
+                default:
+                    return null;
+            }
+        }
+
+        /// <summary>Leading whitespace of the line containing <paramref name="index"/>.</summary>
+        private static string GetLineIndent(CodeEditor2.CodeEditor.CodeDocument codeDocument, int index)
+        {
+            if (index < 0) return "";
+            if (index > codeDocument.Length) index = codeDocument.Length;
+
+            int line = codeDocument.GetLineAt(index);
+            int lineStart = codeDocument.GetLineStartIndex(line);
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            for (int i = lineStart; i < codeDocument.Length; i++)
+            {
+                char c = codeDocument.GetCharAt(i);
+                if (c != ' ' && c != '\t') break;
+                sb.Append(c);
+            }
+            return sb.ToString();
         }
     }
 }
