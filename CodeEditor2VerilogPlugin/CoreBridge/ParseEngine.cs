@@ -1,5 +1,6 @@
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using pluginVerilog.Verilog;
@@ -76,6 +77,69 @@ namespace pluginVerilog.CoreBridge
             }
 
             return parsedDocument;
+        }
+
+        /// <summary>
+        /// Parses the given text AS a building-block instance: the target module
+        /// is parsed with <paramref name="parameterOverrides"/> applied, exactly
+        /// like the editor does when a module instance is opened
+        /// (<c>VerilogModuleInstance.CreateDocumentParser</c>).
+        ///
+        /// <para>
+        /// A plain file parse uses the declared default parameter values, so a
+        /// module instantiated with <c>#(.P_WIDTH(5))</c> would still be shown
+        /// with <c>P_WIDTH = 8</c> (its default) and every width derived from it
+        /// would be wrong. The editor opens the INSTANCE, not the file, which is
+        /// why its diagnostics / colouring reflect the override; this entry
+        /// point gives a UI-less host the same result.
+        /// </para>
+        ///
+        /// <para>
+        /// Unlike <see cref="ParseSystemVerilogAsync"/> this does NOT register
+        /// the parsed building block into the project name spaces: the file's
+        /// plain parse already registered the default-parameter version, and
+        /// overwriting it with one instance's override would corrupt the
+        /// resolution of every other instance of the same module. The result is
+        /// only used for the opened document's diagnostics / colouring.
+        /// </para>
+        /// </summary>
+        public static async Task<Verilog.ParsedDocument?> ParseInstanceAsync(
+            string text,
+            Data.VerilogFile file,
+            string moduleName,
+            Dictionary<string, Expression> parameterOverrides,
+            CancellationToken? cancellationToken = null
+            )
+        {
+            if (text == null) return null;
+            if (string.IsNullOrEmpty(moduleName)) return null;
+
+            // The override constructor requires file.CodeDocument to be set
+            // (it snapshots the version). In UI-less hosts FileCheckAsync has
+            // not run, so create it here (same as ParseSystemVerilogAsync).
+            if (file.CodeDocument == null)
+            {
+                System.Reflection.MethodInfo? create = file.GetType().GetMethod(
+                    "CreateCodeDocument",
+                    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+                create?.Invoke(file, null);
+            }
+            if (file.CodeDocument == null) return null;
+
+            pluginVerilog.Parser.VerilogParser parser = new pluginVerilog.Parser.VerilogParser(
+                file,
+                moduleName,
+                parameterOverrides,
+                CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.BackgroundParse,
+                cancellationToken
+                );
+
+            CodeEditor2.CodeEditor.CodeDocument sourceDocument = new CodeEditor2.CodeEditor.CodeDocument(file, text);
+            parser.Document.CopyTextOnlyFrom(sourceDocument);
+
+            await parser.ParseAsync(cancellationToken ?? CancellationToken.None);
+
+            return parser.VerilogParsedDocument;
         }
 
         private static async System.Threading.Tasks.Task<Verilog.ParsedDocument?> ParseOnceAsync(
