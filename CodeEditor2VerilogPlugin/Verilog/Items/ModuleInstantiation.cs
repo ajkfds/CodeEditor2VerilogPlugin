@@ -645,7 +645,16 @@ namespace pluginVerilog.Verilog.Items
                 {
                     pinName = instancedModule.PortsList[i].Name;
                     Expressions.Expression? expression = Expressions.Expression.ParseCreateAcceptImplicitNet(word, nameSpace, false);
-                    if (word.Prototype && expression != null && !moduleInstantiation.PortConnection.ContainsKey(pinName)) moduleInstantiation.PortConnection.Add(pinName, expression);
+                    if (expression != null)
+                    {
+                        // Same path as a named connection: connectPort records
+                        // the connection, marks the direction (output ports are
+                        // driven, inputs are used) and runs the port checks
+                        // (bit width / data type). Ordered connections used to
+                        // skip all of this, so a width mismatch on `inst(sig)`
+                        // was never reported (only `.port(sig)` was checked).
+                        connectPort(word, moduleInstantiation, instancedModule, pinName, expression);
+                    }
                 }
                else
                {
@@ -671,6 +680,11 @@ namespace pluginVerilog.Verilog.Items
                 {
                     word.MoveNext();
                 }
+                // advance to the next ordered port: without this every
+                // connection was checked against PortsList[0], so the width
+                // check compared the wrong port (and the hint always named the
+                // first port).
+                i++;
             }
         }
 
