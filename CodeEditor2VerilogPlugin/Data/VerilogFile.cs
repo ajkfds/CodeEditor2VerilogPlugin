@@ -362,7 +362,18 @@ namespace pluginVerilog.Data
             }
         }
 
-        public void RegisterInstanceParsedDocument(string id, CodeEditor2.CodeEditor.ParsedDocument parsedDocument, InstanceTextFile moduleInstance)
+        /// <summary>
+        /// Registers an instance's parse result under its parameter-qualified
+        /// key (<see cref="Verilog.ParsedDocument.KeyGenerator"/>), which is
+        /// what <see cref="InstanceTextFile.ParsedDocument"/> looks up.
+        /// </summary>
+        /// <remarks>
+        /// <paramref name="moduleInstance"/> is the instance that produced the
+        /// result; it is optional because a UI-less host (the LSP's
+        /// CoreBridge.ParseEngine) registers the result straight from the
+        /// parser without materialising a VerilogModuleInstance.
+        /// </remarks>
+        public void RegisterInstanceParsedDocument(string id, CodeEditor2.CodeEditor.ParsedDocument parsedDocument, InstanceTextFile? moduleInstance)
         {
             if (parsedDocument == null && System.Diagnostics.Debugger.IsAttached)
             {

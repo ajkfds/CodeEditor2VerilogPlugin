@@ -139,7 +139,34 @@ namespace pluginVerilog.CoreBridge
 
             await parser.ParseAsync(cancellationToken ?? CancellationToken.None);
 
-            return parser.VerilogParsedDocument;
+            Verilog.ParsedDocument? parsed = parser.VerilogParsedDocument;
+
+            // Register the instance parse result under its PARAMETER-QUALIFIED
+            // key on the source file.
+            //
+            // The editor reads an instance's parse result through
+            // InstanceTextFile.ParsedDocument, which does
+            //   source.GetInstancedParsedDocument(
+            //       ParsedDocument.KeyGenerator(source, instanceName, overrides))
+            // (see Data/InstanceTextFile.cs). In the editor that entry is filled
+            // by VerilogFile.AcceptParsedDocumentAsync →
+            // RegisterInstanceParsedDocument. A UI-less host (this engine) only
+            // got the return value and never registered it, so
+            // GetInstancedParsedDocument always missed and every instance read
+            // back null - the opened document then fell back to the plain file
+            // parse and showed the DECLARED parameter values instead of the
+            // overrides.
+            if (parsed != null)
+            {
+                // The key must be built exactly like InstanceTextFile._getKey():
+                // KeyGenerator(<this file>, moduleName, parameterOverrides).
+                // The instance object itself is not needed: registration only
+                // stores the WeakReference under the key.
+                string instanceKey = Verilog.ParsedDocument.KeyGenerator(file, moduleName, parameterOverrides);
+                file.RegisterInstanceParsedDocument(instanceKey, parsed, null);
+            }
+
+            return parsed;
         }
 
         private static async System.Threading.Tasks.Task<Verilog.ParsedDocument?> ParseOnceAsync(
