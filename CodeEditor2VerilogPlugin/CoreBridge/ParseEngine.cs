@@ -181,11 +181,26 @@ namespace pluginVerilog.CoreBridge
                 cancellationToken
                 );
 
-            // load the target text into the parser's working document.
-            // CodeDocument has no public text setter; CopyTextOnlyFrom copies
-            // the raw text (and clears color/mark info) from another document.
-            CodeEditor2.CodeEditor.CodeDocument sourceDocument = new CodeEditor2.CodeEditor.CodeDocument(file, text);
-            parser.Document.CopyTextOnlyFrom(sourceDocument);
+            // The parser's working document was built from `file.CodeDocument`.
+            // Copy the text ONLY when it actually differs (a UI-less caller
+            // that never ran FileCheckAsync, or an in-memory file whose buffer
+            // was swapped).
+            //
+            // The copy is destructive for the colour table: assigning
+            // TextDocument.Text re-raises TextChanged, and the edit bookkeeping
+            // in ColorHandler.OnTextEdit then removes the colour entries of the
+            // lines a multi-line token spans. Doing it unconditionally on every
+            // parse removed every line of a leading /// header comment block but
+            // the first - the reported "scr1/src/top/scr1_top_axi.sv lines 2-6
+            // have no colour". The parse result itself was unaffected (same
+            // building blocks, same diagnostics), which is why only the colour
+            // looked wrong.
+            if (!string.Equals(parser.Document.CreateString(), text, StringComparison.Ordinal))
+            {
+                CodeEditor2.CodeEditor.CodeDocument sourceDocument =
+                    new CodeEditor2.CodeEditor.CodeDocument(file, text);
+                parser.Document.CopyTextOnlyFrom(sourceDocument);
+            }
 
             // run the (UI-free) parse
             await parser.ParseAsync(cancellationToken ?? CancellationToken.None);

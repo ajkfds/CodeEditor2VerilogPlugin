@@ -9,11 +9,33 @@ namespace pluginVerilog.Verilog
     public class WordPointer
     {
         public WordPointer(CodeEditor.CodeDocument document, Verilog.ParsedDocument parsedDocument,int indexReferenceOffset)
+            : this(document, parsedDocument, indexReferenceOffset, false)
+        {
+        }
+
+        /// <summary>
+        /// Constructor used by <see cref="Clone"/>: <paramref name="suppressInitialFetch"/>
+        /// skips the initial fetchNext().
+        /// </summary>
+        /// <remarks>
+        /// fetchNext() also WRITES the token's colour into
+        /// <c>Document.TextColors</c>. A clone replaces the pointer right after
+        /// construction, so that initial fetch only coloured the token at offset
+        /// 0 again - once per clone. Cloning happens inside look-ahead paths
+        /// (fetchNextComment, syntax probes), so a file whose first line is a
+        /// comment collected thousands of duplicate colour entries for line 1 and
+        /// the following lines lost their colour completely: the editor showed
+        /// scr1_top_axi.sv's header uncoloured from line 2 on.
+        /// </remarks>
+        internal WordPointer(
+            CodeEditor.CodeDocument document, Verilog.ParsedDocument parsedDocument,
+            int indexReferenceOffset, bool suppressInitialFetch)
         {
             this.Document = document;
             this.ParsedDocument = parsedDocument;
             this.IndexReferenceOffset = indexReferenceOffset;
             if (this.ParsedDocument == null) throw new Exception();
+            if (suppressInitialFetch) return;
             string? sectionName = SectionName;
             fetchNext(this.Document, ref index, out length, out nextIndex, out wordType, ref sectionName, !InhibitColor);
             SectionName = sectionName;
@@ -72,7 +94,10 @@ namespace pluginVerilog.Verilog
 
         public WordPointer Clone()
         {
-            WordPointer ret = new WordPointer(Document, ParsedDocument,IndexReferenceOffset);
+            // suppressInitialFetch: the constructor's initial fetchNext() would
+            // recolour the token at offset 0 (see the constructor's remarks).
+            WordPointer ret = new WordPointer(Document, ParsedDocument, IndexReferenceOffset, true);
+            ret.InhibitColor = InhibitColor;
             ret.index = index;
             ret.length = length;
             ret.nextIndex = nextIndex;
@@ -185,15 +210,21 @@ namespace pluginVerilog.Verilog
                 return;
             }
 
-            // get next Index
-            if (commentNextFetched)
-            {
-                fetchNext(Document, ref index, out length, out nextIndex, out wordType, ref nextSection, false);
-            }
-            else
-            {
-                fetchNext(Document, ref index, out length, out nextIndex, out wordType, ref nextSection, (!InhibitColor));
-            }
+            // get next Index.
+            //
+            // colouring must stay enabled here. It used to be
+            // `commentNextFetched ? false : !InhibitColor`, on the assumption that
+            // a comment consumed by the loop below had already been coloured by
+            // the fetchNextComment() look-ahead. That assumption does not hold:
+            // fetchNextComment() returns early when its probe reaches EOF or hits
+            // a non-comment, so `commentNextFetched` is often already true while
+            // the token at nextIndex has never been fetched (and therefore never
+            // coloured). The visible symptom: a run of `///` header lines kept
+            // only the FIRST line coloured - on scr1/src/top/scr1_top_axi.sv the
+            // whole 4-line file header plus the include lines stayed uncoloured
+            // from line 2 on. Colour writes are idempotent per offset, so the
+            // extra call is harmless when the look-ahead did run.
+            fetchNext(Document, ref index, out length, out nextIndex, out wordType, ref nextSection, !InhibitColor);
 
             if (wordType == WordTypeEnum.Comment)
             { // fist word is comment
@@ -770,20 +801,23 @@ namespace pluginVerilog.Verilog
                     }
                     nextIndex++;
                 }
+                // Colour up to the newline, NOT through it. Including the
+                // newline made the span cross into the next line, and
+                // ColorHandler.SetColorAt then split it into a full-line entry
+                // plus a ZERO-LENGTH entry on the following line (index + length
+                // lands exactly on that line's start). The zero-length entry is
+                // the only colour the next line got, so a run of /// header
+                // comment lines lost its colour from the second line on (seen
+                // on scr1/src/top/scr1_top_axi.sv, lines 2-4).
+                int commentEnd = nextIndex;
                 if (docLength > nextIndex && document.GetCharAt(nextIndex) == '\n')
                 {
                     nextIndex++;
                 }
                 if (colorComment)
                 {
-                    if (nextIndex > docLength)
-                    {
-                        document.TextColors.SetColorAt(commentStart, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Comment), docLength - commentStart);
-                    }
-                    else
-                    {
-                        document.TextColors.SetColorAt(commentStart, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Comment), nextIndex - commentStart);
-                    }
+                    if (commentEnd > docLength) commentEnd = docLength;
+                    document.TextColors.SetColorAt(commentStart, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Comment), commentEnd - commentStart);
                 }
                 wordType = WordTypeEnum.Comment;
                 return;
