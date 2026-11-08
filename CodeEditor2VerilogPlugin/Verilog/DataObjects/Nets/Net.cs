@@ -536,16 +536,24 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                     if (net.DefinedReference != null) net.AssignedReferences.Add(net.DefinedReference);
                     if (!word.Prototype && assignValue != null)
                     {
+                        // "Size mismatch" on a net declaration initializer
+                        // (`wire [4:0] bb = 8'h00;` — the width of the declared
+                        // net differs from the literal) is an informational
+                        // remark, not a warning: it is reported as a HINT so it
+                        // shows grey in the editor instead of the orange used
+                        // for a real "bit width mismatch". AddHint is used for
+                        // both branches (the net has no width, and the net has
+                        // a width that differs from the value).
                         if (net.BitWidth == null)
                         {
                             if (assignValue.BitWidth != 1 & !word.Prototype)
                             {
-                                assignValue.Reference.AddWarning("Size mismatch 1 <- " + assignValue.BitWidth.ToString());
+                                assignValue.Reference.AddHint("Size mismatch 1 <- " + assignValue.BitWidth.ToString());
                             }
                         }
                         else if (assignValue.BitWidth != net.BitWidth & !word.Prototype && assignValue.Reference != null)
                         {
-                            assignValue.Reference.AddWarning("Size mismatch " + net.BitWidth.ToString() + " <- " + assignValue.BitWidth.ToString());
+                            assignValue.Reference.AddHint("Size mismatch " + net.BitWidth.ToString() + " <- " + assignValue.BitWidth.ToString());
                         }
                     }
                 }

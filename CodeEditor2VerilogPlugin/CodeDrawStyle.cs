@@ -29,36 +29,40 @@ namespace pluginVerilog
 
             markStyle = new CodeEditor2.CodeEditor.CodeDrawStyle.MarkDetail[]
             {
-                // 0 error
+                // 0 error — red, matching the Messages pane / Problems panel
+                // (VS Code shows Error as #f14c4c).
                 new MarkDetail{
-                    Color = Avalonia.Media.Color.FromArgb(200,255,120,120), // red
+                    Color = Avalonia.Media.Color.FromArgb(230,241,76,76),   // red #f14c4c
                     Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkDetail.MarkStyleEnum.WaveLine,
                     DecorationHeight = 1,
                     DecorationWidth = 4,
                     Thickness = 2,
                     ZOrder = 7
                 },
-                // 1 warning
+                // 1 warning — orange, matching the Messages pane
+                // (VS Code shows Warning as #cca700 / orange).
                 new MarkDetail{
-                    Color = Avalonia.Media.Color.FromArgb(200,255,250,150), // yellow
+                    Color = Avalonia.Media.Color.FromArgb(230,204,167,0),   // orange #cca700
                     Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkDetail.MarkStyleEnum.WaveLine,
                     DecorationHeight = -1,
                     DecorationWidth = 4,
                     Thickness = 2,
                     ZOrder = 6
                 },
-                // 2 notice
+                // 2 notice — blue, matching the Messages pane
+                // (VS Code shows Information as #3794ff).
                 new MarkDetail{
-                    Color = Avalonia.Media.Color.FromArgb(200,20,255,20),   // green
+                    Color = Avalonia.Media.Color.FromArgb(230,55,148,255),  // blue #3794ff
                     Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkDetail.MarkStyleEnum.WaveLine,
                     DecorationHeight = 0.5,
                     DecorationWidth = 4,
                     Thickness = 2,
                     ZOrder = 5
                 },
-                // 3 hint
+                // 3 hint — grey, matching the Messages pane
+                // (VS Code shows Hint as #6c6c6c).
                 new MarkDetail{
-                    Color = Avalonia.Media.Color.FromArgb(200,106,176,224), // cyan
+                    Color = Avalonia.Media.Color.FromArgb(230,108,108,108), // grey #6c6c6c
                     Style = CodeEditor2.CodeEditor.CodeDrawStyle.MarkDetail.MarkStyleEnum.WaveLine,
                     DecorationHeight = -0.5,
                     DecorationWidth = 4,
