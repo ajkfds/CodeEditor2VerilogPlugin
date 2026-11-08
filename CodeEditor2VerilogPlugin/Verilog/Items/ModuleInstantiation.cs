@@ -398,26 +398,44 @@ namespace pluginVerilog.Verilog.Items
 
                     VerilogFile? baseFile = sourceProjectProperty.DefinitionNameSpace.GetFile(moduleName) as VerilogFile;
 
-                    if (word.RootParsedDocument.ParseMode == CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.EditParse)
-                    { // editparse時処理
-
-                        if (effectiveModule == null && baseFile != null)
+                    // Parse the parameter-overridden instance right away when its
+                    // parsed document is not available yet.
+                    //
+                    // GetInstancedBuildingBlock only LOOKS UP an already parsed
+                    // instance (keyed by module + parameter overrides); it never
+                    // parses. Previously this instant parse ran only for
+                    // ParseModeEnum.EditParse, so in every other mode (in
+                    // particular the LSP's BackgroundParse) eftectiveModule stayed
+                    // null: the port list of the instantiated module was unknown,
+                    // so port connection checks (bit width / data type mismatch)
+                    // were skipped entirely and the parameters resolved through the
+                    // un-overridden declaration instead of the override. The
+                    // instantiated module is still parsed with its overrides, so
+                    // "moduleSample" is resolved through the document parsed with
+                    // #(.P_WIDTH(5)) rather than its plain declaration.
+                    //
+                    // Kept out of the prototype pass / partial (autocomplete) parse
+                    // and of non-generated generate branches: those must not create
+                    // instances (they would be registered and cost a full parse for
+                    // a branch that is not elaborated).
+                    if (effectiveModule == null && baseFile != null
+                        && !word.Prototype && !word.IsPartialParse && word.Active
+                        && word.CompletionContext == null)
+                    {
+                        VerilogModuleInstance? instance = VerilogModuleInstance.Create(moduleInstantiation);
+                        var baseParser = instance?.CreateDocumentParser(CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.SingleHierParse, word.CancellationToken);
+                        if (instance != null && baseParser != null)
                         {
-                            VerilogModuleInstance? instance = VerilogModuleInstance.Create(moduleInstantiation);
-                            var baseParser = instance?.CreateDocumentParser(CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.SingleHierParse, word.CancellationToken);
-                            if (instance != null && baseParser != null)
+                            await baseParser.ParseAsync();
+                            if (baseParser.ParsedDocument != null)
                             {
-                                await baseParser.ParseAsync();
-                                if (baseParser.ParsedDocument != null)
-                                {
-                                    if (word.RootParsedDocument.File != null) word.RootParsedDocument.File.Items.AddOrUpdate(instance.Name, instance);
-                                    Verilog.ParsedDocument vParsedDocument = (Verilog.ParsedDocument)baseParser.ParsedDocument;
-                                    await instance.AcceptParsedDocumentAsync(baseParser);
-                                }
+                                if (word.RootParsedDocument.File != null) word.RootParsedDocument.File.Items.AddOrUpdate(instance.Name, instance);
+                                Verilog.ParsedDocument vParsedDocument = (Verilog.ParsedDocument)baseParser.ParsedDocument;
+                                await instance.AcceptParsedDocumentAsync(baseParser);
                             }
-
-                            effectiveModule = sourceProjectProperty.GetInstancedBuildingBlock(moduleInstantiation) as Module;
                         }
+
+                        effectiveModule = sourceProjectProperty.GetInstancedBuildingBlock(moduleInstantiation) as Module;
                     }
 
 

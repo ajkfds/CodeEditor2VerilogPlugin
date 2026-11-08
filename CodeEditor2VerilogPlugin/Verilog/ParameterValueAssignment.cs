@@ -173,7 +173,14 @@ namespace pluginVerilog.Verilog
                         else
                         {
                             string paramName = buildingBlock.PortParameterNameList[i];
-                            if (word.Prototype && expression != null)
+                            // Record the ordered override on EVERY pass, like the
+                            // named form below. Restricting this to the prototype
+                            // pass (`word.Prototype`) dropped the overrides in the
+                            // real pass, so `child #(4)` resolved to the declared
+                            // default (WIDTH = 8): the parameter value was wrong
+                            // and the port width check compared against 8, hiding
+                            // the real mismatch.
+                            if (expression != null)
                             {
                                 if (parameterOverrides.ContainsKey(paramName))
                                 {
