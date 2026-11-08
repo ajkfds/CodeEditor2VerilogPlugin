@@ -53,35 +53,37 @@ namespace pluginVerilog.MessageView
             if (textBlock.Inlines == null) return;
             textBlock.Inlines.Clear();
 
+            // The icon colours follow the Messages pane / Problems panel colours
+            // (and the editor's wave mark colours in CodeDrawStyle): red for an
+            // error, orange for a warning, blue for a notice (Information) and
+            // grey for a hint - previously Notice was green and Hint cyan, so
+            // the same message had a different colour in each view.
             Avalonia.Media.IImage? iimage;
             switch (messageType)
             {
                 case Verilog.ParsedDocument.Message.MessageType.Error:
                     iimage = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
                             "CodeEditor2/Assets/Icons/exclamation_triangle.svg",
-                            Avalonia.Media.Color.FromArgb(100, 255, 150, 150)
+                            Avalonia.Media.Color.FromArgb(230, 241, 76, 76)   // #f14c4c
                             );
                     break;
                 case Verilog.ParsedDocument.Message.MessageType.Warning:
                     iimage = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
                             "CodeEditor2/Assets/Icons/exclamation_triangle.svg",
-                            Avalonia.Media.Color.FromArgb(100, 255, 255, 150)
+                            Avalonia.Media.Color.FromArgb(230, 204, 167, 0)   // #cca700
                             );
-                    //                    graphics.DrawImage(icon.GetImage(lineHeight, ajkControls.Primitive.IconImage.ColorStyle.Orange), new Point(x, y));
                     break;
                 case Verilog.ParsedDocument.Message.MessageType.Notice:
                     iimage = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
                             "CodeEditor2/Assets/Icons/exclamation_triangle.svg",
-                            Avalonia.Media.Color.FromArgb(100, 150, 255, 150)
+                            Avalonia.Media.Color.FromArgb(230, 55, 148, 255)  // #3794ff
                             );
-                    //                    graphics.DrawImage(icon.GetImage(lineHeight, ajkControls.Primitive.IconImage.ColorStyle.Green), new Point(x, y));
                     break;
                 case Verilog.ParsedDocument.Message.MessageType.Hint:
                     iimage = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
                             "CodeEditor2/Assets/Icons/exclamation_triangle.svg",
-                            Avalonia.Media.Color.FromArgb(100, 150, 150, 255)
+                            Avalonia.Media.Color.FromArgb(230, 108, 108, 108) // #6c6c6c
                             );
-                    //                    graphics.DrawImage(icon.GetImage(lineHeight, ajkControls.Primitive.IconImage.ColorStyle.Blue), new Point(x, y));
                     break;
                 default:
                     throw new Exception();
