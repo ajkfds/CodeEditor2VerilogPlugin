@@ -1860,7 +1860,7 @@ namespace pluginVerilog.Verilog
             }
 
             IndexReference indexReference = IndexReference.Create(wordPointer.ParsedDocument.IndexReference, wordPointer.Index);
-            ParsedDocument? newParsedDocument;
+            ParsedDocument? newParsedDocument = null;
 
             if (prototype)
             {
@@ -1884,8 +1884,22 @@ namespace pluginVerilog.Verilog
                 {
                     newParsedDocument = vhInstance.VerilogParsedDocument;
                 }
-                else
+                if (newParsedDocument == null)
                 {
+                    // The prototype pass registered a VerilogHeaderInstance for
+                    // this include position, but its VerilogParsedDocument is
+                    // null: InstanceTextFile.ParsedDocument resolves through the
+                    // SOURCE file's instanced-parse table
+                    // (VerilogFile.GetInstancedParsedDocument), and
+                    // addIncludeFile only assigns the instance's own
+                    // _parsedDocument field - it never registers the result in
+                    // that table. Falling through with a null document made this
+                    // method return without consuming the file-name token, so the
+                    // scanner stayed on the string literal and the enclosing
+                    // module reported "illegal module item" for every
+                    // `include written inside a module body (a file-scope
+                    // include never hits this path because no prototype parse
+                    // runs there). Parse the include here instead.
                     addIncludeFile(relativeFilePath, rootFile, id, indexReference, out newParsedDocument, wordPointer.Index);
                 }
             }
