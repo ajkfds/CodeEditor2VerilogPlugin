@@ -1043,6 +1043,20 @@ namespace pluginVerilog.Verilog.Items
                         moduleInstantiation.PortConnection[pinName] = expression;
                     }
                     if (expression != null) expression.AssertAssigned();
+                    // An output port drives the connected signal exactly like a
+                    // continuous assignment, so connecting two instances'
+                    // output ports to the same net (or an output port plus an
+                    // assign / procedural assignment on the same net) is a
+                    // multiple drive (IEEE 1800-2017 6.5 / 23.3.3). Without
+                    // this the parser only filled AssignedMap (undriven
+                    // detection) and never reported the conflict.
+                    if (expression != null && !word.Prototype && word.CompletionContext == null)
+                    {
+                        ContinuousAssign.checkContinuousAssignmentConflict(
+                            word, expression,
+                            "'" + (ContinuousAssign.getAssignedDataObject(expression)?.Name ?? "?") +
+                            "' is driven by multiple module instance output ports");
+                    }
                     checkPortConnection(word.ProjectProperty, instancedModule, moduleInstantiation, expression, pinName, true);
                 }
 

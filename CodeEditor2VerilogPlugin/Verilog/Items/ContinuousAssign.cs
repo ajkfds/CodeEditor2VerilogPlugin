@@ -30,7 +30,28 @@ namespace pluginVerilog.Verilog.Items
         /// continuously by at most one assignment, and continuous assignments
         /// shall not be mixed with procedural assignments to the same variable.
         /// </summary>
-        private static void checkContinuousAssignmentConflict(WordScanner word, Expressions.Expression netLValue)
+        internal static void checkContinuousAssignmentConflict(WordScanner word, Expressions.Expression netLValue)
+        {
+            checkContinuousAssignmentConflict(word, netLValue, null);
+        }
+
+        /// <summary>
+        /// Same check as <see cref="checkContinuousAssignmentConflict(WordScanner, Expressions.Expression)"/>
+        /// but with a caller-supplied message for the "already driven" case.
+        ///
+        /// <para>
+        /// A module instance's OUTPUT port drives the connected signal exactly
+        /// like a continuous assignment does, so two instances connecting their
+        /// output ports to the same net (or an output port plus an
+        /// <c>assign</c> / procedural assignment on the same net) is a multiple
+        /// drive and shall be reported (IEEE 1800-2017 6.5 / 23.3.3). The
+        /// caller passes a message that names the actual source ("driven by
+        /// multiple module instance output ports") instead of the generic
+        /// continuous-assignment wording.
+        /// </para>
+        /// </summary>
+        internal static void checkContinuousAssignmentConflict(
+            WordScanner word, Expressions.Expression netLValue, string? multipleDriveMessage)
         {
             DataObjects.DataObject? dataObject = getAssignedDataObject(netLValue);
             if (dataObject == null) return;
@@ -47,7 +68,7 @@ namespace pluginVerilog.Verilog.Items
             if (isContinuousAssignmentOverlapped(netLValue, dataObject))
             {
                 netLValue.Reference.AddError(
-                    "'" + dataObject.Name + "' has multiple continuous assignments");
+                    multipleDriveMessage ?? ("'" + dataObject.Name + "' has multiple continuous assignments"));
             }
             dataObject.ContinuousAssigned = true;
         }
