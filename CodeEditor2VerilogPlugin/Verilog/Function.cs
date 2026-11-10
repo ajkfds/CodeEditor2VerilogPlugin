@@ -24,6 +24,15 @@ namespace pluginVerilog.Verilog
 
         public Statements.IStatement Statement;
 
+        /// <summary>
+        /// True when this Function is a synthetic wrapper created for a
+        /// randsequence production (RandsequenceStatement.registerProduction).
+        /// A production body is not a real function scope: it may freely
+        /// reference the signals of the enclosing module, so the
+        /// "referenced from a function without a port" check must skip it.
+        /// </summary>
+        public bool IsRandsequenceProduction { get; set; } = false;
+
         public static Function Create(
             NameSpace parent,
             string name

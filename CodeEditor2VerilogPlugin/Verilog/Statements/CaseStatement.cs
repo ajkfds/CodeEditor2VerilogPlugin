@@ -140,6 +140,8 @@ namespace pluginVerilog.Verilog.Statements
                 return null;
             }
 
+            int? caseExpressionBitWidth = caseStatement.Expression?.BitWidth;
+
             while (!word.Eof && word.Text != "endcase" && word.Text != "endmodule" && word.Text != "endfunction")
             {
                 CaseItem caseItem;
@@ -155,6 +157,13 @@ namespace pluginVerilog.Verilog.Statements
                 if (caseItem == null)
                 {
                     break;
+                }
+                // case_item_expression shall have the same bit width as the case
+                // expression (IEEE 1800-2017 12.5); a mismatch silently compares
+                // zero-extended / truncated values.
+                if (!caseStatement.IsMatchesMode && !caseStatement.IsInsideMode)
+                {
+                    CaseItem.checkItemBitWidth(word, caseItem, caseExpressionBitWidth);
                 }
                 caseStatement.CaseItems.Add(caseItem);
             }
@@ -184,6 +193,31 @@ namespace pluginVerilog.Verilog.Statements
                     expression.DisposeSubReference(true);
                 }
                 Statement.DisposeSubReference();
+            }
+
+            /// <summary>
+            /// Reports a warning when a case item expression has a different bit
+            /// width than the case expression (IEEE 1800-2017 12.5). A mismatch
+            /// silently zero-extends / truncates the item, so the comparison does
+            /// not do what the code looks like.
+            ///
+            /// Only statically known widths are compared; items whose width is
+            /// unknown (function calls, unresolved references, ...) are skipped.
+            /// </summary>
+            public static void checkItemBitWidth(WordScanner word, CaseItem caseItem, int? caseExpressionBitWidth)
+            {
+                if (caseExpressionBitWidth == null) return;
+                if (word.Prototype || word.IsPartialParse || word.CompletionContext != null) return;
+
+                foreach (Expressions.Expression expression in caseItem.Expressions)
+                {
+                    int? itemBitWidth = expression.BitWidth;
+                    if (itemBitWidth == null) continue;
+                    if (itemBitWidth == caseExpressionBitWidth) continue;
+                    if (expression.Reference == null) continue;
+                    expression.Reference.AddWarning(
+                        "case item bit width is " + itemBitWidth + " (case expression is " + caseExpressionBitWidth + ")");
+                }
             }
 
             /// <summary>

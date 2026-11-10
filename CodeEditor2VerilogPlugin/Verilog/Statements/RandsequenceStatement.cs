@@ -192,7 +192,10 @@ namespace pluginVerilog.Verilog.Statements
             {
                 Name = production.Name,
                 Project = word.Project,
-                DefinitionReference = word.CrateWordReference()
+                DefinitionReference = word.CrateWordReference(),
+                // a production body is not a real function scope (it may use the
+                // enclosing module's signals), so mark it for the outer-signal check
+                IsRandsequenceProduction = true
             };
             if (production.ReturnType != null && !production.IsVoid)
             {
@@ -238,7 +241,10 @@ namespace pluginVerilog.Verilog.Statements
                         {
                             Name = cur,
                             Project = word.Project,
-                            DefinitionReference = probe.CrateWordReference()
+                            DefinitionReference = probe.CrateWordReference(),
+                            // see registerProduction: a production body is not a
+                            // real function scope
+                            IsRandsequenceProduction = true
                         };
                         nameSpace.NamedElements.Add(cur, function);
                     }

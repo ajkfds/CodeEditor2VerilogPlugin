@@ -53,6 +53,25 @@ namespace pluginVerilog.Verilog.Statements
                                             | function_if_else_if_statement
         function_if_else_if_statement   ::= if (expression ) function_statement_or_null { else if (expression) function_statement_or_null } [ else function_statement_or_null]
         */
+        /// <summary>
+        /// Reports a warning when the condition of an if statement is not a
+        /// 1-bit value. A multi-bit condition is implicitly reduced to a boolean
+        /// (non-zero = true), which is almost always a coding mistake
+        /// (e.g. "if (a)" where a is logic [3:0]).
+        ///
+        /// Only a statically known width is checked; expressions whose width is
+        /// unknown (function calls, unresolved references, ...) are skipped.
+        /// </summary>
+        private static void checkConditionBitWidth(WordScanner word, Expressions.Expression conditionExpression)
+        {
+            if (word.Prototype || word.IsPartialParse || word.CompletionContext != null) return;
+            int? bitWidth = conditionExpression.BitWidth;
+            if (bitWidth == null) return;
+            if (bitWidth == 1) return;
+            if (conditionExpression.Reference == null) return;
+            conditionExpression.Reference.AddWarning("if condition bit width is " + bitWidth + " (expected 1)");
+        }
+
         public static ConditionalStatement? ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label, List<string>? clockDomains = null)
         {
             System.Diagnostics.Debug.Assert(word.Text == "if");
@@ -90,6 +109,7 @@ namespace pluginVerilog.Verilog.Statements
                 word.AddError("illegal conditional expression");
                 return null;
             }
+            checkConditionBitWidth(word, conditionExpression);
 
             if (word.GetCharAt(0) != ')')
             {
@@ -136,6 +156,7 @@ namespace pluginVerilog.Verilog.Statements
                         word.AddError("illegal conditional expression");
                         return null;
                     }
+                    checkConditionBitWidth(word, conditionExpression);
 
                     if (word.GetCharAt(0) != ')')
                     {

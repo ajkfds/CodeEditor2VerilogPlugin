@@ -304,7 +304,17 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                         if (module.NamedElements.ContainsKey(identifier))
                         {
                             Constants? constant = module.NamedElements[identifier] as Constants;
-                            if (constant != null) constant.Defined = true;
+                            if (constant != null)
+                            {
+                                // a second declaration of the same name in the
+                                // same parameter port list is an error
+                                // (IEEE 1800-2017 6.20.1)
+                                if (isDuplicateDeclaration(constant, nameReference))
+                                {
+                                    nameReference.AddError("parameter name duplicated");
+                                }
+                                constant.Defined = true;
+                            }
                         }
                         else
                         {
@@ -400,7 +410,17 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                         if (module.NamedElements.ContainsKey(identifier))
                         {
                             Constants? constant = module.NamedElements[identifier] as Constants;
-                            if (constant != null) constant.Defined = true;
+                            if (constant != null)
+                            {
+                                // a second declaration of the same name in the
+                                // same parameter port list is an error
+                                // (IEEE 1800-2017 6.20.1)
+                                if (isDuplicateDeclaration(constant, nameReference))
+                                {
+                                    nameReference.AddError("parameter name duplicated");
+                                }
+                                constant.Defined = true;
+                            }
                         }
                     }
                 }
@@ -508,6 +528,26 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                 if (nextStartsWithDataType(word, module)) break;
                 word.MoveNext();
             }
+        }
+
+        /// <summary>
+        /// True when <paramref name="existing"/> was declared at a DIFFERENT
+        /// source position than <paramref name="nameReference"/>, i.e. the same
+        /// parameter / localparam name is declared twice in the same scope.
+        ///
+        /// A module / class body is parsed twice (prototype pass, then real
+        /// pass) into the same name space, so the real pass ALWAYS finds the
+        /// entry registered by the prototype pass. Comparing the declaration
+        /// position is the only way to tell "re-parsed the same declaration"
+        /// apart from "declared the name twice"
+        /// (IEEE 1800-2017 6.20.1: a parameter name shall be unique within the
+        /// scope).
+        /// </summary>
+        private static bool isDuplicateDeclaration(Constants existing, WordReference? nameReference)
+        {
+            if (existing.DefinedReference == null) return false;
+            if (nameReference == null) return false;
+            return existing.DefinedReference.Index != nameReference.Index;
         }
 
         /// <summary>
@@ -935,7 +975,16 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                 {
                     if (nameSpace.NamedElements.ContainsKey(identifier) && nameSpace.NamedElements[identifier] is DataObjects.Constants.Constants)
                     { // re-parse after prototype parse 
-                        constants = (DataObjects.Constants.Constants)nameSpace.NamedElements[identifier];
+                        Constants existing = (DataObjects.Constants.Constants)nameSpace.NamedElements[identifier];
+                        // The prototype pass already registered this very
+                        // declaration; only a DIFFERENT declaration position
+                        // means the name is declared twice in the same scope
+                        // (IEEE 1800-2017 6.20.1).
+                        if (isDuplicateDeclaration(existing, nameReference))
+                        {
+                            nameReference.AddError("parameter name duplicated");
+                        }
+                        constants = existing;
                     }
                     else
                     { // for root nameSpace parameter

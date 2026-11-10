@@ -294,6 +294,68 @@ namespace pluginVerilog.Verilog.Expressions
             }
         }
 
+        /// <summary>
+        /// Reports a warning when a function / task body references a signal that
+        /// is declared OUTSIDE of it without passing it through a port
+        /// (IEEE 1800-2017 13.4.1: a function shall not reference a net or
+        /// variable declared outside of its scope unless it is passed in as an
+        /// argument).
+        ///
+        /// Excluded from the check:
+        ///   - parameters / localparams / genvars (constants, freely usable)
+        ///   - class methods (a method may access its class members)
+        ///   - prototype / partial (autocomplete) parses
+        /// </summary>
+        private static void checkOuterSignalReference(
+            WordScanner word, NameSpace nameSpace, DataObjects.DataObject dataObject, WordReference? reference)
+        {
+            if (reference == null) return;
+            if (word.Prototype || word.IsPartialParse || word.CompletionContext != null) return;
+            if (dataObject is DataObjects.Constants.Constants) return;
+            if (dataObject is DataObjects.Variables.Genvar) return;
+            if (dataObject is not Net && dataObject is not Variable) return;
+
+            // find the enclosing function / task
+            NameSpace? scope = nameSpace;
+            NameSpace? enclosing = null;
+            while (scope != null)
+            {
+                if (scope is Function || scope is Task_)
+                {
+                    enclosing = scope;
+                    break;
+                }
+                scope = scope.Parent;
+            }
+            if (enclosing == null) return;
+
+            // a randsequence production is registered as a synthetic Function but
+            // its body is not a real function scope (it may use the enclosing
+            // module's signals)
+            if (enclosing is Function productionFunction && productionFunction.IsRandsequenceProduction) return;
+
+            // the signal is local when it is reachable from the current scope
+            // without leaving the function / task
+            NameSpace? current = nameSpace;
+            while (current != null)
+            {
+                if (current.NamedElements.ContainsKey(dataObject.Name)) return;
+                if (current == enclosing) break;
+                current = current.Parent;
+            }
+
+            // a class method may access the members of its class
+            NameSpace? owner = enclosing.Parent;
+            while (owner != null)
+            {
+                if (owner is BuildingBlocks.Class) return;
+                owner = owner.Parent;
+            }
+
+            string scopeKind = enclosing is Task_ ? "task" : "function";
+            reference.AddWarning("'" + dataObject.Name + "' is referenced from a " + scopeKind + " without a port");
+        }
+
         private static DataObjects.DataObject? GetDataObject(INamedElement owner, string name)
         {
             if (owner.NamedElements.ContainsDataObject(name))
@@ -402,6 +464,11 @@ namespace pluginVerilog.Verilog.Expressions
                     word.AddError("not defined here");
                 }
             }
+
+            // a function / task body shall not reference an outer signal
+            // without passing it through a port (IEEE 1800-2017 13.4.1)
+            checkOuterSignalReference(word, nameSpace, originalDataObject, val.Reference);
+
             word.MoveNext();
 
             // parse unpacked dimensions
