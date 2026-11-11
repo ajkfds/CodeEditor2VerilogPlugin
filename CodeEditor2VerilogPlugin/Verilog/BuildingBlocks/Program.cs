@@ -352,13 +352,29 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         if (program.NamedElements.ContainsKey(vkp.Key) && program.NamedElements[vkp.Key] is DataObjects.Constants.Constants)
                         {
                             DataObjects.Constants.Constants constants = (DataObjects.Constants.Constants)program.NamedElements[vkp.Key];
-                            if (constants.DefinedReference != null)
+                            // report the override hint once (real pass only): the
+                            // override is applied in both passes into the same
+                            // document (see Module.parseModuleAsync).
+                            if (!word.Prototype && constants.DefinedReference != null)
                             {
                                 constants.DefinedReference.AddHint("override " + vkp.Value.Value.ToString());
                             }
 
+                            // Keep the declaration reference so the real parse pass
+                            // does not mistake the override (whose expression is
+                            // located in the instantiating file) for a second
+                            // declaration of the same parameter
+                            // (same reason as Module.parseModuleAsync).
+                            WordReference declarationReference = constants.DefinedReference ?? vkp.Value.Reference;
                             program.NamedElements.Remove(vkp.Key);
-                            DataObjects.Constants.Parameter param = new DataObjects.Constants.Parameter() { Name = vkp.Key, DefinedReference = vkp.Value.Reference, Expression = vkp.Value };
+                            DataObjects.Constants.Parameter param = new DataObjects.Constants.Parameter()
+                            {
+                                Name = vkp.Key,
+                                DefinedReference = declarationReference,
+                                Expression = vkp.Value,
+                                DataType = constants.DataType,
+                                ConstantType = constants.ConstantType
+                            };
                             program.NamedElements.Add(param.Name, param);
                         }
                         else

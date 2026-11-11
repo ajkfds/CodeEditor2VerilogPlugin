@@ -335,13 +335,41 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         if (module.NamedElements.ContainsKey(vkp.Key) && module.NamedElements[vkp.Key] is DataObjects.Constants.Constants)
                         {
                             DataObjects.Constants.Constants constants = (DataObjects.Constants.Constants)module.NamedElements[vkp.Key];
-                            if (constants.DefinedReference != null)
+                            // The override is applied in BOTH passes (prototype, then
+                            // real) into the same parsed document, so an unguarded
+                            // hint would be reported twice. WordScanner.AddHint
+                            // suppresses the prototype pass; calling the reference
+                            // directly bypasses that, hence the explicit guard.
+                            if (!word.Prototype && constants.DefinedReference != null)
                             {
                                 constants.DefinedReference.AddHint("override " + vkp.Value.Value.ToString());
                             }
 
+                            // Apply the override WITHOUT losing the declaration
+                            // reference.
+                            //
+                            // The module body is parsed twice (prototype pass, then
+                            // real pass) into the same name space. The override is
+                            // applied in BOTH passes, so overwriting
+                            // DefinedReference with the override expression's
+                            // reference (which points into the INSTANTIATING file)
+                            // made the real pass see "this parameter is declared at
+                            // a different position" and report
+                            // "parameter name duplicated" on the instanced module
+                            // (false positive for every overridden parameter).
+                            // Keep the declaration position so the duplicate check
+                            // keeps matching the same declaration; the override
+                            // value is carried by Expression and the hint above.
+                            WordReference declarationReference = constants.DefinedReference ?? vkp.Value.Reference;
                             module.NamedElements.Remove(vkp.Key);
-                            DataObjects.Constants.Parameter param = new DataObjects.Constants.Parameter() { Name = vkp.Key, DefinedReference = vkp.Value.Reference, Expression = vkp.Value };
+                            DataObjects.Constants.Parameter param = new DataObjects.Constants.Parameter()
+                            {
+                                Name = vkp.Key,
+                                DefinedReference = declarationReference,
+                                Expression = vkp.Value,
+                                DataType = constants.DataType,
+                                ConstantType = constants.ConstantType
+                            };
                             if (!word.Prototype) param.Defined = true;
                             module.NamedElements.Add(param.Name, param);
                         }
