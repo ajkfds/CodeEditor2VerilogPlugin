@@ -452,7 +452,7 @@ namespace pluginVerilog.Verilog.Statements
                     {
                         // blocking_assignment ;
                         case "=":
-                            statement = BlockingAssignment.ParseCreateAfterAssignmentOperator(word, nameSpace, expression, expressionIref);
+                            statement = BlockingAssignment.ParseCreateAfterAssignmentOperator(word, nameSpace, expression, expressionIref, clockDomains);
                             break;
                         // nonblocking_assignment ;
                         case "<=":
@@ -471,7 +471,7 @@ namespace pluginVerilog.Verilog.Statements
                         case ">>=":
                         case "<<<=":
                         case ">>>=":
-                            statement = BlockingAssignment.ParseCreateAfterAssignmentOperator(word, nameSpace, expression,expressionIref);
+                            statement = BlockingAssignment.ParseCreateAfterAssignmentOperator(word, nameSpace, expression,expressionIref, clockDomains);
                             break;
                         case "++":
                         case "--":

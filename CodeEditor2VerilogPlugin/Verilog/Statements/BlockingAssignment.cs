@@ -56,7 +56,8 @@ namespace pluginVerilog.Verilog.Statements
         public static BlockingAssignedAction? Assigned;
 
         public static BlockingAssignment? ParseCreate(
-        WordScanner word, NameSpace nameSpace
+        WordScanner word, NameSpace nameSpace,
+        List<string>? clockDomains = null
         )
         {
             // EOF at LHS position (e.g. "x|"): suggest DataObject / function candidates
@@ -88,11 +89,12 @@ namespace pluginVerilog.Verilog.Statements
                 default:
                     return null;
             }
-            return ParseCreateAfterAssignmentOperator(word, nameSpace, expression, expressionIref);
+            return ParseCreateAfterAssignmentOperator(word, nameSpace, expression, expressionIref, clockDomains);
         }
         public static BlockingAssignment? ParseCreateAfterAssignmentOperator(
             WordScanner word, NameSpace nameSpace, Expressions.Expression lExpression,
-            IndexReference expressionIref
+            IndexReference expressionIref,
+            List<string>? clockDomains = null
             )
         {
             switch (word.Text)
@@ -207,6 +209,16 @@ namespace pluginVerilog.Verilog.Statements
 
             if (!word.Prototype && lExpression != null && expression != null)
             {
+                // The enclosing event control's clock must match the left-hand
+                // side's declared `// @sync:` domain. Inject it first (this is
+                // what reports "sync mismatch <clock> assigned" when the
+                // declaration names a different clock) and then compare the
+                // right-hand side against it ("sync mismatch"), so a value
+                // crossing from another clock domain is reported as well.
+                if (word.CompletionContext == null)
+                {
+                    addEnclosingClockDomains(word, nameSpace, lExpression, clockDomains);
+                }
                 lExpression.SyncContext.PropageteClockDomainFrom(expression.SyncContext, equalPointer, nameSpace.BuildingBlock.SameSync);
             }
 
@@ -242,6 +254,47 @@ namespace pluginVerilog.Verilog.Statements
             else
             {
                 return null;
+            }
+        }
+
+        /// <summary>
+        /// Adds the clock domains of the enclosing event control
+        /// (e.g. <c>always @(posedge CLK2_I)</c>) to the left-hand side's sync
+        /// context, which reports "sync mismatch &lt;clock&gt; assigned" when the
+        /// signal was annotated with a different <c>// @sync:</c> domain.
+        /// </summary>
+        /// <remarks>
+        /// Shared with <see cref="NonBlockingAssignment"/>, which performed this
+        /// step for non-blocking assignments only; a blocking assignment / a
+        /// continuous assignment never compared the declared domain with the
+        /// clock that actually drives it. Reset signals are skipped inside the
+        /// clock domain collection (see EventExpression.addClockDomain).
+        /// </remarks>
+        internal static void addEnclosingClockDomains(
+            WordScanner word, NameSpace nameSpace,
+            Expressions.Expression lExpression, List<string>? clockDomains)
+        {
+            if (clockDomains == null || lExpression == null) return;
+
+            List<DataObject> dataObjects = new List<DataObject>();
+            lExpression.AppendRefrencedDataObjects(dataObjects);
+
+            foreach (DataObject dataObject in dataObjects)
+            {
+                DataObject? targetDataObject = nameSpace.GetNamedElementUpward(dataObject.Name) as DataObject;
+                if (targetDataObject == null) continue;
+
+                foreach (string clockDomain in clockDomains)
+                {
+                    INamedElement? namedElement = nameSpace.GetNamedElementUpward(clockDomain);
+                    if (namedElement is DataObject clkObject)
+                    {
+                        if (clkObject.SyncContext.IsReset) continue;
+                    }
+
+                    targetDataObject.SyncContext.AddClockDomain(
+                        clockDomain, lExpression.Reference, nameSpace.BuildingBlock.SameSync);
+                }
             }
         }
 

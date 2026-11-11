@@ -154,27 +154,33 @@ namespace pluginVerilog.Verilog.Statements
 
             if (!word.Prototype && clockDomains != null && lExpression != null)
             {
-                List<DataObject> dataObjects = new List<DataObject>();
-                lExpression.AppendRefrencedDataObjects(dataObjects);
                 lExpression.AssertAssigned();
-
-                foreach (DataObject dataObject in dataObjects)
-                {
-                    DataObject? targetDataObject = nameSpace.GetNamedElementUpward(dataObject.Name) as DataObject;
-                    if (targetDataObject == null) continue;
-
-                    foreach (string clockDomain in clockDomains)
-                    {
-                        INamedElement? namedElemect = nameSpace.GetNamedElementUpward(clockDomain);
-                        if (namedElemect is DataObject clkObject)
-                        {
-                            if (clkObject.SyncContext.IsReset) continue;
-                        }
-
-                        targetDataObject.SyncContext.AddClockDomain(clockDomain, lExpression.Reference,nameSpace.BuildingBlock.SameSync);
-                    }
-                }
+                BlockingAssignment.addEnclosingClockDomains(word, nameSpace, lExpression, clockDomains);
             }
+            // Compare the sync context of the right-hand side with the left-hand
+            // side (both the declared `// @sync:` domain and the clock domain the
+            // enclosing event control drives it with, which the block above has
+            // just added). A non-blocking assignment that carries a value from
+            // another clock domain crosses clock domains without a synchroniser:
+            // "sync mismatch".
+            //
+            // BlockingAssignment / VariableAssignment (continuous assign) already
+            // performed this comparison; the non-blocking path only injected the
+            // always-clock domain into the left-hand side and never looked at the
+            // right-hand side, so `always @(posedge CLK2_I) Q <= D_CLK1;` passed
+            // silently. (This is the reason
+            // verilog_sample/mySample/mod2.v - DATA_I is @sync:CLK_I while
+            // DATA1_O is @sync:CLK2_I and driven by CLK2_I - produced no
+            // warning.)
+            if (!word.Prototype && word.CompletionContext == null && lExpression != null && expression != null)
+            {
+                lExpression.SyncContext.PropageteClockDomainFrom(
+                    expression.SyncContext,
+                    lExpression.Reference,
+                    nameSpace.BuildingBlock.SameSync
+                    );
+            }
+
             if (Assigned != null) Assigned(word, nameSpace, assignment);
 
             assignment.LastIndexReference = word.CreateIndexReferenceBefore();
