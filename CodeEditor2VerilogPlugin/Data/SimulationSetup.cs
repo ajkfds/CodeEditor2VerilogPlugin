@@ -52,18 +52,48 @@ namespace pluginVerilog.Data
 
         public CodeEditor2.Data.Project Project;
 
-//        public Dictionary<CodeEditor2.Data.Project, SimulationSetup> ExternalProjectReferences = new Dictionary<Project, SimulationSetup>();
-//        public Dictionary<string, CodeEditor2.Data.Project> ExternalProjectEntryInstance = new Dictionary<string, Project>();
-
+        /// <summary>
+        /// 参照している外部プロジェクトのサブセットアップ (参照関係の有向エッジ)。
+        ///
+        /// 実体 (1 プロジェクトにつき 1 セットアップ) は <see cref="ProjectSetups"/>
+        /// が保持し、このリストは「この setup からどの外部プロジェクトを参照しているか」
+        /// だけを表す。シミュレーション backend はこのエッジを分割コンパイル /
+        /// ライブラリ参照の境界として使う。
+        /// </summary>
         public List<ExternalProjectReference> ExternalProjectReferences = new List<ExternalProjectReference>();
 
+        /// <summary>
+        /// ルートセットアップへの参照。サブセットアップは生成時に設定され、
+        /// ルートセットアップ自身は null。ルートは
+        /// 「1 プロジェクトにつき 1 セットアップ」を保証するための
+        /// <see cref="ProjectSetups"/> の所有者。
+        /// </summary>
+        public SimulationSetup? RootSetup = null;
+
+        /// <summary>
+        /// プロジェクトごとのセットアップ (ルートセットアップのみが実体を持つ)。
+        ///
+        /// 同じ外部プロジェクトを別の instance path から参照しても、
+        /// そのプロジェクトのソース / include / package / class は 1 回だけ
+        /// 収集される。instance path 単位の情報は
+        /// <see cref="ExternalProjectReferences"/> の
+        /// <see cref="ExternalProjectReference.InstancePath"/> が持つ。
+        /// </summary>
+        public Dictionary<CodeEditor2.Data.Project, SimulationSetup> ProjectSetups =
+            new Dictionary<CodeEditor2.Data.Project, SimulationSetup>();
 
         public class ExternalProjectReference
         {
             public CodeEditor2.Data.Project Project;
             public SimulationSetup Setup;
-            public string InstancePath;
 
+            /// <summary>
+            /// この外部プロジェクトを参照している instance path
+            /// (root 直下なら instance 名、深い場合は "a.b.c")。
+            /// 同一プロジェクトを複数箇所から参照した場合は、
+            /// 最初に到達した path が残る。
+            /// </summary>
+            public string InstancePath;
         }
 
 
@@ -73,13 +103,74 @@ namespace pluginVerilog.Data
         /// Files はプロジェクトを跨ぐため、トップの Project.GetAbsolutePath では
         /// 外部プロジェクトのファイルパスを解決できない。
         /// </summary>
-        //public static string? GetAbsolutePath(IVerilogRelatedFile file)
-        //{
-        //    CodeEditor2.Data.Project? owner = null;
-        //    try { owner = file.Project; } catch { owner = null; }
-        //    if (owner == null) return null;
-        //    try { return owner.GetAbsolutePath(file.RelativePath); } catch { return null; }
-        //}
+        public static string? GetAbsolutePath(IVerilogRelatedFile file)
+        {
+            CodeEditor2.Data.Project? owner = null;
+            try { owner = file.Project; } catch { owner = null; }
+            if (owner == null) return null;
+            try { return owner.GetAbsolutePath(file.RelativePath); } catch { return null; }
+        }
+
+        /// <summary>
+        /// シミュレーションに渡すファイル一覧を依存順で返す。
+        ///
+        /// 外部プロジェクト (<c>// @project &lt;name&gt;</c>) のソースは
+        /// <see cref="ExternalProjectReferences"/> のサブセットアップにのみ入るため、
+        /// <see cref="Files"/> だけを列挙する backend では外部プロジェクトを
+        /// instance した設計がコンパイルできない。backend はこのメソッド経由で
+        /// 全ファイルを取得すること。
+        /// 外部プロジェクトは先に、次に自プロジェクトの順 (自プロジェクトの
+        /// module が外部プロジェクトの module を instance するため)。
+        /// </summary>
+        public List<IVerilogRelatedFile> GetAllFiles()
+        {
+            List<IVerilogRelatedFile> results = new List<IVerilogRelatedFile>();
+            collectAllFiles(this, results, new List<SimulationSetup>());
+            return results;
+        }
+
+        private static void collectAllFiles(SimulationSetup setup, List<IVerilogRelatedFile> results, List<SimulationSetup> visited)
+        {
+            if (visited.Contains(setup)) return;
+            visited.Add(setup);
+
+            foreach (ExternalProjectReference reference in setup.ExternalProjectReferences)
+            {
+                if (reference.Setup == null) continue;
+                collectAllFiles(reference.Setup, results, visited);
+            }
+            foreach (IVerilogRelatedFile file in setup.Files)
+            {
+                if (!results.Contains(file)) results.Add(file);
+            }
+        }
+
+        /// <summary>
+        /// シミュレーションに渡す include ディレクトリ一覧
+        /// (このプロジェクト + 外部プロジェクトのサブセットアップ)。
+        /// </summary>
+        public List<string> GetAllIncludePaths()
+        {
+            List<string> results = new List<string>();
+            collectIncludePaths(this, results, new List<SimulationSetup>());
+            return results;
+        }
+
+        private static void collectIncludePaths(SimulationSetup setup, List<string> results, List<SimulationSetup> visited)
+        {
+            if (visited.Contains(setup)) return;
+            visited.Add(setup);
+
+            foreach (string path in setup.IncludePaths)
+            {
+                if (!results.Contains(path)) results.Add(path);
+            }
+            foreach (ExternalProjectReference reference in setup.ExternalProjectReferences)
+            {
+                if (reference.Setup == null) continue;
+                collectIncludePaths(reference.Setup, results, visited);
+            }
+        }
 
         public static async Task<SimulationSetup?> CreateAsync(pluginVerilog.Data.VerilogFile verilogFile)
         {
@@ -90,23 +181,67 @@ namespace pluginVerilog.Data
         }
         public static SimulationSetup? Create(pluginVerilog.Data.VerilogFile verilogFile)
         {
-            SimulationSetup setup = new SimulationSetup();
-            setup.TopFile = verilogFile;
-
-            List<string> ids = new List<string>();
-
             if (verilogFile.VerilogParsedDocument == null) return null;
             if (verilogFile.VerilogParsedDocument.Root == null) return null;
-
-            setup.Project = verilogFile.Project;
 
             // get target top block
             BuildingBlock? buildingBlock = verilogFile.VerilogParsedDocument.Root.BuildingBlocks.Values.FirstOrDefault(
                     block => !(block is Class) && !(block is InterfaceClass) && !(block is Package));
             if (buildingBlock == null) return null;
 
-            setup.TopName = buildingBlock.Name;
-            searchHier(verilogFile, setup.TopName, ids, setup, setup.TopName);
+            return Create(verilogFile, buildingBlock.Name);
+        }
+
+        /// <summary>
+        /// Collect the simulation target files of one building block.
+        ///
+        /// <paramref name="file"/> may be a plain <see cref="VerilogFile"/> (base
+        /// parse of the whole file) or a <see cref="VerilogModuleInstance"/> /
+        /// <see cref="InterfaceInstance"/> which holds the INSTANCE parse (only the
+        /// instantiated building block, with its parameter overrides applied).
+        /// The instance parse is what ParseHierarchy re-parses and keeps
+        /// registered, so callers must pass the instance when the target module
+        /// was reached through an instantiation.
+        ///
+        /// <paramref name="buildingBlockName"/> selects the building block to
+        /// walk; it is required because a file may declare several of them (the
+        /// first non-class block of the base parse is not necessarily the
+        /// instantiated one).
+        /// </summary>
+        public static SimulationSetup? Create(IVerilogRelatedFile file, string buildingBlockName)
+        {
+            SimulationSetup setup = new SimulationSetup();
+            setup.TopFile = file;
+
+            List<string> ids = new List<string>();
+
+            Verilog.ParsedDocument? topParsedDocument = file.VerilogParsedDocument;
+            if (topParsedDocument == null) return null;
+            if (topParsedDocument.Root == null) return null;
+
+            setup.Project = file.Project;
+
+            // The root setup owns the per-project table. A sub-setup created by
+            // Create() for an external project (the fallback path used when the
+            // instance parse is not available yet) registers itself as its own
+            // root so that getExternalProjectSetup() still yields one setup per
+            // project inside that traversal.
+            if (!setup.ProjectSetups.ContainsKey(file.Project))
+            {
+                setup.ProjectSetups.Add(file.Project, setup);
+            }
+
+            if (!topParsedDocument.Root.BuildingBlocks.ContainsKey(buildingBlockName)) return null;
+
+            // The entry file of this setup must be in Files: the simulator
+            // compiles SOURCE files, and nothing else adds the top file (the
+            // recursion below only adds the files it reaches through
+            // instantiations / references).
+            IVerilogRelatedFile topSourceFile = getSourceFile(file);
+            if (!setup.Files.Contains(topSourceFile)) setup.Files.Add(topSourceFile);
+
+            setup.TopName = buildingBlockName;
+            searchHier(file, setup.TopName, ids, setup, setup.TopName);
 
             List<IVerilogRelatedFile> targetClassFiles = setup.ClassFiles.ToList();
 
@@ -122,9 +257,12 @@ namespace pluginVerilog.Data
 
                 foreach (IVerilogRelatedFile classFile in targetClassFiles)
                 {
-                    Data.VerilogFile? file = classFile as Data.VerilogFile;
-                    if (file == null) continue;
-                    Verilog.ParsedDocument? parsedDocument = file.VerilogParsedDocument;
+                    // NOTE: keep this local name distinct from the "file"
+                    // parameter of Create(): a lambda/loop local cannot shadow
+                    // the enclosing method parameter (CS0136).
+                    Data.VerilogFile? classVerilogFile = classFile as Data.VerilogFile;
+                    if (classVerilogFile == null) continue;
+                    Verilog.ParsedDocument? parsedDocument = classVerilogFile.VerilogParsedDocument;
                     if (parsedDocument == null) continue;
                     ProjectProperty? projectProperty = parsedDocument.ProjectProperty;
                     if (projectProperty == null) continue;
@@ -145,11 +283,11 @@ namespace pluginVerilog.Data
                     }
                 }
                 if (newClassFiles.Count == 0) break;
-                foreach (IVerilogRelatedFile file in newClassFiles)
+                foreach (IVerilogRelatedFile newClassFile in newClassFiles)
                 {
-                    if (!setup.ClassFiles.Contains(file))
+                    if (!setup.ClassFiles.Contains(newClassFile))
                     {
-                        setup.ClassFiles.Add(file);
+                        setup.ClassFiles.Add(newClassFile);
                     }
                 }
 
@@ -161,9 +299,44 @@ namespace pluginVerilog.Data
             // are compiled before the referencing files.
             ReorderFilesByClassDependencies(setup);
 
-
             if (setup.Failed) return null;
+
+            // Surface the unresolved references of this setup AND of every
+            // external project sub-setup (a missing definition inside a
+            // referenced project used to be ignored). The setup itself is still
+            // returned: the caller decides (the log / UnfoundModules list the
+            // missing names), and a stale entry recorded by an earlier parse
+            // pass must not make the whole hierarchy unavailable.
+            List<string> unfoundModules = new List<string>();
+            collectUnfoundModules(setup, unfoundModules, new List<SimulationSetup>());
+            foreach (string module in unfoundModules)
+            {
+                CodeEditor2.Controller.AppendLog(module + " unfound", Avalonia.Media.Colors.Red);
+            }
             return setup;
+        }
+
+        /// <summary>
+        /// Gather the unfound references of this setup and of every external
+        /// project sub-setup (recursively). Each entry is prefixed with the name
+        /// of the project that owns the sub-setup so the log shows where the
+        /// missing definition belongs.
+        /// </summary>
+        private static void collectUnfoundModules(SimulationSetup setup, List<string> results, List<SimulationSetup> visited)
+        {
+            if (visited.Contains(setup)) return;
+            visited.Add(setup);
+
+            foreach (string module in setup.UnfoundModules)
+            {
+                string entry = setup.Project != null ? setup.Project.Name + ":" + module : module;
+                if (!results.Contains(entry)) results.Add(entry);
+            }
+            foreach (ExternalProjectReference reference in setup.ExternalProjectReferences)
+            {
+                if (reference.Setup == null) continue;
+                collectUnfoundModules(reference.Setup, results, visited);
+            }
         }
 
 
@@ -180,6 +353,16 @@ namespace pluginVerilog.Data
         {
             if (visited.Contains(setup)) return;
             visited.Add(setup);
+
+            // align the external project sub-setups first so that the top-level
+            // ordering below already sees their final file lists
+            foreach (ExternalProjectReference reference in setup.ExternalProjectReferences)
+            {
+                if (reference.Setup == null) continue;
+                string subPath = reference.Project != null ? reference.Project.Name : "";
+                if (projectPath != "") subPath = projectPath + "/" + subPath;
+                ReorderFilesByClassDependencies(reference.Setup, visited, subPath);
+            }
 
             try
             {
@@ -242,11 +425,15 @@ namespace pluginVerilog.Data
             // so a genuinely missing definition is not silently ignored.
             foreach (string unfound in parsedDocument.UnfoundModules)
             {
+                // A cross-project ("// @project <name>") reference can still be
+                // listed here by a parse pass that ran before the target project
+                // was parsed. The reference is valid as long as the definition
+                // file resolves in the project that owns it, so it must not be
+                // reported as a missing module file.
+                if (isResolvableCrossProjectReference(parsedDocument, unfound)) continue;
+
                 CodeEditor2.Controller.AppendLog("unfound " + unfound, Avalonia.Media.Colors.Red);
-                string entry;
-                try { entry = file.RelativePath + ":" + unfound; }
-                catch { entry = file.ID + ":" + unfound; }
-                if (!setup.UnfoundModules.Contains(entry)) setup.UnfoundModules.Add(entry);
+                addUnfoundModule(setup, file, unfound);
             }
 
             foreach (string external in parsedDocument.ExternalRefrenceModules)
@@ -285,20 +472,20 @@ namespace pluginVerilog.Data
                 }
                 else
                 {
+                    // A class name can be recorded by a parse pass that ran before
+                    // the declaring file was parsed, and the entry is never
+                    // cleared. Aborting the traversal here dropped the WHOLE
+                    // subtree of the file (the same failure mode as the stale
+                    // UnfoundModules early return). Report it and keep walking;
+                    // Create() refuses the setup when UnfoundModules is not empty.
                     CodeEditor2.Controller.AppendLog("unfound " + className, Avalonia.Media.Colors.Red);
-                    setup.Failed= true;
-                    return;
+                    addUnfoundModule(setup, file, className);
                 }
             }
 
             foreach (var ifile in parsedDocument.IncludeFiles.Values)
             {
                 appendVerilogHeaderInstance(ifile, setup);
-            }
-
-            foreach (string cFile in parsedDocument.ReferencedUnitNameSpace)
-            {
-                appendClass(file, cFile, file.Project, setup, ids);
             }
 
             // module / interface / program / udp references are registered to
@@ -311,26 +498,36 @@ namespace pluginVerilog.Data
 
             //}
 
-            foreach (VerilogRelatedFileReference verilogRelatedFileReference in parsedDocument.DefinitionNameSpaceRefs.Values )
+            foreach (VerilogRelatedFileReference verilogRelatedFileReference in parsedDocument.DefinitionNameSpaceRefs.Values)
             {
                 string projectName = verilogRelatedFileReference.ProjectName;
 
-                if (!CodeEditor2.Global.Projects.ContainsKey(projectName))
+                if (!CodeEditor2.Global.Projects.TryGetValue(projectName, out CodeEditor2.Data.Project? ownerProject))
                 {
+                    CodeEditor2.Controller.AppendLog("referenced project not found: " + projectName, Avalonia.Media.Colors.Red);
                     setup.Failed = true;
                     continue;
                 }
-                if (projectName != setup.Project.Name) continue;
 
-                CodeEditor2.Data.Project? localProject = CodeEditor2.Global.Projects[projectName];
-                ProjectProperty? localProperty = localProject.ProjectProperties[Plugin.StaticID] as ProjectProperty;
-                if (localProperty == null) continue;
+                // The definition file is compiled as part of the project that
+                // declares it. A cross-project (// @project <name>) reference
+                // therefore belongs to that project's sub-setup; putting it in
+                // this project's Files would compile it into the wrong library.
+                SimulationSetup ownerSetup = ownerProject == setup.Project
+                    ? setup
+                    : getExternalProjectSetup(setup, ownerProject);
 
                 IVerilogRelatedFile? defFile = verilogRelatedFileReference.GetTargetFile();
-                if (defFile != null && !setup.Files.Contains(defFile))
+                if (defFile == null)
                 {
-                    setup.Files.Add(defFile);
+                    // recorded reference that no longer resolves (file removed
+                    // from the project): surface it instead of silently skipping
+                    addUnfoundModule(ownerSetup, file, verilogRelatedFileReference.RelativeFilePath);
+                    continue;
                 }
+
+                IVerilogRelatedFile defSourceFile = getSourceFile(defFile);
+                if (!ownerSetup.Files.Contains(defSourceFile)) ownerSetup.Files.Add(defSourceFile);
             }
 
             // Process imported packages
@@ -379,19 +576,57 @@ namespace pluginVerilog.Data
                         }
                         CodeEditor2.Data.Project newProject = CodeEditor2.Global.Projects[sourceProjectName];
                         ProjectProperty? newProperty = newProject.ProjectProperties[Plugin.StaticID] as ProjectProperty;
-                        VerilogFile? newFile = newProperty?.DefinitionNameSpace.GetFile(moduleInstantiation.SourceName) as VerilogFile;
-                        if(newFile != null)
+
+                        // Resolve the INSTANCE first (it holds the parameter-overridden
+                        // parse produced by ParseHierarchy), then the definition file.
+                        //
+                        // Create(VerilogFile) used to be called with the definition
+                        // file, so the external sub-setup walked the base parse: it
+                        // picked the first building block of the file (not
+                        // necessarily the instantiated one) and used the DEFAULT
+                        // parameter values, so modules selected by an overridden
+                        // "generate if" were missing from the sub-setup.
+                        VerilogModuleInstance? externalInstance = findModuleInstance(file, moduleInstantiation);
+                        IVerilogRelatedFile? externalTarget = null;
+                        if (externalInstance != null && externalInstance.VerilogParsedDocument != null)
                         {
-                            SimulationSetup? newSimulationSetup = SimulationSetup.Create(newFile as VerilogFile);
-                            if(newSimulationSetup != null)
+                            externalTarget = externalInstance;
+                        }
+                        else
+                        {
+                            externalTarget = newProperty?.DefinitionNameSpace.GetFile(moduleInstantiation.SourceName) as VerilogFile;
+                        }
+
+                        if (externalTarget != null)
+                        {
+                            // Collect into the SHARED sub-setup of that project
+                            // (one setup per project) instead of building a whole
+                            // new setup per instance. Two instance paths that
+                            // reference the same project then contribute to the
+                            // same compile unit, and the reference edge records
+                            // which instance path introduced it.
+                            SimulationSetup subSetup = getExternalProjectSetup(setup, newProject);
+                            if (subSetup.TopFile == null)
                             {
-                                setup.ExternalProjectReferences.Add(new ExternalProjectReference()
-                                {
-                                    Project = newProject,
-                                    Setup = newSimulationSetup,
-                                    InstancePath = newPath
-                                });
+                                subSetup.TopFile = externalTarget;
+                                subSetup.TopName = moduleInstantiation.SourceName;
                             }
+
+                            // The external project's source file is a compile unit
+                            // of that project, so it always goes into the
+                            // sub-setup's Files (searchHier only records the files
+                            // it reaches through references).
+                            IVerilogRelatedFile externalSourceFile = getSourceFile(externalTarget);
+                            if (!subSetup.Files.Contains(externalSourceFile)) subSetup.Files.Add(externalSourceFile);
+
+                            // The sub-setup walks the INSTANCE parse (parameter
+                            // overrides applied) so that the modules selected by
+                            // an overridden "generate if" are the ones collected.
+                            searchHier(externalTarget, moduleInstantiation.SourceName, ids, subSetup, newPath);
+
+                            // record the instance path on the edge from this setup
+                            ExternalProjectReference? edge = setup.ExternalProjectReferences.Find(r => r.Setup == subSetup);
+                            if (edge != null) edge.InstancePath = newPath;
                         }
                     }
                     else
@@ -416,26 +651,9 @@ namespace pluginVerilog.Data
                         // parameter-overridden parse), then the instance-array
                         // elements ("name[i]"), and finally resolve the definition
                         // file directly from the DefinitionNameSpace.
-                        VerilogFile? sourceFile = null;
-                        if (file.Items.TryGetValue(moduleInstantiation.Name, out CodeEditor2.Data.Item? item))
-                        {
-                            sourceFile = (item as VerilogModuleInstance)?.SourceVerilogFile;
-                        }
-                        if (sourceFile == null && moduleInstantiation.InstanceRange != null)
-                        {
-                            // instance array: VerilogModuleInstance.CreateArray registers
-                            // each element to file.Items as "name[i]" while the
-                            // ModuleInstantiation itself is registered with the plain
-                            // name.
-                            int count = moduleInstantiation.InstanceCount;
-                            for (int i = 0; i < count; i++)
-                            {
-                                string elementName = moduleInstantiation.Name + "[" + i.ToString() + "]";
-                                if (!file.Items.TryGetValue(elementName, out CodeEditor2.Data.Item? arrayItem)) continue;
-                                sourceFile = (arrayItem as VerilogModuleInstance)?.SourceVerilogFile;
-                                if (sourceFile != null) break;
-                            }
-                        }
+                        VerilogModuleInstance? moduleInstance = findModuleInstance(file, moduleInstantiation);
+
+                        VerilogFile? sourceFile = moduleInstance?.SourceVerilogFile;
                         if (sourceFile == null)
                         {
                             sourceFile = file.ProjectProperty?.DefinitionNameSpace.GetFile(moduleInstantiation.SourceName) as VerilogFile;
@@ -443,8 +661,37 @@ namespace pluginVerilog.Data
 
                         if (sourceFile != null)
                         {
+                            // The definition FILE is what the simulator has to
+                            // compile, so it is always collected.
                             if (!setup.Files.Contains(sourceFile)) setup.Files.Add(sourceFile);
-                            searchHier(sourceFile, moduleInstantiation.SourceName, ids, setup, newPath);
+
+                            // The dependencies must be walked on the INSTANCE
+                            // parse, not on the definition file's base parse.
+                            //
+                            // A definition file may declare several building
+                            // blocks (e.g. a module plus a package). ParseHierarchy
+                            // re-parses (and keeps registered) the instance parse,
+                            // whose Root only holds the instantiated building block
+                            // and whose parameter overrides are applied. The base
+                            // parse of sourceFile, in contrast, may have never been
+                            // produced in this hierarchy pass (it is skipped when
+                            // the file declares several building blocks, see
+                            // VerilogModuleInstance.AcceptParsedDocumentAsync) or
+                            // still carries the DEFAULT parameter values, so
+                            // searchHier() found no parsed document / the wrong
+                            // generate branches and the whole subtree was missing
+                            // from the setup.
+                            //
+                            // VerilogModuleInstance.VerilogParsedDocument resolves
+                            // the instance parsed document by key (module name +
+                            // parameter overrides), exactly like the editor's
+                            // NavigatePanel and the LSP RTL hierarchy do.
+                            IVerilogRelatedFile target = sourceFile;
+                            if (moduleInstance != null && moduleInstance.VerilogParsedDocument != null)
+                            {
+                                target = moduleInstance;
+                            }
+                            searchHier(target, moduleInstantiation.SourceName, ids, setup, newPath);
                         }
                     }
                 }
@@ -458,16 +705,36 @@ namespace pluginVerilog.Data
                     // file.Items only holds the internal instantiations when the
                     // source file declares exactly one building block, so fall back
                     // to resolving the interface definition file directly.
-                    IVerilogRelatedFile? subfile = null;
+                    InterfaceInstance? interfaceInstance = null;
                     if (file.Items.TryGetValue(moduleInstantiation.Name, out CodeEditor2.Data.Item? item))
                     {
-                        subfile = item as IVerilogRelatedFile;
+                        interfaceInstance = item as InterfaceInstance;
                     }
-                    if (subfile == null)
+
+                    // The simulator compiles the definition FILE, never the
+                    // instance wrapper, so setup.Files always receives the
+                    // source file (adding the instance itself used to put an
+                    // InstanceTextFile into the compile list).
+                    VerilogFile? interfaceSourceFile = interfaceInstance?.SourceVerilogFile;
+                    if (interfaceSourceFile == null)
                     {
-                        subfile = file.ProjectProperty?.DefinitionNameSpace.GetFile(moduleInstantiation.SourceName);
+                        interfaceSourceFile = file.ProjectProperty?.DefinitionNameSpace.GetFile(moduleInstantiation.SourceName) as VerilogFile;
                     }
-                    if (subfile != null) searchHier(subfile, moduleInstantiation.SourceName, ids, setup, newPath);
+                    if (interfaceSourceFile != null)
+                    {
+                        if (!setup.Files.Contains(interfaceSourceFile)) setup.Files.Add(interfaceSourceFile);
+
+                        // Walk the INSTANCE parse (parameter overrides applied,
+                        // only the instantiated interface parsed) instead of the
+                        // definition file's base parse; see the module
+                        // instantiation branch above for the full reasoning.
+                        IVerilogRelatedFile target = interfaceSourceFile;
+                        if (interfaceInstance != null && interfaceInstance.VerilogParsedDocument != null)
+                        {
+                            target = interfaceInstance;
+                        }
+                        searchHier(target, moduleInstantiation.SourceName, ids, setup, newPath);
+                    }
                 }
                 else if (element is Verilog.Items.ProgramInstantiation)
                 {
@@ -483,8 +750,11 @@ namespace pluginVerilog.Data
                 }
                 else if (element is DataObject)
                 {
-                    /*
-                    // Handle DataObject - check if it's a Class or InterfaceClass instance
+                    // A variable declaration is the only place where a class /
+                    // interface class / virtual interface dependency shows up
+                    // without an instantiation. Its source file has to be
+                    // compiled as well, otherwise the simulator sees an unknown
+                    // type.
                     DataObject dataObject = (DataObject)element;
                     // Variables.Object holds BuildingBlocks.Class itself as DataType (not ClassType).
                     // UserDefinedVariable holds UserDefinedType (typedef of class / interface class).
@@ -501,7 +771,6 @@ namespace pluginVerilog.Data
                         // virtual interface: collect the interface definition file
                         appendVirtualInterfaceInstance(file, (Verilog.DataObjects.Variables.VirtualInterface)dataObject, setup);
                     }
-                    */
                 }
             }
         }
@@ -654,7 +923,6 @@ namespace pluginVerilog.Data
             return instance.Name ?? sourceFile.Name;
         }
         */
-        /*
         private static void appendClassInstance(IVerilogRelatedFile file, DataObject dataObject, SimulationSetup setup)
         {
             ProjectProperty? projectProperty = file.ProjectProperty;
@@ -666,15 +934,8 @@ namespace pluginVerilog.Data
                 Class? class_ = objectInstance.GetSourceClass();
                 if (class_ == null) return;
 
-                IVerilogRelatedFile? sourceFile = projectProperty.UnitNameSpace.GetFile(class_.Name);
-                if (sourceFile == null) return;
-
-                if (sourceFile is pluginVerilog.Data.VerilogFile || sourceFile is SystemVerilogFile)
-                {
-                    if (setup.Files.Contains(sourceFile)) return;
-                    setup.Files.Add(sourceFile);
-                    return;
-                }
+                appendClassFile(file, projectProperty, class_.Name, setup);
+                return;
             }
 
             // Handle UserDefinedVariable with UserDefinedType
@@ -683,15 +944,7 @@ namespace pluginVerilog.Data
                 if (userDefinedVariable.DataType is UserDefinedType userDefinedType)
                 {
                     // typedef is registered to UnitNameSpace (compilation-unit scope), not DefinitionNameSpace
-                    IVerilogRelatedFile? sourceFile = projectProperty.UnitNameSpace.GetFile(userDefinedType.Typedef.Name);
-                    if (sourceFile == null) return;
-
-                    if (sourceFile is pluginVerilog.Data.VerilogFile || sourceFile is SystemVerilogFile)
-                    {
-                        if (setup.Files.Contains(sourceFile)) return;
-                        setup.Files.Add(sourceFile);
-                        return;
-                    }
+                    appendClassFile(file, projectProperty, userDefinedType.Typedef.Name, setup);
                 }
             }
         }
@@ -707,17 +960,40 @@ namespace pluginVerilog.Data
             {
                 if (userDefinedVariable.DataType is UserDefinedType userDefinedType)
                 {
-                    IVerilogRelatedFile? sourceFile = projectProperty.UnitNameSpace.GetFile(userDefinedType.Typedef.Name);
-                    if (sourceFile == null) return;
-
-                    if (sourceFile is pluginVerilog.Data.VerilogFile || sourceFile is SystemVerilogFile)
-                    {
-                        if (setup.Files.Contains(sourceFile)) return;
-                        setup.Files.Add(sourceFile);
-                        return;
-                    }
+                    appendClassFile(file, projectProperty, userDefinedType.Typedef.Name, setup);
                 }
             }
+        }
+
+        /// <summary>
+        /// Collect the file that declares the given compilation-unit-scope type
+        /// (class / interface class / typedef) referenced by a variable
+        /// declaration. The declaring project owns the file, so a type from
+        /// another project goes into that project's sub-setup.
+        /// </summary>
+        private static void appendClassFile(
+            IVerilogRelatedFile referrer,
+            ProjectProperty projectProperty,
+            string typeName,
+            SimulationSetup setup)
+        {
+            IVerilogRelatedFile? sourceFile = projectProperty.UnitNameSpace.GetFile(typeName);
+            if (sourceFile == null)
+            {
+                // the type is declared in a file that has not been parsed yet, or
+                // the reference is genuinely missing: surface it (Create() then
+                // refuses the setup) instead of silently dropping the file.
+                addUnfoundModule(setup, referrer, typeName);
+                return;
+            }
+
+            IVerilogRelatedFile source = getSourceFile(sourceFile);
+            SimulationSetup ownerSetup = source.Project == setup.Project
+                ? setup
+                : getExternalProjectSetup(setup, source.Project);
+
+            if (!ownerSetup.Files.Contains(source)) ownerSetup.Files.Add(source);
+            if (!ownerSetup.ClassFiles.Contains(source)) ownerSetup.ClassFiles.Add(source);
         }
 
         private static void appendVirtualInterfaceInstance(IVerilogRelatedFile file, Verilog.DataObjects.Variables.VirtualInterface virtualInterface, SimulationSetup setup)
@@ -747,26 +1023,94 @@ namespace pluginVerilog.Data
                 return;
             }
 
-            if (setup.Files.Contains(interfaceFile)) return;
-            setup.Files.Add(interfaceFile);
+            IVerilogRelatedFile interfaceSource = getSourceFile(interfaceFile);
+            SimulationSetup ownerSetup = interfaceSource.Project == setup.Project
+                ? setup
+                : getExternalProjectSetup(setup, interfaceSource.Project);
+            if (!ownerSetup.Files.Contains(interfaceSource)) ownerSetup.Files.Add(interfaceSource);
         }
-        */
+        /// <summary>
+        /// The source file that owns <paramref name="file"/>.
+        ///
+        /// An instance (VerilogModuleInstance / InterfaceInstance /
+        /// ImportedPackage / VerilogHeaderInstance) is a view over its source
+        /// file: it shares the source's CodeDocument and parsed documents. The
+        /// simulator must compile the SOURCE file, never the instance wrapper
+        /// (an InstanceTextFile has no path of its own), so every place that
+        /// puts something into setup.Files / IncludeFiles goes through here.
+        /// </summary>
+        private static IVerilogRelatedFile getSourceFile(IVerilogRelatedFile file)
+        {
+            if (file is InstanceTextFile instance)
+            {
+                IVerilogRelatedFile? source = instance.SourceTextFile as IVerilogRelatedFile;
+                if (source != null) return source;
+            }
+            return file;
+        }
+
+        /// <summary>
+        /// Find the instance item that a module instantiation produced.
+        ///
+        /// The instance carries the parameter-overridden parse, so it — not the
+        /// definition file's base parse — must be used to walk the dependencies.
+        /// Lookup order:
+        ///   1. the plain instantiation name (a resolved instance registered by
+        ///      the Updater),
+        ///   2. the instance-array elements ("name[i]"), because
+        ///      VerilogModuleInstance.CreateArray registers the elements while the
+        ///      ModuleInstantiation itself is keyed by the plain name.
+        /// Every array element resolves the same module with the same parameter
+        /// overrides, so one element is representative.
+        /// Returns null when the instantiation has not been expanded (e.g. the
+        /// module was not resolved), in which case the caller falls back to the
+        /// definition file.
+        /// </summary>
+        private static VerilogModuleInstance? findModuleInstance(IVerilogRelatedFile file, ModuleInstantiation moduleInstantiation)
+        {
+            VerilogModuleInstance? moduleInstance = null;
+            try
+            {
+                if (file.Items.TryGetValue(moduleInstantiation.Name, out CodeEditor2.Data.Item? item))
+                {
+                    moduleInstance = item as VerilogModuleInstance;
+                }
+                if (moduleInstance == null && moduleInstantiation.InstanceRange != null)
+                {
+                    int count = moduleInstantiation.InstanceCount;
+                    for (int i = 0; i < count; i++)
+                    {
+                        string elementName = moduleInstantiation.Name + "[" + i.ToString() + "]";
+                        if (!file.Items.TryGetValue(elementName, out CodeEditor2.Data.Item? arrayItem)) continue;
+                        moduleInstance = arrayItem as VerilogModuleInstance;
+                        if (moduleInstance != null) break;
+                    }
+                }
+            }
+            catch
+            {
+                return null;
+            }
+            return moduleInstance;
+        }
+
         private static void appendVerilogHeaderInstance(VerilogHeaderInstance file, SimulationSetup setup)
         {
-            if (file.Project == setup.Project)
+            // An include header may live in another project (a shared header
+            // directory referenced from an external project's sources). It then
+            // belongs to that project's sub-setup, otherwise the backend never
+            // receives its include path.
+            SimulationSetup ownerSetup = setup;
+            if (file.Project != setup.Project)
             {
-                if (setup.IncludeFiles.Contains(file)) return;
-                setup.IncludeFiles.Add(file);
-                string? path = System.IO.Path.GetDirectoryName(file.Project.GetAbsolutePath(file.RelativePath));
-                if (path == null) return;
-                if (!setup.IncludePaths.Contains(path)) setup.IncludePaths.Add(path);
-                return;
-            }
-            else
-            {
-                // TODO
+                ownerSetup = getExternalProjectSetup(setup, file.Project);
             }
 
+            if (ownerSetup.IncludeFiles.Contains(file)) return;
+            ownerSetup.IncludeFiles.Add(file);
+            string? path = System.IO.Path.GetDirectoryName(file.Project.GetAbsolutePath(file.RelativePath));
+            if (path == null) return;
+            if (!ownerSetup.IncludePaths.Contains(path)) ownerSetup.IncludePaths.Add(path);
         }
         
         private static void appendImportedPackage(string packageName, CodeEditor2.Data.Project project, SimulationSetup setup, List<string> ids)
@@ -775,22 +1119,24 @@ namespace pluginVerilog.Data
             IVerilogRelatedFile? packageFile = findPackageFile(packageName, project, setup);
             if (packageFile == null) return;
 
-            // Add to ImportFiles
-            SimulationSetup ownerSetup;
-            if (packageFile.Project == setup.Project)
-            {
-                if (setup.ImportFiles.Contains(packageFile)) return;
-                setup.ImportFiles.Add(packageFile);
-                ownerSetup = setup;
-                searchHier(packageFile, packageName, ids, ownerSetup, "");
-            }
-            else
-            {
-                // TODO
-            }
+            // The package file belongs to the project that declares it. When it
+            // is imported from another project it has to go into that project's
+            // sub-setup, otherwise the backend compiles the import without the
+            // package source (and its own dependencies).
+            SimulationSetup ownerSetup = packageFile.Project == setup.Project
+                ? setup
+                : getExternalProjectSetup(setup, packageFile.Project);
+
+            if (ownerSetup.ImportFiles.Contains(packageFile)) return;
+            ownerSetup.ImportFiles.Add(packageFile);
+            // A package is a source file of the compile list as well: the
+            // simulator has to compile it, ImportFiles only records the role.
+            IVerilogRelatedFile packageSourceFile = getSourceFile(packageFile);
+            if (!ownerSetup.Files.Contains(packageSourceFile)) ownerSetup.Files.Add(packageSourceFile);
 
             // package file may itself reference other packages / classes: trace them
             // (also reports missing references in the package as file shortage)
+            searchHier(packageFile, packageName, ids, ownerSetup, "");
         }
         
         private static void appendClass(IVerilogRelatedFile referrer, string className, CodeEditor2.Data.Project project, SimulationSetup setup, List<string> ids)
@@ -803,107 +1149,70 @@ namespace pluginVerilog.Data
                 return;
             }
 
-            // Add to ClassFiles
-            SimulationSetup ownerSetup;
-            if (classFile.Project == setup.Project)
-            {
-                if (setup.ClassFiles.Contains(classFile)) return;
-                setup.ClassFiles.Add(classFile);
-                ownerSetup = setup;
-                searchHier(classFile, className, ids, ownerSetup, "");
-            }
-            else
-            {
-                // TODO
-            }
+            // Same rule as appendImportedPackage: the class file is compiled as
+            // part of the project that declares it, so a class declared in
+            // another project goes into that project's sub-setup.
+            SimulationSetup ownerSetup = classFile.Project == setup.Project
+                ? setup
+                : getExternalProjectSetup(setup, classFile.Project);
+
+            if (ownerSetup.ClassFiles.Contains(classFile)) return;
+            ownerSetup.ClassFiles.Add(classFile);
+            IVerilogRelatedFile classSourceFile = getSourceFile(classFile);
+            if (!ownerSetup.Files.Contains(classSourceFile)) ownerSetup.Files.Add(classSourceFile);
 
             // class file may itself reference other classes / packages: trace them
             // (also reports missing references in the class file as file shortage)
+            searchHier(classFile, className, ids, ownerSetup, "");
         }
-        /*
 
         /// <summary>
-        /// True when the given file has an instance item for the given definition
-        /// name (i.e. an instance of the module / interface was resolved and
-        /// registered to file.Items).
+        /// Get (or create) the sub-setup that collects the files of the given
+        /// external project, and record the reference edge from
+        /// <paramref name="setup"/> to it.
         ///
-        /// Such an instance is traversed by the instance tree (searchNameSpace ->
-        /// appendExternalProjectDependencies), which collects the dependencies of
-        /// the PARAMETER-OVERRIDDEN parse. Walking the definition's base parse as
-        /// well would collect the modules of the default (non-selected) generate
-        /// branch and report them as unfound.
+        /// The sub-setup is cached on the ROOT setup (one sub-setup per
+        /// project), so two different instance paths that reference the same
+        /// external project share one compile unit instead of splitting its
+        /// file list. The reference edge is recorded on the setup that actually
+        /// contains the reference, because the backends use it to decide the
+        /// compile / library boundary.
         /// </summary>
-        private static bool hasInstantiationItem(IVerilogRelatedFile file, string definitionName)
+        private static SimulationSetup getExternalProjectSetup(SimulationSetup setup, CodeEditor2.Data.Project project)
         {
-            try
+            SimulationSetup root = setup.RootSetup ?? setup;
+
+            SimulationSetup subSetup;
+            if (!root.ProjectSetups.TryGetValue(project, out SimulationSetup? existing))
             {
-                foreach (CodeEditor2.Data.Item item in file.Items)
+                subSetup = new SimulationSetup()
                 {
-                    if (item is VerilogModuleInstance moduleInstance && moduleInstance.ModuleName == definitionName) return true;
-                    if (item is InterfaceInstance interfaceInstance && interfaceInstance.ModuleName == definitionName) return true;
-                }
+                    Project = project,
+                    RootSetup = root,
+                    ProjectSetups = root.ProjectSetups,
+                };
+                root.ProjectSetups.Add(project, subSetup);
             }
-            catch
+            else
             {
-                return false;
+                subSetup = existing;
             }
-            return false;
-        }
 
-        /// <summary>
-        /// True when the given name (recorded as unfound by some parse pass) is a
-        /// cross-project reference whose definition file resolves in the project
-        /// that owns it. Such a name is not a missing module file.
-        /// </summary>
-        private static bool isResolvableCrossProjectReference(ParsedDocument parsedDocument, string definitionName)
-        {
-            CodeEditor2.Data.Project? ownProject = parsedDocument.Project;
-            foreach (CodeEditor2.Data.Project crossProject in getReferencedDefinitionProjects(parsedDocument, definitionName))
+            if (setup != subSetup && !setup.ExternalProjectReferences.Exists(r => r.Setup == subSetup))
             {
-                if (crossProject == ownProject) continue;
-                ProjectProperty? crossProperty = crossProject.ProjectProperties[Plugin.StaticID] as ProjectProperty;
-                if (crossProperty == null) continue;
-                if (crossProperty.DefinitionNameSpace.GetFile(definitionName) != null) return true;
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// Projects that own the given referenced definition name, as recorded by
-        /// the parse for cross-project ("// @project <name>") references.
-        /// </summary>
-        private static List<CodeEditor2.Data.Project> getReferencedDefinitionProjects(ParsedDocument parsedDocument, string definitionName)
-        {
-            List<CodeEditor2.Data.Project> results = new List<CodeEditor2.Data.Project>();
-            foreach (string projectName in parsedDocument.GetReferencedDefinitionNameSpaceProjects(definitionName))
-            {
-                if (CodeEditor2.Global.Projects.TryGetValue(projectName, out CodeEditor2.Data.Project? project)
-                    && project != null)
+                setup.ExternalProjectReferences.Add(new ExternalProjectReference()
                 {
-                    if (!results.Contains(project)) results.Add(project);
-                }
+                    Project = project,
+                    Setup = subSetup,
+                    InstancePath = "",
+                });
             }
-            return results;
+            return subSetup;
         }
 
         /// <summary>
-        /// Project name used as part of the visited key of searchHier.
-        /// </summary>
-        private static string getProjectName(IVerilogRelatedFile file)
-        {
-            try
-            {
-                return file.Project?.Name ?? "";
-            }
-            catch
-            {
-                return "";
-            }
-        }
-
-        /// <summary>
-        /// register an unfound reference as "RelativePath:Name" so that the
-        /// log shows where the missing definition/instance is referenced from.
+        /// Register a reference that could not be resolved as
+        /// "RelativePath:Name" so that the log shows where it is referenced from.
         /// </summary>
         private static void addUnfoundModule(SimulationSetup setup, IVerilogRelatedFile file, string name)
         {
@@ -912,7 +1221,36 @@ namespace pluginVerilog.Data
             catch { entry = file.ID + ":" + name; }
             if (!setup.UnfoundModules.Contains(entry)) setup.UnfoundModules.Add(entry);
         }
-        */
+
+        /// <summary>
+        /// True when the given name (recorded as unfound by some parse pass) is a
+        /// cross-project ("// @project &lt;name&gt;") reference whose definition file
+        /// resolves in the project that owns it.
+        ///
+        /// Such a name is not a missing module file: the entry is written by a
+        /// parse pass that ran before the target project was parsed, and
+        /// ParsedDocument.UnfoundModules is de-duplicated on Add but never
+        /// cleared on a later successful pass.
+        /// </summary>
+        private static bool isResolvableCrossProjectReference(ParsedDocument parsedDocument, string definitionName)
+        {
+            CodeEditor2.Data.Project? ownProject = parsedDocument.Project;
+            if (ownProject == null) return false;
+
+            // The name is not missing as long as some registered project declares
+            // it. The stale entry comes from a parse pass that ran before the
+            // owning project was parsed; a definition that exists anywhere in the
+            // workspace means the reference itself is valid.
+            foreach (CodeEditor2.Data.Project project in CodeEditor2.Global.Projects.Values)
+            {
+                if (project == null || project == ownProject) continue;
+                ProjectProperty? property = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+                if (property == null) continue;
+                if (property.DefinitionNameSpace.GetFile(definitionName) != null) return true;
+            }
+            return false;
+        }
+
         private static IVerilogRelatedFile? findPackageFile(string packageName, CodeEditor2.Data.Project project, SimulationSetup setup)
         {
             ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
