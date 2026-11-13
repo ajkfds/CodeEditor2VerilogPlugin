@@ -61,19 +61,51 @@ namespace pluginVerilog.Data.VerilogCommon
 
         public static List<ToolItem> GetToolItems(IVerilogRelatedFile item, int index)
         {
+            // The list of tools lives in CoreBridge.ToolMenuCatalog so that the
+            // editor's Shift+Space menu and the VS Code QuickPick (rtl/toolMenu)
+            // are built from one place; a new tool is added there only. The
+            // catalog holds no Avalonia types, so the entries map to the
+            // editor's ToolItem subclasses here (those do carry icons).
             List<ToolItem> toolItems = new List<ToolItem>();
-            toolItems.Add(new Verilog.Snippets.AlwaysFFSnippet());
-            toolItems.Add(new Verilog.Snippets.AutoConnectSnippet());
-            toolItems.Add(new Verilog.Snippets.AutoFormatSnippet());
-            toolItems.Add(new Verilog.Snippets.ModuleInstanceMenuSnippet());
-            toolItems.Add(new Verilog.Snippets.PortConnectionCreateSnippet());
-            toolItems.Add(new Verilog.Snippets.PortInvertSnippet());
-            toolItems.Add(new Verilog.Snippets.ModPortSnippet());
-            toolItems.Add(new Verilog.Snippets.ConnectionCheckSnippet());
+            foreach (CoreBridge.ToolMenuCatalog.Entry entry in CoreBridge.ToolMenuCatalog.EditorTools)
+            {
+                ToolItem? toolItem = CreateToolItem(entry.Id);
+                if (toolItem == null) continue;
+                toolItems.Add(toolItem);
+            }
 
             if (AppendToolItems != null) AppendToolItems(toolItems, item, index);
 
             return toolItems;
+        }
+
+        /// <summary>
+        /// Maps a <see cref="CoreBridge.ToolMenuCatalog"/> id to the editor's
+        /// ToolItem. Returns null for ids the desktop editor does not offer.
+        /// </summary>
+        private static ToolItem? CreateToolItem(string toolId)
+        {
+            switch (toolId)
+            {
+                case CoreBridge.ToolMenuCatalog.ToolId.AlwaysFF:
+                    return new Verilog.Snippets.AlwaysFFSnippet();
+                case CoreBridge.ToolMenuCatalog.ToolId.AutoConnect:
+                    return new Verilog.Snippets.AutoConnectSnippet();
+                case CoreBridge.ToolMenuCatalog.ToolId.AutoFormat:
+                    return new Verilog.Snippets.AutoFormatSnippet();
+                case CoreBridge.ToolMenuCatalog.ToolId.ModuleInstance:
+                    return new Verilog.Snippets.ModuleInstanceMenuSnippet();
+                case CoreBridge.ToolMenuCatalog.ToolId.PortConnectionCreate:
+                    return new Verilog.Snippets.PortConnectionCreateSnippet();
+                case CoreBridge.ToolMenuCatalog.ToolId.PortInvert:
+                    return new Verilog.Snippets.PortInvertSnippet();
+                case CoreBridge.ToolMenuCatalog.ToolId.ModPort:
+                    return new Verilog.Snippets.ModPortSnippet();
+                case CoreBridge.ToolMenuCatalog.ToolId.ConnectionCheck:
+                    return new Verilog.Snippets.ConnectionCheckSnippet();
+                default:
+                    return null;
+            }
         }
         // Append Tools
         public delegate void AppendToolItemDelegate(List<ToolItem> toolItems, IVerilogRelatedFile item, int index);

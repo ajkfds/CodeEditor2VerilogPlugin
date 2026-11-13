@@ -78,6 +78,7 @@ namespace pluginVerilog.CoreBridge
         public static class SnippetName
         {
             public const string AlwaysFF = "alwaysFF";
+            public const string AutoFormat = "autoFormat";
             public const string ModuleInstance = "moduleInstance";
             public const string PortConnectionCreate = "portConnectionCreate";
             public const string PortInvert = "portInvert";
@@ -122,6 +123,9 @@ namespace pluginVerilog.CoreBridge
             {
                 case SnippetName.AlwaysFF:
                     BuildAlwaysFF(parsedDocument, index, result);
+                    break;
+                case SnippetName.AutoFormat:
+                    BuildAutoFormat(parsedDocument, index, result);
                     break;
                 case SnippetName.ModuleInstance:
                     BuildModuleInstance(file, parsedDocument, index, argument, result);
@@ -188,6 +192,68 @@ namespace pluginVerilog.CoreBridge
                 Start = index,
                 End = index,
                 SnippetText = sb.ToString(),
+            });
+        }
+
+        // ---------------------- autoFormat ----------------------
+
+        /// <summary>
+        /// The editor's "autoFormat" tool: rewrite the module instantiation
+        /// under the caret with <c>ModuleInstantiation.CreateString</c> (one
+        /// port connection per line, aligned).
+        ///
+        /// <para>
+        /// This is the same scope as the editor's tool, i.e. <b>only the
+        /// instantiation at the caret</b> - not the whole document. The LSP
+        /// standard <c>textDocument/formatting</c> is a different feature (it
+        /// returns edits for every instantiation in the file), so the tool menu
+        /// uses this snippet instead of dispatching to the editor's format
+        /// command.
+        /// </para>
+        /// </summary>
+        private static void BuildAutoFormat(
+            Verilog.ParsedDocument parsedDocument,
+            int index,
+            SnippetResult result)
+        {
+            Verilog.Items.ModuleInstantiation? instantiation =
+                FindInstantiationAt(parsedDocument, index);
+            if (instantiation == null)
+            {
+                result.Message = "the caret is not inside a module instantiation";
+                return;
+            }
+            if (instantiation.LastIndexReference == null)
+            {
+                result.Message = "the instantiation has no known extent";
+                return;
+            }
+
+            int start = LastIndex(instantiation.BeginIndexReference);
+            int end = LastIndex(instantiation.LastIndexReference) + 1;
+            string indent = GetIndent(parsedDocument, start);
+
+            // CreateString returns the statement without the trailing
+            // semicolon; the replaced range covers it, so keep it.
+            string? text = instantiation.CreateString(indent);
+            if (string.IsNullOrEmpty(text))
+            {
+                result.Message = "the instantiation could not be reformatted";
+                return;
+            }
+            if (!text.TrimEnd().EndsWith(";", StringComparison.Ordinal))
+            {
+                text = text.TrimEnd() + ";";
+            }
+
+            result.Snippets.Add(new SnippetEntry
+            {
+                Label = "autoFormat",
+                Detail = "reformat " + instantiation.Name,
+                Kind = SnippetKind.Replace,
+                Start = start,
+                End = end,
+                SnippetText = text,
             });
         }
 
@@ -574,6 +640,20 @@ namespace pluginVerilog.CoreBridge
                 }
             }
             return name.ToLowerInvariant();
+        }
+
+        /// <summary>
+        /// True when the caret sits on a module instantiation, i.e. the tools
+        /// that rewrite an instantiation (autoFormat / portConnectionCreate /
+        /// autoConnect) can run here. Used by <c>ToolMenuAdapter</c> to decide
+        /// whether a menu row is enabled; the lookup itself is the same one the
+        /// snippets use, so the menu and the tools never disagree.
+        /// </summary>
+        public static bool HasModuleInstantiationAt(
+            Verilog.ParsedDocument parsedDocument,
+            int index)
+        {
+            return FindInstantiationAt(parsedDocument, index) != null;
         }
 
         /// <summary>Finds the module instantiation whose range contains <paramref name="index"/>.</summary>
