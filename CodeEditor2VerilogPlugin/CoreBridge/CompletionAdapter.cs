@@ -110,6 +110,29 @@ namespace pluginVerilog.CoreBridge
                     detail = acItem.Type.ToString();
                 }
 
+                // A module-name candidate is a ModuleInstanceSnippet, i.e. a
+                // ToolItem rather than an AutoCompleteItem: in the editor,
+                // accepting it runs ApplyAsync(), which inserts a FULL
+                // instantiation (parameter overrides + one named connection per
+                // port) and not just the module name. Report it as a Module
+                // candidate with that text as the snippet body, otherwise the
+                // VS Code host inserts the bare name - the "module name
+                // completion is only a keyword completion" symptom.
+                if (item is Verilog.Snippets.ModuleInstanceSnippet)
+                {
+                    kind = 9; // LSP CompletionItemKind.Module
+                    entries.Add(new CompletionEntry
+                    {
+                        Text = text,
+                        Kind = kind,
+                        Detail = "module",
+                        InsertText = BuildModuleInstanceSnippet(
+                            file, parsedDocument, index, text),
+                        InsertTextFormat = 2, // Snippet
+                    });
+                    continue;
+                }
+
                 CompletionEntry entry = new CompletionEntry { Text = text, Kind = kind, Detail = detail };
 
                 // Block keywords expand to a full block (begin ... end etc.) as a
@@ -132,6 +155,50 @@ namespace pluginVerilog.CoreBridge
                 entries.Add(entry);
             }
             return entries;
+        }
+
+        /// <summary>
+        /// Builds the snippet body for a module-name completion candidate: the
+        /// full instantiation the editor inserts when the candidate is accepted
+        /// (parameter overrides + one named port connection per port, with
+        /// <c>${n:name}</c> tab stops).
+        ///
+        /// <para>
+        /// The editor gets this by running
+        /// <c>ModuleInstanceSnippet.ApplyAsync</c>, which is interactive (it
+        /// drives the popup menu / caret), so it cannot run in a headless host.
+        /// <see cref="SnippetAdapter"/> holds the same text generation without
+        /// the UI, so it is reused here. Falls back to the bare module name when
+        /// the module cannot be resolved (e.g. it is not in the project's
+        /// definition namespace yet).
+        /// </para>
+        /// </summary>
+        private static string BuildModuleInstanceSnippet(
+            Data.VerilogFile file,
+            Verilog.ParsedDocument parsedDocument,
+            int index,
+            string moduleName)
+        {
+            try
+            {
+                SnippetAdapter.SnippetResult result = SnippetAdapter.GetSnippets(
+                    file,
+                    parsedDocument,
+                    index,
+                    SnippetAdapter.SnippetName.ModuleInstance,
+                    moduleName,
+                    0,
+                    0);
+                foreach (SnippetAdapter.SnippetEntry entry in result.Snippets)
+                {
+                    if (!string.IsNullOrEmpty(entry.SnippetText)) return entry.SnippetText;
+                }
+            }
+            catch (Exception)
+            {
+                // never fail completion over the snippet body
+            }
+            return moduleName;
         }
 
         /// <summary>

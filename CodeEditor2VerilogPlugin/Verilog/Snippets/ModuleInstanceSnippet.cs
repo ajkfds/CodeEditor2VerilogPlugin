@@ -13,7 +13,14 @@ namespace pluginVerilog.Verilog.Snippets
         public ModuleInstanceSnippet(string moduleName) : base(moduleName)
         {
             this.moduleName = moduleName;
-            IconImage = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
+            // TryGetSvgBitmap: the snippet is also constructed while PARSING
+            // (CompletionContext.AppendModuleInstanceSnippets builds one per
+            // module name at the start of a module-body line), and the parser
+            // runs in the headless language server too, where Avalonia's asset
+            // loader is absent. A throwing icon lookup aborted the whole
+            // textDocument/completion request there, so the module-name
+            // candidates never reached the client.
+            IconImage = Global.Icons.TryGetSvgBitmap(
                     "CodeEditor2VerilogPlugin/Assets/Icons/module.svg",
                     Plugin.ThemeColor
                     );
