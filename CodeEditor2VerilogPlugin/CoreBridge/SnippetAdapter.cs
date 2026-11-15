@@ -551,9 +551,16 @@ namespace pluginVerilog.CoreBridge
         /// <summary>
         /// Builds the instantiation text: parameter overrides, then one named
         /// port connection per port. Ports already connected in
-        /// <paramref name="existing"/> keep their expression; the rest get a
-        /// <c>${n:name}</c> tab stop so the user can fill them in.
+        /// <paramref name="existing"/> keep their expression; the rest get an
+        /// <b>empty</b> <c>${n}</c> tab stop so the user types the signal.
         /// </summary>
+        /// <remarks>
+        /// The editor's own <c>ModuleInstanceSnippet.getReplaceText</c> emits
+        /// <c>.port(  )</c> for every port - it never guesses a signal. The
+        /// adapter used to fill a placeholder default (<c>${1:clk}</c>), so
+        /// accepting the snippet silently wired the port to a signal that may
+        /// not exist. The blank tab stop matches the editor.
+        /// </remarks>
         private static string BuildInstantiationText(
             Verilog.BuildingBlocks.Module module,
             string instanceName,
@@ -588,7 +595,12 @@ namespace pluginVerilog.CoreBridge
                 sb.Append("\n").Append(indent).Append(") ");
             }
 
-            sb.Append(instanceName).Append(" (\n");
+            // The editor's snippet makes the instance name the FIRST tab stop
+            // (`{0}` in getReplaceText, prefilled with the generated name) so
+            // the user can rename it straight away. Keep that, and start the
+            // port tab stops after it.
+            sb.Append("${1:").Append(instanceName).Append("} (\n");
+            tabStop = 2;
 
             bool firstPort = true;
             string? portGroupName = null;
@@ -612,7 +624,10 @@ namespace pluginVerilog.CoreBridge
                 }
                 else
                 {
-                    sb.Append("${").Append(tabStop).Append(":").Append(DefaultConnectionName(port)).Append("}");
+                    // Blank tab stop: the editor leaves the connection empty
+                    // instead of guessing a signal name (see the remarks on
+                    // BuildInstantiationText).
+                    sb.Append("${").Append(tabStop).Append("}");
                     tabStop++;
                 }
                 sb.Append(" )");
@@ -621,25 +636,6 @@ namespace pluginVerilog.CoreBridge
             if (!firstPort) sb.Append("\n");
             sb.Append(indent).Append(");");
             return sb.ToString();
-        }
-
-        /// <summary>
-        /// The signal name the editor suggests for an unconnected port: the port
-        /// name lower-cased with a trailing <c>_I</c> / <c>_O</c> / <c>_IO</c>
-        /// removed.
-        /// </summary>
-        private static string DefaultConnectionName(Verilog.DataObjects.Port port)
-        {
-            string name = port.Name;
-            foreach (string suffix in new[] { "_I", "_O", "_IO" })
-            {
-                if (name.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
-                {
-                    name = name.Substring(0, name.Length - suffix.Length);
-                    break;
-                }
-            }
-            return name.ToLowerInvariant();
         }
 
         /// <summary>
