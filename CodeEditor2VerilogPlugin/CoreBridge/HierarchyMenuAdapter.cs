@@ -99,12 +99,18 @@ namespace pluginVerilog.CoreBridge
             foreach (HierarchyMenuCatalog.Entry entry in HierarchyMenuCatalog.All)
             {
                 if ((entry.Targets & target) == 0) continue;
+                // A submenu is a grouping row: the native VS Code menu renders
+                // it as a flyout (see HierarchyMenuManifest), and a QuickPick
+                // cannot nest, so listing it here would offer a row that does
+                // nothing. Its children are listed instead, prefixed with the
+                // parent label.
+                if (entry.IsSubmenu) continue;
 
                 string? reason = GetDisabledReason(entry, file, instancePath);
                 result.Entries.Add(new MenuEntry
                 {
                     Id = entry.Id,
-                    Label = entry.Label,
+                    Label = BuildQuickPickLabel(entry),
                     Detail = entry.Detail,
                     Enabled = reason == null,
                     Reason = reason,
@@ -112,6 +118,19 @@ namespace pluginVerilog.CoreBridge
                 });
             }
             return result;
+        }
+
+        /// <summary>
+        /// Label shown in the QuickPick. A nested row is prefixed with its
+        /// parent's label, because the flat list has no other way to show the
+        /// hierarchy the native menu renders as a submenu.
+        /// </summary>
+        private static string BuildQuickPickLabel(HierarchyMenuCatalog.Entry entry)
+        {
+            if (string.IsNullOrEmpty(entry.ParentId)) return entry.Label;
+            HierarchyMenuCatalog.Entry? parent = HierarchyMenuCatalog.Find(entry.ParentId!);
+            if (parent == null) return entry.Label;
+            return parent.Label + " › " + entry.Label;
         }
 
         private static HierarchyMenuCatalog.AppliesTo ToTarget(string nodeKind)
@@ -179,6 +198,14 @@ namespace pluginVerilog.CoreBridge
                 return result;
             }
             result.Title = entry.Label;
+
+            // A submenu only groups rows; it is never invoked (the native menu
+            // renders it as a flyout, and Build() does not offer it).
+            if (entry.IsSubmenu)
+            {
+                result.Message = entry.Label + " is a submenu; pick one of its entries";
+                return result;
+            }
 
             switch (id)
             {

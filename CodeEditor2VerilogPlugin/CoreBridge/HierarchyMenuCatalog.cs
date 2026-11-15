@@ -51,6 +51,13 @@ namespace pluginVerilog.CoreBridge
 
             /// <summary>Show the node's parsed properties.</summary>
             public const string ShowProperty = "showProperty";
+
+            /// <summary>
+            /// Grouping entry (a submenu, not a command) for the simulation
+            /// rows. It exists to show that nesting is data: adding
+            /// <c>ParentId = Simulation</c> to a row puts it in this submenu.
+            /// </summary>
+            public const string Simulation = "simulation";
         }
 
         /// <summary>Which nodes an entry applies to.</summary>
@@ -84,10 +91,42 @@ namespace pluginVerilog.CoreBridge
             /// entries from different plugins interleave predictably).
             /// </summary>
             public int Group { get; init; } = 50;
+
+            /// <summary>
+            /// Id of the <see cref="IsSubmenu"/> entry this row belongs under,
+            /// or null for a top-level row.
+            ///
+            /// <para>
+            /// This is what makes the VS Code context menu hierarchical: VS Code
+            /// renders a nested menu from <c>contributes.submenus</c> plus rows
+            /// whose <c>submenu</c> property names one, and
+            /// <see cref="HierarchyMenuManifest"/> generates both from this
+            /// parent/child relation. The editor's NavigatePanel menu is flat, so
+            /// nesting is a VS Code-side presentation choice, not a parse
+            /// concept.
+            /// </para>
+            /// </summary>
+            public string? ParentId { get; init; }
+
+            /// <summary>
+            /// True when the entry only groups its children and is not runnable
+            /// itself (the manifest turns it into a submenu instead of a
+            /// command).
+            /// </summary>
+            public bool IsSubmenu { get; init; }
         }
 
         private static readonly List<Entry> entries = new List<Entry>
         {
+            new Entry
+            {
+                Id = MenuId.Simulation,
+                Label = "Simulation",
+                Detail = "simulation related actions",
+                Targets = AppliesTo.File | AppliesTo.Instance,
+                Group = 10,
+                IsSubmenu = true,
+            },
             new Entry
             {
                 Id = MenuId.SimulationSetup,
@@ -95,6 +134,7 @@ namespace pluginVerilog.CoreBridge
                 Detail = "list the files / top module the simulator would compile",
                 Targets = AppliesTo.File | AppliesTo.Instance,
                 Group = 10,
+                ParentId = MenuId.Simulation,
             },
             new Entry
             {
@@ -127,6 +167,34 @@ namespace pluginVerilog.CoreBridge
                 Group = 60,
             },
         };
+
+        /// <summary>
+        /// The entries that belong directly under <paramref name="parentId"/>
+        /// (null = the top level), in group order.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="All"/> is a flat, group-ordered list because the QuickPick
+        /// renders it as one list; the tree of submenus is expressed through
+        /// <see cref="Entry.ParentId"/> and walked with this method.
+        /// </remarks>
+        public static List<Entry> Children(string? parentId)
+        {
+            List<Entry> result = new List<Entry>();
+            lock (entries)
+            {
+                foreach (Entry entry in entries)
+                {
+                    if (!string.Equals(entry.ParentId, parentId, StringComparison.Ordinal)) continue;
+                    result.Add(entry);
+                }
+            }
+            result.Sort((a, b) =>
+            {
+                if (a.Group != b.Group) return a.Group.CompareTo(b.Group);
+                return string.Compare(a.Label, b.Label, StringComparison.OrdinalIgnoreCase);
+            });
+            return result;
+        }
 
         /// <summary>Every entry, in group order.</summary>
         public static IReadOnlyList<Entry> All
