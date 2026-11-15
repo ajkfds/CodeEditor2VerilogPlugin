@@ -186,7 +186,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
 
             if (!prototype)
             {
-                if (Text == "+" && (primary1.BitWidth == 1) || primary2.BitWidth == 1)
+                if (Text == "+" && ( (primary1.BitWidth == 1) || primary2.BitWidth == 1 ) )
                 {
 
                 }
