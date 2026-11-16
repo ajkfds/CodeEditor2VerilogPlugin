@@ -40,6 +40,12 @@ namespace pluginVerilog
                 FileTypes.TestResultFile fileType = new FileTypes.TestResultFile();
                 CodeEditor2.Global.FileTypes.Add(fileType.ID, fileType);
             }
+            {
+                // .rule : YAML rule set (name / severity) applied to every
+                // source file below the directory that contains the file
+                FileTypes.RuleFile fileType = new FileTypes.RuleFile();
+                CodeEditor2.Global.FileTypes.Add(fileType.ID, fileType);
+            }
 
             {// external libraries yaml
                 CodeEditor2.Data.YamlFile.AcceptCustomYamlParsedDocument += Setups.ExternalLibrariesSetup.AcceptYamlParsedDocument;

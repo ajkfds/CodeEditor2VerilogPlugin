@@ -139,6 +139,38 @@ namespace pluginVerilog.Verilog
                 return projectProperty;
             }
         }
+
+        /// <summary>
+        /// The rule set that applies to the file currently being parsed.
+        ///
+        /// <para>
+        /// A <c>.rule</c> file configures the severity of the parser rules for
+        /// every source file below the directory that contains it, so the rule
+        /// set has to be resolved per file instead of using the project wide
+        /// default (<see cref="ProjectProperty.RuleSet"/>). Files that no
+        /// <c>.rule</c> file covers get the built-in defaults.
+        /// </para>
+        /// </summary>
+        public pluginVerilog.RuleSet RuleSet
+        {
+            get
+            {
+                CodeEditor2.Data.Project? project = Project;
+                if (project == null) return fallbackRuleSet;
+                if (!project.ProjectProperties.TryGetValue(Plugin.StaticID, out CodeEditor2.Data.ProjectProperty? property))
+                {
+                    return fallbackRuleSet;
+                }
+                if (property is not ProjectProperty projectProperty) return fallbackRuleSet;
+
+                Data.IVerilogRelatedFile? file = RootParsedDocument?.File;
+                if (file == null) return projectProperty.RuleSet;
+                return projectProperty.GetRuleSet(file.RelativePath);
+            }
+        }
+
+        /// <summary>Built-in defaults, used when the project property is unavailable.</summary>
+        private static readonly pluginVerilog.RuleSet fallbackRuleSet = new pluginVerilog.RuleSet();
         public WordPointer RootPointer
         {
             get

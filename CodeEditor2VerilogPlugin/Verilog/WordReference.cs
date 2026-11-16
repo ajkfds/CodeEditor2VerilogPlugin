@@ -89,6 +89,29 @@ namespace pluginVerilog.Verilog
                 return indexReference.Document;
             }
         }
+        /// <summary>
+        /// The rule set that applies to the file this reference belongs to
+        /// (<c>.rule</c> file of the containing directory, falling back to the
+        /// project wide default). Returns the built-in default rule set when
+        /// the project property cannot be resolved.
+        /// </summary>
+        [JsonIgnore]
+        public RuleSet RuleSet
+        {
+            get
+            {
+                CodeEditor2.CodeEditor.ParsedDocument? parsedDocument = indexReference?.ParsedDocument;
+                CodeEditor2.Data.Project? project = parsedDocument?.Project;
+                if (project == null) return new pluginVerilog.RuleSet();
+
+                ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+                if (projectProperty == null) return new pluginVerilog.RuleSet();
+
+                CodeEditor2.Data.TextFile? textFile = parsedDocument?.TextFile;
+                return projectProperty.GetRuleSet(textFile?.RelativePath);
+            }
+        }
+
         public void ApplyRule(Rule rule)
         {
             ApplyRule(rule, "");

@@ -549,7 +549,7 @@ namespace pluginVerilog.Verilog.Items
                 DataObject? targetObject = nameSpace.NamedElements.GetDataObject(portName);
                 if (targetObject == null)
                 {
-                    wildcardRef.ApplyRule(word.ProjectProperty.RuleSet.NotAllPortConnectedWithWildcardNamedPortConnections, "\nport :" + portName);
+                    wildcardRef.ApplyRule(word.RuleSet.NotAllPortConnectedWithWildcardNamedPortConnections, "\nport :" + portName);
                     continue;
                 }
                 Port port = instancedProgram.Ports[portName];

@@ -842,7 +842,7 @@ namespace pluginVerilog.Verilog.Items
                 DataObject? targetObject = nameSpace.NamedElements.GetDataObject(pinName);
                 if (targetObject == null)
                 {
-                    if (!word.Prototype) wildcardRef.ApplyRule(word.ProjectProperty.RuleSet.NotAllPortConnectedWithWildcardNamedPortConnections, "\nport :" + pinName);
+                    if (!word.Prototype) wildcardRef.ApplyRule(word.RuleSet.NotAllPortConnectedWithWildcardNamedPortConnections, "\nport :" + pinName);
                     continue;
                 }
                 Port port = instancedModule.Ports[pinName];
@@ -1285,7 +1285,7 @@ namespace pluginVerilog.Verilog.Items
             ModportInstance? modportInstance = variableReference.TargetDataObject as ModportInstance;
             if (modportInstance == null)
             {
-                expression.Reference.ApplyRule(projectProperty.RuleSet.ImplicitModportInterfaceConnectionToInstance,
+                expression.Reference.ApplyRule(expression.Reference.RuleSet.ImplicitModportInterfaceConnectionToInstance,
                     "\nshould be " + interface_.Name + "." + modportInstantiation.ModportName
                     );
                 return;

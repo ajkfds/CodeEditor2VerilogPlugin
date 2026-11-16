@@ -21,10 +21,233 @@ namespace pluginVerilog
         //}
         public ProjectProperty(Project project, ProjectProperty.Setup setup) : base(project, setup)
         {
+            this.project = project;
             CompileOption = setup.CompileOption;
         }
+
+        /// <summary>
+        /// The project the rule sets belong to (used to resolve the absolute
+        /// paths of the <c>.rule</c> files while scanning the workspace).
+        /// </summary>
+        private Project? project;
+
+        /// <summary>
+        /// Default rule set: used for every file that is not covered by a
+        /// <c>.rule</c> file.
+        /// </summary>
         public RuleSet RuleSet = new RuleSet();
+
         public string CompileOption { get; set; } = "";
+
+        // rule sets -----------------------------------------------------------
+
+        /// <summary>
+        /// Guards <see cref="ruleSets"/> / <see cref="scannedRootPath"/>.
+        /// Parsing runs on background threads, so the lookup from
+        /// <see cref="GetRuleSet"/> may happen while the workspace scan or a
+        /// <c>.rule</c> file accept replaces the table.
+        /// </summary>
+        private readonly object ruleSetLock = new object();
+
+        /// <summary>
+        /// Rule sets keyed by the directory they apply to (project relative,
+        /// '/' separated, "" = project root). A <c>.rule</c> file applies to
+        /// every source file below the directory that contains it.
+        /// </summary>
+        private Dictionary<string, RuleSet> ruleSets = new Dictionary<string, RuleSet>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>Root path the workspace scan already ran for (null = not scanned).</summary>
+        private string? scannedRootPath = null;
+
+        /// <summary>
+        /// Serializes the workspace scan. Parsing runs on background threads
+        /// and the first rule lookup can happen on several of them at once:
+        /// without this, one thread would see <see cref="scannedRootPath"/>
+        /// already set while the scan is still running and parse with the
+        /// built-in defaults.
+        /// </summary>
+        private readonly object ruleScanLock = new object();
+
+        /// <summary>
+        /// Snapshot of the rule sets currently registered per directory.
+        /// </summary>
+        public IReadOnlyDictionary<string, RuleSet> RuleSets
+        {
+            get
+            {
+                lock (ruleSetLock)
+                {
+                    return new Dictionary<string, RuleSet>(ruleSets, StringComparer.OrdinalIgnoreCase);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Normalizes a project relative path for rule set keys: both
+        /// separators are accepted and the result never starts / ends with
+        /// a separator ("" is the project root).
+        /// </summary>
+        public static string NormalizeRuleSetPath(string? relativePath)
+        {
+            if (string.IsNullOrEmpty(relativePath)) return "";
+            string path = relativePath.Replace('\\', '/').Trim();
+            while (path.StartsWith("/", StringComparison.Ordinal)) path = path.Substring(1);
+            while (path.EndsWith("/", StringComparison.Ordinal)) path = path.Substring(0, path.Length - 1);
+            return path;
+        }
+
+        /// <summary>
+        /// Directory (project relative, '/' separated) a file belongs to.
+        /// </summary>
+        private static string GetDirectoryKey(string? relativePath)
+        {
+            string path = NormalizeRuleSetPath(relativePath);
+            int slash = path.LastIndexOf('/');
+            if (slash < 0) return "";
+            return path.Substring(0, slash);
+        }
+
+        /// <summary>
+        /// Registers the rule set of a <c>.rule</c> file. The rule set applies
+        /// to every source file below the directory that contains the
+        /// <c>.rule</c> file.
+        /// </summary>
+        /// <param name="ruleFilePath">project relative path of the .rule file</param>
+        /// <param name="ruleSet">the loaded rule set (null removes the entry)</param>
+        public void SetRuleSet(string ruleFilePath, RuleSet? ruleSet)
+        {
+            string key = GetDirectoryKey(ruleFilePath);
+            lock (ruleSetLock)
+            {
+                if (ruleSet == null)
+                {
+                    ruleSets.Remove(key);
+                }
+                else
+                {
+                    ruleSets[key] = ruleSet;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns the rule set that applies to <paramref name="relativePath"/>.
+        ///
+        /// <para>
+        /// The deepest directory with a <c>.rule</c> file wins, so a
+        /// <c>.rule</c> in <c>src/rtl</c> overrides one in <c>src</c>. When no
+        /// <c>.rule</c> file covers the file, <see cref="RuleSet"/> (the
+        /// built-in defaults) is returned.
+        /// </para>
+        /// </summary>
+        public RuleSet GetRuleSet(string? relativePath)
+        {
+            EnsureRuleSetsLoaded();
+
+            string path = NormalizeRuleSetPath(relativePath);
+            lock (ruleSetLock)
+            {
+                while (true)
+                {
+                    if (ruleSets.TryGetValue(path, out RuleSet? found)) return found;
+                    if (path.Length == 0) break;
+
+                    int slash = path.LastIndexOf('/');
+                    path = slash < 0 ? "" : path.Substring(0, slash);
+                }
+            }
+            return RuleSet;
+        }
+
+        /// <summary>
+        /// Scans the workspace for <c>.rule</c> files the first time a rule
+        /// set is requested (and again when the project root changes), so the
+        /// rules are available during parsing no matter in which order the
+        /// files are parsed.
+        /// </summary>
+        public void EnsureRuleSetsLoaded()
+        {
+            if (project == null) return;
+
+            string rootPath = project.RootPath ?? "";
+            lock (ruleScanLock)
+            {
+                lock (ruleSetLock)
+                {
+                    if (string.Equals(scannedRootPath, rootPath, StringComparison.OrdinalIgnoreCase)) return;
+                }
+
+                RefreshRuleSets();
+
+                lock (ruleSetLock)
+                {
+                    scannedRootPath = rootPath;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Re-reads every <c>.rule</c> file of the workspace and replaces the
+        /// registered rule sets.
+        /// </summary>
+        public void RefreshRuleSets()
+        {
+            if (project == null) return;
+
+            Dictionary<string, RuleSet> loaded = new Dictionary<string, RuleSet>(StringComparer.OrdinalIgnoreCase);
+            try
+            {
+                string rootPath = project.RootPath ?? "";
+                if (rootPath.Length != 0 && System.IO.Directory.Exists(rootPath))
+                {
+                    foreach (string filePath in System.IO.Directory.EnumerateFiles(
+                        rootPath, "*" + RuleFileExtension, System.IO.SearchOption.AllDirectories))
+                    {
+                        string relativePath = project.GetRelativePath(filePath);
+                        if (IsInSkippedDirectory(relativePath)) continue;
+
+                        pluginVerilog.RuleSet? ruleSet = pluginVerilog.RuleSet.LoadFile(filePath);
+                        if (ruleSet == null) continue;
+                        loaded[GetDirectoryKey(relativePath)] = ruleSet;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // an unreadable directory must not break parsing
+            }
+
+            lock (ruleSetLock)
+            {
+                ruleSets = loaded;
+            }
+        }
+
+        /// <summary>Extension of the rule files (<c>.rule</c>).</summary>
+        public const string RuleFileExtension = ".rule";
+
+        /// <summary>
+        /// Build directories / VCS metadata never contribute rule files.
+        /// </summary>
+        private static bool IsInSkippedDirectory(string relativePath)
+        {
+            string path = NormalizeRuleSetPath(relativePath);
+            foreach (string segment in path.Split('/'))
+            {
+                switch (segment.ToLowerInvariant())
+                {
+                    case "obj":
+                    case "bin":
+                    case "publish":
+                    case "node_modules":
+                    case ".git":
+                    case ".svn":
+                    case ".hg":
+                        return true;
+                }
+            }
+            return false;
+        }
 
         public Verilog.AutoComplete.Setup SnippetSetup = new Verilog.AutoComplete.Setup();
 

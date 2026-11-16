@@ -226,7 +226,9 @@ namespace pluginVerilog.Verilog
                 }
                 string name = word.Text;
                 word.Color(CodeDrawStyle.ColorType.Variable);
-                if (direction == Port.DirectionEnum.Undefined) word.ApplyRule(word.Project.GetPluginProperty().RuleSet.ImplicitModportDirection);
+                // the rule set is resolved per file: a .rule file applies to
+                // every source file below its directory
+                if (direction == Port.DirectionEnum.Undefined) word.ApplyRule(word.RuleSet.ImplicitModportDirection);
                 word.MoveNext();
 
                 if (word.Text != "(")
@@ -272,7 +274,7 @@ namespace pluginVerilog.Verilog
                     expression = Expressions.Expression.ParseCreate(word, nameSpace);
                 }
                 if (expression == null) return false;
-                if (direction == Port.DirectionEnum.Undefined) expression.Reference.ApplyRule(word.Project.GetPluginProperty().RuleSet.ImplicitModportDirection);
+                if (direction == Port.DirectionEnum.Undefined) expression.Reference.ApplyRule(word.RuleSet.ImplicitModportDirection);
 
                 registerPort(identifier, direction, expression);
             }

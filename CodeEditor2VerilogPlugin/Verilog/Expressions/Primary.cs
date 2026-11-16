@@ -323,7 +323,7 @@ number
                         // define @ protptype
                         if (word.Prototype)
                         {
-                            word.ApplyPrototypeRule(word.ProjectProperty.RuleSet.ImplicitNetDeclaretion);
+                            word.ApplyPrototypeRule(word.RuleSet.ImplicitNetDeclaretion);
                         }
 
                         return parseDataObject(word, nameSpace, nameSpace, lValue, acceptRange, "");
