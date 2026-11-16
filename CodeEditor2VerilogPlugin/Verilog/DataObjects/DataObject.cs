@@ -309,6 +309,23 @@ namespace pluginVerilog.Verilog.DataObjects
         /// </summary>
         public bool ProceduralAssigned = false;
 
+        /// <summary>
+        /// Identifier of the procedural block (always / initial / final) that
+        /// first assigned this data object, or 0 when it has not been assigned
+        /// procedurally yet. Together with
+        /// <see cref="ProceduralAssignBlockId"/> this detects a variable that is
+        /// driven from two different procedural blocks, which is almost always
+        /// a design error (the value that wins depends on the execution order).
+        /// </summary>
+        public int ProceduralAssignBlockId = 0;
+
+        /// <summary>
+        /// The word reference of the first procedural assignment to this data
+        /// object (used as the reported position when a second procedural block
+        /// drives the same variable).
+        /// </summary>
+        public WordReference? ProceduralAssignReference = null;
+
         public SyncContext SyncContext { get; } = new SyncContext();
 
         public virtual string CreateTypeString()

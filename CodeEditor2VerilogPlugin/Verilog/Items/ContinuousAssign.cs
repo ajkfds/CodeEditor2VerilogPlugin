@@ -131,6 +131,111 @@ namespace pluginVerilog.Verilog.Items
             return null;
         }
 
+        /// <summary>
+        /// Reports assigning a plain (non assignment-pattern) value to a whole
+        /// unpacked array, which is a type mismatch (IEEE 1800-2017 7.4 / 10.9).
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// An unpacked array may only be assigned as a whole from another array
+        /// of the same type, from an assignment pattern (<c>arr = '{a, b};</c>)
+        /// or element by element (<c>arr[i] = a;</c>). <c>arr = 8'hFF;</c> is a
+        /// type mismatch that previously passed silently, because only the bit
+        /// width was compared (the flattened width of the whole array against
+        /// the value).
+        /// </para>
+        /// <para>
+        /// The check lives here (not in <c>DataObjectReference</c>) because the
+        /// right-hand side must be known: an assignment pattern is the legal way
+        /// to assign a whole array and must not be reported. A bit / part select
+        /// on the left-hand side is also legal, which is why an lvalue carrying
+        /// <c>RangesFromOriginal</c> is skipped.
+        /// </para>
+        /// </remarks>
+        internal static void checkWholeUnpackedArrayAssignment(
+            Expressions.Expression lExpression, Expressions.Expression? rExpression)
+        {
+            if (rExpression == null) return;
+            if (rExpression is DataObjects.AssignmentPattern) return;
+
+            if (lExpression is not Expressions.DataObjectReference dataObjectReference) return;
+
+            // an element / slice select ("arr[0] = ...", "arr[1:0] = ...") is legal
+            if (dataObjectReference.RangesFromOriginal.Count != 0) return;
+
+            DataObjects.DataObject? dataObject = dataObjectReference.OrigainalDataObject;
+            if (dataObject == null) return;
+            if (dataObject.UnpackedArrays.Count == 0) return;
+            if (dataObject.UnpackedArrays[0].Size == null) return;
+
+            // a whole-array copy from another array of the same shape is legal
+            DataObjects.DataObject? sourceObject = getAssignedDataObject(rExpression);
+            if (sourceObject != null &&
+                sourceObject.UnpackedArrays.Count == dataObject.UnpackedArrays.Count)
+            {
+                return;
+            }
+
+            lExpression.Reference.AddError(
+                "'" + dataObject.Name + "' is an unpacked array and cannot be assigned a scalar value; "
+                + "assign its elements, use an assignment pattern ('{...}) or assign from an array of the same type");
+        }
+
+        /// <summary>
+        /// Marks the data object as procedurally assigned and reports it when the
+        /// variable is also the target of a continuous assignment, or when a
+        /// DIFFERENT procedural block already assigned it.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Two assignments to the same variable from two different procedural
+        /// blocks (e.g. two <c>always</c> blocks) are legal Verilog but almost
+        /// always a design error: the two processes drive the same signal
+        /// independently, so the value that wins depends on the execution order.
+        /// This is reported as a Warning rather than an Error because the
+        /// language permits it.
+        /// </para>
+        /// <para>
+        /// Assignments from the SAME block (including several branches of one
+        /// if / case inside the block) are not reported - that is the normal way
+        /// to describe a register. A task / function body does not create a new
+        /// procedural block, so a helper task assigning a variable is also not
+        /// reported; only genuinely separate always / initial / final blocks are.
+        /// </para>
+        /// </remarks>
+        internal static void checkProceduralAssignmentConflict(
+            WordScanner word, Expressions.Expression lExpression, string? proceduralBlockMessage = null)
+        {
+            DataObjects.DataObject? dataObject = getAssignedDataObject(lExpression);
+            if (dataObject == null) return;
+
+            // a continuous assignment to the same variable shall not be mixed
+            // with a procedural assignment (IEEE 1800-2017 6.5)
+            if (dataObject.ContinuousAssigned)
+            {
+                lExpression.Reference.AddError(
+                    "'" + dataObject.Name + "' is assigned by both a continuous and a procedural assignment");
+            }
+
+            int blockId = word.CurrentProceduralBlockId;
+            if (blockId != 0)
+            {
+                if (dataObject.ProceduralAssignBlockId == 0)
+                {
+                    dataObject.ProceduralAssignBlockId = blockId;
+                    dataObject.ProceduralAssignReference = lExpression.Reference;
+                }
+                else if (dataObject.ProceduralAssignBlockId != blockId)
+                {
+                    lExpression.Reference.AddWarning(
+                        proceduralBlockMessage ??
+                        ("'" + dataObject.Name + "' is assigned from multiple procedural blocks"));
+                }
+            }
+
+            dataObject.ProceduralAssigned = true;
+        }
+
         public static List<ContinuousAssign> ParseCreate(WordScanner word, NameSpace nameSpace, CompletionContext? completionContext = null)
         {
             // continuous_assign::= assign[drive_strength][delay3] list_of_net_assignments;
@@ -179,6 +284,7 @@ namespace pluginVerilog.Verilog.Items
                     if (!word.Prototype && word.CompletionContext == null)
                     {
                         checkContinuousAssignmentConflict(word, assignment.NetLValue);
+                        checkWholeUnpackedArrayAssignment(assignment.NetLValue, assignment.Expression);
                     }
                 }
                 else

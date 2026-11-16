@@ -232,6 +232,40 @@ namespace pluginVerilog.Verilog
             if (forkDepth > 0) forkDepth--;
         }
 
+        /// <summary>
+        /// Identifier of the procedural block (always / initial / final) that is
+        /// currently being parsed, or 0 outside of any such block.
+        /// </summary>
+        /// <remarks>
+        /// Assigning the same variable from two different procedural blocks is
+        /// legal Verilog, but it is almost always a design error: two
+        /// independent processes drive the same signal, so the value that wins
+        /// depends on the execution order. Recording which block performed an
+        /// assignment lets the assignment checks report "assigned from multiple
+        /// procedural blocks" (see
+        /// <c>Items.ContinuousAssign.checkProceduralAssignmentConflict</c>).
+        /// </remarks>
+        public int CurrentProceduralBlockId { get; set; } = 0;
+
+        private int proceduralBlockCount = 0;
+
+        /// <summary>
+        /// Starts a new procedural block and returns the identifier that was
+        /// current before it, so the caller can restore it when the block has
+        /// been parsed. The previous value must be restored (call
+        /// <c>word.CurrentProceduralBlockId = previous;</c> when done): a
+        /// function / task body is parsed at its declaration site (module
+        /// level), so a stale identifier would tag those assignments with the
+        /// last always block and produce spurious warnings.
+        /// </summary>
+        public int EnterProceduralBlock()
+        {
+            int previous = CurrentProceduralBlockId;
+            proceduralBlockCount++;
+            CurrentProceduralBlockId = proceduralBlockCount;
+            return previous;
+        }
+
         public void StartNonGenerated()
         {
             nonGeneratedCount++;
@@ -257,6 +291,8 @@ namespace pluginVerilog.Verilog
             ret.prototype = prototype;
             ret.designElementDepth = designElementDepth;
             ret.forkDepth = forkDepth;
+            ret.CurrentProceduralBlockId = CurrentProceduralBlockId;
+            ret.proceduralBlockCount = proceduralBlockCount;
             foreach (var wp in stock)
             {
                 ret.stock.Add(wp.Clone());

@@ -87,6 +87,10 @@ namespace pluginVerilog.Verilog.Expressions
                 Function function = (Function)taskNameSpace.NamedElements[ret.TaskName];
                 if (function.ReturnVariable != null)
                 {
+                    // A non-void function is not a task, so "f()" cannot be used
+                    // as a task-enable statement. In a statement position this
+                    // also covers the illegal "f() = value;" form: a function
+                    // name is not an lvalue (IEEE 1800-2017 13.4.1).
                     word.AddError("illegal task name");
                 }
                 else

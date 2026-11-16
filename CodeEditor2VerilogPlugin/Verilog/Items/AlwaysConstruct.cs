@@ -42,7 +42,19 @@ namespace pluginVerilog.Verilog.Items
             word.MoveNext();
 
             AlwaysConstruct always = new AlwaysConstruct() { BeginIndexReference = beginIndex };
-            always.Statement = Statements.Statements.ParseCreateStatement(word, nameSpace, null, null);
+            // Tag every assignment inside this block with a procedural-block
+            // identifier so that assigning the same variable from two different
+            // always blocks can be reported (see
+            // Items.ContinuousAssign.checkProceduralAssignmentConflict).
+            int previousProceduralBlockId = word.EnterProceduralBlock();
+            try
+            {
+                always.Statement = Statements.Statements.ParseCreateStatement(word, nameSpace, null, null);
+            }
+            finally
+            {
+                word.CurrentProceduralBlockId = previousProceduralBlockId;
+            }
             if (always.Statement == null)
             {
                 word.AddError("illegal always construct");

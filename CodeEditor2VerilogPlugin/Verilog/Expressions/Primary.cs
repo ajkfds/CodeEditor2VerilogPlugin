@@ -487,6 +487,23 @@ number
                     }
 
                     {
+                        // A function name denotes the function's return variable,
+                        // which may only be assigned from inside the function body
+                        // (IEEE 1800-2017 13.4.1). Inside the body the name
+                        // resolves to the return DataObject registered in the
+                        // function's own name space (Function.Parse adds it to
+                        // function.NamedElements), so reaching this point with
+                        // lValue set means the assignment comes from outside:
+                        //   initial get_value = 10;        // illegal
+                        //   assign  get_value = 10;        // illegal
+                        //   always @(posedge clk) get_value <= 10;  // illegal
+                        if (lValue && element is Function)
+                        {
+                            word.AddError("a function name cannot be assigned from outside of the function");
+                        }
+                    }
+
+                    {
                         if (element is NameSpace)
                         {
                             NameSpace space = (NameSpace)element;

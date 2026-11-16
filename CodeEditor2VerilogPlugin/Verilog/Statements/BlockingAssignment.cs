@@ -225,13 +225,14 @@ namespace pluginVerilog.Verilog.Statements
             if (!word.Prototype && word.CompletionContext == null && lExpression != null && expression != null)
             {
                 checkEnumAssignment(equalPointer, assignmentOperator, lExpression, expression);
+                Items.ContinuousAssign.checkWholeUnpackedArrayAssignment(lExpression, expression);
             }
 
             // a procedural assignment shall not be mixed with a continuous
             // assignment to the same variable (IEEE 1800-2017 6.5)
             if (!word.Prototype && word.CompletionContext == null && lExpression != null)
             {
-                markProceduralAssignment(lExpression);
+                markProceduralAssignment(word, lExpression);
                 // it shall be illegal to procedurally assign to a net
                 // (IEEE 1800-2017 10.3 / Table 10-1)
                 if (assignmentOperator == "=")
@@ -348,18 +349,13 @@ namespace pluginVerilog.Verilog.Statements
         /// <summary>
         /// Marks the assigned data object as procedurally assigned and reports
         /// the conflict when it is also the target of a continuous assignment
-        /// (IEEE 1800-2017 6.5).
+        /// (IEEE 1800-2017 6.5) or when another procedural block already drives
+        /// the same variable (see
+        /// <see cref="Items.ContinuousAssign.checkProceduralAssignmentConflict"/>).
         /// </summary>
-        private static void markProceduralAssignment(Expressions.Expression lExpression)
+        private static void markProceduralAssignment(WordScanner word, Expressions.Expression lExpression)
         {
-            DataObject? dataObject = Items.ContinuousAssign.getAssignedDataObject(lExpression);
-            if (dataObject == null) return;
-            if (dataObject.ContinuousAssigned)
-            {
-                lExpression.Reference.AddError(
-                    "'" + dataObject.Name + "' is assigned by both a continuous and a procedural assignment");
-            }
-            dataObject.ProceduralAssigned = true;
+            Items.ContinuousAssign.checkProceduralAssignmentConflict(word, lExpression);
         }
 
         /// <summary>

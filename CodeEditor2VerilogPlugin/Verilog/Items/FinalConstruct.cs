@@ -28,7 +28,17 @@ namespace pluginVerilog.Verilog.Items
             word.MoveNext();
 
             FinalConstruct finalConstruct = new FinalConstruct() { BeginIndexReference = beginIndexReference };
-            finalConstruct.Statement = Statements.Statements.ParseCreateStatement(word, nameSpace);
+            // Tag the assignments of this block with a procedural-block
+            // identifier (see Items.ContinuousAssign.checkProceduralAssignmentConflict).
+            int previousProceduralBlockId = word.EnterProceduralBlock();
+            try
+            {
+                finalConstruct.Statement = Statements.Statements.ParseCreateStatement(word, nameSpace);
+            }
+            finally
+            {
+                word.CurrentProceduralBlockId = previousProceduralBlockId;
+            }
             if (finalConstruct.Statement == null)
             {
                 word.AddError("illegal initial construct");

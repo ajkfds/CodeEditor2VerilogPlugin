@@ -150,6 +150,7 @@ namespace pluginVerilog.Verilog.Statements
             if (!word.Prototype && word.CompletionContext == null && lExpression != null)
             {
                 markProceduralAssignment(word, lExpression);
+                Items.ContinuousAssign.checkWholeUnpackedArrayAssignment(lExpression, expression);
             }
 
             if (!word.Prototype && clockDomains != null && lExpression != null)
@@ -191,18 +192,13 @@ namespace pluginVerilog.Verilog.Statements
         /// <summary>
         /// Marks the assigned data object as procedurally assigned and reports
         /// the conflict when it is also the target of a continuous assignment
-        /// (IEEE 1800-2017 6.5).
+        /// (IEEE 1800-2017 6.5) or when another procedural block already drives
+        /// the same variable (see
+        /// <see cref="Items.ContinuousAssign.checkProceduralAssignmentConflict"/>).
         /// </summary>
         private static void markProceduralAssignment(WordScanner word, Expressions.Expression lExpression)
         {
-            DataObject? dataObject = Items.ContinuousAssign.getAssignedDataObject(lExpression);
-            if (dataObject == null) return;
-            if (dataObject.ContinuousAssigned)
-            {
-                lExpression.Reference.AddError(
-                    "'" + dataObject.Name + "' is assigned by both a continuous and a procedural assignment");
-            }
-            dataObject.ProceduralAssigned = true;
+            Items.ContinuousAssign.checkProceduralAssignmentConflict(word, lExpression);
         }
     }
 
