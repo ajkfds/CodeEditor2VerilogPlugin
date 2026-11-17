@@ -12,14 +12,7 @@ namespace pluginVerilog.NavigatePanel
 {
     public class VerilogFileNode : CodeEditor2.NavigatePanel.FileNode, IVerilogNavigateNode
     {
-        static VerilogFileNode()
-        {
-            CustomizeNavigateNodeContextMenu += CustomizeNavigateNodeContextMenuHandler;
-        }
-        public static void CustomizeNavigateNodeContextMenuHandler(ContextMenu contextMenu)
-        {
-            NavigatePanelMenu.Customize(contextMenu);
-        }
+
 
         [SetsRequiredMembers]
         public VerilogFileNode(Data.VerilogFile verilogFile) : base(verilogFile)

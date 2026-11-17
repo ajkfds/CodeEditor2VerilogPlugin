@@ -9,54 +9,26 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.NavigatePanel
 {
+    /// <summary>
+    /// Legacy hook kept so nothing that still calls
+    /// <c>NavigatePanelMenu.Customize</c> breaks.
+    ///
+    /// <para>
+    /// The Verilog Add rows (verilog module / SystemVerilog module /
+    /// SystemVerilog interface) are catalog entries now
+    /// (<c>HierarchyMenuCatalog.MenuId.AddVerilogModule</c> and friends), so the
+    /// editor and VS Code get them from one declaration. This method only looks
+    /// the existing "Add" parent up and does nothing else: adding the rows again
+    /// here would duplicate them, and finding the parent by its header string
+    /// (what the old code did) broke as soon as the label changed.
+    /// </para>
+    /// </summary>
     public static class NavigatePanelMenu
     {
         public static void Customize(ContextMenu contextMenu)
         {
-            MenuItem? menuItem_Add = contextMenu.Items.FirstOrDefault(m =>
-            {
-                if (m is not MenuItem) return false;
-                MenuItem? menuItem = m as MenuItem;
-                if (menuItem == null) return false;
-                if (menuItem.Header is string && (string)menuItem.Header == "Add") return true;
-                return false;
-            }) as MenuItem;
-
-            if (menuItem_Add == null)
-            {
-                menuItem_Add = CodeEditor2.Global.CreateMenuItem(
-                    "Add", "MenuItem_Add"
-                    );
-                contextMenu.Items.Add(menuItem_Add);
-            }
-
-            if (menuItem_Add == null) return;
-            {
-                MenuItem menuItem_AddFile = CodeEditor2.Global.CreateMenuItem("verilog module", "MenuItem_AddVerilogModule",
-                    "CodeEditor2VerilogPlugin/Assets/Icons/verilogDocument.svg",
-                    Avalonia.Media.Color.FromArgb(100, 200, 240, 240)
-                    );
-                menuItem_AddFile.Click += menuItem_AddVerilogModule_Click;
-                menuItem_Add.Items.Add(menuItem_AddFile);
-            }
-
-            {
-                MenuItem menuItem_AddFile = CodeEditor2.Global.CreateMenuItem("SystemVerilog module", "MenuItem_AddSystemVerilogModule",
-                    "CodeEditor2VerilogPlugin/Assets/Icons/systemVerilogDocument.svg",
-                    Avalonia.Media.Color.FromArgb(100, 200, 240, 240)
-                    );
-                menuItem_AddFile.Click += menuItem_AddSystemVerilogModule_Click;
-                menuItem_Add.Items.Add(menuItem_AddFile);
-            }
-
-            {
-                MenuItem menuItem_AddFile = CodeEditor2.Global.CreateMenuItem("SystemVerilog interface", "MenuItem_AddSystemVerilogInterface",
-                    "CodeEditor2VerilogPlugin/Assets/Icons/systemVerilogDocument.svg",
-                    Avalonia.Media.Color.FromArgb(100, 200, 240, 240)
-                    );
-                menuItem_AddFile.Click += menuItem_AddSystemVerilogInterface_Click;
-                menuItem_Add.Items.Add(menuItem_AddFile);
-            }
+            // Rows are rendered by NavigateNodeMenuRenderer from the catalog; see
+            // NavigatePanelNode.CreateContextMenuRows. Nothing to add here.
         }
 
         private static async Task GenerateFileAsync(

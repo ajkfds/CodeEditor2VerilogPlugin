@@ -58,7 +58,7 @@ namespace pluginVerilog.CoreBridge
         public static Manifest Build()
         {
             Manifest manifest = new Manifest();
-            List<HierarchyMenuCatalog.Entry> topLevel = HierarchyMenuCatalog.Children(null);
+            List<HierarchyMenuCatalog.Entry> topLevel = Children(null);
 
             foreach (HierarchyMenuCatalog.Entry entry in topLevel)
             {
@@ -79,6 +79,23 @@ namespace pluginVerilog.CoreBridge
                 }
             }
             return manifest;
+        }
+
+        /// <summary>
+        /// The catalog rows VS Code can run. A row declared
+        /// <see cref="HierarchyMenuCatalog.Hosts.Desktop"/> is never written into
+        /// <c>package.json</c>: the extension could not run it (it needs the
+        /// editor's windows), and emitting it would add a row that does nothing.
+        /// </summary>
+        private static List<HierarchyMenuCatalog.Entry> Children(string? parentId)
+        {
+            List<HierarchyMenuCatalog.Entry> result = new List<HierarchyMenuCatalog.Entry>();
+            foreach (HierarchyMenuCatalog.Entry entry in HierarchyMenuCatalog.Children(parentId))
+            {
+                if ((entry.Hosts & HierarchyMenuCatalog.Hosts.VsCode) == 0) continue;
+                result.Add(entry);
+            }
+            return result;
         }
 
         /// <summary>
@@ -104,7 +121,7 @@ namespace pluginVerilog.CoreBridge
                 });
             }
 
-            foreach (HierarchyMenuCatalog.Entry child in HierarchyMenuCatalog.Children(submenu.Id))
+            foreach (HierarchyMenuCatalog.Entry child in Children(submenu.Id))
             {
                 if (child.IsSubmenu)
                 {

@@ -5,14 +5,29 @@ using System.Collections.Generic;
 namespace pluginVerilog.CoreBridge
 {
     /// <summary>
-    /// The RTL Hierarchy node menu, as data.
+    /// The navigate-node menu (the right-click menu of the desktop editor's
+    /// NavigatePanel and of the VS Code "RTL Hierarchy" view), as data.
     ///
     /// <para>
-    /// VS Code's <c>contributes.menus."view/item/context"</c> entries are
-    /// declared statically in <c>package.json</c>, so an extension host cannot
-    /// add a row at run time. That means a menu item written in C# could never
-    /// appear unless the client also knew about it in advance - which is the
-    /// "adding a menu means editing two repositories" problem.
+    /// Both hosts show the same rows, so the list must not live in two places.
+    /// This catalog is the single source of truth and each host maps it onto its
+    /// own menu API:
+    /// </para>
+    ///
+    /// <list type="bullet">
+    /// <item>the desktop editor renders it into an Avalonia <c>ContextMenu</c>
+    /// (<c>pluginVerilog.NavigatePanel.NavigateNodeMenuRenderer</c>),</item>
+    /// <item>the LSP host serves it through <c>rtl/hierarchyMenu</c> and the
+    /// extension renders the native VS Code rows.</item>
+    /// </list>
+    ///
+    /// <para>
+    /// Rows that only one host can run (the desktop editor owns the LLM agent,
+    /// the simulation windows and the input dialogs) are declared with
+    /// <see cref="Entry.Hosts"/> so the other host simply does not offer them.
+    /// That is what replaces the old per-node-type
+    /// <c>CustomizeNavigateNodeContextMenu</c> delegates: a plugin now calls
+    /// <see cref="Register"/> instead of subscribing to an Avalonia event.
     /// </para>
     ///
     /// <para>
@@ -58,6 +73,88 @@ namespace pluginVerilog.CoreBridge
             /// <c>ParentId = Simulation</c> to a row puts it in this submenu.
             /// </summary>
             public const string Simulation = "simulation";
+
+            // ---- rows that used to be hard-coded in the editor -------------
+            //
+            // NavigatePanelNode.createContextMenu built Add / Delete / Open /
+            // CopyPath / Property inline, so VS Code had to re-implement them in
+            // hierarchy.js. They are catalog rows now, which is what lets one
+            // declaration feed both menus. They stay editor-only until the
+            // extension's file operations move onto ClientOperation.
+
+            /// <summary>Grouping row for the "create a source file" actions.</summary>
+            public const string Add = "add";
+
+            public const string AddFolder = "addFolder";
+            public const string AddBlankFile = "addBlankFile";
+            public const string AddVerilogModule = "addVerilogModule";
+            public const string AddSystemVerilogModule = "addSystemVerilogModule";
+            public const string AddSystemVerilogInterface = "addSystemVerilogInterface";
+            public const string DeleteNode = "deleteNode";
+        }
+
+        /// <summary>
+        /// Which hosts offer an entry.
+        ///
+        /// <para>
+        /// The desktop editor and VS Code share almost every row, but a few need
+        /// a window only one of them owns: the LLM agent, the simulation tab and
+        /// the input / confirmation dialogs exist only in the editor, while
+        /// "Reveal in Editor" and "Copy Instance Path" are VS Code view actions.
+        /// </para>
+        /// </summary>
+        [Flags]
+        public enum Hosts
+        {
+            None = 0,
+            Desktop = 1,
+            VsCode = 2,
+            Both = Desktop | VsCode,
+        }
+
+        /// <summary>
+        /// What running an entry does. A string id would have to be matched by
+        /// both hosts; an enum keeps the "what" on the C# side and leaves only
+        /// "how" (a file-system call, a clipboard write, a dialog) to the host.
+        /// </summary>
+        public enum ActionKind
+        {
+            /// <summary>A submenu row: it only groups its children.</summary>
+            None,
+
+            /// <summary>Copy the workspace-relative path (or the absolute one).</summary>
+            CopyPath,
+
+            /// <summary>Copy the readable instance path ("u_mid.u_leaf").</summary>
+            CopyInstancePath,
+
+            /// <summary>Reveal the node's file in the OS file manager.</summary>
+            RevealInOS,
+
+            /// <summary>Show the node's parsed properties.</summary>
+            ShowProperty,
+
+            /// <summary>Show text the server produced (e.g. the simulation file list).</summary>
+            ShowText,
+
+            /// <summary>Create a directory next to the node.</summary>
+            CreateFolder,
+
+            /// <summary>Create an empty file next to the node.</summary>
+            CreateFile,
+
+            /// <summary>Delete the node's file / directory.</summary>
+            DeleteNode,
+
+            /// <summary>Create a Verilog / SystemVerilog skeleton (see <see cref="Entry.Argument"/>).</summary>
+            CreateSourceFile,
+
+            /// <summary>
+            /// The entry needs a handler only the desktop editor can run. The
+            /// catalog row carries the delegate; VS Code never sees the entry
+            /// because it is declared <c>Hosts.Desktop</c>.
+            /// </summary>
+            DesktopHandler,
         }
 
         /// <summary>Which nodes an entry applies to.</summary>
@@ -65,10 +162,18 @@ namespace pluginVerilog.CoreBridge
         public enum AppliesTo
         {
             None = 0,
-            Folder = 1,
-            File = 2,
-            Instance = 4,
-            All = Folder | File | Instance,
+            /// <summary>The workspace root (the editor's ProjectNode).</summary>
+            Project = 1,
+            Folder = 2,
+            File = 4,
+            Instance = 8,
+            /// <summary>An include header instance inside a file.</summary>
+            Header = 16,
+            /// <summary>An imported package instance inside a file.</summary>
+            Package = 32,
+            All = Project | Folder | File | Instance | Header | Package,
+            /// <summary>The kinds the VS Code tree shows (it has no project node).</summary>
+            VsCodeNodes = Folder | File | Instance,
         }
 
         /// <summary>One row of the hierarchy node menu.</summary>
@@ -85,6 +190,45 @@ namespace pluginVerilog.CoreBridge
 
             /// <summary>Nodes the entry is offered for.</summary>
             public AppliesTo Targets { get; init; } = AppliesTo.All;
+
+            /// <summary>
+            /// Hosts that offer the entry. A row declared
+            /// <see cref="Hosts.Desktop"/> is never sent to VS Code, and a row
+            /// declared <see cref="Hosts.VsCode"/> never reaches the editor's
+            /// context menu.
+            /// </summary>
+            public Hosts Hosts { get; init; } = Hosts.Both;
+
+            /// <summary>What running the entry does (see <see cref="ActionKind"/>).</summary>
+            public ActionKind Action { get; init; } = ActionKind.None;
+
+            /// <summary>
+            /// Free-form argument for the action: the source-file template id
+            /// (<c>"verilog"</c> / <c>"systemverilog"</c> / <c>"interface"</c>)
+            /// for <see cref="ActionKind.CreateSourceFile"/>, or any value a
+            /// <see cref="Handler"/> wants.
+            /// </summary>
+            public string? Argument { get; init; }
+
+            /// <summary>
+            /// Icon asset path for the desktop menu (the editor draws SVG icons;
+            /// VS Code resolves its own). Null when the row has no icon.
+            /// </summary>
+            public string? IconPath { get; init; }
+
+            /// <summary>
+            /// Icon colour as <c>0xAARRGGBB</c>. Kept as a plain number so this
+            /// file stays free of Avalonia types (the LSP host links it too).
+            /// </summary>
+            public uint IconColor { get; init; }
+
+            /// <summary>
+            /// Runs a <see cref="ActionKind.DesktopHandler"/> entry. The context
+            /// carries the node the user right-clicked, so the handler does not
+            /// have to read the current selection (which would be wrong when the
+            /// menu was built for another node).
+            /// </summary>
+            public Action<NavigateNodeMenuContext>? Handler { get; init; }
 
             /// <summary>
             /// Group number, used for ordering only (the client sorts by it, so
@@ -126,6 +270,7 @@ namespace pluginVerilog.CoreBridge
                 Targets = AppliesTo.File | AppliesTo.Instance,
                 Group = 10,
                 IsSubmenu = true,
+                Action = ActionKind.None,
             },
             new Entry
             {
@@ -135,6 +280,7 @@ namespace pluginVerilog.CoreBridge
                 Targets = AppliesTo.File | AppliesTo.Instance,
                 Group = 10,
                 ParentId = MenuId.Simulation,
+                Action = ActionKind.ShowText,
             },
             new Entry
             {
@@ -142,6 +288,7 @@ namespace pluginVerilog.CoreBridge
                 Label = "Open in Explorer",
                 Detail = "reveal the node's file in the OS file manager",
                 Group = 40,
+                Action = ActionKind.RevealInOS,
             },
             new Entry
             {
@@ -149,6 +296,7 @@ namespace pluginVerilog.CoreBridge
                 Label = "Copy Path",
                 Detail = "copy the workspace-relative path",
                 Group = 50,
+                Action = ActionKind.CopyPath,
             },
             new Entry
             {
@@ -157,6 +305,7 @@ namespace pluginVerilog.CoreBridge
                 Detail = "copy the instance path (u_mid.u_leaf)",
                 Targets = AppliesTo.Instance,
                 Group = 50,
+                Action = ActionKind.CopyInstancePath,
             },
             new Entry
             {
@@ -165,6 +314,101 @@ namespace pluginVerilog.CoreBridge
                 Detail = "show the node's parsed properties",
                 Targets = AppliesTo.File | AppliesTo.Instance,
                 Group = 60,
+                Action = ActionKind.ShowProperty,
+            },
+
+            // ---- rows the editor used to build inline ----------------------
+            //
+            // Declared Hosts.Desktop for now: the extension still implements its
+            // own addFolder / addBlankFile / deleteNode in hierarchy.js, so
+            // emitting these too would show every row twice. Moving them to
+            // Hosts.Both is a one-word change once the extension performs
+            // ClientOperation instead.
+
+            new Entry
+            {
+                Id = MenuId.Add,
+                Label = "Add",
+                Detail = "create a file or folder next to the node",
+                Targets = AppliesTo.Project | AppliesTo.Folder | AppliesTo.File | AppliesTo.Instance,
+                Hosts = Hosts.Desktop,
+                Group = 10,
+                IsSubmenu = true,
+                Action = ActionKind.None,
+            },
+            new Entry
+            {
+                Id = MenuId.AddFolder,
+                Label = "Folder",
+                Detail = "create an empty directory",
+                Targets = AppliesTo.Project | AppliesTo.Folder | AppliesTo.File | AppliesTo.Instance,
+                Hosts = Hosts.Desktop,
+                Group = 10,
+                ParentId = MenuId.Add,
+                Action = ActionKind.CreateFolder,
+            },
+            new Entry
+            {
+                Id = MenuId.AddBlankFile,
+                Label = "Blank File",
+                Detail = "create an empty file",
+                Targets = AppliesTo.Project | AppliesTo.Folder | AppliesTo.File | AppliesTo.Instance,
+                Hosts = Hosts.Desktop,
+                Group = 10,
+                ParentId = MenuId.Add,
+                Action = ActionKind.CreateFile,
+            },
+            new Entry
+            {
+                Id = MenuId.AddVerilogModule,
+                Label = "verilog module",
+                Detail = "create a .v file with a module skeleton",
+                Targets = AppliesTo.Project | AppliesTo.Folder | AppliesTo.File | AppliesTo.Instance,
+                Hosts = Hosts.Desktop,
+                Group = 10,
+                ParentId = MenuId.Add,
+                Action = ActionKind.CreateSourceFile,
+                Argument = "verilog",
+                IconPath = "CodeEditor2VerilogPlugin/Assets/Icons/verilogDocument.svg",
+                IconColor = 0x64C8F0F0,
+            },
+            new Entry
+            {
+                Id = MenuId.AddSystemVerilogModule,
+                Label = "SystemVerilog module",
+                Detail = "create a .sv file with a module skeleton",
+                Targets = AppliesTo.Project | AppliesTo.Folder | AppliesTo.File | AppliesTo.Instance,
+                Hosts = Hosts.Desktop,
+                Group = 10,
+                ParentId = MenuId.Add,
+                Action = ActionKind.CreateSourceFile,
+                Argument = "systemverilog",
+                IconPath = "CodeEditor2VerilogPlugin/Assets/Icons/systemVerilogDocument.svg",
+                IconColor = 0x64C8F0F0,
+            },
+            new Entry
+            {
+                Id = MenuId.AddSystemVerilogInterface,
+                Label = "SystemVerilog interface",
+                Detail = "create a .sv file with an interface skeleton",
+                Targets = AppliesTo.Project | AppliesTo.Folder | AppliesTo.File | AppliesTo.Instance,
+                Hosts = Hosts.Desktop,
+                Group = 10,
+                ParentId = MenuId.Add,
+                Action = ActionKind.CreateSourceFile,
+                Argument = "interface",
+                IconPath = "CodeEditor2VerilogPlugin/Assets/Icons/systemVerilogDocument.svg",
+                IconColor = 0x64C8F0F0,
+            },
+            new Entry
+            {
+                Id = MenuId.DeleteNode,
+                Label = "Delete",
+                Detail = "delete the node's file or directory",
+                Targets = AppliesTo.Folder | AppliesTo.File,
+                Hosts = Hosts.Desktop,
+                Group = 20,
+                Action = ActionKind.DeleteNode,
             },
         };
 

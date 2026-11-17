@@ -127,19 +127,74 @@ namespace pluginVerilog
             }
 
             // context menu
-            pluginVerilog.NavigatePanel.VerilogFileNode.CustomizeNavigateNodeContextMenu += CustomizeNavigateNodeContextMenuHandler;
+            //
+            // The navigate-node menu is driven by one catalog shared with VS Code
+            // (CoreBridge.HierarchyMenuCatalog), so this installs the renderer
+            // instead of subscribing to the per-node-type
+            // CustomizeNavigateNodeContextMenu event. Rows that only the editor
+            // can run declare Hosts.Desktop; VS Code simply never sees them.
+            RegisterNavigateNodeMenuEntries();
+            CodeEditor2.NavigatePanel.NavigatePanelNode.CreateContextMenuRows = CustomizeNavigateNodeContextMenuRows;
             return true;
         }
 
-        public static void CustomizeNavigateNodeContextMenuHandler(Avalonia.Controls.ContextMenu contextMenu)
+        /// <summary>
+        /// Draws the navigate-node menu from the shared catalog. Registered once
+        /// in <see cref="Initialize"/>; see
+        /// <see cref="NavigatePanel.NavigateNodeMenuRenderer"/>.
+        /// </summary>
+        public static void CustomizeNavigateNodeContextMenuRows(
+            Avalonia.Controls.ContextMenu contextMenu,
+            CodeEditor2.NavigatePanel.NavigatePanelNode node)
         {
-            MenuItem menuItem_ParseHier = CodeEditor2.Global.CreateMenuItem(
-                "Parse All", "menuItem_ParseHier",
-                "CodeEditor2/Assets/Icons/flame.svg",
-                ThemeColor
-                );
-            contextMenu.Items.Add(menuItem_ParseHier);
-            menuItem_ParseHier.Click += MenuItem_ParseHier_Click;
+            NavigatePanel.NavigateNodeMenuRenderer.Render(contextMenu, node);
+        }
+
+        /// <summary>
+        /// Registers "Parse All" as a catalog row instead of adding it to the
+        /// context menu directly, so the same declaration feeds the desktop menu
+        /// and (when it makes sense) any other host.
+        /// </summary>
+        private static void RegisterNavigateNodeMenuEntries()
+        {
+            CoreBridge.HierarchyMenuCatalog.Register(new CoreBridge.HierarchyMenuCatalog.Entry
+            {
+                Id = "parseAll",
+                Label = "Parse All",
+                Detail = "re-parse every file in the hierarchy",
+                Targets = CoreBridge.HierarchyMenuCatalog.AppliesTo.File
+                        | CoreBridge.HierarchyMenuCatalog.AppliesTo.Instance,
+                Hosts = CoreBridge.HierarchyMenuCatalog.Hosts.Desktop,
+                Group = 30,
+                Action = CoreBridge.HierarchyMenuCatalog.ActionKind.DesktopHandler,
+                IconPath = "CodeEditor2/Assets/Icons/flame.svg",
+                IconColor = PackColor(ThemeColor),
+                Handler = context => MenuItem_ParseHier(context),
+            });
+        }
+
+        /// <summary>Packs an Avalonia colour into the catalog's 0xAARRGGBB form.</summary>
+        private static uint PackColor(Avalonia.Media.Color color)
+        {
+            return ((uint)color.A << 24) | ((uint)color.R << 16) | ((uint)color.G << 8) | color.B;
+        }
+
+        private static void MenuItem_ParseHier(CoreBridge.NavigateNodeMenuContext context)
+        {
+            try
+            {
+                // The hierarchy walk takes a source file; an instance node's
+                // parse result is an InstanceTextFile, so unwrap it.
+                Data.VerilogFile? vfile = context.File as Data.VerilogFile;
+                if (vfile == null) return;
+
+                Tool.ParseHierarchy.PostParseAsync(vfile, Tool.ParseHierarchy.ParseMode.ForceAllFiles);
+            }
+            catch (Exception ex)
+            {
+                if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+                CodeEditor2.Controller.AppendLog("# Exception : " + ex.Message, Avalonia.Media.Colors.Red);
+            }
         }
 
         private static void MenuItem_ParseHier_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
