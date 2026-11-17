@@ -77,10 +77,11 @@ namespace pluginVerilog.CoreBridge
             // ---- rows that used to be hard-coded in the editor -------------
             //
             // NavigatePanelNode.createContextMenu built Add / Delete / Open /
-            // CopyPath / Property inline, so VS Code had to re-implement them in
-            // hierarchy.js. They are catalog rows now, which is what lets one
-            // declaration feed both menus. They stay editor-only until the
-            // extension's file operations move onto ClientOperation.
+            // CopyPath / Property inline, and the extension re-implemented the
+            // file operations in hierarchy.js. They are catalog rows now, so one
+            // declaration feeds both menus; the hosts differ only in how they
+            // perform the returned ClientOperation (System.IO in the editor,
+            // vscode.workspace.fs in the extension).
 
             /// <summary>Grouping row for the "create a source file" actions.</summary>
             public const string Add = "add";
@@ -331,7 +332,6 @@ namespace pluginVerilog.CoreBridge
                 Label = "Add",
                 Detail = "create a file or folder next to the node",
                 Targets = AppliesTo.Project | AppliesTo.Folder | AppliesTo.File | AppliesTo.Instance,
-                Hosts = Hosts.Desktop,
                 Group = 10,
                 IsSubmenu = true,
                 Action = ActionKind.None,
@@ -342,7 +342,6 @@ namespace pluginVerilog.CoreBridge
                 Label = "Folder",
                 Detail = "create an empty directory",
                 Targets = AppliesTo.Project | AppliesTo.Folder | AppliesTo.File | AppliesTo.Instance,
-                Hosts = Hosts.Desktop,
                 Group = 10,
                 ParentId = MenuId.Add,
                 Action = ActionKind.CreateFolder,
@@ -353,7 +352,6 @@ namespace pluginVerilog.CoreBridge
                 Label = "Blank File",
                 Detail = "create an empty file",
                 Targets = AppliesTo.Project | AppliesTo.Folder | AppliesTo.File | AppliesTo.Instance,
-                Hosts = Hosts.Desktop,
                 Group = 10,
                 ParentId = MenuId.Add,
                 Action = ActionKind.CreateFile,
@@ -364,7 +362,6 @@ namespace pluginVerilog.CoreBridge
                 Label = "verilog module",
                 Detail = "create a .v file with a module skeleton",
                 Targets = AppliesTo.Project | AppliesTo.Folder | AppliesTo.File | AppliesTo.Instance,
-                Hosts = Hosts.Desktop,
                 Group = 10,
                 ParentId = MenuId.Add,
                 Action = ActionKind.CreateSourceFile,
@@ -378,7 +375,6 @@ namespace pluginVerilog.CoreBridge
                 Label = "SystemVerilog module",
                 Detail = "create a .sv file with a module skeleton",
                 Targets = AppliesTo.Project | AppliesTo.Folder | AppliesTo.File | AppliesTo.Instance,
-                Hosts = Hosts.Desktop,
                 Group = 10,
                 ParentId = MenuId.Add,
                 Action = ActionKind.CreateSourceFile,
@@ -392,7 +388,6 @@ namespace pluginVerilog.CoreBridge
                 Label = "SystemVerilog interface",
                 Detail = "create a .sv file with an interface skeleton",
                 Targets = AppliesTo.Project | AppliesTo.Folder | AppliesTo.File | AppliesTo.Instance,
-                Hosts = Hosts.Desktop,
                 Group = 10,
                 ParentId = MenuId.Add,
                 Action = ActionKind.CreateSourceFile,
@@ -406,7 +401,6 @@ namespace pluginVerilog.CoreBridge
                 Label = "Delete",
                 Detail = "delete the node's file or directory",
                 Targets = AppliesTo.Folder | AppliesTo.File,
-                Hosts = Hosts.Desktop,
                 Group = 20,
                 Action = ActionKind.DeleteNode,
             },
