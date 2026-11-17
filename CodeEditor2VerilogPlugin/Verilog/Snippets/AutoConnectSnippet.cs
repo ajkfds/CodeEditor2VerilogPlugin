@@ -1,19 +1,32 @@
 using Avalonia.Input;
 using Avalonia.Threading;
 using CodeEditor2.Views;
+using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.Items;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Snippets
 {
+    /// <summary>
+    /// The editor's "Auto Connect Ports" tool.
+    ///
+    /// <para>
+    /// The decision of <b>which signal matches a port</b> lives in
+    /// <see cref="CoreBridge.AutoConnectAdapter.GetCandidates"/>, which the VS
+    /// Code webview (<c>rtl/autoConnect</c>) also calls, so both hosts offer the
+    /// same candidates. This class is the desktop renderer: it opens
+    /// <see cref="Views.AutoConnectWindow"/> for the instantiation under the
+    /// caret and writes the result back through <c>CreateString</c>.
+    /// </para>
+    /// </summary>
     public class AutoConnectSnippet : CodeEditor2.Snippets.InteractiveSnippet
     {
-        public AutoConnectSnippet() : base("autoConnect")
+        public AutoConnectSnippet() : base(CoreBridge.ToolMenuCatalog.ToolId.AutoConnect)
         {
-            IconImage = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
+            IconImage = Global.Icons.TryGetSvgBitmap(
                     "CodeEditor2/Assets/Icons/wrench.svg",
                     Plugin.ThemeColor
                     );
@@ -21,50 +34,27 @@ namespace pluginVerilog.Verilog.Snippets
 
         private CodeEditor2.CodeEditor.CodeDocument? document;
 
-        public override async System.Threading.Tasks.Task ApplyAsync()
+        public override async Task ApplyAsync()
         {
-            List<int> startIndexes = new List<int>();
-            List<int> lastIndexes = new List<int>();
-
             CodeEditor2.Data.TextFile? file = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync();
             if (file == null) return;
             document = file.CodeDocument;
             if (document == null) return;
 
-            ParsedDocument? parsedDocument = file.ParsedDocument as ParsedDocument;
-
-
-            //string indent = "";
-            //if (document.GetCharAt(document.GetLineStartIndex(document.GetLineAt(document.CaretIndex))) == '\t')
-            //{
-            //    indent = "\t";
-            //}
-
             await base.ApplyAsync();
-
-            // run async task
             await RunAsync();
         }
 
-        // backrtound thread ------------------------------------------------------
-
-        private static System.Threading.Tasks.Task? _currentTask;
+        private static Task? _currentTask;
         private static CancellationTokenSource? _cts;
-        private async System.Threading.Tasks.Task RunAsync()
-        {
-            if (_cts != null)
-            {
-                _cts.Cancel();
-            }
 
+        private async Task RunAsync()
+        {
+            _cts?.Cancel();
             _cts = new CancellationTokenSource();
             CancellationToken token = _cts.Token;
 
-            _currentTask = System.Threading.Tasks.Task.Run(async () =>
-            {
-                await runBackGroundAsync(token);
-            }, token);
-
+            _currentTask = Task.Run(async () => await RunBackGroundAsync(token), token);
             try
             {
                 await _currentTask;
@@ -77,14 +67,14 @@ namespace pluginVerilog.Verilog.Snippets
                 _currentTask = null;
                 await CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippetAsync();
             }
-            return;
         }
-        private async System.Threading.Tasks.Task runBackGroundAsync(CancellationToken token)
+
+        private async Task RunBackGroundAsync(CancellationToken token)
         {
             try
             {
                 ModuleInstantiation? moduleInstantiation = null;
-                BuildingBlocks.BuildingBlock? buildingBlock = null;
+                BuildingBlock? buildingBlock = null;
 
                 await Dispatcher.UIThread.InvokeAsync(async () =>
                 {
@@ -93,71 +83,64 @@ namespace pluginVerilog.Verilog.Snippets
                     if (file == null) return;
                     document = file.CodeDocument;
                     if (document == null) return;
-                    pluginVerilog.CodeEditor.CodeDocument? vDocument = document as pluginVerilog.CodeEditor.CodeDocument;
-                    if (vDocument == null) return;
+                    if (document is not pluginVerilog.CodeEditor.CodeDocument vDocument) return;
+                    if (file is not Data.IVerilogRelatedFile verilogFile) return;
 
-
-                    ParsedDocument? parsedDocument = file.ParsedDocument as ParsedDocument;
-                    int index = document.CaretIndex;
-
+                    ParsedDocument? parsedDocument = verilogFile.VerilogParsedDocument;
                     if (parsedDocument == null) return;
+
+                    int index = document.CaretIndex;
                     buildingBlock = parsedDocument.GetBuildingBlockAt(index);
                     if (buildingBlock == null) return;
+
                     IndexReference iref = IndexReference.Create(parsedDocument, vDocument, index);
-
-                    List<IBuildingBlockInstantiation> instances = buildingBlock.GetBuildingBlockInstantiations();
-
-                    foreach (IBuildingBlockInstantiation instance in instances)
+                    foreach (IBuildingBlockInstantiation instance in buildingBlock.GetBuildingBlockInstantiations())
                     {
-                        if (iref.IsSmallerThan(instance.BeginIndexReference)) continue;
-                        if (instance.LastIndexReference == null) continue;
-                        if (iref.IsGreaterThan(instance.LastIndexReference)) continue;
-                        if (instance is not ModuleInstantiation) continue;
-                        moduleInstantiation = (ModuleInstantiation)instance;
+                        if (instance is not ModuleInstantiation candidate) continue;
+                        if (candidate.BeginIndexReference == null) continue;
+                        if (candidate.LastIndexReference == null) continue;
+                        if (iref.IsSmallerThan(candidate.BeginIndexReference)) continue;
+                        if (iref.IsGreaterThan(candidate.LastIndexReference)) continue;
+                        moduleInstantiation = candidate;
                     }
                 });
-                if (moduleInstantiation == null) return;
-                if (buildingBlock == null) return;
+
+                if (moduleInstantiation == null || buildingBlock == null) return;
 
                 await Dispatcher.UIThread.InvokeAsync(async () =>
                 {
                     Views.AutoConnectWindow autoConnectWindow = new Views.AutoConnectWindow(moduleInstantiation, buildingBlock);
                     autoConnectWindow.WindowStartupLocation = Avalonia.Controls.WindowStartupLocation.CenterOwner;
-                    if (autoConnectWindow.Ready)
-                    {
-                        await CodeEditor2.Controller.ShowDialogAsync(autoConnectWindow);
-                    }
-                    if (!autoConnectWindow.Accept) return;
+                    if (!autoConnectWindow.Ready) return;
+                    await CodeEditor2.Controller.ShowDialogAsync(autoConnectWindow);
                 });
 
+                // AutoConnectWindow.Complete() already wrote the accepted
+                // connections into the instantiation's PortConnection, so the
+                // text is regenerated here from the parse tree - the same way
+                // rtl/autoConnectApply answers the VS Code webview.
                 await Dispatcher.UIThread.InvokeAsync(async () =>
                 {
-
                     if (document == null) return;
                     CodeEditor2.Data.TextFile? file = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync();
                     if (file == null) return;
                     document = file.CodeDocument;
                     if (document == null) return;
-                    pluginVerilog.CodeEditor.CodeDocument? vDocument = document as pluginVerilog.CodeEditor.CodeDocument;
-                    if (vDocument == null) return;
+                    if (document is not pluginVerilog.CodeEditor.CodeDocument vDocument) return;
+                    if (moduleInstantiation.LastIndexReference == null) return;
 
                     string indent = vDocument.GetIndentString(vDocument.CaretIndex);
-
-                    string? moduleString = moduleInstantiation.CreateString("\t");
+                    string? moduleString = moduleInstantiation.CreateString(indent);
                     if (moduleString == null)
                     {
                         CodeEditor2.Controller.AppendLog("illegal module instance", Avalonia.Media.Colors.Red);
                         return;
                     }
-                    if (moduleInstantiation.LastIndexReference == null) return;
 
-                    CodeEditor2.Controller.CodeEditor.SetCaretPosition(moduleInstantiation.BeginIndexReference.Indexes.Last());
-                    document.Replace(
-                        moduleInstantiation.BeginIndexReference.Indexes.Last(),
-                        moduleInstantiation.LastIndexReference.Indexes.Last() - moduleInstantiation.BeginIndexReference.Indexes.Last() + 1,
-                        0,
-                        moduleString
-                        );
+                    int start = moduleInstantiation.BeginIndexReference.Indexes[moduleInstantiation.BeginIndexReference.Indexes.Count - 1];
+                    int last = moduleInstantiation.LastIndexReference.Indexes[moduleInstantiation.LastIndexReference.Indexes.Count - 1];
+                    CodeEditor2.Controller.CodeEditor.SetCaretPosition(start);
+                    document.Replace(start, last - start + 1, 0, moduleString);
                     CodeEditor2.Controller.CodeEditor.SetSelection(document.CaretIndex, document.CaretIndex);
                     CodeEditor2.Controller.CodeEditor.EntryParse();
                 });
@@ -170,38 +153,14 @@ namespace pluginVerilog.Verilog.Snippets
                 _currentTask = null;
                 await CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippetAsync();
             }
-            return;
         }
-
-        // UI thread handler ------------------------------------------------------
 
         public override void Aborted()
         {
-            if (_cts != null) _cts.Cancel();
+            _cts?.Cancel();
             CodeEditor2.Controller.CodeEditor.PostClearHighlight();
             document = null;
             base.Aborted();
         }
-
-        public override void KeyDown(object? sender, KeyEventArgs e, PopupMenuView popupMenuView)
-        {
-        }
-        public override void BeforeKeyDown(object? sender, TextInputEventArgs e, CodeEditor2.Views.PopupMenuView popupMenuView)
-        {
-        }
-        public override void AfterKeyDown(object? sender, TextInputEventArgs e, CodeEditor2.Views.PopupMenuView popupMenuView)
-        {
-        }
-        public override void AfterAutoCompleteHandled(CodeEditor2.Views.PopupMenuView popupMenuView)
-        {
-        }
-
-        // return @ carlet line changed
-        public override void Caret_PositionChanged(object? sender, EventArgs e)
-        {
-
-        }
-
     }
 }
-

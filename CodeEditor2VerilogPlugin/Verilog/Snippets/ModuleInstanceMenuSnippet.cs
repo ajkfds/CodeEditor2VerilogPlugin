@@ -1,40 +1,32 @@
-using CodeEditor2.CodeEditor.PopupMenu;
-using System;
-using System.Collections.Generic;
-using System.Reflection;
-
+using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Snippets
 {
-    public class ModuleInstanceMenuSnippet : ToolItem
+    /// <summary>
+    /// The editor's "moduleInstance" tool: lists every module of the project so
+    /// the user can pick one to instantiate.
+    ///
+    /// <para>
+    /// The candidate list and the instantiation text both come from
+    /// <see cref="CoreBridge.SnippetAdapter"/>, and <see cref="SnippetRunner"/>
+    /// shows the picker, so this tool is the same two step flow the VS Code
+    /// extension uses (ask without an argument, get candidates, ask again with
+    /// the chosen name). Keeping the list here would duplicate that logic.
+    /// </para>
+    /// </summary>
+    public class ModuleInstanceMenuSnippet : CodeEditor2.Snippets.InteractiveSnippet
     {
-        public ModuleInstanceMenuSnippet() : base("moduleInstance")
+        public ModuleInstanceMenuSnippet() : base(CoreBridge.ToolMenuCatalog.ToolId.ModuleInstance)
         {
-            IconImage = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
+            IconImage = Global.Icons.TryGetSvgBitmap(
                     "CodeEditor2/Assets/Icons/wrench.svg",
                     Plugin.ThemeColor
                     );
         }
 
-
-        public override async System.Threading.Tasks.Task ApplyAsync()
+        public override Task ApplyAsync()
         {
-            CodeEditor2.Data.TextFile? textFile = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync();
-            if (textFile == null) return;
-
-            List<ToolItem> items = new List<ToolItem>();
-
-            CodeEditor2.Data.Project project = textFile.Project;
-            ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
-            if (projectProperty == null) throw new Exception();
-
-            List<string> moduleNames = projectProperty.DefinitionNameSpace.GetNameList((x) => { return (x is Verilog.BuildingBlocks.Module); });
-            foreach (string moduleName in moduleNames)
-            {
-                items.Add(new ModuleInstanceSnippet(moduleName));
-            }
-
-            CodeEditor2.Controller.CodeEditor.ForceOpenCustomSelection(items);
+            return new SnippetRunner(CoreBridge.ToolMenuCatalog.ToolId.ModuleInstance).ApplyAsync();
         }
     }
 }

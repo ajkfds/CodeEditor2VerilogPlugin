@@ -48,6 +48,27 @@ namespace pluginVerilog.CoreBridge
 
             /// <summary>VS Code snippet text (<c>${1:name}</c> tab stops).</summary>
             public string SnippetText { get; init; } = "";
+
+            /// <summary>
+            /// The same snippet as plain text with every field's default inlined.
+            /// The desktop editor inserts this and highlights
+            /// <see cref="Fields"/>; the VS Code extension inserts
+            /// <see cref="SnippetText"/>. Both come from one
+            /// <see cref="SnippetTemplate"/>, so they cannot drift.
+            /// </summary>
+            public string PlainText { get; init; } = "";
+
+            /// <summary>
+            /// Where the editable fields sit inside <see cref="PlainText"/>
+            /// (empty for snippets without fields).
+            /// </summary>
+            public IReadOnlyList<SnippetField> Fields { get; init; } = Array.Empty<SnippetField>();
+
+            /// <summary>
+            /// <c>true</c> when the snippet has tab stops, i.e. the user is
+            /// expected to fill something in.
+            /// </summary>
+            public bool HasFields => Fields.Count > 0;
         }
 
         /// <summary>Result of a snippet request.</summary>
@@ -99,7 +120,7 @@ namespace pluginVerilog.CoreBridge
         /// <param name="selectionStart">Selection start (for <c>portInvert</c>).</param>
         /// <param name="selectionEnd">Selection end, exclusive (for <c>portInvert</c>).</param>
         public static SnippetResult GetSnippets(
-            Data.VerilogFile file,
+            Data.IVerilogRelatedFile file,
             Verilog.ParsedDocument parsedDocument,
             int index,
             string name,
@@ -152,6 +173,16 @@ namespace pluginVerilog.CoreBridge
         /// The editor's "alwaysFF" snippet: an <c>always @(posedge clk or
         /// negedge rst)</c> block with the clock / reset taken from the ports
         /// the parser marked as clock / reset (SyncContext).
+        ///
+        /// <para>
+        /// The clock and reset are real tab stops (not baked-in text) so the
+        /// user can pick a different one: several annotated clocks / resets
+        /// become a choice list (<c>${1|CLK_I,CLK2_I|}</c> in VS Code, the
+        /// popup the desktop editor already opened). The <c>if(~reset)</c> is a
+        /// <b>mirror</b> of the reset tab stop, so editing one updates the
+        /// other - the desktop editor used to copy the text with a background
+        /// task and the VS Code extension could not do it at all.
+        /// </para>
         /// </summary>
         private static void BuildAlwaysFF(
             Verilog.ParsedDocument parsedDocument,
@@ -160,38 +191,53 @@ namespace pluginVerilog.CoreBridge
         {
             string indent = GetIndent(parsedDocument, index);
 
-            string clock = "clock";
-            string reset = "reset_x";
-
+            List<string> clocks = new();
+            List<string> resets = new();
             Verilog.BuildingBlocks.BuildingBlock? block = parsedDocument.GetBuildingBlockAt(index);
             if (block is Verilog.IPortNameSpace portNameSpace)
             {
                 foreach (Verilog.DataObjects.Port port in portNameSpace.PortsList)
                 {
                     if (port.DataObject == null) continue;
-                    if (port.DataObject.SyncContext.IsClock && clock == "clock") clock = port.Name;
-                    if (port.DataObject.SyncContext.IsReset && reset == "reset_x") reset = port.Name;
+                    if (port.DataObject.SyncContext.IsClock && !clocks.Contains(port.Name)) clocks.Add(port.Name);
+                    if (port.DataObject.SyncContext.IsReset && !resets.Contains(port.Name)) resets.Add(port.Name);
                 }
             }
 
-            StringBuilder sb = new StringBuilder();
-            sb.Append(indent).Append("always @(posedge ").Append(clock).Append(" or negedge ").Append(reset).Append(")\n");
-            sb.Append(indent).Append("begin\n");
-            sb.Append(indent).Append("\tif(~").Append(reset).Append(") begin\n");
-            sb.Append(indent).Append("\t\t${1}\n");
-            sb.Append(indent).Append("\tend else begin\n");
-            sb.Append(indent).Append("\t\t${2}\n");
-            sb.Append(indent).Append("\tend\n");
-            sb.Append(indent).Append("end");
+            SnippetTemplate template = new SnippetTemplate();
+            template.AppendText(indent + "always @(posedge ");
+            template.AddField("clock", clocks.Count > 0 ? clocks[0] : "clock", clocks);
+            template.AppendText(" or negedge ");
+            int resetField = template.AddField("reset", resets.Count > 0 ? resets[0] : "reset_x", resets);
+            template.AppendText(")\n");
+            template.AppendText(indent + "begin\n");
+            template.AppendText(indent + "\tif(~");
+            template.AddMirror(resetField);
+            template.AppendText(") begin\n");
+            template.AppendText(indent + "\t\t");
+            template.AddField("reset-branch", "");
+            template.AppendText("\n");
+            template.AppendText(indent + "\tend else begin\n");
+            template.AppendText(indent + "\t\t");
+            template.AddField("else-branch", "");
+            template.AppendText("\n");
+            template.AppendText(indent + "\tend\n");
+            template.AppendText(indent + "end");
+
+            List<SnippetField> fields = new();
+            string plainText = template.ToPlainText(fields);
 
             result.Snippets.Add(new SnippetEntry
             {
                 Label = "alwaysFF",
-                Detail = "always @(posedge " + clock + " or negedge " + reset + ")",
+                Detail = "always @(posedge " + (clocks.Count > 0 ? clocks[0] : "clock")
+                    + " or negedge " + (resets.Count > 0 ? resets[0] : "reset_x") + ")",
                 Kind = SnippetKind.Insert,
                 Start = index,
                 End = index,
-                SnippetText = sb.ToString(),
+                SnippetText = template.ToVscodeSnippet(),
+                Fields = fields,
+                PlainText = plainText,
             });
         }
 
@@ -254,6 +300,10 @@ namespace pluginVerilog.CoreBridge
                 Start = start,
                 End = end,
                 SnippetText = text,
+                // No tab stops: the reformatted text is literal (any '$' or
+                // '}' in a port expression must not be read as snippet syntax),
+                // so the plain text is what both hosts insert.
+                PlainText = text,
             });
         }
 
@@ -307,30 +357,35 @@ namespace pluginVerilog.CoreBridge
             }
 
             string indent = GetIndent(parsedDocument, index);
-            StringBuilder sb = new StringBuilder();
-            sb.Append(indent).Append("modport ${1:modportname} (\n");
+            SnippetTemplate template = new SnippetTemplate();
+            template.AppendText(indent + "modport ");
+            template.AddField("modport-name", "modportname");
+            template.AppendText(" (\n");
             bool first = true;
             foreach (KeyValuePair<string, Verilog.ModPort.Port.DirectionEnum> entry in directions)
             {
-                if (!first) sb.Append(",\n");
-                sb.Append(indent).Append("\t");
+                if (!first) template.AppendText(",\n");
+                template.AppendText(indent + "\t");
                 switch (entry.Value)
                 {
                     case Verilog.ModPort.Port.DirectionEnum.Input:
-                        sb.Append("input");
+                        template.AppendText("input");
                         break;
                     case Verilog.ModPort.Port.DirectionEnum.Inout:
-                        sb.Append("inout");
+                        template.AppendText("inout");
                         break;
                     default:
-                        sb.Append("output");
+                        template.AppendText("output");
                         break;
                 }
-                sb.Append("\t.").Append(entry.Key);
+                template.AppendText("\t." + entry.Key);
                 first = false;
             }
-            if (!first) sb.Append("\n");
-            sb.Append(indent).Append(")");
+            if (!first) template.AppendText("\n");
+            template.AppendText(indent + ")");
+
+            List<SnippetField> fields = new();
+            string plainText = template.ToPlainText(fields);
 
             result.Snippets.Add(new SnippetEntry
             {
@@ -339,7 +394,9 @@ namespace pluginVerilog.CoreBridge
                 Kind = SnippetKind.Insert,
                 Start = index,
                 End = index,
-                SnippetText = sb.ToString(),
+                SnippetText = template.ToVscodeSnippet(),
+                PlainText = plainText,
+                Fields = fields,
             });
         }
 
@@ -352,14 +409,13 @@ namespace pluginVerilog.CoreBridge
         /// names are returned so the host can show a picker.
         /// </summary>
         private static void BuildModuleInstance(
-            Data.VerilogFile file,
+            Data.IVerilogRelatedFile file,
             Verilog.ParsedDocument parsedDocument,
             int index,
             string? moduleName,
             SnippetResult result)
         {
-            ProjectProperty? projectProperty =
-                file.Project?.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+            ProjectProperty? projectProperty = file.ProjectProperty;
             if (projectProperty == null)
             {
                 result.Message = "the project has no Verilog property";
@@ -387,7 +443,10 @@ namespace pluginVerilog.CoreBridge
 
             string instanceName = MakeUniqueInstanceName(parsedDocument, index, moduleName);
             string indent = GetIndent(parsedDocument, index);
-            string text = BuildInstantiationText(module, instanceName, indent, null);
+            SnippetTemplate template = BuildInstantiationTemplate(module, instanceName, indent, null);
+
+            List<SnippetField> fields = new();
+            string plainText = template.ToPlainText(fields);
 
             result.Snippets.Add(new SnippetEntry
             {
@@ -396,7 +455,9 @@ namespace pluginVerilog.CoreBridge
                 Kind = SnippetKind.Insert,
                 Start = index,
                 End = index,
-                SnippetText = text,
+                SnippetText = template.ToVscodeSnippet(),
+                PlainText = plainText,
+                Fields = fields,
             });
         }
 
@@ -433,7 +494,10 @@ namespace pluginVerilog.CoreBridge
             int start = LastIndex(instantiation.BeginIndexReference);
             int end = LastIndex(instantiation.LastIndexReference) + 1;
             string indent = GetIndent(parsedDocument, start);
-            string text = BuildInstantiationText(module, instantiation.Name, indent, instantiation);
+            SnippetTemplate template = BuildInstantiationTemplate(module, instantiation.Name, indent, instantiation);
+
+            List<SnippetField> fields = new();
+            string plainText = template.ToPlainText(fields);
 
             result.Snippets.Add(new SnippetEntry
             {
@@ -442,7 +506,9 @@ namespace pluginVerilog.CoreBridge
                 Kind = SnippetKind.Replace,
                 Start = start,
                 End = end,
-                SnippetText = text,
+                SnippetText = template.ToVscodeSnippet(),
+                PlainText = plainText,
+                Fields = fields,
             });
         }
 
@@ -486,6 +552,9 @@ namespace pluginVerilog.CoreBridge
                 Start = selectionStart,
                 End = selectionEnd,
                 SnippetText = text,
+                // Literal replacement: the inverted declarations contain no tab
+                // stops, so both hosts insert the same text.
+                PlainText = text,
             });
         }
 
@@ -561,81 +630,79 @@ namespace pluginVerilog.CoreBridge
         /// accepting the snippet silently wired the port to a signal that may
         /// not exist. The blank tab stop matches the editor.
         /// </remarks>
-        private static string BuildInstantiationText(
+        private static SnippetTemplate BuildInstantiationTemplate(
             Verilog.BuildingBlocks.Module module,
             string instanceName,
             string indent,
             Verilog.Items.ModuleInstantiation? existing)
         {
-            StringBuilder sb = new StringBuilder();
-            int tabStop = 1;
+            SnippetTemplate template = new SnippetTemplate();
 
-            sb.Append(module.Name).Append(" ");
+            template.AppendText(module.Name + " ");
             if (module.PortParameterNameList.Count > 0)
             {
-                sb.Append("#(\n");
+                template.AppendText("#(\n");
                 bool firstParam = true;
                 foreach (string paramName in module.PortParameterNameList)
                 {
-                    if (!firstParam) sb.Append(",\n");
-                    sb.Append(indent).Append("\t.").Append(paramName).Append("\t( ");
+                    if (!firstParam) template.AppendText(",\n");
+                    template.AppendText(indent + "\t." + paramName + "\t( ");
                     if (existing != null && existing.ParameterOverrides.TryGetValue(paramName, out var over))
                     {
-                        sb.Append(over.CreateString());
+                        template.AppendText(over.CreateString());
                     }
                     else if (module.NamedElements.TryGetValue(paramName, out var element)
                              && element is Verilog.DataObjects.Constants.Constants constant
                              && constant.Expression != null)
                     {
-                        sb.Append(constant.Expression.CreateString());
+                        template.AppendText(constant.Expression.CreateString());
                     }
-                    sb.Append(" )");
+                    template.AppendText(" )");
                     firstParam = false;
                 }
-                sb.Append("\n").Append(indent).Append(") ");
+                template.AppendText("\n" + indent + ") ");
             }
 
-            // The editor's snippet makes the instance name the FIRST tab stop
-            // (`{0}` in getReplaceText, prefilled with the generated name) so
-            // the user can rename it straight away. Keep that, and start the
-            // port tab stops after it.
-            sb.Append("${1:").Append(instanceName).Append("} (\n");
-            tabStop = 2;
+            // The instance name is the FIRST tab stop (prefilled with the
+            // generated name) so the user can rename it straight away; the port
+            // tab stops start after it. Same ordering as the desktop editor.
+            template.AppendText("");
+            template.AddField("instance-name", instanceName);
+            template.AppendText(" (\n");
 
             bool firstPort = true;
             string? portGroupName = null;
             foreach (Verilog.DataObjects.Port port in module.Ports.Values)
             {
-                if (!firstPort) sb.Append(",\n");
+                if (!firstPort) template.AppendText(",\n");
 
                 if (port.PortGroupName != portGroupName)
                 {
                     portGroupName = port.PortGroupName;
                     if (!string.IsNullOrEmpty(portGroupName))
                     {
-                        sb.Append(indent).Append("// ").Append(portGroupName).Append("\n");
+                        template.AppendText(indent + "// " + portGroupName + "\n");
                     }
                 }
 
-                sb.Append(indent).Append("\t.").Append(port.Name).Append("\t( ");
+                template.AppendText(indent + "\t." + port.Name + "\t( ");
                 if (existing != null && existing.PortConnection.TryGetValue(port.Name, out var connection))
                 {
-                    sb.Append(connection.CreateString());
+                    template.AppendText(connection.CreateString());
                 }
                 else
                 {
                     // Blank tab stop: the editor leaves the connection empty
                     // instead of guessing a signal name (see the remarks on
                     // BuildInstantiationText).
-                    sb.Append("${").Append(tabStop).Append("}");
-                    tabStop++;
+                    template.AddField(port.Name, "");
                 }
-                sb.Append(" )");
+                template.AppendText(" )");
                 firstPort = false;
             }
-            if (!firstPort) sb.Append("\n");
-            sb.Append(indent).Append(");");
-            return sb.ToString();
+            if (!firstPort) template.AppendText("\n");
+            template.AppendText(indent + ");");
+            return template;
         }
 
         /// <summary>

@@ -1,15 +1,23 @@
-using Avalonia.Input;
-using CodeEditor2.CodeEditor;
-using CodeEditor2.Views;
-using pluginVerilog.Verilog.BuildingBlocks;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Snippets
 {
+    /// <summary>
+    /// The editor's "moduleInstance" snippet for one named module: the full
+    /// instantiation (parameter overrides + one named port connection per
+    /// port).
+    ///
+    /// <para>
+    /// The text comes from <see cref="CoreBridge.SnippetAdapter"/>, which the
+    /// VS Code extension also uses (through <c>rtl/snippet</c> and the
+    /// completion adapter), so the editor and the extension insert the same
+    /// instantiation. This class only carries the module name.
+    /// </para>
+    /// </summary>
     public class ModuleInstanceSnippet : CodeEditor2.Snippets.InteractiveSnippet
     {
+        private readonly string moduleName;
+
         public ModuleInstanceSnippet(string moduleName) : base(moduleName)
         {
             this.moduleName = moduleName;
@@ -26,219 +34,9 @@ namespace pluginVerilog.Verilog.Snippets
                     );
         }
 
-
-        // initial value for {n}
-        private List<string> initials = new List<string> { };
-
-        private CodeDocument? codeDocument;
-        private CodeEditor2.Data.TextFile? textFile;
-        private string moduleName;
-
-        public override async System.Threading.Tasks.Task ApplyAsync()
+        public override Task ApplyAsync()
         {
-            CodeEditor2.Data.TextFile? textFile = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync();
-            if (textFile == null) return;
-            codeDocument = textFile.CodeDocument;
-
-            CodeEditor2.Data.Project project = textFile.Project;
-            if (codeDocument == null) return;
-            Data.IVerilogRelatedFile? file = codeDocument.TextFile as Data.IVerilogRelatedFile;
-            if (file == null) return;
-            Verilog.ParsedDocument? parsedDocument = file.VerilogParsedDocument;
-            if (parsedDocument == null) return;
-
-            Data.VerilogCommon.AutoComplete.GetAutoCompleteTarget(
-                file, parsedDocument, codeDocument.CaretIndex,
-                out Verilog.NameSpace? nameSpace,
-                out Verilog.INamedElement? namedElement,
-                out string cantidate,
-                out int cantidateIndex);
-
-            // delete after last .
-//            codeDocument.Replace(cantidateIndex, cantidate.Length, ColorIndex, Text);
-//            CodeEditor2.Controller.CodeEditor.SetCaretPosition(cantidateIndex + Text.Length);
-
-//            CodeEditor2.Controller.CodeEditor.AutoCompleteHandled();
-//            return;
-
-
-
-
-            ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
-            if (projectProperty == null) return;
-
-            Data.VerilogFile? targetFile = projectProperty.DefinitionNameSpace.GetFile(moduleName) as Data.VerilogFile;
-            if (targetFile == null) return;
-
-            string instanceName = moduleName + "_";
-            {
-                Data.IVerilogRelatedFile? vFile = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync() as Data.IVerilogRelatedFile;
-                if (vFile == null) return;
-
-                ParsedDocument? parentParsedDocument = vFile.VerilogParsedDocument;
-                if (parentParsedDocument == null) return;
-                if (vFile == null) return;
-                if (vFile.CodeDocument == null) return;
-
-                int line = vFile.CodeDocument.GetLineAt(vFile.CodeDocument.CaretIndex);
-                int lineStartIndex = vFile.CodeDocument.GetLineStartIndex(line);
-                BuildingBlock? module = parentParsedDocument.GetBuildingBlockAt(lineStartIndex);
-                if (module == null) return;
-
-                int instanceCount = 0;
-                while (module.NamedElements.ContainsIBuldingBlockInstantiation(moduleName + "_" + instanceCount.ToString()))
-                {
-                    instanceCount++;
-                }
-                instanceName = moduleName + "_" + instanceCount.ToString();
-            }
-
-            Verilog.ParsedDocument? targetParsedDocument = targetFile.ParsedDocument as Verilog.ParsedDocument;
-            if (targetParsedDocument == null) return;
-
-            Module? targetModule = targetParsedDocument.Root.BuildingBlocks[moduleName] as Module;
-            if (targetModule == null) return;
-
-            string replaceText = getReplaceText(targetModule, instanceName);
-
-            codeDocument.Replace(cantidateIndex, cantidate.Length, 0, "");
-            int index = cantidateIndex;
-
-            if (initials.Count == 0)
-            {
-                codeDocument.Replace(index,0, 0, replaceText);
-                CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
-            }
-            else
-            {
-                for (int i = 0; i < initials.Count; i++)
-                {
-                    string target = "{" + i.ToString() + "}";
-                    if (!replaceText.Contains(target)) break;
-                    startIndexes.Add(index + replaceText.IndexOf(target));
-                    lastIndexes.Add(index + replaceText.IndexOf(target) + initials[i].Length - 1);
-                    replaceText = replaceText.Replace(target, initials[i]);
-                }
-
-                codeDocument.Replace(index, 0, 0, replaceText);
-                CodeEditor2.Controller.CodeEditor.SetCaretPosition(startIndexes[0]);
-                CodeEditor2.Controller.CodeEditor.SetSelection(startIndexes[0], lastIndexes[0] + 1);
-
-                CodeEditor2.Controller.CodeEditor.PostClearHighlight();
-                for (int i = 0; i < startIndexes.Count; i++)
-                {
-                    CodeEditor2.Controller.CodeEditor.AppendHighlight(startIndexes[i], lastIndexes[i]);
-                }
-            }
-
-            await base.ApplyAsync();
+            return new SnippetRunner(CoreBridge.ToolMenuCatalog.ToolId.ModuleInstance, moduleName).ApplyAsync();
         }
-
-
-
-
-        public override void Aborted()
-        {
-            CodeEditor2.Controller.CodeEditor.PostClearHighlight();
-            codeDocument = null;
-            textFile = null;
-            base.Aborted();
-        }
-
-        private List<int> startIndexes = new List<int>();
-        private List<int> lastIndexes = new List<int>();
-
-        public override void KeyDown(object? sender, KeyEventArgs e, PopupMenuView popupMenuView)
-        {
-            // overrider return & escape
-            if (!CodeEditor2.Controller.CodeEditor.IsPopupMenuOpened)
-            {
-                if (e.Key == Key.Return || e.Key == Key.Escape)
-                {
-                    bool moved;
-                    moveToNextHighlight(out moved);
-                    if (!moved) CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
-                    e.Handled = true;
-                }
-            }
-        }
-
-        public override void AfterKeyDown(object? sender, TextInputEventArgs e, CodeEditor2.Views.PopupMenuView popupMenuView)
-        {
-
-        }
-
-        public override void AfterAutoCompleteHandled(CodeEditor2.Views.PopupMenuView popupMenuView)
-        {
-            if (codeDocument == null) return;
-            int i = CodeEditor2.Controller.CodeEditor.GetHighlightIndex(codeDocument.CaretIndex);
-            switch (i)
-            {
-                default:
-                    CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
-                    break;
-            }
-        }
-
-        private void moveToNextHighlight(out bool moved)
-        {
-            moved = false;
-            if (codeDocument == null) return;
-            int i = CodeEditor2.Controller.CodeEditor.GetHighlightIndex(codeDocument.CaretIndex);
-            if (i == -1) return;
-            i++;
-            if (i >= initials.Count) return;
-
-            CodeEditor2.Controller.CodeEditor.SelectHighlight(i);
-            moved = true;
-        }
-
-        private void ApplyTool(object sender, EventArgs e)
-        {
-
-        }
-
-
-        private string getReplaceText(Module module, string instanceName)
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append(module.Name);
-            sb.Append(" ");
-            if (module.PortParameterNameList.Count > 0)
-            {
-                sb.Append("#(\r\n");
-                bool first = true;
-                foreach (string portName in module.PortParameterNameList)
-                {
-                    if (!first) sb.Append(",\r\n");
-                    sb.Append("\t");
-                    sb.Append(".");
-                    sb.Append(portName);
-                    sb.Append("\t( ");
-                    sb.Append(" )");
-                    first = false;
-                }
-                sb.Append("\r\n) ");
-            }
-
-            sb.Append("{0}");
-            initials.Add(instanceName);
-
-            sb.Append(" (\r\n");
-            int j = 0;
-            foreach (Verilog.DataObjects.Port port in module.Ports.Values)
-            {
-                sb.Append("\t.");
-                sb.Append(port.Name);
-                sb.Append("\t(  )");
-                if (j != module.Ports.Count - 1) sb.Append(",");
-                sb.Append("\r\n");
-                j++;
-            }
-            sb.Append(");");
-
-            return sb.ToString();
-        }
-
     }
 }

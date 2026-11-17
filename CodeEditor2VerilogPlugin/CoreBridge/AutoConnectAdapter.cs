@@ -131,10 +131,16 @@ namespace pluginVerilog.CoreBridge
 
         /// <summary>
         /// Signals of the enclosing module that match <paramref name="port"/>,
-        /// best match first. Same rule as the editor's
-        /// <c>AutoConnectWindow.ConnectionItem.GetCantidates</c>.
+        /// best match first.
+        ///
+        /// <para>
+        /// This is the <b>only</b> implementation of the rule. The desktop
+        /// editor's <c>AutoConnectWindow.ConnectionItem.GetCantidates</c> calls
+        /// it too, so the two hosts can never offer different candidates
+        /// (previously each kept its own copy and they drifted).
+        /// </para>
         /// </summary>
-        private static List<string> GetCandidates(
+        public static List<string> GetCandidates(
             Verilog.DataObjects.Port port,
             Verilog.BuildingBlocks.BuildingBlock enclosing)
         {

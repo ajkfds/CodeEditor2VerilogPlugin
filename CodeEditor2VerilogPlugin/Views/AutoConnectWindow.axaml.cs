@@ -272,46 +272,19 @@ namespace pluginVerilog.Views
                 ColorLabel.AppendToTextBlock(TextBlock);
             }
 
-            private List<string> removePortSuffixs = new List<string>() { "_I", "_O", "_IO" };
-
             private List<ColorLabel> GetCantidates()
             {
-                List<(int, ColorLabel)> cantidates = new List<(int, ColorLabel)>();
-
-                foreach (var namedElement in BuildingBlock.NamedElements)
-                {
-                    string portName = Port.Name;
-
-                    if (namedElement.Name.ToLower() == portName.ToLower())
-                    {
-                        ColorLabel label = new ColorLabel();
-                        label.AppendText(namedElement.Name, Avalonia.Media.Colors.Red);
-                        cantidates.Add((0, label));
-                        continue;
-                    }
-
-                    foreach (string removePortSuffix in removePortSuffixs)
-                    {
-                        if (Port.Name.EndsWith(removePortSuffix))
-                        {
-                            portName = Port.Name.Substring(0, Port.Name.Length - removePortSuffix.Length);
-
-                            if (namedElement.Name.ToLower() == portName.ToLower())
-                            {
-                                ColorLabel label = new ColorLabel();
-                                label.AppendText(namedElement.Name, Avalonia.Media.Colors.Red);
-                                cantidates.Add((0, label));
-                                continue;
-                            }
-                        }
-                    }
-                }
-
+                // The matching rule lives in CoreBridge.AutoConnectAdapter so
+                // the desktop editor and the VS Code webview (rtl/autoConnect)
+                // offer exactly the same candidates. Keeping a copy here made
+                // the two drift whenever one side was fixed.
                 List<ColorLabel> colorLabels = new List<ColorLabel>();
-                colorLabels = cantidates
-                    .OrderBy(c => c.Item1)
-                    .Select(c => c.Item2)
-                    .ToList();
+                foreach (string candidate in CoreBridge.AutoConnectAdapter.GetCandidates(Port, BuildingBlock))
+                {
+                    ColorLabel label = new ColorLabel();
+                    label.AppendText(candidate, Avalonia.Media.Colors.Red);
+                    colorLabels.Add(label);
+                }
                 return colorLabels;
             }
 

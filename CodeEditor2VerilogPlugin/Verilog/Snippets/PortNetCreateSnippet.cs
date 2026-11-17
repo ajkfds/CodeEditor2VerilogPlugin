@@ -1,225 +1,26 @@
-using CodeEditor2.CodeEditor;
-using CodeEditor2.CodeEditor.PopupMenu;
-using pluginVerilog.Verilog.BuildingBlocks;
-using pluginVerilog.Verilog.DataObjects.Nets;
-using pluginVerilog.Verilog.Items;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Snippets
 {
-    public class PortConnectionCreateSnippet : ToolItem
+    /// <summary>
+    /// The editor's "portConnectionCreate" tool: rewrites the instantiation
+    /// under the caret with one named connection per port. The text comes from
+    /// <see cref="CoreBridge.SnippetAdapter"/> (shared with the VS Code
+    /// extension); <see cref="SnippetRunner"/> inserts it and walks the fields.
+    /// </summary>
+    public class PortConnectionCreateSnippet : CodeEditor2.Snippets.InteractiveSnippet
     {
-        public PortConnectionCreateSnippet() : base("portConnectionCreate")
+        public PortConnectionCreateSnippet() : base(CoreBridge.ToolMenuCatalog.ToolId.PortConnectionCreate)
         {
-            IconImage = AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
+            IconImage = Global.Icons.TryGetSvgBitmap(
                     "CodeEditor2/Assets/Icons/wrench.svg",
                     Plugin.ThemeColor
                     );
         }
 
-        public override async System.Threading.Tasks.Task ApplyAsync()
+        public override Task ApplyAsync()
         {
-            CodeEditor2.Data.TextFile? file = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync();
-            if (file == null) return;
-            CodeEditor2.CodeEditor.CodeDocument? codeDocument = file.CodeDocument;
-            if (codeDocument == null) return;
-
-            CodeEditor2.Data.ITextFile? iText = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync();
-
-            if (!(iText is Data.IVerilogRelatedFile)) return;
-            Data.IVerilogRelatedFile? vFile = iText as Data.IVerilogRelatedFile;
-            if (vFile == null) return;
-
-            ParsedDocument? parsedDocument = vFile.VerilogParsedDocument;
-            if (parsedDocument == null) return;
-
-            int index = codeDocument.CaretIndex;
-            IndexReference iref = IndexReference.Create(parsedDocument.IndexReference, index);
-
-            BuildingBlock? buildingBlock = parsedDocument.GetBuildingBlockAt(index);
-            if (buildingBlock == null) return;
-
-            List<IBuildingBlockInstantiation> buildingBlockInstantiations = buildingBlock.GetBuildingBlockInstantiations();
-            foreach (var instance in buildingBlockInstantiations)
-            {
-                ModuleInstantiation? moduleInstantiation = instance as ModuleInstantiation;
-                if (moduleInstantiation == null) continue;
-
-                if (iref.IsSmallerThan(moduleInstantiation.BeginIndexReference)) continue;
-                if (moduleInstantiation.LastIndexReference == null || iref.IsGreaterThan(moduleInstantiation.LastIndexReference)) continue;
-
-                await writeModuleInstanceAsync(codeDocument, index, moduleInstantiation);
-                return;
-            }
-        }
-
-        private async System.Threading.Tasks.Task writeModuleInstanceAsync(CodeDocument codeDocument, int index, Items.ModuleInstantiation moduleInstantiation)
-        {
-            CodeEditor.CodeDocument? vCodeDocument = codeDocument as CodeEditor.CodeDocument;
-            if (vCodeDocument == null) return;
-            if (moduleInstantiation.LastIndexReference == null) return;
-            CodeEditor2.Data.ITextFile? iText = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync();
-            if (iText == null) return;
-            ProjectProperty? projectProperty = iText.Project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
-            if (projectProperty == null) return;
-
-            string indent = vCodeDocument.GetIndentString(index);
-
-            CodeEditor2.Controller.CodeEditor.SetCaretPosition(moduleInstantiation.BeginIndexReference.Indexes.Last());
-            codeDocument.Replace(
-                moduleInstantiation.BeginIndexReference.Indexes.Last(),
-                moduleInstantiation.LastIndexReference.Indexes.Last() - moduleInstantiation.BeginIndexReference.Indexes.Last() + 1,
-                0,
-                CreateString(moduleInstantiation, "\t", projectProperty)
-                );
-            CodeEditor2.Controller.CodeEditor.SetSelection(codeDocument.CaretIndex, codeDocument.CaretIndex);
-            CodeEditor2.Controller.CodeEditor.RequestReparsePost();
-        }
-
-        public List<string> RemoveSuffixList = new List<string> { "_I", "_O", "_IO" };
-
-        private string CreateString(Verilog.Items.ModuleInstantiation moduleInstantiation, string indent, ProjectProperty projectProperty)
-        {
-            Module? instancedModule = moduleInstantiation.GetInstancedBuildingBlock() as Module;
-            //            Module? instancedModule = projectProperty.GetBuildingBlock(moduleInstantiation.SourceName) as Module;
-            if (instancedModule == null) return "";
-            StringBuilder sbDefine = new StringBuilder();
-
-
-            StringBuilder sb = new StringBuilder();
-            bool first;
-
-            sb.Append(moduleInstantiation.SourceName);
-            if (moduleInstantiation.ModuleNameComment != null && moduleInstantiation.ModuleNameComment != "")
-            {
-                sb.Append(moduleInstantiation.ModuleNameComment);
-            }
-            else
-            {
-                sb.Append(" ");
-            }
-
-            if (instancedModule.PortParameterNameList.Count != 0)
-            {
-                sb.Append("#(\r\n");
-
-                first = true;
-                foreach (var paramName in instancedModule.PortParameterNameList)
-                {
-                    if (!first) sb.Append(",\r\n");
-                    sb.Append(indent);
-                    sb.Append(".");
-                    sb.Append(paramName);
-                    sb.Append("\t( ");
-                    if (moduleInstantiation.ParameterOverrides.ContainsKey(paramName))
-                    {
-                        sb.Append(moduleInstantiation.ParameterOverrides[paramName].CreateString());
-                    }
-                    else
-                    {
-                        if (
-                            instancedModule.NamedElements.ContainsKey(paramName) &&
-                            instancedModule.NamedElements[paramName] is DataObjects.Constants.Constants &&
-                            ((DataObjects.Constants.Constants)instancedModule.NamedElements[paramName]).Expression != null
-                            )
-                        {
-                            sb.Append(((DataObjects.Constants.Constants)instancedModule.NamedElements[paramName]).Expression.CreateString());
-                        }
-                    }
-                    sb.Append(" )");
-                    first = false;
-                }
-                sb.Append("\r\n) ");
-            }
-
-            sb.Append(moduleInstantiation.Name);
-            sb.Append(" (\r\n");
-
-            first = true;
-            string? portGroupName = null;
-            foreach (var port in instancedModule.Ports.Values)
-            {
-                if (!first) sb.Append(",\r\n");
-
-                if (port.PortGroupName != portGroupName)
-                {
-                    portGroupName = port.PortGroupName;
-                    sb.Append("// ");
-                    sb.Append(portGroupName);
-                    sb.Append("\r\n");
-                }
-                sb.Append(indent);
-                sb.Append(".");
-                sb.Append(port.Name);
-                sb.Append("\t");
-                sb.Append("( ");
-                if (moduleInstantiation.PortConnection.ContainsKey(port.Name))
-                {
-                    sb.Append(moduleInstantiation.PortConnection[port.Name].CreateString());
-                }
-                else
-                {
-                    string portName = port.Name;
-                    foreach (string removeSuffix in RemoveSuffixList)
-                    {
-                        if (portName.EndsWith(removeSuffix, StringComparison.OrdinalIgnoreCase))
-                        {
-                            portName = portName.Substring(0, portName.Length - removeSuffix.Length);
-                        }
-                    }
-
-                    string valueName = portName.ToLower();
-                    sb.Append(valueName);
-
-                    BuildingBlock? buildingBlock = moduleInstantiation.GetInstancedBuildingBlock();
-                    if (buildingBlock != null && !buildingBlock.NamedElements.ContainsKey(valueName))
-                    {
-
-
-                        if (port.DataObject != null)
-                        {
-                            if (port.DataObject is DataObjects.Nets.Net)
-                            {
-                                DataObjects.Nets.Net net = (DataObjects.Nets.Net)port.DataObject;
-                                DataObjects.Nets.Net newNet = DataObjects.Nets.Net.Create(valueName, Net.NetTypeEnum.Wire, port.DataObject.DataType.Clone());
-                                sbDefine.Append(newNet.CreateTypeString());
-                            }
-                            else if (port.DataObject is DataObjects.Variables.IntegerVectorValueVariable)
-                            {
-                                DataObjects.Variables.IntegerVectorValueVariable vector = (DataObjects.Variables.IntegerVectorValueVariable)port.DataObject;
-                                DataObjects.Nets.Net newNet = DataObjects.Nets.Net.Create(valueName, Net.NetTypeEnum.Wire, DataObjects.DataTypes.LogicType.Create(false, null));
-                                foreach (var dimension in vector.PackedDimensions)
-                                {
-                                    newNet.PackedDimensions.Add(dimension.Clone());
-                                }
-                                sbDefine.Append(newNet.CreateTypeString());
-                            }
-                            else
-                            {
-                                sbDefine.Append(port.DataObject.CreateTypeString());
-                            }
-
-
-                            sbDefine.Append("\t" + valueName);
-                            foreach (var dimension in port.DataObject.UnpackedArrays)
-                            {
-                                sbDefine.Append(dimension.CreateString());
-                            }
-                            sbDefine.Append(";\n");
-                        }
-                    }
-                }
-                sb.Append(" )");
-                first = false;
-            }
-            sb.Append("\r\n);");
-
-            sbDefine.Append(sb.ToString());
-            return sbDefine.ToString();
+            return new SnippetRunner(CoreBridge.ToolMenuCatalog.ToolId.PortConnectionCreate).ApplyAsync();
         }
     }
 }
-
