@@ -61,7 +61,14 @@ namespace pluginVerilog.Verilog.Snippets
             }
 
             CoreBridge.SnippetTemplate template = new CoreBridge.SnippetTemplate();
-            template.AppendText(indent + "always @(posedge ");
+            if (parsedDocument.SystemVerilog)
+            {
+                template.AppendText(indent + "always_ff @(posedge ");
+            }
+            else
+            {
+                template.AppendText(indent + "always @(posedge ");
+            }
             template.AddField("clock", clocks.Count > 0 ? clocks[0] : "clock", clocks);
             template.AppendText(" or negedge ");
             int resetField = template.AddField("reset", resets.Count > 0 ? resets[0] : "reset_x", resets);

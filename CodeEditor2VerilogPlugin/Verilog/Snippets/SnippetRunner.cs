@@ -43,8 +43,31 @@ namespace pluginVerilog.Verilog.Snippets
         private SnippetAdapter.SnippetEntry? entry;
         private int? checkLine;
 
+        /// <summary>
+        /// Range of the field currently being asked, or -1 when none is.
+        /// <see cref="Caret_PositionChanged"/> accepts a caret anywhere inside
+        /// it, because the snippet itself parks the caret on the highlight start
+        /// and that must not be mistaken for the user leaving the field.
+        /// </summary>
+        private int currentFieldStart = -1;
+        private int currentFieldLast = -1;
+
         private TaskCompletionSource<string>? fieldDone;
         private TaskCompletionSource<string>? choiceMade;
+
+        /// <summary>
+        /// An Enter that arrived while no field was waiting.
+        ///
+        /// <para>
+        /// The wait source is only created after the highlight has been selected
+        /// and after the candidate popup has closed, so an Enter pressed in that
+        /// window used to be swallowed: the caret sat on the highlight, the key
+        /// was marked handled (no newline) and nothing advanced until the user
+        /// pressed Enter a second time. Latching the request makes every Enter
+        /// advance, whatever the timing.
+        /// </para>
+        /// </summary>
+        private bool confirmPending;
 
         public SnippetRunner(string kind, string? argument = null) : base(kind)
         {
@@ -193,13 +216,20 @@ namespace pluginVerilog.Verilog.Snippets
                                 }
                             });
                         }
+                        // Choosing from the selector IS the confirmation of this
+                        // field: the user already pressed Enter (or clicked) in
+                        // the popup, so asking for a second Enter here made the
+                        // snippet feel stuck. Moving straight on matches the old
+                        // alwaysFF, which received AfterAutoCompleteHandled from
+                        // the popup and treated it as "moveNext".
+                        //
+                        // An abort (Escape) still ends the snippet.
+                        if (picked == null) return;
+                        await SyncMirrorsAsync();
+                        continue;
                     }
 
-                    fieldDone = new TaskCompletionSource<string>();
-                    checkLine = document == null ? null : document.GetLineAt(document.SelectionStart);
-                    string result = await fieldDone.Task;
-                    checkLine = null;
-                    fieldDone = null;
+                    string? result = await WaitForFieldAsync(fieldIndex);
                     if (result != "moveNext") return;
 
                     // Keep the mirrored fields in step as soon as this field is
@@ -220,6 +250,77 @@ namespace pluginVerilog.Verilog.Snippets
             {
                 await CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippetAsync();
             }
+        }
+
+        /// <summary>
+        /// Waits for the user to confirm the current field (Enter / Down / Tab)
+        /// or abort it (Escape / Up).
+        ///
+        /// <para>
+        /// Returns <c>moveNext</c> or <c>abort</c>. An Enter that arrived
+        /// <b>before</b> the wait started is honoured instead of being lost:
+        /// <see cref="confirmPending"/> latches it, because the field's
+        /// highlight is already selected at that point (the caret sits on the
+        /// highlight start) and the key is marked handled, so without the latch
+        /// the user had to press Enter twice.
+        /// </para>
+        /// </summary>
+        private async Task<string> WaitForFieldAsync(int fieldIndex)
+        {
+            fieldDone = new TaskCompletionSource<string>();
+
+            // Take the line from the highlight itself, not from
+            // document.SelectionStart: an empty highlight (a blank field such as
+            // alwaysFF's branches) produces AvaloniaEdit's EmptySelection, which
+            // does not update CodeDocument._selectionStart, so SelectionStart
+            // keeps the PREVIOUS field's offset. The resulting wrong checkLine
+            // made the snippet abort on the next caret movement.
+            // GetHighlightPosition asserts the UI thread (it reads the text
+            // view's renderer state), and this runs on the background walk, so
+            // marshal it.
+            int highlightStart = -1;
+            int highlightLast = -1;
+            await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                CodeEditor2.Controller.CodeEditor.GetHighlightPosition(
+                    fieldIndex, out highlightStart, out highlightLast);
+            });
+            currentFieldStart = highlightStart;
+            currentFieldLast = highlightLast;
+            checkLine = document == null || highlightStart < 0
+                ? null
+                : document.GetLineAt(highlightStart);
+
+            if (confirmPending)
+            {
+                confirmPending = false;
+                checkLine = null;
+                currentFieldStart = -1;
+                currentFieldLast = -1;
+                fieldDone = null;
+                return "moveNext";
+            }
+            string result = await fieldDone.Task;
+            checkLine = null;
+            currentFieldStart = -1;
+            currentFieldLast = -1;
+            fieldDone = null;
+            return result;
+        }
+
+        /// <summary>
+        /// Records a confirmation (Enter / Down / Tab) for the current field.
+        /// When no field is waiting yet the request is latched for the next
+        /// <see cref="WaitForFieldAsync"/>.
+        /// </summary>
+        private void RequestMoveNext()
+        {
+            if (fieldDone != null)
+            {
+                fieldDone.TrySetResult("moveNext");
+                return;
+            }
+            confirmPending = true;
         }
 
         /// <summary>
@@ -308,6 +409,10 @@ namespace pluginVerilog.Verilog.Snippets
         {
             CodeEditor2.Controller.CodeEditor.PostClearHighlight();
             document = null;
+            confirmPending = false;
+            checkLine = null;
+            currentFieldStart = -1;
+            currentFieldLast = -1;
             fieldDone?.TrySetResult("abort");
             choiceMade?.TrySetResult("");
             base.Aborted();
@@ -319,19 +424,32 @@ namespace pluginVerilog.Verilog.Snippets
 
             if (e.Key == Key.Escape || e.Key == Key.Up)
             {
+                // drop a latched Enter too: the snippet is ending
+                confirmPending = false;
                 fieldDone?.TrySetResult("abort");
                 CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
                 e.Handled = true;
             }
-            else if (e.Key == Key.Return || e.Key == Key.Down || e.Key == Key.Tab)
+            // Key.Return and Key.Enter are distinct in Avalonia (Enter is the
+            // numeric keypad key); the popup handles both, so the snippet must
+            // too or the numpad Enter silently did nothing.
+            else if (e.Key == Key.Return || e.Key == Key.Enter || e.Key == Key.Down || e.Key == Key.Tab)
             {
-                fieldDone?.TrySetResult("moveNext");
+                // RequestMoveNext instead of fieldDone?.TrySetResult: the wait
+                // source does not exist yet while the highlight is being
+                // selected / the popup is closing, and an Enter in that window
+                // used to be swallowed (the user had to press Enter twice).
+                RequestMoveNext();
                 e.Handled = true;
             }
         }
 
         public override void AfterAutoCompleteHandled(PopupMenuView popupMenuView)
         {
+            // Only complete a field that is actually waiting. This hook also
+            // fires for the ordinary code-completion popup (AutoCompleteItem
+            // calls Controller.CodeEditor.AutoCompleteHandled), so latching here
+            // would silently skip the field the user is editing.
             fieldDone?.TrySetResult("moveNext");
         }
 
@@ -341,6 +459,20 @@ namespace pluginVerilog.Verilog.Snippets
             if (document == null) return;
             int? caret = CodeEditor2.Controller.CodeEditor.GetCaretPosition();
             if (caret == null) return;
+
+            // Being anywhere inside the current field - including its very
+            // start and the position just past its end - is legitimate: the
+            // snippet itself puts the caret on the highlight start when it
+            // selects a field, and a caret sitting exactly there used to look
+            // like "the user went somewhere else". Only a caret outside the
+            // range means the user left the field.
+            if (currentFieldStart >= 0
+                && (int)caret >= currentFieldStart
+                && (int)caret <= currentFieldLast + 1)
+            {
+                return;
+            }
+
             if (document.GetLineAt((int)caret) != checkLine)
             {
                 CodeEditor2.Controller.CodeEditor.AbortInteractiveSnippet();
