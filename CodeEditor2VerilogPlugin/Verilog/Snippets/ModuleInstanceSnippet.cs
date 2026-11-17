@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Snippets
@@ -8,10 +9,10 @@ namespace pluginVerilog.Verilog.Snippets
     /// port).
     ///
     /// <para>
-    /// The text comes from <see cref="CoreBridge.SnippetAdapter"/>, which the
-    /// VS Code extension also uses (through <c>rtl/snippet</c> and the
-    /// completion adapter), so the editor and the extension insert the same
-    /// instantiation. This class only carries the module name.
+    /// The text is built by <see cref="Build"/> here, which the VS Code
+    /// extension also uses (through <c>rtl/snippet</c> and the completion
+    /// adapter), so the editor and the extension insert the same
+    /// instantiation.
     /// </para>
     /// </summary>
     public class ModuleInstanceSnippet : CodeEditor2.Snippets.InteractiveSnippet
@@ -37,6 +38,65 @@ namespace pluginVerilog.Verilog.Snippets
         public override Task ApplyAsync()
         {
             return new SnippetRunner(CoreBridge.ToolMenuCatalog.ToolId.ModuleInstance, moduleName).ApplyAsync();
+        }
+
+        /// <summary>
+        /// Builds the snippet for the caret at <paramref name="index"/>. Without
+        /// <paramref name="moduleName"/> the candidate module names are returned
+        /// so the host can show a picker.
+        /// </summary>
+        public static void Build(
+            Data.IVerilogRelatedFile file,
+            Verilog.ParsedDocument parsedDocument,
+            int index,
+            string? moduleName,
+            CoreBridge.SnippetAdapter.SnippetResult result)
+        {
+            ProjectProperty? projectProperty = file.ProjectProperty;
+            if (projectProperty == null)
+            {
+                result.Message = "the project has no Verilog property";
+                return;
+            }
+
+            if (string.IsNullOrEmpty(moduleName))
+            {
+                // no module chosen yet: hand the candidates to the host
+                foreach (string name in projectProperty.DefinitionNameSpace.GetNameList(
+                             x => x is Verilog.BuildingBlocks.Module))
+                {
+                    result.Candidates.Add(name);
+                }
+                if (result.Candidates.Count == 0) result.Message = "no module found in the project";
+                return;
+            }
+
+            Verilog.BuildingBlocks.Module? module = SnippetBuilder.ResolveModule(projectProperty, moduleName);
+            if (module == null)
+            {
+                result.Message = "module not found: " + moduleName;
+                return;
+            }
+
+            string instanceName = SnippetBuilder.MakeUniqueInstanceName(parsedDocument, index, moduleName);
+            string indent = SnippetBuilder.GetIndent(parsedDocument, index);
+            CoreBridge.SnippetTemplate template =
+                SnippetBuilder.BuildInstantiationTemplate(module, instanceName, indent, null);
+
+            List<CoreBridge.SnippetField> fields = new();
+            string plainText = template.ToPlainText(fields);
+
+            result.Snippets.Add(new CoreBridge.SnippetAdapter.SnippetEntry
+            {
+                Label = moduleName,
+                Detail = "instantiate " + moduleName,
+                Kind = CoreBridge.SnippetAdapter.SnippetKind.Insert,
+                Start = index,
+                End = index,
+                SnippetText = template.ToVscodeSnippet(),
+                PlainText = plainText,
+                Fields = fields,
+            });
         }
     }
 }

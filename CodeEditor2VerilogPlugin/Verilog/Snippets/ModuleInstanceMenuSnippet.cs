@@ -8,7 +8,7 @@ namespace pluginVerilog.Verilog.Snippets
     ///
     /// <para>
     /// The candidate list and the instantiation text both come from
-    /// <see cref="CoreBridge.SnippetAdapter"/>, and <see cref="SnippetRunner"/>
+    /// <see cref="ModuleInstanceSnippet.Build"/>, and <see cref="SnippetRunner"/>
     /// shows the picker, so this tool is the same two step flow the VS Code
     /// extension uses (ask without an argument, get candidates, ask again with
     /// the chosen name). Keeping the list here would duplicate that logic.

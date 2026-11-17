@@ -12,7 +12,8 @@ namespace pluginVerilog.Verilog.Snippets
     /// Runs a <see cref="SnippetAdapter"/> snippet in the desktop editor.
     ///
     /// <para>
-    /// The snippet logic lives in <see cref="SnippetAdapter"/> (UI free) so the
+    /// The snippet logic lives in the snippet classes of this folder
+    /// (<see cref="AlwaysFFSnippet.Build"/> and friends, UI free) so the
     /// desktop editor and the VS Code extension insert exactly the same text
     /// from one implementation. This class is only the <b>host</b>: it inserts
     /// <see cref="SnippetAdapter.SnippetEntry.PlainText"/>, turns
