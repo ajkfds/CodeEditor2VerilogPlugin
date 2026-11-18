@@ -31,8 +31,22 @@ namespace pluginVerilog.CoreBridge
             /// <summary>Stable id (one of <see cref="HierarchyMenuCatalog.MenuId"/>).</summary>
             public string Id { get; init; } = string.Empty;
 
-            /// <summary>Menu label.</summary>
+            /// <summary>
+            /// Menu label, exactly as the catalog declares it ("Folder",
+            /// "Copy Path"). A host that renders nesting itself (the editor
+            /// nests MenuItems, VS Code renders a flyout from package.json)
+            /// must use this one: prefixing the parent here made the desktop
+            /// menu read "Add › Folder" even though it already shows the row
+            /// inside an "Add" submenu.
+            /// </summary>
             public string Label { get; init; } = string.Empty;
+
+            /// <summary>
+            /// Label for a <b>flat</b> list, where nesting cannot be drawn: a
+            /// nested row is prefixed with its parent's label ("Add › Folder").
+            /// Only the QuickPick fallback uses this.
+            /// </summary>
+            public string FlatLabel { get; init; } = string.Empty;
 
             /// <summary>One line explaining what the entry does.</summary>
             public string Detail { get; init; } = string.Empty;
@@ -168,7 +182,8 @@ namespace pluginVerilog.CoreBridge
                 result.Entries.Add(new MenuEntry
                 {
                     Id = entry.Id,
-                    Label = BuildQuickPickLabel(entry),
+                    Label = entry.Label,
+                    FlatLabel = BuildQuickPickLabel(entry),
                     Detail = entry.Detail,
                     Enabled = reason == null,
                     Reason = reason,
@@ -184,9 +199,11 @@ namespace pluginVerilog.CoreBridge
         }
 
         /// <summary>
-        /// Label shown in a flat list. A nested row is prefixed with its parent's
-        /// label, because a QuickPick has no other way to show the hierarchy the
-        /// native menu renders as a submenu.
+        /// Label shown in a flat list (<see cref="MenuEntry.FlatLabel"/>). A
+        /// nested row is prefixed with its parent's label, because a QuickPick
+        /// has no other way to show the hierarchy the native menu renders as a
+        /// submenu. <see cref="MenuEntry.Label"/> stays unprefixed for hosts
+        /// that nest for real.
         /// </summary>
         private static string BuildQuickPickLabel(HierarchyMenuCatalog.Entry entry)
         {

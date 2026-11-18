@@ -89,7 +89,10 @@ namespace pluginVerilog.CoreBridge
                 legacy.Entries.Add(new MenuEntry
                 {
                     Id = entry.Id,
-                    Label = entry.Label,
+                    // The QuickPick fallback is flat, so it needs the
+                    // parent-prefixed label ("Add › Folder"); the native rows
+                    // take the plain label from package.json instead.
+                    Label = entry.FlatLabel,
                     Detail = entry.Detail,
                     Enabled = entry.Enabled,
                     Reason = entry.Reason,
