@@ -55,22 +55,28 @@ namespace pluginVerilog.CoreBridge
         /// a new entry reaches VS Code by regenerating, never by hand-editing
         /// the extension.
         /// </remarks>
+        /// <summary>
+        /// The menu the RTL Hierarchy tree's right-click menu is declared in.
+        /// </summary>
+        public const string ViewItemContextMenu = "view/item/context";
+
         public static Manifest Build()
         {
             Manifest manifest = new Manifest();
-            List<HierarchyMenuCatalog.Entry> topLevel = Children(null);
 
-            foreach (HierarchyMenuCatalog.Entry entry in topLevel)
+            foreach (HierarchyMenuCatalog.Entry entry in Children(null))
             {
                 if (entry.IsSubmenu)
                 {
-                    AddSubmenu(manifest, entry);
+                    // The row that OPENS the flyout belongs to the menu we are
+                    // currently filling; its children go into their own menu.
+                    AddSubmenu(manifest, entry, ViewItemContextMenu);
                     continue;
                 }
                 AddCommand(manifest, entry);
                 foreach (string when in WhenClauses(entry))
                 {
-                    manifest.Menus.Add(new ManifestMenuRow
+                    manifest.AddMenuRow(ViewItemContextMenu, new ManifestMenuRow
                     {
                         Command = CommandId(entry.Id),
                         When = when,
@@ -99,11 +105,35 @@ namespace pluginVerilog.CoreBridge
         }
 
         /// <summary>
-        /// Emits a submenu: its <c>contributes.submenus</c> entry, one
-        /// <c>view/item/context</c> row per node kind that opens it, and the
-        /// rows of its children (recursively, so nesting is unbounded).
+        /// Emits a submenu: its <c>contributes.submenus</c> entry, one row in
+        /// <paramref name="parentMenu"/> per node kind that opens it, and the
+        /// rows of its children in a menu keyed by the submenu id.
         /// </summary>
-        private static void AddSubmenu(Manifest manifest, HierarchyMenuCatalog.Entry submenu)
+        /// <param name="parentMenu">
+        /// The menu the flyout-opening row belongs to
+        /// (<see cref="ViewItemContextMenu"/> at the top level, otherwise the
+        /// id of the enclosing submenu).
+        /// </param>
+        /// <remarks>
+        /// <para>
+        /// A submenu's children must be declared in
+        /// <c>contributes.menus["&lt;submenu id&gt;"]</c>, NOT in
+        /// <c>view/item/context</c>. VS Code fills a flyout from the menu named
+        /// after the submenu id; a child left in <c>view/item/context</c> is
+        /// rendered as an ordinary row of the tree's context menu, which is why
+        /// the Add rows appeared flat next to the "Add" flyout instead of
+        /// inside it.
+        /// </para>
+        /// <para>
+        /// The children also keep their <c>when</c> clause: a submenu does not
+        /// inherit the parent row's context, so each child re-states
+        /// <c>view == ... &amp;&amp; viewItem == ...</c>.
+        /// </para>
+        /// </remarks>
+        private static void AddSubmenu(
+            Manifest manifest,
+            HierarchyMenuCatalog.Entry submenu,
+            string parentMenu)
         {
             manifest.Submenus.Add(new ManifestSubmenu
             {
@@ -113,7 +143,7 @@ namespace pluginVerilog.CoreBridge
 
             foreach (string when in WhenClauses(submenu))
             {
-                manifest.Menus.Add(new ManifestMenuRow
+                manifest.AddMenuRow(parentMenu, new ManifestMenuRow
                 {
                     Submenu = SubmenuId(submenu.Id),
                     When = when,
@@ -125,13 +155,13 @@ namespace pluginVerilog.CoreBridge
             {
                 if (child.IsSubmenu)
                 {
-                    AddSubmenu(manifest, child);
+                    AddSubmenu(manifest, child, SubmenuId(submenu.Id));
                     continue;
                 }
                 AddCommand(manifest, child);
                 foreach (string when in WhenClauses(child))
                 {
-                    manifest.Menus.Add(new ManifestMenuRow
+                    manifest.AddMenuRow(SubmenuId(submenu.Id), new ManifestMenuRow
                     {
                         Command = CommandId(child.Id),
                         When = when,
@@ -199,7 +229,10 @@ namespace pluginVerilog.CoreBridge
                 note = UsageNote,
                 commands = manifest.Commands,
                 submenus = manifest.Submenus,
-                menus = new { viewItemContext = manifest.Menus },
+                // `menus` is a map of menu name -> rows. The tree's own menu is
+                // "view/item/context"; a submenu's contents are keyed by the
+                // submenu id, which is how VS Code fills the flyout.
+                menus = manifest.Menus,
             }, options);
         }
     }
@@ -213,8 +246,30 @@ namespace pluginVerilog.CoreBridge
         /// <summary>Rows for <c>contributes.submenus</c>.</summary>
         public List<ManifestSubmenu> Submenus { get; } = new();
 
-        /// <summary>Rows for <c>contributes.menus."view/item/context"</c>.</summary>
-        public List<ManifestMenuRow> Menus { get; } = new();
+        /// <summary>
+        /// Rows keyed by the <c>contributes.menus</c> property they belong to:
+        /// <c>view/item/context</c> for the tree's own menu, and
+        /// <c>&lt;submenu id&gt;</c> for the contents of a flyout.
+        /// </summary>
+        /// <remarks>
+        /// VS Code reads a flyout's contents from the menu named after the
+        /// submenu id. Putting a submenu's children in
+        /// <c>view/item/context</c> instead makes them ordinary rows of the
+        /// tree's context menu (the flat "Add" rows next to the "Add" flyout).
+        /// </remarks>
+        public SortedDictionary<string, List<ManifestMenuRow>> Menus { get; } =
+            new(StringComparer.Ordinal);
+
+        /// <summary>Appends a row to the menu called <paramref name="menu"/>.</summary>
+        public void AddMenuRow(string menu, ManifestMenuRow row)
+        {
+            if (!Menus.TryGetValue(menu, out List<ManifestMenuRow>? rows))
+            {
+                rows = new List<ManifestMenuRow>();
+                Menus[menu] = rows;
+            }
+            rows.Add(row);
+        }
     }
 
     /// <summary>One <c>contributes.commands</c> row.</summary>
