@@ -46,63 +46,54 @@ namespace pluginVerilog.NavigatePanel
             NavigateNodeMenuAdapter.MenuResult result =
                 NavigateNodeMenuAdapter.Build(context, HierarchyMenuCatalog.Hosts.Desktop);
 
-            // ParentId -> the MenuItem its children are added to. Rows arrive in
-            // group order, so a parent is always created before its children.
-            Dictionary<string, MenuItem> parents = new Dictionary<string, MenuItem>(StringComparer.Ordinal);
-
+            // Rows arrive as a flat list in depth-first order with ParentId set,
+            // so one pass rebuilds the nesting: each row goes under the MenuItem
+            // its parent produced. A grouping row's children follow it in the
+            // list, which is why the parent is always in the map by then.
+            Dictionary<string, MenuItem> items = new Dictionary<string, MenuItem>(StringComparer.Ordinal);
             foreach (NavigateNodeMenuAdapter.MenuEntry entry in result.Entries)
             {
                 MenuItem item = CreateMenuItem(entry);
+                items[entry.Id] = item;
 
-                if (entry.IsSubmenu)
+                if (!entry.IsSubmenu)
                 {
-                    parents[entry.Id] = item;
-                    AddTo(menu, parents, entry.ParentId, item);
-                    continue;
+                    item.IsEnabled = entry.Enabled;
+                    if (!string.IsNullOrEmpty(entry.Reason))
+                    {
+                        ToolTip.SetTip(item, entry.Reason);
+                    }
+
+                    string id = entry.Id;
+                    item.Click += async (_, _) =>
+                    {
+                        try
+                        {
+                            await RunAsync(id, context, node);
+                        }
+                        catch (Exception ex)
+                        {
+                            if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+                            CodeEditor2.Controller.AppendLog(
+                                "# Exception : " + ex.Message, Avalonia.Media.Colors.Red);
+                        }
+                    };
                 }
 
-                item.IsEnabled = entry.Enabled;
-                if (!string.IsNullOrEmpty(entry.Reason))
+                // A row whose parent is not in the map is a top-level row, or
+                // one whose parent the adapter filtered out (a host mismatch).
+                // Adding it at the top level keeps it reachable instead of
+                // dropping it silently.
+                if (!string.IsNullOrEmpty(entry.ParentId)
+                    && items.TryGetValue(entry.ParentId!, out MenuItem? parent))
                 {
-                    ToolTip.SetTip(item, entry.Reason);
+                    parent.Items.Add(item);
                 }
-
-                string id = entry.Id;
-                item.Click += async (_, _) =>
+                else
                 {
-                    try
-                    {
-                        await RunAsync(id, context, node);
-                    }
-                    catch (Exception ex)
-                    {
-                        if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
-                        CodeEditor2.Controller.AppendLog(
-                            "# Exception : " + ex.Message, Avalonia.Media.Colors.Red);
-                    }
-                };
-
-                AddTo(menu, parents, entry.ParentId, item);
+                    menu.Items.Add(item);
+                }
             }
-        }
-
-        /// <summary>
-        /// Adds <paramref name="item"/> under its parent submenu, or at the top
-        /// level when the row has none. A missing parent falls back to the top
-        /// level rather than dropping the row.
-        /// </summary>
-        private static void AddTo(
-            ContextMenu menu,
-            Dictionary<string, MenuItem> parents,
-            string? parentId,
-            MenuItem item)
-        {
-            if (!string.IsNullOrEmpty(parentId) && parents.TryGetValue(parentId!, out MenuItem? parent))
-            {
-                parent.Items.Add(item);
-                return;
-            }
-            menu.Items.Add(item);
         }
 
         /// <summary>

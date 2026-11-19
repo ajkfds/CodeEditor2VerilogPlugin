@@ -69,8 +69,8 @@ namespace pluginVerilog.CoreBridge
 
             /// <summary>
             /// Grouping entry (a submenu, not a command) for the simulation
-            /// rows. It exists to show that nesting is data: adding
-            /// <c>ParentId = Simulation</c> to a row puts it in this submenu.
+            /// rows. Nesting is the shape of the declaration: a row is in this
+            /// submenu because it is written inside its <c>Children</c>.
             /// </summary>
             public const string Simulation = "simulation";
 
@@ -238,27 +238,36 @@ namespace pluginVerilog.CoreBridge
             public int Group { get; init; } = 50;
 
             /// <summary>
-            /// Id of the <see cref="IsSubmenu"/> entry this row belongs under,
-            /// or null for a top-level row.
+            /// Rows nested under this one, in display order.
             ///
             /// <para>
-            /// This is what makes the VS Code context menu hierarchical: VS Code
-            /// renders a nested menu from <c>contributes.submenus</c> plus rows
-            /// whose <c>submenu</c> property names one, and
-            /// <see cref="HierarchyMenuManifest"/> generates both from this
-            /// parent/child relation. The editor's NavigatePanel menu is flat, so
-            /// nesting is a VS Code-side presentation choice, not a parse
-            /// concept.
+            /// Nesting is the shape of the declaration, not a relation
+            /// reconstructed from ids: the literal below reads like the menu it
+            /// describes, and every consumer (the editor's context menu, the VS
+            /// Code manifest, the QuickPick fallback) just walks this list.
+            /// Before, a row carried a <c>ParentId</c> and an
+            /// <c>IsSubmenu</c> flag, so the tree had to be rebuilt from
+            /// scattered strings - and a child written into the wrong menu (a
+            /// submenu's children placed in <c>view/item/context</c>) produced a
+            /// flat menu with nothing to catch it.
+            /// </para>
+            ///
+            /// <para>
+            /// A row with children is a grouping row: it is not runnable itself
+            /// and both hosts render it as a submenu / flyout. The list is
+            /// mutable only so <see cref="Register"/> and
+            /// <see cref="Unregister"/> can extend the catalog; nothing else
+            /// should touch it.
             /// </para>
             /// </summary>
-            public string? ParentId { get; init; }
+            public List<Entry> Children { get; init; } = new List<Entry>();
 
             /// <summary>
-            /// True when the entry only groups its children and is not runnable
-            /// itself (the manifest turns it into a submenu instead of a
-            /// command).
+            /// True when the entry only groups its children (see
+            /// <see cref="Children"/>). Derived, so it cannot disagree with the
+            /// tree the way a separately authored flag could.
             /// </summary>
-            public bool IsSubmenu { get; init; }
+            public bool IsSubmenu => Children.Count > 0;
         }
 
         private static readonly List<Entry> entries = new List<Entry>
@@ -270,18 +279,18 @@ namespace pluginVerilog.CoreBridge
                 Detail = "simulation related actions",
                 Targets = AppliesTo.File | AppliesTo.Instance,
                 Group = 10,
-                IsSubmenu = true,
-                Action = ActionKind.None,
-            },
-            new Entry
-            {
-                Id = MenuId.SimulationSetup,
-                Label = "Simulation Setup (files)",
-                Detail = "list the files / top module the simulator would compile",
-                Targets = AppliesTo.File | AppliesTo.Instance,
-                Group = 10,
-                ParentId = MenuId.Simulation,
-                Action = ActionKind.ShowText,
+                Children =
+                {
+                    new Entry
+                    {
+                        Id = MenuId.SimulationSetup,
+                        Label = "Simulation Setup (files)",
+                        Detail = "list the files / top module the simulator would compile",
+                        Targets = AppliesTo.File | AppliesTo.Instance,
+                        Group = 10,
+                        Action = ActionKind.ShowText,
+                    },
+                },
             },
             new Entry
             {
@@ -333,67 +342,63 @@ namespace pluginVerilog.CoreBridge
                 Detail = "create a file or folder next to the node",
                 Targets = AppliesTo.Project | AppliesTo.Folder | AppliesTo.File | AppliesTo.Instance,
                 Group = 10,
-                IsSubmenu = true,
-                Action = ActionKind.None,
-            },
-            new Entry
-            {
-                Id = MenuId.AddFolder,
-                Label = "Folder",
-                Detail = "create an empty directory",
-                Targets = AppliesTo.Project | AppliesTo.Folder | AppliesTo.File | AppliesTo.Instance,
-                Group = 10,
-                ParentId = MenuId.Add,
-                Action = ActionKind.CreateFolder,
-            },
-            new Entry
-            {
-                Id = MenuId.AddBlankFile,
-                Label = "Blank File",
-                Detail = "create an empty file",
-                Targets = AppliesTo.Project | AppliesTo.Folder | AppliesTo.File | AppliesTo.Instance,
-                Group = 10,
-                ParentId = MenuId.Add,
-                Action = ActionKind.CreateFile,
-            },
-            new Entry
-            {
-                Id = MenuId.AddVerilogModule,
-                Label = "verilog module",
-                Detail = "create a .v file with a module skeleton",
-                Targets = AppliesTo.Project | AppliesTo.Folder | AppliesTo.File | AppliesTo.Instance,
-                Group = 10,
-                ParentId = MenuId.Add,
-                Action = ActionKind.CreateSourceFile,
-                Argument = "verilog",
-                IconPath = "CodeEditor2VerilogPlugin/Assets/Icons/verilogDocument.svg",
-                IconColor = 0x64C8F0F0,
-            },
-            new Entry
-            {
-                Id = MenuId.AddSystemVerilogModule,
-                Label = "SystemVerilog module",
-                Detail = "create a .sv file with a module skeleton",
-                Targets = AppliesTo.Project | AppliesTo.Folder | AppliesTo.File | AppliesTo.Instance,
-                Group = 10,
-                ParentId = MenuId.Add,
-                Action = ActionKind.CreateSourceFile,
-                Argument = "systemverilog",
-                IconPath = "CodeEditor2VerilogPlugin/Assets/Icons/systemVerilogDocument.svg",
-                IconColor = 0x64C8F0F0,
-            },
-            new Entry
-            {
-                Id = MenuId.AddSystemVerilogInterface,
-                Label = "SystemVerilog interface",
-                Detail = "create a .sv file with an interface skeleton",
-                Targets = AppliesTo.Project | AppliesTo.Folder | AppliesTo.File | AppliesTo.Instance,
-                Group = 10,
-                ParentId = MenuId.Add,
-                Action = ActionKind.CreateSourceFile,
-                Argument = "interface",
-                IconPath = "CodeEditor2VerilogPlugin/Assets/Icons/systemVerilogDocument.svg",
-                IconColor = 0x64C8F0F0,
+                Children =
+                {
+                    new Entry
+                    {
+                        Id = MenuId.AddFolder,
+                        Label = "Folder",
+                        Detail = "create an empty directory",
+                        Targets = AppliesTo.Project | AppliesTo.Folder | AppliesTo.File | AppliesTo.Instance,
+                        Group = 10,
+                        Action = ActionKind.CreateFolder,
+                    },
+                    new Entry
+                    {
+                        Id = MenuId.AddBlankFile,
+                        Label = "Blank File",
+                        Detail = "create an empty file",
+                        Targets = AppliesTo.Project | AppliesTo.Folder | AppliesTo.File | AppliesTo.Instance,
+                        Group = 10,
+                        Action = ActionKind.CreateFile,
+                    },
+                    new Entry
+                    {
+                        Id = MenuId.AddVerilogModule,
+                        Label = "verilog module",
+                        Detail = "create a .v file with a module skeleton",
+                        Targets = AppliesTo.Project | AppliesTo.Folder | AppliesTo.File | AppliesTo.Instance,
+                        Group = 10,
+                        Action = ActionKind.CreateSourceFile,
+                        Argument = "verilog",
+                        IconPath = "CodeEditor2VerilogPlugin/Assets/Icons/verilogDocument.svg",
+                        IconColor = 0x64C8F0F0,
+                    },
+                    new Entry
+                    {
+                        Id = MenuId.AddSystemVerilogModule,
+                        Label = "SystemVerilog module",
+                        Detail = "create a .sv file with a module skeleton",
+                        Targets = AppliesTo.Project | AppliesTo.Folder | AppliesTo.File | AppliesTo.Instance,
+                        Group = 10,
+                        Action = ActionKind.CreateSourceFile,
+                        Argument = "systemverilog",
+                        IconPath = "CodeEditor2VerilogPlugin/Assets/Icons/systemVerilogDocument.svg",
+                        IconColor = 0x64C8F0F0,
+                    },
+                    new Entry
+                    {
+                        Id = MenuId.AddSystemVerilogInterface,
+                        Label = "SystemVerilog interface",
+                        Detail = "create a .sv file with an interface skeleton",
+                        Targets = AppliesTo.Project | AppliesTo.Folder | AppliesTo.File | AppliesTo.Instance,
+                        Group = 10,
+                        Action = ActionKind.CreateSourceFile,
+                        Argument = "interface",
+                        IconPath = "CodeEditor2VerilogPlugin/Assets/Icons/systemVerilogDocument.svg",
+                        IconColor = 0x64C8F0F0,
+                    },
+                },
             },
             new Entry
             {
@@ -407,103 +412,188 @@ namespace pluginVerilog.CoreBridge
         };
 
         /// <summary>
-        /// The entries that belong directly under <paramref name="parentId"/>
-        /// (null = the top level), in group order.
+        /// The top-level rows, in display order. The tree hangs off each row's
+        /// <see cref="Entry.Children"/>, so a host walks it recursively instead
+        /// of looking rows up by parent id.
         /// </summary>
-        /// <remarks>
-        /// <see cref="All"/> is a flat, group-ordered list because the QuickPick
-        /// renders it as one list; the tree of submenus is expressed through
-        /// <see cref="Entry.ParentId"/> and walked with this method.
-        /// </remarks>
-        public static List<Entry> Children(string? parentId)
-        {
-            List<Entry> result = new List<Entry>();
-            lock (entries)
-            {
-                foreach (Entry entry in entries)
-                {
-                    if (!string.Equals(entry.ParentId, parentId, StringComparison.Ordinal)) continue;
-                    result.Add(entry);
-                }
-            }
-            result.Sort((a, b) =>
-            {
-                if (a.Group != b.Group) return a.Group.CompareTo(b.Group);
-                return string.Compare(a.Label, b.Label, StringComparison.OrdinalIgnoreCase);
-            });
-            return result;
-        }
-
-        /// <summary>Every entry, in group order.</summary>
-        public static IReadOnlyList<Entry> All
+        public static List<Entry> Root
         {
             get
             {
                 lock (entries)
                 {
-                    List<Entry> sorted = new List<Entry>(entries);
-                    sorted.Sort((a, b) =>
-                    {
-                        if (a.Group != b.Group) return a.Group.CompareTo(b.Group);
-                        return string.Compare(a.Label, b.Label, StringComparison.OrdinalIgnoreCase);
-                    });
-                    return sorted;
+                    List<Entry> result = new List<Entry>(entries);
+                    result.Sort(CompareByGroup);
+                    return result;
                 }
             }
         }
 
         /// <summary>
-        /// Appends an entry (or replaces the one with the same id). Used by
-        /// plugins that extend the hierarchy menu; the LSP host serves whatever
-        /// is registered here, so the client needs no change.
+        /// The children of <paramref name="entry"/>, in display order. Empty for
+        /// a leaf row.
         /// </summary>
-        public static void Register(Entry entry)
+        public static List<Entry> Children(Entry entry)
+        {
+            if (entry == null || entry.Children.Count == 0) return new List<Entry>();
+            List<Entry> result = new List<Entry>(entry.Children);
+            result.Sort(CompareByGroup);
+            return result;
+        }
+
+        /// <summary>
+        /// Every row, flattened depth-first in display order. The QuickPick
+        /// fallback uses it because it cannot nest; hosts that nest walk
+        /// <see cref="Root"/> / <see cref="Children(Entry)"/> instead.
+        /// </summary>
+        public static IReadOnlyList<Entry> All
+        {
+            get
+            {
+                List<Entry> result = new List<Entry>();
+                foreach (Entry entry in Root) Flatten(entry, result);
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// Walks <paramref name="entry"/> depth-first. Reads
+        /// <see cref="Entry.Children"/> directly (no sorting copy) because the
+        /// caller already holds the lock.
+        /// </summary>
+        private static void Flatten(Entry entry, List<Entry> result)
+        {
+            result.Add(entry);
+            List<Entry> children = new List<Entry>(entry.Children);
+            children.Sort(CompareByGroup);
+            foreach (Entry child in children) Flatten(child, result);
+        }
+
+        /// <summary>Ordering used by every host: group number, then label.</summary>
+        private static int CompareByGroup(Entry a, Entry b)
+        {
+            if (a.Group != b.Group) return a.Group.CompareTo(b.Group);
+            return string.Compare(a.Label, b.Label, StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// The parent of <paramref name="id"/> in the tree, or null when it is a
+        /// top-level row / not found. Needed to label a nested row in a flat
+        /// list ("Add > Folder") and to reject running a grouping row.
+        /// </summary>
+        public static Entry? ParentOf(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return null;
+            lock (entries)
+            {
+                foreach (Entry entry in entries)
+                {
+                    Entry? found = FindParentIn(entry, id);
+                    if (found != null) return found;
+                }
+            }
+            return null;
+        }
+
+        private static Entry? FindParentIn(Entry parent, string id)
+        {
+            foreach (Entry child in parent.Children)
+            {
+                if (string.Equals(child.Id, id, StringComparison.Ordinal)) return parent;
+                Entry? found = FindParentIn(child, id);
+                if (found != null) return found;
+            }
+            return null;
+        }
+
+        /// <summary>The row with this id anywhere in the tree, or null.</summary>
+        public static Entry? Find(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return null;
+            foreach (Entry entry in All)
+            {
+                if (string.Equals(entry.Id, id, StringComparison.Ordinal)) return entry;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Adds a row (or replaces the one with the same id anywhere in the
+        /// tree). Used by plugins that extend the hierarchy menu; the LSP host
+        /// serves whatever is registered here, so the client needs no change.
+        /// </summary>
+        /// <param name="entry">The row to add.</param>
+        /// <param name="parentId">
+        /// Id of the grouping row to add it under, or null for the top level.
+        /// Ignored when a row with the same id already exists (it is replaced in
+        /// place, keeping its position in the tree).
+        /// </param>
+        public static void Register(Entry entry, string? parentId = null)
         {
             if (entry == null) return;
             if (string.IsNullOrEmpty(entry.Id)) return;
             lock (entries)
             {
-                for (int i = 0; i < entries.Count; i++)
+                if (ReplaceInPlace(entries, entry)) return;
+
+                if (string.IsNullOrEmpty(parentId))
                 {
-                    if (entries[i].Id == entry.Id)
-                    {
-                        entries[i] = entry;
-                        return;
-                    }
+                    entries.Add(entry);
+                    return;
                 }
-                entries.Add(entry);
+
+                Entry? parent = Find(parentId);
+                if (parent == null)
+                {
+                    // A plugin asked for a parent that does not exist. Adding the
+                    // row at the top level is better than dropping it silently,
+                    // and keeps the menu usable.
+                    entries.Add(entry);
+                    return;
+                }
+                parent.Children.Add(entry);
             }
         }
 
+        private static bool ReplaceInPlace(List<Entry> rows, Entry replacement)
+        {
+            for (int i = 0; i < rows.Count; i++)
+            {
+                if (string.Equals(rows[i].Id, replacement.Id, StringComparison.Ordinal))
+                {
+                    rows[i] = replacement;
+                    return true;
+                }
+                if (ReplaceInPlace(rows[i].Children, replacement)) return true;
+            }
+            return false;
+        }
+
         /// <summary>
-        /// Removes a registered entry. Used by the tests and by a plugin that
-        /// tears its menu contribution down again.
+        /// Removes a registered row from anywhere in the tree. Used by the tests
+        /// and by a plugin that tears its menu contribution down again.
         /// </summary>
         public static void Unregister(string id)
         {
             if (string.IsNullOrEmpty(id)) return;
             lock (entries)
             {
-                for (int i = 0; i < entries.Count; i++)
-                {
-                    if (entries[i].Id != id) continue;
-                    entries.RemoveAt(i);
-                    return;
-                }
+                if (RemoveFrom(entries, id)) return;
             }
         }
 
-        /// <summary>The catalog entry for <paramref name="id"/>, or null.</summary>
-        public static Entry? Find(string id)
+        private static bool RemoveFrom(List<Entry> rows, string id)
         {
-            lock (entries)
+            for (int i = 0; i < rows.Count; i++)
             {
-                foreach (Entry entry in entries)
+                if (string.Equals(rows[i].Id, id, StringComparison.Ordinal))
                 {
-                    if (entry.Id == id) return entry;
+                    rows.RemoveAt(i);
+                    return true;
                 }
+                if (RemoveFrom(rows[i].Children, id)) return true;
             }
-            return null;
+            return false;
         }
     }
 }

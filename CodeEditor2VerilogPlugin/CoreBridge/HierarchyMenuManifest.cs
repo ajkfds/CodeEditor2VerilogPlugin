@@ -79,20 +79,46 @@ namespace pluginVerilog.CoreBridge
         public static Manifest Build()
         {
             Manifest manifest = new Manifest();
+            AddRows(manifest, HierarchyMenuCatalog.Root, ViewItemContextMenu);
+            return manifest;
+        }
 
-            foreach (HierarchyMenuCatalog.Entry entry in Children(null))
+        /// <summary>
+        /// Emits <paramref name="rows"/> into <paramref name="menu"/>, recursing
+        /// into each grouping row.
+        /// </summary>
+        /// <param name="menu">
+        /// The <c>contributes.menus</c> key the rows belong to:
+        /// <see cref="ViewItemContextMenu"/> at the top level, otherwise the id
+        /// of the enclosing submenu.
+        /// </param>
+        /// <remarks>
+        /// Walking the tree is what makes the nesting correct by construction: a
+        /// child is emitted into its parent's menu because that is where the
+        /// recursion is, not because a <c>ParentId</c> string was matched. The
+        /// earlier id-based version put a submenu's children into
+        /// <c>view/item/context</c>, which VS Code renders as ordinary rows of
+        /// the tree's menu - the "Add entries are flat" bug.
+        /// </remarks>
+        private static void AddRows(
+            Manifest manifest,
+            IReadOnlyList<HierarchyMenuCatalog.Entry> rows,
+            string menu)
+        {
+            foreach (HierarchyMenuCatalog.Entry entry in rows)
             {
+                if (!OffersToVsCode(entry)) continue;
+
                 if (entry.IsSubmenu)
                 {
-                    // The row that OPENS the flyout belongs to the menu we are
-                    // currently filling; its children go into their own menu.
-                    AddSubmenu(manifest, entry, ViewItemContextMenu);
+                    AddSubmenu(manifest, entry, menu);
                     continue;
                 }
+
                 AddCommand(manifest, entry);
                 foreach (string when in WhenClauses(entry))
                 {
-                    manifest.AddMenuRow(ViewItemContextMenu, new ManifestMenuRow
+                    manifest.AddMenuRow(menu, new ManifestMenuRow
                     {
                         Command = CommandId(entry.Id),
                         When = when,
@@ -100,25 +126,15 @@ namespace pluginVerilog.CoreBridge
                     });
                 }
             }
-            return manifest;
         }
 
         /// <summary>
-        /// The catalog rows VS Code can run. A row declared
-        /// <see cref="HierarchyMenuCatalog.Hosts.Desktop"/> is never written into
-        /// <c>package.json</c>: the extension could not run it (it needs the
-        /// editor's windows), and emitting it would add a row that does nothing.
+        /// Whether the row is part of the extension manifest. A
+        /// <see cref="HierarchyMenuCatalog.Hosts.Desktop"/> row cannot run in VS
+        /// Code, so it is never written to <c>package.json</c>.
         /// </summary>
-        private static List<HierarchyMenuCatalog.Entry> Children(string? parentId)
-        {
-            List<HierarchyMenuCatalog.Entry> result = new List<HierarchyMenuCatalog.Entry>();
-            foreach (HierarchyMenuCatalog.Entry entry in HierarchyMenuCatalog.Children(parentId))
-            {
-                if ((entry.Hosts & HierarchyMenuCatalog.Hosts.VsCode) == 0) continue;
-                result.Add(entry);
-            }
-            return result;
-        }
+        private static bool OffersToVsCode(HierarchyMenuCatalog.Entry entry)
+            => (entry.Hosts & HierarchyMenuCatalog.Hosts.VsCode) != 0;
 
         /// <summary>
         /// Emits a submenu: its <c>contributes.submenus</c> entry, one row in
@@ -167,24 +183,9 @@ namespace pluginVerilog.CoreBridge
                 });
             }
 
-            foreach (HierarchyMenuCatalog.Entry child in Children(submenu.Id))
-            {
-                if (child.IsSubmenu)
-                {
-                    AddSubmenu(manifest, child, SubmenuId(submenu.Id));
-                    continue;
-                }
-                AddCommand(manifest, child);
-                foreach (string when in WhenClauses(child))
-                {
-                    manifest.AddMenuRow(SubmenuId(submenu.Id), new ManifestMenuRow
-                    {
-                        Command = CommandId(child.Id),
-                        When = when,
-                        Group = GroupName(child.Group),
-                    });
-                }
-            }
+            // The flyout's contents live in the menu named after the submenu id;
+            // the recursion is what puts them there.
+            AddRows(manifest, HierarchyMenuCatalog.Children(submenu), SubmenuId(submenu.Id));
         }
 
         /// <summary>

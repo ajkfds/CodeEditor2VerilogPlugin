@@ -169,15 +169,15 @@ namespace pluginVerilog.CoreBridge
                 return result;
             }
 
+            // Rows arrive as a tree, flattened depth-first with ParentId filled
+            // in. The editor re-nests them by ParentId (its ContextMenu is
+            // rebuilt per node) and the VS Code manifest turns each grouping row
+            // into a flyout, so both hosts get the same shape from one walk.
             foreach (HierarchyMenuCatalog.Entry entry in HierarchyMenuCatalog.All)
             {
                 if ((entry.Hosts & host) == 0) continue;
                 if ((entry.Targets & target) == 0) continue;
 
-                // A submenu is a grouping row: the native VS Code menu renders
-                // it as a flyout (see HierarchyMenuManifest) and the desktop
-                // menu nests MenuItems, so it is listed here as a row the host
-                // turns into a parent item.
                 string? reason = entry.IsSubmenu ? null : GetDisabledReason(entry, context);
                 result.Entries.Add(new MenuEntry
                 {
@@ -188,7 +188,7 @@ namespace pluginVerilog.CoreBridge
                     Enabled = reason == null,
                     Reason = reason,
                     Group = entry.Group,
-                    ParentId = entry.ParentId,
+                    ParentId = HierarchyMenuCatalog.ParentOf(entry.Id)?.Id,
                     IsSubmenu = entry.IsSubmenu,
                     IconPath = entry.IconPath,
                     IconColor = entry.IconColor,
@@ -207,10 +207,8 @@ namespace pluginVerilog.CoreBridge
         /// </summary>
         private static string BuildQuickPickLabel(HierarchyMenuCatalog.Entry entry)
         {
-            if (string.IsNullOrEmpty(entry.ParentId)) return entry.Label;
-            HierarchyMenuCatalog.Entry? parent = HierarchyMenuCatalog.Find(entry.ParentId!);
-            if (parent == null) return entry.Label;
-            return parent.Label + " › " + entry.Label;
+            HierarchyMenuCatalog.Entry? parent = HierarchyMenuCatalog.ParentOf(entry.Id);
+            return parent == null ? entry.Label : parent.Label + " › " + entry.Label;
         }
 
         /// <summary>
