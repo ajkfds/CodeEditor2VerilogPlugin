@@ -15,10 +15,10 @@ namespace pluginVerilog
     /// Every rule has a fixed <see cref="Rule.Name"/> / <see cref="Rule.Message"/> /
     /// <see cref="Rule.Description"/> and a configurable
     /// <see cref="Rule.Severity"/>. A rule set can be written to a
-    /// <c>.rule</c> file as a YAML list of "name / severity" pairs and loaded
-    /// back, so the severity of each diagnostic can be tuned per directory:
-    /// a <c>.rule</c> file applies to every source file below the directory it
-    /// is placed in (see
+    /// <c>.rule.yaml</c> file as a YAML list of "name / severity" pairs and
+    /// loaded back, so the severity of each diagnostic can be tuned per
+    /// directory: a <c>.rule.yaml</c> file applies to every source file below
+    /// the directory it is placed in (see
     /// <see cref="ProjectProperty.GetRuleSet(string)"/>).
     /// </para>
     /// </summary>
@@ -73,8 +73,8 @@ namespace pluginVerilog
         /// </summary>
         /// <remarks>
         /// Reflection is used so that adding a rule only requires adding the
-        /// field above: the YAML writer, the YAML reader and the <c>.rule</c>
-        /// template all pick it up automatically.
+        /// field above: the YAML writer, the YAML reader and the
+        /// <c>.rule.yaml</c> template all pick it up automatically.
         /// </remarks>
         private static readonly FieldInfo[] ruleFields = typeof(RuleSet)
             .GetFields(BindingFlags.Public | BindingFlags.Instance)
@@ -126,7 +126,7 @@ namespace pluginVerilog
         // ------------------------------------------------------------------
 
         /// <summary>
-        /// One "name / severity" pair of a <c>.rule</c> file.
+        /// One "name / severity" pair of a <c>.rule.yaml</c> file.
         /// </summary>
         public class RuleSetting
         {
@@ -135,7 +135,7 @@ namespace pluginVerilog
         }
 
         /// <summary>
-        /// Root object of a <c>.rule</c> file:
+        /// Root object of a <c>.rule.yaml</c> file:
         /// <code>
         /// rules:
         ///   - name: ImplicitNetDeclaration
@@ -161,7 +161,7 @@ namespace pluginVerilog
         }
 
         /// <summary>
-        /// Serializes this rule set as the YAML body of a <c>.rule</c> file.
+        /// Serializes this rule set as the YAML body of a <c>.rule.yaml</c> file.
         /// </summary>
         public string ToYaml()
         {
@@ -174,11 +174,11 @@ namespace pluginVerilog
         }
 
         /// <summary>
-        /// Builds a rule set from the YAML body of a <c>.rule</c> file.
+        /// Builds a rule set from the YAML body of a <c>.rule.yaml</c> file.
         /// </summary>
         /// <remarks>
         /// The returned set starts from the built-in defaults and only the
-        /// severities listed in the file are overridden, so a <c>.rule</c>
+        /// severities listed in the file are overridden, so a <c>.rule.yaml</c>
         /// file may name a subset of the rules. Unknown rule names and
         /// unparsable severities are reported through
         /// <paramref name="errorMessage"/> (the remaining entries are still
@@ -269,7 +269,7 @@ namespace pluginVerilog
         // ------------------------------------------------------------------
 
         /// <summary>
-        /// Loads a rule set from a <c>.rule</c> file. Returns null when the
+        /// Loads a rule set from a <c>.rule.yaml</c> file. Returns null when the
         /// file does not exist or its YAML is malformed.
         /// </summary>
         public static RuleSet? LoadFile(string absolutePath, out string? errorMessage)
@@ -292,7 +292,7 @@ namespace pluginVerilog
         }
 
         /// <summary>
-        /// Loads a rule set from a <c>.rule</c> file, ignoring any error.
+        /// Loads a rule set from a <c>.rule.yaml</c> file, ignoring any error.
         /// </summary>
         public static RuleSet? LoadFile(string absolutePath)
         {
@@ -300,7 +300,7 @@ namespace pluginVerilog
         }
 
         /// <summary>
-        /// Writes this rule set to a <c>.rule</c> file as YAML
+        /// Writes this rule set to a <c>.rule.yaml</c> file as YAML
         /// (UTF-8, LF line endings).
         /// </summary>
         public void SaveFile(string absolutePath)

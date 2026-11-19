@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace pluginVerilog.Parser
 {
     /// <summary>
-    /// Parser for <c>.rule</c> files.
+    /// Parser for <c>.rule.yaml</c> files.
     ///
     /// <para>
     /// The file is YAML (<c>rules:</c> / <c>- name:</c> / <c>severity:</c>).

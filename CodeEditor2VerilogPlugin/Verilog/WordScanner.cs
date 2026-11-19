@@ -144,11 +144,11 @@ namespace pluginVerilog.Verilog
         /// The rule set that applies to the file currently being parsed.
         ///
         /// <para>
-        /// A <c>.rule</c> file configures the severity of the parser rules for
+        /// A <c>.rule.yaml</c> file configures the severity of the parser rules for
         /// every source file below the directory that contains it, so the rule
         /// set has to be resolved per file instead of using the project wide
         /// default (<see cref="ProjectProperty.RuleSet"/>). Files that no
-        /// <c>.rule</c> file covers get the built-in defaults.
+        /// <c>.rule.yaml</c> file covers get the built-in defaults.
         /// </para>
         /// </summary>
         public pluginVerilog.RuleSet RuleSet

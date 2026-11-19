@@ -226,8 +226,8 @@ namespace pluginVerilog.Verilog
                 }
                 string name = word.Text;
                 word.Color(CodeDrawStyle.ColorType.Variable);
-                // the rule set is resolved per file: a .rule file applies to
-                // every source file below its directory
+                // the rule set is resolved per file: a .rule.yaml file applies
+                // to every source file below its directory
                 if (direction == Port.DirectionEnum.Undefined) word.ApplyRule(word.RuleSet.ImplicitModportDirection);
                 word.MoveNext();
 

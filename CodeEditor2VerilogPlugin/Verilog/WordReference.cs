@@ -91,7 +91,7 @@ namespace pluginVerilog.Verilog
         }
         /// <summary>
         /// The rule set that applies to the file this reference belongs to
-        /// (<c>.rule</c> file of the containing directory, falling back to the
+        /// (<c>.rule.yaml</c> file of the containing directory, falling back to the
         /// project wide default). Returns the built-in default rule set when
         /// the project property cannot be resolved.
         /// </summary>

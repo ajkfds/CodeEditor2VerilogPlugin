@@ -4,10 +4,10 @@ using System.Threading.Tasks;
 namespace pluginVerilog.Data
 {
     /// <summary>
-    /// TextFile representation of a <c>.rule</c> file.
+    /// TextFile representation of a <c>.rule.yaml</c> file.
     ///
     /// <para>
-    /// A <c>.rule</c> file holds the severity settings of the parser rules as
+    /// A <c>.rule.yaml</c> file holds the severity settings of the parser rules as
     /// YAML (<c>rules: - name: ... / severity: ...</c>). The file applies to
     /// every source file below the directory that contains it: on accept the
     /// parsed rule set is registered in

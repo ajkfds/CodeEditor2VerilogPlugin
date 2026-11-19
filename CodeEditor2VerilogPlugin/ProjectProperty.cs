@@ -27,13 +27,13 @@ namespace pluginVerilog
 
         /// <summary>
         /// The project the rule sets belong to (used to resolve the absolute
-        /// paths of the <c>.rule</c> files while scanning the workspace).
+        /// paths of the <c>.rule.yaml</c> files while scanning the workspace).
         /// </summary>
         private Project? project;
 
         /// <summary>
         /// Default rule set: used for every file that is not covered by a
-        /// <c>.rule</c> file.
+        /// <c>.rule.yaml</c> file.
         /// </summary>
         public RuleSet RuleSet = new RuleSet();
 
@@ -45,14 +45,14 @@ namespace pluginVerilog
         /// Guards <see cref="ruleSets"/> / <see cref="scannedRootPath"/>.
         /// Parsing runs on background threads, so the lookup from
         /// <see cref="GetRuleSet"/> may happen while the workspace scan or a
-        /// <c>.rule</c> file accept replaces the table.
+        /// <c>.rule.yaml</c> file accept replaces the table.
         /// </summary>
         private readonly object ruleSetLock = new object();
 
         /// <summary>
         /// Rule sets keyed by the directory they apply to (project relative,
-        /// '/' separated, "" = project root). A <c>.rule</c> file applies to
-        /// every source file below the directory that contains it.
+        /// '/' separated, "" = project root). A <c>.rule.yaml</c> file applies
+        /// to every source file below the directory that contains it.
         /// </summary>
         private Dictionary<string, RuleSet> ruleSets = new Dictionary<string, RuleSet>(StringComparer.OrdinalIgnoreCase);
 
@@ -108,11 +108,13 @@ namespace pluginVerilog
         }
 
         /// <summary>
-        /// Registers the rule set of a <c>.rule</c> file. The rule set applies
-        /// to every source file below the directory that contains the
-        /// <c>.rule</c> file.
+        /// Registers the rule set of a <c>.rule.yaml</c> file. The rule set
+        /// applies to every source file below the directory that contains the
+        /// <c>.rule.yaml</c> file.
         /// </summary>
-        /// <param name="ruleFilePath">project relative path of the .rule file</param>
+        /// <param name="ruleFilePath">
+        /// project relative path of the .rule.yaml file
+        /// </param>
         /// <param name="ruleSet">the loaded rule set (null removes the entry)</param>
         public void SetRuleSet(string ruleFilePath, RuleSet? ruleSet)
         {
@@ -134,9 +136,9 @@ namespace pluginVerilog
         /// Returns the rule set that applies to <paramref name="relativePath"/>.
         ///
         /// <para>
-        /// The deepest directory with a <c>.rule</c> file wins, so a
-        /// <c>.rule</c> in <c>src/rtl</c> overrides one in <c>src</c>. When no
-        /// <c>.rule</c> file covers the file, <see cref="RuleSet"/> (the
+        /// The deepest directory with a <c>.rule.yaml</c> file wins, so a
+        /// <c>.rule.yaml</c> in <c>src/rtl</c> overrides one in <c>src</c>. When
+        /// no <c>.rule.yaml</c> file covers the file, <see cref="RuleSet"/> (the
         /// built-in defaults) is returned.
         /// </para>
         /// </summary>
@@ -160,7 +162,7 @@ namespace pluginVerilog
         }
 
         /// <summary>
-        /// Scans the workspace for <c>.rule</c> files the first time a rule
+        /// Scans the workspace for <c>.rule.yaml</c> files the first time a rule
         /// set is requested (and again when the project root changes), so the
         /// rules are available during parsing no matter in which order the
         /// files are parsed.
@@ -187,7 +189,7 @@ namespace pluginVerilog
         }
 
         /// <summary>
-        /// Re-reads every <c>.rule</c> file of the workspace and replaces the
+        /// Re-reads every <c>.rule.yaml</c> file of the workspace and replaces the
         /// registered rule sets.
         /// </summary>
         public void RefreshRuleSets()
@@ -200,9 +202,14 @@ namespace pluginVerilog
                 string rootPath = project.RootPath ?? "";
                 if (rootPath.Length != 0 && System.IO.Directory.Exists(rootPath))
                 {
+                    // Enumerate once and filter on the extension: two passes would
+                    // make a directory that holds both spellings depend on which
+                    // pass ran last.
                     foreach (string filePath in System.IO.Directory.EnumerateFiles(
-                        rootPath, "*" + RuleFileExtension, System.IO.SearchOption.AllDirectories))
+                        rootPath, "*", System.IO.SearchOption.AllDirectories))
                     {
+                        if (!IsRuleFilePath(filePath)) continue;
+
                         string relativePath = project.GetRelativePath(filePath);
                         if (IsInSkippedDirectory(relativePath)) continue;
 
@@ -223,8 +230,43 @@ namespace pluginVerilog
             }
         }
 
-        /// <summary>Extension of the rule files (<c>.rule</c>).</summary>
-        public const string RuleFileExtension = ".rule";
+        /// <summary>
+        /// Extension of the rule files (<c>.rule.yaml</c>).
+        /// </summary>
+        /// <remarks>
+        /// The double extension says what the file is (a rule set) and what it
+        /// contains (YAML), so editors highlight it as YAML out of the box. The
+        /// older <c>.rule</c> spelling is still recognised by
+        /// <see cref="RuleFileExtensions"/> so an existing workspace keeps
+        /// working; only new files are created with the long name.
+        /// </remarks>
+        public const string RuleFileExtension = ".rule.yaml";
+
+        /// <summary>
+        /// Every extension a rule file may use, newest first. The first entry is
+        /// what <see cref="FileTypes.RuleFile.CreateNewFile"/> writes.
+        /// </summary>
+        /// <remarks>
+        /// <c>.rule</c> is the original spelling and stays readable: a workspace
+        /// that already has one must not silently stop applying its severities
+        /// because the extension changed. It is not offered for new files.
+        /// </remarks>
+        public static readonly string[] RuleFileExtensions = { ".rule.yaml", ".rule" };
+
+        /// <summary>
+        /// True when <paramref name="path"/> names a rule file, whichever
+        /// spelling it uses.
+        /// </summary>
+        public static bool IsRuleFilePath(string path)
+        {
+            if (string.IsNullOrEmpty(path)) return false;
+            string lower = path.ToLowerInvariant();
+            foreach (string extension in RuleFileExtensions)
+            {
+                if (lower.EndsWith(extension, StringComparison.Ordinal)) return true;
+            }
+            return false;
+        }
 
         /// <summary>
         /// Build directories / VCS metadata never contribute rule files.

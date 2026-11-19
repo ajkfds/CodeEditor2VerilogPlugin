@@ -3,9 +3,14 @@ using System.Threading.Tasks;
 namespace pluginVerilog.FileTypes
 {
     /// <summary>
-    /// <c>.rule</c> file type: YAML rule set (name / severity) that applies to
-    /// every source file below the directory containing the file.
+    /// <c>.rule.yaml</c> file type: YAML rule set (name / severity) that applies
+    /// to every source file below the directory containing the file.
     /// </summary>
+    /// <remarks>
+    /// The older <c>.rule</c> spelling is accepted too, so an existing workspace
+    /// keeps its severities; new files are created as <c>.rule.yaml</c> (see
+    /// <see cref="ProjectProperty.RuleFileExtension"/>).
+    /// </remarks>
     public class RuleFile : CodeEditor2.FileTypes.FileType
     {
         public static string TypeID = "RuleFile";
@@ -13,11 +18,7 @@ namespace pluginVerilog.FileTypes
 
         public override bool IsThisFileType(string relativeFilePath, CodeEditor2.Data.Project project)
         {
-            if (relativeFilePath.ToLower().EndsWith(ProjectProperty.RuleFileExtension))
-            {
-                return true;
-            }
-            return false;
+            return ProjectProperty.IsRuleFilePath(relativeFilePath);
         }
 
         public override async Task<CodeEditor2.Data.File> CreateFile(string relativeFilePath, CodeEditor2.Data.Project project)
