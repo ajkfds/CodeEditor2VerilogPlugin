@@ -26,6 +26,13 @@ namespace pluginVerilog.CoreBridge
             public bool Enabled { get; init; }
             public string? Reason { get; init; }
             public int Group { get; init; }
+
+            /// <summary>
+            /// Icon for the client: an icon name under the extension's
+            /// <c>icons/</c> folder, or a <c>$(...)</c> codicon. Null when the
+            /// row has none.
+            /// </summary>
+            public string? VsCodeIcon { get; init; }
         }
 
         /// <summary>The menu for one node.</summary>
@@ -97,6 +104,7 @@ namespace pluginVerilog.CoreBridge
                     Enabled = entry.Enabled,
                     Reason = entry.Reason,
                     Group = entry.Group,
+                    VsCodeIcon = entry.VsCodeIcon,
                 });
             }
             return legacy;

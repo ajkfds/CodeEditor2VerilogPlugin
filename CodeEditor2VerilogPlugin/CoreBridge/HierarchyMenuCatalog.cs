@@ -212,10 +212,40 @@ namespace pluginVerilog.CoreBridge
             public string? Argument { get; init; }
 
             /// <summary>
-            /// Icon asset path for the desktop menu (the editor draws SVG icons;
-            /// VS Code resolves its own). Null when the row has no icon.
+            /// Icon asset path for the desktop menu (the editor draws SVG
+            /// icons). Null when the row has no icon.
             /// </summary>
+            /// <remarks>
+            /// This is a repository-relative path into the editor's own assets,
+            /// so it means nothing to VS Code. Use
+            /// <see cref="VsCodeIcon"/> for the extension side.
+            /// </remarks>
             public string? IconPath { get; init; }
+
+            /// <summary>
+            /// Icon for the VS Code command contribution, or null when the row
+            /// has none.
+            /// </summary>
+            /// <remarks>
+            /// <para>
+            /// Two forms, matching <c>contributes.commands[].icon</c>:
+            /// </para>
+            /// <list type="bullet">
+            /// <item>a bare icon name that ships in the extension's
+            /// <c>icons/</c> folder (<c>"verilog-document"</c>,
+            /// <c>"interface"</c>, ...) - the light and dark files are paired
+            /// automatically;</item>
+            /// <item>a codicon in <c>$(...)</c> form (<c>"$(trash)"</c>) for a
+            /// row with no matching asset.</item>
+            /// </list>
+            /// <para>
+            /// Note that VS Code does <b>not</b> draw icons in
+            /// <c>view/item/context</c> menus - the schema has no icon property
+            /// there and the rows are text only. This icon is what the command
+            /// palette and any toolbar placement show.
+            /// </para>
+            /// </remarks>
+            public string? VsCodeIcon { get; init; }
 
             /// <summary>
             /// Icon colour as <c>0xAARRGGBB</c>. Kept as a plain number so this
@@ -342,6 +372,9 @@ namespace pluginVerilog.CoreBridge
                 Detail = "reveal the node's file in the OS file manager",
                 Group = 40,
                 Action = ActionKind.RevealInOS,
+                IconPath = "CodeEditor2/Assets/Icons/search.svg",
+                IconColor = 0x64C8C8FF,
+                VsCodeIcon = "$(folder-opened)",
             },
             new Entry
             {
@@ -350,6 +383,9 @@ namespace pluginVerilog.CoreBridge
                 Detail = "copy the workspace-relative path",
                 Group = 50,
                 Action = ActionKind.CopyPath,
+                IconPath = "CodeEditor2/Assets/Icons/gear.svg",
+                IconColor = 0x64C8C8FF,
+                VsCodeIcon = "$(clippy)",
             },
             new Entry
             {
@@ -359,6 +395,9 @@ namespace pluginVerilog.CoreBridge
                 Targets = AppliesTo.Instance,
                 Group = 50,
                 Action = ActionKind.CopyInstancePath,
+                IconPath = "CodeEditor2/Assets/Icons/gear.svg",
+                IconColor = 0x64C8C8FF,
+                VsCodeIcon = "$(clippy)",
             },
             new Entry
             {
@@ -368,6 +407,9 @@ namespace pluginVerilog.CoreBridge
                 Targets = AppliesTo.File | AppliesTo.Instance,
                 Group = 60,
                 Action = ActionKind.ShowProperty,
+                IconPath = "CodeEditor2/Assets/Icons/gear.svg",
+                IconColor = 0x64C8C8FF,
+                VsCodeIcon = "$(gear)",
             },
 
             // ---- rows the editor used to build inline ----------------------
@@ -395,6 +437,9 @@ namespace pluginVerilog.CoreBridge
                         Targets = AppliesTo.Project | AppliesTo.Folder | AppliesTo.File | AppliesTo.Instance,
                         Group = 10,
                         Action = ActionKind.CreateFolder,
+                        IconPath = "CodeEditor2/Assets/Icons/folder.svg",
+                        IconColor = 0x646496FF,
+                        VsCodeIcon = "folder",
                     },
                     new Entry
                     {
@@ -404,6 +449,9 @@ namespace pluginVerilog.CoreBridge
                         Targets = AppliesTo.Project | AppliesTo.Folder | AppliesTo.File | AppliesTo.Instance,
                         Group = 10,
                         Action = ActionKind.CreateFile,
+                        IconPath = "CodeEditor2/Assets/Icons/paper2.svg",
+                        IconColor = 0x646464FF,
+                        VsCodeIcon = "$(new-file)",
                     },
                     new Entry
                     {
@@ -416,6 +464,7 @@ namespace pluginVerilog.CoreBridge
                         Argument = "verilog",
                         IconPath = "CodeEditor2VerilogPlugin/Assets/Icons/verilogDocument.svg",
                         IconColor = 0x64C8F0F0,
+                        VsCodeIcon = "verilog-document",
                     },
                     new Entry
                     {
@@ -428,6 +477,7 @@ namespace pluginVerilog.CoreBridge
                         Argument = "systemverilog",
                         IconPath = "CodeEditor2VerilogPlugin/Assets/Icons/systemVerilogDocument.svg",
                         IconColor = 0x64C8F0F0,
+                        VsCodeIcon = "systemverilog-document",
                     },
                     new Entry
                     {
@@ -440,6 +490,7 @@ namespace pluginVerilog.CoreBridge
                         Argument = "interface",
                         IconPath = "CodeEditor2VerilogPlugin/Assets/Icons/systemVerilogDocument.svg",
                         IconColor = 0x64C8F0F0,
+                        VsCodeIcon = "systemverilog-document",
                     },
                 },
             },
@@ -451,6 +502,7 @@ namespace pluginVerilog.CoreBridge
                 Targets = AppliesTo.Folder | AppliesTo.File,
                 Group = 20,
                 Action = ActionKind.DeleteNode,
+                VsCodeIcon = "$(trash)",
             },
         };
 

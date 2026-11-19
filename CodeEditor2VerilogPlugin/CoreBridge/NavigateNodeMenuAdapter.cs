@@ -73,6 +73,19 @@ namespace pluginVerilog.CoreBridge
             public uint IconColor { get; init; }
 
             /// <summary>
+            /// Icon the VS Code client can draw: an icon name under the
+            /// extension's <c>icons/</c> folder, or a <c>$(...)</c> codicon.
+            /// Null when the row has none.
+            /// </summary>
+            /// <remarks>
+            /// The QuickPick fallback uses this. The native
+            /// <c>view/item/context</c> menu cannot show an icon (the schema has
+            /// no icon property for those rows), so this is the only place the
+            /// extension can draw one next to a node-menu row.
+            /// </remarks>
+            public string? VsCodeIcon { get; init; }
+
+            /// <summary>
             /// The row needs a window only the desktop editor owns, so an LSP host
             /// can never run it. Declared through
             /// <see cref="HierarchyMenuCatalog.Entry.Hosts"/>, so a VS Code build
@@ -197,6 +210,7 @@ namespace pluginVerilog.CoreBridge
                     IsSubmenu = entry.IsSubmenu,
                     IconPath = entry.IconPath,
                     IconColor = entry.IconColor,
+                    VsCodeIcon = entry.VsCodeIcon,
                     DesktopOnly = (entry.Hosts & HierarchyMenuCatalog.Hosts.VsCode) == 0,
                 });
             }

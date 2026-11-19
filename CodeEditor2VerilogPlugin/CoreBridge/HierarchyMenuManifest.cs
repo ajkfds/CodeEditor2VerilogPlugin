@@ -221,6 +221,14 @@ namespace pluginVerilog.CoreBridge
         /// Adds the <c>contributes.commands</c> row. The title is the catalog
         /// label, so the menu shows exactly what C# declares.
         /// </summary>
+        /// <remarks>
+        /// <c>icon</c> is emitted when the row declares a
+        /// <see cref="HierarchyMenuCatalog.Entry.VsCodeIcon"/>: a bare icon name
+        /// becomes a light / dark pair from the extension's <c>icons/</c> folder,
+        /// and a <c>$(...)</c> codicon is passed through. The context menu does
+        /// not render it (VS Code has no icon property there) - it is what the
+        /// command palette and toolbar placements show.
+        /// </remarks>
         private static void AddCommand(Manifest manifest, HierarchyMenuCatalog.Entry entry)
         {
             manifest.Commands.Add(new ManifestCommand
@@ -228,7 +236,28 @@ namespace pluginVerilog.CoreBridge
                 Command = CommandId(entry.Id),
                 Title = entry.Label,
                 Category = "RTL Hierarchy",
+                Icon = BuildIcon(entry.VsCodeIcon),
             });
+        }
+
+        /// <summary>
+        /// Turns a catalog icon name into a <c>contributes.commands[].icon</c>
+        /// value, or null when the row has none.
+        /// </summary>
+        private static ManifestIcon? BuildIcon(string? icon)
+        {
+            if (string.IsNullOrEmpty(icon)) return null;
+
+            // A codicon ("$(trash)") is already in the form VS Code wants.
+            if (icon!.StartsWith("$(", StringComparison.Ordinal)) return new ManifestIcon { Codicon = icon };
+
+            // A bare name refers to the extension's icons/ folder. The light and
+            // dark files are paired so the icon follows the theme.
+            return new ManifestIcon
+            {
+                Light = "icons/" + icon + ".svg",
+                Dark = "icons/" + icon + "-dark.svg",
+            };
         }
 
         /// <summary>
@@ -881,6 +910,58 @@ namespace pluginVerilog.CoreBridge
         public string Command { get; set; } = string.Empty;
         public string Title { get; set; } = string.Empty;
         public string Category { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Command icon, or null. Serialised either as a light / dark pair (a
+        /// bare icon name) or as a single codicon string.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonConverter(typeof(ManifestIconConverter))]
+        public ManifestIcon? Icon { get; set; }
+    }
+
+    /// <summary>
+    /// A <c>contributes.commands[].icon</c> value: either a theme-aware pair of
+    /// asset paths or one codicon.
+    /// </summary>
+    /// <remarks>
+    /// VS Code accepts <c>"$(codicon)"</c> or <c>{ "light": ..., "dark": ... }</c>.
+    /// Keeping both shapes here means the catalog can name an asset when one
+    /// exists and fall back to a codicon when it does not.
+    /// </remarks>
+    public sealed class ManifestIcon
+    {
+        public string? Codicon { get; set; }
+        public string? Light { get; set; }
+        public string? Dark { get; set; }
+    }
+
+    /// <summary>
+    /// Serialises a <c>contributes.commands[].icon</c> in whichever shape it
+    /// takes: a codicon as a plain string, an asset as a light / dark object.
+    /// </summary>
+    public sealed class ManifestIconConverter : System.Text.Json.Serialization.JsonConverter<ManifestIcon>
+    {
+        public override ManifestIcon Read(
+            ref System.Text.Json.Utf8JsonReader reader,
+            Type typeToConvert,
+            System.Text.Json.JsonSerializerOptions options)
+            => throw new NotSupportedException("the manifest is write-only");
+
+        public override void Write(
+            System.Text.Json.Utf8JsonWriter writer,
+            ManifestIcon value,
+            System.Text.Json.JsonSerializerOptions options)
+        {
+            if (!string.IsNullOrEmpty(value.Codicon))
+            {
+                writer.WriteStringValue(value.Codicon);
+                return;
+            }
+            writer.WriteStartObject();
+            if (!string.IsNullOrEmpty(value.Light)) writer.WriteString("light", value.Light);
+            if (!string.IsNullOrEmpty(value.Dark)) writer.WriteString("dark", value.Dark);
+            writer.WriteEndObject();
+        }
     }
 
     /// <summary>One <c>contributes.submenus</c> row.</summary>
