@@ -111,6 +111,9 @@ namespace pluginVerilog.CoreBridge
 
                 if (entry.IsSubmenu)
                 {
+                    // A flyout with no runnable child is worse than no flyout:
+                    // VS Code would show a "Add" entry that opens onto nothing.
+                    if (!HasOfferedChild(entry)) continue;
                     AddSubmenu(manifest, entry, menu);
                     continue;
                 }
@@ -129,12 +132,38 @@ namespace pluginVerilog.CoreBridge
         }
 
         /// <summary>
-        /// Whether the row is part of the extension manifest. A
-        /// <see cref="HierarchyMenuCatalog.Hosts.Desktop"/> row cannot run in VS
-        /// Code, so it is never written to <c>package.json</c>.
+        /// Whether the row is part of the extension manifest.
         /// </summary>
+        /// <remarks>
+        /// <para>
+        /// A <see cref="HierarchyMenuCatalog.Hosts.Desktop"/> row cannot run in VS
+        /// Code, so it is never written to <c>package.json</c>.
+        /// </para>
+        /// <para>
+        /// <see cref="HierarchyMenuCatalog.Entry.IsAvailable"/> is checked too: a
+        /// row whose action needs a plugin that is not loaded here would be
+        /// written as a permanently unavailable entry, which is worse than
+        /// leaving it out. The generator therefore runs with the plugins it
+        /// intends to publish loaded.
+        /// </para>
+        /// </remarks>
         private static bool OffersToVsCode(HierarchyMenuCatalog.Entry entry)
-            => (entry.Hosts & HierarchyMenuCatalog.Hosts.VsCode) != 0;
+            => (entry.Hosts & HierarchyMenuCatalog.Hosts.VsCode) != 0 && entry.IsAvailable();
+
+        /// <summary>
+        /// True when at least one child of the grouping row would be written to
+        /// the manifest, i.e. the flyout would not be empty.
+        /// </summary>
+        private static bool HasOfferedChild(HierarchyMenuCatalog.Entry entry)
+        {
+            foreach (HierarchyMenuCatalog.Entry child in HierarchyMenuCatalog.Children(entry))
+            {
+                if (!OffersToVsCode(child)) continue;
+                if (child.IsSubmenu && !HasOfferedChild(child)) continue;
+                return true;
+            }
+            return false;
+        }
 
         /// <summary>
         /// Emits a submenu: its <c>contributes.submenus</c> entry, one row in

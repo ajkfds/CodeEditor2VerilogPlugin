@@ -178,6 +178,11 @@ namespace pluginVerilog.CoreBridge
                 if ((entry.Hosts & host) == 0) continue;
                 if ((entry.Targets & target) == 0) continue;
 
+                // A row can be unavailable right now (a plugin that owns the
+                // action is not loaded). A grouping row inherits that from its
+                // children: showing an empty submenu is worse than hiding it.
+                if (!IsOffered(entry, host, target)) continue;
+
                 string? reason = entry.IsSubmenu ? null : GetDisabledReason(entry, context);
                 result.Entries.Add(new MenuEntry
                 {
@@ -196,6 +201,35 @@ namespace pluginVerilog.CoreBridge
                 });
             }
             return result;
+        }
+
+        /// <summary>
+        /// Whether the row should be listed at all: its host and node filters
+        /// pass, and it is available right now.
+        /// </summary>
+        /// <remarks>
+        /// A grouping row is offered when at least one of its children is, so an
+        /// "Add" submenu never opens onto nothing. The host / target filters are
+        /// re-applied to the children because a child can be narrower than its
+        /// parent (a submenu offered for files and folders with a child that
+        /// only makes sense for folders).
+        /// </remarks>
+        private static bool IsOffered(
+            HierarchyMenuCatalog.Entry entry,
+            HierarchyMenuCatalog.Hosts host,
+            HierarchyMenuCatalog.AppliesTo target)
+        {
+            if ((entry.Hosts & host) == 0) return false;
+            if ((entry.Targets & target) == 0) return false;
+            if (!entry.IsAvailable()) return false;
+
+            if (!entry.IsSubmenu) return true;
+
+            foreach (HierarchyMenuCatalog.Entry child in HierarchyMenuCatalog.Children(entry))
+            {
+                if (IsOffered(child, host, target)) return true;
+            }
+            return false;
         }
 
         /// <summary>

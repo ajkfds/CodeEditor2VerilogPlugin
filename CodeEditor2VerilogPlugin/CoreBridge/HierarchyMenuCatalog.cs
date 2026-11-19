@@ -268,6 +268,49 @@ namespace pluginVerilog.CoreBridge
             /// tree the way a separately authored flag could.
             /// </summary>
             public bool IsSubmenu => Children.Count > 0;
+
+            /// <summary>
+            /// Extra condition evaluated when a menu is built, or null when the
+            /// row is always offered. Used for a row whose usefulness depends on
+            /// something only the running host knows - a simulation plugin being
+            /// loaded, an LLM having been configured - so a menu does not show an
+            /// action that cannot work.
+            /// </summary>
+            /// <remarks>
+            /// <para>
+            /// This is <b>not</b> a substitute for <see cref="Hosts"/>:
+            /// <see cref="Hosts"/> says which host can ever run the row, and
+            /// <see cref="Available"/> refines it at run time. Both must pass.
+            /// </para>
+            /// <para>
+            /// The manifest only asks about a row whose <see cref="Hosts"/>
+            /// includes VS Code, and it treats a missing plugin as "not
+            /// available" - so a row that needs the Icarus plugin is never
+            /// written into <c>package.json</c> even though VS Code could in
+            /// principle call it. That is deliberate: the extension has no way
+            /// to run it, and a row that always reports "unavailable" is worse
+            /// than no row.
+            /// </para>
+            /// </remarks>
+            public Func<bool>? Available { get; init; }
+
+            /// <summary>
+            /// Whether the row should be offered right now. A null
+            /// <see cref="Available"/> means "always".
+            /// </summary>
+            public bool IsAvailable()
+            {
+                try
+                {
+                    return Available == null || Available();
+                }
+                catch (Exception)
+                {
+                    // A predicate that throws must not take the whole menu down;
+                    // hide the row instead.
+                    return false;
+                }
+            }
         }
 
         private static readonly List<Entry> entries = new List<Entry>
