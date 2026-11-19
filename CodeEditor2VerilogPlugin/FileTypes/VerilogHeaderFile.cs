@@ -5,7 +5,8 @@ namespace pluginVerilog.FileTypes
 {
     public class VerilogHeaderFile : CodeEditor2.FileTypes.FileType
     {
-        public override string ID { get { return "VerilogHeaderFile"; } }
+        public static string TypeID = "VerilogHeaderFile";
+        public override string ID { get { return TypeID; } }
 
         public override bool IsThisFileType(string relativeFilePath, CodeEditor2.Data.Project project)
         {
