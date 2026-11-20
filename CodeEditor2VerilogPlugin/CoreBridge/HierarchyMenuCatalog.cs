@@ -403,8 +403,14 @@ namespace pluginVerilog.CoreBridge
             {
                 Id = MenuId.ShowProperty,
                 Label = "Property",
-                Detail = "show the node's parsed properties",
-                Targets = AppliesTo.File | AppliesTo.Instance,
+                Detail = "show the node's properties",
+                // Every node kind: the editor's inline row offered this on the
+                // project, folders, files, instances, headers and packages, and
+                // the property form only needs the node's Item (not a parse
+                // result). Narrowing this to File | Instance made the row
+                // disappear from the other nodes when the catalog replaced the
+                // inline rows.
+                Targets = AppliesTo.All,
                 Group = 60,
                 Action = ActionKind.ShowProperty,
                 IconPath = "CodeEditor2/Assets/Icons/gear.svg",

@@ -297,7 +297,18 @@ namespace pluginVerilog.CoreBridge
                     return null;
 
                 case HierarchyMenuCatalog.ActionKind.ShowProperty:
-                    return context.File == null ? "the file could not be resolved" : null;
+                    // Every node kind has properties: the editor's form reads the
+                    // node's Item (so it works for a project or folder, which has
+                    // no parse result), and the text rendering below falls back to
+                    // the paths. Only a node with no path and no file has nothing
+                    // to show.
+                    if (context.File == null
+                        && string.IsNullOrEmpty(context.FsPath)
+                        && string.IsNullOrEmpty(context.WorkspaceRelativePath))
+                    {
+                        return "this node has no file";
+                    }
+                    return null;
 
                 case HierarchyMenuCatalog.ActionKind.DesktopHandler:
                     return entry.Handler == null ? "this entry has no handler" : null;
@@ -636,6 +647,7 @@ namespace pluginVerilog.CoreBridge
         private static string BuildPropertyText(NavigateNodeMenuContext context)
         {
             StringBuilder sb = new StringBuilder();
+            sb.Append("kind: ").Append(DescribeKind(context.Kind)).Append('\n');
             sb.Append("label: ").Append(context.NodeLabel ?? "").Append('\n');
             sb.Append("path: ").Append(context.WorkspaceRelativePath ?? "").Append('\n');
             sb.Append("file: ").Append(context.FsPath ?? "").Append('\n');
@@ -651,6 +663,25 @@ namespace pluginVerilog.CoreBridge
                 sb.Append("warnings: ").Append(parsedDocument.WarningCount).Append('\n');
             }
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Human readable name of a node kind, so the property text says what was
+        /// right-clicked (the row applies to every kind, including folders and
+        /// the project root, which carry no parse result).
+        /// </summary>
+        private static string DescribeKind(HierarchyMenuCatalog.AppliesTo kind)
+        {
+            switch (kind)
+            {
+                case HierarchyMenuCatalog.AppliesTo.Project: return "project";
+                case HierarchyMenuCatalog.AppliesTo.Folder: return "folder";
+                case HierarchyMenuCatalog.AppliesTo.File: return "file";
+                case HierarchyMenuCatalog.AppliesTo.Instance: return "instance";
+                case HierarchyMenuCatalog.AppliesTo.Header: return "header";
+                case HierarchyMenuCatalog.AppliesTo.Package: return "package";
+                default: return "unknown";
+            }
         }
     }
 }

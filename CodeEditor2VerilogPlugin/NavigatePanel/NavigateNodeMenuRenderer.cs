@@ -134,6 +134,19 @@ namespace pluginVerilog.NavigatePanel
             NavigateNodeMenuContext context,
             NavigatePanelNode node)
         {
+            // "Property" is the one row whose desktop rendering is not text: the
+            // editor owns an editable property form bound to the node
+            // (ItemPropertyForm, filled by the project's ProjectProperties), which
+            // the host-neutral adapter cannot express. Before the catalog existed
+            // this was built inline in NavigatePanelNode.createContextMenu; the
+            // row now comes from the catalog, so the form has to be opened here.
+            // VS Code keeps the text rendering the adapter returns.
+            if (string.Equals(id, HierarchyMenuCatalog.MenuId.ShowProperty, StringComparison.Ordinal))
+            {
+                await ShowPropertyFormAsync(node);
+                return;
+            }
+
             NavigateNodeMenuAdapter.InvokeResult result =
                 NavigateNodeMenuAdapter.Invoke(id, context);
 
@@ -176,6 +189,32 @@ namespace pluginVerilog.NavigatePanel
                 // document tab so a multi-line list stays readable.
                 CodeEditor2.Controller.AppendLog(result.Text, Avalonia.Media.Colors.White);
                 return;
+            }
+        }
+
+        /// <summary>
+        /// Opens the editor's property form for <paramref name="node"/>.
+        /// </summary>
+        /// <remarks>
+        /// This is what the inline row in <c>NavigatePanelNode</c> used to do
+        /// (<c>menuItem_OpenProperty_Click</c>): the form is editable and asks the
+        /// project's <c>ProjectProperties</c> to fill their tabs, so it cannot be
+        /// reduced to the text the adapter produces for VS Code. Failures are
+        /// logged rather than thrown, like the old handler.
+        /// </remarks>
+        private static async Task ShowPropertyFormAsync(NavigatePanelNode node)
+        {
+            try
+            {
+                CodeEditor2.Tools.ItemPropertyForm form = new CodeEditor2.Tools.ItemPropertyForm(node);
+                form.WindowStartupLocation = Avalonia.Controls.WindowStartupLocation.CenterOwner;
+                await CodeEditor2.Controller.ShowDialogAsync(form);
+            }
+            catch (Exception ex)
+            {
+                if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
+                CodeEditor2.Controller.AppendLog(
+                    "# Exception : " + ex.Message, Avalonia.Media.Colors.Red);
             }
         }
 
