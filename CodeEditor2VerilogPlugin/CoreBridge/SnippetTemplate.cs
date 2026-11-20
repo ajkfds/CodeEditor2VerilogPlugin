@@ -96,6 +96,45 @@ namespace pluginVerilog.CoreBridge
         }
 
         /// <summary>
+        /// Appends another template's parts, keeping its field numbering.
+        /// </summary>
+        /// <remarks>
+        /// Used when a snippet has to prepend generated text (the signal
+        /// declarations of "Fill Port Connections") to the text built from a
+        /// shared template: rebuilding the literal string would drop the tab
+        /// stops, and re-adding the fields would renumber them.
+        /// </remarks>
+        public void Append(SnippetTemplate other)
+        {
+            if (other == null) return;
+            int offset = definitions.Count;
+            foreach (FieldDefinition definition in other.definitions)
+            {
+                definitions.Add(new FieldDefinition
+                {
+                    Index = definition.Index + offset,
+                    Name = definition.Name,
+                    Default = definition.Default,
+                    Candidates = definition.Candidates,
+                });
+            }
+            foreach (Part part in other.parts)
+            {
+                if (part is LiteralPart literal)
+                {
+                    parts.Add(new LiteralPart { Text = literal.Text });
+                    continue;
+                }
+                FieldPart field = (FieldPart)part;
+                parts.Add(new FieldPart
+                {
+                    Index = field.Index + offset,
+                    IsMirror = field.IsMirror,
+                });
+            }
+        }
+
+        /// <summary>
         /// Adds a tab stop and returns its index. When
         /// <paramref name="candidates"/> has more than one entry the field
         /// becomes a choice and the first candidate is its default.

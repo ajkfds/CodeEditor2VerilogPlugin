@@ -54,8 +54,15 @@ namespace pluginVerilog.Verilog.Snippets
             int start = SnippetBuilder.LastIndex(instantiation.BeginIndexReference);
             int end = SnippetBuilder.LastIndex(instantiation.LastIndexReference) + 1;
             string indent = SnippetBuilder.GetIndent(parsedDocument, start);
-            CoreBridge.SnippetTemplate template =
-                SnippetBuilder.BuildInstantiationTemplate(module, instantiation.Name, indent, instantiation);
+
+            // The enclosing building block is what decides whether a derived
+            // signal name still has to be declared, so the tool has to know it.
+            // The replacement range starts inside the instance, so looking the
+            // block up at "start" gives the module the instantiation lives in.
+            Verilog.BuildingBlocks.BuildingBlock? enclosing = parsedDocument.GetBuildingBlockAt(start);
+
+            CoreBridge.SnippetTemplate template = SnippetBuilder.BuildInstantiationTemplate(
+                module, instantiation.Name, indent, instantiation, enclosing);
 
             List<CoreBridge.SnippetField> fields = new();
             string plainText = template.ToPlainText(fields);

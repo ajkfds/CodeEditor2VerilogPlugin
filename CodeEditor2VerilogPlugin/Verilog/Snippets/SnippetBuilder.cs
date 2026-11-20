@@ -121,27 +121,44 @@ namespace pluginVerilog.Verilog.Snippets
         /// <summary>
         /// Builds the instantiation text: parameter overrides, then one named
         /// port connection per port. Ports already connected in
-        /// <paramref name="existing"/> keep their expression; the rest get an
-        /// <b>empty</b> <c>${n}</c> tab stop so the user types the signal.
+        /// <paramref name="existing"/> keep their expression.
         /// </summary>
+        /// <param name="enclosing">
+        /// The building block the text is inserted into, or <c>null</c> for
+        /// "blank connections".
+        /// <para>
+        /// The two tools that share this formatting differ in exactly one
+        /// respect, which is why this is a parameter and not a second method:
+        /// </para>
+        /// <list type="bullet">
+        /// <item><b>Insert Module Instance</b> (<c>null</c>) writes
+        /// <c>.port(  )</c> for every port - it never guesses a signal, so the
+        /// user fills them in;</item>
+        /// <item><b>Fill Port Connections</b> (the enclosing module) derives a
+        /// signal name from each unconnected port and declares it when the
+        /// enclosing module does not have it yet, so accepting the tool leaves a
+        /// usable instantiation instead of a wall of empty connections.</item>
+        /// </list>
+        /// </param>
         /// <remarks>
-        /// The editor's own <c>ModuleInstanceSnippet.getReplaceText</c> emits
-        /// <c>.port(  )</c> for every port - it never guesses a signal. The
-        /// adapter used to fill a placeholder default (<c>${1:clk}</c>), so
-        /// accepting the snippet silently wired the port to a signal that may
-        /// not exist. The blank tab stop matches the editor.
-        ///
-        /// Shared by <see cref="ModuleInstanceSnippet"/> (new instantiation) and
-        /// <see cref="PortConnectionCreateSnippet"/> (rewrite an existing one),
-        /// so the two cannot produce different text.
+        /// The derived name is the port name with the <c>_I</c> / <c>_O</c> /
+        /// <c>_IO</c> direction suffix removed and the rest lower-cased
+        /// (<c>CLK_I</c> -&gt; <c>clk</c>), and the declaration reuses the port's
+        /// own type. That is what the editor's original
+        /// <c>PortConnectionCreateSnippet.CreateString</c> did; it was lost when
+        /// the text generation moved into this shared helper, leaving every
+        /// connection blank.
         /// </remarks>
         public static CoreBridge.SnippetTemplate BuildInstantiationTemplate(
             Verilog.BuildingBlocks.Module module,
             string instanceName,
             string indent,
-            Verilog.Items.ModuleInstantiation? existing)
+            Verilog.Items.ModuleInstantiation? existing,
+            Verilog.BuildingBlocks.BuildingBlock? enclosing = null)
         {
             CoreBridge.SnippetTemplate template = new CoreBridge.SnippetTemplate();
+            StringBuilder declarations = new StringBuilder();
+            HashSet<string> declaredNames = new HashSet<string>(System.StringComparer.Ordinal);
 
             template.AppendText(module.Name + " ");
             if (module.PortParameterNameList.Count > 0)
@@ -195,11 +212,19 @@ namespace pluginVerilog.Verilog.Snippets
                 {
                     template.AppendText(connection.CreateString());
                 }
+                else if (enclosing != null)
+                {
+                    // Derive the signal name from the port the way the editor
+                    // always did (see the remarks above) and declare it when the
+                    // enclosing module does not have it yet.
+                    string signal = ConnectionName(port.Name);
+                    template.AppendText(signal);
+                    AppendSignalDeclaration(declarations, enclosing, signal, port, declaredNames);
+                }
                 else
                 {
-                    // Blank tab stop: the editor leaves the connection empty
-                    // instead of guessing a signal name (see the remarks on
-                    // BuildInstantiationTemplate).
+                    // Blank tab stop: "Insert Module Instance" never guesses a
+                    // signal, so the user fills every connection in.
                     template.AddField(port.Name, "");
                 }
                 template.AppendText(" )");
@@ -213,7 +238,109 @@ namespace pluginVerilog.Verilog.Snippets
             // the instance disappeared from the hierarchy and re-running the
             // tool on it failed.
             template.AppendText(indent + ");");
+
+            if (declarations.Length > 0)
+            {
+                // The declarations must precede the statement they are used by,
+                // so they are prepended. They are literal text (no tab stops).
+                CoreBridge.SnippetTemplate combined = new CoreBridge.SnippetTemplate();
+                combined.AppendText(declarations.ToString());
+                combined.Append(template);
+                return combined;
+            }
             return template;
+        }
+
+        /// <summary>
+        /// Signal name the editor derives for an unconnected port: the port name
+        /// with the direction suffix removed and the rest lower-cased
+        /// (<c>CLK_I</c> -&gt; <c>clk</c>, <c>DATA_O</c> -&gt; <c>data</c>).
+        /// </summary>
+        /// <remarks>
+        /// The suffix list is the one the original
+        /// <c>PortConnectionCreateSnippet</c> used (<c>_I</c> / <c>_O</c> /
+        /// <c>_IO</c>, compared case-insensitively).
+        /// </remarks>
+        public static string ConnectionName(string portName)
+        {
+            string name = portName;
+            foreach (string suffix in DirectionSuffixes)
+            {
+                if (name.EndsWith(suffix, System.StringComparison.OrdinalIgnoreCase))
+                {
+                    name = name.Substring(0, name.Length - suffix.Length);
+                }
+            }
+            return name.ToLowerInvariant();
+        }
+
+        /// <summary>
+        /// Direction suffixes stripped from a port name to make a signal name.
+        /// </summary>
+        private static readonly string[] DirectionSuffixes = { "_I", "_O", "_IO" };
+
+        /// <summary>
+        /// Appends <c>wire [..] name;</c> for <paramref name="signal"/> when
+        /// <paramref name="enclosing"/> does not already declare it, using the
+        /// port's own type so the connection is width-correct.
+        /// </summary>
+        /// <remarks>
+        /// The type comes from the port's data object: a net keeps its type, a
+        /// packed vector becomes a <c>wire</c> carrying the same packed
+        /// dimensions, and anything else reuses its declaration text. The
+        /// original editor implementation did the same three cases.
+        /// </remarks>
+        private static void AppendSignalDeclaration(
+            StringBuilder declarations,
+            Verilog.BuildingBlocks.BuildingBlock enclosing,
+            string signal,
+            Verilog.DataObjects.Port port,
+            HashSet<string> declaredNames)
+        {
+            if (enclosing.NamedElements.ContainsKey(signal)) return;
+            if (!declaredNames.Add(signal)) return;
+            if (port.DataObject == null) return;
+
+            Verilog.DataObjects.DataObject source = port.DataObject;
+            string typeText;
+            if (source is Verilog.DataObjects.Nets.Net net)
+            {
+                Verilog.DataObjects.Nets.Net declared = Verilog.DataObjects.Nets.Net.Create(
+                    signal, Verilog.DataObjects.Nets.Net.NetTypeEnum.Wire, net.DataType?.Clone());
+                typeText = declared.CreateTypeString();
+            }
+            else if (source is Verilog.DataObjects.Variables.IntegerVectorValueVariable vector)
+            {
+                Verilog.DataObjects.Nets.Net declared = Verilog.DataObjects.Nets.Net.Create(
+                    signal,
+                    Verilog.DataObjects.Nets.Net.NetTypeEnum.Wire,
+                    Verilog.DataObjects.DataTypes.LogicType.Create(false, null));
+                foreach (Verilog.DataObjects.Arrays.PackedArray dimension in vector.PackedDimensions)
+                {
+                    declared.PackedDimensions.Add(dimension.Clone());
+                }
+                typeText = declared.CreateTypeString();
+            }
+            else
+            {
+                typeText = source.CreateTypeString();
+            }
+
+            // CreateTypeString already ends with a space ("wire " / "wire  [7:0] "),
+            // so the name is appended directly. A tab here produced
+            // "wire \tclk;", which does not line up with the hand-written
+            // declarations around it.
+            declarations.Append(typeText);
+            if (!typeText.EndsWith(" ", System.StringComparison.Ordinal))
+            {
+                declarations.Append(' ');
+            }
+            declarations.Append(signal);
+            foreach (Verilog.DataObjects.Arrays.UnPackedArray dimension in source.UnpackedArrays)
+            {
+                declarations.Append(dimension.CreateString());
+            }
+            declarations.Append(";\n");
         }
 
         /// <summary>
