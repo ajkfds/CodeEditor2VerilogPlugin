@@ -206,7 +206,13 @@ namespace pluginVerilog.Verilog.Snippets
                 firstPort = false;
             }
             if (!firstPort) template.AppendText("\n");
-            template.AppendText(indent + ";");
+            // ");" closes the port list opened by " (\\n" above AND terminates
+            // the statement. Dropping the ")" (it was lost when this helper
+            // moved out of SnippetAdapter) produced an instantiation whose
+            // parenthesis never closed: the inserted text no longer parsed, so
+            // the instance disappeared from the hierarchy and re-running the
+            // tool on it failed.
+            template.AppendText(indent + ");");
             return template;
         }
 
