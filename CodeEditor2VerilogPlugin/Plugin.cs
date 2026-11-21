@@ -14,11 +14,6 @@ namespace pluginVerilog
 
         public bool Register()
         {
-            // register the plugin-specific hover content provider so that
-            // any embedded LSP / `ISystemVerilogCore` consumer can render
-            // rich hover descriptions (data type, bit width, port direction, ...).
-            CoreBridge.PluginHoverInstaller.Install();
-
             // register filetypes
             {
                 FileTypes.VerilogFile fileType = new FileTypes.VerilogFile();
@@ -229,11 +224,6 @@ namespace pluginVerilog
             }
             if (psetup == null) psetup = new pluginVerilog.ProjectProperty.Setup();
             project.ProjectProperties.Add(Id, new ProjectProperty(project, psetup));
-
-            // expose the parsed project through the UI-agnostic
-            // SystemVerilogCore seam so the LSP server (or any other tool)
-            // can consume the same adapter instances as the editor.
-            CoreBridge.VerilogSystemVerilogCore.Instance.Wrap(project, Id + ":" + project.Name);
         }
 
         private void MenuItem_CreateSnapShot_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)

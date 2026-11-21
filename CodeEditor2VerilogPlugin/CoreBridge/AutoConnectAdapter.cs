@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using SystemVerilogCore.AutoConnect;
+
 
 namespace pluginVerilog.CoreBridge
 {
@@ -22,6 +22,12 @@ namespace pluginVerilog.CoreBridge
     /// The matching rule is the editor's: a signal whose name equals the port
     /// name, or the port name with an <c>_I</c> / <c>_O</c> / <c>_IO</c> suffix
     /// removed (case-insensitive). Candidates are ordered best match first.
+    /// </para>
+    ///
+    /// <para>
+    /// The returned <see cref="AutoConnectModel"/> is defined in this assembly,
+    /// so the plugin stays free of any dependency on the LSP /
+    /// <c>SystemVerilogCore</c> contract assembly.
     /// </para>
     /// </summary>
     public static class AutoConnectAdapter
