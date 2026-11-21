@@ -311,7 +311,9 @@ namespace pluginVerilog.Data
                 CodeEditor2.Controller.CodeEditor.PostRefresh();
             }
             await UpdateAsync();
-            NavigatePanelNode.UpdateVisual();
+            // Announce the updated parse result; the host decides how to
+            // refresh (editor: UI thread repaint, server: hierarchy push).
+            NotifyPresentationChanged();
         }
 
 

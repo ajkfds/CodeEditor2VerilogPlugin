@@ -297,13 +297,13 @@ namespace pluginVerilog.Data
                 // NOTE: the Items update (UpdateAsync) is already awaited by
                 // AcceptParsedDocumentAsync before this UI-thread refresh runs.
 
-                // refresh the navigate panel node icon (error/warning badge, ...)
-                // after the parsed document is updated. Without this, the icon of a
-                // deeply parsed VerilogModuleInstance stays stale until the node is
-                // selected (same as VerilogHeaderInstance.AcceptParsedDocumentAsync).
-                // Post (not Invoke) to avoid blocking this background parse thread
-                // on the UI thread.
-                NavigatePanelNode.UpdateVisual();
+                // Announce the updated parse result (error/warning badge, ...)
+                // instead of repainting the UI node from here. Without a
+                // notification the icon of a deeply parsed instance stays stale
+                // until the node is selected. The editor's NavigatePanel
+                // marshals to the UI thread; the language server pushes
+                // rtl/hierarchyInvalidated.
+                NotifyPresentationChanged();
             }
             catch (Exception ex)
             {
