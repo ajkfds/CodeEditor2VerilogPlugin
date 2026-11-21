@@ -293,11 +293,7 @@ namespace pluginVerilog.Data
             }
         }
 
-        protected override CodeEditor2.NavigatePanel.NavigatePanelNode CreateNode()
-        {
-            NavigatePanel.InterfaceInstanceNode node = new NavigatePanel.InterfaceInstanceNode(this);
-            return node;
-        }
+
 
         public override DocumentParser CreateDocumentParser(DocumentParser.ParseModeEnum parseMode, System.Threading.CancellationToken? token)
         {

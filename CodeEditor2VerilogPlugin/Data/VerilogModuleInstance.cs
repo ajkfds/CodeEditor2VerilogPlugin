@@ -363,11 +363,7 @@ namespace pluginVerilog.Data
         }
 
 
-        protected override CodeEditor2.NavigatePanel.NavigatePanelNode CreateNode()
-        {
-            NavigatePanel.VerilogModuleInstanceNode node = new NavigatePanel.VerilogModuleInstanceNode(this);
-            return node;
-        }
+
 
 
 

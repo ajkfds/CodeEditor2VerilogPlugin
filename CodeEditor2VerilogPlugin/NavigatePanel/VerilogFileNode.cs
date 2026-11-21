@@ -123,7 +123,7 @@ namespace pluginVerilog.NavigatePanel
             {
                 foreach (CodeEditor2.Data.Item item in VerilogFile.Items)
                 {
-                    newNodes.Add(item.NavigatePanelNode);
+                    newNodes.Add(CodeEditor2.NavigatePanel.NavigateNodeFactory.GetNode(item));
                 }
             }
 

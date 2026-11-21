@@ -460,11 +460,7 @@ namespace pluginVerilog.Data
             }
         }
 
-        protected override CodeEditor2.NavigatePanel.NavigatePanelNode CreateNode()
-        {
-            NavigatePanel.VerilogFileNode node = new NavigatePanel.VerilogFileNode(this);
-            return node;
-        }
+
 
 
         #region instance file registration ----------------------------------------------------------------------------------------------------------

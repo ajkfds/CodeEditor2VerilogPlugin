@@ -264,11 +264,7 @@ namespace pluginVerilog.Data
         }
 
 
-        protected override CodeEditor2.NavigatePanel.NavigatePanelNode CreateNode()
-        {
-            NavigatePanel.ImportedPackageNode node = new NavigatePanel.ImportedPackageNode(this);
-            return node;
-        }
+
 
 
 

@@ -14,6 +14,31 @@ namespace pluginVerilog
 
         public bool Register()
         {
+            // Register the navigate-node creators for this plugin's item types.
+            //
+            // These used to be CreateNode() overrides on the item classes,
+            // which forced the data layer to reference Avalonia. The mapping
+            // now lives in the UI layer (NavigateNodeFactory) and the plugin
+            // supplies its own node types from here.
+            {
+                CodeEditor2.NavigatePanel.NavigateNodeFactory.Register<Data.VerilogFile>(
+                    file => new NavigatePanel.VerilogFileNode(file));
+                CodeEditor2.NavigatePanel.NavigateNodeFactory.Register<Data.VerilogHeaderFile>(
+                    file => new NavigatePanel.VerilogHeaderNode(file));
+                CodeEditor2.NavigatePanel.NavigateNodeFactory.Register<Data.VerilogModuleInstance>(
+                    instance => new NavigatePanel.VerilogModuleInstanceNode(instance));
+                CodeEditor2.NavigatePanel.NavigateNodeFactory.Register<Data.InterfaceInstance>(
+                    instance => new NavigatePanel.InterfaceInstanceNode(instance));
+                CodeEditor2.NavigatePanel.NavigateNodeFactory.Register<Data.VerilogHeaderInstance>(
+                    instance => new NavigatePanel.VerilogHeaderInstanceNode(instance, instance.Project));
+                CodeEditor2.NavigatePanel.NavigateNodeFactory.Register<Data.ImportedPackage>(
+                    package => new NavigatePanel.ImportedPackageNode(package));
+                CodeEditor2.NavigatePanel.NavigateNodeFactory.Register<Data.RuleFile>(
+                    file => new CodeEditor2.NavigatePanel.TextFileNode(file));
+                CodeEditor2.NavigatePanel.NavigateNodeFactory.Register<Data.TestResultFile>(
+                    file => new CodeEditor2.NavigatePanel.TextFileNode(file));
+            }
+
             // register filetypes
             {
                 FileTypes.VerilogFile fileType = new FileTypes.VerilogFile();

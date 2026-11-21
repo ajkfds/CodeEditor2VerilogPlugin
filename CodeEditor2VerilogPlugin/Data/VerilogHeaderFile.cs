@@ -212,10 +212,7 @@ namespace pluginVerilog.Data
             await UpdateAsync();
         }
 
-        protected override CodeEditor2.NavigatePanel.NavigatePanelNode CreateNode()
-        {
-            return new NavigatePanel.VerilogHeaderNode(this);
-        }
+
 
         public override DocumentParser? CreateDocumentParser(DocumentParser.ParseModeEnum parseMode, System.Threading.CancellationToken? token)
         {

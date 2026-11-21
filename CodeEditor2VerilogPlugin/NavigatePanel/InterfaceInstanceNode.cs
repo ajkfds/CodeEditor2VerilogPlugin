@@ -190,7 +190,7 @@ namespace pluginVerilog.NavigatePanel
                 if (item == null) continue;
                 if (addDataItems.Contains(item))
                 {
-                    Nodes.Insert(treeIndex, item.NavigatePanelNode);
+                    Nodes.Insert(treeIndex, CodeEditor2.NavigatePanel.NavigateNodeFactory.GetNode(item));
                 }
                 treeIndex++;
             }

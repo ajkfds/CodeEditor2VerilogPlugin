@@ -286,8 +286,8 @@ namespace pluginVerilog.Data
             // The node is repainted on the UI thread. Saves normally originate from
             // the UI thread (Ctrl+S / File menu) but keep a fallback for callers on
             // a background thread, matching the other instance node updates.
-            CodeEditor2.NavigatePanel.NavigatePanelNode? node = NavigatePanelNode;
-            if (node == null) return;
+            CodeEditor2.NavigatePanel.NavigatePanelNode node =
+                CodeEditor2.NavigatePanel.NavigateNodeFactory.GetNode(this);
             if (Avalonia.Threading.Dispatcher.UIThread.CheckAccess())
             {
                 node.UpdateVisual();
