@@ -14,15 +14,7 @@ namespace pluginVerilog.Verilog.Expressions
         void IStatement.DisposeSubReference()
         {
         }
-        public AutocompleteItem CreateAutoCompleteItem()
-        {
-            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
-                Name,
-                CodeDrawStyle.ColorIndex(ColorType),
-                Global.CodeDrawStyle.Color(ColorType),
-                "CodeEditor2/Assets/Icons/tag.svg"
-                );
-        }
+
         public DataObjectReference? DataObjectReference { get; set; }
         public bool Increment = false;
         public required WordReference WordReference { get; init; }

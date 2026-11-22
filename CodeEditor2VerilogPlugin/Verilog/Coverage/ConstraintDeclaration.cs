@@ -782,15 +782,7 @@ namespace pluginVerilog.Verilog.Coverage
             return item;
         }
 
-        public CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem CreateAutoCompleteItem()
-        {
-            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
-                Name,
-                CodeDrawStyle.ColorIndex(ColorType),
-                Global.CodeDrawStyle.Color(ColorType),
-                "CodeEditor2/Assets/Icons/tag.svg"
-            );
-        }
+
 
         public void DisposeSubReference()
         {

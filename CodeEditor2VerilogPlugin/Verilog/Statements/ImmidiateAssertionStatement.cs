@@ -66,15 +66,7 @@ namespace pluginVerilog.Verilog.Statements
             ElseStatement?.DisposeSubReference();
         }
 
-        public AutocompleteItem CreateAutoCompleteItem()
-        {
-            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
-                Name,
-                CodeDrawStyle.ColorIndex(ColorType),
-                Global.CodeDrawStyle.Color(ColorType),
-                "CodeEditor2/Assets/Icons/tag.svg"
-                );
-        }
+
 
         public Expressions.Expression? ConditionalExpression;
         public IStatement? Statement;

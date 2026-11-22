@@ -158,13 +158,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             if (!@class.NamedElements.ContainsKey(identifier)) return null;
             return @class.NamedElements[identifier] as DataObject;
         }
-        public override void AppendAutoCompleteItem(List<CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem> items)
-        {
-            Class? @class = GetSourceClass();
-            if (@class == null) return;
 
-            @class.AppendAutoCompleteItem(items);
-        }
 
 
     }

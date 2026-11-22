@@ -597,19 +597,6 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             return new List<string> { "endprimitive" };
         }
 
-        public override void AppendAutoCompleteItem(List<AutocompleteItem> items)
-        {
-            base.AppendAutoCompleteItem(items);
 
-            // Add port names as autocomplete items
-            foreach (var port in Ports.Values)
-            {
-                items.Add(new AutocompleteItem(
-                    port.Name,
-                    CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Variable),
-                    Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Variable)
-                ));
-            }
-        }
     }
 }

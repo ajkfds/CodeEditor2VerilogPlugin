@@ -488,20 +488,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             return;
         }
 
-        private AutocompleteItem newItem(string text, CodeDrawStyle.ColorType colorType)
-        {
-            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(text, CodeDrawStyle.ColorIndex(colorType), Global.CodeDrawStyle.Color(colorType));
-        }
-        public override void AppendAutoCompleteItem(List<AutocompleteItem> items)
-        {
-            base.AppendAutoCompleteItem(items);
 
-            foreach (IBuildingBlockInstantiation instantiation in NamedElements.Values.OfType<IBuildingBlockInstantiation>())
-            {
-                if (instantiation.Name == null) continue;
-                items.Add(newItem(instantiation.Name, CodeDrawStyle.ColorType.Identifier));
-            }
-        }
 
         //protected static void checkVariablesUseAndDriven(WordScanner word, NameSpace nameSpace)
         //{

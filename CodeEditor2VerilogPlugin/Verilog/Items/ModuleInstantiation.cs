@@ -19,15 +19,7 @@ namespace pluginVerilog.Verilog.Items
     {
         public NamedElements NamedElements { get; } = new NamedElements();
 
-        public AutocompleteItem CreateAutoCompleteItem()
-        {
-            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
-                Name,
-                CodeDrawStyle.ColorIndex(ColorType),
-                Global.CodeDrawStyle.Color(ColorType),
-                "CodeEditor2/Assets/Icons/tag.svg"
-                );
-        }
+
         public virtual CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Identifier; } }
         //protected ModuleInstantiation() { }
         /*

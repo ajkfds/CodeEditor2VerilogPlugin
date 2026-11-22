@@ -237,15 +237,7 @@ namespace pluginVerilog.Verilog.Coverage
             return covergroup;
         }
 
-        public CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem CreateAutoCompleteItem()
-        {
-            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
-                Name,
-                CodeDrawStyle.ColorIndex(ColorType),
-                Global.CodeDrawStyle.Color(ColorType),
-                "CodeEditor2/Assets/Icons/tag.svg"
-            );
-        }
+
 
         public void DisposeSubReference()
         {
@@ -428,15 +420,7 @@ namespace pluginVerilog.Verilog.Coverage
             return coverpoint;
         }
 
-        public CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem CreateAutoCompleteItem()
-        {
-            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
-                Name,
-                CodeDrawStyle.ColorIndex(ColorType),
-                Global.CodeDrawStyle.Color(ColorType),
-                "CodeEditor2/Assets/Icons/tag.svg"
-            );
-        }
+
 
         public void DisposeSubReference()
         {
@@ -539,15 +523,7 @@ namespace pluginVerilog.Verilog.Coverage
             return cross;
         }
 
-        public CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem CreateAutoCompleteItem()
-        {
-            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
-                Name,
-                CodeDrawStyle.ColorIndex(ColorType),
-                Global.CodeDrawStyle.Color(ColorType),
-                "CodeEditor2/Assets/Icons/tag.svg"
-            );
-        }
+
 
         public void DisposeSubReference()
         {

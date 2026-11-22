@@ -20,15 +20,7 @@ namespace pluginVerilog.Verilog.Statements
         public NamedElements NamedElements => new NamedElements();
 
         public Expressions.Expression Value;
-        public AutocompleteItem CreateAutoCompleteItem()
-        {
-            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
-                Name,
-                CodeDrawStyle.ColorIndex(ColorType),
-                Global.CodeDrawStyle.Color(ColorType),
-                "CodeEditor2/Assets/Icons/tag.svg"
-                );
-        }
+
 
         public void DisposeSubReference()
         {

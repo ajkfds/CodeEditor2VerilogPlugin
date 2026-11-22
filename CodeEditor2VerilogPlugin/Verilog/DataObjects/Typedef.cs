@@ -11,15 +11,7 @@ namespace pluginVerilog.Verilog.DataObjects
         public virtual CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Identifier; } }
 
         public NamedElements NamedElements { get; } = new NamedElements();
-        public AutocompleteItem CreateAutoCompleteItem()
-        {
-            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
-                Name,
-                CodeDrawStyle.ColorIndex(ColorType),
-                Global.CodeDrawStyle.Color(ColorType),
-                "CodeEditor2/Assets/Icons/tag.svg"
-                );
-        }
+
 
         public void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
         {

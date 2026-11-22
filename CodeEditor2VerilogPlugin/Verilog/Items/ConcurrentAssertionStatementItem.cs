@@ -123,10 +123,7 @@ namespace pluginVerilog.Verilog.Items
             return true;
         }
 
-        public AutocompleteItem CreateAutoCompleteItem()
-        {
-            throw new NotImplementedException();
-        }
+
 
         /// <summary>
         /// Reference to the AssertPropertyStatement (if this item represents an assert property)

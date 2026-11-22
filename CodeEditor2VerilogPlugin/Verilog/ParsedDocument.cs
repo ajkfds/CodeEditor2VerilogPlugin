@@ -857,27 +857,13 @@ namespace pluginVerilog.Verilog
         }
 
 
-        private void appendAutoCompleteINamedElements(List<AutocompleteItem> items, NameSpace nameSpace, string candidate)
-        {
-            bool add = false;
-            foreach (INamedElement element in nameSpace.NamedElements.Values)
-            {
-                if (!element.Name.StartsWith(candidate)) continue;
-                items.Add(
-                    element.CreateAutoCompleteItem()
-                );
-                add = true;
-            }
-
-            if (add) return;
-            if (nameSpace.Parent == null) return;
-            if (nameSpace == Root) return;
-            if (nameSpace is BuildingBlocks.BuildingBlock) return;
-            if (nameSpace.Parent == nameSpace) return;
-
-            // upward search if no items found in the namespace
-            if (nameSpace.Parent is NameSpace) appendAutoCompleteINamedElements(items, nameSpace.Parent, candidate);
-        }
+        // NOTE: appendAutoCompleteINamedElements() was removed here. It was the
+        // only caller of INamedElement.CreateAutoCompleteItem(), and nothing
+        // called it: the live completion path is
+        // CompletionContext.appendNamedElements -> appendItemsUpward, which
+        // builds candidates itself. Keeping a second, unreachable implementation
+        // is what made the parser appear to depend on the editor's
+        // AutocompleteItem type.
 
        　
 
@@ -902,10 +888,7 @@ namespace pluginVerilog.Verilog
 
 
 
-        private AutocompleteItem newItem(string text, CodeDrawStyle.ColorType colorType)
-        {
-            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(text, CodeDrawStyle.ColorIndex(colorType), Global.CodeDrawStyle.Color(colorType));
-        }
+
 
 
         /// <summary>

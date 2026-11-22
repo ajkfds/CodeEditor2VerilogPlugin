@@ -122,14 +122,7 @@ namespace pluginVerilog.Verilog.DataObjects
             return true;
         }
 
-        public CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem CreateAutoCompleteItem()
-        {
-            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
-                Name,
-                CodeDrawStyle.ColorIndex(ColorType),
-                Global.CodeDrawStyle.Color(ColorType)
-            );
-        }
+
 
         public void DisposeSubReference()
         {

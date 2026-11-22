@@ -628,20 +628,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             return new List<string> { "endchecker" };
         }
 
-        public override void AppendAutoCompleteItem(List<AutocompleteItem> items)
-        {
-            base.AppendAutoCompleteItem(items);
 
-            // Add ports as autocomplete items
-            foreach (var port in Ports.Values)
-            {
-                items.Add(new AutocompleteItem(
-                    port.Name,
-                    CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Variable),
-                    Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Variable)
-                ));
-            }
-        }
     }
 
     /// <summary>

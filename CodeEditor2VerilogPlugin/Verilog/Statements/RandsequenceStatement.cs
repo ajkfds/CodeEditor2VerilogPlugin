@@ -855,14 +855,6 @@ namespace pluginVerilog.Verilog.Statements
         {
         }
 
-        public AutocompleteItem CreateAutoCompleteItem()
-        {
-            return new AutocompleteItem(
-                Name,
-                CodeDrawStyle.ColorIndex(ColorType),
-                Global.CodeDrawStyle.Color(ColorType),
-                "CodeEditor2/Assets/Icons/tag.svg"
-            );
-        }
+
     }
 }

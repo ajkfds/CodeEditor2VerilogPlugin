@@ -7,7 +7,13 @@ namespace pluginVerilog.Verilog
 
         public NamedElements NamedElements { get; }
 
-        public CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem CreateAutoCompleteItem();
-
+        // NOTE: `CreateAutoCompleteItem()` was removed here.
+        //
+        // It returned the editor's `CodeEditor2...AutocompleteItem`, which tied
+        // every parser element to the editor assembly. Its only caller was
+        // ParsedDocument.appendAutoCompleteINamedElements, which nothing called
+        // (the live completion path is CompletionContext.appendNamedElements ->
+        // appendItemsUpward). Completion candidates are built there directly, so
+        // the member was dead code and is gone rather than abstracted.
     }
 }

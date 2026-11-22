@@ -15,15 +15,7 @@ namespace pluginVerilog.Verilog.Statements
         {
         }
 
-        public AutocompleteItem CreateAutoCompleteItem()
-        {
-            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
-                Name,
-                CodeDrawStyle.ColorIndex(ColorType),
-                Global.CodeDrawStyle.Color(ColorType),
-                "CodeEditor2/Assets/Icons/tag.svg"
-                );
-        }
+
         public string Identifier { get; protected set; }
 
         // disable_statement::= (From Annex A - A.6.5)  

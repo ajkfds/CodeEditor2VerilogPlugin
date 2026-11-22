@@ -440,20 +440,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             return;
         }
 
-        private AutocompleteItem newItem(string text, CodeDrawStyle.ColorType colorType)
-        {
-            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(text, CodeDrawStyle.ColorIndex(colorType), Global.CodeDrawStyle.Color(colorType));
-        }
-        public override void AppendAutoCompleteItem(List<AutocompleteItem> items)
-        {
-            base.AppendAutoCompleteItem(items);
 
-            foreach (IBuildingBlockInstantiation inst in NamedElements.Values.OfType<IBuildingBlockInstantiation>())
-            {
-                if (inst.Name == null) throw new Exception();
-                items.Add(newItem(inst.Name, CodeDrawStyle.ColorType.Identifier));
-            }
-        }
 
 
         protected static void parseListOfPorts_ListOfPortsDeclarations(WordScanner word, Program module)

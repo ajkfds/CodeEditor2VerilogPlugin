@@ -118,10 +118,7 @@ namespace pluginVerilog.Verilog.Items
             return true;
         }
 
-        public CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem CreateAutoCompleteItem()
-        {
-            return null;
-        }
+
 
         public void DisposeSubReference()
         {

@@ -113,15 +113,7 @@ namespace pluginVerilog.Verilog.DataObjects
             get { return RandomQualifier == "randc"; }
         }
 
-        public virtual AutocompleteItem CreateAutoCompleteItem()
-        {
-            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
-                Name,
-                CodeDrawStyle.ColorIndex(ColorType),
-                Global.CodeDrawStyle.Color(ColorType),
-                "CodeEditor2/Assets/Icons/tag.svg"
-                );
-        }
+
 
         private WeakReference<NameSpace>? wr_DefinedNameSpace = null;
         [JsonIgnore]
@@ -361,9 +353,11 @@ namespace pluginVerilog.Verilog.DataObjects
         {
             return null;
         }
-        public virtual void AppendAutoCompleteItem(List<CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem> items)
-        {
-        }
+        // NOTE: `virtual void AppendAutoCompleteItem(List<AutocompleteItem>)` was
+        // removed here. It existed only so NameSpace.AppendAutoCompleteItem could
+        // recurse into class / interface members, and that whole family was
+        // unreachable (see NameSpace's note). The live path is
+        // CompletionContext.appendNamedElements -> appendItemsUpward.
 
 
     }

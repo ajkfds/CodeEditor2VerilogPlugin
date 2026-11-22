@@ -204,15 +204,7 @@ namespace pluginVerilog.Verilog.DataObjects
             return false;
         }
 
-        public CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem CreateAutoCompleteItem()
-        {
-            return new AutocompleteItem(
-                Name,
-                CodeDrawStyle.ColorIndex(ColorType),
-                Global.CodeDrawStyle.Color(ColorType),
-                "CodeEditor2/Assets/Icons/tag.svg"
-            );
-        }
+
 
         public void DisposeSubReference()
         {

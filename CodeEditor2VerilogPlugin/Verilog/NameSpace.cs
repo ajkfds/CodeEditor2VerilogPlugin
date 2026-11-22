@@ -18,15 +18,6 @@ namespace pluginVerilog.Verilog
         protected NameSpace()
         {
         }
-        public AutocompleteItem CreateAutoCompleteItem()
-        {
-            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
-                Name,
-                CodeDrawStyle.ColorIndex(ColorType),
-                Global.CodeDrawStyle.Color(ColorType),
-                "CodeEditor2/Assets/Icons/tag.svg"
-                );
-        }
         public virtual CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
 
         [JsonIgnore]
@@ -191,67 +182,13 @@ namespace pluginVerilog.Verilog
         }
 
 
-        private AutocompleteItem newItem(string text, CodeDrawStyle.ColorType colorType)
-        {
-            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(text, CodeDrawStyle.ColorIndex(colorType), Global.CodeDrawStyle.Color(colorType));
-        }
-        public virtual void AppendAutoCompleteItem(List<AutocompleteItem> items)
-        {
-            foreach (INamedElement element in NamedElements.Values)
-            {
-                if (element is DataObjects.DataObject)
-                {
-                    DataObjects.DataObject variable = (DataObjects.DataObject)element;
-                    if (variable is DataObjects.Nets.Net)
-                    {
-                        items.Add(newItem(variable.Name, CodeDrawStyle.ColorType.Net));
-                    }
-                    else if (variable is DataObjects.Variables.Variable)
-                    {
-                        items.Add(newItem(variable.Name, CodeDrawStyle.ColorType.Variable));
-                    }
-                    else if (variable is DataObjects.Variables.Object)
-                    {
-                        items.Add(newItem(variable.Name, CodeDrawStyle.ColorType.Variable));
-                    }
-                    else if (variable is DataObjects.Variables.Time || variable is DataObjects.Variables.Real || variable is DataObjects.Variables.Realtime || variable is DataObjects.Variables.Integer || variable is DataObjects.Variables.Genvar)
-                    {
-                        items.Add(newItem(variable.Name, CodeDrawStyle.ColorType.Variable));
-                    }
-                }
-                else if (element is NameSpace)
-                {
-                    NameSpace space = (NameSpace)element;
-                    if (space.Name == null) System.Diagnostics.Debugger.Break();
-                    if (space.Name == null) continue;
-                    items.Add(newItem(space.Name, CodeDrawStyle.ColorType.Identifier));
-
-                }
-                else if (element is DataObjects.Constants.Constants)
-                {
-                    DataObjects.Constants.Constants constants = (DataObjects.Constants.Constants)element;
-                    items.Add(newItem(constants.Name, CodeDrawStyle.ColorType.Parameter));
-                }
-                else if (element is Function)
-                {
-                    Function function = (Function)element;
-                    items.Add(newItem(function.Name, CodeDrawStyle.ColorType.Identifier));
-                }
-                else if (element is Task_)
-                {
-                    Task_ task = (Task_)element;
-                    items.Add(newItem(task.Name, CodeDrawStyle.ColorType.Identifier));
-                }
-            }
-
-            if (Parent != null)
-            {
-                Parent.AppendAutoCompleteItem(items);
-            }
-
-            // Also add items from comment scope references (legacy fallback)
-            AppendAutoCompleteItemFromCommentScopes(items);
-        }
+        // NOTE: AppendAutoCompleteItem / AppendAutoCompleteItemFromCommentScopes /
+        // AppendAutoCompleteItemsFromModuleInstance were removed here. They were
+        // an unreachable second implementation of completion: nothing outside
+        // this family of overrides ever called them. The live path is
+        // CompletionContext.appendNamedElements -> appendItemsUpward, which
+        // walks NamedElements (including the @scope virtual namespaces that
+        // resolveScopeReference registers) and builds the candidates itself.
 
         public DataObjects.Constants.Constants? GetConstants(string identifier)
         {
@@ -396,59 +333,6 @@ namespace pluginVerilog.Verilog
             }
 
             return null;
-        }
-
-        /// <summary>
-        /// Adds autocomplete items from comment scope references.
-        /// </summary>
-        public void AppendAutoCompleteItemFromCommentScopes(List<AutocompleteItem> items)
-        {
-            foreach (var scopeRef in CommentScopeReferences)
-            {
-                // Try to resolve the scope reference if not already resolved
-                if (scopeRef.ResolvedBuildingBlock == null)
-                {
-                    resolveScopeReference(scopeRef);
-                }
-
-                if (scopeRef.ResolvedBuildingBlock != null)
-                {
-                    // If instance name is specified, add items from the instance
-                    if (!string.IsNullOrEmpty(scopeRef.InstanceName))
-                    {
-                        // Search for instance in the building block
-                        foreach (var elem in scopeRef.ResolvedBuildingBlock.NamedElements.Values)
-                        {
-                            if (elem is Data.VerilogModuleInstance instance && instance.Name == scopeRef.InstanceName)
-                            {
-                                // Get elements from the instance's parsed document
-                                AppendAutoCompleteItemsFromModuleInstance(instance, items);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // No instance name - add items directly from building block's namespace
-                        scopeRef.ResolvedBuildingBlock.AppendAutoCompleteItem(items);
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Appends autocomplete items from a VerilogModuleInstance.
-        /// </summary>
-        private void AppendAutoCompleteItemsFromModuleInstance(Data.VerilogModuleInstance instance, List<AutocompleteItem> items)
-        {
-            var vParsedDoc = instance.VerilogParsedDocument;
-            if (vParsedDoc?.Root == null) return;
-
-            // Get the module's namespace
-            var moduleName = instance.InstanceName;
-            if (vParsedDoc.Root.BuildingBlocks.TryGetValue(moduleName, out var module))
-            {
-                module.AppendAutoCompleteItem(items);
-            }
         }
 
         /// <summary>

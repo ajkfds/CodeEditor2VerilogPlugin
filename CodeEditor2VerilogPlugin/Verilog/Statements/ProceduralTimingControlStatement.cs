@@ -22,15 +22,7 @@ namespace pluginVerilog.Verilog.Statements
         public EventControl? EventControl { get; protected set; }
         public IStatement? Statement { get; protected set; }
 
-        public AutocompleteItem CreateAutoCompleteItem()
-        {
-            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
-                Name,
-                CodeDrawStyle.ColorIndex(ColorType),
-                Global.CodeDrawStyle.Color(ColorType),
-                "CodeEditor2/Assets/Icons/tag.svg"
-                );
-        }
+
         public static ProceduralTimingControlStatement? ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label, List<string>? clockDomains = null)
         {
             switch (word.Text)

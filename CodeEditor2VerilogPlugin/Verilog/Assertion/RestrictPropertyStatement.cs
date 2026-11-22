@@ -78,10 +78,7 @@ namespace pluginVerilog.Verilog.Assertion
 
         public NamedElements NamedElements => new NamedElements();
 
-        public AutocompleteItem CreateAutoCompleteItem()
-        {
-            return null;
-        }
+
 
         public void DisposeSubReference()
         {

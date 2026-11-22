@@ -21,15 +21,7 @@ namespace pluginVerilog.Verilog.Statements
             }
         }
 
-        public AutocompleteItem CreateAutoCompleteItem()
-        {
-            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
-                Name,
-                CodeDrawStyle.ColorIndex(ColorType),
-                Global.CodeDrawStyle.Color(ColorType),
-                "CodeEditor2/Assets/Icons/tag.svg"
-                );
-        }
+
         public List<ConditionStatementPair> ConditionStatementPairs = new List<ConditionStatementPair>();
 
         public struct ConditionStatementPair

@@ -20,15 +20,7 @@ namespace pluginVerilog.Verilog
             return builtInMethod;
         }
 
-        public AutocompleteItem CreateAutoCompleteItem()
-        {
-            return new CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem(
-                Name,
-                CodeDrawStyle.ColorIndex(ColorType),
-                Global.CodeDrawStyle.Color(ColorType),
-                "CodeEditor2/Assets/Icons/tag.svg"
-                );
-        }
+
 
         private Dictionary<string, DataObjects.Port> ports = new Dictionary<string, DataObjects.Port>();
         public Dictionary<string, DataObjects.Port> Ports { get { return ports; } }
