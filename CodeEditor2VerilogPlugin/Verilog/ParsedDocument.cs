@@ -17,8 +17,29 @@ using System.Threading;
 
 namespace pluginVerilog.Verilog
 {
-    public class ParsedDocument : CodeEditor2.CodeEditor.ParsedDocument
+    public class ParsedDocument : CodeEditor2.CodeEditor.ParsedDocument,
+        CodeEditor2.CodeEditor.IParsedDocumentMessagesProvider
     {
+        /// <summary>
+        /// The parser's diagnostics, exposed to the editor's Messages pane.
+        ///
+        /// <para>
+        /// The pane reads messages through this interface because the parser's
+        /// <see cref="Message"/> is its own type: it no longer derives from
+        /// <c>CodeEditor2.CodeEditor.ParsedDocument.Message</c> (that
+        /// inheritance is what tied the parser to the editor assembly).
+        /// </para>
+        /// </summary>
+        IReadOnlyList<object> CodeEditor2.CodeEditor.IParsedDocumentMessagesProvider.Messages
+        {
+            get
+            {
+                List<object> list = new List<object>(Messages.Count);
+                foreach (Message message in Messages) list.Add(message);
+                return list;
+            }
+        }
+
         public ParsedDocument(Data.IVerilogRelatedFile file, string key, IndexReference? indexReference, DocumentParser.ParseModeEnum parseMode) : base((CodeEditor2.Data.TextFile)file, key, getCodeDocument(file).Version, parseMode)
         {
             CodeDocument? document = file.CodeDocument as CodeDocument;
@@ -241,6 +262,19 @@ namespace pluginVerilog.Verilog
             Data.IVerilogRelatedFile? file = File;
             base.Dispose();
         }
+
+        /// <summary>
+        /// Diagnostics collected while parsing this document.
+        ///
+        /// <para>
+        /// This used to be inherited from
+        /// <c>CodeEditor2.CodeEditor.ParsedDocument.Messages</c> (a
+        /// <c>List&lt;CodeEditor2...Message&gt;</c>), which is why the parser
+        /// had to derive from the editor's ParsedDocument. It is a plain list
+        /// of this type's own <see cref="Message"/> now.
+        /// </para>
+        /// </summary>
+        public List<Message> Messages { get; } = new List<Message>();
 
         [JsonIgnore]
         public int ErrorCount = 0;
@@ -810,9 +844,22 @@ namespace pluginVerilog.Verilog
         }
 
 
-        public new class Message : CodeEditor2.CodeEditor.ParsedDocument.Message
+        /// <summary>
+        /// A parse diagnostic (error / warning / notice / hint) with its
+        /// position and the file it came from.
+        ///
+        /// <para>
+        /// This used to derive from <c>CodeEditor2.CodeEditor.ParsedDocument.Message</c>,
+        /// which dragged the editor's <c>MessageView</c> (Avalonia) into the
+        /// parser. The only thing that base class contributed was the
+        /// <c>CreateMessageNode()</c> hook for the editor's message pane, which
+        /// is a UI concern and is now built by the editor from this plain data
+        /// instead.
+        /// </para>
+        /// </summary>
+        public class Message
         {
-            public Message(Data.IVerilogRelatedFile file, string text, MessageType type, int index, int lineNo, int length, CodeEditor2.Data.Project project)
+            public Message(Data.IVerilogRelatedFile file, string text, MessageType type, int index, int lineNo, int length, CodeEditor2.Data.Project? project)
             {
                 this.fileRef = new WeakReference<Data.IVerilogRelatedFile>(file);
                 this.Text = text;
@@ -822,6 +869,22 @@ namespace pluginVerilog.Verilog
                 this.Type = type;
                 this.Project = project;
             }
+
+            /// <summary>Character offset of the offending token.</summary>
+            public int Index { get; set; }
+
+            /// <summary>Length of the marked span, in characters.</summary>
+            public int Length { get; set; }
+
+            /// <summary>Diagnostic text.</summary>
+            public string Text { get; set; } = "";
+
+            /// <summary>
+            /// Project the file belonged to when the message was created, or
+            /// null. Kept so hosts can route a message back to its project
+            /// without walking the file tree again.
+            /// </summary>
+            public CodeEditor2.Data.Project? Project { get; set; }
 
             private System.WeakReference<Data.IVerilogRelatedFile> fileRef;
             [JsonIgnore]
@@ -846,11 +909,10 @@ namespace pluginVerilog.Verilog
             }
             public MessageType Type { get; protected set; }
 
-            public override CodeEditor2.MessageView.MessageNode CreateMessageNode()
-            {
-                MessageView.MessageNode node = new MessageView.MessageNode(File, this);
-                return node;
-            }
+            // CreateMessageNode() (the editor's MessageView node) used to be an
+            // override here. It is a UI concern, so the editor now builds its
+            // node from this data itself; the parser no longer references
+            // MessageView.
 
         }
     }

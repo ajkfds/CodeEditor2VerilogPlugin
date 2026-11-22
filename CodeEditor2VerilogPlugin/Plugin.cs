@@ -39,6 +39,16 @@ namespace pluginVerilog
                     file => new CodeEditor2.NavigatePanel.TextFileNode(file));
             }
 
+            // Supply the Messages-pane row for this plugin's diagnostics.
+            // Message.CreateMessageNode() used to be overridden on the message
+            // class, which forced the parser's message type to derive from the
+            // editor's ParsedDocument.Message. Registering a factory keeps the
+            // parser's type independent.
+            CodeEditor2.Views.MessageNodeFactory.Register<Verilog.ParsedDocument.Message>(
+                message => message.File == null
+                    ? null
+                    : new MessageView.MessageNode(message.File, message));
+
             // register filetypes
             {
                 FileTypes.VerilogFile fileType = new FileTypes.VerilogFile();
