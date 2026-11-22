@@ -1,4 +1,4 @@
-namespace pluginVerilog.Verilog.AutoComplete
+namespace pluginVerilog.Data.VerilogCommon.EditorAutoComplete
 {
     public class Setup
     {

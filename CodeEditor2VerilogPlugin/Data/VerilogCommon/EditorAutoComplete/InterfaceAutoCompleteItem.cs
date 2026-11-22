@@ -1,10 +1,10 @@
 using CodeEditor2.CodeEditor.CodeComplete;
 
-namespace pluginVerilog.Verilog.AutoComplete
+namespace pluginVerilog.Data.VerilogCommon.EditorAutoComplete
 {
-    public class ModuleAutocompleteItem : pluginVerilog.Data.VerilogCommon.AutoCompleteItem
+    public class InterfaceAutocompleteItem : pluginVerilog.Data.VerilogCommon.AutoCompleteItem
     {
-        public ModuleAutocompleteItem() : base(CompleteType.Keyword, "module", CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Plugin.ThemeColor, "CodeEditor2/Assets/Icons/screwdriver.svg")
+        public InterfaceAutocompleteItem() : base(CompleteType.Keyword, "interface", CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Plugin.ThemeColor, "CodeEditor2/Assets/Icons/screwdriver.svg")
         {
         }
         public override System.Threading.Tasks.Task ApplyAsync()
@@ -26,9 +26,9 @@ namespace pluginVerilog.Verilog.AutoComplete
 
             char currentChar = document.GetCharAt(document.CaretIndex);
 
-            string appendText = "module [module_name];" + cr;
+            string appendText = "interface [interface_name];" + cr;
             appendText += indent + "\t" + cr;
-            appendText += indent + "endmodule" + cr;
+            appendText += indent + "endinterface" + cr;
 
             //if (currentChar != '\r' && currentChar != '\n')
             //{

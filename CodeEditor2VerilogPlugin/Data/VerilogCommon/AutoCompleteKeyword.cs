@@ -21,13 +21,13 @@ namespace pluginVerilog.Data.VerilogCommon
         {
 
 
-            appendItems(items, candidate, new Verilog.AutoComplete.BeginAutoCompleteItem(),itemFilter);
-            appendItems(items, candidate, new Verilog.AutoComplete.CaseAutocompleteItem(), itemFilter);
-            appendItems(items, candidate, new Verilog.AutoComplete.FunctionAutocompleteItem(), itemFilter);
-            appendItems(items, candidate, new Verilog.AutoComplete.GenerateAutoCompleteItem(), itemFilter);
-            appendItems(items, candidate, new Verilog.AutoComplete.ModuleAutocompleteItem(), itemFilter);
-            appendItems(items, candidate, new Verilog.AutoComplete.TaskAutocompleteItem(), itemFilter);
-            if (candidate == "<=") appendItems(items, candidate, new Verilog.AutoComplete.NonBlockingAssignmentAutoCompleteItem(), itemFilter);
+            appendItems(items, candidate, new EditorAutoComplete.BeginAutoCompleteItem(),itemFilter);
+            appendItems(items, candidate, new EditorAutoComplete.CaseAutocompleteItem(), itemFilter);
+            appendItems(items, candidate, new EditorAutoComplete.FunctionAutocompleteItem(), itemFilter);
+            appendItems(items, candidate, new EditorAutoComplete.GenerateAutoCompleteItem(), itemFilter);
+            appendItems(items, candidate, new EditorAutoComplete.ModuleAutocompleteItem(), itemFilter);
+            appendItems(items, candidate, new EditorAutoComplete.TaskAutocompleteItem(), itemFilter);
+            if (candidate == "<=") appendItems(items, candidate, new EditorAutoComplete.NonBlockingAssignmentAutoCompleteItem(), itemFilter);
 
             appendKeywordItems(items, candidate, "sync",itemFilter); // annotation
             appendKeywordItems(items, candidate, "async", itemFilter); // annotation
@@ -154,7 +154,7 @@ namespace pluginVerilog.Data.VerilogCommon
                 if (itemFilter(item)) items.Add(item);
             }
 
-            appendItems(items, candidate, new Verilog.AutoComplete.InterfaceAutocompleteItem(), itemFilter);
+            appendItems(items, candidate, new EditorAutoComplete.InterfaceAutocompleteItem(), itemFilter);
 
             if (systemVerilog)
             {

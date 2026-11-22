@@ -1,6 +1,6 @@
 using CodeEditor2.CodeEditor.CodeComplete;
 
-namespace pluginVerilog.Verilog.AutoComplete
+namespace pluginVerilog.Data.VerilogCommon.EditorAutoComplete
 {
     public class GenerateAutoCompleteItem : pluginVerilog.Data.VerilogCommon.AutoCompleteItem
     {

@@ -1,12 +1,13 @@
 using CodeEditor2.CodeEditor.CodeComplete;
 
-namespace pluginVerilog.Verilog.AutoComplete
+namespace pluginVerilog.Data.VerilogCommon.EditorAutoComplete
 {
-    public class InterfaceAutocompleteItem : pluginVerilog.Data.VerilogCommon.AutoCompleteItem
+    public class NonBlockingAssignmentAutoCompleteItem : pluginVerilog.Data.VerilogCommon.AutoCompleteItem
     {
-        public InterfaceAutocompleteItem() : base(CompleteType.Keyword, "interface", CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Plugin.ThemeColor, "CodeEditor2/Assets/Icons/screwdriver.svg")
+        public NonBlockingAssignmentAutoCompleteItem() : base(CompleteType.Keyword, "<=", CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Plugin.ThemeColor, "CodeEditor2/Assets/Icons/screwdriver.svg")
         {
         }
+
         public override System.Threading.Tasks.Task ApplyAsync()
         {
             if (codeDocument == null) return System.Threading.Tasks.Task.CompletedTask;
@@ -26,9 +27,7 @@ namespace pluginVerilog.Verilog.AutoComplete
 
             char currentChar = document.GetCharAt(document.CaretIndex);
 
-            string appendText = "interface [interface_name];" + cr;
-            appendText += indent + "\t" + cr;
-            appendText += indent + "endinterface" + cr;
+            string appendText = "<= #P_DELAY[]";
 
             //if (currentChar != '\r' && currentChar != '\n')
             //{
@@ -42,7 +41,9 @@ namespace pluginVerilog.Verilog.AutoComplete
             document.Replace(headIndex, length, ColorIndex, appendText);
             CodeEditor2.Controller.CodeEditor.SetCaretPosition(headIndex + selectStart);
             CodeEditor2.Controller.CodeEditor.SetSelection(headIndex + selectStart, headIndex + selectLast - 1);
+
             return System.Threading.Tasks.Task.CompletedTask;
         }
+
     }
 }

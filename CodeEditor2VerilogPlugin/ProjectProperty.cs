@@ -296,7 +296,7 @@ namespace pluginVerilog
             return false;
         }
 
-        public Verilog.AutoComplete.Setup SnippetSetup = new Verilog.AutoComplete.Setup();
+        public Data.VerilogCommon.EditorAutoComplete.Setup SnippetSetup = new Data.VerilogCommon.EditorAutoComplete.Setup();
 
         public override void InitializePropertyForm(ItemPropertyForm form, CodeEditor2.NavigatePanel.NavigatePanelNode node, Project project)
         {

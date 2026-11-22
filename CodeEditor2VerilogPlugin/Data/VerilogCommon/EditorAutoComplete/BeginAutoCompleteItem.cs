@@ -1,11 +1,10 @@
 using CodeEditor2.CodeEditor.CodeComplete;
 
-
-namespace pluginVerilog.Verilog.AutoComplete
+namespace pluginVerilog.Data.VerilogCommon.EditorAutoComplete
 {
-    public class FunctionAutocompleteItem : pluginVerilog.Data.VerilogCommon.AutoCompleteItem
+    public class BeginAutoCompleteItem : pluginVerilog.Data.VerilogCommon.AutoCompleteItem
     {
-        public FunctionAutocompleteItem() : base(CompleteType.Keyword, "function", CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Plugin.ThemeColor, "CodeEditor2/Assets/Icons/screwdriver.svg")
+        public BeginAutoCompleteItem() : base(CompleteType.Keyword, "begin", CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Plugin.ThemeColor, "CodeEditor2/Assets/Icons/screwdriver.svg")
         {
         }
 
@@ -28,15 +27,14 @@ namespace pluginVerilog.Verilog.AutoComplete
 
             char currentChar = document.GetCharAt(document.CaretIndex);
 
-            string appendText = "function [type_and_function_name];" + cr;
-            appendText += indent + "begin" + cr;
-            appendText += indent + "\t" + cr;
+            string appendText = "begin" + cr;
+            appendText += indent + "\t[]" + cr;
             appendText += indent + "end" + cr;
-            appendText += indent + "endfunction";
-            if (currentChar != '\r' && currentChar != '\n')
-            {
-                appendText = "";
-            }
+
+            //if (currentChar != '\r' && currentChar != '\n')
+            //{
+            //    appendText = "";
+            //}
             int selectStart = appendText.IndexOf("[");
             int selectLast = appendText.IndexOf("]");
             appendText = appendText.Replace("[", "");
@@ -45,7 +43,6 @@ namespace pluginVerilog.Verilog.AutoComplete
             document.Replace(headIndex, length, ColorIndex, appendText);
             CodeEditor2.Controller.CodeEditor.SetCaretPosition(headIndex + selectStart);
             CodeEditor2.Controller.CodeEditor.SetSelection(headIndex + selectStart, headIndex + selectLast - 1);
-
             return System.Threading.Tasks.Task.CompletedTask;
         }
     }

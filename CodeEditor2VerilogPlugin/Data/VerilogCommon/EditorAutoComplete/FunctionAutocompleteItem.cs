@@ -1,10 +1,11 @@
 using CodeEditor2.CodeEditor.CodeComplete;
 
-namespace pluginVerilog.Verilog.AutoComplete
+
+namespace pluginVerilog.Data.VerilogCommon.EditorAutoComplete
 {
-    public class NonBlockingAssignmentAutoCompleteItem : pluginVerilog.Data.VerilogCommon.AutoCompleteItem
+    public class FunctionAutocompleteItem : pluginVerilog.Data.VerilogCommon.AutoCompleteItem
     {
-        public NonBlockingAssignmentAutoCompleteItem() : base(CompleteType.Keyword, "<=", CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Plugin.ThemeColor, "CodeEditor2/Assets/Icons/screwdriver.svg")
+        public FunctionAutocompleteItem() : base(CompleteType.Keyword, "function", CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Plugin.ThemeColor, "CodeEditor2/Assets/Icons/screwdriver.svg")
         {
         }
 
@@ -27,12 +28,15 @@ namespace pluginVerilog.Verilog.AutoComplete
 
             char currentChar = document.GetCharAt(document.CaretIndex);
 
-            string appendText = "<= #P_DELAY[]";
-
-            //if (currentChar != '\r' && currentChar != '\n')
-            //{
-            //    appendText = "";
-            //}
+            string appendText = "function [type_and_function_name];" + cr;
+            appendText += indent + "begin" + cr;
+            appendText += indent + "\t" + cr;
+            appendText += indent + "end" + cr;
+            appendText += indent + "endfunction";
+            if (currentChar != '\r' && currentChar != '\n')
+            {
+                appendText = "";
+            }
             int selectStart = appendText.IndexOf("[");
             int selectLast = appendText.IndexOf("]");
             appendText = appendText.Replace("[", "");
@@ -44,6 +48,5 @@ namespace pluginVerilog.Verilog.AutoComplete
 
             return System.Threading.Tasks.Task.CompletedTask;
         }
-
     }
 }

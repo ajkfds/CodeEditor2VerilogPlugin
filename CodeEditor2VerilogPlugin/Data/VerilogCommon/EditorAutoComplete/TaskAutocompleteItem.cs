@@ -1,15 +1,12 @@
 using CodeEditor2.CodeEditor.CodeComplete;
-using pluginVerilog.Data;
 
-namespace pluginVerilog.Verilog.AutoComplete
+namespace pluginVerilog.Data.VerilogCommon.EditorAutoComplete
 {
-    public class CaseAutocompleteItem : pluginVerilog.Data.VerilogCommon.AutoCompleteItem
+    public class TaskAutocompleteItem : pluginVerilog.Data.VerilogCommon.AutoCompleteItem
     {
-        public CaseAutocompleteItem() : base(CompleteType.Keyword, "case", CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Plugin.ThemeColor, "CodeEditor2/Assets/Icons/screwdriver.svg")
+        public TaskAutocompleteItem() : base(CompleteType.Keyword, "task", CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Plugin.ThemeColor, "CodeEditor2/Assets/Icons/screwdriver.svg")
         {
         }
-
-        private string CaseHeader = "P_";
 
         public override System.Threading.Tasks.Task ApplyAsync()
         {
@@ -30,26 +27,9 @@ namespace pluginVerilog.Verilog.AutoComplete
 
             char currentChar = document.GetCharAt(document.CaretIndex);
 
-            string appendText = "case([])" + cr;
+            string appendText = "task [task_name];" + cr;
             appendText += indent + "\t" + cr;
-            appendText += indent + "endcase" + cr;
-
-            IVerilogRelatedFile vfile = document.VerilogFile;
-
-            {
-                BuildingBlocks.BuildingBlock? buildingBlock = vfile.VerilogParsedDocument?.GetBuildingBlockAt(prevIndex);
-                if (buildingBlock != null)
-                {
-                    foreach (INamedElement namedElement in buildingBlock.NamedElements)
-                    {
-                        if (namedElement is not Verilog.DataObjects.Constants.Constants) continue;
-                        if (namedElement.Name.StartsWith(CaseHeader))
-                        {
-                            appendText += indent + "\t" + namedElement.Name + ":" + cr;
-                        }
-                    }
-                }
-            }
+            appendText += indent + "endtask" + cr;
 
             //if (currentChar != '\r' && currentChar != '\n')
             //{

@@ -1,12 +1,20 @@
 using CodeEditor2.CodeEditor.CodeComplete;
+using pluginVerilog.Data;
+// Moved out of pluginVerilog.Verilog (it is an editor-side consumer, never
+// used by the parser), so the enclosing namespaces it relied on are now
+// imported explicitly.
+using pluginVerilog.Verilog;
+using pluginVerilog.Verilog.BuildingBlocks;
 
-namespace pluginVerilog.Verilog.AutoComplete
+namespace pluginVerilog.Data.VerilogCommon.EditorAutoComplete
 {
-    public class BeginAutoCompleteItem : pluginVerilog.Data.VerilogCommon.AutoCompleteItem
+    public class CaseAutocompleteItem : pluginVerilog.Data.VerilogCommon.AutoCompleteItem
     {
-        public BeginAutoCompleteItem() : base(CompleteType.Keyword, "begin", CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Plugin.ThemeColor, "CodeEditor2/Assets/Icons/screwdriver.svg")
+        public CaseAutocompleteItem() : base(CompleteType.Keyword, "case", CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Plugin.ThemeColor, "CodeEditor2/Assets/Icons/screwdriver.svg")
         {
         }
+
+        private string CaseHeader = "P_";
 
         public override System.Threading.Tasks.Task ApplyAsync()
         {
@@ -27,9 +35,27 @@ namespace pluginVerilog.Verilog.AutoComplete
 
             char currentChar = document.GetCharAt(document.CaretIndex);
 
-            string appendText = "begin" + cr;
-            appendText += indent + "\t[]" + cr;
-            appendText += indent + "end" + cr;
+            string appendText = "case([])" + cr;
+            appendText += indent + "\t" + cr;
+            appendText += indent + "endcase" + cr;
+
+            IVerilogRelatedFile vfile = document.VerilogFile;
+
+            {
+                pluginVerilog.Verilog.BuildingBlocks.BuildingBlock? buildingBlock =
+                    vfile.VerilogParsedDocument?.GetBuildingBlockAt(prevIndex);
+                if (buildingBlock != null)
+                {
+                    foreach (pluginVerilog.Verilog.INamedElement namedElement in buildingBlock.NamedElements)
+                    {
+                        if (namedElement is not Verilog.DataObjects.Constants.Constants) continue;
+                        if (namedElement.Name.StartsWith(CaseHeader))
+                        {
+                            appendText += indent + "\t" + namedElement.Name + ":" + cr;
+                        }
+                    }
+                }
+            }
 
             //if (currentChar != '\r' && currentChar != '\n')
             //{
@@ -43,6 +69,7 @@ namespace pluginVerilog.Verilog.AutoComplete
             document.Replace(headIndex, length, ColorIndex, appendText);
             CodeEditor2.Controller.CodeEditor.SetCaretPosition(headIndex + selectStart);
             CodeEditor2.Controller.CodeEditor.SetSelection(headIndex + selectStart, headIndex + selectLast - 1);
+
             return System.Threading.Tasks.Task.CompletedTask;
         }
     }
