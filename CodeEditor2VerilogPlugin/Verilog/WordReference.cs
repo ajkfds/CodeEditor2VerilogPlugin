@@ -89,6 +89,19 @@ namespace pluginVerilog.Verilog
                 return indexReference.Document;
             }
         }
+
+        /// <summary>
+        /// The document this reference points into, as the UI-free contract, so
+        /// colouring a reference does not need the editor's concrete document.
+        /// </summary>
+        [JsonIgnore]
+        public SystemVerilogCore.Documents.IVerilogTextDocument? ContractDocument
+        {
+            get
+            {
+                return indexReference.Document;
+            }
+        }
         /// <summary>
         /// The rule set that applies to the file this reference belongs to
         /// (<c>.rule.yaml</c> file of the containing directory, falling back to the
@@ -161,8 +174,9 @@ namespace pluginVerilog.Verilog
 
         public void Color(CodeDrawStyle.ColorType colorType)
         {
-            if (Document == null) return;
-            Document.TextColors.SetColorAt(Index, CodeDrawStyle.ColorIndex(colorType), length);
+            SystemVerilogCore.Documents.IVerilogTextDocument? document = ContractDocument;
+            if (document == null) return;
+            document.SetColorAt(Index, CodeDrawStyle.ColorIndex(colorType), length);
         }
     }
 }

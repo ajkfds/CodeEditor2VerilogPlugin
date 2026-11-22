@@ -2,7 +2,7 @@ namespace pluginVerilog.Verilog
 {
     public class CommentScanner
     {
-        public CommentScanner(CodeEditor2.CodeEditor.CodeDocument document, int commentStart, int commentEnd)
+        public CommentScanner(SystemVerilogCore.Documents.IVerilogTextDocument document, int commentStart, int commentEnd)
         {
             this.document = document;
             this.commentStart = commentStart;
@@ -11,7 +11,7 @@ namespace pluginVerilog.Verilog
             index = commentStart;
             indexEnd = commentStart;
         }
-        CodeEditor2.CodeEditor.CodeDocument document;
+        SystemVerilogCore.Documents.IVerilogTextDocument document;
         int commentStart;
         int commentEnd;
 
@@ -68,7 +68,7 @@ namespace pluginVerilog.Verilog
 
         public void Color(CodeDrawStyle.ColorType colorType)
         {
-            document.TextColors.SetColorAt(index, CodeDrawStyle.ColorIndex(colorType), indexEnd - index);
+            document.SetColorAt(index, CodeDrawStyle.ColorIndex(colorType), indexEnd - index);
         }
         public string Text
         {

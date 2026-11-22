@@ -17,7 +17,11 @@ namespace pluginVerilog.Verilog
             bool systemVerilog,
             int indexReferenceOffset = 0,
             CompletionContext completionContext = null
-            ) : this(document, parsedDocument, systemVerilog, false,false,indexReferenceOffset)
+            ) : this(
+                  document,
+                  document?.VerilogFile,
+                  document,
+                  parsedDocument, systemVerilog, false, false, indexReferenceOffset, false)
         {
             CompletionContext = completionContext;
         }
@@ -27,7 +31,11 @@ namespace pluginVerilog.Verilog
             bool systemVerilog, bool supressCompilerDirectiveError,
             bool prototype, int indexReferenceOffset = 0
             )
-            : this(document, parsedDocument, systemVerilog, supressCompilerDirectiveError,
+            : this(
+                  document,
+                  document?.VerilogFile,
+                  document,
+                  parsedDocument, systemVerilog, supressCompilerDirectiveError,
                    prototype, indexReferenceOffset, false)
         {
         }
@@ -41,14 +49,18 @@ namespace pluginVerilog.Verilog
         /// spurious "duplicate macro name" errors.
         /// </summary>
         internal WordScanner(
-            CodeEditor.CodeDocument document, Verilog.ParsedDocument parsedDocument,
+            SystemVerilogCore.Documents.IVerilogTextDocument document,
+            Data.IVerilogRelatedFile? verilogFile,
+            CodeEditor.CodeDocument? concreteDocument,
+            Verilog.ParsedDocument parsedDocument,
             bool systemVerilog, bool supressCompilerDirectiveError,
             bool prototype, int indexReferenceOffset,
             bool suppressInitialDirective
             )
         {
             RootParsedDocument = parsedDocument;
-            wordPointer = new WordPointer(document, parsedDocument,indexReferenceOffset);
+            wordPointer = new WordPointer(
+                document, verilogFile, concreteDocument, parsedDocument, indexReferenceOffset);
             SupressCompilerDerectiveError = supressCompilerDirectiveError;
             this.prototype = prototype;
             if (!suppressInitialDirective) recheckWord();
@@ -108,11 +120,29 @@ namespace pluginVerilog.Verilog
         }
 
         public Verilog.ParsedDocument RootParsedDocument { get; protected set; }
-        public CodeEditor.CodeDocument Document
+
+        /// <summary>
+        /// The document being scanned, as the UI-free contract. Callers that
+        /// need the editor's concrete document (colour table, foldings) go
+        /// through <see cref="ConcreteDocument"/>.
+        /// </summary>
+        public SystemVerilogCore.Documents.IVerilogTextDocument Document
         {
             get
             {
                 return wordPointer.Document;
+            }
+        }
+
+        /// <summary>
+        /// The same document as the editor's concrete <c>CodeDocument</c> when
+        /// it is one, otherwise null.
+        /// </summary>
+        public CodeEditor2.CodeEditor.CodeDocument? ConcreteDocument
+        {
+            get
+            {
+                return wordPointer.ConcreteDocument;
             }
         }
 
@@ -330,7 +360,11 @@ namespace pluginVerilog.Verilog
         static System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
         public WordScanner Clone(bool supressError)
         {
-            WordScanner ret = new WordScanner(wordPointer.Document, RootParsedDocument, systemVerilog, supressError, prototype, 0, true);
+            WordScanner ret = new WordScanner(
+                wordPointer.Document,
+                wordPointer.VerilogFile,
+                wordPointer.ConcreteDocument,
+                RootParsedDocument, systemVerilog, supressError, prototype, 0, true);
             ret.wordPointer = wordPointer.Clone();
             ret.nonGeneratedCount = nonGeneratedCount;
             ret.prototype = prototype;
@@ -664,7 +698,14 @@ namespace pluginVerilog.Verilog
             {
                 warning = true;
             }
-            wordPointer.ParsedDocument.CodeDocument = wordPointer.Document;
+            // CodeDocument on the parse result is the plugin's own type (the
+            // buffer this scanner was given), so it is only available when the
+            // document came from the editor. Macro-expansion / snapshot buffers
+            // created by the parser itself are that type as well.
+            if (wordPointer.ConcreteDocument != null)
+            {
+                wordPointer.ParsedDocument.CodeDocument = wordPointer.ConcreteDocument;
+            }
 
             if (wordPointer.ParsedDocument == stock.Last().ParsedDocument)
             {
@@ -674,9 +715,14 @@ namespace pluginVerilog.Verilog
 
             //if(wordPointer.ParsedDocument.Item != null) wordPointer.ParsedDocument.Item.Update();
 
-            if (!RootParsedDocument.LockedDocument.Contains(wordPointer.Document))
+            // The parse result records the buffers it locked with the editor's
+            // concrete type, so publish the concrete document (when the buffer
+            // is one) rather than the contract view.
+            CodeEditor2.CodeEditor.CodeDocument? concreteDocument = wordPointer.ConcreteDocument;
+            if (concreteDocument != null
+                && !RootParsedDocument.LockedDocument.Contains(concreteDocument))
             {
-                RootParsedDocument.LockedDocument.Add(wordPointer.Document);
+                RootParsedDocument.LockedDocument.Add(concreteDocument);
             }
 
             //wordPointer.Dispose(); keep document & parsedData
@@ -1425,7 +1471,7 @@ namespace pluginVerilog.Verilog
         /// </summary>
         private int getLineEndIndex(int index)
         {
-            CodeEditor2.CodeEditor.CodeDocument document = wordPointer.Document;
+            SystemVerilogCore.Documents.IVerilogTextDocument document = wordPointer.Document;
             int position = index;
             while (position < document.Length)
             {
@@ -1971,7 +2017,11 @@ namespace pluginVerilog.Verilog
 
             stock.Add(wordPointer);
             wordPointer = newPointer;
-            wordPointer.Document._tag = "diveInto";
+            // NOTE: this used to tag the document with
+            // `wordPointer.Document._tag = "diveInto"`. `_tag` was write-only
+            // (nothing in the repository ever read it back), and it lived on the
+            // editor's CodeDocument, which the tokenizer no longer references.
+            // The assignment is therefore dropped rather than abstracted.
             //            System.Diagnostics.Debug.Print("### "+newParsedDocument.File.Name+"  "+wordPointer.InhibitColor.ToString());
 
             if (wordPointer.Eof)

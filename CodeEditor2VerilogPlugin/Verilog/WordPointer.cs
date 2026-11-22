@@ -9,7 +9,39 @@ namespace pluginVerilog.Verilog
     public class WordPointer
     {
         public WordPointer(CodeEditor.CodeDocument document, Verilog.ParsedDocument parsedDocument,int indexReferenceOffset)
-            : this(document, parsedDocument, indexReferenceOffset, false)
+            : this(
+                  (SystemVerilogCore.Documents.IVerilogTextDocument)document,
+                  document?.VerilogFile,
+                  document,
+                  parsedDocument, indexReferenceOffset, false)
+        {
+        }
+
+        /// <summary>
+        /// Constructor over the UI-free document contract, so the tokenizer
+        /// does not have to know the editor's concrete <c>CodeDocument</c>.
+        /// </summary>
+        /// <param name="document">The text to tokenize.</param>
+        /// <param name="verilogFile">
+        /// The plugin file the document came from, or null for a throw-away
+        /// buffer (macro expansion). Kept separately because the contract's
+        /// <c>File</c> only carries the identity fields the parser needs, while
+        /// <c>`include</c> resolution still hands the Data-layer file object to
+        /// <c>VerilogHeaderInstance.Create</c>.
+        /// </param>
+        /// <param name="concreteDocument">
+        /// The same document as the plugin's own <c>CodeDocument</c> when it is
+        /// one. The parse result records its locked documents with that type, so
+        /// the two places that publish the buffer back to the parse result need
+        /// it. Null for documents created outside the editor.
+        /// </param>
+        public WordPointer(
+            SystemVerilogCore.Documents.IVerilogTextDocument document,
+            Data.IVerilogRelatedFile? verilogFile,
+            CodeEditor.CodeDocument? concreteDocument,
+            Verilog.ParsedDocument parsedDocument,
+            int indexReferenceOffset)
+            : this(document, verilogFile, concreteDocument, parsedDocument, indexReferenceOffset, false)
         {
         }
 
@@ -28,10 +60,15 @@ namespace pluginVerilog.Verilog
         /// scr1_top_axi.sv's header uncoloured from line 2 on.
         /// </remarks>
         internal WordPointer(
-            CodeEditor.CodeDocument document, Verilog.ParsedDocument parsedDocument,
+            SystemVerilogCore.Documents.IVerilogTextDocument document,
+            Data.IVerilogRelatedFile? verilogFile,
+            CodeEditor.CodeDocument? concreteDocument,
+            Verilog.ParsedDocument parsedDocument,
             int indexReferenceOffset, bool suppressInitialFetch)
         {
             this.Document = document;
+            this.VerilogFile = verilogFile;
+            this.ConcreteDocument = concreteDocument;
             this.ParsedDocument = parsedDocument;
             this.IndexReferenceOffset = indexReferenceOffset;
             if (this.ParsedDocument == null) throw new Exception();
@@ -43,24 +80,38 @@ namespace pluginVerilog.Verilog
 
         public void Dispose()
         {
-            this.Document = null;
-            this.ParsedDocument = null;
+            this.Document = null!;
+            this.ConcreteDocument = null;
+            this.VerilogFile = null;
+            this.ParsedDocument = null!;
         }
 
         public int IndexReferenceOffset { get; set; } = 0;
         
-        public CodeEditor.CodeDocument Document { get; protected set; }
+        /// <summary>
+        /// The document being tokenized, as the UI-free contract. The tokenizer
+        /// only needs length / character access / substring / colour spans, so
+        /// it never has to reference the editor's concrete <c>CodeDocument</c>.
+        /// </summary>
+        public SystemVerilogCore.Documents.IVerilogTextDocument Document { get; protected set; }
+
+        /// <summary>
+        /// The same document as the plugin's own <c>CodeDocument</c> when it is
+        /// one, otherwise null. Only the two places that hand the buffer back to
+        /// the parse result's <c>LockedDocument</c> list need it.
+        /// </summary>
+        public CodeEditor.CodeDocument? ConcreteDocument { get; protected set; }
+
         public Verilog.ParsedDocument ParsedDocument { get; protected set; }
         public bool InhibitColor = false;
 
-        public Data.IVerilogRelatedFile VerilogFile
-        {
-            get
-            {
-                if (Document == null) return null;
-                return Document.VerilogFile;
-            }
-        }
+        /// <summary>
+        /// The plugin file the document came from, or null for a throw-away
+        /// buffer. Held directly rather than read off the document: the
+        /// contract's <c>File</c> is the identity-only view, while `include`
+        /// resolution needs the Data-layer file object itself.
+        /// </summary>
+        public Data.IVerilogRelatedFile? VerilogFile { get; protected set; }
 
         public string SectionName { get; protected set; }
 
@@ -96,7 +147,8 @@ namespace pluginVerilog.Verilog
         {
             // suppressInitialFetch: the constructor's initial fetchNext() would
             // recolour the token at offset 0 (see the constructor's remarks).
-            WordPointer ret = new WordPointer(Document, ParsedDocument, IndexReferenceOffset, true);
+            WordPointer ret = new WordPointer(
+                Document, VerilogFile, ConcreteDocument, ParsedDocument, IndexReferenceOffset, true);
             ret.InhibitColor = InhibitColor;
             ret.index = index;
             ret.length = length;
@@ -111,13 +163,13 @@ namespace pluginVerilog.Verilog
         public void Color(CodeDrawStyle.ColorType colorType)
         {
             if (InhibitColor) return;
-            Document.TextColors.SetColorAt(index, CodeDrawStyle.ColorIndex(colorType), length);
+            Document.SetColorAt(index, CodeDrawStyle.ColorIndex(colorType), length);
         }
 
         public void Color(CodeDrawStyle.ColorType colorType, int start, int last)
         {
             if (InhibitColor) return;
-            Document.TextColors.SetColorAt(start, CodeDrawStyle.ColorIndex(colorType), last - start);
+            Document.SetColorAt(start, CodeDrawStyle.ColorIndex(colorType), last - start);
         }
 
         public void AppendBlock(int startIndex, int lastIndex)
@@ -424,7 +476,7 @@ namespace pluginVerilog.Verilog
         }
 
         public static void FetchNext(
-            CodeEditor2.CodeEditor.CodeDocument document,
+            SystemVerilogCore.Documents.IVerilogTextDocument document,
             ref int index, out int length, out int nextIndex,
             out WordTypeEnum wordType,
             ref string sectionName
@@ -449,7 +501,7 @@ namespace pluginVerilog.Verilog
         /// <param name="sectionName"></param>
         /// <param name="colorComment"></param>
         private static void fetchNext(
-            CodeEditor2.CodeEditor.CodeDocument document,
+            SystemVerilogCore.Documents.IVerilogTextDocument document,
             ref int index, out int length, out int nextIndex,
             out WordTypeEnum wordType,
             ref string sectionName,
@@ -587,7 +639,7 @@ namespace pluginVerilog.Verilog
         }
 
         public static void FetchNextUntilEol(
-            CodeEditor2.CodeEditor.CodeDocument document,
+            SystemVerilogCore.Documents.IVerilogTextDocument document,
             ref int index, out int length, out int nextIndex,
             out WordTypeEnum wordType)
         {
@@ -636,7 +688,7 @@ namespace pluginVerilog.Verilog
         }
 
         private static void fetchNextAtNumber(
-            CodeEditor2.CodeEditor.CodeDocument document,
+            SystemVerilogCore.Documents.IVerilogTextDocument document,
             ref int nextIndex, ref WordTypeEnum wordType
             )
         {
@@ -747,7 +799,7 @@ namespace pluginVerilog.Verilog
         }
 
         private static void fetchNextAtOperator(
-            CodeEditor2.CodeEditor.CodeDocument document,
+            SystemVerilogCore.Documents.IVerilogTextDocument document,
             ref int nextIndex,
             ref WordTypeEnum wordType,
             ref string sectionName,
@@ -775,11 +827,11 @@ namespace pluginVerilog.Verilog
                 {
                     if (nextIndex > docLength)
                     {
-                        document.TextColors.SetColorAt(commentStart, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Comment), docLength - commentStart);
+                        document.SetColorAt(commentStart, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Comment), docLength - commentStart);
                     }
                     else
                     {
-                        document.TextColors.SetColorAt(commentStart, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Comment), nextIndex - commentStart);
+                        document.SetColorAt(commentStart, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Comment), nextIndex - commentStart);
                     }
                 }
                 wordType = WordTypeEnum.Comment;
@@ -817,7 +869,7 @@ namespace pluginVerilog.Verilog
                 if (colorComment)
                 {
                     if (commentEnd > docLength) commentEnd = docLength;
-                    document.TextColors.SetColorAt(commentStart, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Comment), commentEnd - commentStart);
+                    document.SetColorAt(commentStart, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Comment), commentEnd - commentStart);
                 }
                 wordType = WordTypeEnum.Comment;
                 return;
@@ -936,7 +988,7 @@ namespace pluginVerilog.Verilog
         }
 
         private static void ParseInLineComments(
-            CodeEditor2.CodeEditor.CodeDocument document,
+            SystemVerilogCore.Documents.IVerilogTextDocument document,
             ref int nextIndex,
             ref WordTypeEnum wordType,
             ref string sectionName
