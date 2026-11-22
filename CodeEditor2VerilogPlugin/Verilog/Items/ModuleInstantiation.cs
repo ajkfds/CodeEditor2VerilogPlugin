@@ -148,16 +148,14 @@ namespace pluginVerilog.Verilog.Items
 
             string instanceKey = Verilog.ParsedDocument.KeyGenerator(file, SourceName, ParameterOverrides);
 
-            CodeEditor2.CodeEditor.ParsedDocument? codeEditorParsedDocument = source.GetInstancedParsedDocument(instanceKey);
+            CodeEditor2.CodeEditor.IParsedDocument? codeEditorParsedDocument = source.GetInstancedParsedDocument(instanceKey);
             if(codeEditorParsedDocument == null) // don't have module parse result
             {
                 codeEditorParsedDocument = source.ParsedDocument;
             }
 
 
-            if (codeEditorParsedDocument is not ParsedDocument) return null;
-            ParsedDocument? parsedDocument = (ParsedDocument)codeEditorParsedDocument;
-            if (parsedDocument == null) return null;
+            if (codeEditorParsedDocument is not ParsedDocument parsedDocument) return null;
             if (parsedDocument.Root == null) return null;
 
             if(parsedDocument.Root.BuildingBlocks.TryGetValue(SourceName, out BuildingBlock? buildingBlock))

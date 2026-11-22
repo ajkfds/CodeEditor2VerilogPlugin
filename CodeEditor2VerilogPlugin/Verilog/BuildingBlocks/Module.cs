@@ -388,7 +388,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                 if (word.Eof || word.Text == "endmodule") break;
 
-                if (word.RootParsedDocument.ParseMode == CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.LoadParse)
+                if (word.RootParsedDocument.ParseMode == SystemVerilogCore.Parsing.VerilogParseMode.LoadParse)
                 {
                     while (!word.Eof)
                     {

@@ -150,9 +150,9 @@ namespace pluginVerilog.Data
             Verilog.ParsedDocument? newParsedDocument = parser.ParsedDocument as Verilog.ParsedDocument;
             if (newParsedDocument == null) return;
 
-            CodeEditor2.CodeEditor.ParsedDocument? oldParsedDocument = ParsedDocument; // no lock is needed. ParsedDocument property is thread safe
+            CodeEditor2.CodeEditor.IParsedDocument? oldParsedDocument = ParsedDocument; // no lock is needed. ParsedDocument property is thread safe
 
-            if (oldParsedDocument == newParsedDocument) return;
+            if (ReferenceEquals(oldParsedDocument, newParsedDocument)) return;
 
             if (newParsedDocument == null)
             {
@@ -323,18 +323,18 @@ namespace pluginVerilog.Data
         // Instance ParsedDocument Registration
         // このファイルがインスタンスされたときにそのインスタンスのWeakReferenceを保持する
 
-        private ConcurrentDictionary<string, System.WeakReference<CodeEditor2.CodeEditor.ParsedDocument>> instancedParsedDocumentRefs = new ConcurrentDictionary<string, WeakReference<CodeEditor2.CodeEditor.ParsedDocument>>();
+        private ConcurrentDictionary<string, System.WeakReference<CodeEditor2.CodeEditor.IParsedDocument>> instancedParsedDocumentRefs = new ConcurrentDictionary<string, WeakReference<CodeEditor2.CodeEditor.IParsedDocument>>();
 
-        public CodeEditor2.CodeEditor.ParsedDocument? GetInstancedParsedDocument(string key)
+        public CodeEditor2.CodeEditor.IParsedDocument? GetInstancedParsedDocument(string key)
         {
-            CodeEditor2.CodeEditor.ParsedDocument? ret;
+            CodeEditor2.CodeEditor.IParsedDocument? ret;
             if (key == "")
             {
                 return ParsedDocument; // no lock is needed. ParsedDocument property is thread safe
             }
             else
             {
-                if (instancedParsedDocumentRefs.TryGetValue(key, out WeakReference<CodeEditor2.CodeEditor.ParsedDocument>? weakRef))
+                if (instancedParsedDocumentRefs.TryGetValue(key, out WeakReference<CodeEditor2.CodeEditor.IParsedDocument>? weakRef))
                 {
                     if (weakRef == null)
                     {
@@ -373,7 +373,7 @@ namespace pluginVerilog.Data
         /// CoreBridge.ParseEngine) registers the result straight from the
         /// parser without materialising a VerilogModuleInstance.
         /// </remarks>
-        public void RegisterInstanceParsedDocument(string id, CodeEditor2.CodeEditor.ParsedDocument parsedDocument, InstanceTextFile? moduleInstance)
+        public void RegisterInstanceParsedDocument(string id, CodeEditor2.CodeEditor.IParsedDocument parsedDocument, InstanceTextFile? moduleInstance)
         {
             if (parsedDocument == null && System.Diagnostics.Debugger.IsAttached)
             {
@@ -386,13 +386,13 @@ namespace pluginVerilog.Data
             }
             else
             {
-                instancedParsedDocumentRefs.AddOrUpdate(id, new WeakReference<CodeEditor2.CodeEditor.ParsedDocument>(parsedDocument), (key, oldValue) => new WeakReference<CodeEditor2.CodeEditor.ParsedDocument>(parsedDocument));
+                instancedParsedDocumentRefs.AddOrUpdate(id, new WeakReference<CodeEditor2.CodeEditor.IParsedDocument>(parsedDocument), (key, oldValue) => new WeakReference<CodeEditor2.CodeEditor.IParsedDocument>(parsedDocument));
             }
         }
 
         public void CleanWeakRef()
         {
-            CodeEditor2.CodeEditor.ParsedDocument? ret;
+            CodeEditor2.CodeEditor.IParsedDocument? ret;
             foreach (var r in instancedParsedDocumentRefs)
             {
                 if (!r.Value.TryGetTarget(out ret)) instancedParsedDocumentRefs.TryRemove(r.Key, out _);

@@ -326,7 +326,7 @@ namespace pluginVerilog.Verilog.Items
                 // only thing that needs parsing is the referenced
                 // BuildingBlock's owning file -- no synthetic instance is
                 // created.
-                if (word.RootParsedDocument.ParseMode == CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.EditParse
+                if (word.RootParsedDocument.ParseMode == SystemVerilogCore.Parsing.VerilogParseMode.EditParse
                     && word.ProjectProperty.DefinitionNameSpace.Get(scopeRef.BuildingBlockName) == null)
                 {
                     Data.IVerilogRelatedFile? targetFile =

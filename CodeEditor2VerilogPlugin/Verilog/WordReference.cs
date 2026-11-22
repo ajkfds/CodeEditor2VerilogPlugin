@@ -74,7 +74,7 @@ namespace pluginVerilog.Verilog
         }
 
         [JsonIgnore]
-        public CodeEditor2.CodeEditor.ParsedDocument? ParsedDocument
+        public CodeEditor2.CodeEditor.IParsedDocument? ParsedDocument
         {
             get
             {
@@ -100,15 +100,16 @@ namespace pluginVerilog.Verilog
         {
             get
             {
-                CodeEditor2.CodeEditor.ParsedDocument? parsedDocument = indexReference?.ParsedDocument;
-                CodeEditor2.Data.Project? project = parsedDocument?.Project;
-                if (project == null) return new pluginVerilog.RuleSet();
-
-                ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+                // The parser's own document type carries the cached project
+                // property and the source file, so no editor project is needed.
+                if (indexReference?.ParsedDocument is not ParsedDocument parsedDocument)
+                {
+                    return new pluginVerilog.RuleSet();
+                }
+                ProjectProperty? projectProperty = parsedDocument.ProjectProperty;
                 if (projectProperty == null) return new pluginVerilog.RuleSet();
 
-                CodeEditor2.Data.TextFile? textFile = parsedDocument?.TextFile;
-                return projectProperty.GetRuleSet(textFile?.RelativePath);
+                return projectProperty.GetRuleSet(parsedDocument.TextFile?.RelativePath);
             }
         }
 

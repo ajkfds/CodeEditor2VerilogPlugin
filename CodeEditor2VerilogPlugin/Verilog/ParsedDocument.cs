@@ -17,7 +17,7 @@ using System.Threading;
 
 namespace pluginVerilog.Verilog
 {
-    public class ParsedDocument : CodeEditor2.CodeEditor.ParsedDocument,
+    public class ParsedDocument : CodeEditor2.CodeEditor.IParsedDocument,
         CodeEditor2.CodeEditor.IParsedDocumentMessagesProvider
     {
         /// <summary>
@@ -40,11 +40,66 @@ namespace pluginVerilog.Verilog
             }
         }
 
-        public ParsedDocument(Data.IVerilogRelatedFile file, string key, IndexReference? indexReference, DocumentParser.ParseModeEnum parseMode) : base((CodeEditor2.Data.TextFile)file, key, getCodeDocument(file).Version, parseMode)
+        // ---- members that used to be inherited ---------------------------
+        // The parser used to derive from CodeEditor2.CodeEditor.ParsedDocument,
+        // which supplied the key, version, parse mode, locked-document list and
+        // the owning file/project. They are declared here now so the parser no
+        // longer depends on that type. The editor still consumes them: it reads
+        // Key to cache instance parses and ParseMode to decide whether to defer
+        // work.
+
+        /// <summary>Cache key of this parse result.</summary>
+        public string Key { get; set; }
+
+        /// <summary>Document version this result was produced from.</summary>
+        public ulong Version { get; set; }
+
+        /// <summary>Why this document was parsed.</summary>
+        public readonly SystemVerilogCore.Parsing.VerilogParseMode ParseMode;
+
+        /// <summary>
+        /// Documents held during the parse. The editor inspects this to know
+        /// which buffers a parse locked; the language server leaves it empty.
+        /// </summary>
+        // NOTE: the element type must be CodeEditor2's CodeDocument (the base
+        // class), not this file's pluginVerilog.CodeEditor.CodeDocument.
+        public List<CodeEditor2.CodeEditor.CodeDocument> LockedDocument =
+            new List<CodeEditor2.CodeEditor.CodeDocument>();
+
+        /// <summary>
+        /// Interface view of <see cref="LockedDocument"/>: a field cannot
+        /// implement an interface member.
+        /// </summary>
+        List<CodeEditor2.CodeEditor.CodeDocument>
+            CodeEditor2.CodeEditor.IParsedDocument.LockedDocument => LockedDocument;
+
+        /// <summary>The file this result was parsed from, or null.</summary>
+        [JsonIgnore]
+        public Data.IVerilogRelatedFile? TextFile
         {
+            get
+            {
+                if (!fileRef.TryGetTarget(out Data.IVerilogRelatedFile? file)) return null;
+                return file;
+            }
+        }
+
+        /// <summary>
+        /// The project this file belongs to, as the editor's concrete type, or
+        /// null in a host that has no editor project.
+        /// </summary>
+        [JsonIgnore]
+        public CodeEditor2.Data.Project? Project => ProjectInterop.AsEditorProject(TextFile?.Project);
+
+        public ParsedDocument(Data.IVerilogRelatedFile file, string key, IndexReference? indexReference, SystemVerilogCore.Parsing.VerilogParseMode parseMode)
+        {
+            Key = key;
+            ParseMode = parseMode;
+
             CodeDocument? document = file.CodeDocument as CodeDocument;
             if (document == null) throw new Exception();
             codeDocument = document;
+            Version = (ulong)document.Version;
 
             if (file is SystemVerilogFile || file is SystemVerilogHeaderFile) SystemVerilog = true;
 
@@ -265,12 +320,11 @@ namespace pluginVerilog.Verilog
         [JsonIgnore]
         public ProjectProperty? ProjectProperty { get; private set; }
 
-        public override void Dispose()
+        public void Dispose()
         {
             if (Root == null) return;
 
             Data.IVerilogRelatedFile? file = File;
-            base.Dispose();
         }
 
         /// <summary>

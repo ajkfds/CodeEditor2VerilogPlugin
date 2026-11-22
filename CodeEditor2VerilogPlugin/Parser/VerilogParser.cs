@@ -41,7 +41,8 @@ namespace pluginVerilog.Parser
             fileRef = new WeakReference<Data.VerilogFile>(verilogFile);
 
             string key = Verilog.ParsedDocument.KeyGenerator(verilogRelatedFile, null, null);
-            parsedDocument = new Verilog.ParsedDocument(verilogRelatedFile, key, null, parseMode);
+            parsedDocument = new Verilog.ParsedDocument(
+                verilogRelatedFile, key, null, DocumentParser.ToVerilogParseMode(parseMode));
             parsedDocument.Version = verilogRelatedFile.CodeDocument.Version;
 
             // swap CodeDocument to new one
@@ -122,7 +123,8 @@ namespace pluginVerilog.Parser
             fileRef = new WeakReference<Data.VerilogFile>(verilogFile);
             string key = Verilog.ParsedDocument.KeyGenerator(verilogFile, moduleName, parameterOverrides);
 
-            parsedDocument = new Verilog.ParsedDocument(verilogRelatedFile, key, null, parseMode);
+            parsedDocument = new Verilog.ParsedDocument(
+                verilogRelatedFile, key, null, DocumentParser.ToVerilogParseMode(parseMode));
 
             // swap CodeDocument to new one
             CodeEditor.CodeDocument originalCodeDocument = parsedDocument.CodeDocument;
@@ -153,11 +155,11 @@ namespace pluginVerilog.Parser
         }
 
         private Verilog.ParsedDocument parsedDocument;
-        public override CodeEditor2.CodeEditor.ParsedDocument ParsedDocument
+        public override CodeEditor2.CodeEditor.IParsedDocument ParsedDocument
         {
             get
             {
-                return parsedDocument as CodeEditor2.CodeEditor.ParsedDocument;
+                return parsedDocument;
             }
         }
         public virtual Verilog.ParsedDocument VerilogParsedDocument

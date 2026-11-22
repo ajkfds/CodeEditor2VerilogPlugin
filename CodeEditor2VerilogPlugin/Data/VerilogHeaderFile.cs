@@ -200,7 +200,7 @@ namespace pluginVerilog.Data
 
         public override async System.Threading.Tasks.Task AcceptParsedDocumentAsync(CodeEditor2.CodeEditor.Parser.DocumentParser parser)
         {
-            CodeEditor2.CodeEditor.ParsedDocument? newParsedDocument = parser.ParsedDocument;
+            CodeEditor2.CodeEditor.IParsedDocument? newParsedDocument = parser.ParsedDocument;
             if (newParsedDocument == null) return;
             if (Plugin.StopParse) return;
 

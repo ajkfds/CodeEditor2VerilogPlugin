@@ -116,7 +116,7 @@ namespace pluginVerilog.Verilog.Items
 
             string instanceKey = Verilog.ParsedDocument.KeyGenerator(file, SourceName, ParameterOverrides);
 
-            CodeEditor2.CodeEditor.ParsedDocument? codeEditorParsedDocument = source.GetInstancedParsedDocument(instanceKey);
+            CodeEditor2.CodeEditor.IParsedDocument? codeEditorParsedDocument = source.GetInstancedParsedDocument(instanceKey);
             // UDPs do not have parameter ports, so the base parse result suffices.
             if (codeEditorParsedDocument == null)
             {

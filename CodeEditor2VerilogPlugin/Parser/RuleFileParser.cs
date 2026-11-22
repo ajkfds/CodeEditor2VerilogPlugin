@@ -61,14 +61,17 @@ namespace pluginVerilog.Parser
 
             ColorLines(text);
 
-            if (errorMessage != null && ParsedDocument != null)
+            // Narrow to the editor's own ParsedDocument: the parser contract
+            // has no Messages/Project, and this parser always builds one.
+            if (errorMessage != null
+                && ParsedDocument is CodeEditor2.CodeEditor.ParsedDocument ownDocument)
             {
-                ParsedDocument.Messages.Add(new CodeEditor2.CodeEditor.ParsedDocument.Message()
+                ownDocument.Messages.Add(new CodeEditor2.CodeEditor.ParsedDocument.Message()
                 {
                     Index = 0,
                     Length = System.Math.Max(1, Document.Length),
                     Text = errorMessage,
-                    Project = ParsedDocument.Project
+                    Project = ownDocument.Project
                 });
             }
         }
