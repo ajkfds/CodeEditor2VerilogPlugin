@@ -1,4 +1,4 @@
-using CodeEditor2.CodeEditor.CodeComplete;
+
 using pluginVerilog.Verilog.Items.Generate;
 using System.Threading.Tasks;
 

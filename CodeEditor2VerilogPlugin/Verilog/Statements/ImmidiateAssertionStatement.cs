@@ -1,4 +1,4 @@
-using CodeEditor2.CodeEditor.CodeComplete;
+
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog.Statements

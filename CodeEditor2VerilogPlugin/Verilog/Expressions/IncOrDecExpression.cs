@@ -1,4 +1,4 @@
-using CodeEditor2.CodeEditor.CodeComplete;
+
 using pluginVerilog.Verilog.Statements;
 
 namespace pluginVerilog.Verilog.Expressions
