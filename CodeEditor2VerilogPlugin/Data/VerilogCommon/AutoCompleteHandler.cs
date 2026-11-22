@@ -87,22 +87,25 @@ namespace pluginVerilog.Data.VerilogCommon
         {
             switch (toolId)
             {
+                // The snippet classes are editor-side consumers (they derive
+                // from InteractiveSnippet), so they live under
+                // Data/VerilogCommon/EditorSnippets rather than Verilog/.
                 case CoreBridge.ToolMenuCatalog.ToolId.AlwaysFF:
-                    return new Verilog.Snippets.AlwaysFFSnippet();
+                    return new EditorSnippets.AlwaysFFSnippet();
                 case CoreBridge.ToolMenuCatalog.ToolId.AutoConnect:
-                    return new Verilog.Snippets.AutoConnectSnippet();
+                    return new EditorSnippets.AutoConnectSnippet();
                 case CoreBridge.ToolMenuCatalog.ToolId.AutoFormat:
-                    return new Verilog.Snippets.AutoFormatSnippet();
+                    return new EditorSnippets.AutoFormatSnippet();
                 case CoreBridge.ToolMenuCatalog.ToolId.ModuleInstance:
-                    return new Verilog.Snippets.ModuleInstanceMenuSnippet();
+                    return new EditorSnippets.ModuleInstanceMenuSnippet();
                 case CoreBridge.ToolMenuCatalog.ToolId.PortConnectionCreate:
-                    return new Verilog.Snippets.PortConnectionCreateSnippet();
+                    return new EditorSnippets.PortConnectionCreateSnippet();
                 case CoreBridge.ToolMenuCatalog.ToolId.PortInvert:
-                    return new Verilog.Snippets.PortInvertSnippet();
+                    return new EditorSnippets.PortInvertSnippet();
                 case CoreBridge.ToolMenuCatalog.ToolId.ModPort:
-                    return new Verilog.Snippets.ModPortSnippet();
+                    return new EditorSnippets.ModPortSnippet();
                 case CoreBridge.ToolMenuCatalog.ToolId.ConnectionCheck:
-                    return new Verilog.Snippets.ConnectionCheckSnippet();
+                    return new EditorSnippets.ConnectionCheckSnippet();
                 default:
                     return null;
             }

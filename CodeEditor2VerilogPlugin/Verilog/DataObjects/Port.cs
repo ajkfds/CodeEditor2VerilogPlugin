@@ -1,5 +1,4 @@
 
-using CodeEditor2.Data;
 using DynamicData;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.CommentAnnotation;
@@ -96,7 +95,11 @@ namespace pluginVerilog.Verilog.DataObjects
             Ref
         }
 
-        public static Port? Create(string name, Project project, DirectionEnum direction, DataObject dataObject)
+        public static Port? Create(
+            string name,
+            SystemVerilogCore.Projects.IVerilogProject project,
+            DirectionEnum direction,
+            DataObject dataObject)
         {
             Port port = new Port() { DefinitionReference = null, Name = name, Project = project, Direction = direction, DataObject = dataObject };
             return port;

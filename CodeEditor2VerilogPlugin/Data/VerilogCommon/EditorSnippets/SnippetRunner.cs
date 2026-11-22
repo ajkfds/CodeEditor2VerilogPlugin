@@ -1,12 +1,13 @@
 using Avalonia.Input;
 using CodeEditor2.Views;
 using pluginVerilog.CoreBridge;
+using pluginVerilog.Verilog;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace pluginVerilog.Verilog.Snippets
+namespace pluginVerilog.Data.VerilogCommon.EditorSnippets
 {
     /// <summary>
     /// Runs a <see cref="SnippetAdapter"/> snippet in the desktop editor.

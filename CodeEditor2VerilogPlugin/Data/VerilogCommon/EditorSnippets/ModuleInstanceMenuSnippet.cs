@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace pluginVerilog.Verilog.Snippets
+namespace pluginVerilog.Data.VerilogCommon.EditorSnippets
 {
     /// <summary>
     /// The editor's "moduleInstance" tool: lists every module of the project so

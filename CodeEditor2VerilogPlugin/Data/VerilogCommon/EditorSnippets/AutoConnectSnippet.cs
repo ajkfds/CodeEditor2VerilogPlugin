@@ -1,14 +1,16 @@
 using Avalonia.Input;
 using Avalonia.Threading;
 using CodeEditor2.Views;
+using pluginVerilog.Verilog;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.Items;
+using pluginVerilog.Verilog.Snippets;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace pluginVerilog.Verilog.Snippets
+namespace pluginVerilog.Data.VerilogCommon.EditorSnippets
 {
     /// <summary>
     /// The editor's "Auto Connect Ports" tool.

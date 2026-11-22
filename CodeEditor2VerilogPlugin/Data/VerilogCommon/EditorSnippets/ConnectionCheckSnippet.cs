@@ -1,7 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Threading;
-using CodeEditor2.CodeEditor;
+using pluginVerilog.Verilog;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.Expressions;
@@ -10,7 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace pluginVerilog.Verilog.Snippets
+namespace pluginVerilog.Data.VerilogCommon.EditorSnippets
 {
     public class ConnectionCheckSnippet : CodeEditor2.Snippets.InteractiveSnippet
     {
@@ -22,7 +22,7 @@ namespace pluginVerilog.Verilog.Snippets
                     );
         }
 
-        private CodeDocument? document;
+        private CodeEditor2.CodeEditor.CodeDocument? document;
 
         public override async System.Threading.Tasks.Task ApplyAsync()
         {

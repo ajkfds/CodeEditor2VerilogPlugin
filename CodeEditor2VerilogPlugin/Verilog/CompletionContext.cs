@@ -466,7 +466,7 @@ namespace pluginVerilog.Verilog
                 List<string> moduleNames = projectProperty.DefinitionNameSpace.GetNameList((x) => { return (x is Module); });
                 foreach (string moduleName in moduleNames)
                 {
-                    AutoCompleteItems.Add(new Verilog.Snippets.ModuleInstanceSnippet(moduleName));
+                    AutoCompleteItems.Add(new Data.VerilogCommon.EditorSnippets.ModuleInstanceSnippet(moduleName));
                 }
             }
 

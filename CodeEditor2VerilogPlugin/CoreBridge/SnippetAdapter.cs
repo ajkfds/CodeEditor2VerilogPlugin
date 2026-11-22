@@ -153,22 +153,22 @@ namespace pluginVerilog.CoreBridge
             switch (name)
             {
                 case SnippetName.AlwaysFF:
-                    Verilog.Snippets.AlwaysFFSnippet.Build(parsedDocument, index, result);
+                    Data.VerilogCommon.EditorSnippets.AlwaysFFSnippet.Build(parsedDocument, index, result);
                     break;
                 case SnippetName.AutoFormat:
-                    Verilog.Snippets.AutoFormatSnippet.Build(parsedDocument, index, result);
+                    Data.VerilogCommon.EditorSnippets.AutoFormatSnippet.Build(parsedDocument, index, result);
                     break;
                 case SnippetName.ModuleInstance:
-                    Verilog.Snippets.ModuleInstanceSnippet.Build(file, parsedDocument, index, argument, result);
+                    Data.VerilogCommon.EditorSnippets.ModuleInstanceSnippet.Build(file, parsedDocument, index, argument, result);
                     break;
                 case SnippetName.PortConnectionCreate:
-                    Verilog.Snippets.PortConnectionCreateSnippet.Build(parsedDocument, index, result);
+                    Data.VerilogCommon.EditorSnippets.PortConnectionCreateSnippet.Build(parsedDocument, index, result);
                     break;
                 case SnippetName.PortInvert:
-                    Verilog.Snippets.PortInvertSnippet.Build(parsedDocument, selectionStart, selectionEnd, result);
+                    Data.VerilogCommon.EditorSnippets.PortInvertSnippet.Build(parsedDocument, selectionStart, selectionEnd, result);
                     break;
                 case SnippetName.ModPort:
-                    Verilog.Snippets.ModPortSnippet.Build(parsedDocument, index, result);
+                    Data.VerilogCommon.EditorSnippets.ModPortSnippet.Build(parsedDocument, index, result);
                     break;
                 default:
                     result.Message = "unknown snippet: " + name;

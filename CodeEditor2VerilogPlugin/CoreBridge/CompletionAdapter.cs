@@ -121,7 +121,7 @@ namespace pluginVerilog.CoreBridge
                 // candidate with that text as the snippet body, otherwise the
                 // VS Code host inserts the bare name - the "module name
                 // completion is only a keyword completion" symptom.
-                if (item is Verilog.Snippets.ModuleInstanceSnippet)
+                if (item is Data.VerilogCommon.EditorSnippets.ModuleInstanceSnippet)
                 {
                     kind = 9; // LSP CompletionItemKind.Module
                     entries.Add(new CompletionEntry

@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace pluginVerilog.Verilog.Snippets
+namespace pluginVerilog.Data.VerilogCommon.EditorSnippets
 {
     /// <summary>
     /// The editor's "autoFormat" tool: rewrite the module instantiation under
@@ -15,6 +15,14 @@ namespace pluginVerilog.Verilog.Snippets
     /// returns edits for every instantiation in the file), so the tool menu
     /// uses this snippet instead of dispatching to the editor's format
     /// command.
+    /// </para>
+    ///
+    /// <para>
+    /// Moved out of <c>pluginVerilog.Verilog.Snippets</c>: the snippet classes
+    /// that derive from the editor's <c>InteractiveSnippet</c> are editor-side
+    /// consumers, not part of the parser. Only <c>SnippetBuilder</c> (UI-free
+    /// text generation, used by <c>CoreBridge.SnippetAdapter</c>) stays under
+    /// <c>Verilog/</c>.
     /// </para>
     /// </summary>
     public class AutoFormatSnippet : CodeEditor2.Snippets.InteractiveSnippet
@@ -39,7 +47,7 @@ namespace pluginVerilog.Verilog.Snippets
             CoreBridge.SnippetAdapter.SnippetResult result)
         {
             Verilog.Items.ModuleInstantiation? instantiation =
-                SnippetBuilder.FindInstantiationAt(parsedDocument, index);
+                Verilog.Snippets.SnippetBuilder.FindInstantiationAt(parsedDocument, index);
             if (instantiation == null)
             {
                 result.Message = "the caret is not inside a module instantiation";
@@ -51,9 +59,9 @@ namespace pluginVerilog.Verilog.Snippets
                 return;
             }
 
-            int start = SnippetBuilder.LastIndex(instantiation.BeginIndexReference);
-            int end = SnippetBuilder.LastIndex(instantiation.LastIndexReference) + 1;
-            string indent = SnippetBuilder.GetIndent(parsedDocument, start);
+            int start = Verilog.Snippets.SnippetBuilder.LastIndex(instantiation.BeginIndexReference);
+            int end = Verilog.Snippets.SnippetBuilder.LastIndex(instantiation.LastIndexReference) + 1;
+            string indent = Verilog.Snippets.SnippetBuilder.GetIndent(parsedDocument, start);
 
             // CreateString returns the statement without the trailing
             // semicolon; the replaced range covers it, so keep it.

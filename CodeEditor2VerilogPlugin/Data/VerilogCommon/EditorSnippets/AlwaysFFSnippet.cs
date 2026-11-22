@@ -1,8 +1,15 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+// Moved out of pluginVerilog.Verilog (editor-side consumer), so the parser
+// namespace it used to inherit is imported explicitly.
+using pluginVerilog.Verilog;
+using pluginVerilog.Verilog.Snippets;
 
-namespace pluginVerilog.Verilog.Snippets
+namespace pluginVerilog.Data.VerilogCommon.EditorSnippets
 {
+    // NOTE: an editor-side consumer (derives from the editor's
+    // InteractiveSnippet), so it lives here rather than under Verilog/. Only
+    // SnippetBuilder (UI-free text generation) stays in Verilog/Snippets.
     /// <summary>
     /// The editor's "alwaysFF" tool: an <c>always @(posedge clk or negedge
     /// rst)</c> block with the clock / reset taken from the ports the parser
