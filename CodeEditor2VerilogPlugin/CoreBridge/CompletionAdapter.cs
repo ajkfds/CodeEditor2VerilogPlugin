@@ -84,30 +84,33 @@ namespace pluginVerilog.CoreBridge
                 if (string.IsNullOrEmpty(text)) continue;
                 if (!seen.Add(text)) continue; // reject duplicated entries
 
-                // LSP CompletionItemKind: 3=Function, 6=Variable, 9=Module, 14=Keyword
+                // LSP CompletionItemKind: 3=Function, 6=Variable, 9=Module,
+                // 14=Keyword. Read the category through the parser-facing
+                // contract instead of the plugin's concrete candidate type, so
+                // the mapping does not depend on an editor-derived class.
                 int kind = 14;
                 string detail = "";
-                if (item is Data.VerilogCommon.AutoCompleteItem acItem)
+                if (item is SystemVerilogCore.Documents.IVerilogAutocompleteItem contractItem)
                 {
-                    switch (acItem.Type)
+                    kind = contractItem.Kind switch
                     {
-                        case Data.VerilogCommon.AutoCompleteItem.CompleteType.Keyword:
-                            kind = 14;
-                            break;
-                        case Data.VerilogCommon.AutoCompleteItem.CompleteType.Function:
-                            kind = 3;
-                            break;
-                        case Data.VerilogCommon.AutoCompleteItem.CompleteType.Task:
-                            kind = 3;
-                            break;
-                        case Data.VerilogCommon.AutoCompleteItem.CompleteType.DataObject:
-                            kind = 6;
-                            break;
-                        case Data.VerilogCommon.AutoCompleteItem.CompleteType.NameSpace:
-                            kind = 9;
-                            break;
-                    }
-                    detail = acItem.Type.ToString();
+                        SystemVerilogCore.Documents.SystemVerilogAutocompleteItemKind.Function => 3,
+                        SystemVerilogCore.Documents.SystemVerilogAutocompleteItemKind.Task => 3,
+                        SystemVerilogCore.Documents.SystemVerilogAutocompleteItemKind.Variable => 6,
+                        SystemVerilogCore.Documents.SystemVerilogAutocompleteItemKind.Net => 6,
+                        SystemVerilogCore.Documents.SystemVerilogAutocompleteItemKind.Parameter => 6,
+                        SystemVerilogCore.Documents.SystemVerilogAutocompleteItemKind.LocalParameter => 6,
+                        SystemVerilogCore.Documents.SystemVerilogAutocompleteItemKind.Port => 6,
+                        SystemVerilogCore.Documents.SystemVerilogAutocompleteItemKind.Module => 9,
+                        SystemVerilogCore.Documents.SystemVerilogAutocompleteItemKind.Interface => 9,
+                        SystemVerilogCore.Documents.SystemVerilogAutocompleteItemKind.Package => 9,
+                        SystemVerilogCore.Documents.SystemVerilogAutocompleteItemKind.Class => 7,
+                        SystemVerilogCore.Documents.SystemVerilogAutocompleteItemKind.Typedef => 7,
+                        SystemVerilogCore.Documents.SystemVerilogAutocompleteItemKind.Macro => 14,
+                        SystemVerilogCore.Documents.SystemVerilogAutocompleteItemKind.Snippet => 15,
+                        _ => 14,
+                    };
+                    detail = contractItem.Kind.ToString();
                 }
 
                 // A module-name candidate is a ModuleInstanceSnippet, i.e. a

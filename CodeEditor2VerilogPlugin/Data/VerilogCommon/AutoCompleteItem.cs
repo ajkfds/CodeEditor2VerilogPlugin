@@ -24,6 +24,23 @@ namespace pluginVerilog.Data.VerilogCommon
             DataObject,
             NameSpace
         }
+
+        /// <summary>
+        /// The parser-facing kind of this candidate, so a UI-free host (the
+        /// language server) can map it to its own completion kind without
+        /// knowing this type. Derived from <see cref="Type"/> because that is
+        /// what the parser already decides when it builds a candidate.
+        /// </summary>
+        public override SystemVerilogCore.Documents.SystemVerilogAutocompleteItemKind Kind =>
+                Type switch
+                {
+                    CompleteType.Keyword => SystemVerilogCore.Documents.SystemVerilogAutocompleteItemKind.Keyword,
+                    CompleteType.Task => SystemVerilogCore.Documents.SystemVerilogAutocompleteItemKind.Task,
+                    CompleteType.Function => SystemVerilogCore.Documents.SystemVerilogAutocompleteItemKind.Function,
+                    CompleteType.DataObject => SystemVerilogCore.Documents.SystemVerilogAutocompleteItemKind.Variable,
+                    CompleteType.NameSpace => SystemVerilogCore.Documents.SystemVerilogAutocompleteItemKind.Module,
+                    _ => SystemVerilogCore.Documents.SystemVerilogAutocompleteItemKind.Unknown,
+                };
         // autocomplete item作成時に取得したheadindex, lengthの場所を更新する
         //public override System.Threading.Tasks.Task ApplyAsync()
         //{
