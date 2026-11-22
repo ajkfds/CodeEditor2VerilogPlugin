@@ -116,6 +116,18 @@ namespace pluginVerilog.Verilog
             }
         }
 
+        /// <summary>
+        /// The project being parsed.
+        ///
+        /// <para>
+        /// Still exposed because ~49 parse sites read it (mostly to reach
+        /// <c>ProjectProperty</c>, and to build instance objects that need the
+        /// owning project). It is resolved through the parsed document's cached
+        /// <see cref="ParsedDocument.ProjectProperty"/> rather than walking
+        /// <c>Project.ProjectProperties</c>, so this property itself does not
+        /// add a new dependency on the editor's project type.
+        /// </para>
+        /// </summary>
         public CodeEditor2.Data.Project Project
         {
             get
@@ -129,12 +141,20 @@ namespace pluginVerilog.Verilog
             get;set;
         }
 
+        /// <summary>
+        /// The plugin property of the project being parsed.
+        ///
+        /// <para>
+        /// Read from the parsed document's cached copy instead of walking
+        /// <c>CodeEditor2.Data.Project.ProjectProperties</c>, so this property
+        /// no longer depends on the editor's project type.
+        /// </para>
+        /// </summary>
         public ProjectProperty ProjectProperty
         {
             get
             {
-                if (Project == null) throw new Exception();
-                ProjectProperty? projectProperty = Project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+                ProjectProperty? projectProperty = RootParsedDocument.ProjectProperty;
                 if (projectProperty == null) throw new Exception();
                 return projectProperty;
             }
@@ -155,13 +175,8 @@ namespace pluginVerilog.Verilog
         {
             get
             {
-                CodeEditor2.Data.Project? project = Project;
-                if (project == null) return fallbackRuleSet;
-                if (!project.ProjectProperties.TryGetValue(Plugin.StaticID, out CodeEditor2.Data.ProjectProperty? property))
-                {
-                    return fallbackRuleSet;
-                }
-                if (property is not ProjectProperty projectProperty) return fallbackRuleSet;
+                ProjectProperty? projectProperty = RootParsedDocument?.ProjectProperty;
+                if (projectProperty == null) return fallbackRuleSet;
 
                 Data.IVerilogRelatedFile? file = RootParsedDocument?.File;
                 if (file == null) return projectProperty.RuleSet;

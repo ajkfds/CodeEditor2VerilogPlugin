@@ -49,6 +49,10 @@ namespace pluginVerilog.Verilog
             if (file is SystemVerilogFile || file is SystemVerilogHeaderFile) SystemVerilog = true;
 
             fileRef = new WeakReference<Data.IVerilogRelatedFile>(file);
+            // Capture the project property now: parse-time lookups
+            // (Macros / SystemFunctions / RuleSet / name spaces) all go through
+            // it, and the weak file reference may be collected later.
+            ProjectProperty = file.ProjectProperty;
             if (indexReference == null)
             {
                 IndexReference = IndexReference.Create(this, document, 0);
@@ -244,16 +248,22 @@ namespace pluginVerilog.Verilog
             }
         }
 
+        /// <summary>
+        /// The plugin property of the project this file belongs to, captured
+        /// once at construction.
+        ///
+        /// <para>
+        /// Every parse-time lookup the parser needs from a project goes through
+        /// this object (<c>Macros</c>, <c>SystemFunctions</c>,
+        /// <c>SystemTaskParsers</c>, <c>DefinitionNameSpace</c>,
+        /// <c>RuleSet</c>), so the parser never needs the editor's
+        /// <c>CodeEditor2.Data.Project</c> type. Holding it here also means the
+        /// lookups keep working after the file's weak reference to the project
+        /// has been collected.
+        /// </para>
+        /// </summary>
         [JsonIgnore]
-        public ProjectProperty? ProjectProperty
-        {
-            get
-            {
-                Data.IVerilogRelatedFile? file = File;
-                if (file == null) return null;
-                return file.ProjectProperty;
-            }
-        }
+        public ProjectProperty? ProjectProperty { get; private set; }
 
         public override void Dispose()
         {
