@@ -372,7 +372,8 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 Name = portName,
                 Direction = direction,
                 //DataType = dataType,
-                DefinitionReference = word.GetReference()
+                DefinitionReference = word.GetReference(),
+                Project = word.RootParsedDocument.Project
             };
 
             foreach (var arr in unpackedArrays)

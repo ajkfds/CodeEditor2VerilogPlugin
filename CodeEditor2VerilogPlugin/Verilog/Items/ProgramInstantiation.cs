@@ -77,8 +77,8 @@ namespace pluginVerilog.Verilog.Items
             // Resolve in the project that defines the program (the "@project"
             // target when specified); the local project's DefinitionNameSpace
             // does not contain a cross-project program.
-            Project sourceProject = GetInstancedBuildingBlockProject();
-            ProjectProperty? sourceProjectProperty = sourceProject.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+            SystemVerilogCore.Projects.IVerilogProject sourceProject = GetInstancedBuildingBlockProject();
+            ProjectProperty? sourceProjectProperty = sourceProject.Settings as ProjectProperty;
             if (sourceProjectProperty == null) return;
             Program? originalProgram = sourceProjectProperty.DefinitionNameSpace.Get(SourceName) as Program;
             if (originalProgram == null) return;
@@ -87,24 +87,23 @@ namespace pluginVerilog.Verilog.Items
             label.AppendLabel(port.GetLabel());
         }
 
-        public Project GetInstancedBuildingBlockProject()
+        public SystemVerilogCore.Projects.IVerilogProject GetInstancedBuildingBlockProject()
         {
-            Project sourceProject = Project;
-            if (CodeEditor2.Global.Projects.ContainsKey(SourceProjectName))
-            {
-                sourceProject = CodeEditor2.Global.Projects[SourceProjectName];
-            }
+            SystemVerilogCore.Projects.IVerilogProject sourceProject = Project;
+            SystemVerilogCore.Projects.IVerilogProject? resolved = Project.ResolveProject(SourceProjectName);
+            if (resolved != null) sourceProject = resolved;
             return sourceProject;
         }
 
         public BuildingBlock? GetInstancedBuildingBlock()
         {
             ProjectProperty projectProperty = ProjectProperty;
-            Project sourceProject = Project;
-            if (CodeEditor2.Global.Projects.ContainsKey(SourceProjectName))
+            SystemVerilogCore.Projects.IVerilogProject sourceProject = Project;
+            SystemVerilogCore.Projects.IVerilogProject? resolved = Project.ResolveProject(SourceProjectName);
+            if (resolved != null)
             {
-                sourceProject = CodeEditor2.Global.Projects[SourceProjectName];
-                projectProperty = (ProjectProperty)sourceProject.GetPluginProperty();
+                sourceProject = resolved;
+                if (resolved.Settings is ProjectProperty resolvedProperty) projectProperty = resolvedProperty;
             }
 
             Data.IVerilogRelatedFile? file = projectProperty.DefinitionNameSpace.GetFile(SourceName);

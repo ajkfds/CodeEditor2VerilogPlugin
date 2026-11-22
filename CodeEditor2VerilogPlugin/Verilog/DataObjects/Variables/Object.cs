@@ -13,7 +13,8 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         public required Dictionary<string, Expressions.Expression> ParameterOverrides { get; init; }
         public BuildingBlocks.Class? GetSourceClass() {
 
-            ProjectProperty projectProperty = (ProjectProperty)Project.GetPluginProperty();
+            ProjectProperty? projectProperty = Project.Settings as ProjectProperty;
+            if (projectProperty == null) throw new Exception();
     
             Data.IVerilogRelatedFile? file = projectProperty.UnitNameSpace.GetFile(SourceName);
             if (file == null)
@@ -63,7 +64,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             }
         }
         public required string SourceName { get; init; }
-        public required CodeEditor2.Data.Project Project { get; init; }
+        public required SystemVerilogCore.Projects.IVerilogProject Project { get; init; }
 
         public override NamedElements NamedElements { get {
                 Class? @class = GetSourceClass();

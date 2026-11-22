@@ -22,7 +22,7 @@ namespace pluginVerilog.Verilog.Items
         Attribute? Attribute { get; set; }
         WordReference? DefinitionReference { get; init; }
 
-        CodeEditor2.Data.Project Project { get; }
+        SystemVerilogCore.Projects.IVerilogProject Project { get; }
 
 
     }

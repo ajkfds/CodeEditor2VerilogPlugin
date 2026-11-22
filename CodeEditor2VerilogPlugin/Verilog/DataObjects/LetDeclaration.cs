@@ -130,7 +130,8 @@ namespace pluginVerilog.Verilog.DataObjects
                 BeginIndexReference = beginReference,
                 Name = word.Text,
                 BuildingBlock = nameSpace.BuildingBlock,
-                Parent = nameSpace
+                Parent = nameSpace,
+                Project = word.RootParsedDocument.Project
             };
             word.Color(CodeDrawStyle.ColorType.Identifier);
             word.MoveNext();

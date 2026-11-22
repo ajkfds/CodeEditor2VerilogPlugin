@@ -120,12 +120,10 @@ namespace pluginVerilog.Verilog
         /// The project being parsed.
         ///
         /// <para>
-        /// Still exposed because ~49 parse sites read it (mostly to reach
-        /// <c>ProjectProperty</c>, and to build instance objects that need the
-        /// owning project). It is resolved through the parsed document's cached
-        /// <see cref="ParsedDocument.ProjectProperty"/> rather than walking
-        /// <c>Project.ProjectProperties</c>, so this property itself does not
-        /// add a new dependency on the editor's project type.
+        /// Kept because ~49 parse sites read it (to build instance objects that
+        /// need the owning project, and to reach <c>ProjectProperty</c>).
+        /// Include resolution no longer goes through it: that is handled by
+        /// <see cref="ParsedDocument.IncludeResolver"/>, which is UI-free.
         /// </para>
         /// </summary>
         public CodeEditor2.Data.Project Project

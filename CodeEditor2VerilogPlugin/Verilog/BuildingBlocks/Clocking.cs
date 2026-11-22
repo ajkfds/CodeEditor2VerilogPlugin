@@ -156,6 +156,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     DefinitionReference = word.CrateWordReference(),
                     IsDefault = isDefault,
                     IsGlobal = isGlobal,
+                    Project = word.RootParsedDocument.Project,
                 };
                 word.Color(CodeDrawStyle.ColorType.Identifier);
                 word.MoveNext();
@@ -170,6 +171,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     DefinitionReference = word.CrateWordReference(),
                     IsDefault = isDefault,
                     IsGlobal = isGlobal,
+                    Project = word.RootParsedDocument.Project,
                 };
             }
 

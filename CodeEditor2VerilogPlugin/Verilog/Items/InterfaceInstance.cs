@@ -20,8 +20,13 @@ namespace pluginVerilog.Verilog.Items
         [JsonIgnore]
         public required NameSpace InstancedNameSpace { get; init; }
 
+        /// <summary>
+        /// The project this instance belongs to, typed as the UI-free
+        /// <see cref="SystemVerilogCore.Projects.IVerilogProject"/> so the parser
+        /// does not depend on the editor's project type.
+        /// </summary>
         [JsonIgnore]
-        public required Project Project { get; init; }
+        public required SystemVerilogCore.Projects.IVerilogProject Project { get; init; }
 
         public Dictionary<string, string> Properties = new Dictionary<string, string>();
         [JsonIgnore]
@@ -29,7 +34,8 @@ namespace pluginVerilog.Verilog.Items
         {
             get
             {
-                ProjectProperty? projectProperty = Project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+                ProjectProperty? projectProperty =
+                    Project.Settings as ProjectProperty;
                 if (projectProperty == null) throw new Exception();
                 return projectProperty;
             }
@@ -102,8 +108,7 @@ namespace pluginVerilog.Verilog.Items
                     return instancedInterface;
                 }
 
-                ProjectProperty projectProperty = (ProjectProperty)Project.ProjectProperties[Plugin.StaticID];
-                instancedInterface = projectProperty.DefinitionNameSpace.Get(SourceName) as Interface;
+                instancedInterface = ProjectProperty.DefinitionNameSpace.Get(SourceName) as Interface;
                 return instancedInterface;
             }
         }

@@ -98,8 +98,8 @@ namespace pluginVerilog.Verilog.Items
             // Resolve in the project that defines the module (the "@project"
             // target when specified); the local project's DefinitionNameSpace
             // does not contain a cross-project module.
-            Project sourceProject = GetInstancedBuildingBlockProject();
-            ProjectProperty? sourceProjectProperty = sourceProject.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+            SystemVerilogCore.Projects.IVerilogProject sourceProject = GetInstancedBuildingBlockProject();
+            ProjectProperty? sourceProjectProperty = sourceProject.Settings as ProjectProperty;
             if (sourceProjectProperty == null) return;
             Module? originalModule = sourceProjectProperty.DefinitionNameSpace.Get(SourceName) as Module;
             if (originalModule == null) return;
@@ -108,23 +108,35 @@ namespace pluginVerilog.Verilog.Items
             label.AppendLabel(port.GetLabel());
         }
 
-        public Project GetInstancedBuildingBlockProject()
+        /// <summary>
+        /// The project that defines the instantiated module: the
+        /// <c>// @project &lt;name&gt;</c> target when one is given and loaded,
+        /// otherwise this instance's own project.
+        ///
+        /// <para>
+        /// Resolved through <see cref="SystemVerilogCore.Projects.IVerilogProjectResolver"/>
+        /// instead of the editor's <c>Global.Projects</c> dictionary, so the
+        /// language server (which maps projects to workspace folders) can
+        /// resolve cross-project references too.
+        /// </para>
+        /// </summary>
+        public SystemVerilogCore.Projects.IVerilogProject GetInstancedBuildingBlockProject()
         {
-            Project sourceProject = Project;
-            if (CodeEditor2.Global.Projects.ContainsKey(SourceProjectName))
-            {
-                sourceProject = CodeEditor2.Global.Projects[SourceProjectName];
-            }
+            SystemVerilogCore.Projects.IVerilogProject sourceProject = Project;
+            SystemVerilogCore.Projects.IVerilogProject? resolved =
+                Project.ResolveProject(SourceProjectName);
+            if (resolved != null) sourceProject = resolved;
             return sourceProject;
         }
         public BuildingBlock? GetInstancedBuildingBlock()
         {
             ProjectProperty projectProperty = ProjectProperty;
-            Project sourceProject = Project;
-            if (CodeEditor2.Global.Projects.ContainsKey(SourceProjectName))
+            SystemVerilogCore.Projects.IVerilogProject sourceProject = Project;
+            SystemVerilogCore.Projects.IVerilogProject? resolved = Project.ResolveProject(SourceProjectName);
+            if (resolved != null)
             {
-                sourceProject = CodeEditor2.Global.Projects[SourceProjectName];
-                projectProperty = (ProjectProperty)sourceProject.GetPluginProperty();
+                sourceProject = resolved;
+                if (resolved.Settings is ProjectProperty resolvedProperty) projectProperty = resolvedProperty;
             }
 
             Data.IVerilogRelatedFile? file = projectProperty.DefinitionNameSpace.GetFile(SourceName);
@@ -1100,7 +1112,10 @@ namespace pluginVerilog.Verilog.Items
                 ModportInstance? modportInstantiation = instancedModule.Ports[pinName].DataObject as ModportInstance;
                 if (modportInstantiation == null) throw new Exception();
                 string interfaceName = modportInstantiation.InterfaceName;
-                Interface? interface_ = instancedModule.Project.GetPluginProperty().DefinitionNameSpace.Get(interfaceName) as Interface;
+                // Resolve the interface through the UI-free settings view: the
+                // instantiated module may live in another project.
+                ProjectProperty? instancedSettings = instancedModule.Project.Settings as ProjectProperty;
+                Interface? interface_ = instancedSettings?.DefinitionNameSpace.Get(interfaceName) as Interface;
                 if (interface_ == null)
                 {
                     expression.Reference.AddError("illegal interface");
@@ -1114,7 +1129,8 @@ namespace pluginVerilog.Verilog.Items
             {
                 InterfaceInstance? portInterfaceInstantiation = (((instancedModule.Ports[pinName].DataObject as InterfaceInstance)));
                 if (portInterfaceInstantiation == null) throw new Exception();
-                Interface? interface_ = instancedModule.Project.GetPluginProperty().DefinitionNameSpace.Get(portInterfaceInstantiation.SourceName) as Interface;
+                ProjectProperty? instancedSettings2 = instancedModule.Project.Settings as ProjectProperty;
+                Interface? interface_ = instancedSettings2?.DefinitionNameSpace.Get(portInterfaceInstantiation.SourceName) as Interface;
                 if (interface_ == null)
                 {
                     expression.Reference.AddError("illegal interface");

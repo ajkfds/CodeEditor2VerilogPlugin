@@ -50,8 +50,8 @@ namespace pluginVerilog.Data
             bool isArrayInstance = false
             )
         {
-            CodeEditor2.Data.Project project = moduleInstantiation.GetInstancedBuildingBlockProject();
-            ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+            SystemVerilogCore.Projects.IVerilogProject project = moduleInstantiation.GetInstancedBuildingBlockProject();
+            ProjectProperty? projectProperty = project.Settings as ProjectProperty;
             if (projectProperty == null) throw new Exception();
             Data.IVerilogRelatedFile? file = projectProperty.DefinitionNameSpace.GetFile(moduleInstantiation.SourceName);
             if (file == null) return null;
@@ -70,13 +70,17 @@ namespace pluginVerilog.Data
             {
                 InstanceName = moduleInstantiation.SourceName,
                 ParameterOverrides = moduleInstantiation.ParameterOverrides,
-                Project = project,
+                // VerilogModuleInstance is an editor item, so it needs the
+                // concrete project; the parser-side interface is narrowed back
+                // here (always an editor project in this process).
+                Project = ProjectInterop.AsEditorProject(project)
+                    ?? throw new Exception("the instanced project is not an editor project"),
                 RelativePath = file.RelativePath,
                 Name = instanceName,
                 InstanceIndex = instanceIndex,
                 IsArrayInstance = isArrayInstance
             };
-            if (moduleInstantiation.Project != project)
+            if (!ReferenceEquals(moduleInstantiation.Project, project))
             {
                 fileItem.ExternalProject = true;
             }

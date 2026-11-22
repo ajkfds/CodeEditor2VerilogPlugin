@@ -13,8 +13,13 @@ using pluginVerilog.Verilog;
 
 namespace pluginVerilog
 {
-    public class ProjectProperty : CodeEditor2.Data.ProjectProperty
+    public class ProjectProperty : CodeEditor2.Data.ProjectProperty,
+        SystemVerilogCore.Projects.IVerilogProjectSettings
     {
+        // The ID is required by the parser-facing settings contract so a parse
+        // site can identify these settings without knowing the editor type.
+        string SystemVerilogCore.Projects.IVerilogProjectSettings.ID => Plugin.StaticID;
+
         //public ProjectProperty(CodeEditor2.Data.Project project)
         //{
         //    this.project = project;

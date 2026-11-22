@@ -42,7 +42,7 @@ namespace pluginVerilog.Verilog
         {
             // Determine proxy values from the target's owning file.
             string relativePath = $"@virtual/{entryName}";
-            CodeEditor2.Data.Project? owningProject = null;
+            SystemVerilogCore.Projects.IVerilogProject? owningProject = null;
             if (target?.File is Data.IVerilogRelatedFile vFile)
             {
                 if (!string.IsNullOrEmpty(vFile.RelativePath))

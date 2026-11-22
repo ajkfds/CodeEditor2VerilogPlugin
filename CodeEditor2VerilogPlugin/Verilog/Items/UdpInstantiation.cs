@@ -88,24 +88,23 @@ namespace pluginVerilog.Verilog.Items
             label.AppendLabel(port.GetLabel());
         }
 
-        public Project GetInstancedBuildingBlockProject()
+        public SystemVerilogCore.Projects.IVerilogProject GetInstancedBuildingBlockProject()
         {
-            Project sourceProject = Project;
-            if (CodeEditor2.Global.Projects.ContainsKey(SourceProjectName))
-            {
-                sourceProject = CodeEditor2.Global.Projects[SourceProjectName];
-            }
+            SystemVerilogCore.Projects.IVerilogProject sourceProject = Project;
+            SystemVerilogCore.Projects.IVerilogProject? resolved = Project.ResolveProject(SourceProjectName);
+            if (resolved != null) sourceProject = resolved;
             return sourceProject;
         }
 
         public BuildingBlock? GetInstancedBuildingBlock()
         {
             ProjectProperty projectProperty = ProjectProperty;
-            Project sourceProject = Project;
-            if (CodeEditor2.Global.Projects.ContainsKey(SourceProjectName))
+            SystemVerilogCore.Projects.IVerilogProject sourceProject = Project;
+            SystemVerilogCore.Projects.IVerilogProject? resolved = Project.ResolveProject(SourceProjectName);
+            if (resolved != null)
             {
-                sourceProject = CodeEditor2.Global.Projects[SourceProjectName];
-                projectProperty = (ProjectProperty)sourceProject.GetPluginProperty();
+                sourceProject = resolved;
+                if (resolved.Settings is ProjectProperty resolvedProperty) projectProperty = resolvedProperty;
             }
 
             Data.IVerilogRelatedFile? file = projectProperty.DefinitionNameSpace.GetFile(SourceName);

@@ -17,7 +17,8 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public BuildingBlocks.Interface? GetSourceInterface()
         {
-            ProjectProperty projectProperty = (ProjectProperty)Project.GetPluginProperty();
+            ProjectProperty? projectProperty = Project.Settings as ProjectProperty;
+            if (projectProperty == null) throw new Exception();
 
             Data.IVerilogRelatedFile? file = projectProperty.DefinitionNameSpace.GetFile(SourceName);
             if (file == null) return null;
@@ -51,7 +52,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         }
 
         public required string SourceName { get; init; }
-        public required CodeEditor2.Data.Project Project { get; init; }
+        public required SystemVerilogCore.Projects.IVerilogProject Project { get; init; }
 
 
         public override NamedElements NamedElements {

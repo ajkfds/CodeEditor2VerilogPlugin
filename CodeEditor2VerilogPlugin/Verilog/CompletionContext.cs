@@ -460,8 +460,7 @@ namespace pluginVerilog.Verilog
         {
             if (onLineStart && NameSpace != null && NameSpace.BuildingBlock is Module && CandidateWord.Length > 1 && (documentRegion is Module ||documentRegion is GenerateBlock))
             {
-                CodeEditor2.Data.Project project = NameSpace.Project;
-                ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+                ProjectProperty? projectProperty = NameSpace.ProjectProperty;
                 if (projectProperty == null) throw new Exception();
 
                 List<string> moduleNames = projectProperty.DefinitionNameSpace.GetNameList((x) => { return (x is Module); });

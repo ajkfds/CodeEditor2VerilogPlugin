@@ -178,7 +178,8 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     {
                         Name = word.Text,
                         Direction = Port.DirectionEnum.Output,
-                        DefinitionReference = word.GetReference()
+                        DefinitionReference = word.GetReference(),
+                        Project = word.RootParsedDocument.Project
                     };
                     word.Color(CodeDrawStyle.ColorType.Variable);
                     word.MoveNext();
@@ -194,7 +195,8 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         {
                             Name = word.Text,
                             Direction = Port.DirectionEnum.Input,
-                            DefinitionReference = word.GetReference()
+                            DefinitionReference = word.GetReference(),
+                            Project = word.RootParsedDocument.Project
                         };
                         word.Color(CodeDrawStyle.ColorType.Variable);
                         word.MoveNext();
@@ -412,7 +414,8 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                        {
                            Name = portName,
                            Direction = isOutput ? Port.DirectionEnum.Output : Port.DirectionEnum.Input,
-                           DefinitionReference = word.CrateWordReference()
+                           DefinitionReference = word.CrateWordReference(),
+                           Project = word.RootParsedDocument.Project
                        };
                        if (!primitive.Ports.ContainsKey(portName))
                        {

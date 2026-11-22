@@ -346,11 +346,12 @@ namespace pluginVerilog.Data.VerilogCommon
                         if (instantiation is ModuleInstantiation)
                         {
                             ModuleInstantiation moduleInstantiation = (ModuleInstantiation)instantiation;
-                            Project sourceProject = moduleInstantiation.GetInstancedBuildingBlockProject();
+                            SystemVerilogCore.Projects.IVerilogProject sourceProject =
+                                moduleInstantiation.GetInstancedBuildingBlockProject();
 
                             VerilogModuleInstance? moduleInstance = subItem as VerilogModuleInstance;
 
-                            ProjectProperty? projectProperty = sourceProject.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+                            ProjectProperty? projectProperty = sourceProject.Settings as ProjectProperty;
                             if (projectProperty == null) throw new Exception();
 
                             Data.IVerilogRelatedFile? ivFile = projectProperty.DefinitionNameSpace.GetFile(moduleInstantiation.SourceName);
