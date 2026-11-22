@@ -1339,31 +1339,16 @@ namespace pluginVerilog.Verilog
                 {
                     sameFolderPath = filePath;
                 }
-                if (wordPointer.ParsedDocument == null) return;
-                if (wordPointer.ParsedDocument.Project == null) return;
+                // Resolved through the UI-free item tree so the parser does not
+                // need the editor's Project/Item types. Same-folder first, then
+                // a project-wide name match (see below).
+                // Fully qualified: `Project` is the UI-free interface, but its
+                // `Items` member name collides with Data.Item.Items elsewhere.
+                SystemVerilogCore.Projects.IVerilogItemTree? items =
+                    ((SystemVerilogCore.Projects.IVerilogProject)wordPointer.ParsedDocument.Project!).Items;
+                if (items == null) return;
 
-                List<CodeEditor2.Data.Item> items = wordPointer.ParsedDocument.Project.FindItems(
-                    (item) =>
-                    {
-                        if (item == null) return false;
-                        if (item is CodeEditor2.Data.TextFile)
-                        {
-                            var textFile = item as CodeEditor2.Data.TextFile;
-                            if (textFile == null) throw new Exception();
-                            string textFileRelative = (textFile.RelativePath ?? "").Replace('\\', '/');
-                            if (textFileRelative == sameFolderPath)
-                            {
-                                return true;
-                            }
-                        }
-                        return false;
-                    },
-                    (item) =>
-                    {
-                        return false;
-                    }
-                );
-                if (items.Count > 0)
+                if (items.FindByRelativePath(sameFolderPath) != null)
                 {
                     //wordPointer.MoveNext();
                     diveIntoIncludeFile(sameFolderPath);
@@ -1375,7 +1360,6 @@ namespace pluginVerilog.Verilog
             // search same filename in full project
             if (wordPointer.ParsedDocument != null && wordPointer.ParsedDocument.Project != null)
             {
-
                 // Extract the file name portion so that a path including a
                 // directory prefix (e.g. "include_directory/defs.sv") matches a
                 // file registered with only its base name.
@@ -1383,17 +1367,14 @@ namespace pluginVerilog.Verilog
                 int filePathSlash = filePath.LastIndexOf('/');
                 if (filePathSlash >= 0) filePathNameOnly = filePath.Substring(filePathSlash + 1);
 
-                CodeEditor2.Data.File? fFile = wordPointer.ParsedDocument.Project.SearchFile(
-                    (f) =>
-                    {
-                        if (f.Name == filePath) return true;
-                        if (f.Name == filePathNameOnly) return true;
-                        return false;
-                    });
-                if (fFile != null)
+                SystemVerilogCore.Projects.IVerilogItemTree tree =
+                    ((SystemVerilogCore.Projects.IVerilogProject)wordPointer.ParsedDocument.Project!).Items;
+                SystemVerilogCore.Projects.IVerilogItem? found =
+                    tree.FindByName(filePathNameOnly);
+                if (found != null)
                 {
                     //wordPointer.MoveNext();
-                    diveIntoIncludeFile(fFile.RelativePath);
+                    diveIntoIncludeFile(found.RelativePath);
                     return;
                 }
             }
