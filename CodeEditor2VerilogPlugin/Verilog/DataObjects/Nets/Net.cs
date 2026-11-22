@@ -75,55 +75,55 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             Interconnect
         }
 
-        public override void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
             switch (NetType)
             {
                 case NetTypeEnum.Supply0:
-                    label.AppendText("supply0", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("supply0", CodeDrawStyle.ColorType.Keyword);
                     break;
                 case NetTypeEnum.Supply1:
-                    label.AppendText("supply1", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("supply1", CodeDrawStyle.ColorType.Keyword);
                     break;
                 case NetTypeEnum.Tri:
-                    label.AppendText("tri", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("tri", CodeDrawStyle.ColorType.Keyword);
                     break;
                 case NetTypeEnum.Triand:
-                    label.AppendText("triand", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("triand", CodeDrawStyle.ColorType.Keyword);
                     break;
                 case NetTypeEnum.Trior:
-                    label.AppendText("trior", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("trior", CodeDrawStyle.ColorType.Keyword);
                     break;
                 case NetTypeEnum.Trireg:
-                    label.AppendText("trireg", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("trireg", CodeDrawStyle.ColorType.Keyword);
                     break;
                 case NetTypeEnum.Tri0:
-                    label.AppendText("tri0", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("tri0", CodeDrawStyle.ColorType.Keyword);
                     break;
                 case NetTypeEnum.Tri1:
-                    label.AppendText("tri1", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("tri1", CodeDrawStyle.ColorType.Keyword);
                     break;
                 case NetTypeEnum.Uwire:
-                    label.AppendText("uwire", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("uwire", CodeDrawStyle.ColorType.Keyword);
                     break;
                 case NetTypeEnum.Wire:
-                    label.AppendText("wire", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("wire", CodeDrawStyle.ColorType.Keyword);
                     break;
                 case NetTypeEnum.Wand:
-                    label.AppendText("wand", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("wand", CodeDrawStyle.ColorType.Keyword);
                     break;
                 case NetTypeEnum.Wor:
-                    label.AppendText("wor", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("wor", CodeDrawStyle.ColorType.Keyword);
                     break;
                 case NetTypeEnum.Interconnect:
-                    label.AppendText("interconnect", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("interconnect", CodeDrawStyle.ColorType.Keyword);
                     break;
             }
 
             label.AppendText(" ");
             if (Signed)
             {
-                label.AppendText("signed ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                label.AppendText("signed ", CodeDrawStyle.ColorType.Keyword);
             }
 
             if (DataType != null)
@@ -133,14 +133,17 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             }
         }
 
-        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendIconImage(AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap("CodeEditor2VerilogPlugin/Assets/Icons/wire.svg", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Net)));
+            // The icon is a leading decoration only; the "wire" / "tri" / ...
+            // text appended below already names the net kind, and the UI-free
+            // label cannot carry a rendered image.
+            label.AppendIconImage();
 
             AppendTypeLabel(label);
             if (Name == null) return;
 
-            label.AppendText(Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Net));
+            label.AppendText(Name, CodeDrawStyle.ColorType.Net);
 
             foreach (DataObjects.Arrays.VariableArray dimension in UnpackedArrays)
             {
@@ -151,7 +154,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             if (Comment != "")
             {
                 label.AppendText(" ");
-                label.AppendText(Comment.Trim(new char[] { '\r', '\n', '\t', ' ' }), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Comment));
+                label.AppendText(Comment.Trim(new char[] { '\r', '\n', '\t', ' ' }), CodeDrawStyle.ColorType.Comment);
             }
 
             label.AppendText("\r\n");

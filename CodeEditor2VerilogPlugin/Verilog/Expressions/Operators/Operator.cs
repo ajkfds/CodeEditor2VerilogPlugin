@@ -13,9 +13,9 @@ namespace pluginVerilog.Verilog.Expressions.Operators
         public readonly string Text = "";
         public readonly byte Precedence;
 
-        public override AjkAvaloniaLibs.Controls.ColorLabel GetLabel()
+        public override SystemVerilogCore.Documents.VerilogLabel GetLabel()
         {
-            AjkAvaloniaLibs.Controls.ColorLabel label = new AjkAvaloniaLibs.Controls.ColorLabel();
+            SystemVerilogCore.Documents.VerilogLabel label = new SystemVerilogCore.Documents.VerilogLabel();
             AppendLabel(label);
             return label;
         }

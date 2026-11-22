@@ -31,14 +31,14 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         }
         public string CreateString()
         {
-            AjkAvaloniaLibs.Controls.ColorLabel label = new AjkAvaloniaLibs.Controls.ColorLabel();
+            SystemVerilogCore.Documents.VerilogLabel label = new SystemVerilogCore.Documents.VerilogLabel();
             AppendTypeLabel(label);
             return label.CreateString();
         }
-        public void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText("interface ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-            label.AppendText(Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Identifier));
+            label.AppendText("interface ", CodeDrawStyle.ColorType.Keyword);
+            label.AppendText(Name, CodeDrawStyle.ColorType.Identifier);
         }
 
         public DataObjects.DataTypes.IDataType Clone()

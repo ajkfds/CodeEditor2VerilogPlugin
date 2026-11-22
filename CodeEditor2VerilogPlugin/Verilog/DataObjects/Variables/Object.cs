@@ -72,16 +72,16 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 return @class.NamedElements; 
             } }
 
-        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
             AppendTypeLabel(label);
             label.AppendText(Name);
         }
-        public override void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
             Class? @class = GetSourceClass();
             if(@class == null) return;
-            label.AppendText(@class.Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+            label.AppendText(@class.Name, CodeDrawStyle.ColorType.Keyword);
             label.AppendText(" ");
         }
         public static new Object Create(string name, IDataType dataType)

@@ -42,21 +42,21 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
         }
         public ConstantTypeEnum ConstantType = ConstantTypeEnum.parameter;
         public override bool Packable { get { return false; } }
-        public override void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
             switch (ConstantType)
             {
                 case ConstantTypeEnum.parameter:
-                    label.AppendText("parameter", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("parameter", CodeDrawStyle.ColorType.Keyword);
                     break;
                 case ConstantTypeEnum.localparam:
-                    label.AppendText("localparam", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("localparam", CodeDrawStyle.ColorType.Keyword);
                     break;
                 case ConstantTypeEnum.specparam:
-                    label.AppendText("specparam", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("specparam", CodeDrawStyle.ColorType.Keyword);
                     break;
                 case ConstantTypeEnum.enum_:
-                    label.AppendText("enum", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("enum", CodeDrawStyle.ColorType.Keyword);
                     break;
             }
         }
@@ -66,7 +66,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
         // the width is taken from the declared data type.
         public override int? BitWidth { get { return Expression != null ? Expression.BitWidth : DataType?.BitWidth; } }
 
-        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
             AppendTypeLabel(label);
 
@@ -77,7 +77,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
             }
             label.AppendText(" ");
 
-            label.AppendText(Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Parameter));
+            label.AppendText(Name, CodeDrawStyle.ColorType.Parameter);
 
             if (Expression != null)
             {

@@ -12,7 +12,7 @@ namespace pluginVerilog.Verilog.Items
         //string OverrideParameterID { get; }
         bool Prototype { get; set; }
         BuildingBlock? GetInstancedBuildingBlock();
-        void AppendLabel(IndexReference iref, AjkAvaloniaLibs.Controls.ColorLabel label);
+        void AppendLabel(IndexReference iref, SystemVerilogCore.Documents.VerilogLabel label);
 
         IndexReference BeginIndexReference { get; }
         IndexReference? BlockBeginIndexReference { get; }

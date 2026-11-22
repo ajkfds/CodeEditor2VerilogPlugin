@@ -49,7 +49,7 @@ namespace pluginVerilog.Verilog.Items
         public required IndexReference BeginIndexReference { get; init; }
         public required IndexReference BlockBeginIndexReference { get; set; }
         public IndexReference? LastIndexReference { get; set; }
-        public void AppendLabel(IndexReference iref, AjkAvaloniaLibs.Controls.ColorLabel label)
+        public void AppendLabel(IndexReference iref, SystemVerilogCore.Documents.VerilogLabel label)
         {
         }
         public string OverrideParameterID
@@ -387,7 +387,7 @@ namespace pluginVerilog.Verilog.Items
                     {
                         Port port = instancedInterface.PortsList[0];
                         word.CompletionContext.CarletPopupItems.Add(
-                            new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                            port.GetLabel().ToPopupItem());
                     }
                     return;
                 }
@@ -405,7 +405,7 @@ namespace pluginVerilog.Verilog.Items
                             {
                                 Port port = instancedInterface.PortsList[0];
                                 word.CompletionContext.CarletPopupItems.Add(
-                                    new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                                    port.GetLabel().ToPopupItem());
                             }
                             return;
                         }
@@ -449,7 +449,7 @@ namespace pluginVerilog.Verilog.Items
                             {
                                 Port port = instancedInterface.Ports[pinName];
                                 word.CompletionContext.CarletPopupItems.Add(
-                                    new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                                    port.GetLabel().ToPopupItem());
                             }
                             return;
                         }
@@ -489,7 +489,7 @@ namespace pluginVerilog.Verilog.Items
                                 {
                                     Port port = instancedInterface.Ports[pinName];
                                     word.CompletionContext.CarletPopupItems.Add(
-                                        new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                                        port.GetLabel().ToPopupItem());
                                 }
                                 return;
                             }
@@ -523,7 +523,7 @@ namespace pluginVerilog.Verilog.Items
                             {
                                 Port port = instancedInterface.Ports[pinName];
                                 word.CompletionContext.CarletPopupItems.Add(
-                                    new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                                    port.GetLabel().ToPopupItem());
                             }
                             return;
                         }
@@ -558,7 +558,7 @@ namespace pluginVerilog.Verilog.Items
                             {
                                 Port port = instancedInterface.PortsList[i];
                                 word.CompletionContext.CarletPopupItems.Add(
-                                    new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                                    port.GetLabel().ToPopupItem());
                             }
                             return;
                         }
@@ -583,7 +583,7 @@ namespace pluginVerilog.Verilog.Items
                             {
                                 Port port = instancedInterface.PortsList[i];
                                 word.CompletionContext.CarletPopupItems.Add(
-                                    new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                                    port.GetLabel().ToPopupItem());
                             }
                             return;
                         }

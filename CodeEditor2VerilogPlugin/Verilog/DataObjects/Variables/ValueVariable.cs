@@ -5,10 +5,10 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
 
-        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
             AppendTypeLabel(label);
-            label.AppendText(Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Register));
+            label.AppendText(Name, CodeDrawStyle.ColorType.Register);
 
             foreach (Arrays.VariableArray dimension in UnpackedArrays)
             {
@@ -20,7 +20,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             if (Comment != "")
             {
                 label.AppendText(" ");
-                label.AppendText(Comment.Trim(new char[] { '\r', '\n', '\t', ' ' }), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Comment));
+                label.AppendText(Comment.Trim(new char[] { '\r', '\n', '\t', ' ' }), CodeDrawStyle.ColorType.Comment);
             }
 
             label.AppendText("\r\n");

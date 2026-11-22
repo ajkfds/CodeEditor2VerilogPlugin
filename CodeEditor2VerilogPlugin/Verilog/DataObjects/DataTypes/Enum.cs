@@ -33,9 +33,9 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         }
         public virtual bool PartSelectable { get { return true; } }
 
-        public void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText(CreateString() + " ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+            label.AppendText(CreateString() + " ", CodeDrawStyle.ColorType.Keyword);
         }
 
         public virtual string CreateString()

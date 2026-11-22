@@ -63,16 +63,16 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             } 
         }
 
-        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
             AppendTypeLabel(label);
             label.AppendText(Name);
         }
-        public override void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
             Interface? @interface = GetSourceInterface();
             if (@interface == null) return;
-            label.AppendText(@interface.Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+            label.AppendText(@interface.Name, CodeDrawStyle.ColorType.Keyword);
             label.AppendText(" ");
         }
         public static new VirtualInterface Create(string name,　DataObjects.DataTypes.IDataType dataType)

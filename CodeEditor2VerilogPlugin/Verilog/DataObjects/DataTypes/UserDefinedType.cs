@@ -1,4 +1,4 @@
-using AjkAvaloniaLibs.Controls;
+
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using System.Collections.Generic;
 
@@ -65,9 +65,9 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
         public List<PackedArray> PackedDimensions { get; init; } = new List<PackedArray>();
 
-        public void AppendTypeLabel(ColorLabel label)
+        public void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText(Typedef.Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Identifier));
+            label.AppendText(Typedef.Name, CodeDrawStyle.ColorType.Identifier);
             label.AppendText(" ");
             foreach (var packedArray in PackedDimensions)
             {
@@ -109,7 +109,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
         public string CreateString()
         {
-            ColorLabel colorLabel = new ColorLabel();
+            SystemVerilogCore.Documents.VerilogLabel colorLabel = new();
             AppendTypeLabel(colorLabel);
             return colorLabel.CreateString();
         }

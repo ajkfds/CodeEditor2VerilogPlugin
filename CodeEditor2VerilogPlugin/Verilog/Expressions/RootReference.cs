@@ -16,12 +16,12 @@ namespace pluginVerilog.Verilog.Expressions
 
         public List<string> Path = new List<string>();
 
-        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText("$root", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Variable));
+            label.AppendText("$root", CodeDrawStyle.ColorType.Variable);
             foreach (string p in Path)
             {
-                label.AppendText("." + p, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Identifier));
+                label.AppendText("." + p, CodeDrawStyle.ColorType.Identifier);
             }
         }
 

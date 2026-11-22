@@ -13,10 +13,10 @@ namespace pluginVerilog.Verilog.DataObjects
         public NamedElements NamedElements { get; } = new NamedElements();
 
 
-        public void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText("typedef ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-            label.AppendText(Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Identifier));
+            label.AppendText("typedef ", CodeDrawStyle.ColorType.Keyword);
+            label.AppendText(Name, CodeDrawStyle.ColorType.Identifier);
             label.AppendText("\n");
 
             if (VariableType != null)

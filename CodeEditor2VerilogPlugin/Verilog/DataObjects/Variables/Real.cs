@@ -31,9 +31,9 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             return Clone(Name);
         }
 
-        public override void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText("real ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+            label.AppendText("real ", CodeDrawStyle.ColorType.Keyword);
             label.AppendText(" ");
         }
 

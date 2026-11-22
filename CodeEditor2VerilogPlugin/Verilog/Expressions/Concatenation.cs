@@ -7,7 +7,7 @@ namespace pluginVerilog.Verilog.Expressions
         internal Concatenation() { }
         public List<Expression> Expressions = new List<Expression>();
 
-        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
             label.AppendText("{ ");
             bool first = true;
@@ -236,7 +236,7 @@ namespace pluginVerilog.Verilog.Expressions
         internal EmptyUnpackedArrayConcatenation() { }
         
 
-        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
             label.AppendText("{ }");
         }
@@ -279,7 +279,7 @@ namespace pluginVerilog.Verilog.Expressions
             }
         }
 
-        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
             label.AppendText("{ ");
             label.AppendText(StreamOperator);
@@ -546,7 +546,7 @@ namespace pluginVerilog.Verilog.Expressions
             WithArrayRange?.DisposeSubReference(false);
         }
 
-        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
             if (Expression != null)
             {
@@ -647,7 +647,7 @@ namespace pluginVerilog.Verilog.Expressions
             SecondExpression?.DisposeSubReference(false);
         }
 
-        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
             if (FirstExpression != null)
             {
@@ -734,7 +734,7 @@ namespace pluginVerilog.Verilog.Expressions
         public Primary ConcatenationPrimary;
         public RangeExpression RangeExpression;
 
-        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
             ConcatenationPrimary.AppendLabel(label);
             RangeExpression.AppendLabel(label);
@@ -760,7 +760,7 @@ namespace pluginVerilog.Verilog.Expressions
         public Expression? MultipleExpression { get; protected set; }
         public Expression? Expression { get; protected set; }
 
-        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
             label.AppendText("{ ");
             if (MultipleExpression != null) label.AppendLabel(MultipleExpression.GetLabel());

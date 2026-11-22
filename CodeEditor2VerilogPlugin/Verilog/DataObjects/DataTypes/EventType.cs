@@ -52,9 +52,9 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             return "event";
         }
 
-        public void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText("event", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+            label.AppendText("event", CodeDrawStyle.ColorType.Keyword);
         }
 
         public IDataType Clone()

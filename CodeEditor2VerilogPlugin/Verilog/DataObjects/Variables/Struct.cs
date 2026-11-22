@@ -62,12 +62,12 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         {
             return Clone(Name);
         }
-        public override void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
             if (StructType == null) return;
             StructType.AppendTypeLabel(label);
-            //label.AppendText("struct ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-            //label.AppendText( StructType.na, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+            //label.AppendText("struct ", CodeDrawStyle.ColorType.Keyword);
+            //label.AppendText( StructType.na, CodeDrawStyle.ColorType.Keyword);
         }
 
         public override bool PartSelectable

@@ -37,17 +37,17 @@ namespace pluginVerilog.Verilog.DataObjects
             }
         }
 
-        public override void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText(InterfaceName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+            label.AppendText(InterfaceName, CodeDrawStyle.ColorType.Keyword);
             label.AppendText(".");
-            label.AppendText(ModportName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+            label.AppendText(ModportName, CodeDrawStyle.ColorType.Keyword);
             label.AppendText(" ");
         }
-        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
             AppendTypeLabel(label);
-            label.AppendText(Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Variable));
+            label.AppendText(Name, CodeDrawStyle.ColorType.Variable);
 
             foreach (Arrays.VariableArray dimension in UnpackedArrays)
             {
@@ -59,7 +59,7 @@ namespace pluginVerilog.Verilog.DataObjects
             if (Comment != "")
             {
                 label.AppendText(" ");
-                label.AppendText(Comment.Trim(new char[] { '\r', '\n', '\t', ' ' }), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Comment));
+                label.AppendText(Comment.Trim(new char[] { '\r', '\n', '\t', ' ' }), CodeDrawStyle.ColorType.Comment);
             }
             label.AppendText("\r\n");
 

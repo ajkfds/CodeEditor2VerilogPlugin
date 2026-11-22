@@ -39,31 +39,31 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             }
         }
 
-        public override void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
             if (DataType == null) return;
             switch (DataType.Type)
             {
                 case DataTypeEnum.Byte:
-                    label.AppendText("byte ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("byte ", CodeDrawStyle.ColorType.Keyword);
                     break;
                 case DataTypeEnum.Shortint:
-                    label.AppendText("shortint ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("shortint ", CodeDrawStyle.ColorType.Keyword);
                     break;
                 case DataTypeEnum.Int:
-                    label.AppendText("int ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("int ", CodeDrawStyle.ColorType.Keyword);
                     break;
                 case DataTypeEnum.Longint:
-                    label.AppendText("longint ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("longint ", CodeDrawStyle.ColorType.Keyword);
                     break;
                 case DataTypeEnum.Integer:
-                    label.AppendText("integer ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("integer ", CodeDrawStyle.ColorType.Keyword);
                     break;
                 case DataTypeEnum.Time:
-                    label.AppendText("time ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("time ", CodeDrawStyle.ColorType.Keyword);
                     break;
                 case DataTypeEnum.Class:
-                    label.AppendText("class ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Identifier));
+                    label.AppendText("class ", CodeDrawStyle.ColorType.Identifier);
                     break;
                 default:
                     throw new Exception();
@@ -71,7 +71,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             label.AppendText(" ");
             if (Signed)
             {
-                label.AppendText("signed ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                label.AppendText("signed ", CodeDrawStyle.ColorType.Keyword);
             }
         }
 

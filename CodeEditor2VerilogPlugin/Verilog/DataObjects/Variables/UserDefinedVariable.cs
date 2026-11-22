@@ -68,11 +68,11 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         {
             return Clone(Name);
         }
-        public override void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
             UserDefinedType.AppendTypeLabel(label);
         }
-        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
             base.AppendLabel(label);
             UserDefinedType.Typedef.AppendLabel(label);

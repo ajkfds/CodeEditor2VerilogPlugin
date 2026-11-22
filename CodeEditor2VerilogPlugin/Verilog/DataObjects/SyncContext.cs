@@ -10,36 +10,36 @@ namespace pluginVerilog.Verilog.DataObjects
         private bool isReset = false;
 
 
-        public void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
             if (isClock)
             {
-                label.AppendText("@clock\n\n", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.HighLightedComment));
+                label.AppendText("@clock\n\n", CodeDrawStyle.ColorType.HighLightedComment);
             }
             if (isReset)
             {
-                label.AppendText("@reset\n\n", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.HighLightedComment));
+                label.AppendText("@reset\n\n", CodeDrawStyle.ColorType.HighLightedComment);
             }
             if (Data.Count == 0) return;
 
-            label.AppendText("@sync ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.HighLightedComment));
+            label.AppendText("@sync ", CodeDrawStyle.ColorType.HighLightedComment);
             bool first = true;
             foreach (var sync in Data)
             {
                 if (!first) label.AppendText(",");
-                if (sync != null) label.AppendText(sync, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.HighLightedComment));
+                if (sync != null) label.AppendText(sync, CodeDrawStyle.ColorType.HighLightedComment);
                 first = false;
             }
             label.AppendText("\r\n");
 
             //if (SameSyncTargets.Count != 0)
             //{
-            //    label.AppendText("@samesync ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.HighLightedComment));
+            //    label.AppendText("@samesync ", CodeDrawStyle.ColorType.HighLightedComment);
             //    bool firstSame = true;
             //    foreach (var same in SameSyncTargets)
             //    {
             //        if (!firstSame) label.AppendText(",");
-            //        if (same != null) label.AppendText(same, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.HighLightedComment));
+            //        if (same != null) label.AppendText(same, CodeDrawStyle.ColorType.HighLightedComment);
             //        firstSame = false;
             //    }
             //    label.AppendText("\r\n");

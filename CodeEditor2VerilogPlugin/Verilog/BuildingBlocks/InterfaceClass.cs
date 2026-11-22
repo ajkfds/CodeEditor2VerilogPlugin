@@ -1,4 +1,4 @@
-using AjkAvaloniaLibs.Controls;
+
 
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
@@ -716,15 +716,15 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
         public string CreateString()
         {
-            ColorLabel label = new ColorLabel();
+            SystemVerilogCore.Documents.VerilogLabel label = new SystemVerilogCore.Documents.VerilogLabel();
             AppendTypeLabel(label);
             return label.CreateString();
         }
 
-        public void AppendTypeLabel(ColorLabel label)
+        public void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText("interface class ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-            label.AppendText(Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Identifier));
+            label.AppendText("interface class ", CodeDrawStyle.ColorType.Keyword);
+            label.AppendText(Name, CodeDrawStyle.ColorType.Identifier);
         }
 
         public static List<string> UniqueKeywords = new List<string> {

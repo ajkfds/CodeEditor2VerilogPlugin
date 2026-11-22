@@ -1,4 +1,4 @@
-using AjkAvaloniaLibs.Controls;
+
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.Expressions;
 using System.Collections.Generic;
@@ -69,16 +69,16 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
          */
         public string CreateString()
         {
-            ColorLabel label = new ColorLabel();
+            SystemVerilogCore.Documents.VerilogLabel label = new SystemVerilogCore.Documents.VerilogLabel();
             AppendTypeLabel(label);
             return label.CreateString();
         }
 
-        public virtual void AppendTypeLabel(ColorLabel label)
+        public virtual void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText(IsUnion ? "union" : "struct", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-            if (Packed) label.AppendText(" packed", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-            if (Signed) label.AppendText(" signed", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+            label.AppendText(IsUnion ? "union" : "struct", CodeDrawStyle.ColorType.Keyword);
+            if (Packed) label.AppendText(" packed", CodeDrawStyle.ColorType.Keyword);
+            if (Signed) label.AppendText(" signed", CodeDrawStyle.ColorType.Keyword);
             if (Members.Count != 0)
             {
                 label.AppendText("{\n");
@@ -452,7 +452,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 }
                 return member;
             }
-            public void AppendTypeLabel(ColorLabel label)
+            public void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
             {
                 DatType.AppendTypeLabel(label);
                 foreach (var packedArray in Dimentions)
@@ -460,7 +460,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     packedArray.AppendLabel(label);
                     label.AppendText(" ");
                 }
-                label.AppendText(Identifier, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Identifier));
+                label.AppendText(Identifier, CodeDrawStyle.ColorType.Identifier);
             }
         }
 

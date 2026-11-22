@@ -338,7 +338,7 @@ namespace pluginVerilog.Verilog.Expressions
             if (index >= method.PortsList.Count) return;   // all arguments are already given
             DataObjects.Port port = method.PortsList[index];
             completionContext.CarletPopupItems.Add(
-                new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                port.GetLabel().ToPopupItem());
         }
     }
 }

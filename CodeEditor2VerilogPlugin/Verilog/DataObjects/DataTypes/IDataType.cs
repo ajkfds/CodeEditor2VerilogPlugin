@@ -25,7 +25,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         /// ColorLabelにDataType宣言を追加する。
         /// </summary>
         /// <param name="label"></param>
-        public void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label);
+        public void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label);
 
         /// <summary>
         /// Vectorであることを示す。

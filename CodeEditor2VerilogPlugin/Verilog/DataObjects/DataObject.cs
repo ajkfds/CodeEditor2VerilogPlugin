@@ -326,13 +326,13 @@ namespace pluginVerilog.Verilog.DataObjects
             return "";
         }
 
-        public virtual void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public virtual void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
             label.AppendText(Name);
             SyncContext.AppendLabel(label);
         }
 
-        public virtual void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public virtual void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
 
         }

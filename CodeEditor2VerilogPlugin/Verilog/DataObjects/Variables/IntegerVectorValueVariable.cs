@@ -34,20 +34,20 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             }
         }
 
-        public override void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
             if (DataType == null) return;
 
             switch (DataType.Type)
             {
                 case DataTypeEnum.Bit:
-                    label.AppendText("bit ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("bit ", CodeDrawStyle.ColorType.Keyword);
                     break;
                 case DataTypeEnum.Logic:
-                    label.AppendText("logic ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("logic ", CodeDrawStyle.ColorType.Keyword);
                     break;
                 case DataTypeEnum.Reg:
-                    label.AppendText("reg ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("reg ", CodeDrawStyle.ColorType.Keyword);
                     break;
                 default:
                     System.Diagnostics.Debugger.Break();
@@ -56,7 +56,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             label.AppendText(" ");
             if (Signed)
             {
-                label.AppendText("signed ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                label.AppendText("signed ", CodeDrawStyle.ColorType.Keyword);
             }
 
             foreach (DataObjects.Arrays.PackedArray dimension in PackedDimensions)

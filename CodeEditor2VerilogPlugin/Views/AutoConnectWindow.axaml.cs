@@ -234,7 +234,7 @@ namespace pluginVerilog.Views
                 this.BuildingBlock = buildingBlock;
                 if (expression != null)
                 {
-                    this.original = expression.GetLabel();
+                    this.original = expression.GetLabel().ToPopupItem();
                     this.target = original;
                 }
 

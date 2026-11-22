@@ -32,9 +32,9 @@ namespace pluginVerilog.Verilog.Expressions
         //    return primary;
         //}
 
-        public new virtual AjkAvaloniaLibs.Controls.ColorLabel GetLabel()
+        public new virtual SystemVerilogCore.Documents.VerilogLabel GetLabel()
         {
-            AjkAvaloniaLibs.Controls.ColorLabel label = new AjkAvaloniaLibs.Controls.ColorLabel();
+            SystemVerilogCore.Documents.VerilogLabel label = new SystemVerilogCore.Documents.VerilogLabel();
             AppendLabel(label);
             return label;
         }

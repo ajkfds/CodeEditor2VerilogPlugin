@@ -70,7 +70,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         //public override void AppendLabel(ColorLabel label)
         //{
         //    AppendTypeLabel(label);
-        //    label.AppendText(Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Register));
+        //    label.AppendText(Name, CodeDrawStyle.ColorType.Register);
 
         //    foreach (Range dimension in Dimensions)
         //    {
@@ -81,13 +81,13 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         //    if (Comment != "")
         //    {
         //        label.AppendText(" ");
-        //        label.AppendText(Comment.Trim(new char[] { '\r', '\n', '\t', ' ' }), Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Comment));
+        //        label.AppendText(Comment.Trim(new char[] { '\r', '\n', '\t', ' ' }), CodeDrawStyle.ColorType.Comment);
         //    }
 
         //    label.AppendText("\r\n");
         //}
 
-        //public override void AppendTypeLabel(ColorLabel label)
+        //public override void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         //{
         //}
 

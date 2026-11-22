@@ -1,4 +1,4 @@
-using AjkAvaloniaLibs.Controls;
+
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.Expressions;
@@ -172,7 +172,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             return vit;
         }
 
-        void IDataType.AppendTypeLabel(ColorLabel label)
+        void IDataType.AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
             throw new System.NotImplementedException();
         }

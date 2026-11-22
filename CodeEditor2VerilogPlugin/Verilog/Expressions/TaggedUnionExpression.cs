@@ -14,10 +14,10 @@ namespace pluginVerilog.Verilog.Expressions
         public Expression? MemberExpression { get; protected set; }
         public string? MemberIdentifier { get; protected set; }
 
-        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText("tagged", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-            if (MemberIdentifier != null) label.AppendText(" " + MemberIdentifier, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Identifier));
+            label.AppendText("tagged", CodeDrawStyle.ColorType.Keyword);
+            if (MemberIdentifier != null) label.AppendText(" " + MemberIdentifier, CodeDrawStyle.ColorType.Identifier);
             if (MemberExpression != null)
             {
                 label.AppendText("(");

@@ -1,4 +1,4 @@
-using AjkAvaloniaLibs.Controls;
+
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.Expressions;
 using System.Collections.Generic;
@@ -37,12 +37,12 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             }
         }
 
-        public override void AppendTypeLabel(ColorLabel label)
+        public override void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText("union", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-            if (Tagged) label.AppendText(" tagged", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-            if (Packed) label.AppendText(" packed", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-            if (Signed) label.AppendText(" signed", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+            label.AppendText("union", CodeDrawStyle.ColorType.Keyword);
+            if (Tagged) label.AppendText(" tagged", CodeDrawStyle.ColorType.Keyword);
+            if (Packed) label.AppendText(" packed", CodeDrawStyle.ColorType.Keyword);
+            if (Signed) label.AppendText(" signed", CodeDrawStyle.ColorType.Keyword);
             if (Members.Count != 0)
             {
                 label.AppendText("{\n");

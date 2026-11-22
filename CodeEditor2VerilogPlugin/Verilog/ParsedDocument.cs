@@ -467,7 +467,14 @@ namespace pluginVerilog.Verilog
             if (iref.RootParsedDocument == null) return null;
 
 
+            // Two parts, converted once at the end:
+            //  - the message lines are editor-only decorations (arbitrary
+            //    colours, icons), so they go straight into the PopupItem;
+            //  - the element labels are the parser's UI-free VerilogLabel
+            //    (palette indices), converted through the plugin's palette by
+            //    ToPopupItem().
             var ret = new CodeEditor2.CodeEditor.PopupHint.PopupItem();
+            var elementLabel = new SystemVerilogCore.Documents.VerilogLabel();
 
             // add messages
             foreach (Message message in Messages)
@@ -516,105 +523,33 @@ namespace pluginVerilog.Verilog
             {
                 if (element is DataObject)
                 {
-                    ((DataObject)element).AppendLabel(ret);
+                    ((DataObject)element).AppendLabel(elementLabel);
                 }
                 else if (element is Function)
                 {
-                    ((Function)element).AppendLabel(ret);
+                    ((Function)element).AppendLabel(elementLabel);
                 }
                 else if (element is Task_)
                 {
-                    ((Task_)element).AppendLabel(ret);
+                    ((Task_)element).AppendLabel(elementLabel);
                 }
                 else if (element is DataObjects.Typedef)
                 {
-                    ((DataObjects.Typedef)element).AppendLabel(ret);
+                    ((DataObjects.Typedef)element).AppendLabel(elementLabel);
                 }
             }
 
             if (Macros.ContainsKey(text))
             {
-                Macros[text].AppendLabel(ret, Macros);
+                Macros[text].AppendLabel(elementLabel, Macros);
             }
+            ret.AppendLabel(elementLabel);
             return ret;
 
-
-
-            Root? root = iref.RootParsedDocument.Root;
-            if (root == null) return null;
-
-            NameSpace? space = iref.RootParsedDocument.Root;
-            if (space == null) return null;
-
-            {
-                BuildingBlock? buildingBlock = root.GetBuildingBlock(iref);
-                if (buildingBlock != null) space = buildingBlock.GetHierarchyNameSpace(iref);
-            }
-
-            int count = ret.ItemCount;
-
-            if (space != null)
-            {
-                foreach (IBuildingBlockInstantiation instantiation in space.BuildingBlock.NamedElements.Values.OfType<IBuildingBlockInstantiation>())
-                {
-                    if (instantiation.BeginIndexReference == null) continue;
-                    if (instantiation.LastIndexReference == null) continue;
-
-                    if (iref.IsSmallerThan(instantiation.BeginIndexReference)) continue;
-                    if (iref.IsGreaterThan(instantiation.LastIndexReference)) continue;
-                    instantiation.AppendLabel(iref, ret);
-                    break;
-                }
-            }
-
-            if (ret.ItemCount != count) return ret;
-
-            if (text.StartsWith("`"))
-            {
-                if (Macros.ContainsKey(text.Substring(1)))
-                {
-                    Macro macro = Macros[text.Substring(1)];
-                    macro.AppendLabel(ret, Macros);
-                }
-                else if (iref.RootParsedDocument.Macros.ContainsKey(text.Substring(1)))
-                {
-                    Macro macro = iref.RootParsedDocument.Macros[text.Substring(1)];
-                    macro.AppendLabel(ret, Macros);
-                }
-            }
-
-
-            if (space != null)
-            {
-                INamedElement? namedElement = space.GetNamedElementUpward(text);
-                if (namedElement != null)
-                {
-                    if (namedElement is DataObject)
-                    {
-                        ((DataObject)namedElement).AppendLabel(ret);
-                    }
-                    else if (namedElement is Function)
-                    {
-                        ((Function)namedElement).AppendLabel(ret);
-                    }
-                    else if (namedElement is Task_)
-                    {
-                        ((Task_)namedElement).AppendLabel(ret);
-                    }
-                    else if (namedElement is DataObjects.Typedef)
-                    {
-                        ((DataObjects.Typedef)namedElement).AppendLabel(ret);
-                    }
-                }
-
-                if (Macros.ContainsKey(text))
-                {
-                    Macros[text].AppendLabel(ret, Macros);
-                }
-            }
-
-
-            return ret;
+            // NOTE: a second, unreachable implementation used to sit here
+            // (hierarchy lookup + macro / element labels appended again). It
+            // followed `return ret;`, so it never ran; it was removed rather
+            // than converted when the labels moved to the UI-free contract.
         }
 
         private bool getPopupTarget(int index, out NameSpace? nameSpace, out INamedElement? element)

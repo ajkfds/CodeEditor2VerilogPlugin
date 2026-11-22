@@ -17,7 +17,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
 
         public Expressions.Expression? MaxSizeExpression { get; protected set; }
 
-        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
             label.AppendText("[ $");
             if (MaxSizeExpression != null)

@@ -14,9 +14,9 @@ namespace pluginVerilog.Verilog.Expressions
     {
         protected StdRandomizeCall() { }
 
-        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText("std::randomize()", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Identifier));
+            label.AppendText("std::randomize()", CodeDrawStyle.ColorType.Identifier);
         }
 
         public override string CreateString()

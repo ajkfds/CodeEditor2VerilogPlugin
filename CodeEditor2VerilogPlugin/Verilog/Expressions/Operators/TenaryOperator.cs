@@ -20,7 +20,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
             Primary2.DisposeSubReference(false);
         }
 
-        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
             Condition.AppendLabel(label);
             label.AppendText(" ? ");

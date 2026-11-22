@@ -10,9 +10,9 @@ namespace pluginVerilog.Verilog.Expressions
         protected ConditionalExpression() { }
         // conditional_expression::= expression1 ? { attribute_instance } expression2: expression3
 
-        public new AjkAvaloniaLibs.Controls.ColorLabel GetLabel()
+        public new SystemVerilogCore.Documents.VerilogLabel GetLabel()
         {
-            AjkAvaloniaLibs.Controls.ColorLabel label = new AjkAvaloniaLibs.Controls.ColorLabel();
+            SystemVerilogCore.Documents.VerilogLabel label = new SystemVerilogCore.Documents.VerilogLabel();
 
             if (this.ConditionExpression != null) label.AppendLabel(this.ConditionExpression.GetLabel());
             label.AppendText(" ? ");

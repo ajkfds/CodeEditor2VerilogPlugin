@@ -74,7 +74,7 @@ namespace pluginVerilog.Verilog.Items
             public readonly IndexReference LastIndexReference;
             public readonly string Name;
         }
-        public void AppendLabel(IndexReference iref, AjkAvaloniaLibs.Controls.ColorLabel label)
+        public void AppendLabel(IndexReference iref, SystemVerilogCore.Documents.VerilogLabel label)
         {
             PortReference? portRef = null;
             foreach (PortReference pRef in PortReferences)
@@ -640,7 +640,7 @@ namespace pluginVerilog.Verilog.Items
                         port = instancedModule.PortsList[i];
                     }
                     if (port != null) word.CompletionContext.CarletPopupItems.Add(
-                        new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                        port.GetLabel().ToPopupItem());
                     return;
                 }
                 // Check for wildcard port connection .*
@@ -688,7 +688,7 @@ namespace pluginVerilog.Verilog.Items
                     {
                         Port port = instancedModule.PortsList[i];
                         word.CompletionContext.CarletPopupItems.Add(
-                            new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                            port.GetLabel().ToPopupItem());
                     }
                     return;
                 }
@@ -898,7 +898,7 @@ namespace pluginVerilog.Verilog.Items
             if (word.CompletionContext != null && word.Eof && instancedModule!=null && instancedModule.Ports.ContainsKey(pinName))
             {
                 Port? port = instancedModule?.Ports[pinName];
-                if(port !=null) word.CompletionContext.CarletPopupItems.Add(new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                if(port !=null) word.CompletionContext.CarletPopupItems.Add(port.GetLabel().ToPopupItem());
                 return;
             }
 
@@ -928,7 +928,7 @@ namespace pluginVerilog.Verilog.Items
             if (word.CompletionContext != null && word.Eof && instancedModule != null && instancedModule.Ports.ContainsKey(pinName))
             {
                 Port? port = instancedModule?.Ports[pinName];
-                if (port != null) word.CompletionContext.CarletPopupItems.Add(new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                if (port != null) word.CompletionContext.CarletPopupItems.Add(port.GetLabel().ToPopupItem());
                 return;
             }
 

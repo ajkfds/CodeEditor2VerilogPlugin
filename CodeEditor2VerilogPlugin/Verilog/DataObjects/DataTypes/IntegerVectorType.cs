@@ -77,18 +77,18 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     return null;
             }
         }
-        public void AppendTypeLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
             switch (Type)
             {
                 case DataTypeEnum.Bit:
-                    label.AppendText("bit", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("bit", CodeDrawStyle.ColorType.Keyword);
                     break;
                 case DataTypeEnum.Logic:
-                    label.AppendText("logic", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("logic", CodeDrawStyle.ColorType.Keyword);
                     break;
                 case DataTypeEnum.Reg:
-                    label.AppendText("reg", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("reg", CodeDrawStyle.ColorType.Keyword);
                     break;
             }
 
@@ -101,7 +101,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
         public virtual string CreateString()
         {
-            AjkAvaloniaLibs.Controls.ColorLabel label = new AjkAvaloniaLibs.Controls.ColorLabel();
+            SystemVerilogCore.Documents.VerilogLabel label = new SystemVerilogCore.Documents.VerilogLabel();
             AppendTypeLabel(label);
             return label.CreateString();
         }

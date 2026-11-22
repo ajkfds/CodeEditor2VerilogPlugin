@@ -38,7 +38,7 @@ namespace pluginVerilog.Verilog.Expressions
         }
         //public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
         //{
-        //    label.AppendText(Text, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Variable));
+        //    label.AppendText(Text, CodeDrawStyle.ColorType.Variable);
         //}
 
         //public override void AppendString(StringBuilder stringBuilder)

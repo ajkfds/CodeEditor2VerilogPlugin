@@ -1,4 +1,4 @@
-using AjkAvaloniaLibs.Controls;
+
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using System;
 using System.Collections.Generic;
@@ -24,14 +24,14 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
         public string CreateString()
         {
-            ColorLabel label = new ColorLabel();
+            SystemVerilogCore.Documents.VerilogLabel label = new SystemVerilogCore.Documents.VerilogLabel();
             AppendTypeLabel(label);
             return label.CreateString();
         }
 
-        public void AppendTypeLabel(ColorLabel label)
+        public void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText("shortreal", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+            label.AppendText("shortreal", CodeDrawStyle.ColorType.Keyword);
         }
         public IDataType Clone()
         {

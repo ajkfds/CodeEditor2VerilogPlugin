@@ -55,9 +55,9 @@ namespace pluginVerilog.Verilog.Expressions
         /// get label object of this expression
         /// </summary>
         /// <returns></returns>
-        public virtual AjkAvaloniaLibs.Controls.ColorLabel GetLabel()
+        public virtual SystemVerilogCore.Documents.VerilogLabel GetLabel()
         {
-            var label = new AjkAvaloniaLibs.Controls.ColorLabel();
+            var label = new SystemVerilogCore.Documents.VerilogLabel();
             AppendLabel(label);
             return label;
         }
@@ -69,7 +69,7 @@ namespace pluginVerilog.Verilog.Expressions
             AppendString(sb);
             return sb.ToString();
         }
-        public virtual void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public virtual void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
 
         }

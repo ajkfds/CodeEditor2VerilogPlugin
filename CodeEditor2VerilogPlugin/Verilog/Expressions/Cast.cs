@@ -15,9 +15,9 @@ namespace pluginVerilog.Verilog.Expressions
             Expression.DisposeSubReference(false);
         }
 
-        public override AjkAvaloniaLibs.Controls.ColorLabel GetLabel()
+        public override SystemVerilogCore.Documents.VerilogLabel GetLabel()
         {
-            AjkAvaloniaLibs.Controls.ColorLabel label = new AjkAvaloniaLibs.Controls.ColorLabel();
+            SystemVerilogCore.Documents.VerilogLabel label = new SystemVerilogCore.Documents.VerilogLabel();
             label.AppendText("(");
             if (Expression != null) label.AppendLabel(Expression.GetLabel());
             label.AppendText(")");
@@ -28,9 +28,9 @@ namespace pluginVerilog.Verilog.Expressions
             return Text;
         }
 
-        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText(Text, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Number));
+            label.AppendText(Text, CodeDrawStyle.ColorType.Number);
         }
 
         public override void AppendString(StringBuilder stringBuilder)

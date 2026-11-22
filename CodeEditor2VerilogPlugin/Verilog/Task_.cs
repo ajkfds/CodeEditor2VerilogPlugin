@@ -95,7 +95,7 @@ namespace pluginVerilog.Verilog
         public List<DataObjects.Port> PortsList { get { return portsList; } }
 
         public Statements.IStatement Statement;
-        public virtual void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public virtual void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
             label.AppendText(Name);
         }

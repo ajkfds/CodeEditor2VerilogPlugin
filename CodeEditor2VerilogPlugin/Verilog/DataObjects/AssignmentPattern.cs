@@ -150,19 +150,19 @@ namespace pluginVerilog.Verilog.DataObjects
             return assignmentPattern;
         }
 
-        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText("'{", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Normal));
+            label.AppendText("'{", CodeDrawStyle.ColorType.Normal);
             if (this is AssignmentPatternWithKey withKey)
             {
                 bool first = true;
                 foreach (var keyExpression in withKey.KeyExpressions)
                 {
-                    if (!first) label.AppendText(", ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Normal));
+                    if (!first) label.AppendText(", ", CodeDrawStyle.ColorType.Normal);
                     first = false;
-                    if (keyExpression.Key == "default") label.AppendText("default", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-                    else label.AppendText(keyExpression.Key, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Identifier));
-                    label.AppendText(" : ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Normal));
+                    if (keyExpression.Key == "default") label.AppendText("default", CodeDrawStyle.ColorType.Keyword);
+                    else label.AppendText(keyExpression.Key, CodeDrawStyle.ColorType.Identifier);
+                    label.AppendText(" : ", CodeDrawStyle.ColorType.Normal);
                     keyExpression.Expression?.AppendLabel(label);
                 }
             }
@@ -171,12 +171,12 @@ namespace pluginVerilog.Verilog.DataObjects
                 bool first = true;
                 foreach (var expression in withoutKey.Expressions)
                 {
-                    if (!first) label.AppendText(", ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Normal));
+                    if (!first) label.AppendText(", ", CodeDrawStyle.ColorType.Normal);
                     first = false;
                     expression?.AppendLabel(label);
                 }
             }
-            label.AppendText("}", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Normal));
+            label.AppendText("}", CodeDrawStyle.ColorType.Normal);
         }
 
         public override string CreateString()
@@ -222,13 +222,13 @@ namespace pluginVerilog.Verilog.DataObjects
         public required Expressions.Expression Count;
         public required Expressions.Expression Element;
 
-        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText("'{", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Normal));
+            label.AppendText("'{", CodeDrawStyle.ColorType.Normal);
             Count?.AppendLabel(label);
-            label.AppendText("{", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Normal));
+            label.AppendText("{", CodeDrawStyle.ColorType.Normal);
             Element?.AppendLabel(label);
-            label.AppendText("}", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Normal));
+            label.AppendText("}", CodeDrawStyle.ColorType.Normal);
         }
 
         public override string CreateString()

@@ -64,7 +64,7 @@ namespace pluginVerilog.Verilog
         {
             Parse(word, nameSpace, true);
         }
-        public virtual void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public virtual void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
             //if (ReturnVariable != null && ReturnVariable.DataType != null) {
             //    ReturnVariable.DataType.

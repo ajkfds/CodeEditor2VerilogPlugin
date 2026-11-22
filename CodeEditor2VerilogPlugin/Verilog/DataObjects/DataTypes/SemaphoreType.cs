@@ -1,4 +1,4 @@
-using AjkAvaloniaLibs.Controls;
+
 using pluginVerilog.Verilog.DataObjects.Variables;
 using System;
 using System.Collections.Generic;
@@ -26,14 +26,14 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         public virtual List<DataObjects.Arrays.PackedArray> PackedDimensions { get; protected set; } = new List<Arrays.PackedArray>();
         public string CreateString()
         {
-            ColorLabel label = new ColorLabel();
+            SystemVerilogCore.Documents.VerilogLabel label = new SystemVerilogCore.Documents.VerilogLabel();
             AppendTypeLabel(label);
             return label.CreateString();
         }
 
-        public void AppendTypeLabel(ColorLabel label)
+        public void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText("semaphore ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+            label.AppendText("semaphore ", CodeDrawStyle.ColorType.Keyword);
         }
         public IDataType Clone()
         {

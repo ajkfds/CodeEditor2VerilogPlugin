@@ -99,12 +99,12 @@ namespace pluginVerilog.Verilog
             return sb.ToString();
         }
 
-        public void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label, Dictionary<string, Macro> macros)
+        public void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label, Dictionary<string, Macro> macros)
         {
             if (Name == null) return;
-            label.AppendText(Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Identifier));
+            label.AppendText(Name, CodeDrawStyle.ColorType.Identifier);
             label.AppendText(" : ");
-            label.AppendText(MacroText, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Normal));
+            label.AppendText(MacroText, CodeDrawStyle.ColorType.Normal);
             label.AppendText("\r\n");
 
             string fixedText = MacroText;
@@ -123,8 +123,8 @@ namespace pluginVerilog.Verilog
             }
             if (fixedText != MacroText)
             {
-                label.AppendText("  = ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Normal));
-                label.AppendText(fixedText, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Normal));
+                label.AppendText("  = ", CodeDrawStyle.ColorType.Normal);
+                label.AppendText(fixedText, CodeDrawStyle.ColorType.Normal);
                 label.AppendText("\r\n");
             }
         }

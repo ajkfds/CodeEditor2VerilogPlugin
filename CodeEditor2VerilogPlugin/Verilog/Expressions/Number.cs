@@ -151,9 +151,9 @@ namespace pluginVerilog.Verilog.Expressions
             return Text;
         }
 
-        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText(Text, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Number));
+            label.AppendText(Text, CodeDrawStyle.ColorType.Number);
         }
 
         public override void AppendString(StringBuilder stringBuilder)

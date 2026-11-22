@@ -21,10 +21,10 @@ namespace pluginVerilog.Verilog.Expressions
         public string? VariableName { get; protected set; }
         public DataObjects.DataObject? BoundVariable { get; protected set; }
 
-        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText(".", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-            if (VariableName != null) label.AppendText(VariableName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Variable));
+            label.AppendText(".", CodeDrawStyle.ColorType.Keyword);
+            if (VariableName != null) label.AppendText(VariableName, CodeDrawStyle.ColorType.Variable);
         }
 
         public override string CreateString()
@@ -94,10 +94,10 @@ namespace pluginVerilog.Verilog.Expressions
         public Expressions.Expression? MemberPattern { get; protected set; }
         public List<Expressions.Expression> Expressions = new List<Expressions.Expression>();
 
-        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText("tagged", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
-            if (MemberIdentifier != null) label.AppendText(" " + MemberIdentifier, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Identifier));
+            label.AppendText("tagged", CodeDrawStyle.ColorType.Keyword);
+            if (MemberIdentifier != null) label.AppendText(" " + MemberIdentifier, CodeDrawStyle.ColorType.Identifier);
             if (MemberPattern != null)
             {
                 label.AppendText(" ");

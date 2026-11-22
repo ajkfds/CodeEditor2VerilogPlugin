@@ -44,28 +44,28 @@ namespace pluginVerilog.Verilog.Expressions
         public string? StructMemberName { get; set; } = null;
 
 
-        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
             if (!string.IsNullOrEmpty(NameSpacePath))
             {
-                label.AppendText(NameSpacePath, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Normal));
+                label.AppendText(NameSpacePath, CodeDrawStyle.ColorType.Normal);
             }
 
             if (TargetDataObject is Reg || TargetDataObject is Bit || TargetDataObject is Logic)
             {
-                label.AppendText(DatObjectName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Register));
+                label.AppendText(DatObjectName, CodeDrawStyle.ColorType.Register);
             }
             else if (TargetDataObject is Net)
             {
-                label.AppendText(DatObjectName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Net));
+                label.AppendText(DatObjectName, CodeDrawStyle.ColorType.Net);
             }
             else if (TargetDataObject is DataObjects.Constants.Constants)
             {
-                label.AppendText(DatObjectName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Parameter));
+                label.AppendText(DatObjectName, CodeDrawStyle.ColorType.Parameter);
             }
             else
             {
-                label.AppendText(DatObjectName, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Variable));
+                label.AppendText(DatObjectName, CodeDrawStyle.ColorType.Variable);
             }
         }
 
@@ -76,7 +76,7 @@ namespace pluginVerilog.Verilog.Expressions
 
         public override string CreateString()
         {
-            AjkAvaloniaLibs.Controls.ColorLabel label = new AjkAvaloniaLibs.Controls.ColorLabel();
+            SystemVerilogCore.Documents.VerilogLabel label = new SystemVerilogCore.Documents.VerilogLabel();
             AppendLabel(label);
             StringBuilder sb = new StringBuilder();
             if (!string.IsNullOrEmpty(NameSpacePath))

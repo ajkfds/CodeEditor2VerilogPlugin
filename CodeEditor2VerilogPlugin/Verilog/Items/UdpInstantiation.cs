@@ -60,7 +60,7 @@ namespace pluginVerilog.Verilog.Items
             public readonly string Name;
         }
 
-        public void AppendLabel(IndexReference iref, AjkAvaloniaLibs.Controls.ColorLabel label)
+        public void AppendLabel(IndexReference iref, SystemVerilogCore.Documents.VerilogLabel label)
         {
             PortReference? portRef = null;
             foreach (PortReference pRef in PortReferences)
@@ -346,7 +346,7 @@ namespace pluginVerilog.Verilog.Items
                     port = instancedUdp.PortsList[0];
                 }
                 if (port != null) word.CompletionContext.CarletPopupItems.Add(
-                    new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                    port.GetLabel().ToPopupItem());
                 return;
             }
 
@@ -376,7 +376,7 @@ namespace pluginVerilog.Verilog.Items
                         port = instancedUdp.PortsList[1 + inputIndex];
                     }
                     if (port != null) word.CompletionContext.CarletPopupItems.Add(
-                        new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                        port.GetLabel().ToPopupItem());
                     return;
                 }
 
@@ -401,7 +401,7 @@ namespace pluginVerilog.Verilog.Items
                         port = instancedUdp.PortsList[1 + inputIndex];
                     }
                     if (port != null) word.CompletionContext.CarletPopupItems.Add(
-                        new CodeEditor2.CodeEditor.PopupHint.PopupItem(port.GetLabel()));
+                        port.GetLabel().ToPopupItem());
                     return;
                 }
             }

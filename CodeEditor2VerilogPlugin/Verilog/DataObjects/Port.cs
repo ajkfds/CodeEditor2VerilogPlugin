@@ -107,27 +107,46 @@ namespace pluginVerilog.Verilog.DataObjects
 
         public string CreateDefinitionString()
         {
-            AjkAvaloniaLibs.Controls.ColorLabel label = GetLabel();
-            return label.CreateString();
+            return GetLabel().CreateString();
         }
 
-        public AjkAvaloniaLibs.Controls.ColorLabel GetLabel()
+        /// <summary>
+        /// The editor palette slot for a <see cref="CodeDrawStyle.ColorType"/>,
+        /// as the UI-free contract spells it. The numeric values are identical
+        /// (see <c>VerilogColorType</c>), so this is a pure relabel.
+        /// </summary>
+        private static SystemVerilogCore.Documents.VerilogColorType Contract(
+            CodeDrawStyle.ColorType colorType) =>
+            (SystemVerilogCore.Documents.VerilogColorType)(byte)colorType;
+
+        /// <summary>
+        /// The port's declaration as a UI-free coloured label (direction,
+        /// packed / unpacked dimensions, name, trailing comment).
+        ///
+        /// <para>
+        /// Returns <see cref="SystemVerilogCore.Documents.VerilogLabel"/> rather
+        /// than the editor's <c>ColorLabel</c> so the parser (and the hint call
+        /// sites that use this) do not reference the editor assembly. Colours
+        /// travel as palette indices; the host maps them back to its own table.
+        /// </para>
+        /// </summary>
+        public SystemVerilogCore.Documents.VerilogLabel GetLabel()
         {
-            AjkAvaloniaLibs.Controls.ColorLabel label = new AjkAvaloniaLibs.Controls.ColorLabel();
+            SystemVerilogCore.Documents.VerilogLabel label = new();
 
             switch (Direction)
             {
                 case DirectionEnum.Input:
-                    label.AppendText("input ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("input ", Contract(CodeDrawStyle.ColorType.Keyword));
                     break;
                 case DirectionEnum.Output:
-                    label.AppendText("output ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("output ", Contract(CodeDrawStyle.ColorType.Keyword));
                     break;
                 case DirectionEnum.Inout:
-                    label.AppendText("inout ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("inout ", Contract(CodeDrawStyle.ColorType.Keyword));
                     break;
                 case DirectionEnum.Ref:
-                    label.AppendText("ref ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("ref ", Contract(CodeDrawStyle.ColorType.Keyword));
                     break;
                 default:
                     break;
@@ -135,9 +154,8 @@ namespace pluginVerilog.Verilog.DataObjects
 
             if (DataObject is Variables.Reg)
             {
-                label.AppendText("reg ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+                label.AppendText("reg ", Contract(CodeDrawStyle.ColorType.Keyword));
             }
-
 
             if (PackedDimensions != null)
             {
@@ -152,11 +170,11 @@ namespace pluginVerilog.Verilog.DataObjects
             {
                 if (DataObject is Net)
                 {
-                    label.AppendText(Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Net));
+                    label.AppendText(Name, Contract(CodeDrawStyle.ColorType.Net));
                 }
                 else if (DataObject is Variables.Reg)
                 {
-                    label.AppendText(Name, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Register));
+                    label.AppendText(Name, Contract(CodeDrawStyle.ColorType.Register));
                 }
                 else
                 {
@@ -174,7 +192,7 @@ namespace pluginVerilog.Verilog.DataObjects
             }
             if (Comment != "")
             {
-                label.AppendText(" // " + Comment, Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Comment));
+                label.AppendText(" // " + Comment, Contract(CodeDrawStyle.ColorType.Comment));
             }
 
             return label;

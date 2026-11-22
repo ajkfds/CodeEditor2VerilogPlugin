@@ -37,10 +37,10 @@ namespace pluginVerilog.Verilog.Expressions.Operators
             Pattern?.DisposeSubReference(false);
         }
 
-        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
             if (Primary != null) Primary.AppendLabel(label);
-            label.AppendText(" matches ", Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword));
+            label.AppendText(" matches ", CodeDrawStyle.ColorType.Keyword);
             Pattern?.AppendLabel(label);
         }
 

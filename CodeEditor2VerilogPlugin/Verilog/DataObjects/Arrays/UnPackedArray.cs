@@ -154,7 +154,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
             return unPackedArray;
         }
 
-        public override void AppendLabel(AjkAvaloniaLibs.Controls.ColorLabel label)
+        public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
             if (SizeExpression0 == null) return;
             label.AppendText("[");
@@ -166,9 +166,9 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
             }
             label.AppendText("]");
         }
-        public override AjkAvaloniaLibs.Controls.ColorLabel GetLabel()
+        public override SystemVerilogCore.Documents.VerilogLabel GetLabel()
         {
-            AjkAvaloniaLibs.Controls.ColorLabel label = new AjkAvaloniaLibs.Controls.ColorLabel();
+            SystemVerilogCore.Documents.VerilogLabel label = new();
             AppendLabel(label);
             return label;
         }

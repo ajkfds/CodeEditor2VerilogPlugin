@@ -225,10 +225,9 @@ namespace pluginVerilog.Verilog
             if (!buildingBlock.NamedElements.ContainsKey(paramName)) return;
             if (buildingBlock.NamedElements[paramName] is not DataObjects.Constants.Constants parameter) return;
 
-            AjkAvaloniaLibs.Controls.ColorLabel label = new AjkAvaloniaLibs.Controls.ColorLabel();
+            SystemVerilogCore.Documents.VerilogLabel label = new SystemVerilogCore.Documents.VerilogLabel();
             parameter.AppendLabel(label);
-            completionContext.CarletPopupItems.Add(
-                new CodeEditor2.CodeEditor.PopupHint.PopupItem(label));
+            completionContext.CarletPopupItems.Add(label.ToPopupItem());
         }
 
         /// <summary>
