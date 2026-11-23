@@ -144,7 +144,7 @@ namespace pluginVerilog.Verilog.Items
             if (!General.IsSimpleIdentifier(word.Text)) return false;
             if (General.ListOfKeywords.Contains(word.Text)) return false;
 
-            Project sourceProject = word.Project;
+            SystemVerilogCore.Projects.IVerilogProject sourceProject = word.Project;
 
             var programIdentifier = word.CrateWordReference();
             string programName = word.Text;

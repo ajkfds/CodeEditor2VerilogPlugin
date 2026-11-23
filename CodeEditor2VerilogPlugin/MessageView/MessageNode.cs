@@ -34,7 +34,10 @@ namespace pluginVerilog.MessageView
         int index;
         int length;
         int lineNo;
-        CodeEditor2.Data.Project project;
+        // The message carries the UI-free project contract now; this node is
+        // editor-only and currently only stores it, so keep it as the contract
+        // rather than narrowing (narrow it where a concrete project is needed).
+        SystemVerilogCore.Projects.IVerilogProject? project;
 
         public override void OnSelected()
         {

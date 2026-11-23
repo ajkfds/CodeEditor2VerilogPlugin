@@ -150,13 +150,19 @@ namespace pluginVerilog.Verilog
         /// The project being parsed.
         ///
         /// <para>
-        /// Kept because ~49 parse sites read it (to build instance objects that
-        /// need the owning project, and to reach <c>ProjectProperty</c>).
+        /// Typed as the UI-free contract: every parse site only ever stores it
+        /// into <see cref="NamedItem.Project"/> (also the contract type) or asks
+        /// it for a <c>// @project</c> target, so the parser never needs the
+        /// editor's concrete <c>Data.Project</c>. The editor's project and the
+        /// language server's per-workspace project both implement it.
+        /// </para>
+        ///
+        /// <para>
         /// Include resolution no longer goes through it: that is handled by
         /// <see cref="ParsedDocument.IncludeResolver"/>, which is UI-free.
         /// </para>
         /// </summary>
-        public CodeEditor2.Data.Project Project
+        public SystemVerilogCore.Projects.IVerilogProject Project
         {
             get
             {
@@ -2083,12 +2089,23 @@ namespace pluginVerilog.Verilog
             //}
 
 
+            // VerilogHeaderInstance.Create needs the editor's concrete project
+            // (it builds an item-tree node). Narrow at this one call site; a
+            // host without editor projects has no item tree to include into.
+            CodeEditor2.Data.Project? editorProject =
+                ProjectInterop.AsEditorProject(wordPointer.ParsedDocument.Project);
+            if (editorProject == null)
+            {
+                newParsedDocument = null;
+                return;
+            }
+
             Data.VerilogHeaderInstance vhInstance = Data.VerilogHeaderInstance.Create(
                                             relativeFilePath,
                                             name,
                                             CreateIndexReference(),
                                             rootFile,
-                                            wordPointer.ParsedDocument.Project,
+                                            editorProject,
                                             id
                                             );
 

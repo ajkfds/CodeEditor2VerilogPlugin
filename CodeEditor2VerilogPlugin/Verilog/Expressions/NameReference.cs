@@ -9,11 +9,11 @@ namespace pluginVerilog.Verilog.Expressions
 {
     public class NameReference
     {
-        public NameReference(CodeEditor2.Data.Project project)
+        public NameReference(SystemVerilogCore.Projects.IVerilogProject project)
         {
             this.project = project;
         }
-        CodeEditor2.Data.Project project { get; init; }
+        SystemVerilogCore.Projects.IVerilogProject project { get; init; }
 
 
         private List<string> Names = new List<string>();

@@ -279,7 +279,12 @@ namespace pluginVerilog.Verilog.Statements
     {
         public IndexReference? BeginIndexReference { get; set; }
         public IndexReference? LastIndexReference { get; set; }
-        public CodeEditor2.Data.Project Project { get; set; }
+        /// <summary>
+        /// The project the call was parsed in. Typed as the UI-free contract so
+        /// the parser does not depend on the editor's concrete project type;
+        /// nothing reads it, it is kept for diagnostics / future use.
+        /// </summary>
+        public SystemVerilogCore.Projects.IVerilogProject Project { get; set; }
 
         /// <summary>
         /// Whether null was specified: randomize(null)

@@ -158,7 +158,7 @@ namespace pluginVerilog.Verilog.Items
             if (!General.IsSimpleIdentifier(word.Text)) return itemFilter;
             if (General.ListOfKeywords.Contains(word.Text)) return itemFilter;
 
-            Project sourceProject = word.Project;
+            SystemVerilogCore.Projects.IVerilogProject sourceProject = word.Project;
 
             var udpIdentifier = word.CrateWordReference();
             string udpName = word.Text;

@@ -838,9 +838,11 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
         public string? DelayValue { get; set; }
 
         /// <summary>
-        /// Project reference for this interconnect
+        /// The project this interconnect was declared in, as the UI-free
+        /// contract. Nothing reads it yet; it is kept so a host can route the
+        /// interconnect back to its project without the editor's concrete type.
         /// </summary>
-        public CodeEditor2.Data.Project? Project { get; set; }
+        public SystemVerilogCore.Projects.IVerilogProject? Project { get; set; }
 
         /// <summary>
         /// Index reference for the beginning of this interconnect

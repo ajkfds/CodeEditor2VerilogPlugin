@@ -468,7 +468,13 @@ namespace pluginVerilog.Data
                 }
                 if (class_ != null)
                 {
-                    appendClass(file, className, parsedDocument.Project, setup, ids);
+                    // The contract hands out the UI-free project; this class is
+                    // editor-only (it walks Global.Projects), so narrow it back
+                    // here at the single place that needs the concrete type.
+                    CodeEditor2.Data.Project? editorProject =
+                        ProjectInterop.AsEditorProject(parsedDocument.Project);
+                    if (editorProject == null) continue;
+                    appendClass(file, className, editorProject, setup, ids);
                 }
                 else
                 {
@@ -1234,7 +1240,11 @@ namespace pluginVerilog.Data
         /// </summary>
         private static bool isResolvableCrossProjectReference(ParsedDocument parsedDocument, string definitionName)
         {
-            CodeEditor2.Data.Project? ownProject = parsedDocument.Project;
+            // Narrowed here because this check walks Global.Projects (an
+            // editor-only registry). A host without editor projects cannot have
+            // a stale cross-project entry to explain away.
+            CodeEditor2.Data.Project? ownProject =
+                ProjectInterop.AsEditorProject(parsedDocument.Project);
             if (ownProject == null) return false;
 
             // The name is not missing as long as some registered project declares

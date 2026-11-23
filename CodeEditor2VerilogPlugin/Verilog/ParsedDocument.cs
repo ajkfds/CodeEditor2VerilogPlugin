@@ -85,11 +85,19 @@ namespace pluginVerilog.Verilog
         }
 
         /// <summary>
-        /// The project this file belongs to, as the editor's concrete type, or
-        /// null in a host that has no editor project.
+        /// The project this file belongs to, as the UI-free contract.
+        ///
+        /// <para>
+        /// This used to hand out the editor's concrete <c>Data.Project</c>
+        /// (through <c>ProjectInterop.AsEditorProject</c>), which meant every
+        /// parser site that only stored the project into a
+        /// <see cref="NamedItem.Project"/> (already the contract type) still
+        /// depended on the editor assembly. The contract carries everything the
+        /// parser needs: the name, the item tree and the settings.
+        /// </para>
         /// </summary>
         [JsonIgnore]
-        public CodeEditor2.Data.Project? Project => ProjectInterop.AsEditorProject(TextFile?.Project);
+        public SystemVerilogCore.Projects.IVerilogProject? Project => TextFile?.Project;
 
         public ParsedDocument(Data.IVerilogRelatedFile file, string key, IndexReference? indexReference, SystemVerilogCore.Parsing.VerilogParseMode parseMode)
         {
@@ -841,7 +849,7 @@ namespace pluginVerilog.Verilog
         /// </summary>
         public class Message
         {
-            public Message(Data.IVerilogRelatedFile file, string text, MessageType type, int index, int lineNo, int length, CodeEditor2.Data.Project? project)
+            public Message(Data.IVerilogRelatedFile file, string text, MessageType type, int index, int lineNo, int length, SystemVerilogCore.Projects.IVerilogProject? project)
             {
                 this.fileRef = new WeakReference<Data.IVerilogRelatedFile>(file);
                 this.Text = text;
@@ -866,7 +874,7 @@ namespace pluginVerilog.Verilog
             /// null. Kept so hosts can route a message back to its project
             /// without walking the file tree again.
             /// </summary>
-            public CodeEditor2.Data.Project? Project { get; set; }
+            public SystemVerilogCore.Projects.IVerilogProject? Project { get; set; }
 
             private System.WeakReference<Data.IVerilogRelatedFile> fileRef;
             [JsonIgnore]
