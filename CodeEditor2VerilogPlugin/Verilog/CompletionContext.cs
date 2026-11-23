@@ -1,4 +1,3 @@
-using Avalonia.Input;
 using DynamicData.Aggregation;
 using pluginVerilog.Parser;
 using pluginVerilog.Verilog;

@@ -1,5 +1,4 @@
 //using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Avalonia.Threading;
 using pluginVerilog.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;

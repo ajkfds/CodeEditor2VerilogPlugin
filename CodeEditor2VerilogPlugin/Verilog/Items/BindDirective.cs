@@ -23,7 +23,6 @@ bind_instantiation ::=
 
 */
 
-using Avalonia.Controls;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.Expressions;
 using pluginVerilog.Verilog.Property;

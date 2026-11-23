@@ -1,4 +1,3 @@
-using Avalonia.Input;
 using pluginVerilog.Verilog.DataObjects.Variables;
 using System;
 using System.Collections.Generic;
