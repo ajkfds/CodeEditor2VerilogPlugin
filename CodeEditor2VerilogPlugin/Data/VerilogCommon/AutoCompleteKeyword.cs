@@ -11,7 +11,7 @@ namespace pluginVerilog.Data.VerilogCommon
     public class AutoCompleteKeyword
     {
         public static void AppendKeywordAutoCompleteItems(
-            List<CodeEditor2.CodeEditor.PopupMenu.ToolItem> items,
+            List<SystemVerilogCore.Documents.IVerilogAutocompleteItem> items,
             string candidate, 
             int candidateStartIndex,
             int lineStartIndex,
@@ -176,12 +176,12 @@ namespace pluginVerilog.Data.VerilogCommon
 
         }
 
-        private static void appendItems(List<CodeEditor2.CodeEditor.PopupMenu.ToolItem> items, string cantidate, pluginVerilog.Data.VerilogCommon.AutoCompleteItem item, Func<Data.VerilogCommon.AutoCompleteItem, bool> itemFilter)
+        private static void appendItems(List<SystemVerilogCore.Documents.IVerilogAutocompleteItem> items, string cantidate, pluginVerilog.Data.VerilogCommon.AutoCompleteItem item, Func<Data.VerilogCommon.AutoCompleteItem, bool> itemFilter)
         {
             if (!item.Text.StartsWith(cantidate)) return;
             if (itemFilter(item)) items.Add(item);
         }
-        private static void appendKeywordItems(List<CodeEditor2.CodeEditor.PopupMenu.ToolItem> items, string cantidate, string keyword, Func<Data.VerilogCommon.AutoCompleteItem, bool> itemFilter)
+        private static void appendKeywordItems(List<SystemVerilogCore.Documents.IVerilogAutocompleteItem> items, string cantidate, string keyword, Func<Data.VerilogCommon.AutoCompleteItem, bool> itemFilter)
         {
             if (!keyword.StartsWith(cantidate)) return;
 

@@ -1,7 +1,6 @@
 using Avalonia.Input;
 using CodeEditor2.CodeEditor.CodeComplete;
 using CodeEditor2.CodeEditor.PopupHint;
-using CodeEditor2.CodeEditor.PopupMenu;
 using DynamicData.Aggregation;
 using pluginVerilog.Parser;
 using pluginVerilog.Verilog;
@@ -354,7 +353,7 @@ namespace pluginVerilog.Verilog
             {
                 if (CandidateWord != "" && !subElement.Name.StartsWith(CandidateWord)) continue;
                 if (subElement.Name.StartsWith("\0", StringComparison.Ordinal)) continue; // reject unnamed elements
-                if (AutoCompleteItems.Find(x => x.Text == subElement.Name) != null) continue; // reject duplicated elements
+                if (AutoCompleteItems.Find(x => x.Label == subElement.Name) != null) continue; // reject duplicated elements
 
                 Data.VerilogCommon.AutoCompleteItem.CompleteType completeType = Data.VerilogCommon.AutoCompleteItem.CompleteType.Keyword;
                 if (subElement is NameSpace) completeType = Data.VerilogCommon.AutoCompleteItem.CompleteType.NameSpace;
@@ -524,7 +523,7 @@ namespace pluginVerilog.Verilog
             {
                 if (!subElement.Name.StartsWith(CandidateWord)) continue;
                 if (subElement.Name.StartsWith("\0", StringComparison.Ordinal)) continue; // reject unnamed elements
-                if (AutoCompleteItems.Find(x => x.Text == subElement.Name) != null) continue;   // reject duplicated elements
+                if (AutoCompleteItems.Find(x => x.Label == subElement.Name) != null) continue;   // reject duplicated elements
 
                 Data.VerilogCommon.AutoCompleteItem.CompleteType completeType = Data.VerilogCommon.AutoCompleteItem.CompleteType.Keyword;
                 if (subElement is NameSpace) completeType = Data.VerilogCommon.AutoCompleteItem.CompleteType.NameSpace;

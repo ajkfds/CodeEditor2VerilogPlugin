@@ -77,20 +77,20 @@ namespace pluginVerilog.CoreBridge
 
             List<CompletionEntry> entries = new List<CompletionEntry>();
             HashSet<string> seen = new HashSet<string>();
-            foreach (CodeEditor2.CodeEditor.PopupMenu.ToolItem item in context.AutoCompleteItems)
+            // The list holds the UI-free contract, so this adapter never needs
+            // the editor's candidate type (it used to iterate ToolItem and cast
+            // each entry back to the contract).
+            foreach (SystemVerilogCore.Documents.IVerilogAutocompleteItem contractItem in context.AutoCompleteItems)
             {
-                if (item == null) continue;
-                string text = item.Text;
+                if (contractItem == null) continue;
+                string text = contractItem.Label;
                 if (string.IsNullOrEmpty(text)) continue;
                 if (!seen.Add(text)) continue; // reject duplicated entries
 
                 // LSP CompletionItemKind: 3=Function, 6=Variable, 9=Module,
-                // 14=Keyword. Read the category through the parser-facing
-                // contract instead of the plugin's concrete candidate type, so
-                // the mapping does not depend on an editor-derived class.
+                // 14=Keyword.
                 int kind = 14;
                 string detail = "";
-                if (item is SystemVerilogCore.Documents.IVerilogAutocompleteItem contractItem)
                 {
                     kind = contractItem.Kind switch
                     {
@@ -121,7 +121,7 @@ namespace pluginVerilog.CoreBridge
                 // candidate with that text as the snippet body, otherwise the
                 // VS Code host inserts the bare name - the "module name
                 // completion is only a keyword completion" symptom.
-                if (item is Data.VerilogCommon.EditorSnippets.ModuleInstanceSnippet)
+                if (contractItem is Data.VerilogCommon.EditorSnippets.ModuleInstanceSnippet)
                 {
                     kind = 9; // LSP CompletionItemKind.Module
                     entries.Add(new CompletionEntry
