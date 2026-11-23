@@ -456,7 +456,10 @@ namespace pluginVerilog.Verilog
         }
         public void AppendModuleInstanceSnippets(Func<Data.VerilogCommon.AutoCompleteItem, bool> filter)
         {
-            if (onLineStart && NameSpace != null && NameSpace.BuildingBlock is Module && CandidateWord.Length > 1 && (documentRegion is Module ||documentRegion is GenerateBlock))
+            // CandidateWord.Length > 1: the candidate list would otherwise show
+            // every module in the project after a single keystroke at the start
+            // of a module-body line. One character is enough to narrow it.
+            if (onLineStart && NameSpace != null && NameSpace.BuildingBlock is Module && CandidateWord.Length > 0 && (documentRegion is Module ||documentRegion is GenerateBlock))
             {
                 ProjectProperty? projectProperty = NameSpace.ProjectProperty;
                 if (projectProperty == null) throw new Exception();

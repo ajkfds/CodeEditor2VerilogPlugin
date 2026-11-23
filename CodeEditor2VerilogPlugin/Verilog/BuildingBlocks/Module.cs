@@ -417,7 +417,17 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                            // (e.g. expression candidates collected inside "assign dst = mysi"):
                            // clearing here suppressed instance / variable name candidates
                            // when typing an identifier without a dot
-                           if (word.CompletionContext.AutoCompleteItems.Count == 0)
+                           // AppendModuleInstanceSnippets must run even though
+                           // AppendKeywords below fills the list: the condition
+                           // used to gate BOTH on "the list is empty", so after
+                           // the keywords were added the snippet append was
+                           // skipped and module-name candidates never appeared
+                           // (VS Code showed only keywords, while the desktop
+                           // editor's own path also lost them). The guard is
+                           // kept only around the keyword append.
+                           bool appendModuleSnippets =
+                               word.CompletionContext.AutoCompleteItems.Count == 0;
+                           if (appendModuleSnippets)
                            {
                             word.CompletionContext.AutoCompleteItems.Clear();
                             word.CompletionContext.AppendKeywords(new List<string> { 
@@ -428,8 +438,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                                 "genvar","string","wire","tri","triand","trior","tri0","tri1","uwire",
                                 "parameter","localparam"
                            });
-                            word.CompletionContext.AppendModuleInstanceSnippets((ac) => true);
                            }
+                           // Module-name candidates are appended regardless of
+                           // whether the keyword list above ran: they are the
+                           // ones that expand to a full instantiation.
+                           word.CompletionContext.AppendModuleInstanceSnippets((ac) => true);
                            return;
                        }
                        break;
