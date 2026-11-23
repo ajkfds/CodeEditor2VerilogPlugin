@@ -57,21 +57,10 @@ namespace pluginVerilog.Verilog
         /// <summary>Why this document was parsed.</summary>
         public readonly SystemVerilogCore.Parsing.VerilogParseMode ParseMode;
 
-        /// <summary>
-        /// Documents held during the parse. The editor inspects this to know
-        /// which buffers a parse locked; the language server leaves it empty.
-        /// </summary>
-        // NOTE: the element type must be CodeEditor2's CodeDocument (the base
-        // class), not this file's pluginVerilog.CodeEditor.CodeDocument.
-        public List<CodeEditor2.CodeEditor.CodeDocument> LockedDocument =
-            new List<CodeEditor2.CodeEditor.CodeDocument>();
-
-        /// <summary>
-        /// Interface view of <see cref="LockedDocument"/>: a field cannot
-        /// implement an interface member.
-        /// </summary>
-        List<CodeEditor2.CodeEditor.CodeDocument>
-            CodeEditor2.CodeEditor.IParsedDocument.LockedDocument => LockedDocument;
+        // NOTE: `LockedDocument` used to live here (a List of the editor's
+        // concrete CodeDocument). The parser appended to it on every parse but
+        // nothing ever read it, so it only served to make the parser reference
+        // the editor's document type. Removed from the contract and from here.
 
         /// <summary>The file this result was parsed from, or null.</summary>
         [JsonIgnore]

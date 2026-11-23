@@ -243,15 +243,6 @@ namespace pluginVerilog.Parser
         {
             word.GetFirst();
             word.CancellationToken = cancellationToken;
-            // LockedDocument holds the editor's concrete CodeDocument, so only
-            // record it when this parse actually runs on one (the language
-            // server's buffers are the plugin's own type, which is the same
-            // class, so this is non-null there too).
-            CodeEditor2.CodeEditor.CodeDocument? lockedDocument = word.ConcreteDocument;
-            if (lockedDocument != null)
-            {
-                word.RootParsedDocument.LockedDocument.Add(lockedDocument);
-            }
             if (File is not Data.VerilogFile) throw new Exception();
 
             Root root = await Root.ParseCreateAsync(word, VerilogParsedDocument, File);

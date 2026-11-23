@@ -135,10 +135,10 @@ namespace pluginVerilog.Verilog
         }
 
         /// <summary>
-        /// The same document as the editor's concrete <c>CodeDocument</c> when
-        /// it is one, otherwise null.
+        /// The document as the plugin's own <c>CodeDocument</c> when it is one,
+        /// otherwise null (see <see cref="WordPointer.ConcreteDocument"/>).
         /// </summary>
-        public CodeEditor2.CodeEditor.CodeDocument? ConcreteDocument
+        public CodeEditor.CodeDocument? ConcreteDocument
         {
             get
             {
@@ -720,16 +720,6 @@ namespace pluginVerilog.Verilog
             }
 
             //if(wordPointer.ParsedDocument.Item != null) wordPointer.ParsedDocument.Item.Update();
-
-            // The parse result records the buffers it locked with the editor's
-            // concrete type, so publish the concrete document (when the buffer
-            // is one) rather than the contract view.
-            CodeEditor2.CodeEditor.CodeDocument? concreteDocument = wordPointer.ConcreteDocument;
-            if (concreteDocument != null
-                && !RootParsedDocument.LockedDocument.Contains(concreteDocument))
-            {
-                RootParsedDocument.LockedDocument.Add(concreteDocument);
-            }
 
             //wordPointer.Dispose(); keep document & parsedData
             wordPointer = stock.Last();

@@ -96,9 +96,16 @@ namespace pluginVerilog.Verilog
         public SystemVerilogCore.Documents.IVerilogTextDocument Document { get; protected set; }
 
         /// <summary>
-        /// The same document as the plugin's own <c>CodeDocument</c> when it is
-        /// one, otherwise null. Only the two places that hand the buffer back to
-        /// the parse result's <c>LockedDocument</c> list need it.
+        /// The document as the plugin's own <c>CodeDocument</c> when it is one,
+        /// otherwise null.
+        ///
+        /// <para>
+        /// The plugin's <c>CodeDocument</c> derives from the editor's, so the
+        /// scanner can still reach the colour table / foldings through it, but
+        /// the type named here is the plugin's own - the parser does not have to
+        /// mention the editor assembly. Buffers the parser creates itself
+        /// (macro expansion, include snapshots) are that type too.
+        /// </para>
         /// </summary>
         public CodeEditor.CodeDocument? ConcreteDocument { get; protected set; }
 
