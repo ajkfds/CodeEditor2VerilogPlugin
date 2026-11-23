@@ -356,6 +356,23 @@ namespace pluginVerilog.Data
             return parentFile.CreateDocumentParser(parseMode, token);
         }
 
+        /// <summary>
+        /// UI-free parser factory (see
+        /// <see cref="IVerilogRelatedFile.CreateVerilogDocumentParser"/>).
+        /// A header instance has no parser of its own: it is parsed together
+        /// with its parent file, so only an edit parse (which goes through the
+        /// parent) has anything to do.
+        /// </summary>
+        public SystemVerilogCore.Parsing.IVerilogDocumentParser? CreateVerilogDocumentParser(
+            SystemVerilogCore.Parsing.VerilogParseMode parseMode,
+            System.Threading.CancellationToken? token)
+        {
+            Data.IVerilogRelatedFile? parentFile = Parent as Data.IVerilogRelatedFile;
+            if (parentFile == null) return null;
+            if (parseMode != SystemVerilogCore.Parsing.VerilogParseMode.EditParse) return null;
+            return parentFile.CreateVerilogDocumentParser(parseMode, token);
+        }
+
         // update sub-items from ParsedDocument
         public override async System.Threading.Tasks.Task UpdateAsync()
         {

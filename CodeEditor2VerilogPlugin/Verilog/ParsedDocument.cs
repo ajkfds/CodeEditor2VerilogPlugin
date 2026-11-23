@@ -1,4 +1,3 @@
-using CodeEditor2.CodeEditor.Parser;
 using pluginVerilog.CodeEditor;
 using pluginVerilog.Data;
 using pluginVerilog.FileTypes;

@@ -301,6 +301,20 @@ namespace pluginVerilog.Data
             return new Parser.VerilogParser(this.SourceVerilogFile, InstanceName, ParameterOverrides, parseMode, token);
         }
 
+        /// <summary>
+        /// UI-free parser factory (see
+        /// <see cref="IVerilogRelatedFile.CreateVerilogDocumentParser"/>).
+        /// Delegates to the editor-facing overload so both hosts share one
+        /// implementation.
+        /// </summary>
+        public SystemVerilogCore.Parsing.IVerilogDocumentParser? CreateVerilogDocumentParser(
+            SystemVerilogCore.Parsing.VerilogParseMode parseMode,
+            System.Threading.CancellationToken? token)
+        {
+            return CreateDocumentParser(
+                (DocumentParser.ParseModeEnum)(int)parseMode, token);
+        }
+
         private readonly SemaphoreSlim _updateSemaphore = new SemaphoreSlim(1, 1);
         public override async Task UpdateAsync()
         {

@@ -440,13 +440,13 @@ namespace pluginVerilog.Verilog.Items
                         && word.CompletionContext == null)
                     {
                         VerilogModuleInstance? instance = VerilogModuleInstance.Create(moduleInstantiation);
-                        // CreateDocumentParser takes the editor's alias enum (it
-                        // is the editor-side entry point), so this call keeps
-                        // naming it. The fully-qualified name is deliberate: it
-                        // avoids a `using CodeEditor2...` in a file that
-                        // otherwise has no editor dependency.
-                        var baseParser = instance?.CreateDocumentParser(
-                            CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.SingleHierParse,
+                        // Go through the UI-free factory: CreateDocumentParser
+                        // belongs to the editor's parser base class, and naming
+                        // it here is what kept this file bound to the editor
+                        // assembly. CreateVerilogDocumentParser returns the
+                        // contract (IVerilogDocumentParser) instead.
+                        var baseParser = instance?.CreateVerilogDocumentParser(
+                            SystemVerilogCore.Parsing.VerilogParseMode.SingleHierParse,
                             word.CancellationToken);
                         if (instance != null && baseParser != null)
                         {
@@ -455,7 +455,7 @@ namespace pluginVerilog.Verilog.Items
                             {
                                 if (word.RootParsedDocument.File != null) word.RootParsedDocument.File.Items.AddOrUpdate(instance.Name, instance);
                                 Verilog.ParsedDocument vParsedDocument = (Verilog.ParsedDocument)baseParser.ParsedDocument;
-                                await instance.AcceptParsedDocumentAsync(baseParser);
+                                await instance.AcceptVerilogParsedDocumentAsync(baseParser);
                             }
                         }
 

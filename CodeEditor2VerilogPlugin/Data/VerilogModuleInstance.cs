@@ -358,6 +358,20 @@ namespace pluginVerilog.Data
             return new Parser.VerilogParser(this, moduleName, parameterOverrides, parseMode, token);
         }
 
+        /// <summary>
+        /// UI-free parser factory (see
+        /// <see cref="IVerilogRelatedFile.CreateVerilogDocumentParser"/>).
+        /// Delegates to the editor-facing overload so both hosts share one
+        /// implementation.
+        /// </summary>
+        public SystemVerilogCore.Parsing.IVerilogDocumentParser? CreateVerilogDocumentParser(
+            SystemVerilogCore.Parsing.VerilogParseMode parseMode,
+            System.Threading.CancellationToken? token)
+        {
+            return CreateDocumentParser(
+                (DocumentParser.ParseModeEnum)(int)parseMode, token);
+        }
+
 
         // update sub-items from ParsedDocument
         public override async Task UpdateAsync()

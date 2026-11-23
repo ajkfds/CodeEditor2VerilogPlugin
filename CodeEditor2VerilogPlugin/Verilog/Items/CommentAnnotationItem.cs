@@ -334,15 +334,20 @@ namespace pluginVerilog.Verilog.Items
                     if (targetFile is Data.VerilogFile targetVerilogFile
                         && targetVerilogFile.VerilogParsedDocument == null)
                     {
-                        var baseParser = targetVerilogFile.CreateDocumentParser(
-                            CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.SingleHierParse,
+                        // Go through the UI-free factory: CreateDocumentParser
+                        // belongs to the editor's parser base class, and naming
+                        // it here is what kept this file bound to the editor
+                        // assembly. CreateVerilogDocumentParser returns the
+                        // contract (IVerilogDocumentParser) instead.
+                        var baseParser = targetVerilogFile.CreateVerilogDocumentParser(
+                            SystemVerilogCore.Parsing.VerilogParseMode.SingleHierParse,
                             word.CancellationToken);
                         if (baseParser != null)
                         {
                             await baseParser.ParseAsync();
                             if (baseParser.ParsedDocument != null)
                             {
-                                await targetVerilogFile.AcceptParsedDocumentAsync(baseParser);
+                                await targetVerilogFile.AcceptVerilogParsedDocumentAsync(baseParser);
                             }
                         }
                     }

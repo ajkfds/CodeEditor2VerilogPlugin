@@ -590,6 +590,20 @@ namespace pluginVerilog.Data
             return CreateDocumentParser(parseMode, token, null);
         }
 
+        /// <summary>
+        /// UI-free parser factory (see
+        /// <see cref="IVerilogRelatedFile.CreateVerilogDocumentParser"/>).
+        /// Delegates to the editor-facing overload so both hosts share one
+        /// implementation.
+        /// </summary>
+        public SystemVerilogCore.Parsing.IVerilogDocumentParser? CreateVerilogDocumentParser(
+            SystemVerilogCore.Parsing.VerilogParseMode parseMode,
+            System.Threading.CancellationToken? token)
+        {
+            return CreateDocumentParser(
+                (DocumentParser.ParseModeEnum)(int)parseMode, token);
+        }
+
         public override DocumentParser CreateDocumentParser(DocumentParser.ParseModeEnum parseMode, System.Threading.CancellationToken? token, CodeEditor2.Data.ParseRuleDefinition.Rule? parseRuleOverride)
         {
             CheckDirty();

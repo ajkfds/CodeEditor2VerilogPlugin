@@ -304,6 +304,30 @@ namespace pluginVerilog.Data
             if (source != null) source.PostStatusCheck();
         }
 
+        /// <summary>
+        /// UI-free parser factory (see
+        /// <see cref="IVerilogRelatedFile.CreateVerilogDocumentParser"/>).
+        ///
+        /// <para>
+        /// Base fallback: an instance file that does not override this parses
+        /// its source file. Module / interface / imported package / header
+        /// instances override it to build a parser for the instance itself
+        /// (module name + parameter overrides).
+        /// </para>
+        /// </summary>
+        public virtual SystemVerilogCore.Parsing.IVerilogDocumentParser? CreateVerilogDocumentParser(
+            SystemVerilogCore.Parsing.VerilogParseMode parseMode,
+            System.Threading.CancellationToken? token)
+        {
+            Data.VerilogFile? source = SourceVerilogFile;
+            if (source == null) return null;
+            return source.CreateVerilogDocumentParser(parseMode, token);
+        }
+
+        // NOTE: AcceptVerilogParsedDocumentAsync is inherited from
+        // CodeEditor2.Data.TextFile (which narrows the contract back to the
+        // editor's parser type), so no instance-specific handling is needed.
+
         protected override async Task FileCheckAsync()
         {
             await Task.CompletedTask;
