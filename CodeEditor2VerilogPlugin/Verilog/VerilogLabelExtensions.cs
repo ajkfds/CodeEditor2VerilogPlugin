@@ -19,6 +19,13 @@ namespace pluginVerilog
     /// that type lives in the contract assembly, which must not reference this
     /// one.
     /// </para>
+    ///
+    /// <para>
+    /// The editor-side half (turning a label into a <c>PopupItem</c>) lives in
+    /// <c>Data/VerilogCommon/PopupItemLabelExtensions.cs</c>: that one needs the
+    /// editor assembly, and this file is used by the parser, so keeping them
+    /// together would drag the editor back into <c>Verilog/</c>.
+    /// </para>
     /// </summary>
     internal static class VerilogLabelExtensions
     {
@@ -38,60 +45,6 @@ namespace pluginVerilog
             SystemVerilogCore.Documents.VerilogLabel other)
         {
             label.AppendLabel((SystemVerilogCore.Documents.VerilogLabel?)other);
-        }
-
-        /// <summary>
-        /// Builds the editor's caret-hint item from the parser's UI-free label,
-        /// resolving palette indices through the plugin's own palette.
-        ///
-        /// <para>
-        /// The parser only knows palette indices (it must stay UI-free), so the
-        /// concrete colours are looked up here - the one place that owns both
-        /// the contract and the editor's <c>PopupItem</c>.
-        /// </para>
-        /// </summary>
-        public static CodeEditor2.CodeEditor.PopupHint.PopupItem ToPopupItem(
-            this SystemVerilogCore.Documents.VerilogLabel label)
-        {
-            return new CodeEditor2.CodeEditor.PopupHint.PopupItem(
-                label,
-                colorType => Global.CodeDrawStyle.Color((CodeDrawStyle.ColorType)(byte)colorType));
-        }
-
-        /// <summary>
-        /// Appends a parser label to an existing editor hint item
-        /// (<c>ParsedDocument.GetPopupItem</c> builds one incrementally and also
-        /// mixes in message colours that are not palette entries).
-        /// </summary>
-        public static void AppendLabel(
-            this CodeEditor2.CodeEditor.PopupHint.PopupItem target,
-            SystemVerilogCore.Documents.VerilogLabel label)
-        {
-            if (label == null) return;
-            foreach (SystemVerilogCore.Documents.VerilogLabelRun run in label.Runs)
-            {
-                if (run.ColorType is SystemVerilogCore.Documents.VerilogColorType colorType)
-                {
-                    target.AppendText(
-                        run.Text,
-                        Global.CodeDrawStyle.Color((CodeDrawStyle.ColorType)(byte)colorType));
-                }
-                else
-                {
-                    target.AppendText(run.Text);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Appends a macro's label to an existing editor hint item.
-        /// </summary>
-        public static void AppendLabel(
-            this CodeEditor2.CodeEditor.PopupHint.PopupItem target,
-            SystemVerilogCore.Documents.VerilogLabel label,
-            object _macroTable)
-        {
-            target.AppendLabel(label);
         }
     }
 }
