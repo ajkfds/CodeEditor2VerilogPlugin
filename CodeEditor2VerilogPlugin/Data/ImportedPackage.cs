@@ -55,7 +55,7 @@ namespace pluginVerilog.Data
         public string NameSpaceString { set; get; } = "";
 
         // ImportedPackageでparsedDocumentを保持しないとSourceFile側で保持するのはWeakReferenceだけなので消えてしまう。
-        public override CodeEditor2.CodeEditor.IParsedDocument? ParsedDocument
+        public override SystemVerilogCore.Parsing.IParsedDocument? ParsedDocument
         {
             get
             {

@@ -155,7 +155,7 @@ namespace pluginVerilog.Parser
         }
 
         private Verilog.ParsedDocument parsedDocument;
-        public override CodeEditor2.CodeEditor.IParsedDocument ParsedDocument
+        public override SystemVerilogCore.Parsing.IParsedDocument ParsedDocument
         {
             get
             {

@@ -192,7 +192,7 @@ namespace pluginVerilog.Data
         private void disposeItems()
         {
             Verilog.ParsedDocument? vParsedDoc = null;
-            CodeEditor2.CodeEditor.IParsedDocument? parsedDoc = null;
+            SystemVerilogCore.Parsing.IParsedDocument? parsedDoc = null;
             vParsedDoc = VerilogParsedDocument;
             parsedDoc = ParsedDocument;
         }

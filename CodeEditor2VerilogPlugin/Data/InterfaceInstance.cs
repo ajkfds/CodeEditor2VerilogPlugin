@@ -115,12 +115,12 @@ namespace pluginVerilog.Data
         }
 
 
-        public override CodeEditor2.CodeEditor.IParsedDocument? ParsedDocument
+        public override SystemVerilogCore.Parsing.IParsedDocument? ParsedDocument
         {
             get
             {
                 Data.VerilogFile source = SourceVerilogFile;
-                CodeEditor2.CodeEditor.IParsedDocument? parsedDocument = source.GetInstancedParsedDocument(_getKey());
+                SystemVerilogCore.Parsing.IParsedDocument? parsedDocument = source.GetInstancedParsedDocument(_getKey());
 
                 // 取得するたびに保持しているparsedDocumentを最新のものに置き換える。
                 // 不要なparsedDocumentのGC回収を促進するため。

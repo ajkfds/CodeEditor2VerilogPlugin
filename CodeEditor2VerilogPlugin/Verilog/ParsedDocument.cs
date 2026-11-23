@@ -15,7 +15,24 @@ using System.Threading;
 
 namespace pluginVerilog.Verilog
 {
-    public class ParsedDocument : CodeEditor2.CodeEditor.IParsedDocument,
+    /// <summary>
+    /// A parse result.
+    ///
+    /// <para>
+    /// Implements the UI-free
+    /// <see cref="SystemVerilogCore.Parsing.IParsedDocument"/> (key + version),
+    /// not the editor's alias of it, so the parser does not reference the editor
+    /// assembly for this. The editor's <c>IParsedDocument</c> derives from the
+    /// same contract, so a <c>TextFile</c> still holds this object directly.
+    /// </para>
+    ///
+    /// <para>
+    /// <c>IParsedDocumentMessagesProvider</c> is the editor's narrow view of the
+    /// message list (the Messages pane reads it); it stays implemented because
+    /// the pane is an editor feature.
+    /// </para>
+    /// </summary>
+    public class ParsedDocument : SystemVerilogCore.Parsing.IParsedDocument,
         CodeEditor2.CodeEditor.IParsedDocumentMessagesProvider
     {
         /// <summary>
