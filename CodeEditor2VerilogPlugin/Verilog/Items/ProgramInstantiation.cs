@@ -1,6 +1,4 @@
 using Avalonia.Threading;
-using CodeEditor2.CodeEditor.CodeComplete;
-using CodeEditor2.Data;
 using pluginVerilog.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;

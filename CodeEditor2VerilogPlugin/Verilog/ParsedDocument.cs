@@ -1,4 +1,3 @@
-using CodeEditor2.CodeEditor.CodeComplete;
 using CodeEditor2.CodeEditor.Parser;
 using CodeEditor2.CodeEditor.PopupHint;
 using pluginVerilog.CodeEditor;

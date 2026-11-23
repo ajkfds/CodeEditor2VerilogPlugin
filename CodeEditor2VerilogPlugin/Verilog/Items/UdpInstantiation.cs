@@ -1,5 +1,3 @@
-using CodeEditor2.CodeEditor.CodeComplete;
-using CodeEditor2.Data;
 using OpenAI.Realtime;
 using pluginVerilog.Data;
 using pluginVerilog.Verilog.BuildingBlocks;

@@ -1,7 +1,5 @@
 //using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Avalonia.Threading;
-using CodeEditor2.CodeEditor.CodeComplete;
-using CodeEditor2.Data;
 using pluginVerilog.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
@@ -443,7 +441,14 @@ namespace pluginVerilog.Verilog.Items
                         && word.CompletionContext == null)
                     {
                         VerilogModuleInstance? instance = VerilogModuleInstance.Create(moduleInstantiation);
-                        var baseParser = instance?.CreateDocumentParser(CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.SingleHierParse, word.CancellationToken);
+                        // CreateDocumentParser takes the editor's alias enum (it
+                        // is the editor-side entry point), so this call keeps
+                        // naming it. The fully-qualified name is deliberate: it
+                        // avoids a `using CodeEditor2...` in a file that
+                        // otherwise has no editor dependency.
+                        var baseParser = instance?.CreateDocumentParser(
+                            CodeEditor2.CodeEditor.Parser.DocumentParser.ParseModeEnum.SingleHierParse,
+                            word.CancellationToken);
                         if (instance != null && baseParser != null)
                         {
                             await baseParser.ParseAsync();
