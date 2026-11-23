@@ -325,6 +325,22 @@ namespace pluginVerilog.Data
 
         private ConcurrentDictionary<string, System.WeakReference<CodeEditor2.CodeEditor.IParsedDocument>> instancedParsedDocumentRefs = new ConcurrentDictionary<string, WeakReference<CodeEditor2.CodeEditor.IParsedDocument>>();
 
+        /// <summary>
+        /// The instance parse result registered under <paramref name="key"/>,
+        /// typed as the parser's own result.
+        ///
+        /// <para>
+        /// The table itself stores the editor's <c>IParsedDocument</c> contract
+        /// (so a <c>TextFile</c> can hold any plugin's result), but every
+        /// caller in the parser immediately narrows it back to
+        /// <see cref="Verilog.ParsedDocument"/>. Returning the narrowed type
+        /// here keeps that downcast in this one editor-side place instead of
+        /// spreading the editor contract through the parser.
+        /// </para>
+        /// </summary>
+        public Verilog.ParsedDocument? GetInstancedVerilogParsedDocument(string key) =>
+            GetInstancedParsedDocument(key) as Verilog.ParsedDocument;
+
         public CodeEditor2.CodeEditor.IParsedDocument? GetInstancedParsedDocument(string key)
         {
             CodeEditor2.CodeEditor.IParsedDocument? ret;

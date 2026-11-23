@@ -73,12 +73,24 @@ namespace pluginVerilog.Verilog
             return ret;
         }
 
+        /// <summary>
+        /// The parse result this reference belongs to, typed as the parser's
+        /// own result.
+        ///
+        /// <para>
+        /// This used to expose the editor's <c>IParsedDocument</c> contract, but
+        /// every reader narrows it back to <see cref="ParsedDocument"/>
+        /// immediately (to reach the name spaces / rule set / message list). The
+        /// downcast now happens here, so the parser does not reference the
+        /// editor contract at all.
+        /// </para>
+        /// </summary>
         [JsonIgnore]
-        public CodeEditor2.CodeEditor.IParsedDocument? ParsedDocument
+        public ParsedDocument? ParsedDocument
         {
             get
             {
-                return indexReference.ParsedDocument;
+                return indexReference.ParsedDocument as ParsedDocument;
             }
         }
         [JsonIgnore]
