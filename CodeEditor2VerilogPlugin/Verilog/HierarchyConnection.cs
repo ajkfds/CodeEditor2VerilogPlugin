@@ -142,20 +142,11 @@ namespace pluginVerilog.Verilog
             return null;
         }
 
-        private Verilog.Items.ModuleInstantiation? getParentModuleInstance(CodeEditor2.Data.File file)
-        {
-            Data.VerilogModuleInstance? moduleInstance = file as Data.VerilogModuleInstance;
-            if (moduleInstance == null) return null;
-            string instanceName = moduleInstance.Name;
-
-            Data.IVerilogRelatedFile? parentFile = file.Parent as Data.IVerilogRelatedFile;
-            if (parentFile?.VerilogParsedDocument?.Root?.NamedElements.ContainsKey(instanceName) != true) return null;
-            INamedElement namedElement = parentFile.VerilogParsedDocument.Root.NamedElements[instanceName];
-            Verilog.Items.ModuleInstantiation? moduleInst = namedElement as Verilog.Items.ModuleInstantiation;
-            if (moduleInst == null) return null;
-            return moduleInst;
-        }
-
-
+        // NOTE: getParentModuleInstance(CodeEditor2.Data.File) used to live
+        // here. It had no caller (it only appeared in its own declaration), and
+        // its parameter was the editor's concrete file type - the last thing
+        // that tied this file to the editor assembly. Removed rather than
+        // re-typed: dead code carrying a host type is a dependency with no
+        // consumer.
     }
 }

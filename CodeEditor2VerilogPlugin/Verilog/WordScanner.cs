@@ -2079,23 +2079,25 @@ namespace pluginVerilog.Verilog
             //}
 
 
-            // VerilogHeaderInstance.Create needs the editor's concrete project
-            // (it builds an item-tree node). Narrow at this one call site; a
-            // host without editor projects has no item tree to include into.
-            CodeEditor2.Data.Project? editorProject =
-                ProjectInterop.AsEditorProject(wordPointer.ParsedDocument.Project);
-            if (editorProject == null)
+            // Resolve the included file through the UI-free project contract.
+            // This used to narrow to the editor's concrete project at this call
+            // site, which is what kept this scanner bound to the editor
+            // assembly. VerilogHeaderInstance.Create now takes the contract and
+            // does the narrowing itself, in the data layer.
+            SystemVerilogCore.Projects.IVerilogProject? project =
+                wordPointer.ParsedDocument.Project;
+            if (project == null)
             {
                 newParsedDocument = null;
                 return;
             }
 
-            Data.VerilogHeaderInstance vhInstance = Data.VerilogHeaderInstance.Create(
+            Data.VerilogHeaderInstance? vhInstance = Data.VerilogHeaderInstance.Create(
                                             relativeFilePath,
                                             name,
                                             CreateIndexReference(),
                                             rootFile,
-                                            editorProject,
+                                            project,
                                             id
                                             );
 

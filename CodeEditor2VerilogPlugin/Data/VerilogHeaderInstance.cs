@@ -52,6 +52,31 @@ namespace pluginVerilog.Data
         // ------------------------
 
 
+        /// <summary>
+        /// Creates a header instance, resolving the included file through the
+        /// UI-free project contract.
+        ///
+        /// <para>
+        /// This is the overload the parser calls: it used to pass the editor's
+        /// concrete <c>Data.Project</c> just so the item tree could be walked,
+        /// which is what kept <c>WordScanner</c> bound to the editor assembly.
+        /// The contract carries the same lookup
+        /// (<see cref="SystemVerilogCore.Projects.IVerilogItemTree.FindByRelativePath"/>).
+        /// </para>
+        /// </summary>
+        public static VerilogHeaderInstance? Create(
+            string relativePath,
+            string name,
+            IndexReference instancedReference,
+            IVerilogRelatedFile parentFile,
+            SystemVerilogCore.Projects.IVerilogProject project,
+            string id)
+        {
+            CodeEditor2.Data.Project? editorProject = ProjectInterop.AsEditorProject(project);
+            if (editorProject == null) return null;
+            return Create(relativePath, name, instancedReference, parentFile, editorProject, id);
+        }
+
         public static VerilogHeaderInstance? Create(
             string relativePath,
             string name,
