@@ -183,7 +183,10 @@ namespace pluginVerilog.Verilog.Items
                     word.AddError("unfound udp");
                     word.RootParsedDocument.ReparseRequested = true;
                     if (!word.RootParsedDocument.UnfoundModules.Contains(udpName)) word.RootParsedDocument.UnfoundModules.Add(udpName);
-                    CodeEditor2.Controller.AppendLog("## unfound " + udpName + " at " + buildingBlock.Name, Avalonia.Media.Colors.Orange);
+                    // Through the project's log sink: the editor shows it, a
+                    // headless host drops it (see IVerilogDiagnosticLog).
+                    ((SystemVerilogCore.Projects.IVerilogProject)word.Project)
+                        .Log?.WriteWarning("## unfound " + udpName + " at " + buildingBlock.Name);
                 }
             }
             // else: already registered

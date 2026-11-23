@@ -160,7 +160,7 @@ namespace pluginVerilog.Verilog.Items
                 //word.AddError("unfound program");
                 //word.RootParsedDocument.ReparseRequested = true;
                 //if (!word.RootParsedDocument.UnfoundModules.Contains(programName)) word.RootParsedDocument.UnfoundModules.Add(programName);
-                //CodeEditor2.Controller.AppendLog("## unfound " + programName + " at " + buildingBlock.Name, Avalonia.Media.Colors.Orange);
+
             }
             // Register the referenced program name so that SimulationSetup can collect
             // the program definition file (missing definition is reported as unfound there).

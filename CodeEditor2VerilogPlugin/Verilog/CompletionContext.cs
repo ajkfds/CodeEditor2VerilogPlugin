@@ -104,14 +104,13 @@ namespace pluginVerilog.Verilog
             if (documentRegion is Verilog.Items.ModuleInstantiation)
             {
                 #pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
-//                CodeEditor2.Controller.AppendLog("ModuleInstantiation.ParseCreate");
                 Verilog.Items.ModuleInstantiation.ParseAsync(word, NameSpace).GetAwaiter().GetResult();
                 #pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
             }else if(documentRegion is Module module)
             {
                 if (word.Text == "module" || word.Text == "macromodule")
                 {
-//                    CodeEditor2.Controller.AppendLog("Module.ParseCreate");
+
                     Module.ParseCreateAsync(word, module.ParameterOverrides, module.Attribute, module.BuildingBlock, item, false).GetAwaiter().GetResult();
                 }
             }else if(documentRegion is Verilog.Items.AlwaysConstruct)
@@ -119,7 +118,7 @@ namespace pluginVerilog.Verilog
                 // partial parse of "always ..." statement: propagate completionContext to statements
                 if(word.Text == "always" || word.Text == "always_comb" || word.Text == "always_latch" || word.Text == "always_ff")
                 {
-//                    CodeEditor2.Controller.AppendLog("AlwaysConstruct.ParseCreate");
+
                     Verilog.Items.AlwaysConstruct.ParseCreate(word, NameSpace);
                 }
             }else if(documentRegion is Verilog.Items.InitialConstruct)
@@ -127,7 +126,7 @@ namespace pluginVerilog.Verilog
                 // partial parse of "initial ..." statement: propagate completionContext to statements
                 if (word.Text == "initial")
                 {
-//                    CodeEditor2.Controller.AppendLog("InitialConstruct.ParseCreate");
+
                     Verilog.Items.InitialConstruct.ParseCreate(word, NameSpace);
                 }
             }else if(documentRegion is Verilog.Items.FinalConstruct)
@@ -135,24 +134,24 @@ namespace pluginVerilog.Verilog
                 // partial parse of "final ..." statement: propagate completionContext to statements
                 if (word.Text == "final")
                 {
-//                    CodeEditor2.Controller.AppendLog("FinalConstruct.ParseCreate");
+
                     Verilog.Items.FinalConstruct.ParseCreate(word, NameSpace);
                 }
             }else if(documentRegion is Verilog.Items.ProgramInstantiation)
             {
                 #pragma warning disable VSTHRD002 // Avoid problematic synchronous waits
-  //              CodeEditor2.Controller.AppendLog("ProgramInstantiation.ParseAsync");
+
                 Verilog.Items.ProgramInstantiation.ParseAsync(word, NameSpace).GetAwaiter().GetResult();
                 #pragma warning restore VSTHRD002 // Avoid problematic synchronous waits
             }else if(documentRegion is Verilog.Items.InterfaceInstance)
             {
-//                CodeEditor2.Controller.AppendLog("InterfaceInstance.Parse");
+
                 Verilog.Items.InterfaceInstance.Parse(word, NameSpace);
             }else if(documentRegion is Verilog.Items.BindDirective)
             {
                 if (word.Text == "bind")
                 {
-//                    CodeEditor2.Controller.AppendLog("BindDirective.Parse");
+
                     Verilog.Items.BindDirective? bindDirective;
                     Verilog.Items.BindDirective.Parse(word, NameSpace, out bindDirective);
                 }
@@ -160,59 +159,59 @@ namespace pluginVerilog.Verilog
             {
                 if (word.Text == "alias")
                 {
-//                    CodeEditor2.Controller.AppendLog("NetAlias.Parse");
+
                     Verilog.Items.NetAlias.Parse(word, NameSpace);
                 }
             }else if(documentRegion is Verilog.Items.ParameterOverride)
             {
                 if (word.Text == "defparam")
                 {
-//                    CodeEditor2.Controller.AppendLog("ParameterOverride.Parse");
+
                     Verilog.Items.ParameterOverride.Parse(word, NameSpace);
                 }
             }else if(documentRegion is Verilog.Statements.CaseStatement)
             {
                 // partial parse of case statement: propagate completionContext (via WordScanner)
                 // to case expression / case item parse
-//                CodeEditor2.Controller.AppendLog("CaseStatement.ParseCreate");
+
                 Verilog.Statements.CaseStatement.ParseCreate(word, NameSpace, null);
             }else if(documentRegion is Verilog.Statements.WhileStatememt)
             {
                 // partial parse of while statement: propagate completionContext (via WordScanner)
                 // to condition expression / statement parse
-//                CodeEditor2.Controller.AppendLog("WhileStatememt.ParseCreate");
+
                 Verilog.Statements.WhileStatememt.ParseCreate(word, NameSpace, null);
             }else if(documentRegion is Verilog.Statements.RepeatStatement)
             {
                 // partial parse of repeat statement: propagate completionContext (via WordScanner)
                 // to condition expression / statement parse
-//                CodeEditor2.Controller.AppendLog("RepeatStatement.ParseCreate");
+
                 Verilog.Statements.RepeatStatement.ParseCreate(word, NameSpace, null);
             }else if(documentRegion is Verilog.Statements.ConditionalStatement)
             {
                 // partial parse of if statement: propagate completionContext (via WordScanner)
                 // to condition expression / statement parse
-//                CodeEditor2.Controller.AppendLog("ConditionalStatement.ParseCreate");
+
                 Verilog.Statements.ConditionalStatement.ParseCreate(word, NameSpace, null);
             }else if(documentRegion is Verilog.Statements.ForStatememt)
             {
                 // partial parse of for statement: propagate completionContext (via WordScanner)
                 // to for_initialization / expression parse
-//                CodeEditor2.Controller.AppendLog("ForStatememt.ParseCreate");
+
                 Verilog.Statements.ForStatememt.ParseCreate(word, NameSpace, null);
             }else if(documentRegion is NonBlockingAssignment)
             {
-//                CodeEditor2.Controller.AppendLog("NonBlockingAssignment.ParseCreate");
+
                 Verilog.Statements.NonBlockingAssignment.ParseCreate(word, NameSpace);
             }else if(documentRegion is BlockingAssignment)
             {
-//                CodeEditor2.Controller.AppendLog("BlockingAssignment.ParseCreate");
+
                 Verilog.Statements.BlockingAssignment.ParseCreate(word, NameSpace);
             }else if(documentRegion is SequentialBlock)
             {
                 if(word.Text == "begin")
                 {
- //                   CodeEditor2.Controller.AppendLog("SequentialBlock.ParseCreate");
+
                     Verilog.Statements.SequentialBlock.ParseCreate(word, NameSpace, null);
                 }
             }
@@ -222,7 +221,7 @@ namespace pluginVerilog.Verilog
                 {
                     // partial parse of parallel block: propagate completionContext (via WordScanner)
                     // to statements inside the block
-//                    CodeEditor2.Controller.AppendLog("ParallelBlock.ParseCreate");
+
                     Verilog.Statements.ParallelBlock.ParseCreate(word, NameSpace, null);
                 }
             }
@@ -232,7 +231,7 @@ namespace pluginVerilog.Verilog
                 // partial parse to propagate completionContext to statements inside the block
                 if(word.Text == "begin")
                 {
-//                    CodeEditor2.Controller.AppendLog("SequentialBlock.ParseCreate (named)");
+
                     Verilog.Statements.SequentialBlock.ParseCreate(word, NameSpace, null);
                 }
             }
@@ -242,7 +241,7 @@ namespace pluginVerilog.Verilog
                 // partial parse to propagate completionContext to statements inside the block
                 if(word.Text == "fork")
                 {
-//                    CodeEditor2.Controller.AppendLog("ParallelBlock.ParseCreate (named)");
+
                     Verilog.Statements.ParallelBlock.ParseCreate(word, NameSpace, null);
                 }
             }
@@ -252,7 +251,7 @@ namespace pluginVerilog.Verilog
                 {
                     // partial parse of generate block items: propagate completionContext
                     // (via WordScanner) to udp / module instantiation parse inside the block
-//                    CodeEditor2.Controller.AppendLog("GenerateBlock.ParseAsync");
+
                     Verilog.Items.Generate.GenerateBlock.ParseAsync(word, NameSpace).GetAwaiter().GetResult();
                 }
             }
@@ -260,7 +259,7 @@ namespace pluginVerilog.Verilog
             {
                 // partial parse of gate instantiation: propagate completionContext (via WordScanner)
                 // to gate keyword / terminal parse
-//                CodeEditor2.Controller.AppendLog("GateInstantiation.Parse");
+
                 Verilog.Items.GateInstantiation.Parse(word, NameSpace);
             }else if(documentRegion is Verilog.Items.ContinuousAssign)
             {
@@ -268,7 +267,7 @@ namespace pluginVerilog.Verilog
                 {
                     // partial parse of continuous assign: propagate completionContext (via WordScanner)
                     // to LHS / RHS expression parse (A9)
-//                    CodeEditor2.Controller.AppendLog("ContinuousAssign.ParseCreate");
+
                     Verilog.Items.ContinuousAssign.ParseCreate(word, NameSpace, this);
                 }
             }

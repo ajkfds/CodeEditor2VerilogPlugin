@@ -207,7 +207,11 @@ namespace pluginVerilog.Verilog.Items
             if (!General.IsSimpleIdentifier(word.Text)) return;
             if (General.ListOfKeywords.Contains(word.Text)) return;
 
-            Project sourceProject = word.Project;
+            // Kept as the contract type: the "// @project <name>" branch below
+            // swaps it for another project, and that lookup is host-neutral
+            // (IVerilogProject.ResolveProject) rather than the editor's
+            // Global.Projects dictionary.
+            SystemVerilogCore.Projects.IVerilogProject sourceProject = word.Project;
             // ProjectProperty used to resolve the instantiated module.
             // It is swapped to the "@project" target project below, so that all
             // later lookups (parameter-overridden module / its source file) are
@@ -251,16 +255,27 @@ namespace pluginVerilog.Verilog.Items
                         comment.Color(CodeDrawStyle.ColorType.HighLightedComment);
                         comment.MoveNext();
                         comment.Color(CodeDrawStyle.ColorType.HighLightedComment);
-                        if (!CodeEditor2.Global.Projects.ContainsKey(comment.Text)) break;
+                        // Resolved through the project contract instead of the
+                        // editor's Global.Projects, so the parser works in any
+                        // host (the language server maps it to its workspace
+                        // folders).
+                        SystemVerilogCore.Projects.IVerilogProject? resolvedProject =
+                            ((SystemVerilogCore.Projects.IVerilogProject)word.Project)
+                                .ResolveProject(comment.Text);
+                        if (resolvedProject == null) break;
 
-                        sourceProject = CodeEditor2.Global.Projects[comment.Text];
+                        sourceProject = resolvedProject;
                         // Resolve against the target project: the module (and the
                         // parameter-overridden instance below) lives in that project's
                         // DefinitionNameSpace. Keeping the local project property here
                         // made GetInstancedBuildingBlock / GetFile return null, which
                         // reported a bogus "not parsed yet." error even though the
                         // module was definable via "@project".
-                        ProjectProperty? targetProjectProperty = sourceProject.GetPluginProperty();
+                        // The target project's settings, reached through the
+                        // contract (the editor's ProjectProperty and the
+                        // server's per-workspace settings both surface here).
+                        ProjectProperty? targetProjectProperty =
+                            resolvedProject.Settings as ProjectProperty;
                         if (targetProjectProperty == null) break;
                         sourceProjectProperty = targetProjectProperty;
                         instancedModule = sourceProjectProperty.DefinitionNameSpace.Get(moduleName) as Module;
@@ -315,7 +330,12 @@ namespace pluginVerilog.Verilog.Items
                         if (!word.RootParsedDocument.UnfoundModules.Contains(moduleName))
                         {
                             word.RootParsedDocument.UnfoundModules.Add(moduleName);
-                            CodeEditor2.Controller.AppendLog("## unfound " + moduleName + " at " + buildingBlock.Name, Avalonia.Media.Colors.Orange);
+                            // Reported through the project's log sink; the
+                            // editor shows it in its log view, a headless host
+                            // simply drops it.
+                            ((SystemVerilogCore.Projects.IVerilogProject)word.Project)
+                                .Log?.WriteWarning(
+                                    "## unfound " + moduleName + " at " + buildingBlock.Name);
                         }
                     }
                 }
