@@ -55,7 +55,53 @@ namespace pluginVerilog.Data.VerilogCommon
             int headIndex, length;
             item.CodeDocument.GetWord(index, out headIndex, out length);
             string text = item.CodeDocument.CreateString(headIndex, length);
-            return parsedDocument.GetPopupItem(index, text);
+
+            // The parser supplies plain data; drawing the hint (colours, icons,
+            // text spans) is this host's job. Before this the parser built the
+            // PopupItem itself, which is what kept it referencing the editor
+            // assembly and Avalonia.
+            SystemVerilogCore.Documents.VerilogHintContent? content =
+                parsedDocument.GetHintContent(index, text);
+            if (content == null) return null;
+
+            return BuildPopupItem(content);
+        }
+
+        /// <summary>
+        /// Renders a hint's data as the editor's popup item: one coloured line
+        /// with a triangle icon per message, then the element's declaration
+        /// label.
+        /// </summary>
+        private static PopupItem BuildPopupItem(SystemVerilogCore.Documents.VerilogHintContent content)
+        {
+            PopupItem ret = new PopupItem();
+
+            foreach (SystemVerilogCore.Documents.VerilogHintMessage message in content.Messages)
+            {
+                // The message colours are editor-only decorations: they are not
+                // palette entries (a message is not a token), so they stay here.
+                (Avalonia.Media.Color iconColor, Avalonia.Media.Color textColor) = message.Severity switch
+                {
+                    SystemVerilogCore.Documents.VerilogHintSeverity.Error =>
+                        (Avalonia.Media.Color.FromArgb(100, 255, 150, 150), Avalonia.Media.Colors.Pink),
+                    SystemVerilogCore.Documents.VerilogHintSeverity.Warning =>
+                        (Avalonia.Media.Color.FromArgb(100, 255, 255, 150), Avalonia.Media.Colors.Orange),
+                    SystemVerilogCore.Documents.VerilogHintSeverity.Notice =>
+                        (Avalonia.Media.Color.FromArgb(100, 150, 255, 150), Avalonia.Media.Colors.LimeGreen),
+                    _ =>
+                        (Avalonia.Media.Color.FromArgb(100, 150, 150, 255), Avalonia.Media.Colors.LightCyan),
+                };
+
+                ret.AppendIconImage(AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
+                    "CodeEditor2/Assets/Icons/exclamation_triangle.svg", iconColor));
+                ret.AppendText(message.Text + "\n", textColor);
+            }
+
+            if (content.Label != null)
+            {
+                ret.AppendLabel(content.Label);
+            }
+            return ret;
         }
 
 

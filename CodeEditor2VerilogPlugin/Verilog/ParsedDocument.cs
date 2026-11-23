@@ -1,5 +1,4 @@
 using CodeEditor2.CodeEditor.Parser;
-using CodeEditor2.CodeEditor.PopupHint;
 using pluginVerilog.CodeEditor;
 using pluginVerilog.Data;
 using pluginVerilog.FileTypes;
@@ -457,57 +456,41 @@ namespace pluginVerilog.Verilog
         }
 
 
-        public PopupItem? GetPopupItem(int index, string text)
+        /// <summary>
+        /// The data a mouse-over hint is built from at <paramref name="index"/>:
+        /// the messages covering that position plus the element's declaration
+        /// label, or null when there is nothing to show.
+        ///
+        /// <para>
+        /// This used to build the editor's <c>PopupItem</c> directly (coloured
+        /// text spans plus a rendered SVG icon), which is why the parser
+        /// referenced the editor assembly and Avalonia. It now returns plain
+        /// data and the editor does the drawing - see
+        /// <c>Data/VerilogCommon/AutoCompleteHandler.GetPopupItem</c>.
+        /// </para>
+        /// </summary>
+        public SystemVerilogCore.Documents.VerilogHintContent? GetHintContent(int index, string text)
         {
             IndexReference iref = IndexReference.Create(this.IndexReference, index);
             if (iref.RootParsedDocument == null) return null;
 
+            SystemVerilogCore.Documents.VerilogHintContent content = new();
 
-            // Two parts, converted once at the end:
-            //  - the message lines are editor-only decorations (arbitrary
-            //    colours, icons), so they go straight into the PopupItem;
-            //  - the element labels are the parser's UI-free VerilogLabel
-            //    (palette indices), converted through the plugin's palette by
-            //    ToPopupItem().
-            var ret = new CodeEditor2.CodeEditor.PopupHint.PopupItem();
-            var elementLabel = new SystemVerilogCore.Documents.VerilogLabel();
-
-            // add messages
+            // messages covering this position, in declaration order
             foreach (Message message in Messages)
             {
                 if (index < message.Index) continue;
                 if (index > message.Index + message.Length) continue;
-                switch (message.Type)
+
+                SystemVerilogCore.Documents.VerilogHintSeverity severity = message.Type switch
                 {
-                    case Message.MessageType.Error:
-                        ret.AppendIconImage(AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
-                            "CodeEditor2/Assets/Icons/exclamation_triangle.svg",
-                            Avalonia.Media.Color.FromArgb(100, 255, 150, 150)
-                            ));
-                        ret.AppendText(message.Text + "\n", Avalonia.Media.Colors.Pink);
-                        break;
-                    case Message.MessageType.Warning:
-                        ret.AppendIconImage(AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
-                            "CodeEditor2/Assets/Icons/exclamation_triangle.svg",
-                            Avalonia.Media.Color.FromArgb(100, 255, 255, 150)
-                            ));
-                        ret.AppendText(message.Text + "\n", Avalonia.Media.Colors.Orange);
-                        break;
-                    case Message.MessageType.Notice:
-                        ret.AppendIconImage(AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
-                            "CodeEditor2/Assets/Icons/exclamation_triangle.svg",
-                            Avalonia.Media.Color.FromArgb(100, 150, 255, 150)
-                            ));
-                        ret.AppendText(message.Text + "\n", Avalonia.Media.Colors.LimeGreen);
-                        break;
-                    case Message.MessageType.Hint:
-                        ret.AppendIconImage(AjkAvaloniaLibs.Libs.Icons.GetSvgBitmap(
-                            "CodeEditor2/Assets/Icons/exclamation_triangle.svg",
-                            Avalonia.Media.Color.FromArgb(100, 150, 150, 255)
-                            ));
-                        ret.AppendText(message.Text + "\n", Avalonia.Media.Colors.LightCyan);
-                        break;
-                }
+                    Message.MessageType.Error => SystemVerilogCore.Documents.VerilogHintSeverity.Error,
+                    Message.MessageType.Warning => SystemVerilogCore.Documents.VerilogHintSeverity.Warning,
+                    Message.MessageType.Notice => SystemVerilogCore.Documents.VerilogHintSeverity.Notice,
+                    _ => SystemVerilogCore.Documents.VerilogHintSeverity.Hint,
+                };
+                content.Messages.Add(
+                    new SystemVerilogCore.Documents.VerilogHintMessage(severity, message.Text));
             }
 
             if (File == null || !getPopupTarget(index, out NameSpace? nameSpace, out INamedElement? element))
@@ -515,6 +498,7 @@ namespace pluginVerilog.Verilog
                 return null;
             }
 
+            SystemVerilogCore.Documents.VerilogLabel elementLabel = new();
             if (element != null)
             {
                 if (element is DataObject)
@@ -539,13 +523,8 @@ namespace pluginVerilog.Verilog
             {
                 Macros[text].AppendLabel(elementLabel, Macros);
             }
-            ret.AppendLabel(elementLabel);
-            return ret;
-
-            // NOTE: a second, unreachable implementation used to sit here
-            // (hierarchy lookup + macro / element labels appended again). It
-            // followed `return ret;`, so it never ran; it was removed rather
-            // than converted when the labels moved to the UI-free contract.
+            content.Label = elementLabel;
+            return content;
         }
 
         private bool getPopupTarget(int index, out NameSpace? nameSpace, out INamedElement? element)
