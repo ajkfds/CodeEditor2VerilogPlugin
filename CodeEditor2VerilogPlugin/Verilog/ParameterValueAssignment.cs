@@ -227,7 +227,9 @@ namespace pluginVerilog.Verilog
 
             SystemVerilogCore.Documents.VerilogLabel label = new SystemVerilogCore.Documents.VerilogLabel();
             parameter.AppendLabel(label);
-            completionContext.CarletPopupItems.Add(label.ToPopupItem());
+            // The list holds the UI-free label now; the editor resolves the
+            // palette when it renders the hint.
+            completionContext.CarletPopupItems.Add(label);
         }
 
         /// <summary>

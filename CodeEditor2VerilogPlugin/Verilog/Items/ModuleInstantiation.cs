@@ -659,8 +659,7 @@ namespace pluginVerilog.Verilog.Items
                     {
                         port = instancedModule.PortsList[i];
                     }
-                    if (port != null) word.CompletionContext.CarletPopupItems.Add(
-                        port.GetLabel().ToPopupItem());
+                    if (port != null) word.CompletionContext.CarletPopupItems.Add(port.GetLabel());
                     return;
                 }
                 // Check for wildcard port connection .*
@@ -707,8 +706,7 @@ namespace pluginVerilog.Verilog.Items
                     if (instancedModule != null && i < instancedModule.PortsList.Count)
                     {
                         Port port = instancedModule.PortsList[i];
-                        word.CompletionContext.CarletPopupItems.Add(
-                            port.GetLabel().ToPopupItem());
+                        word.CompletionContext.CarletPopupItems.Add(port.GetLabel());
                     }
                     return;
                 }
@@ -918,7 +916,7 @@ namespace pluginVerilog.Verilog.Items
             if (word.CompletionContext != null && word.Eof && instancedModule!=null && instancedModule.Ports.ContainsKey(pinName))
             {
                 Port? port = instancedModule?.Ports[pinName];
-                if(port !=null) word.CompletionContext.CarletPopupItems.Add(port.GetLabel().ToPopupItem());
+                if (port != null) word.CompletionContext.CarletPopupItems.Add(port.GetLabel());
                 return;
             }
 
@@ -948,7 +946,7 @@ namespace pluginVerilog.Verilog.Items
             if (word.CompletionContext != null && word.Eof && instancedModule != null && instancedModule.Ports.ContainsKey(pinName))
             {
                 Port? port = instancedModule?.Ports[pinName];
-                if (port != null) word.CompletionContext.CarletPopupItems.Add(port.GetLabel().ToPopupItem());
+                if (port != null) word.CompletionContext.CarletPopupItems.Add(port.GetLabel());
                 return;
             }
 

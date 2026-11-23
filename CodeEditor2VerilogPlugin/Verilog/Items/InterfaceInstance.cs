@@ -386,8 +386,7 @@ namespace pluginVerilog.Verilog.Items
                     if (instancedInterface != null && instancedInterface.PortsList.Count != 0)
                     {
                         Port port = instancedInterface.PortsList[0];
-                        word.CompletionContext.CarletPopupItems.Add(
-                            port.GetLabel().ToPopupItem());
+                        word.CompletionContext.CarletPopupItems.Add(port.GetLabel());
                     }
                     return;
                 }
@@ -404,8 +403,7 @@ namespace pluginVerilog.Verilog.Items
                             if (instancedInterface != null && instancedInterface.PortsList.Count != 0)
                             {
                                 Port port = instancedInterface.PortsList[0];
-                                word.CompletionContext.CarletPopupItems.Add(
-                                    port.GetLabel().ToPopupItem());
+                                word.CompletionContext.CarletPopupItems.Add(port.GetLabel());
                             }
                             return;
                         }
@@ -448,8 +446,7 @@ namespace pluginVerilog.Verilog.Items
                             if (instancedInterface != null && instancedInterface.Ports.ContainsKey(pinName))
                             {
                                 Port port = instancedInterface.Ports[pinName];
-                                word.CompletionContext.CarletPopupItems.Add(
-                                    port.GetLabel().ToPopupItem());
+                                word.CompletionContext.CarletPopupItems.Add(port.GetLabel());
                             }
                             return;
                         }
@@ -488,8 +485,7 @@ namespace pluginVerilog.Verilog.Items
                                 if (instancedInterface != null && instancedInterface.Ports.ContainsKey(pinName))
                                 {
                                     Port port = instancedInterface.Ports[pinName];
-                                    word.CompletionContext.CarletPopupItems.Add(
-                                        port.GetLabel().ToPopupItem());
+                                    word.CompletionContext.CarletPopupItems.Add(port.GetLabel());
                                 }
                                 return;
                             }
@@ -522,8 +518,7 @@ namespace pluginVerilog.Verilog.Items
                             if (instancedInterface != null && instancedInterface.Ports.ContainsKey(pinName))
                             {
                                 Port port = instancedInterface.Ports[pinName];
-                                word.CompletionContext.CarletPopupItems.Add(
-                                    port.GetLabel().ToPopupItem());
+                                word.CompletionContext.CarletPopupItems.Add(port.GetLabel());
                             }
                             return;
                         }
@@ -557,8 +552,7 @@ namespace pluginVerilog.Verilog.Items
                             if (instancedInterface != null && i < instancedInterface.PortsList.Count)
                             {
                                 Port port = instancedInterface.PortsList[i];
-                                word.CompletionContext.CarletPopupItems.Add(
-                                    port.GetLabel().ToPopupItem());
+                                word.CompletionContext.CarletPopupItems.Add(port.GetLabel());
                             }
                             return;
                         }
@@ -582,8 +576,7 @@ namespace pluginVerilog.Verilog.Items
                             if (instancedInterface != null && i < instancedInterface.PortsList.Count)
                             {
                                 Port port = instancedInterface.PortsList[i];
-                                word.CompletionContext.CarletPopupItems.Add(
-                                    port.GetLabel().ToPopupItem());
+                                word.CompletionContext.CarletPopupItems.Add(port.GetLabel());
                             }
                             return;
                         }

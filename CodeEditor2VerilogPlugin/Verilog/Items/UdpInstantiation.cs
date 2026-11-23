@@ -348,8 +348,7 @@ namespace pluginVerilog.Verilog.Items
                 {
                     port = instancedUdp.PortsList[0];
                 }
-                if (port != null) word.CompletionContext.CarletPopupItems.Add(
-                    port.GetLabel().ToPopupItem());
+                if (port != null) word.CompletionContext.CarletPopupItems.Add(port.GetLabel());
                 return;
             }
 
@@ -378,8 +377,7 @@ namespace pluginVerilog.Verilog.Items
                     {
                         port = instancedUdp.PortsList[1 + inputIndex];
                     }
-                    if (port != null) word.CompletionContext.CarletPopupItems.Add(
-                        port.GetLabel().ToPopupItem());
+                    if (port != null) word.CompletionContext.CarletPopupItems.Add(port.GetLabel());
                     return;
                 }
 
@@ -403,8 +401,7 @@ namespace pluginVerilog.Verilog.Items
                     {
                         port = instancedUdp.PortsList[1 + inputIndex];
                     }
-                    if (port != null) word.CompletionContext.CarletPopupItems.Add(
-                        port.GetLabel().ToPopupItem());
+                    if (port != null) word.CompletionContext.CarletPopupItems.Add(port.GetLabel());
                     return;
                 }
             }

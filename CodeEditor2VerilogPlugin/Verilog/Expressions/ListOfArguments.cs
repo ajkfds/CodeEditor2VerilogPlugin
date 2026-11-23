@@ -473,8 +473,7 @@ namespace pluginVerilog.Verilog.Expressions
             if (index < 0) return;
             if (index >= portNameSpace.PortsList.Count) return;   // all arguments are already given
             DataObjects.Port port = portNameSpace.PortsList[index];
-            completionContext.CarletPopupItems.Add(
-                port.GetLabel().ToPopupItem());
+            completionContext.CarletPopupItems.Add(port.GetLabel());
         }
 
         /// <summary>

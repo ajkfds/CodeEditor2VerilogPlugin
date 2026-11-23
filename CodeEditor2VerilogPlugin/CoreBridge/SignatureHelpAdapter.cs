@@ -69,7 +69,7 @@ namespace pluginVerilog.CoreBridge
 
             List<SignatureEntry> entries = new List<SignatureEntry>();
             HashSet<string> seen = new HashSet<string>();
-            foreach (CodeEditor2.CodeEditor.PopupHint.PopupItem item in context.CarletPopupItems)
+            foreach (SystemVerilogCore.Documents.IVerilogPopupItem item in context.CarletPopupItems)
             {
                 if (item == null) continue;
                 string label = item.CreateString();

@@ -368,8 +368,7 @@ namespace pluginVerilog.Verilog.Items
                     if (instancedProgram != null && i < instancedProgram.PortsList.Count)
                     {
                         Port port = instancedProgram.PortsList[i];
-                        word.CompletionContext.CarletPopupItems.Add(
-                            port.GetLabel().ToPopupItem());
+                        word.CompletionContext.CarletPopupItems.Add(port.GetLabel());
                     }
                     return;
                 }
@@ -393,8 +392,7 @@ namespace pluginVerilog.Verilog.Items
                     if (instancedProgram != null && i < instancedProgram.PortsList.Count)
                     {
                         Port port = instancedProgram.PortsList[i];
-                        word.CompletionContext.CarletPopupItems.Add(
-                            port.GetLabel().ToPopupItem());
+                        word.CompletionContext.CarletPopupItems.Add(port.GetLabel());
                     }
                     return;
                 }
@@ -575,8 +573,7 @@ namespace pluginVerilog.Verilog.Items
             if (word.CompletionContext != null && word.Eof)
             {
                 Port? port = instancedProgram != null && instancedProgram.Ports.ContainsKey(portName) ? instancedProgram.Ports[portName] : null;
-                if (port != null) word.CompletionContext.CarletPopupItems.Add(
-                    port.GetLabel().ToPopupItem());
+                if (port != null) word.CompletionContext.CarletPopupItems.Add(port.GetLabel());
                 return;
             }
 
@@ -614,8 +611,7 @@ namespace pluginVerilog.Verilog.Items
             if (word.CompletionContext != null && word.Eof)
             {
                 Port? port = instancedProgram != null && instancedProgram.Ports.ContainsKey(portName) ? instancedProgram.Ports[portName] : null;
-                if (port != null) word.CompletionContext.CarletPopupItems.Add(
-                    port.GetLabel().ToPopupItem());
+                if (port != null) word.CompletionContext.CarletPopupItems.Add(port.GetLabel());
                 return;
             }
 

@@ -115,50 +115,35 @@ namespace pluginVerilog.Verilog
                             // wrapper's Parent (the @scope's owning
                             // namespace's BuildingBlock.File.ProjectProperty)
                             // or from the Project field on this wrapper.
-                            CodeEditor2.Data.ProjectProperty? projectProperty = null;
+                            // Settings are reached through the contract:
+                            // IVerilogProject.Settings means "the first settings
+                            // object this project has", which is exactly what the
+                            // editor's ProjectProperties dictionary walk did. The
+                            // per-ProjectProperty routing used by
+                            // IVerilogRelatedFile already gives the right one when
+                            // available above, so this is only the fallback.
+                            pluginVerilog.ProjectProperty? projectProperty = null;
                             if (Parent is BuildingBlock parentBlock
                                 && parentBlock.File is Data.IVerilogRelatedFile parentFile
                                 && parentFile.ProjectProperty != null)
                             {
                                 projectProperty = parentFile.ProjectProperty;
                             }
-                            else if (Project is CodeEditor2.Data.Project pj
-                                && pj.ProjectProperties != null
-                                && pj.ProjectProperties.Count > 0)
+                            else
                             {
-                                // The Project carries a dictionary of
-                                // ProjectProperty objects keyed by ID. The
-                                // first available property is sufficient for a
-                                // building block lookup; the per-ProjectProperty
-                                // routing used by IVerilogRelatedFile already
-                                // gives the right one when available above.
-                                foreach (var pp in pj.ProjectProperties.Values)
-                                {
-                                    if (pp != null)
-                                    {
-                                        projectProperty = pp;
-                                        break;
-                                    }
-                                }
+                                // Null when this host has no Verilog settings (the
+                                // settings object is another plugin's), in which
+                                // case the target simply cannot be late-bound.
+                                projectProperty =
+                                    Project.Settings as pluginVerilog.ProjectProperty;
                             }
                             if (projectProperty != null)
                             {
-                                // The base ProjectProperty class does not
-                                // expose GetBuildingBlock; the Verilog
-                                // plugin's ProjectProperty does. Cast to the
-                                // plugin type to access the lookup. If the
-                                // ProjectProperty instance is not the Verilog
-                                // one, the cast will fail and we'll leave
-                                // resolved = null, which simply means we
-                                // can't late-bind the target.
-                                if (projectProperty is pluginVerilog.ProjectProperty verilogPP)
+                                resolved = projectProperty.DefinitionNameSpace.Get(
+                                    SourceCommentScopeReference.BuildingBlockName);
+                                if (resolved != null)
                                 {
-                                    resolved = verilogPP.DefinitionNameSpace.Get(
-                                        SourceCommentScopeReference.BuildingBlockName);
-                                    if (resolved != null)
-                                    {
-                                        SourceCommentScopeReference.ResolvedBuildingBlock = resolved;
-                                    }
+                                    SourceCommentScopeReference.ResolvedBuildingBlock = resolved;
                                 }
                             }
                         }
