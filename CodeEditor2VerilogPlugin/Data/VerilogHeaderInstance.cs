@@ -60,7 +60,9 @@ namespace pluginVerilog.Data
             CodeEditor2.Data.Project project,
             string id)
         {
-            ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
+            // NOTE: a `projectProperty` lookup used to sit here; it was never
+            // read (the instance takes its settings from the file it wraps), so
+            // it is gone rather than carried along.
             CodeEditor2.Data.Item? fileItem = project.GetItem(relativePath);
             CodeEditor2.Data.TextFile? vhFile = fileItem as CodeEditor2.Data.TextFile;
 

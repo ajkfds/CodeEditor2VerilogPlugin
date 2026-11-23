@@ -2129,11 +2129,13 @@ namespace pluginVerilog.Verilog
                 vhInstance = wordPointer.ParsedDocument.IncludeFiles[vhInstance.ID];
             }
 
-            CodeEditor2.Data.Item? parent = wordPointer.ParsedDocument.File as CodeEditor2.Data.Item;
-            if (parent == null) throw new Exception();
-            vhInstance.Parent = parent;
-
-            string key = Verilog.ParsedDocument.KeyGenerator(vhInstance.Parent.ID, vhInstance, null, null);
+            // The item-tree parent is NOT set here: that is the editor's
+            // bookkeeping (VerilogCommon.Updater assigns it when it builds the
+            // NavigatePanel nodes). The parser only reached for it to read its
+            // ID, which is the root file's ID - available from the contract, so
+            // this path no longer needs the editor's Data.Item at all.
+            string key = Verilog.ParsedDocument.KeyGenerator(
+                wordPointer.ParsedDocument.File.ID, vhInstance, null, null);
             newParsedDocument = new Verilog.ParsedDocument(vhInstance, key, indexReference, RootParsedDocument.ParseMode);
             CodeDocument? originalDocument = vhInstance.CodeDocument as CodeDocument;
             if (originalDocument == null) throw new Exception();
