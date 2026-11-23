@@ -33,7 +33,7 @@ namespace pluginVerilog.Verilog
     /// </para>
     /// </summary>
     public class ParsedDocument : SystemVerilogCore.Parsing.IParsedDocument,
-        CodeEditor2.CodeEditor.IParsedDocumentMessagesProvider
+        SystemVerilogCore.Parsing.IParsedDocumentMessagesProvider
     {
         /// <summary>
         /// The parser's diagnostics, exposed to the editor's Messages pane.
@@ -45,7 +45,7 @@ namespace pluginVerilog.Verilog
         /// inheritance is what tied the parser to the editor assembly).
         /// </para>
         /// </summary>
-        IReadOnlyList<object> CodeEditor2.CodeEditor.IParsedDocumentMessagesProvider.Messages
+        IReadOnlyList<object> SystemVerilogCore.Parsing.IParsedDocumentMessagesProvider.Messages
         {
             get
             {
