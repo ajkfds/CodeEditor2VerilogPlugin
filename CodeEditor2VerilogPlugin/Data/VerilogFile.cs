@@ -665,7 +665,7 @@ namespace pluginVerilog.Data
             }
             return toolItems;
         }
-        public override CodeEditor2.CodeEditor.CodeComplete.CompletionContext? GetAutoCompleteItems(int index)
+        public override SystemVerilogCore.Documents.VerilogCompletionContext? GetAutoCompleteItems(int index)
         {
             if (VerilogParsedDocument == null) return null;
             return VerilogCommon.AutoComplete.GetAutoCompleteItems(this, VerilogParsedDocument, index);

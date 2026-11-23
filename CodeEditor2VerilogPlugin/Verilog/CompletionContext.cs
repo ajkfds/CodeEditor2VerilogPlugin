@@ -1,6 +1,4 @@
 using Avalonia.Input;
-using CodeEditor2.CodeEditor.CodeComplete;
-using CodeEditor2.CodeEditor.PopupHint;
 using DynamicData.Aggregation;
 using pluginVerilog.Parser;
 using pluginVerilog.Verilog;
@@ -16,7 +14,19 @@ using System.Threading;
 
 namespace pluginVerilog.Verilog
 {
-    public class CompletionContext : CodeEditor2.CodeEditor.CodeComplete.CompletionContext
+    /// <summary>
+    /// The SystemVerilog partial-parse completion context.
+    ///
+    /// <para>
+    /// Derives from the UI-free contract
+    /// (<see cref="SystemVerilogCore.Documents.VerilogCompletionContext"/>), not
+    /// from the editor's completion type: the parser only fills plain values and
+    /// contract lists, so it no longer references the editor assembly here. The
+    /// editor's <c>CodeComplete.CompletionContext</c> derives from the same
+    /// contract, which is what lets the editor consume this object directly.
+    /// </para>
+    /// </summary>
+    public class CompletionContext : SystemVerilogCore.Documents.VerilogCompletionContext
     {
         public CompletionContext(Data.IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, int index)
         {
