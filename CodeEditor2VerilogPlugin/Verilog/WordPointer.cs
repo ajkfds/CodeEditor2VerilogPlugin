@@ -18,6 +18,25 @@ namespace pluginVerilog.Verilog
         }
 
         /// <summary>
+        /// Tokenizer over a throw-away buffer (macro expansion, hint text), taking
+        /// the document as the UI-free contract.
+        ///
+        /// <para>
+        /// The parser builds such buffers itself and only needs the contract
+        /// surface, so this overload lets it tokenize without naming the plugin's
+        /// concrete <c>CodeDocument</c>. There is no concrete document to publish
+        /// back, hence <see cref="ConcreteDocument"/> stays null.
+        /// </para>
+        /// </summary>
+        public WordPointer(
+            SystemVerilogCore.Documents.IVerilogTextDocument document,
+            Verilog.ParsedDocument parsedDocument,
+            int indexReferenceOffset)
+            : this(document, null, null, parsedDocument, indexReferenceOffset, false)
+        {
+        }
+
+        /// <summary>
         /// Constructor over the UI-free document contract, so the tokenizer
         /// does not have to know the editor's concrete <c>CodeDocument</c>.
         /// </summary>

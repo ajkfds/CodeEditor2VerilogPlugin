@@ -186,7 +186,7 @@ namespace pluginVerilog.Verilog.Expressions
 
         public static Expression? Create(string text, ParsedDocument parsedDocument, bool systemVerilog, NameSpace nameSpace)
         {
-            WordScanner wordScanner = new WordScanner(parsedDocument.CodeDocument, parsedDocument, systemVerilog);
+            WordScanner wordScanner = new WordScanner(parsedDocument.VerilogDocument, parsedDocument, systemVerilog, false, false);
             return ParseCreate(wordScanner, nameSpace);
         }
 

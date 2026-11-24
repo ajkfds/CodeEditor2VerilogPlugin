@@ -25,7 +25,7 @@ namespace pluginVerilog.Verilog.Snippets
         /// </summary>
         public static string GetIndent(Verilog.ParsedDocument parsedDocument, int index)
         {
-            pluginVerilog.CodeEditor.CodeDocument? doc = parsedDocument.CodeDocument;
+            SystemVerilogCore.Documents.IVerilogTextDocument? doc = parsedDocument.VerilogDocument;
             if (doc == null) return "";
             if (index < 0) index = 0;
             if (index > doc.Length) index = doc.Length;

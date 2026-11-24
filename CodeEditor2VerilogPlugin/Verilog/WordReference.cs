@@ -93,8 +93,12 @@ namespace pluginVerilog.Verilog
                 return indexReference.ParsedDocument as ParsedDocument;
             }
         }
+        /// <summary>
+        /// The document this reference points into, as the UI-free contract, so
+        /// colouring a reference does not need the editor's concrete document.
+        /// </summary>
         [JsonIgnore]
-        public pluginVerilog.CodeEditor.CodeDocument? Document
+        public SystemVerilogCore.Documents.IVerilogTextDocument? Document
         {
             get
             {
@@ -103,8 +107,8 @@ namespace pluginVerilog.Verilog
         }
 
         /// <summary>
-        /// The document this reference points into, as the UI-free contract, so
-        /// colouring a reference does not need the editor's concrete document.
+        /// Alias of <see cref="Document"/> kept for the call sites that spelled
+        /// out that they wanted the contract type.
         /// </summary>
         [JsonIgnore]
         public SystemVerilogCore.Documents.IVerilogTextDocument? ContractDocument

@@ -69,7 +69,7 @@ namespace pluginVerilog.Verilog
         }
 
 
-        public static IndexReference Create(ParsedDocument parsedDocument, CodeEditor.CodeDocument document, int index)
+        public static IndexReference Create(ParsedDocument parsedDocument, SystemVerilogCore.Documents.IVerilogTextDocument document, int index)
         {
             IndexReference ret = new IndexReference();
 
@@ -126,13 +126,13 @@ namespace pluginVerilog.Verilog
         }
 
         [JsonIgnore]
-        public pluginVerilog.CodeEditor.CodeDocument? Document
+        public SystemVerilogCore.Documents.IVerilogTextDocument? Document
         {
             get
             {
                 ParsedDocument? parsedDocument = ParsedDocument;
                 if (parsedDocument == null) return null;
-                return parsedDocument.CodeDocument;
+                return parsedDocument.VerilogDocument;
             }
         }
 

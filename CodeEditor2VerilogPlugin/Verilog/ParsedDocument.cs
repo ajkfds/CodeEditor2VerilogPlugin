@@ -300,7 +300,7 @@ namespace pluginVerilog.Verilog
             }
         }
 
-        CodeDocument codeDocument;
+        private CodeDocument codeDocument;
         [JsonIgnore]
         public CodeDocument CodeDocument
         {
@@ -313,6 +313,20 @@ namespace pluginVerilog.Verilog
                 codeDocument = value;
             }
         }
+
+        /// <summary>
+        /// The buffer being coloured, as the UI-free document contract.
+        ///
+        /// <para>
+        /// The parser writes colours, marks and fold regions into the buffer
+        /// through this view only. <see cref="CodeDocument"/> stays because the
+        /// data layer still copies the colour table out of it
+        /// (<c>CopyColorMarkFrom</c>) and the editor owns the palette, but the
+        /// parser no longer names that type.
+        /// </para>
+        /// </summary>
+        [JsonIgnore]
+        public SystemVerilogCore.Documents.IVerilogTextDocument VerilogDocument => codeDocument;
 
         /// <summary>
         /// The plugin property of the project this file belongs to, captured

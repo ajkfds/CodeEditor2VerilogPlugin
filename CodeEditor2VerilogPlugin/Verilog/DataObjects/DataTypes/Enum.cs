@@ -175,7 +175,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             WordReference? reference = expression.Reference;
             if (reference != null)
             {
-                CodeEditor.CodeDocument? document = reference.Document;
+                SystemVerilogCore.Documents.IVerilogTextDocument? document = reference.Document;
                 if (document != null && reference.Index >= 0 && reference.Length > 0)
                 {
                     string text = document.CreateString(reference.Index, reference.Length);

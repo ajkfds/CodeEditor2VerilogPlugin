@@ -41,6 +41,55 @@ namespace pluginVerilog.Verilog
         }
 
         /// <summary>
+        /// Scanner over a throw-away buffer (macro expansion, hint text), taking
+        /// the document as the UI-free contract.
+        ///
+        /// <para>
+        /// The parser builds such buffers itself and only needs the contract
+        /// surface, so this overload lets it tokenize without naming the
+        /// plugin's concrete <c>CodeDocument</c>. There is no concrete document
+        /// to publish back, hence <c>concreteDocument</c> is null.
+        /// </para>
+        /// </summary>
+        public WordScanner(
+            SystemVerilogCore.Documents.IVerilogTextDocument document,
+            Verilog.ParsedDocument parsedDocument,
+            bool systemVerilog,
+            bool supressCompilerDirectiveError,
+            bool prototype,
+            int indexReferenceOffset = 0
+            )
+            : this(
+                  document,
+                  null,
+                  null,
+                  parsedDocument, systemVerilog, supressCompilerDirectiveError,
+                   prototype, indexReferenceOffset, false)
+        {
+        }
+
+        /// <summary>
+        /// Contract-document overload that also attaches a completion context
+        /// (the autocomplete partial parse).
+        /// </summary>
+        public WordScanner(
+            SystemVerilogCore.Documents.IVerilogTextDocument document,
+            Verilog.ParsedDocument parsedDocument,
+            bool systemVerilog,
+            int indexReferenceOffset,
+            CompletionContext? completionContext
+            )
+            : this(
+                  document,
+                  null,
+                  null,
+                  parsedDocument, systemVerilog, false,
+                   false, indexReferenceOffset, false)
+        {
+            CompletionContext = completionContext;
+        }
+
+        /// <summary>
         /// Constructor used by <see cref="Clone"/>: <paramref name="suppressInitialDirective"/>
         /// skips the initial recheckWord() so that compiler directives at index 0
         /// are not processed a second time. The clone replaces wordPointer right
@@ -1431,7 +1480,11 @@ namespace pluginVerilog.Verilog
             // expand the given text as a new macro-expansion document and push the
             // original scan position onto the hierarchy stock (same as parseMacro)
             stock.Add(wordPointer);
-            CodeEditor.CodeDocument codeDocument = new CodeEditor.CodeDocument(macroText);
+            // Macro-expansion buffer: a contract-only document is enough, so this
+            // no longer builds the plugin's CodeDocument (which pulls in the
+            // editor's document type).
+            SystemVerilogCore.Documents.IVerilogTextDocument codeDocument =
+                new SystemVerilogCore.Documents.PlainTextDocument(macroText);
             string key = "";
             ParsedDocument newParsedDocument = new ParsedDocument(
                 (IVerilogRelatedFile)wordPointer.ParsedDocument.TextFile,
@@ -1800,7 +1853,11 @@ namespace pluginVerilog.Verilog
             }
 
             stock.Add(wordPointer);
-            CodeEditor.CodeDocument codeDocument = new CodeEditor.CodeDocument(macroText);
+            // Macro body buffer: a contract-only document is enough, so this no
+            // longer builds the plugin's CodeDocument (which pulls in the
+            // editor's document type).
+            SystemVerilogCore.Documents.IVerilogTextDocument codeDocument =
+                new SystemVerilogCore.Documents.PlainTextDocument(macroText);
             string key = "";// Verilog.ParsedDocument.KeyGenerator(wordPointer.VerilogFile,) .KeyGenerator(wordPointer.ParsedDocument, wordPointer.Index);
             ParsedDocument newParsedDocument = new ParsedDocument(
                 (IVerilogRelatedFile)wordPointer.ParsedDocument.TextFile,

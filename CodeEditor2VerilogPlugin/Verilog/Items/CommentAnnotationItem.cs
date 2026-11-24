@@ -235,8 +235,8 @@ namespace pluginVerilog.Verilog.Items
                             try
                             {
                                 // Create a temporary document to parse the expression
-                                var tempDoc = new pluginVerilog.CodeEditor.CodeDocument(paramValueText);
-                                var tempScanner = new WordScanner(tempDoc, word.RootParsedDocument, word.SystemVerilog);
+                                var tempDoc = new SystemVerilogCore.Documents.PlainTextDocument(paramValueText);
+                                var tempScanner = new WordScanner(tempDoc, word.RootParsedDocument, word.SystemVerilog, false, false);
                                 var paramExpr = Expressions.Expression.ParseCreate(tempScanner, nameSpace);
                                 if (paramExpr != null && paramExpr.Constant)
                                 {

@@ -106,8 +106,12 @@ namespace pluginVerilog.Verilog
             if (CandidateStartIndex - parseBlockIndex < 1) return;
 
             string blockText = item.CodeDocument.CreateString(parseBlockIndex, CandidateStartIndex - parseBlockIndex);
-            pluginVerilog.CodeEditor.CodeDocument document = new pluginVerilog.CodeEditor.CodeDocument(blockText);
-            
+            // Throw-away buffer for the partial parse: a contract-only document
+            // is enough, so this no longer builds the plugin's CodeDocument
+            // (which would pull in the editor's document type).
+            SystemVerilogCore.Documents.IVerilogTextDocument document =
+                new SystemVerilogCore.Documents.PlainTextDocument(blockText);
+
             WordScanner word = new WordScanner(document, parsedDocument, parsedDocument.SystemVerilog,CandidateStartIndex,this);
             if (documentRegion is Verilog.Items.ModuleInstantiation)
             {
