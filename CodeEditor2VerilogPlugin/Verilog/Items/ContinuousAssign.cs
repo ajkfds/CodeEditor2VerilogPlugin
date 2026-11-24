@@ -67,10 +67,46 @@ namespace pluginVerilog.Verilog.Items
 
             if (isContinuousAssignmentOverlapped(netLValue, dataObject))
             {
-                netLValue.Reference.AddError(
-                    multipleDriveMessage ?? ("'" + dataObject.Name + "' has multiple continuous assignments"));
+                if (!IsWiredLogicNet(dataObject))
+                {
+                    netLValue.Reference.AddError(
+                        multipleDriveMessage ?? ("'" + dataObject.Name + "' has multiple continuous assignments"));
+                }
             }
             dataObject.ContinuousAssigned = true;
+        }
+
+        /// <summary>
+        /// True for the wired-logic net types: <c>wor</c> / <c>wand</c> /
+        /// <c>trior</c> / <c>triand</c>.
+        ///
+        /// <para>
+        /// These nets resolve multiple drivers by their wired function (OR /
+        /// AND), so driving one from several continuous assignments is exactly
+        /// what the net type is for (IEEE 1364-2005 4.4.2, IEEE 1800-2017
+        /// 6.6.7). Reporting a multiple drive there is wrong; only the
+        /// single-driver net types (<c>wire</c>, <c>tri</c>, ...) are restricted
+        /// to one continuous assignment (6.5).
+        /// </para>
+        ///
+        /// <para>
+        /// <c>supply0</c> / <c>supply1</c> are excluded: they are constant
+        /// drivers, not wired logic.
+        /// </para>
+        /// </summary>
+        private static bool IsWiredLogicNet(DataObjects.DataObject dataObject)
+        {
+            if (dataObject is not DataObjects.Nets.Net net) return false;
+            switch (net.NetType)
+            {
+                case DataObjects.Nets.Net.NetTypeEnum.Wor:
+                case DataObjects.Nets.Net.NetTypeEnum.Wand:
+                case DataObjects.Nets.Net.NetTypeEnum.Trior:
+                case DataObjects.Nets.Net.NetTypeEnum.Triand:
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         /// <summary>
