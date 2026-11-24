@@ -100,7 +100,7 @@ namespace pluginVerilog.Verilog
         internal WordScanner(
             SystemVerilogCore.Documents.IVerilogTextDocument document,
             Data.IVerilogRelatedFile? verilogFile,
-            CodeEditor.CodeDocument? concreteDocument,
+            SystemVerilogCore.Documents.IVerilogTextDocument? concreteDocument,
             Verilog.ParsedDocument parsedDocument,
             bool systemVerilog, bool supressCompilerDirectiveError,
             bool prototype, int indexReferenceOffset,
@@ -184,10 +184,11 @@ namespace pluginVerilog.Verilog
         }
 
         /// <summary>
-        /// The document as the plugin's own <c>CodeDocument</c> when it is one,
-        /// otherwise null (see <see cref="WordPointer.ConcreteDocument"/>).
+        /// The buffer this scanner was given, as the UI-free contract, or null
+        /// for a document the parser created itself (macro expansion, hint
+        /// text). Used to publish the buffer back onto the parse result.
         /// </summary>
-        public CodeEditor.CodeDocument? ConcreteDocument
+        public SystemVerilogCore.Documents.IVerilogTextDocument? ConcreteDocument
         {
             get
             {
@@ -759,7 +760,7 @@ namespace pluginVerilog.Verilog
             // created by the parser itself are that type as well.
             if (wordPointer.ConcreteDocument != null)
             {
-                wordPointer.ParsedDocument.CodeDocument = wordPointer.ConcreteDocument;
+                wordPointer.ParsedDocument.VerilogDocument = wordPointer.ConcreteDocument;
             }
 
             if (wordPointer.ParsedDocument == stock.Last().ParsedDocument)

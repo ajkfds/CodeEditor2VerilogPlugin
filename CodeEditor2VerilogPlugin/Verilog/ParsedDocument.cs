@@ -109,7 +109,7 @@ namespace pluginVerilog.Verilog
 
             CodeDocument? document = file.CodeDocument as CodeDocument;
             if (document == null) throw new Exception();
-            codeDocument = document;
+            verilogDocument = document;
             Version = (ulong)document.Version;
 
             if (file is SystemVerilogFile || file is SystemVerilogHeaderFile) SystemVerilog = true;
@@ -140,19 +140,10 @@ namespace pluginVerilog.Verilog
         //    }
         //}
 
-        private static CodeDocument? getCodeDocument(Data.IVerilogRelatedFile file)
-        {
-            if (file == null) return null; // foe illeagal jon constructor 
-            CodeDocument? codeDocument = file.CodeDocument as CodeDocument;
-
-            codeDocument = file.CodeDocument as pluginVerilog.CodeEditor.CodeDocument;
-            if (codeDocument == null)
-            {
-                System.Diagnostics.Debugger.Break();
-            }
-            return codeDocument;
-        }
-
+        // NOTE: a private getCodeDocument(file) helper used to live here. It had
+        // no caller and named the plugin's concrete CodeDocument only to cast
+        // the file's document into it, so it was dead code carrying a host type.
+        // Removed rather than re-typed.
 
         public static string KeyGenerator(
             Data.IVerilogRelatedFile verilogRelatedFile,
@@ -300,33 +291,55 @@ namespace pluginVerilog.Verilog
             }
         }
 
-        private CodeDocument codeDocument;
-        [JsonIgnore]
-        public CodeDocument CodeDocument
-        {
-            get
-            {
-                return codeDocument;
-            }
-            set
-            {
-                codeDocument = value;
-            }
-        }
+        private SystemVerilogCore.Documents.IVerilogTextDocument verilogDocument = null!;
 
         /// <summary>
         /// The buffer being coloured, as the UI-free document contract.
         ///
         /// <para>
         /// The parser writes colours, marks and fold regions into the buffer
-        /// through this view only. <see cref="CodeDocument"/> stays because the
+        /// through this view only, and it is what the tokenizer restores after a
+        /// macro-expansion dive. <see cref="CodeDocument"/> stays because the
         /// data layer still copies the colour table out of it
         /// (<c>CopyColorMarkFrom</c>) and the editor owns the palette, but the
         /// parser no longer names that type.
         /// </para>
         /// </summary>
         [JsonIgnore]
-        public SystemVerilogCore.Documents.IVerilogTextDocument VerilogDocument => codeDocument;
+        public SystemVerilogCore.Documents.IVerilogTextDocument VerilogDocument
+        {
+            get
+            {
+                return verilogDocument;
+            }
+            set
+            {
+                verilogDocument = value;
+            }
+        }
+
+        /// <summary>
+        /// The same buffer as the plugin's concrete document, or null when the
+        /// parser supplied a contract-only buffer (macro expansion, hint text).
+        ///
+        /// <para>
+        /// Only the data layer needs the concrete type: it copies the colour
+        /// table out of the parse result. Everything the parser does goes
+        /// through <see cref="VerilogDocument"/>.
+        /// </para>
+        /// </summary>
+        [JsonIgnore]
+        public CodeDocument? CodeDocument
+        {
+            get
+            {
+                return verilogDocument as CodeDocument;
+            }
+            set
+            {
+                verilogDocument = value!;
+            }
+        }
 
         /// <summary>
         /// The plugin property of the project this file belongs to, captured

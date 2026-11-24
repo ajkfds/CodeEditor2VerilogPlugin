@@ -57,7 +57,7 @@ namespace pluginVerilog.Verilog
         public WordPointer(
             SystemVerilogCore.Documents.IVerilogTextDocument document,
             Data.IVerilogRelatedFile? verilogFile,
-            CodeEditor.CodeDocument? concreteDocument,
+            SystemVerilogCore.Documents.IVerilogTextDocument? concreteDocument,
             Verilog.ParsedDocument parsedDocument,
             int indexReferenceOffset)
             : this(document, verilogFile, concreteDocument, parsedDocument, indexReferenceOffset, false)
@@ -81,7 +81,7 @@ namespace pluginVerilog.Verilog
         internal WordPointer(
             SystemVerilogCore.Documents.IVerilogTextDocument document,
             Data.IVerilogRelatedFile? verilogFile,
-            CodeEditor.CodeDocument? concreteDocument,
+            SystemVerilogCore.Documents.IVerilogTextDocument? concreteDocument,
             Verilog.ParsedDocument parsedDocument,
             int indexReferenceOffset, bool suppressInitialFetch)
         {
@@ -126,7 +126,7 @@ namespace pluginVerilog.Verilog
         /// (macro expansion, include snapshots) are that type too.
         /// </para>
         /// </summary>
-        public CodeEditor.CodeDocument? ConcreteDocument { get; protected set; }
+        public SystemVerilogCore.Documents.IVerilogTextDocument? ConcreteDocument { get; protected set; }
 
         public Verilog.ParsedDocument ParsedDocument { get; protected set; }
         public bool InhibitColor = false;
