@@ -30,8 +30,9 @@ namespace pluginVerilog.Verilog
         public CompletionContext(Data.IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, int index)
         {
 
-            CodeEditor.CodeDocument? codeDocument = item.CodeDocument as CodeEditor.CodeDocument;
-            if (codeDocument == null) return;
+            // Only the contract surface is needed here (length / substring /
+            // line lookup), so the editor's concrete document type is not named.
+            if (item.CodeDocument is not SystemVerilogCore.Documents.IVerilogTextDocument) return;
             CandidateWord = "";
 
             this.item = item;
@@ -50,13 +51,15 @@ namespace pluginVerilog.Verilog
                 return;
             }
 
+            SystemVerilogCore.Documents.IVerilogTextDocument codeDocument =
+                (SystemVerilogCore.Documents.IVerilogTextDocument)item.CodeDocument!;
             int line = codeDocument.GetLineAt(index);
             int lineStartIndex = codeDocument.GetLineStartIndex(line);
 
             onLineStart = false;
             while (true)
             {
-                string lineString = codeDocument.CreateLineString(line);
+                string lineString = codeDocument.CreateString(lineStartIndex, codeDocument.GetLineLength(line));
                 int inlinePosition = CandidateStartIndex - lineStartIndex;
                 if (inlinePosition < 0) break;
                 if (inlinePosition > lineString.Length) break;
