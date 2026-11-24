@@ -145,9 +145,17 @@ namespace pluginVerilog.Verilog.Statements
                 Items.ContinuousAssign.checkWholeUnpackedArrayAssignment(lExpression, expression);
             }
 
-            if (!word.Prototype && clockDomains != null && lExpression != null)
+            // Record the drive. This must NOT depend on clockDomains: only an
+            // event control creates that list, so always_comb / always_latch /
+            // initial (no sensitivity list) never filled the assigned map and
+            // every variable they drove was reported as "undriven".
+            if (!word.Prototype && word.CompletionContext == null && lExpression != null)
             {
                 lExpression.AssertAssigned();
+            }
+
+            if (!word.Prototype && clockDomains != null && lExpression != null)
+            {
                 BlockingAssignment.addEnclosingClockDomains(word, nameSpace, lExpression, clockDomains);
             }
             // Compare the sync context of the right-hand side with the left-hand

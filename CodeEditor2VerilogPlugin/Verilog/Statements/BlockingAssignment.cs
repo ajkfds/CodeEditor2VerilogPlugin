@@ -347,6 +347,12 @@ namespace pluginVerilog.Verilog.Statements
         /// </summary>
         private static void markProceduralAssignment(WordScanner word, Expressions.Expression lExpression)
         {
+            // Record the drive itself. checkProceduralAssignmentConflict only
+            // compares against continuous / other procedural drives; it never
+            // filled the assigned map, so a variable assigned only from a
+            // blocking assignment (always_comb a = b; / initial c = b;) stayed
+            // "undriven".
+            lExpression.AssertAssigned();
             Items.ContinuousAssign.checkProceduralAssignmentConflict(word, lExpression);
         }
 
