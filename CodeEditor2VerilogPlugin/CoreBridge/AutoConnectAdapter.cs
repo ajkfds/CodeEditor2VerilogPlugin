@@ -98,6 +98,12 @@ namespace pluginVerilog.CoreBridge
                     // pick candidates[0], which is the same signal).
                     IsSettled = current != null
                         && (candidates.Count == 0 || candidates[0] == current),
+                    // The candidates are whole signal names, so an existing
+                    // connection that is a select / expression (AAA[2:1],
+                    // {a, b}, ~x, ...) must not be replaced by candidates[0]:
+                    // that would drop the select. The host keeps the written
+                    // text for these rows.
+                    KeepsExistingConnection = IsExpressionConnection(current, candidates),
                 });
             }
 
@@ -179,6 +185,38 @@ namespace pluginVerilog.CoreBridge
 
             // de-duplicate while keeping the best-match order
             return candidates.Distinct(StringComparer.Ordinal).ToList();
+        }
+
+        /// <summary>
+        /// True when <paramref name="current"/> is an existing connection that
+        /// the candidate list cannot reproduce, so "accept" must keep it.
+        ///
+        /// <para>
+        /// Candidates are plain signal names taken from the enclosing module's
+        /// namespace. Anything else - <c>AAA[2:1]</c>, <c>{a, b}</c>,
+        /// <c>~x</c>, <c>obj.field</c>, a literal - is a deliberate connection
+        /// the user wrote; replacing it with the whole signal would silently
+        /// change the design. Such a row therefore keeps its text unless the
+        /// user picks another connection explicitly.
+        /// </para>
+        ///
+        /// <para>
+        /// A connection is "reproducible" only when it is exactly one of the
+        /// candidates, or when there are no candidates at all (nothing to
+        /// replace it with).
+        /// </para>
+        /// </summary>
+        private static bool IsExpressionConnection(string? current, List<string> candidates)
+        {
+            if (string.IsNullOrEmpty(current)) return false;
+            foreach (string candidate in candidates)
+            {
+                if (string.Equals(candidate, current, StringComparison.Ordinal)) return false;
+            }
+            // Either an expression (AAA[2:1], {a, b}, ~x, ...) or a plain name
+            // that simply has no matching signal in this module. Both must keep
+            // the written text: there is nothing that can reproduce it.
+            return true;
         }
 
         private static string DirectionName(Verilog.DataObjects.Port.DirectionEnum direction) => direction switch

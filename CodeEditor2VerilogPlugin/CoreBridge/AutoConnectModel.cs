@@ -56,6 +56,21 @@ namespace pluginVerilog.CoreBridge
         /// exists, i.e. the row needs no user decision.
         /// </summary>
         public bool IsSettled { get; init; }
+
+        /// <summary>
+        /// True when <see cref="CurrentConnection"/> is not a plain signal name
+        /// (a bit / part select such as <c>AAA[2:1]</c>, a concatenation,
+        /// <c>~x</c>, ...).
+        ///
+        /// <para>
+        /// The candidates are whole signal names, so replacing such a
+        /// connection with <c>Candidates[0]</c> would silently drop the select.
+        /// A host must keep the existing text for these rows unless the user
+        /// explicitly picks a different connection: "accept" on an untouched
+        /// row means "keep what is written".
+        /// </para>
+        /// </summary>
+        public bool KeepsExistingConnection { get; init; }
     }
 
     /// <summary>
