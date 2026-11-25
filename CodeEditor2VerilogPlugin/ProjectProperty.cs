@@ -29,6 +29,39 @@ namespace pluginVerilog
         // site can identify these settings without knowing the editor type.
         string SystemVerilogCore.Projects.IVerilogProjectSettings.ID => Plugin.StaticID;
 
+        // ---- IVerilogProjectSettings: what the parser reads ----------------
+        // Same values as the members below; the contract just types them so a
+        // parse site does not have to name this class.
+
+        SystemVerilogCore.Verilog.IVerilogNameSpace
+            SystemVerilogCore.Projects.IVerilogProjectSettings.DefinitionNameSpace =>
+            DefinitionNameSpace;
+
+        SystemVerilogCore.Verilog.IVerilogNameSpace
+            SystemVerilogCore.Projects.IVerilogProjectSettings.PackageNameSpace =>
+            PackageNameSpace;
+
+        SystemVerilogCore.Verilog.IVerilogNameSpace
+            SystemVerilogCore.Projects.IVerilogProjectSettings.UnitNameSpace =>
+            UnitNameSpace;
+
+        IReadOnlyDictionary<string, Macro>
+            SystemVerilogCore.Projects.IVerilogProjectSettings.Macros => Macros;
+
+        AnnotationCommands
+            SystemVerilogCore.Projects.IVerilogProjectSettings.AnnotationCommands =>
+            AnnotationCommands;
+
+        RuleSet SystemVerilogCore.Projects.IVerilogProjectSettings.RuleSet => RuleSet;
+
+        IReadOnlyDictionary<string, string>
+            SystemVerilogCore.Projects.IVerilogProjectSettings.ExtenralModuleLibraryPath =>
+            ExtenralModuleLibraryPath;
+
+        IReadOnlyDictionary<string, string>
+            SystemVerilogCore.Projects.IVerilogProjectSettings.ExtenralPrimitiveLibraryPath =>
+            ExtenralPrimitiveLibraryPath;
+
         //public ProjectProperty(CodeEditor2.Data.Project project)
         //{
         //    this.project = project;

@@ -28,9 +28,21 @@ namespace pluginVerilog.Verilog
     /// wrapper, for example) is not registered.
     /// </para>
     /// </summary>
-    public class RegisterNameSpace<T> where T : class
+    public class RegisterNameSpace<T> : SystemVerilogCore.Verilog.IVerilogNameSpace where T : class
     {
         private readonly SystemVerilogCore.Verilog.RegisterNameSpace<T> inner = new();
+
+        // ---- IVerilogNameSpace (non-generic view) -------------------------
+        // The settings contract carries the name spaces without naming their
+        // element type, so this adapter exposes the same three operations.
+
+        object? SystemVerilogCore.Verilog.IVerilogNameSpace.GetElement(string name) => inner.Get(name);
+
+        SystemVerilogCore.Verilog.IVerilogNameSpaceFile?
+            SystemVerilogCore.Verilog.IVerilogNameSpace.GetDeclaringFile(string name) => inner.GetFile(name);
+
+        List<string> SystemVerilogCore.Verilog.IVerilogNameSpace.GetNameList(Func<object, bool> isMatched) =>
+            inner.GetNameList(element => isMatched(element));
 
         /// <summary>
         /// Records that <paramref name="buildingBlockName"/> is declared in
