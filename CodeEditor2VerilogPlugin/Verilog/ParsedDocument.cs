@@ -102,23 +102,36 @@ namespace pluginVerilog.Verilog
         [JsonIgnore]
         public SystemVerilogCore.Projects.IVerilogProject? Project => TextFile?.Project;
 
-        public ParsedDocument(Data.IVerilogRelatedFile file, string key, IndexReference? indexReference, SystemVerilogCore.Parsing.VerilogParseMode parseMode)
+        /// <summary>
+        /// Builds a parse result for a file.
+        ///
+        /// <para>
+        /// The constructor takes the UI-free source file contract, so nothing it
+        /// touches names the editor assembly. The file is still stored (weakly)
+        /// as the editor's <c>Data.IVerilogRelatedFile</c> because
+        /// <see cref="File"/> is handed back to editor-facing callers that need
+        /// more than the contract offers (the item tree, for instance); the cast
+        /// is safe because only that type can reach this constructor.
+        /// </para>
+        /// </summary>
+        public ParsedDocument(SystemVerilogCore.Documents.IVerilogSourceFile file, string key, IndexReference? indexReference, SystemVerilogCore.Parsing.VerilogParseMode parseMode)
         {
             Key = key;
             ParseMode = parseMode;
 
-            CodeDocument? document = file.CodeDocument as CodeDocument;
+            SystemVerilogCore.Documents.IVerilogTextDocument? document = file.VerilogTextDocument;
             if (document == null) throw new Exception();
             verilogDocument = document;
-            Version = (ulong)document.Version;
+            Version = file.VerilogTextDocumentVersion;
 
-            if (file is SystemVerilogFile || file is SystemVerilogHeaderFile) SystemVerilog = true;
+            SystemVerilog = file.IsSystemVerilog;
 
-            fileRef = new WeakReference<Data.IVerilogRelatedFile>(file);
+            Data.IVerilogRelatedFile editorFile = (Data.IVerilogRelatedFile)file;
+            fileRef = new WeakReference<Data.IVerilogRelatedFile>(editorFile);
             // Capture the project property now: parse-time lookups
             // (Macros / SystemFunctions / RuleSet / name spaces) all go through
             // it, and the weak file reference may be collected later.
-            ProjectProperty = file.ProjectProperty;
+            ProjectProperty = file.ProjectSettings as ProjectProperty;
             if (indexReference == null)
             {
                 IndexReference = IndexReference.Create(this, document, 0);

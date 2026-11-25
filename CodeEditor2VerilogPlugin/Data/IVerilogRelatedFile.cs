@@ -39,6 +39,33 @@ namespace pluginVerilog.Data
         // provide it. It is not re-declared: an interface cannot give it a body,
         // and re-declaring it would only restate the same signature.
 
+        // ---- SystemVerilogCore.Documents.IVerilogSourceFile ----------------
+        // The contract carries the same values under names that do not collide
+        // with ITextFile's (a second declaration of `CodeDocument` /
+        // `Project` / `ParsedDocument` would make every call site through this
+        // interface ambiguous). These forward to the members below.
+
+        SystemVerilogCore.Documents.IVerilogTextDocument?
+            SystemVerilogCore.Documents.IVerilogSourceFile.VerilogTextDocument => CodeDocument;
+
+        /// <summary>
+        /// Version of the buffer the parser will read. Same value as
+        /// <c>CodeDocument.Version</c>; kept as a plain number so the contract
+        /// does not depend on the editor's document type.
+        /// </summary>
+        ulong SystemVerilogCore.Documents.IVerilogSourceFile.VerilogTextDocumentVersion =>
+            (ulong)(CodeDocument?.Version ?? 0);
+
+        SystemVerilogCore.Projects.IVerilogProjectSettings?
+            SystemVerilogCore.Documents.IVerilogSourceFile.ProjectSettings => ProjectProperty;
+
+        SystemVerilogCore.Projects.IVerilogProject?
+            SystemVerilogCore.Documents.IVerilogSourceFile.VerilogProject => Project;
+
+        string SystemVerilogCore.Documents.IVerilogSourceFile.FileRelativePath => RelativePath;
+
+        bool SystemVerilogCore.Documents.IVerilogSourceFile.IsSystemVerilog => SystemVerilog;
+
         ProjectProperty ProjectProperty { get; }
         bool SystemVerilog { get; }
 
