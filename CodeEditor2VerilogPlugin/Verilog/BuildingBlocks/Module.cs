@@ -70,7 +70,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         public Dictionary<string, Expressions.Expression>? ParameterOverrides { set; get; }
 
 
-        public static async System.Threading.Tasks.Task<Module> ParseCreateAsync(WordScanner word, Attribute attribute, BuildingBlock parent, Data.IVerilogRelatedFile file, bool protoType)
+        public static async System.Threading.Tasks.Task<Module> ParseCreateAsync(WordScanner word, Attribute attribute, BuildingBlock parent, SystemVerilogCore.Documents.IVerilogSourceFile file, bool protoType)
         {
             return await ParseCreateAsync(word, null, attribute, parent, file, protoType);
         }
@@ -80,7 +80,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             Dictionary<string, Expressions.Expression>? parameterOverrides,
             Attribute? attribute,
             BuildingBlock parent,
-            Data.IVerilogRelatedFile file,
+            SystemVerilogCore.Documents.IVerilogSourceFile file,
             bool protoType
             )
         {

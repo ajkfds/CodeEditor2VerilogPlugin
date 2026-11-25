@@ -114,7 +114,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             public string EdgeIndicators { get; set; } = "";
         }
 
-        public static async Task<Primitive?> ParseCreate(WordScanner word, Attribute? attribute, BuildingBlock parent, Data.IVerilogRelatedFile file, bool protoType)
+        public static async Task<Primitive?> ParseCreate(WordScanner word, Attribute? attribute, BuildingBlock parent, SystemVerilogCore.Documents.IVerilogSourceFile file, bool protoType)
         {
             return await ParseCreate(word, null, attribute, parent, file, protoType);
         }
@@ -124,7 +124,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             Dictionary<string, Expressions.Expression>? parameterOverrides,
             Attribute attribute,
             BuildingBlock parent,
-            Data.IVerilogRelatedFile file,
+            SystemVerilogCore.Documents.IVerilogSourceFile file,
             bool protoType
             )
         {

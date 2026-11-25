@@ -166,7 +166,19 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
         }
 
-        public static async System.Threading.Tasks.Task<Root> ParseCreateAsync(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
+        /// <summary>
+        /// Parses a source text into the root of its building-block tree.
+        ///
+        /// <para>
+        /// <paramref name="file"/> is the UI-free source-file contract rather than
+        /// the editor's concrete <c>Data.VerilogFile</c>. It is only stored on the
+        /// root (and handed to each building block below), so the contract is all
+        /// this needs; that lets the parser build the tree without naming the
+        /// editor assembly. <c>Data.IVerilogRelatedFile</c> implements the
+        /// contract, so the editor call sites pass their file unchanged.
+        /// </para>
+        /// </summary>
+        public static async System.Threading.Tasks.Task<Root> ParseCreateAsync(WordScanner word, ParsedDocument parsedDocument, IVerilogSourceFile file)
         {
             Root root = new Root()
             {
@@ -266,7 +278,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         }
 
 
-        private static async System.Threading.Tasks.Task parseModuleAsync(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
+        private static async System.Threading.Tasks.Task parseModuleAsync(WordScanner word, ParsedDocument parsedDocument, IVerilogSourceFile file)
         {
             if (word.Text != "module" && word.Text != "macromodule") throw new Exception();
 
@@ -322,7 +334,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             // Note: ReparseRequested for ParseMode is now set only once at the end of ParseCreate based on ParseMode
         }
 
-        private static async System.Threading.Tasks.Task parsePackageAsync(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
+        private static async System.Threading.Tasks.Task parsePackageAsync(WordScanner word, ParsedDocument parsedDocument, IVerilogSourceFile file)
         {
             if (word.Text != "package") System.Diagnostics.Debugger.Break();
 
@@ -351,7 +363,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             // Note: ReparseRequested is now set only once at the end of ParseCreate based on ParseMode
         }
 
-        private static async System.Threading.Tasks.Task parseProgramAsync(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
+        private static async System.Threading.Tasks.Task parseProgramAsync(WordScanner word, ParsedDocument parsedDocument, IVerilogSourceFile file)
         {
             if (word.Text != "program") System.Diagnostics.Debugger.Break();
 
@@ -431,7 +443,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
         }
 
-        private static async System.Threading.Tasks.Task parseInterfaceAsync(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
+        private static async System.Threading.Tasks.Task parseInterfaceAsync(WordScanner word, ParsedDocument parsedDocument, IVerilogSourceFile file)
         {
             if (word.Text != "interface") System.Diagnostics.Debugger.Break();
 
@@ -475,7 +487,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             // Note: ReparseRequested for ParseMode is now set only once at the end of ParseCreate based on ParseMode
         }
 
-        private static async System.Threading.Tasks.Task parseBindDirectiveAsync(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
+        private static async System.Threading.Tasks.Task parseBindDirectiveAsync(WordScanner word, ParsedDocument parsedDocument, IVerilogSourceFile file)
         {
             if (word.Text != "bind") throw new Exception();
 
@@ -488,7 +500,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
         }
 
-        private static async System.Threading.Tasks.Task parsePrimitiveAsync(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
+        private static async System.Threading.Tasks.Task parsePrimitiveAsync(WordScanner word, ParsedDocument parsedDocument, IVerilogSourceFile file)
         {
             if (word.Text != "primitive") throw new Exception();
 
@@ -517,7 +529,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             // Note: ReparseRequested is now set only once at the end of ParseCreate based on ParseMode
         }
 
-        private static async System.Threading.Tasks.Task parseCheckerAsync(WordScanner word, ParsedDocument parsedDocument, Data.VerilogFile file)
+        private static async System.Threading.Tasks.Task parseCheckerAsync(WordScanner word, ParsedDocument parsedDocument, IVerilogSourceFile file)
         {
             if (word.Text != "checker") throw new Exception();
 

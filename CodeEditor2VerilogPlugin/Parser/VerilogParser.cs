@@ -38,7 +38,9 @@ namespace pluginVerilog.Parser
             }
             if (verilogFile == null) throw new Exception();
 
-            fileRef = new WeakReference<Data.VerilogFile>(verilogFile);
+            // WeakReference<T> is invariant, so it has to be created for the
+            // contract type the property exposes.
+            fileRef = new WeakReference<SystemVerilogCore.Documents.IVerilogSourceFile>(verilogFile);
 
             string key = Verilog.ParsedDocument.KeyGenerator(verilogRelatedFile, null, null);
             parsedDocument = new Verilog.ParsedDocument(
@@ -120,7 +122,7 @@ namespace pluginVerilog.Parser
 
             if (verilogFile == null) throw new Exception();
 
-            fileRef = new WeakReference<Data.VerilogFile>(verilogFile);
+            fileRef = new WeakReference<SystemVerilogCore.Documents.IVerilogSourceFile>(verilogFile);
             string key = Verilog.ParsedDocument.KeyGenerator(verilogFile, moduleName, parameterOverrides);
 
             parsedDocument = new Verilog.ParsedDocument(
@@ -173,19 +175,26 @@ namespace pluginVerilog.Parser
         //        private Dictionary<string, Verilog.Expressions.Expression> parameterOverrides;
         //        private string targetModuleName = null;
 
-        private System.WeakReference<VerilogFile> fileRef;
-        public VerilogFile? File
+        /// <summary>
+        /// The file being parsed, as the UI-free source-file contract.
+        ///
+        /// <para>
+        /// This used to be the editor's concrete <c>Data.VerilogFile</c>, and
+        /// <see cref="ParseAsync"/> even asserted the concrete type before parsing.
+        /// The parse only hands the file to <c>Root.ParseCreateAsync</c>, which
+        /// stores it as <c>IVerilogSourceFile</c>, so the concrete type was never
+        /// needed - it just kept the parser bound to the editor assembly.
+        /// </para>
+        /// </summary>
+        private System.WeakReference<SystemVerilogCore.Documents.IVerilogSourceFile> fileRef;
+        public SystemVerilogCore.Documents.IVerilogSourceFile? File
         {
             get
             {
-                VerilogFile? ret;
+                SystemVerilogCore.Documents.IVerilogSourceFile? ret;
                 if (!fileRef.TryGetTarget(out ret)) return null;
                 return ret;
             }
-            //protected set
-            //{
-            //    fileRef = new WeakReference<Data.IVerilogRelatedFile>(value);
-            //}
         }
 
 
@@ -243,7 +252,10 @@ namespace pluginVerilog.Parser
         {
             word.GetFirst();
             word.CancellationToken = cancellationToken;
-            if (File is not Data.VerilogFile) throw new Exception();
+            // The parse only stores the file (as IVerilogSourceFile) and hands it to
+            // the building blocks, so the UI-free contract is enough here; the
+            // concrete VerilogFile assertion is gone with the type.
+            if (File == null) throw new Exception();
 
             Root root = await Root.ParseCreateAsync(word, VerilogParsedDocument, File);
         }

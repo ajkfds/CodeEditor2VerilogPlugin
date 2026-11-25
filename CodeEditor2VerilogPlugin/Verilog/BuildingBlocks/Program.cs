@@ -30,7 +30,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         public bool AnsiPortStyle = false;
         public bool Static = true;
 
-        public static System.Threading.Tasks.Task<Program> ParseAsync(WordScanner word, Attribute attribute, BuildingBlock parent, Data.IVerilogRelatedFile file, bool protoType)
+        public static System.Threading.Tasks.Task<Program> ParseAsync(WordScanner word, Attribute attribute, BuildingBlock parent, SystemVerilogCore.Documents.IVerilogSourceFile file, bool protoType)
         {
             return ParseAsync(word, null, attribute, parent, file, protoType);
         }
@@ -39,7 +39,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             Dictionary<string, Expressions.Expression>? parameterOverrides,
             Attribute? attribute,
             BuildingBlock parent,
-            Data.IVerilogRelatedFile file,
+            SystemVerilogCore.Documents.IVerilogSourceFile file,
             bool protoType
             )
         {

@@ -102,7 +102,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             NameSpace nameSpace,
             Attribute? attribute,
             BuildingBlock parent,
-            Data.IVerilogRelatedFile file,
+            SystemVerilogCore.Documents.IVerilogSourceFile file,
             bool protoType
             )
         {

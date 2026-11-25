@@ -115,7 +115,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
         //List<PackedArray> IDataType.PackedDimensions => new List<PackedArray>();
 
-        public static async System.Threading.Tasks.Task<Interface> Create(WordScanner word, NameSpace nameSpace, Attribute? attribute, BuildingBlock parent, Data.IVerilogRelatedFile file, bool protoType)
+        public static async System.Threading.Tasks.Task<Interface> Create(WordScanner word, NameSpace nameSpace, Attribute? attribute, BuildingBlock parent, SystemVerilogCore.Documents.IVerilogSourceFile file, bool protoType)
         {
             return await Create(word, nameSpace, null, attribute, parent, file, protoType);
         }
@@ -125,7 +125,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             Dictionary<string, Expressions.Expression>? parameterOverrides,
             Attribute? attribute,
             BuildingBlock parent,
-            Data.IVerilogRelatedFile file,
+            SystemVerilogCore.Documents.IVerilogSourceFile file,
             bool protoType
             )
         {
