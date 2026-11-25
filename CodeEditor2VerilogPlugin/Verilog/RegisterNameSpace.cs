@@ -12,7 +12,12 @@ namespace pluginVerilog.Verilog
         private readonly System.Threading.ReaderWriterLockSlim accessLock = new System.Threading.ReaderWriterLockSlim(System.Threading.LockRecursionPolicy.NoRecursion);
 
         // BuildingBlock -> File Table
-        private WeakReferenceDictionary<string, Data.IVerilogRelatedFile> fileTable = new WeakReferenceDictionary<string, Data.IVerilogRelatedFile>();
+        //
+        // The weak table moved to the UI-free assembly (it is plain BCL code and
+        // the parser is its only consumer). This type itself cannot follow yet:
+        // it still names the plugin's `Data.VerilogFile` / `Data.IVerilogRelatedFile`,
+        // which is exactly what the parser contract work has to replace first.
+        private SystemVerilogCore.Verilog.WeakReferenceDictionary<string, Data.IVerilogRelatedFile> fileTable = new SystemVerilogCore.Verilog.WeakReferenceDictionary<string, Data.IVerilogRelatedFile>();
 
 
         public void Register(string buildingBlockName, T buildingBlock, Data.VerilogFile file)
