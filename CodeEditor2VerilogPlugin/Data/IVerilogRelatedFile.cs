@@ -69,6 +69,13 @@ namespace pluginVerilog.Data
         /// <summary>Unique id, as the source file contract.</summary>
         string SystemVerilogCore.Documents.IVerilogSourceFile.Id => ID;
 
+        /// <summary>
+        /// This file's children in the editor's item tree, as the source file
+        /// contract. The parser records on-demand parsed instances here.
+        /// </summary>
+        SystemVerilogCore.Projects.IVerilogItemList?
+            SystemVerilogCore.Documents.IVerilogSourceFile.ChildItems => Items;
+
         string SystemVerilogCore.Documents.IVerilogSourceFile.FileRelativePath => RelativePath;
 
         bool SystemVerilogCore.Documents.IVerilogSourceFile.IsSystemVerilog => SystemVerilog;

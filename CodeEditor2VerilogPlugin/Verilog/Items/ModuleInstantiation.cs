@@ -454,7 +454,11 @@ namespace pluginVerilog.Verilog.Items
                             await baseParser.ParseAsync();
                             if (baseParser.ParsedDocument != null)
                             {
-                                if (word.RootParsedDocument.File != null) word.RootParsedDocument.File.Items.AddOrUpdate(instance.Name, instance);
+                                // Record the on-demand parsed instance in the
+                                // project's item tree so the editor shows it.
+                                // Through the contract: the parser does not name
+                                // the editor's ItemList.
+                                word.RootParsedDocument.SourceFile?.ChildItems?.AddOrUpdate(instance.Name, instance);
                                 Verilog.ParsedDocument vParsedDocument = (Verilog.ParsedDocument)baseParser.ParsedDocument;
                                 await instance.AcceptVerilogParsedDocumentAsync(baseParser);
                             }
