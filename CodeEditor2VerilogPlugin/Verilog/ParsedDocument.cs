@@ -10,6 +10,9 @@ using System.Linq;
 using System.Reflection.Metadata;
 using System.Text;
 using System.Text.Json.Serialization;
+
+// The macro type now lives in the UI-free parser assembly.
+using Macro = SystemVerilogCore.Verilog.Macro;
 using System.Threading;
 
 namespace pluginVerilog.Verilog

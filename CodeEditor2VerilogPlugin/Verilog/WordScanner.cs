@@ -8,8 +8,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using SystemVerilogCore.Documents;
 
-// The rule model now lives in the UI-free parser assembly.
+// The rule model and the macro type now live in the UI-free parser assembly.
 using Rule = SystemVerilogCore.Verilog.Rule;
+using Macro = SystemVerilogCore.Verilog.Macro;
 
 namespace pluginVerilog.Verilog
 {

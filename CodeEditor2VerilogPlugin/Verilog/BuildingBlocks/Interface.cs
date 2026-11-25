@@ -5,6 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using SystemVerilogCore.Documents;
 
+// The macro type now lives in the UI-free parser assembly.
+using Macro = SystemVerilogCore.Verilog.Macro;
+
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
     public class Interface : BuildingBlock, IModuleOrInterface, IModuleOrInterfaceOrCheckerOrClass, DataObjects.DataTypes.IDataType

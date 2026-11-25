@@ -18,6 +18,7 @@ using pluginVerilog.Verilog;
 using Rule = SystemVerilogCore.Verilog.Rule;
 using RuleSet = SystemVerilogCore.Verilog.RuleSet;
 using AnnotationCommands = SystemVerilogCore.Verilog.AnnotationCommands;
+using Macro = SystemVerilogCore.Verilog.Macro;
 
 namespace pluginVerilog
 {
@@ -431,7 +432,7 @@ namespace pluginVerilog
         //        public Dictionary<string, Action<Verilog.ParsedDocument>> InLineCommentCommands { get; } = new Dictionary<string, Action<Verilog.ParsedDocument>>();
 
         // macros
-        public Dictionary<string, Verilog.Macro> Macros { get; } = new Dictionary<string, Verilog.Macro>();
+        public Dictionary<string, Macro> Macros { get; } = new Dictionary<string, Macro>();
 
         // system tasks
         public Dictionary<string, Func<Verilog.WordScanner, Verilog.NameSpace, Verilog.Statements.SystemTask.SystemTask>?> SystemTaskParsers { get; }
