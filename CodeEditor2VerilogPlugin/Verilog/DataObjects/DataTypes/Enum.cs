@@ -3,6 +3,7 @@ using pluginVerilog.Verilog.DataObjects.Constants;
 using pluginVerilog.Verilog.Expressions;
 using System.Collections.Generic;
 using System.Text;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
@@ -19,7 +20,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         {
             get { return true; }
         }
-        public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
+        public VerilogColorType ColorType { get { return VerilogColorType.Variable; } }
         public bool IsValidForNet { get { return true; } }
         public IDataType? BaseType { get; protected set; } = null;
         public List<Item> Items = new List<Item>();
@@ -35,7 +36,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
         public void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText(CreateString() + " ", CodeDrawStyle.ColorType.Keyword);
+            label.AppendText(CreateString() + " ", VerilogColorType.Keyword);
         }
 
         public virtual string CreateString()
@@ -72,7 +73,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         public static Enum ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "enum") System.Diagnostics.Debugger.Break();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.AddSystemVerilogError();
             word.MoveNext();
 
@@ -211,7 +212,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
             Item item = new Item();
             item.Identifier = word.Text;
-            word.Color(CodeDrawStyle.ColorType.Parameter);
+            word.Color(VerilogColorType.Parameter);
 
             WordReference wordReference = word.GetReference();
 

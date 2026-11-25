@@ -4,8 +4,11 @@ namespace pluginVerilog.Data.VerilogCommon.EditorAutoComplete
 {
     public class TaskAutocompleteItem : pluginVerilog.Data.VerilogCommon.AutoCompleteItem
     {
-        public TaskAutocompleteItem() : base(CompleteType.Keyword, "task", CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Plugin.ThemeColor, "CodeEditor2/Assets/Icons/screwdriver.svg")
+        public TaskAutocompleteItem() : base(CompleteType.Keyword, "task", (byte)SystemVerilogCore.Documents.VerilogColorType.Keyword, "CodeEditor2/Assets/Icons/screwdriver.svg")
         {
+            // Snippet rows use the plugin accent colour, which is outside the
+            // syntax palette; the base resolves it on draw.
+            colorOverride = Plugin.ThemeColor;
         }
 
         public override System.Threading.Tasks.Task ApplyAsync()

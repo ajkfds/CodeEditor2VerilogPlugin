@@ -1,3 +1,4 @@
+using SystemVerilogCore.Documents;
 namespace pluginVerilog.Verilog.Expressions
 {
     public class ParameterReference : Primary
@@ -13,7 +14,7 @@ namespace pluginVerilog.Verilog.Expressions
         }
         public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText(ParameterName, CodeDrawStyle.ColorType.Parameter);
+            label.AppendText(ParameterName, VerilogColorType.Parameter);
         }
 
         public new static ParameterReference ParseCreate(WordScanner word, NameSpace nameSpace)
@@ -26,7 +27,7 @@ namespace pluginVerilog.Verilog.Expressions
             val.Constant = true;
             val.Reference = word.GetReference();
 
-            word.Color(CodeDrawStyle.ColorType.Parameter);
+            word.Color(VerilogColorType.Parameter);
             word.MoveNext();
 
             if (parameter.Expression != null) val.Value = parameter.Expression.Value;

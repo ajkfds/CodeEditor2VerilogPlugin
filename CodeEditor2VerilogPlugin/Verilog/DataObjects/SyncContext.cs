@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects
 {
@@ -14,32 +15,32 @@ namespace pluginVerilog.Verilog.DataObjects
         {
             if (isClock)
             {
-                label.AppendText("@clock\n\n", CodeDrawStyle.ColorType.HighLightedComment);
+                label.AppendText("@clock\n\n", VerilogColorType.HighLightedComment);
             }
             if (isReset)
             {
-                label.AppendText("@reset\n\n", CodeDrawStyle.ColorType.HighLightedComment);
+                label.AppendText("@reset\n\n", VerilogColorType.HighLightedComment);
             }
             if (Data.Count == 0) return;
 
-            label.AppendText("@sync ", CodeDrawStyle.ColorType.HighLightedComment);
+            label.AppendText("@sync ", VerilogColorType.HighLightedComment);
             bool first = true;
             foreach (var sync in Data)
             {
                 if (!first) label.AppendText(",");
-                if (sync != null) label.AppendText(sync, CodeDrawStyle.ColorType.HighLightedComment);
+                if (sync != null) label.AppendText(sync, VerilogColorType.HighLightedComment);
                 first = false;
             }
             label.AppendText("\r\n");
 
             //if (SameSyncTargets.Count != 0)
             //{
-            //    label.AppendText("@samesync ", CodeDrawStyle.ColorType.HighLightedComment);
+            //    label.AppendText("@samesync ", VerilogColorType.HighLightedComment);
             //    bool firstSame = true;
             //    foreach (var same in SameSyncTargets)
             //    {
             //        if (!firstSame) label.AppendText(",");
-            //        if (same != null) label.AppendText(same, CodeDrawStyle.ColorType.HighLightedComment);
+            //        if (same != null) label.AppendText(same, VerilogColorType.HighLightedComment);
             //        firstSame = false;
             //    }
             //    label.AppendText("\r\n");

@@ -3,6 +3,7 @@ using pluginVerilog.Verilog.Items;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
@@ -17,7 +18,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
         // data type
         public int? BitWidth { get; } = null;
-        public new CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
+        public new VerilogColorType ColorType { get { return VerilogColorType.Variable; } }
         public bool IsVector { get { return false; } }
 
         public bool Packable
@@ -37,8 +38,8 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         }
         public void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText("interface ", CodeDrawStyle.ColorType.Keyword);
-            label.AppendText(Name, CodeDrawStyle.ColorType.Identifier);
+            label.AppendText("interface ", VerilogColorType.Keyword);
+            label.AppendText(Name, VerilogColorType.Identifier);
         }
 
         public DataObjects.DataTypes.IDataType Clone()
@@ -141,7 +142,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             */
 
             if (word.Text != "interface") System.Diagnostics.Debugger.Break();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             IndexReference beginReference = word.CreateIndexReference();
             word.MoveNext();
 
@@ -156,7 +157,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 DefinitionReference = word.CrateWordReference()
             };
             if (word.CellDefine) interface_.cellDefine = true;
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             if (!General.IsIdentifier(word.Text))
             {
                 word.AddError("illegal module name");
@@ -218,7 +219,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 return interface_;
             }
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             interface_.LastIndexReference = word.CreateIndexReference();
 
             if (interface_.BlockBeginIndexReference != null)
@@ -232,7 +233,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 word.MoveNext();
                 if (word.Text == interface_.Name)
                 {
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                 }
                 else

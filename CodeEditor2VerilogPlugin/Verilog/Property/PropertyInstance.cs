@@ -1,5 +1,6 @@
 using pluginVerilog.Verilog.Expressions;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Property
 {
@@ -53,13 +54,13 @@ namespace pluginVerilog.Verilog.Property
 
             // Parse property identifier (may be hierarchical with :: or . separators)
             string identifier = word.Text;
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
 
             // Handle hierarchical identifiers (e.g., package::property_name or top.mod.prop)
             while (word.Text == "::" || word.Text == ".")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 identifier += word.Text;
                 word.MoveNext();
 
@@ -70,7 +71,7 @@ namespace pluginVerilog.Verilog.Property
                 }
 
                 identifier += word.Text;
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
             }
 
@@ -86,7 +87,7 @@ namespace pluginVerilog.Verilog.Property
                     // Check for named argument (.identifier(...))
                     if (word.Text == ".")
                     {
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.Color(VerilogColorType.Keyword);
                         word.MoveNext();
 
                         string namedArgName = word.Text;
@@ -95,7 +96,7 @@ namespace pluginVerilog.Verilog.Property
                             word.AddError("identifier expected for named argument");
                             break;
                         }
-                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.Color(VerilogColorType.Identifier);
                         word.MoveNext();
 
                         if (word.Text == "(")

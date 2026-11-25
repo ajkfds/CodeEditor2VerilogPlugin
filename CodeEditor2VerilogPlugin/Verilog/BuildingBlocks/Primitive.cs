@@ -5,6 +5,7 @@ using pluginVerilog.Verilog.Expressions;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
@@ -135,7 +136,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             */
 
             if (word.Text != "primitive") throw new Exception();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             IndexReference beginReference = word.CreateIndexReference();
             word.MoveNext();
 
@@ -158,7 +159,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 Project = word.Project
             };
             primitive.BuildingBlock = primitive;
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             primitive.NameReference = word.GetReference();
             word.MoveNext();
 
@@ -181,7 +182,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         DefinitionReference = word.GetReference(),
                         Project = word.RootParsedDocument.Project
                     };
-                    word.Color(CodeDrawStyle.ColorType.Variable);
+                    word.Color(VerilogColorType.Variable);
                     word.MoveNext();
                     primitive.Ports.Add(outputPort.Name, outputPort);
                     primitive.PortsList.Add(outputPort);
@@ -198,7 +199,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                             DefinitionReference = word.GetReference(),
                             Project = word.RootParsedDocument.Project
                         };
-                        word.Color(CodeDrawStyle.ColorType.Variable);
+                        word.Color(VerilogColorType.Variable);
                         word.MoveNext();
                         primitive.Ports.Add(inputPort.Name, inputPort);
                         primitive.PortsList.Add(inputPort);
@@ -225,7 +226,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             // Semicolon after port list
             if (word.Text == ";")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
             else
@@ -252,7 +253,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             // endprimitive keyword
             if (word.Text == "endprimitive")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 primitive.LastIndexReference = word.CreateIndexReference();
 
                 if (primitive.BlockBeginIndexReference != null)
@@ -267,7 +268,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     word.MoveNext();
                     if (word.Text == primitive.Name)
                     {
-                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.Color(VerilogColorType.Identifier);
                         word.MoveNext();
                     }
                     else
@@ -324,7 +325,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 if (word.Text == "table")
                 {
                     // Start of table definition
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
 
                     // Parse table entries
@@ -354,7 +355,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         // Expect semicolon after entry
                         if (word.Text == ";")
                         {
-                            word.Color(CodeDrawStyle.ColorType.Keyword);
+                            word.Color(VerilogColorType.Keyword);
                             word.MoveNext();
                         }
                     }
@@ -362,7 +363,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     // endtable keyword
                     if (word.Text == "endtable")
                     {
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.Color(VerilogColorType.Keyword);
                         word.MoveNext();
                     }
                     else
@@ -376,7 +377,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 {
                     // Sequential UDP: output is registered
                     primitive.IsSequential = true;
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                 }
                else if (word.Text == "output" || word.Text == "input")
@@ -385,14 +386,14 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                    // output_declaration ::= "output" [reg] [range] list_of_port_identifiers ;
                    // input_declaration ::= "input" [range] list_of_port_identifiers ;
                    bool isOutput = word.Text == "output";
-                   word.Color(CodeDrawStyle.ColorType.Keyword);
+                   word.Color(VerilogColorType.Keyword);
                    word.MoveNext();
 
                    // optional "reg" for sequential UDP output
                    if (isOutput && word.Text == "reg")
                    {
                        primitive.IsSequential = true;
-                       word.Color(CodeDrawStyle.ColorType.Keyword);
+                       word.Color(VerilogColorType.Keyword);
                        word.MoveNext();
                    }
 
@@ -407,7 +408,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                    while (!word.Eof && General.IsIdentifier(word.Text))
                    {
                        string portName = word.Text;
-                       word.Color(CodeDrawStyle.ColorType.Variable);
+                       word.Color(VerilogColorType.Variable);
                        word.MoveNext();
 
                        Port port = new Port()
@@ -434,7 +435,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 else if (word.Text == "reg")
                 {
                     // Sequential UDP output register
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     primitive.IsSequential = true;
                 }
@@ -442,7 +443,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                {
                    // UDP initial statement: initial [ output_port_identifier = ] init_val ;
                    // (init_val ::= 1'b0 | 1'b1 | 1'bx | 1'X | 1'B0 | ...)
-                   word.Color(CodeDrawStyle.ColorType.Keyword);
+                   word.Color(VerilogColorType.Keyword);
                    word.MoveNext();
 
                    while (!word.Eof && word.Text != ";")
@@ -495,7 +496,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 if (token.Length == 1 && "01xXbB".IndexOf(token[0]) >= 0)
                 {
                     entry.InputLevels += token.ToLower();
-                    word.Color(CodeDrawStyle.ColorType.Number);
+                    word.Color(VerilogColorType.Number);
                     word.MoveNext();
                 }
                 // Edge symbols can be combined
@@ -507,7 +508,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         string inner = token.Substring(1, token.Length - 2);
                         entry.IsEdge = true;
                         entry.EdgeIndicators += token;
-                        word.Color(CodeDrawStyle.ColorType.Number);
+                        word.Color(VerilogColorType.Number);
                         word.MoveNext();
                     }
                     else
@@ -525,7 +526,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                                 entry.InputLevels += char.ToLower(c);
                             }
                         }
-                        word.Color(CodeDrawStyle.ColorType.Number);
+                        word.Color(VerilogColorType.Number);
                         word.MoveNext();
                     }
                 }
@@ -571,7 +572,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 word.AddError(": expected in table entry");
                 return null;
             }
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             // Parse output level
@@ -579,7 +580,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             if (outputToken.Length == 1 && "01xX-".IndexOf(outputToken[0]) >= 0)
             {
                 entry.OutputLevel = char.ToLower(outputToken[0]);
-                word.Color(CodeDrawStyle.ColorType.Number);
+                word.Color(VerilogColorType.Number);
                 word.MoveNext();
             }
             else

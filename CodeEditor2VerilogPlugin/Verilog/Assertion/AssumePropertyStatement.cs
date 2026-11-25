@@ -1,6 +1,7 @@
 
 using System;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Assertion
 {
@@ -27,10 +28,10 @@ namespace pluginVerilog.Verilog.Assertion
                 throw new Exception();
             }
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext(); // assume
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext(); // property
 
             AssumePropertyStatement assumePropertyStatement = new AssumePropertyStatement() { BeginIndexReference = word.CreateIndexReference() };
@@ -56,7 +57,7 @@ namespace pluginVerilog.Verilog.Assertion
             }
 
             if (word.Text != "else") return assumePropertyStatement;
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext(); // else
 
             assumePropertyStatement.ElseStatement = Statements.Statements.ParseCreateStatementOrNull(word, nameSpace);
@@ -82,7 +83,7 @@ namespace pluginVerilog.Verilog.Assertion
 
         public string Name { get; set; } = "";
 
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Keyword;
+        public VerilogColorType ColorType => VerilogColorType.Keyword;
 
         public NamedElements NamedElements => new NamedElements();
 

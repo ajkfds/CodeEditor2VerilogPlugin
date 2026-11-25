@@ -3,6 +3,7 @@ using pluginVerilog.Verilog.DataObjects.DataTypes;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.Nets
 {
@@ -42,7 +43,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
         }
 
         public NetTypeEnum NetType = NetTypeEnum.Wire;
-        public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Net; } }
+        public override VerilogColorType ColorType { get { return VerilogColorType.Net; } }
 
         public List<DataObjects.Arrays.PackedArray> PackedDimensions
         {
@@ -80,50 +81,50 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             switch (NetType)
             {
                 case NetTypeEnum.Supply0:
-                    label.AppendText("supply0", CodeDrawStyle.ColorType.Keyword);
+                    label.AppendText("supply0", VerilogColorType.Keyword);
                     break;
                 case NetTypeEnum.Supply1:
-                    label.AppendText("supply1", CodeDrawStyle.ColorType.Keyword);
+                    label.AppendText("supply1", VerilogColorType.Keyword);
                     break;
                 case NetTypeEnum.Tri:
-                    label.AppendText("tri", CodeDrawStyle.ColorType.Keyword);
+                    label.AppendText("tri", VerilogColorType.Keyword);
                     break;
                 case NetTypeEnum.Triand:
-                    label.AppendText("triand", CodeDrawStyle.ColorType.Keyword);
+                    label.AppendText("triand", VerilogColorType.Keyword);
                     break;
                 case NetTypeEnum.Trior:
-                    label.AppendText("trior", CodeDrawStyle.ColorType.Keyword);
+                    label.AppendText("trior", VerilogColorType.Keyword);
                     break;
                 case NetTypeEnum.Trireg:
-                    label.AppendText("trireg", CodeDrawStyle.ColorType.Keyword);
+                    label.AppendText("trireg", VerilogColorType.Keyword);
                     break;
                 case NetTypeEnum.Tri0:
-                    label.AppendText("tri0", CodeDrawStyle.ColorType.Keyword);
+                    label.AppendText("tri0", VerilogColorType.Keyword);
                     break;
                 case NetTypeEnum.Tri1:
-                    label.AppendText("tri1", CodeDrawStyle.ColorType.Keyword);
+                    label.AppendText("tri1", VerilogColorType.Keyword);
                     break;
                 case NetTypeEnum.Uwire:
-                    label.AppendText("uwire", CodeDrawStyle.ColorType.Keyword);
+                    label.AppendText("uwire", VerilogColorType.Keyword);
                     break;
                 case NetTypeEnum.Wire:
-                    label.AppendText("wire", CodeDrawStyle.ColorType.Keyword);
+                    label.AppendText("wire", VerilogColorType.Keyword);
                     break;
                 case NetTypeEnum.Wand:
-                    label.AppendText("wand", CodeDrawStyle.ColorType.Keyword);
+                    label.AppendText("wand", VerilogColorType.Keyword);
                     break;
                 case NetTypeEnum.Wor:
-                    label.AppendText("wor", CodeDrawStyle.ColorType.Keyword);
+                    label.AppendText("wor", VerilogColorType.Keyword);
                     break;
                 case NetTypeEnum.Interconnect:
-                    label.AppendText("interconnect", CodeDrawStyle.ColorType.Keyword);
+                    label.AppendText("interconnect", VerilogColorType.Keyword);
                     break;
             }
 
             label.AppendText(" ");
             if (Signed)
             {
-                label.AppendText("signed ", CodeDrawStyle.ColorType.Keyword);
+                label.AppendText("signed ", VerilogColorType.Keyword);
             }
 
             if (DataType != null)
@@ -143,7 +144,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             AppendTypeLabel(label);
             if (Name == null) return;
 
-            label.AppendText(Name, CodeDrawStyle.ColorType.Net);
+            label.AppendText(Name, VerilogColorType.Net);
 
             foreach (DataObjects.Arrays.VariableArray dimension in UnpackedArrays)
             {
@@ -154,7 +155,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             if (Comment != "")
             {
                 label.AppendText(" ");
-                label.AppendText(Comment.Trim(new char[] { '\r', '\n', '\t', ' ' }), CodeDrawStyle.ColorType.Comment);
+                label.AppendText(Comment.Trim(new char[] { '\r', '\n', '\t', ' ' }), VerilogColorType.Comment);
             }
 
             label.AppendText("\r\n");
@@ -305,7 +306,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                 default:
                     return null;
             }
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
             return ret;
         }
@@ -435,12 +436,12 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             // [vectored | scalared]
             if (word.Text == "vectored")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
             else if (word.Text == "scalared")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
 
@@ -513,7 +514,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                         {
                             nameSpace.NamedElements.Add(net.Name, net);
                         }
-                        word.Color(CodeDrawStyle.ColorType.Net);
+                        word.Color(VerilogColorType.Net);
                     }
                     else
                     {
@@ -524,7 +525,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                             newNet.Defined = true;
                             net = newNet;
                         }
-                        word.Color(CodeDrawStyle.ColorType.Net);
+                        word.Color(VerilogColorType.Net);
                     }
                 }
 
@@ -645,7 +646,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             if (word.Text != "interconnect") return false;
 
             IndexReference beginReference = word.CreateIndexReference();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             // Parse implicit_data_type: [ signing ] { packed_dimension }
@@ -653,13 +654,13 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             if (word.Text == "signed")
             {
                 isSigned = true;
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
             else if (word.Text == "unsigned")
             {
                 isSigned = false;
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
 
@@ -683,7 +684,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             {
                 word.MoveNext();
                 // delay_value can be a number or expression
-                word.Color(CodeDrawStyle.ColorType.Number);
+                word.Color(VerilogColorType.Number);
                 word.MoveNext();
             }
 
@@ -711,7 +712,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                 }
                 net.DefinedReference = word.GetReference();
 
-                word.Color(CodeDrawStyle.ColorType.Net);
+                word.Color(VerilogColorType.Net);
                 word.MoveNext();
 
                 // Parse unpacked dimensions
@@ -739,7 +740,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             // Semicolon
             if (word.Text == ";")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
             else

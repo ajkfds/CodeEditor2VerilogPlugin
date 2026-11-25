@@ -1,3 +1,4 @@
+using SystemVerilogCore.Documents;
 
 
 namespace pluginVerilog.Verilog.Statements
@@ -24,7 +25,7 @@ namespace pluginVerilog.Verilog.Statements
         public required IndexReference BeginIndexReference { get; init; }
         public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public VerilogColorType ColorType => VerilogColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
         // task_enable ::= (From Annex A - A.6.9) hierarchical_task_identifier [ ( expression { , expression } ) ] ;
 

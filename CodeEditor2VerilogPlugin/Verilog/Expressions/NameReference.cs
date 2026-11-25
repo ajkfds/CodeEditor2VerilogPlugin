@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Expressions
 {
@@ -299,7 +300,7 @@ namespace pluginVerilog.Verilog.Expressions
                 }
 
                 nameReference.Names.Add(wordClone.Text);
-                wordClone.Color(CodeDrawStyle.ColorType.Identifier);
+                wordClone.Color(VerilogColorType.Identifier);
                 nameReference.WordReferences.Add(wordClone.GetReference());
                 wordClone.MoveNext();
 
@@ -327,7 +328,7 @@ namespace pluginVerilog.Verilog.Expressions
                 // here before the "::" separator is processed.
                 if (wordClone.Text == "#" && wordClone.NextText == "(")
                 {
-                    wordClone.Color(CodeDrawStyle.ColorType.Keyword);
+                    wordClone.Color(VerilogColorType.Keyword);
                     wordClone.MoveNext(); // #
                     wordClone.MoveNext(); // (
                     int depth = 0;

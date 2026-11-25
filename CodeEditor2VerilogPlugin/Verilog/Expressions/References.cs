@@ -1,4 +1,5 @@
 using System;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Expressions
 {
@@ -44,7 +45,7 @@ namespace pluginVerilog.Verilog.Expressions
             ret = new TaskReference();
             ret.TaskName = word.Text;
             ret.ModuleName = nameSpace.BuildingBlock.Name;
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
 
             if (!word.Prototype)
             {
@@ -70,7 +71,7 @@ namespace pluginVerilog.Verilog.Expressions
                 TaskReference ret = new TaskReference();
                 ret.TaskName = word.Text;
                 ret.ModuleName = nameSpace.BuildingBlock.Name;
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
 
                 ret.Task = (Task_)taskNameSpace.NamedElements[ret.TaskName];
@@ -81,7 +82,7 @@ namespace pluginVerilog.Verilog.Expressions
                 TaskReference ret = new TaskReference();
                 ret.TaskName = word.Text;
                 ret.ModuleName = nameSpace.BuildingBlock.Name;
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
 
                 Function function = (Function)taskNameSpace.NamedElements[ret.TaskName];

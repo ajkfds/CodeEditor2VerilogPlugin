@@ -8,6 +8,7 @@ using pluginVerilog.Verilog.DataObjects.Nets;
 using pluginVerilog.Verilog.Items;
 using System;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects
 {
@@ -111,12 +112,12 @@ namespace pluginVerilog.Verilog.DataObjects
         }
 
         /// <summary>
-        /// The editor palette slot for a <see cref="CodeDrawStyle.ColorType"/>,
+        /// The editor palette slot for a <see cref="VerilogColorType"/>,
         /// as the UI-free contract spells it. The numeric values are identical
         /// (see <c>VerilogColorType</c>), so this is a pure relabel.
         /// </summary>
         private static SystemVerilogCore.Documents.VerilogColorType Contract(
-            CodeDrawStyle.ColorType colorType) =>
+            VerilogColorType colorType) =>
             (SystemVerilogCore.Documents.VerilogColorType)(byte)colorType;
 
         /// <summary>
@@ -137,16 +138,16 @@ namespace pluginVerilog.Verilog.DataObjects
             switch (Direction)
             {
                 case DirectionEnum.Input:
-                    label.AppendText("input ", Contract(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("input ", Contract(VerilogColorType.Keyword));
                     break;
                 case DirectionEnum.Output:
-                    label.AppendText("output ", Contract(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("output ", Contract(VerilogColorType.Keyword));
                     break;
                 case DirectionEnum.Inout:
-                    label.AppendText("inout ", Contract(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("inout ", Contract(VerilogColorType.Keyword));
                     break;
                 case DirectionEnum.Ref:
-                    label.AppendText("ref ", Contract(CodeDrawStyle.ColorType.Keyword));
+                    label.AppendText("ref ", Contract(VerilogColorType.Keyword));
                     break;
                 default:
                     break;
@@ -154,7 +155,7 @@ namespace pluginVerilog.Verilog.DataObjects
 
             if (DataObject is Variables.Reg)
             {
-                label.AppendText("reg ", Contract(CodeDrawStyle.ColorType.Keyword));
+                label.AppendText("reg ", Contract(VerilogColorType.Keyword));
             }
 
             if (PackedDimensions != null)
@@ -170,11 +171,11 @@ namespace pluginVerilog.Verilog.DataObjects
             {
                 if (DataObject is Net)
                 {
-                    label.AppendText(Name, Contract(CodeDrawStyle.ColorType.Net));
+                    label.AppendText(Name, Contract(VerilogColorType.Net));
                 }
                 else if (DataObject is Variables.Reg)
                 {
-                    label.AppendText(Name, Contract(CodeDrawStyle.ColorType.Register));
+                    label.AppendText(Name, Contract(VerilogColorType.Register));
                 }
                 else
                 {
@@ -192,7 +193,7 @@ namespace pluginVerilog.Verilog.DataObjects
             }
             if (Comment != "")
             {
-                label.AppendText(" // " + Comment, Contract(CodeDrawStyle.ColorType.Comment));
+                label.AppendText(" // " + Comment, Contract(VerilogColorType.Comment));
             }
 
             return label;
@@ -300,7 +301,7 @@ namespace pluginVerilog.Verilog.DataObjects
             {
                 block.Ports.Add(port.Name, port);
             }
-            word.Color(CodeDrawStyle.ColorType.Variable);
+            word.Color(VerilogColorType.Variable);
             word.MoveNext();
 
             return true;
@@ -401,7 +402,7 @@ namespace pluginVerilog.Verilog.DataObjects
             }
             if (direction != null)
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
 
                 // A10: "input |" EOF -> net/variable type keyword hint
@@ -599,7 +600,7 @@ namespace pluginVerilog.Verilog.DataObjects
             }
             else
             {
-                word.Color(CodeDrawStyle.ColorType.Variable);
+                word.Color(VerilogColorType.Variable);
             }
             word.MoveNext();
 
@@ -814,14 +815,14 @@ namespace pluginVerilog.Verilog.DataObjects
             //            string? modPortName = null;
 
             BuildingBlock buildingBlock = nameSpace.BuildingBlock;
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
 
             if (word.Text == ".")
             {
                 word.MoveNext();
 
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 if (interface_ != null && !interface_.NamedElements.ContainsModPort(word.Text))
                 {
                     word.AddError("illegal modport name");
@@ -844,7 +845,7 @@ namespace pluginVerilog.Verilog.DataObjects
             }
             InterfaceInstance iInst = InterfaceInstance.CreatePortInstance(word, identifier, nameSpace);
             //            iInst.ModPortName = modPortName;
-            word.Color(CodeDrawStyle.ColorType.Variable);
+            word.Color(VerilogColorType.Variable);
             word.MoveNext();
 
             Port port = new Port() { DefinitionReference = word.CrateWordReference(), Name = iInst.Name, Project = word.Project };
@@ -975,31 +976,31 @@ namespace pluginVerilog.Verilog.DataObjects
             {
                 case "input":
                     direction = DirectionEnum.Input;
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     break;
                 case "output":
                     direction = DirectionEnum.Output;
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     break;
                 case "inout":
                     direction = DirectionEnum.Inout;
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     break;
                 case "ref":
                     direction = DirectionEnum.Ref;
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     break;
                 case "const":
                     direction = DirectionEnum.Ref;
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     if (word.Text == "ref")
                     {
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.Color(VerilogColorType.Keyword);
                         word.MoveNext();
                     }
                     else
@@ -1023,7 +1024,7 @@ namespace pluginVerilog.Verilog.DataObjects
             // [ var ]
             if (word.Text == "var")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
 
@@ -1075,7 +1076,7 @@ namespace pluginVerilog.Verilog.DataObjects
             Port port = new Port() { DefinitionReference = word.CrateWordReference(), Name = word.Text, Project = word.Project };
             port.Direction = (DirectionEnum)direction;
             port.DataObject = Variables.Variable.Create(port.Name, dataType);
-            word.Color(CodeDrawStyle.ColorType.Variable);
+            word.Color(VerilogColorType.Variable);
 
             if (portNameSpace.Ports.ContainsKey(port.Name))
             {
@@ -1198,26 +1199,26 @@ namespace pluginVerilog.Verilog.DataObjects
             {
                 case "input":
                     direction = DirectionEnum.Input;
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     break;
                 case "output":
                     direction = DirectionEnum.Output;
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     break;
                 case "inout":
                     direction = DirectionEnum.Inout;
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     break;
                 case "const":
                     direction = DirectionEnum.Ref;
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     if (word.Text == "ref")
                     {
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.Color(VerilogColorType.Keyword);
                         word.MoveNext();
                     }
                     else
@@ -1241,7 +1242,7 @@ namespace pluginVerilog.Verilog.DataObjects
             // ["var"]
             if (word.Text == "var")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
 
@@ -1343,7 +1344,7 @@ namespace pluginVerilog.Verilog.DataObjects
 
                 if (!word.Prototype) port.DataObject.Defined = true;
 
-                word.Color(CodeDrawStyle.ColorType.Variable);
+                word.Color(VerilogColorType.Variable);
                 word.MoveNext();
 
                 // { variable_dimension } [ = expression]

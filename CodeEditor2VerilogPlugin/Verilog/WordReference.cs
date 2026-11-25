@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog
 {
@@ -188,11 +189,11 @@ namespace pluginVerilog.Verilog
             parsedDocument.AddHint(Index, Length, message);
         }
 
-        public void Color(CodeDrawStyle.ColorType colorType)
+        public void Color(VerilogColorType colorType)
         {
             SystemVerilogCore.Documents.IVerilogTextDocument? document = ContractDocument;
             if (document == null) return;
-            document.SetColorAt(Index, CodeDrawStyle.ColorIndex(colorType), length);
+            document.SetColorAt(Index, (byte)colorType, length);
         }
     }
 }

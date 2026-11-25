@@ -1,3 +1,4 @@
+using SystemVerilogCore.Documents;
 namespace pluginVerilog.Verilog
 {
     // A.2.2.2 Strengths
@@ -120,57 +121,57 @@ namespace pluginVerilog.Verilog
             switch (word.Text)
             {
                 case "supply0":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return Strengths.supply0;
                 case "strong0":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return Strengths.strong0;
                 case "pull0":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return Strengths.pull0;
                 case "weak0":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return Strengths.weak0;
                 case "highz0":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return Strengths.highz0;
 
                 case "supply1":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return Strengths.supply1;
                 case "strong1":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return Strengths.strong1;
                 case "pull1":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return Strengths.pull1;
                 case "weak1":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return Strengths.weak1;
                 case "highz1":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return Strengths.highz1;
 
                 case "small":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return Strengths.small;
                 case "medium":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return Strengths.medium;
                 case "large":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return Strengths.large;
                 default:
@@ -592,57 +593,57 @@ namespace pluginVerilog.Verilog
             switch (word.Text)
             {
                 case "supply0":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return Strengths.supply0;
                 case "strong0":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return Strengths.strong0;
                 case "pull0":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return Strengths.pull0;
                 case "weak0":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return Strengths.weak0;
                 case "highz0":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return Strengths.highz0;
 
                 case "supply1":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return Strengths.supply1;
                 case "strong1":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return Strengths.strong1;
                 case "pull1":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return Strengths.pull1;
                 case "weak1":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return Strengths.weak1;
                 case "highz1":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return Strengths.highz1;
 
                 case "small":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return Strengths.small;
                 case "medium":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return Strengths.medium;
                 case "large":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return Strengths.large;
                 default:

@@ -5,6 +5,7 @@ using pluginVerilog.Verilog.DataObjects.Variables;
 using pluginVerilog.Verilog.Expressions;
 using System;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog
 {
@@ -38,7 +39,7 @@ namespace pluginVerilog.Verilog
         public static bool Parse(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "modport") throw new Exception();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             while (!word.Eof)
@@ -73,7 +74,7 @@ namespace pluginVerilog.Verilog
             if (interface_ == null) return false;
 
             ModPort modport = new ModPort(interface_) { BeginIndexReference = word.CreateIndexReference(), DefinitionReference = word.CrateWordReference(), Name = word.Text, Parent = nameSpace, Project = word.Project };
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
             if (interface_ != null)
             {
@@ -121,7 +122,7 @@ namespace pluginVerilog.Verilog
         internal bool parse_modport_clocking_declaration(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "clocking") throw new Exception();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             // clocking_identifier
@@ -130,7 +131,7 @@ namespace pluginVerilog.Verilog
                 word.AddError("clocking identifier expected");
                 return false;
             }
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
 
             return true;
@@ -143,7 +144,7 @@ namespace pluginVerilog.Verilog
             // import_export keyword was consumed by caller switch; accept it here too when called directly
             if (word.Text == "import" || word.Text == "export")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
 
@@ -158,7 +159,7 @@ namespace pluginVerilog.Verilog
                 else if (General.IsIdentifier(word.Text))
                 {
                     // tf_identifier
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                 }
                 else
@@ -198,7 +199,7 @@ namespace pluginVerilog.Verilog
                 default:
                     throw new Exception();
             }
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             while (!word.Eof)
@@ -225,7 +226,7 @@ namespace pluginVerilog.Verilog
                     return false;
                 }
                 string name = word.Text;
-                word.Color(CodeDrawStyle.ColorType.Variable);
+                word.Color(VerilogColorType.Variable);
                 // the rule set is resolved per file: a .rule.yaml file applies
                 // to every source file below its directory
                 if (direction == Port.DirectionEnum.Undefined) word.ApplyRule(word.RuleSet.ImplicitModportDirection);

@@ -1,5 +1,6 @@
 
 using pluginVerilog.Verilog.Statements;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Expressions
 {
@@ -9,7 +10,7 @@ namespace pluginVerilog.Verilog.Expressions
         public required IndexReference BeginIndexReference { get; init; }
         public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public VerilogColorType ColorType => VerilogColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
         void IStatement.DisposeSubReference()
         {

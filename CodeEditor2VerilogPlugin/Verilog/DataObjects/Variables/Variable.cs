@@ -3,6 +3,7 @@ using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using System;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
@@ -273,21 +274,21 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
             if (word.Text == "const")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
                 pointerMoved = true;
             }
 
             if (word.Text == "var")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
                 pointerMoved = true;
             }
 
             if (word.Text == "static" | word.Text == "automatic")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
                 pointerMoved = true;
             }
@@ -295,7 +296,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             bool virtual_ = false;
             if (word.Text == "virtual")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
                 virtual_ = true;
             }
@@ -433,7 +434,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
                     if (word.Text == "new")
                     {
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.Color(VerilogColorType.Keyword);
                         word.MoveNext();
                         if (word.Text == "[") // dynamic array size
                         {

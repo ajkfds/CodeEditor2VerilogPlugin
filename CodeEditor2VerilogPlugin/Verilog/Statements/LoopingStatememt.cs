@@ -4,6 +4,7 @@ using pluginVerilog.Verilog.Expressions;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Statements
 {
@@ -13,7 +14,7 @@ namespace pluginVerilog.Verilog.Statements
         public required IndexReference BeginIndexReference { get; init; }
         public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public VerilogColorType ColorType => VerilogColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
 
         public void DisposeSubReference()
@@ -44,7 +45,7 @@ namespace pluginVerilog.Verilog.Statements
         public static ForeverStatement ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             ForeverStatement foreverStatement = new ForeverStatement() { BeginIndexReference = word.CreateIndexReference() };
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             foreverStatement.Statement = Statements.ParseCreateStatement(word, nameSpace);
@@ -63,7 +64,7 @@ namespace pluginVerilog.Verilog.Statements
         public required IndexReference BeginIndexReference { get; init; }
         public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public VerilogColorType ColorType => VerilogColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
 
         public void DisposeSubReference()
@@ -84,7 +85,7 @@ namespace pluginVerilog.Verilog.Statements
             if (!word.SystemVerilog) word.AddError("SystemVerilog expression");
 
             DoStatement doStatement = new DoStatement() { BeginIndexReference = word.CreateIndexReference() };
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             doStatement.Statement = Statements.ParseCreateStatement(word, nameSpace);
@@ -95,7 +96,7 @@ namespace pluginVerilog.Verilog.Statements
                 word.SkipToKeyword(";");
                 return doStatement;
             }
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
             if (word.Eof || word.Text != "(")
             {
@@ -136,7 +137,7 @@ namespace pluginVerilog.Verilog.Statements
         public required IndexReference BeginIndexReference { get; init; }
         public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public VerilogColorType ColorType => VerilogColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
 
         public void DisposeSubReference()
@@ -159,7 +160,7 @@ namespace pluginVerilog.Verilog.Statements
         public static RepeatStatement ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             RepeatStatement repeatStatement = new RepeatStatement() { BeginIndexReference = word.CreateIndexReference() };
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             if (word.GetCharAt(0) != '(')
@@ -201,7 +202,7 @@ namespace pluginVerilog.Verilog.Statements
         public required IndexReference BeginIndexReference { get; init; }
         public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public VerilogColorType ColorType => VerilogColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
 
         public void DisposeSubReference()
@@ -224,7 +225,7 @@ namespace pluginVerilog.Verilog.Statements
         public static WhileStatememt ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             WhileStatememt whileStatement = new WhileStatememt() { BeginIndexReference = word.CreateIndexReference() };
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             if (word.GetCharAt(0) != '(')
@@ -316,7 +317,7 @@ namespace pluginVerilog.Verilog.Statements
                 Project = word.Project
             };
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
             /*
             loop_statement ::=    for ( [ for_initialization ] ; [ expression ] ; [ for_step ] ) statement_or_null 
@@ -477,7 +478,7 @@ namespace pluginVerilog.Verilog.Statements
                 Parent = nameSpace,
                 Project = word.Project
             };
-            word.Color(CodeDrawStyle.ColorType.Keyword);    // foreach keyword
+            word.Color(VerilogColorType.Keyword);    // foreach keyword
             word.MoveNext();
 
             if (word.Text != "(")
@@ -522,7 +523,7 @@ namespace pluginVerilog.Verilog.Statements
                 }
                 DataObjects.DataTypes.IDataType dataType = DataObjects.DataTypes.IntType.Create(false);
                 DataObjects.DataObject index = DataObjects.DataObject.Create(name, dataType);
-                word.Color(CodeDrawStyle.ColorType.Variable);
+                word.Color(VerilogColorType.Variable);
                 if (!foreachStatement.NamedElements.ContainsKey(index.Name)) foreachStatement.NamedElements.Add(index.Name, index);
                 else word.AddError("illegal index");
                 if (!word.Prototype) index.Defined = true;

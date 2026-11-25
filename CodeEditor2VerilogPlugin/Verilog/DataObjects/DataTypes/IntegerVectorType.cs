@@ -1,6 +1,7 @@
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using System;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
@@ -9,7 +10,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         protected IntegerVectorType() { }
         public required virtual DataTypeEnum Type { get; init; }
 
-        public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Register; } }
+        public VerilogColorType ColorType { get { return VerilogColorType.Register; } }
 
         public bool Packable
         {
@@ -82,13 +83,13 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             switch (Type)
             {
                 case DataTypeEnum.Bit:
-                    label.AppendText("bit", CodeDrawStyle.ColorType.Keyword);
+                    label.AppendText("bit", VerilogColorType.Keyword);
                     break;
                 case DataTypeEnum.Logic:
-                    label.AppendText("logic", CodeDrawStyle.ColorType.Keyword);
+                    label.AppendText("logic", VerilogColorType.Keyword);
                     break;
                 case DataTypeEnum.Reg:
-                    label.AppendText("reg", CodeDrawStyle.ColorType.Keyword);
+                    label.AppendText("reg", VerilogColorType.Keyword);
                     break;
             }
 
@@ -145,7 +146,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
             bool signed = false;
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             if (dataType == DataTypeEnum.Bit | dataType == DataTypeEnum.Logic)
             {
                 word.AddSystemVerilogError();
@@ -160,7 +161,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             }
             if (word.Text == "signed")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
                 signed = true;
             }

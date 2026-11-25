@@ -1,6 +1,7 @@
 using pluginVerilog.Verilog;
 using System;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog
 {
@@ -21,7 +22,7 @@ namespace pluginVerilog
         public static Attribute ParseCreate(Verilog.WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "(*") throw new Exception();
-            //            word.Color(CodeDrawStyle.ColorType.Identifier);
+            //            word.Color(VerilogColorType.Identifier);
             Attribute attr = new Attribute() { Reference = word.GetReference() };
             word.MoveNext();
 
@@ -33,7 +34,7 @@ namespace pluginVerilog
                     break;
                 }
                 string name = word.Text;
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
 
                 Verilog.Expressions.Expression? expression = null;
@@ -71,7 +72,7 @@ namespace pluginVerilog
             if (word.Text == "*)")
             {
                 attr.Reference = WordReference.CreateReferenceRange(attr.Reference,word.CrateWordReference());
-//                word.Color(CodeDrawStyle.ColorType.Identifier);
+//                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
             }
             return attr;

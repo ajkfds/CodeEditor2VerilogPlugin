@@ -3,6 +3,7 @@ using pluginVerilog.Verilog.Expressions;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
@@ -16,7 +17,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         }
         public required virtual DataTypeEnum Type { get; init; }
         public bool Packable { get { return true; } }
-        public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
+        public VerilogColorType ColorType { get { return VerilogColorType.Variable; } }
         public virtual List<DataObjects.Arrays.PackedArray> PackedDimensions { get; protected set; } = new List<DataObjects.Arrays.PackedArray>();
         public virtual bool Signed { get; protected set; }
 
@@ -89,7 +90,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
         public void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText(CreateString() + " ", CodeDrawStyle.ColorType.Keyword);
+            label.AppendText(CreateString() + " ", VerilogColorType.Keyword);
         }
         public virtual string CreateString()
         {
@@ -160,7 +161,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
         protected static IntegerAtomType? parse(WordScanner word, NameSpace nameSpace, DataTypeEnum dataType)
         {
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             IntegerAtomType integerAtomType = new IntegerAtomType() { Type = dataType };
@@ -174,13 +175,13 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             }
             if (word.Text == "signed")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
                 integerAtomType.Signed = true;
             }
             else if (word.Text == "unsigned")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
                 integerAtomType.Signed = false;
             }

@@ -2,6 +2,7 @@ using pluginVerilog.Verilog.DataObjects;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Expressions.Operators
 {
@@ -17,7 +18,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
         {
             if (word.Text != "matches") throw new Exception();
             Reference = word.GetReference();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             // pattern ::= constant_expression | assignment_pattern | tagged_pattern
@@ -40,7 +41,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
         public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
             if (Primary != null) Primary.AppendLabel(label);
-            label.AppendText(" matches ", CodeDrawStyle.ColorType.Keyword);
+            label.AppendText(" matches ", VerilogColorType.Keyword);
             Pattern?.AppendLabel(label);
         }
 

@@ -1,4 +1,5 @@
 using pluginVerilog.Verilog.BuildingBlocks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Items
 {
@@ -51,7 +52,7 @@ namespace pluginVerilog.Verilog.Items
 
                 // "default clocking" clocking_identifier;
                 case "default":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     if (word.Text == "clocking")
                     {

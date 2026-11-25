@@ -1,6 +1,7 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Items
 {
@@ -282,7 +283,7 @@ namespace pluginVerilog.Verilog.Items
                 System.Diagnostics.Debugger.Break();
             }
             IndexReference beginIndexReference = word.CreateIndexReference();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             // A9: "assign |" EOF -> LHS DataObject candidates

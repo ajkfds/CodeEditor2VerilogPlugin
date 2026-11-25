@@ -2,6 +2,7 @@
 using pluginVerilog.Verilog.Expressions;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Statements
 {
@@ -19,7 +20,7 @@ namespace pluginVerilog.Verilog.Statements
         public required IndexReference BeginIndexReference { get; init; }
         public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; } = "";
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public VerilogColorType ColorType => VerilogColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
 
         /// <summary>
@@ -50,7 +51,7 @@ namespace pluginVerilog.Verilog.Statements
             if (word.Text != "randcase") return null;
 
             RandcaseStatement statement = new RandcaseStatement() { BeginIndexReference = word.CreateIndexReference() };
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             // Parse case items
@@ -62,7 +63,7 @@ namespace pluginVerilog.Verilog.Statements
                 if (word.Text == "default")
                 {
                     item.IsDefault = true;
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                 }
                 else
@@ -74,7 +75,7 @@ namespace pluginVerilog.Verilog.Statements
                 // Optional colon
                 if (word.Text == ":")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                 }
 
@@ -90,7 +91,7 @@ namespace pluginVerilog.Verilog.Statements
             statement.LastIndexReference = word.CreateIndexReference();
             if (word.Text == "endcase")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
 

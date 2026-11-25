@@ -1,6 +1,7 @@
 using pluginVerilog.Verilog.BuildingBlocks;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog
 {
@@ -65,9 +66,9 @@ namespace pluginVerilog.Verilog
             };
         }
 
-        public override CodeDrawStyle.ColorType ColorType
+        public override VerilogColorType ColorType
         {
-            get { return CodeDrawStyle.ColorType.Identifier; }
+            get { return VerilogColorType.Identifier; }
         }
 
         /// <summary>

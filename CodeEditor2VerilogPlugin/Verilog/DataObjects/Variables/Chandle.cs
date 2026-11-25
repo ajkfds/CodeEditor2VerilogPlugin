@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
@@ -38,7 +39,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         //public override void AppendLabel(ColorLabel label)
         //{
         //    AppendTypeLabel(label);
-        //    label.AppendText(Name, CodeDrawStyle.ColorType.Register);
+        //    label.AppendText(Name, VerilogColorType.Register);
 
         //    foreach (Range dimension in Dimensions)
         //    {
@@ -49,7 +50,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         //    if (Comment != "")
         //    {
         //        label.AppendText(" ");
-        //        label.AppendText(Comment.Trim(new char[] { '\r', '\n', '\t', ' ' }), CodeDrawStyle.ColorType.Comment);
+        //        label.AppendText(Comment.Trim(new char[] { '\r', '\n', '\t', ' ' }), VerilogColorType.Comment);
         //    }
 
         //    label.AppendText("\r\n");

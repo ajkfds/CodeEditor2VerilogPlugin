@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Items
 {
@@ -194,7 +195,7 @@ namespace pluginVerilog.Verilog.Items
             if (word.Text == "pullup") pullup = true;
             WordReference beginRef = word.CrateWordReference();
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             DriveStrength driveStrength;
@@ -215,7 +216,7 @@ namespace pluginVerilog.Verilog.Items
             }
             else
             {
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 name = word.Text;
                 word.MoveNext();
             }
@@ -251,7 +252,7 @@ namespace pluginVerilog.Verilog.Items
         // gate_instantiation::=    cmos_switchtype  [delay3] cmos_switch_instance        { , cmos_switch_instance }; 
         public static new CmosSwitchInstiation ParseCreate(WordScanner word, NameSpace nameSpace)
         {
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             string name = "";
@@ -263,7 +264,7 @@ namespace pluginVerilog.Verilog.Items
             if (word.Text != "(" && General.IsIdentifier(word.Text))
             {
                 name = word.Text;
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
             }
             CmosSwitchInstiation ret = new CmosSwitchInstiation() { DefinitionReference = word.CrateWordReference(), Name = name, Project = word.Project };
@@ -294,7 +295,7 @@ namespace pluginVerilog.Verilog.Items
         public static new void Parse(WordScanner word, NameSpace nameSpace)
         {
             string type = word.Text;
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             if (word.Text == "(")
@@ -308,7 +309,7 @@ namespace pluginVerilog.Verilog.Items
                 if (word.Text != "(" && General.IsIdentifier(word.Text))
                 {
                     name = word.Text;
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                 }
                 MosSwitchInstiation ret = new MosSwitchInstiation() { DefinitionReference = word.CrateWordReference(), Name = name, Project = word.Project };
@@ -374,7 +375,7 @@ namespace pluginVerilog.Verilog.Items
         // enable_gate_instance             ::= [name_of_gate_instance] (output_terminal, input_terminal, enable_terminal) 
         public static new EnableGate? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             // EOF just after gate keyword (e.g. "bufif1 |"): suggest instance name / terminal candidates
@@ -393,7 +394,7 @@ namespace pluginVerilog.Verilog.Items
             {
                 if (General.IsIdentifier(word.Text))
                 {
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                 }
                 if (word.Text != "(")
@@ -434,7 +435,7 @@ namespace pluginVerilog.Verilog.Items
         // n_input_gate_instance            ::= [name_of_gate_instance] (output_terminal, input_terminal { , input_terminal } ) 
         public static new NInputGate? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             // EOF just after gate keyword (e.g. "and |"): suggest instance name / terminal candidates
@@ -453,7 +454,7 @@ namespace pluginVerilog.Verilog.Items
             {
                 if (General.IsIdentifier(word.Text))
                 {
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                 }
                 if (word.Text != "(")
@@ -512,7 +513,7 @@ namespace pluginVerilog.Verilog.Items
         // n_output_gate_instance           ::= [name_of_gate_instance] (output_terminal { , output_terminal } , input_terminal ) 
         public static new NOutputGate? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             // EOF just after gate keyword (e.g. "buf |"): suggest instance name / terminal candidates
@@ -531,7 +532,7 @@ namespace pluginVerilog.Verilog.Items
             {
                 if (General.IsIdentifier(word.Text))
                 {
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                 }
                 if (word.Text != "(")
@@ -587,7 +588,7 @@ namespace pluginVerilog.Verilog.Items
             bool isReversible = switchType == "rtran";
 
             WordReference beginRef = word.CrateWordReference();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             PassSwitch ret = new PassSwitch() { DefinitionReference = beginRef, Name = "", Project = word.Project, IsReversible = isReversible };
@@ -601,7 +602,7 @@ namespace pluginVerilog.Verilog.Items
                 if (General.IsIdentifier(word.Text))
                 {
                     instanceName = word.Text;
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                 }
 
@@ -673,7 +674,7 @@ namespace pluginVerilog.Verilog.Items
             bool isReversible = switchType == "rtranif0" || switchType == "rtranif1";
 
             WordReference beginRef = word.CrateWordReference();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             PassEnableSwitch ret = new PassEnableSwitch() 
@@ -694,7 +695,7 @@ namespace pluginVerilog.Verilog.Items
                 if (General.IsIdentifier(word.Text))
                 {
                     instanceName = word.Text;
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                 }
 

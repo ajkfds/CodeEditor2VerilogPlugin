@@ -2,6 +2,7 @@
 using pluginVerilog.Verilog.Assertion;
 using System;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Items
 {
@@ -152,7 +153,7 @@ namespace pluginVerilog.Verilog.Items
 
         public required string Name { get; set; }
 
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Keyword;
+        public VerilogColorType ColorType => VerilogColorType.Keyword;
 
         public NamedElements NamedElements => throw new NotImplementedException();
     }

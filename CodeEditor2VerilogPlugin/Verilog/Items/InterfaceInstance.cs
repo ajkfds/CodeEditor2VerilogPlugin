@@ -5,13 +5,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Items
 {
     public class InterfaceInstance : DataObject, IBuildingBlockInstantiation, INamedElement, IDocumentRegeion
     {
         internal InterfaceInstance() { }
-        public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
+        public override VerilogColorType ColorType { get { return VerilogColorType.Variable; } }
         public Attribute? Attribute { get; set; }
 
         public required WordReference DefinitionReference { get; init; }
@@ -157,13 +158,13 @@ namespace pluginVerilog.Verilog.Items
                 word.SkipToKeyword(";");
                 return;
             }
-            interfaceIdentifier.Color(CodeDrawStyle.ColorType.Keyword);
+            interfaceIdentifier.Color(VerilogColorType.Keyword);
 
             // get parameters to override interface port parameter
             Dictionary<string, Expressions.Expression> parameterOverrides = new Dictionary<string, Expressions.Expression>();
             if (word.Text == "#") // parse parameter override
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
 
                 if (word.Text != "(")
@@ -180,7 +181,7 @@ namespace pluginVerilog.Verilog.Items
                     {
                         bool error = false;
                         word.MoveNext();
-                        word.Color(CodeDrawStyle.ColorType.Parameter);
+                        word.Color(VerilogColorType.Parameter);
                         string paramName = word.Text;
                         if (instancedInterface != null && !instancedInterface.PortParameterNameList.Contains(paramName))
                         {
@@ -292,7 +293,7 @@ namespace pluginVerilog.Verilog.Items
             while (!word.Eof)
             {
 
-                word.Color(CodeDrawStyle.ColorType.Variable);
+                word.Color(VerilogColorType.Variable);
                 if (!General.IsIdentifier(word.Text))
                 {
                     if (word.Prototype) word.AddError("illegal instance name");
@@ -409,7 +410,7 @@ namespace pluginVerilog.Verilog.Items
 
                         string pinName = word.Text;
                         bool outPort = false;
-                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.Color(VerilogColorType.Identifier);
                         if (instancedInterface != null && !word.Prototype)
                         {
                             if (instancedInterface.Ports.ContainsKey(pinName))

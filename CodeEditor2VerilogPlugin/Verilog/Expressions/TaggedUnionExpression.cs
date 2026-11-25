@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Expressions
 {
@@ -16,8 +17,8 @@ namespace pluginVerilog.Verilog.Expressions
 
         public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText("tagged", CodeDrawStyle.ColorType.Keyword);
-            if (MemberIdentifier != null) label.AppendText(" " + MemberIdentifier, CodeDrawStyle.ColorType.Identifier);
+            label.AppendText("tagged", VerilogColorType.Keyword);
+            if (MemberIdentifier != null) label.AppendText(" " + MemberIdentifier, VerilogColorType.Identifier);
             if (MemberExpression != null)
             {
                 label.AppendText("(");
@@ -40,14 +41,14 @@ namespace pluginVerilog.Verilog.Expressions
         public static TaggedUnionExpression? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             WordReference beginRef = word.GetReference();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext(); // "tagged"
 
             TaggedUnionExpression tagged = new TaggedUnionExpression();
 
             if (word.Text == "unique")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
 
@@ -58,7 +59,7 @@ namespace pluginVerilog.Verilog.Expressions
             }
 
             tagged.MemberIdentifier = word.Text;
-            word.Color(CodeDrawStyle.ColorType.Variable);
+            word.Color(VerilogColorType.Variable);
             word.MoveNext();
 
             if (word.GetCharAt(0) == '(')
@@ -88,7 +89,7 @@ namespace pluginVerilog.Verilog.Expressions
                     word.AddError("union member identifier expected");
                     break;
                 }
-                word.Color(CodeDrawStyle.ColorType.Variable);
+                word.Color(VerilogColorType.Variable);
                 word.MoveNext();
                 if (word.GetCharAt(0) == '(')
                 {

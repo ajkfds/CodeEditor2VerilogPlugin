@@ -2,6 +2,7 @@ using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.Expressions;
 using System;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.Nets
 {
@@ -92,13 +93,13 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                 if (word.Text == "highz0")
                 {
                     strength0 = StrengthValueEnum.HighZ0;
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                 }
                 else if (word.Text == "highz1")
                 {
                     strength0 = StrengthValueEnum.HighZ1;
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                 }
             }
@@ -118,13 +119,13 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                 if (word.Text == "highz0")
                 {
                     strength1 = StrengthValueEnum.HighZ0;
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                 }
                 else if (word.Text == "highz1")
                 {
                     strength1 = StrengthValueEnum.HighZ1;
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                 }
             }
@@ -173,7 +174,7 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
                 default:
                     return null;
             }
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
             return ret;
         }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog
 {
@@ -102,9 +103,9 @@ namespace pluginVerilog.Verilog
         public void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label, Dictionary<string, Macro> macros)
         {
             if (Name == null) return;
-            label.AppendText(Name, CodeDrawStyle.ColorType.Identifier);
+            label.AppendText(Name, VerilogColorType.Identifier);
             label.AppendText(" : ");
-            label.AppendText(MacroText, CodeDrawStyle.ColorType.Normal);
+            label.AppendText(MacroText, VerilogColorType.Normal);
             label.AppendText("\r\n");
 
             string fixedText = MacroText;
@@ -123,8 +124,8 @@ namespace pluginVerilog.Verilog
             }
             if (fixedText != MacroText)
             {
-                label.AppendText("  = ", CodeDrawStyle.ColorType.Normal);
-                label.AppendText(fixedText, CodeDrawStyle.ColorType.Normal);
+                label.AppendText("  = ", VerilogColorType.Normal);
+                label.AppendText(fixedText, VerilogColorType.Normal);
                 label.AppendText("\r\n");
             }
         }

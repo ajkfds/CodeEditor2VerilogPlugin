@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Threading;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog
 {
@@ -377,8 +378,7 @@ namespace pluginVerilog.Verilog
                 Data.VerilogCommon.AutoCompleteItem acItem = new Data.VerilogCommon.AutoCompleteItem(
                     completeType,
                     subElement.Name,
-                    CodeDrawStyle.ColorIndex(subElement.ColorType),
-                    Global.CodeDrawStyle.Color(subElement.ColorType),
+                    (byte)subElement.ColorType,
                     "CodeEditor2/Assets/Icons/tag.svg"
                     );
                 AutoCompleteItems.Add(acItem);
@@ -395,8 +395,7 @@ namespace pluginVerilog.Verilog
                 Data.VerilogCommon.AutoCompleteItem acItem = new Data.VerilogCommon.AutoCompleteItem(
                     Data.VerilogCommon.AutoCompleteItem.CompleteType.Keyword,
                     macroText,
-                    CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
-                    Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword),
+                    (byte)VerilogColorType.Keyword,
                     "CodeEditor2/Assets/Icons/bookmark.svg"
                     );
                 if (filter(acItem)) AutoCompleteItems.Add(acItem);
@@ -408,8 +407,7 @@ namespace pluginVerilog.Verilog
                 Data.VerilogCommon.AutoCompleteItem acItem = new Data.VerilogCommon.AutoCompleteItem(
                     Data.VerilogCommon.AutoCompleteItem.CompleteType.Keyword,
                     macroText,
-                    CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
-                    Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword),
+                    (byte)VerilogColorType.Keyword,
                     "CodeEditor2/Assets/Icons/bookmark.svg"
                     );
                 if (filter(acItem)) AutoCompleteItems.Add(acItem);
@@ -446,8 +444,7 @@ namespace pluginVerilog.Verilog
                 Data.VerilogCommon.AutoCompleteItem acItem = new Data.VerilogCommon.AutoCompleteItem(
                     Data.VerilogCommon.AutoCompleteItem.CompleteType.Task,
                     key,
-                    CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
-                    Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
+                    (byte)VerilogColorType.Keyword
                     );
                 if (filter(acItem)) AutoCompleteItems.Add(acItem);
             }
@@ -463,8 +460,7 @@ namespace pluginVerilog.Verilog
                 Data.VerilogCommon.AutoCompleteItem acItem = new Data.VerilogCommon.AutoCompleteItem(
                     Data.VerilogCommon.AutoCompleteItem.CompleteType.Function,
                     key,
-                    CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
-                    Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword)
+                    (byte)VerilogColorType.Keyword
                     );
                 if (filter(acItem)) AutoCompleteItems.Add(acItem);
             }
@@ -524,8 +520,7 @@ namespace pluginVerilog.Verilog
                     Data.VerilogCommon.AutoCompleteItem acItem = new Data.VerilogCommon.AutoCompleteItem(
                         completeType,
                         subElement.Name,
-                        CodeDrawStyle.ColorIndex(subElement.ColorType),
-                        Global.CodeDrawStyle.Color(subElement.ColorType),
+                        (byte)subElement.ColorType,
                         "CodeEditor2/Assets/Icons/tag.svg"
                         );
                     if (filter(acItem)) AutoCompleteItems.Add(acItem);
@@ -557,8 +552,7 @@ namespace pluginVerilog.Verilog
                 Data.VerilogCommon.AutoCompleteItem acItem = new Data.VerilogCommon.AutoCompleteItem(
                     completeType,
                     subElement.Name,
-                    CodeDrawStyle.ColorIndex(subElement.ColorType),
-                    Global.CodeDrawStyle.Color(subElement.ColorType),
+                    (byte)subElement.ColorType,
                     "CodeEditor2/Assets/Icons/tag.svg"
                     );
                 if (filter(acItem)) AutoCompleteItems.Add(acItem);

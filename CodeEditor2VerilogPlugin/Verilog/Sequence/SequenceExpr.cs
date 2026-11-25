@@ -1,6 +1,7 @@
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.Expressions;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Sequence
 {
@@ -182,7 +183,7 @@ namespace pluginVerilog.Verilog.Sequence
 
 
 /*
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             if (word.Text == "(")
@@ -204,7 +205,7 @@ namespace pluginVerilog.Verilog.Sequence
             else
             {
                 // Simple identifier
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 string identifier = word.Text;
                 word.MoveNext();
                 return identifier;
@@ -218,7 +219,7 @@ namespace pluginVerilog.Verilog.Sequence
         private static object? ParseCycleDelayRange(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "##") return null;
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             CycleDelayRange range = new CycleDelayRange();
@@ -244,13 +245,13 @@ namespace pluginVerilog.Verilog.Sequence
 
                 if (word.Text == "*")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     range.Type = CycleDelayRangeType.RepeatZeroOrMore;
                 }
                 else if (word.Text == "+")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     range.Type = CycleDelayRangeType.RepeatOneOrMore;
                 }
@@ -266,7 +267,7 @@ namespace pluginVerilog.Verilog.Sequence
                         Expression? endExpr = null;
                         if (word.Text == "$")
                         {
-                            word.Color(CodeDrawStyle.ColorType.Identifier);
+                            word.Color(VerilogColorType.Identifier);
                             word.MoveNext();
                             range.IsDollarEnd = true;
                         }
@@ -303,7 +304,7 @@ namespace pluginVerilog.Verilog.Sequence
         private static SequenceExpr? ParseFirstMatch(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "first_match") return null;
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             if (word.Text != "(")
@@ -431,7 +432,7 @@ namespace pluginVerilog.Verilog.Sequence
 
             if (word.Text == "*")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
                 if (word.Text == "]")
                 {
@@ -441,7 +442,7 @@ namespace pluginVerilog.Verilog.Sequence
             }
             else if (word.Text == "+")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
                 if (word.Text == "]")
                 {
@@ -509,7 +510,7 @@ namespace pluginVerilog.Verilog.Sequence
 
             if (word.Text == "*")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
                 if (word.Text == "]")
                 {
@@ -525,7 +526,7 @@ namespace pluginVerilog.Verilog.Sequence
             }
             else if (word.Text == "+")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
                 if (word.Text == "]")
                 {
@@ -535,7 +536,7 @@ namespace pluginVerilog.Verilog.Sequence
             }
             else if (word.Text == "=")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
                 // [= const_or_range_expression]  e.g. [=2:10] / [=3]
                 if (TryParseRepetitionCountRange(word, nameSpace, out Expression? sEq, out Expression? eEq))
@@ -663,23 +664,23 @@ namespace pluginVerilog.Verilog.Sequence
             switch (word.Text)
             {
                 case "and":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return new SequenceBinaryOperator { Operator = "and", Precedence = 1 };
                 case "or":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return new SequenceBinaryOperator { Operator = "or", Precedence = 0 };
                 case "intersect":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return new SequenceBinaryOperator { Operator = "intersect", Precedence = 2 };
                 case "throughout":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return new SequenceBinaryOperator { Operator = "throughout", Precedence = 4 };
                 case "within":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return new SequenceBinaryOperator { Operator = "within", Precedence = 3 };
             }
@@ -714,7 +715,7 @@ namespace pluginVerilog.Verilog.Sequence
 
             if (word.Text == "*")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
                 if (word.Text == "]")
                 {
@@ -730,7 +731,7 @@ namespace pluginVerilog.Verilog.Sequence
             }
             else if (word.Text == "+")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
                 if (word.Text == "]")
                 {
@@ -740,7 +741,7 @@ namespace pluginVerilog.Verilog.Sequence
             }
             else if (word.Text == "=")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
                 // [= const_or_range_expression]  e.g. [=2:10] / [=3]
                 if (SequenceExpr.TryParseRepetitionCountRange(word, nameSpace, out Expression? sEq, out Expression? eEq))

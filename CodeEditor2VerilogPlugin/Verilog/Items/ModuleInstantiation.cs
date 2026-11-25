@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Items
 {
@@ -17,7 +18,7 @@ namespace pluginVerilog.Verilog.Items
         public NamedElements NamedElements { get; } = new NamedElements();
 
 
-        public virtual CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Identifier; } }
+        public virtual VerilogColorType ColorType { get { return VerilogColorType.Identifier; } }
         //protected ModuleInstantiation() { }
         /*
         A.4.1.1 Module instantiation 
@@ -247,9 +248,9 @@ namespace pluginVerilog.Verilog.Items
                             comment.MoveNext();
                             continue;
                         }
-                        comment.Color(CodeDrawStyle.ColorType.HighLightedComment);
+                        comment.Color(VerilogColorType.HighLightedComment);
                         comment.MoveNext();
-                        comment.Color(CodeDrawStyle.ColorType.HighLightedComment);
+                        comment.Color(VerilogColorType.HighLightedComment);
                         // Resolved through the project contract instead of the
                         // editor's Global.Projects, so the parser works in any
                         // host (the language server maps it to its workspace
@@ -360,7 +361,7 @@ namespace pluginVerilog.Verilog.Items
                 if (word.Text == ";") word.MoveNext();
                 return;
             }
-            moduleIdentifier.Color(CodeDrawStyle.ColorType.Keyword);
+            moduleIdentifier.Color(VerilogColorType.Keyword);
             //            word.MoveNext();
 
             Dictionary<string, Expressions.Expression> parameterOverrides = new Dictionary<string, Expressions.Expression>();
@@ -373,7 +374,7 @@ namespace pluginVerilog.Verilog.Items
 
             while (!word.Eof)
             {
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
 
 
                 if (!General.IsIdentifier(word.Text))
@@ -668,7 +669,7 @@ namespace pluginVerilog.Verilog.Items
                 if (word.Text == ".*")
                 {
                     // Wildcard connection - all remaining ports are implicitly connected
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                     if (word.Text != ",")
                     {
@@ -764,7 +765,7 @@ namespace pluginVerilog.Verilog.Items
                 if (word.Text == "*") // 23.3.2.4 Connecting module instances using wildcard named port connections ( .*)
                 {
                     wildcardConnection = true;
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     wildcardRef = word.GetReference();
                     word.MoveNext();
                     if (word.Text != ",")
@@ -782,7 +783,7 @@ namespace pluginVerilog.Verilog.Items
                 IndexReference startRef = word.CreateIndexReference();
                 if (notWrittenPortName.Contains(pinName)) notWrittenPortName.Remove(pinName);
                 WordReference pinReference = word.GetReference();
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
 
                 if (word.Prototype)
                 {

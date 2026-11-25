@@ -4,6 +4,7 @@ using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.Expressions;
 using System;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Statements
 {
@@ -11,7 +12,7 @@ namespace pluginVerilog.Verilog.Statements
     {
         protected BlockingAssignment() { }
         public string Name { get; protected set; }
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public VerilogColorType ColorType => VerilogColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
         public required IndexReference BeginIndexReference { get; init; }
         public IndexReference? LastIndexReference { get; set; } = null;
@@ -395,7 +396,7 @@ namespace pluginVerilog.Verilog.Statements
             else if (word.Text == "repeat" && word.NextText == "(")
             {
                 // repeat ( expression ) event_control
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext(); // repeat
                 word.MoveNext(); // (
                 Expressions.Expression? repeatCount = Expressions.Expression.ParseCreate(word, nameSpace);
@@ -433,7 +434,7 @@ namespace pluginVerilog.Verilog.Statements
                 class_ = word.ProjectProperty.UnitNameSpace.Get(word.Text) as BuildingBlocks.Class;
                 if (class_ != null)
                 {
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                     if (word.Text != "::")
                     {
@@ -477,7 +478,7 @@ namespace pluginVerilog.Verilog.Statements
                 word.AddError("an abstract class shall not be instantiated");
             }
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             // Handle dynamic array new: new [expression] [(expression)]

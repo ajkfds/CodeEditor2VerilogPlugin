@@ -5,6 +5,7 @@ using pluginVerilog.Verilog.DataObjects.Nets;
 using pluginVerilog.Verilog.Items;
 using System;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Expressions
 {
@@ -462,7 +463,7 @@ number
                             NameSpaceReference nameSpaceReference = new NameSpaceReference(buildingBlock) { 
                                 Reference = WordReference.CreateReferenceRange(beginRef, word.GetReference()) 
                             };
-                            word.Color(CodeDrawStyle.ColorType.Identifier);
+                            word.Color(VerilogColorType.Identifier);
                             word.MoveNext();
                             return nameSpaceReference;
                         }
@@ -478,7 +479,7 @@ number
                             {
                                 Reference = WordReference.CreateReferenceRange(beginRef, word.GetReference())
                             };
-                            word.Color(CodeDrawStyle.ColorType.Identifier);
+                            word.Color(VerilogColorType.Identifier);
                             word.MoveNext();
                             return sequenceReference;
                         }
@@ -510,7 +511,7 @@ number
                             {
                                 Reference = WordReference.CreateReferenceRange(beginRef, word.GetReference())
                             };
-                            word.Color(CodeDrawStyle.ColorType.Identifier);
+                            word.Color(VerilogColorType.Identifier);
                             word.MoveNext();
                             return nameSpaceReference;
                         }
@@ -610,7 +611,7 @@ number
             WordReference beginRef = word.GetReference();
 
             word.AddError("undefined function");
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
 
             if (word.Text == "(")

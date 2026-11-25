@@ -3,6 +3,7 @@ using pluginVerilog.Verilog.BuildingBlocks;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Statements
 {
@@ -23,7 +24,7 @@ namespace pluginVerilog.Verilog.Statements
         public required IndexReference BeginIndexReference { get; init; }
         public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public VerilogColorType ColorType => VerilogColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
         public void DisposeSubReference()
         {
@@ -53,7 +54,7 @@ namespace pluginVerilog.Verilog.Statements
         public static IStatement? ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label, string? blockIdentifier = null)
         {
             if (word.Text != "fork") throw new Exception();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             IndexReference beginIndex = word.CreateIndexReference();
             word.MoveNext(); // fork
 
@@ -120,7 +121,7 @@ namespace pluginVerilog.Verilog.Statements
 
             reportIllegalJoinInFunction(word, nameSpace, sequentialBlock.JoinType);
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             sequentialBlock.LastIndexReference = word.CreateIndexReference();
             word.MoveNext(); // end
 
@@ -191,7 +192,7 @@ namespace pluginVerilog.Verilog.Statements
             { // implementation
                 if (nameSpace.NamedElements.ContainsKey(name) && nameSpace.NamedElements[name] is NamedParallelBlock)
                 {
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     namedBlock = (NamedParallelBlock)nameSpace.NamedElements[name];
                 }
                 else
@@ -248,7 +249,7 @@ namespace pluginVerilog.Verilog.Statements
 
             reportIllegalJoinInFunction(word, nameSpace, namedBlock.JoinType);
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             namedBlock.LastIndexReference = word.CreateIndexReference();
             word.MoveNext(); // join/join_any/join_none
 
@@ -265,7 +266,7 @@ namespace pluginVerilog.Verilog.Statements
                 }
                 else
                 {
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                 }
             }
@@ -321,7 +322,7 @@ namespace pluginVerilog.Verilog.Statements
         public required IndexReference BeginIndexReference { get; init; }
         public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; } = "disable fork";
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public VerilogColorType ColorType => VerilogColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
 
         public static DisableForkStatement ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
@@ -330,17 +331,17 @@ namespace pluginVerilog.Verilog.Statements
             if (word.NextText != "fork") return null;
 
             DisableForkStatement statement = new DisableForkStatement() { BeginIndexReference = word.CreateIndexReference() };
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext(); // disable
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext(); // fork
 
             // Semicolon
             statement.LastIndexReference = word.CreateIndexReferenceBefore();
             if (word.Text == ";")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
             else

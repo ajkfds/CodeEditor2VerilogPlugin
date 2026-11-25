@@ -1,5 +1,6 @@
 using pluginVerilog.Verilog.Items.Generate;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog
 {
@@ -73,7 +74,7 @@ namespace pluginVerilog.Verilog
             if (word.Text != "begin") return false;
 
             // generate_block ::= begin[ : generate_block_identifier]  { generate_item } end
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             WordReference beginRef = word.GetReference();
             IndexReference beginReference = word.CreateIndexReference();
             word.MoveNext();
@@ -89,7 +90,7 @@ namespace pluginVerilog.Verilog
                     word.AddError("identifier required");
                     return true;
                 }
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 block = NamedGeneratedBlock.Create(word, nameSpace, beginReference);
                 if (word.Prototype)
                 {
@@ -150,14 +151,14 @@ namespace pluginVerilog.Verilog
 
             if (word.Text == "end")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
                 if (word.Text == ":")
                 {
                     word.MoveNext();
                     if (block != null && word.Text == block.Name)
                     {
-                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.Color(VerilogColorType.Identifier);
                         word.MoveNext();
                     }
                     else
@@ -181,7 +182,7 @@ namespace pluginVerilog.Verilog
 
             string identifier = "";
             // generate_block ::= begin[ : generate_block_identifier]  { generate_item } end
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             WordReference beginRef = word.GetReference();
             word.MoveNext();
 
@@ -198,7 +199,7 @@ namespace pluginVerilog.Verilog
                     word.AddError("identifier required");
                     return true;
                 }
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 identifier = word.Text;
                 word.MoveNext();
             }
@@ -236,14 +237,14 @@ namespace pluginVerilog.Verilog
 
             if (word.Text == "end")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
                 if (word.Text == ":")
                 {
                     word.MoveNext();
                     if (word.Text == identifier)
                     {
-                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.Color(VerilogColorType.Identifier);
                         word.MoveNext();
                     }
                     else

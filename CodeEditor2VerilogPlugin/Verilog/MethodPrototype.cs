@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog
 {
@@ -32,7 +33,7 @@ namespace pluginVerilog.Verilog
             // fails to implement it can be reported.
             if (word.NextText == "constraint")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext(); // pure
                 Coverage.ConstraintDeclaration? pureConstraint =
                     Coverage.ConstraintDeclaration.ParseCreate(word, nameSpace);
@@ -60,11 +61,11 @@ namespace pluginVerilog.Verilog
                 word.AddError("pure virtual methods can only be declared in a virtual class");
             }
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             if (word.Eof | word.Text != "virtual") return true;
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             if (ParseCreate(word, nameSpace))
@@ -137,7 +138,7 @@ namespace pluginVerilog.Verilog
             if (word.Text != "new") return;
 
             IndexReference beginReference = word.CreateIndexReference();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext(); // new
 
             // Create constructor function
@@ -183,25 +184,25 @@ namespace pluginVerilog.Verilog
                         DataObjects.Port.DirectionEnum direction = DataObjects.Port.DirectionEnum.Input;
                         if (word.Text == "input")
                         {
-                            word.Color(CodeDrawStyle.ColorType.Keyword);
+                            word.Color(VerilogColorType.Keyword);
                             word.MoveNext();
                             direction = DataObjects.Port.DirectionEnum.Input;
                         }
                         else if (word.Text == "output")
                         {
-                            word.Color(CodeDrawStyle.ColorType.Keyword);
+                            word.Color(VerilogColorType.Keyword);
                             word.MoveNext();
                             direction = DataObjects.Port.DirectionEnum.Output;
                         }
                         else if (word.Text == "inout")
                         {
-                            word.Color(CodeDrawStyle.ColorType.Keyword);
+                            word.Color(VerilogColorType.Keyword);
                             word.MoveNext();
                             direction = DataObjects.Port.DirectionEnum.Inout;
                         }
                         else if (word.Text == "ref")
                         {
-                            word.Color(CodeDrawStyle.ColorType.Keyword);
+                            word.Color(VerilogColorType.Keyword);
                             word.MoveNext();
                             direction = DataObjects.Port.DirectionEnum.Ref;
                         }
@@ -217,7 +218,7 @@ namespace pluginVerilog.Verilog
                         if (General.IsIdentifier(word.Text))
                         {
                             string portName = word.Text;
-                            word.Color(CodeDrawStyle.ColorType.Variable);
+                            word.Color(VerilogColorType.Variable);
                             word.MoveNext();
 
                             // Create port
@@ -290,7 +291,7 @@ namespace pluginVerilog.Verilog
             // Semicolon
             if (word.Text == ";")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
             else

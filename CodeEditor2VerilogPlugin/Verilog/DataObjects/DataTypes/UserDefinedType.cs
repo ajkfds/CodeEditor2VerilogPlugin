@@ -1,6 +1,7 @@
 
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
@@ -47,7 +48,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             }
         }
 
-        public CodeDrawStyle.ColorType ColorType
+        public VerilogColorType ColorType
         {
             get
             {
@@ -67,7 +68,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
         public void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText(Typedef.Name, CodeDrawStyle.ColorType.Identifier);
+            label.AppendText(Typedef.Name, VerilogColorType.Identifier);
             label.AppendText(" ");
             foreach (var packedArray in PackedDimensions)
             {

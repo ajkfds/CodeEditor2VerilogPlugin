@@ -1,3 +1,4 @@
+using SystemVerilogCore.Documents;
 namespace pluginVerilog.Verilog.Expressions
 {
     public class Null : Primary
@@ -5,7 +6,7 @@ namespace pluginVerilog.Verilog.Expressions
         protected Null() { }
         public static new Null ParseCreate(WordScanner word, NameSpace nameSpace)
         {
-            word.Color(CodeDrawStyle.ColorType.Variable);
+            word.Color(VerilogColorType.Variable);
             Null null_ = new Null();
             null_.Constant = true;
             null_.Reference = word.GetReference();

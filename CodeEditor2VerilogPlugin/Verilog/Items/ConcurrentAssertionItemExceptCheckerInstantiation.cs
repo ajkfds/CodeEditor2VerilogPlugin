@@ -1,5 +1,6 @@
 using pluginVerilog.Verilog.Assertion;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Items
 {
@@ -25,7 +26,7 @@ namespace pluginVerilog.Verilog.Items
             if (General.IsSimpleIdentifier(word.Text) && word.NextText == ":")
             {
                 blockIdentifier = word.Text;
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
                 word.MoveNext();
             }

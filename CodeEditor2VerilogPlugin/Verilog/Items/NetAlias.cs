@@ -2,6 +2,7 @@
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.Expressions;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Items
 {
@@ -19,7 +20,7 @@ namespace pluginVerilog.Verilog.Items
         protected NetAlias() { }
 
 //        public string Name { get; set; } = "";
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public VerilogColorType ColorType => VerilogColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
 
         /// <summary>
@@ -43,7 +44,7 @@ namespace pluginVerilog.Verilog.Items
             }
 
             IndexReference beginReference = word.CreateIndexReference();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext(); // alias
 
 
@@ -78,7 +79,7 @@ namespace pluginVerilog.Verilog.Items
                     if (word.Text == ";") word.MoveNext();
                     return true;
                 }
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
 
                 // Parse expression
@@ -102,7 +103,7 @@ namespace pluginVerilog.Verilog.Items
                 if (word.Text == ";") word.MoveNext();
                 return true;
             }
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             // register the region of the whole "alias ... ;" statement

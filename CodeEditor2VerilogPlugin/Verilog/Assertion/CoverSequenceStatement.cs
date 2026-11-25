@@ -1,6 +1,7 @@
 
 using System;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Assertion
 {
@@ -32,10 +33,10 @@ namespace pluginVerilog.Verilog.Assertion
                 throw new Exception();
             }
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext(); // cover
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext(); // sequence
 
             CoverSequenceStatement coverSequenceStatement = new CoverSequenceStatement() { BeginIndexReference = word.CreateIndexReference() };
@@ -55,7 +56,7 @@ namespace pluginVerilog.Verilog.Assertion
             // Parse optional disable iff
             if (word.Text == "disable")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
                 if (word.Text != "iff")
                 {
@@ -63,7 +64,7 @@ namespace pluginVerilog.Verilog.Assertion
                 }
                 else
                 {
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     if (word.Text == "(")
                     {
@@ -124,7 +125,7 @@ namespace pluginVerilog.Verilog.Assertion
 
         public string Name { get; set; } = "";
 
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Keyword;
+        public VerilogColorType ColorType => VerilogColorType.Keyword;
 
         public NamedElements NamedElements => new NamedElements();
 

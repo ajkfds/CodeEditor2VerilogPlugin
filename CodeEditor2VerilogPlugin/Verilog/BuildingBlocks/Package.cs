@@ -3,6 +3,7 @@ using pluginVerilog.Verilog.Items;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
@@ -64,7 +65,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             */
 
             if (word.Text != "package") throw new Exception();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             IndexReference beginReference = word.CreateIndexReference();
             word.MoveNext();
 
@@ -77,7 +78,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
 
             // module_identifier
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             if (!General.IsIdentifier(word.Text))
             {
                 word.AddError("illegal package name");
@@ -135,7 +136,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             // endmodule keyword
             if (word.Text == "endpackage")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 package.LastIndexReference = word.CreateIndexReference();
 
                 word.AppendBlock(package.BeginIndexReference, package.LastIndexReference);
@@ -151,7 +152,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 word.MoveNext();
                 if (word.Text == package.Name)
                 {
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                 }
                 else

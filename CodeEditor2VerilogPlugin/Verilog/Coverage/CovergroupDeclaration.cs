@@ -2,6 +2,7 @@ using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.Expressions;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Coverage
 {
@@ -40,7 +41,7 @@ namespace pluginVerilog.Verilog.Coverage
     public class CovergroupDeclaration : INamedElement
     {
         public string Name { get; set; } = "";
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public VerilogColorType ColorType => VerilogColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
 
         /// <summary>
@@ -78,7 +79,7 @@ namespace pluginVerilog.Verilog.Coverage
                 return null;
             }
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext(); // covergroup
 
             // covergroup_identifier
@@ -94,17 +95,17 @@ namespace pluginVerilog.Verilog.Coverage
             {
                 Name = word.Text
             };
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
 
             // [ "with" "function" "sample" "(" [ covergroup_range_list ] ")" ]
             if (word.Text == "with" && word.NextText == "function")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext(); // with
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext(); // function
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext(); // sample
 
                 if (word.Text == "(")
@@ -218,7 +219,7 @@ namespace pluginVerilog.Verilog.Coverage
             // endgroup
             if (word.Text == "endgroup")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
 
                 // Check for optional : covergroup_identifier
@@ -227,7 +228,7 @@ namespace pluginVerilog.Verilog.Coverage
                     word.MoveNext();
                     if (word.Text == covergroup.Name)
                     {
-                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.Color(VerilogColorType.Identifier);
                         covergroup.EndLabel = word.Text;
                         word.MoveNext();
                     }
@@ -271,7 +272,7 @@ namespace pluginVerilog.Verilog.Coverage
                 return null;
             }
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             // Parse name = expression pairs
@@ -280,7 +281,7 @@ namespace pluginVerilog.Verilog.Coverage
                 if (General.IsIdentifier(word.Text))
                 {
                     string name = word.Text;
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
 
                     if (word.Text == "=")
@@ -322,7 +323,7 @@ namespace pluginVerilog.Verilog.Coverage
     public class Coverpoint : INamedElement
     {
         public string Name { get; set; } = "";
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public VerilogColorType ColorType => VerilogColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
 
         /// <summary>
@@ -347,7 +348,7 @@ namespace pluginVerilog.Verilog.Coverage
                 return null;
             }
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             Coverpoint coverpoint = new Coverpoint();
@@ -355,7 +356,7 @@ namespace pluginVerilog.Verilog.Coverage
             // Check for wildcard coverpoint or identifier
             if (word.Text == "wildcard")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
                 // wildcard coverpoint doesn't have expression
             }
@@ -376,7 +377,7 @@ namespace pluginVerilog.Verilog.Coverage
                 if (General.IsIdentifier(word.Text))
                 {
                     coverpoint.Name = word.Text;
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                 }
                 else
@@ -388,7 +389,7 @@ namespace pluginVerilog.Verilog.Coverage
             // Parse optional iff condition
             if (word.Text == "iff")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
 
                 if (word.Text == "(")
@@ -435,7 +436,7 @@ namespace pluginVerilog.Verilog.Coverage
     public class CoverCross : INamedElement
     {
         public string Name { get; set; } = "";
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public VerilogColorType ColorType => VerilogColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
 
         /// <summary>
@@ -460,7 +461,7 @@ namespace pluginVerilog.Verilog.Coverage
                 return null;
             }
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             CoverCross cross = new CoverCross();
@@ -471,7 +472,7 @@ namespace pluginVerilog.Verilog.Coverage
                 if (General.IsIdentifier(word.Text))
                 {
                     cross.CoverpointIdentifiers.Add(word.Text);
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                 }
 
@@ -491,7 +492,7 @@ namespace pluginVerilog.Verilog.Coverage
             // Parse optional iff condition
             if (word.Text == "iff")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
 
                 if (word.Text == "(")
@@ -601,7 +602,7 @@ namespace pluginVerilog.Verilog.Coverage
             if (word.Text == "wildcard")
             {
                 bins.IsWildcard = true;
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
 
@@ -609,7 +610,7 @@ namespace pluginVerilog.Verilog.Coverage
             if (word.Text == "bins" || word.Text == "ignore_bins" || word.Text == "illegal_bins")
             {
                 bins.BinsType = word.Text;
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
             else if (General.IsIdentifier(word.Text))
@@ -636,19 +637,19 @@ namespace pluginVerilog.Verilog.Coverage
             }
 
             bins.Identifier = word.Text;
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
 
             // Check for = (assignment)
             if (word.Text == "=")
             {
-                word.Color(CodeDrawStyle.ColorType.Normal);
+                word.Color(VerilogColorType.Normal);
                 word.MoveNext();
 
                 // Check for "with" expression
                 if (word.Text == "with")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
 
                     if (word.Text == "(")
@@ -665,7 +666,7 @@ namespace pluginVerilog.Verilog.Coverage
                 else if (General.IsIdentifier(word.Text))
                 {
                     bins.CrossReference = word.Text;
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                 }
                 // Otherwise parse as transition expression
@@ -678,7 +679,7 @@ namespace pluginVerilog.Verilog.Coverage
             // Parse optional matches value
             if (word.Text == "matches")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
                 if (IsSimpleNumber(word.Text))
                 {
@@ -686,7 +687,7 @@ namespace pluginVerilog.Verilog.Coverage
                     {
                         bins.Matches = matchesValue;
                     }
-                    word.Color(CodeDrawStyle.ColorType.Number);
+                    word.Color(VerilogColorType.Number);
                     word.MoveNext();
                 }
             }
@@ -694,7 +695,7 @@ namespace pluginVerilog.Verilog.Coverage
             // Parse optional iff condition
             if (word.Text == "iff")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
 
                 if (word.Text == "(")

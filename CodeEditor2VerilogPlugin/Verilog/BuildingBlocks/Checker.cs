@@ -5,6 +5,7 @@ using pluginVerilog.Verilog.Expressions;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
@@ -113,7 +114,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             */
 
             if (word.Text != "checker") throw new Exception();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             IndexReference beginReference = word.CreateIndexReference();
             word.MoveNext();
 
@@ -136,7 +137,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 Project = word.Project
             };
             checker.BuildingBlock = checker;
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             checker.NameReference = word.GetReference();
             word.MoveNext();
 
@@ -180,7 +181,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             // Semicolon after port list or checker keyword
             if (word.Text == ";")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
             else
@@ -204,7 +205,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             // endchecker keyword
             if (word.Text == "endchecker")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 checker.LastIndexReference = word.CreateIndexReference();
 
                 if (checker.BlockBeginIndexReference != null)
@@ -219,7 +220,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     word.MoveNext();
                     if (word.Text == checker.Name)
                     {
-                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.Color(VerilogColorType.Identifier);
                         word.MoveNext();
                     }
                     else
@@ -269,13 +270,13 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             Port.DirectionEnum direction = Port.DirectionEnum.Input;
             if (word.Text == "input")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
                 direction = Port.DirectionEnum.Input;
             }
             else if (word.Text == "output")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
                 direction = Port.DirectionEnum.Output;
             }
@@ -288,7 +289,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             if (word.Text == "input" || word.Text == "output")
             {
                 // Direction already parsed, now parse the type
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
 
@@ -320,7 +321,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 if (namedElement is DataObjects.DataTypes.IDataType)
                 {
                     dataType = (DataObjects.DataTypes.IDataType)namedElement;
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                 }
                 else
@@ -338,7 +339,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
 
             string portName = word.Text;
-            word.Color(CodeDrawStyle.ColorType.Variable);
+            word.Color(VerilogColorType.Variable);
             word.MoveNext();
 
             // { variable_dimension }
@@ -450,11 +451,11 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                             if (General.IsIdentifier(word.Text))
                             {
                                 checker.DefaultClocking = word.Text;
-                                word.Color(CodeDrawStyle.ColorType.Identifier);
+                                word.Color(VerilogColorType.Identifier);
                                 word.MoveNext();
                                 if (word.Text == ";")
                                 {
-                                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                                    word.Color(VerilogColorType.Keyword);
                                     word.MoveNext();
                                 }
                             }
@@ -466,12 +467,12 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                             word.MoveNext(); // disable
                             if (word.Text == "iff")
                             {
-                                word.Color(CodeDrawStyle.ColorType.Keyword);
+                                word.Color(VerilogColorType.Keyword);
                                 word.MoveNext();
                                 checker.DefaultDisable = Expressions.Expression.ParseCreate(word, checker);
                                 if (word.Text == ";")
                                 {
-                                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                                    word.Color(VerilogColorType.Keyword);
                                     word.MoveNext();
                                 }
                             }
@@ -590,7 +591,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                     // end of declaration
                     case ";":
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.Color(VerilogColorType.Keyword);
                         word.MoveNext();
                         break;
 

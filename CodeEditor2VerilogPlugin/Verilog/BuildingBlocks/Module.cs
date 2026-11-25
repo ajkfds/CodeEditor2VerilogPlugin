@@ -3,6 +3,7 @@ using pluginVerilog.Verilog.Items;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
@@ -96,7 +97,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
             // module_keyword ( module | macromodule )
             if (word.Text != "module" && word.Text != "macromodule") throw new Exception();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             IndexReference beginReference = word.CreateIndexReference();
             word.MoveNext();
 
@@ -124,7 +125,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             module.BuildingBlock = module;
 
             if (word.CellDefine) module.cellDefine = true;
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             if (!General.IsIdentifier(word.Text))
             {
                 word.AddError("illegal module name");
@@ -173,7 +174,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             // endmodule keyword
             if(word.Text == "endmodule")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
             }
             else
             {
@@ -193,7 +194,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 word.MoveNext();
                 if (word.Text == module.Name)
                 {
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                 }
                 else

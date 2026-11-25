@@ -5,8 +5,9 @@ namespace pluginVerilog.Data.VerilogCommon.EditorAutoComplete
 {
     public class FunctionAutocompleteItem : pluginVerilog.Data.VerilogCommon.AutoCompleteItem
     {
-        public FunctionAutocompleteItem() : base(CompleteType.Keyword, "function", CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Plugin.ThemeColor, "CodeEditor2/Assets/Icons/screwdriver.svg")
+        public FunctionAutocompleteItem() : base(CompleteType.Keyword, "function", (byte)SystemVerilogCore.Documents.VerilogColorType.Keyword, "CodeEditor2/Assets/Icons/screwdriver.svg")
         {
+            colorOverride = Plugin.ThemeColor;
         }
 
         public override System.Threading.Tasks.Task ApplyAsync()

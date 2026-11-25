@@ -5,6 +5,7 @@ using pluginVerilog.Verilog.DataObjects.Variables;
 using pluginVerilog.Verilog.Items;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog
 {
@@ -77,7 +78,7 @@ namespace pluginVerilog.Verilog
         {
             if (word.Text != "function") throw new System.Exception();
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             IndexReference beginReference = word.CreateIndexReference();
             //            function.BeginIndexReference = word.CreateIndexReference();
             word.MoveNext();
@@ -127,11 +128,11 @@ namespace pluginVerilog.Verilog
             switch (word.Text)
             {
                 case "static":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     break;
                 case "automatic":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     break;
             }
@@ -153,7 +154,7 @@ namespace pluginVerilog.Verilog
             switch (word.Text)
             {
                 case "void":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     returnVoid = true;
                     word.MoveNext();
                     break;
@@ -165,12 +166,12 @@ namespace pluginVerilog.Verilog
                         if (word.Text == "signed")
                         {
                             signed = true;
-                            word.Color(CodeDrawStyle.ColorType.Keyword);
+                            word.Color(VerilogColorType.Keyword);
                             word.MoveNext();
                         }
                         else if (word.Text == "unsigned")
                         {
-                            word.Color(CodeDrawStyle.ColorType.Keyword);
+                            word.Color(VerilogColorType.Keyword);
                             word.MoveNext();
                         }
                         List<DataObjects.Arrays.PackedArray> packedDimensions = new List<DataObjects.Arrays.PackedArray>();
@@ -215,9 +216,9 @@ namespace pluginVerilog.Verilog
                var classElement = nameSpace.GetNamedElementUpward(className);
                if (classElement == null) classElement = word.ProjectProperty.UnitNameSpace.Get(className);
                BuildingBlocks.Class? outOfBlockClass = classElement as BuildingBlocks.Class;
-               word.Color(CodeDrawStyle.ColorType.Identifier);
+               word.Color(VerilogColorType.Identifier);
                word.MoveNext();    // class identifier
-               word.Color(CodeDrawStyle.ColorType.Keyword);
+               word.Color(VerilogColorType.Keyword);
                word.MoveNext();    // "::"
                if (outOfBlockClass == null)
                {
@@ -305,7 +306,7 @@ namespace pluginVerilog.Verilog
                 }
             }
 
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
 
             function.BlockBeginIndexReference = word.CreateIndexReference();
@@ -397,7 +398,7 @@ namespace pluginVerilog.Verilog
 
             if (word.Text == "endfunction")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 function.LastIndexReference = word.CreateIndexReference();
                 if (function.BlockBeginIndexReference != null) word.AppendBlock(function.BlockBeginIndexReference, function.LastIndexReference);
                 word.MoveNext();
@@ -413,7 +414,7 @@ namespace pluginVerilog.Verilog
                 word.MoveNext();
                 if (word.Text == function.Name)
                 {
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                 }
                 else
@@ -430,7 +431,7 @@ namespace pluginVerilog.Verilog
         {
             if (word.Text != "function") throw new System.Exception();
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             IndexReference beginReference = word.CreateIndexReference();
             word.MoveNext();
 
@@ -441,7 +442,7 @@ namespace pluginVerilog.Verilog
             switch (word.Text)
             {
                 case "void":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     returnVoid = true;
                     word.MoveNext();
                     break;
@@ -453,12 +454,12 @@ namespace pluginVerilog.Verilog
                         if (word.Text == "signed")
                         {
                             signed = true;
-                            word.Color(CodeDrawStyle.ColorType.Keyword);
+                            word.Color(VerilogColorType.Keyword);
                             word.MoveNext();
                         }
                         else if (word.Text == "unsigned")
                         {
-                            word.Color(CodeDrawStyle.ColorType.Keyword);
+                            word.Color(VerilogColorType.Keyword);
                             word.MoveNext();
                         }
                         List<DataObjects.Arrays.PackedArray> packedDimensions = new List<DataObjects.Arrays.PackedArray>();
@@ -556,7 +557,7 @@ namespace pluginVerilog.Verilog
                 }
             }
 
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
 
 
@@ -568,7 +569,7 @@ namespace pluginVerilog.Verilog
             {
                 // function_prototype ::= function data_type_or_void function_identifier [ ( [ tf_port_list ] ) ]
                 // tf_port_list is optional: "extern function void subroutine;" (no parentheses)
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
             else

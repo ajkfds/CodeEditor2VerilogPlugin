@@ -1,10 +1,11 @@
 using pluginVerilog.Verilog.BuildingBlocks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects
 {
     internal class ModportInstance : DataObject, INamedElement
     {
-        public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
+        public override VerilogColorType ColorType { get { return VerilogColorType.Variable; } }
         public static ModportInstance Create(string identifier, Interface interface_, ModPort modPort)
         {
             ModportInstance modportInstance = new ModportInstance() { Name = identifier, ModPort = modPort, InterfaceName = interface_.Name, ModportName = modPort.Name };
@@ -39,15 +40,15 @@ namespace pluginVerilog.Verilog.DataObjects
 
         public override void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText(InterfaceName, CodeDrawStyle.ColorType.Keyword);
+            label.AppendText(InterfaceName, VerilogColorType.Keyword);
             label.AppendText(".");
-            label.AppendText(ModportName, CodeDrawStyle.ColorType.Keyword);
+            label.AppendText(ModportName, VerilogColorType.Keyword);
             label.AppendText(" ");
         }
         public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
             AppendTypeLabel(label);
-            label.AppendText(Name, CodeDrawStyle.ColorType.Variable);
+            label.AppendText(Name, VerilogColorType.Variable);
 
             foreach (Arrays.VariableArray dimension in UnpackedArrays)
             {
@@ -59,7 +60,7 @@ namespace pluginVerilog.Verilog.DataObjects
             if (Comment != "")
             {
                 label.AppendText(" ");
-                label.AppendText(Comment.Trim(new char[] { '\r', '\n', '\t', ' ' }), CodeDrawStyle.ColorType.Comment);
+                label.AppendText(Comment.Trim(new char[] { '\r', '\n', '\t', ' ' }), VerilogColorType.Comment);
             }
             label.AppendText("\r\n");
 

@@ -2,13 +2,14 @@ using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using System;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
     public class Object : Variable
     {
         protected Object() { }
-        public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
+        public override VerilogColorType ColorType { get { return VerilogColorType.Variable; } }
 
         public required Dictionary<string, Expressions.Expression> ParameterOverrides { get; init; }
         public BuildingBlocks.Class? GetSourceClass() {
@@ -77,7 +78,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         {
             Class? @class = GetSourceClass();
             if(@class == null) return;
-            label.AppendText(@class.Name, CodeDrawStyle.ColorType.Keyword);
+            label.AppendText(@class.Name, VerilogColorType.Keyword);
             label.AppendText(" ");
         }
         public static new Object Create(string name, IDataType dataType)

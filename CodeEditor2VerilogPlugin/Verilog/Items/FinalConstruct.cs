@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Items
 {
@@ -24,7 +25,7 @@ namespace pluginVerilog.Verilog.Items
             //    initial_construct   ::= initial statement
             System.Diagnostics.Debug.Assert(word.Text == "final");
             IndexReference beginIndexReference = word.CreateIndexReference();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             FinalConstruct finalConstruct = new FinalConstruct() { BeginIndexReference = beginIndexReference };

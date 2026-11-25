@@ -3,6 +3,7 @@ using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.Expressions;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
@@ -62,7 +63,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
         int? IDataType.BitWidth => null;
 
-        CodeDrawStyle.ColorType IDataType.ColorType => CodeDrawStyle.ColorType.Variable;
+        VerilogColorType IDataType.ColorType => VerilogColorType.Variable;
 
         List<PackedArray> packedArrays = new List<PackedArray>();
         List<PackedArray> IDataType.PackedDimensions => packedArrays;
@@ -75,7 +76,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 return null;
             }
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext(); // virtual
 
             VirtualInterfaceType vit = new VirtualInterfaceType();
@@ -83,7 +84,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             // Optional "interface" keyword
             if (word.Text == "interface")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
 
@@ -95,13 +96,13 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             }
 
             vit.InterfaceIdentifier = word.Text;
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
 
             // Optional parameter_value_assignment
             if (word.Text == "#")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
 
                 if (word.Text == "(")
@@ -141,7 +142,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
                     if (word.Text == ")")
                     {
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.Color(VerilogColorType.Keyword);
                         word.MoveNext();
                     }
                     else
@@ -154,13 +155,13 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             // Optional . modport_identifier
             if (word.Text == ".")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
 
                 if (General.IsIdentifier(word.Text))
                 {
                     vit.ModportIdentifier = word.Text;
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                 }
                 else

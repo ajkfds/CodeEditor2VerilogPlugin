@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects
 {
@@ -152,17 +153,17 @@ namespace pluginVerilog.Verilog.DataObjects
 
         public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText("'{", CodeDrawStyle.ColorType.Normal);
+            label.AppendText("'{", VerilogColorType.Normal);
             if (this is AssignmentPatternWithKey withKey)
             {
                 bool first = true;
                 foreach (var keyExpression in withKey.KeyExpressions)
                 {
-                    if (!first) label.AppendText(", ", CodeDrawStyle.ColorType.Normal);
+                    if (!first) label.AppendText(", ", VerilogColorType.Normal);
                     first = false;
-                    if (keyExpression.Key == "default") label.AppendText("default", CodeDrawStyle.ColorType.Keyword);
-                    else label.AppendText(keyExpression.Key, CodeDrawStyle.ColorType.Identifier);
-                    label.AppendText(" : ", CodeDrawStyle.ColorType.Normal);
+                    if (keyExpression.Key == "default") label.AppendText("default", VerilogColorType.Keyword);
+                    else label.AppendText(keyExpression.Key, VerilogColorType.Identifier);
+                    label.AppendText(" : ", VerilogColorType.Normal);
                     keyExpression.Expression?.AppendLabel(label);
                 }
             }
@@ -171,12 +172,12 @@ namespace pluginVerilog.Verilog.DataObjects
                 bool first = true;
                 foreach (var expression in withoutKey.Expressions)
                 {
-                    if (!first) label.AppendText(", ", CodeDrawStyle.ColorType.Normal);
+                    if (!first) label.AppendText(", ", VerilogColorType.Normal);
                     first = false;
                     expression?.AppendLabel(label);
                 }
             }
-            label.AppendText("}", CodeDrawStyle.ColorType.Normal);
+            label.AppendText("}", VerilogColorType.Normal);
         }
 
         public override string CreateString()
@@ -224,11 +225,11 @@ namespace pluginVerilog.Verilog.DataObjects
 
         public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText("'{", CodeDrawStyle.ColorType.Normal);
+            label.AppendText("'{", VerilogColorType.Normal);
             Count?.AppendLabel(label);
-            label.AppendText("{", CodeDrawStyle.ColorType.Normal);
+            label.AppendText("{", VerilogColorType.Normal);
             Element?.AppendLabel(label);
-            label.AppendText("}", CodeDrawStyle.ColorType.Normal);
+            label.AppendText("}", VerilogColorType.Normal);
         }
 
         public override string CreateString()
@@ -502,7 +503,7 @@ namespace pluginVerilog.Verilog.DataObjects
                 if (!IsStructurePatternKeyCandidate(keyExpression.Key)) continue;
                 if (structType.Members.ContainsKey(keyExpression.Key))
                 {
-                    keyExpression.KeyReference.Color(CodeDrawStyle.ColorType.Identifier);
+                    keyExpression.KeyReference.Color(VerilogColorType.Identifier);
                     continue;
                 }
                 keyExpression.KeyReference.AddError(
@@ -536,7 +537,7 @@ namespace pluginVerilog.Verilog.DataObjects
             {
                 string key = word.Text;
                 WordReference keyReference = word.GetReference();
-                if (key == "default") word.Color(CodeDrawStyle.ColorType.Keyword);
+                if (key == "default") word.Color(VerilogColorType.Keyword);
 
                // array_pattern_key ::= constant_expression | assignment_pattern_key
                // bracket index key : e.g. '{[2]:1, [0]:0}

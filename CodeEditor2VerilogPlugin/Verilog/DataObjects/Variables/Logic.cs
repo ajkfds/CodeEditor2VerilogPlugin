@@ -1,5 +1,6 @@
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using System;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
@@ -7,7 +8,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected Logic() { }
 
-        //       public override CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Variable;
+        //       public override VerilogColorType ColorType => VerilogColorType.Variable;
 
         public static new Logic Create(string name, IDataType dataType)
         {

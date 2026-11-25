@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using pluginVerilog.Verilog.Items;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
@@ -413,7 +414,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             while (!word.Eof)
             {
                 if (stopWords.Contains(word.Text)) break;   // TODO support hier module definition
-                word.Color(CodeDrawStyle.ColorType.Inactivated);
+                word.Color(VerilogColorType.Inactivated);
                 word.MoveNext();
             }
             if (word.Text == endWord) word.MoveNext();

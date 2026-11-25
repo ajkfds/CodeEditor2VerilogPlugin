@@ -2,6 +2,7 @@
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.Expressions;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
@@ -39,10 +40,10 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
         public override void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText("union", CodeDrawStyle.ColorType.Keyword);
-            if (Tagged) label.AppendText(" tagged", CodeDrawStyle.ColorType.Keyword);
-            if (Packed) label.AppendText(" packed", CodeDrawStyle.ColorType.Keyword);
-            if (Signed) label.AppendText(" signed", CodeDrawStyle.ColorType.Keyword);
+            label.AppendText("union", VerilogColorType.Keyword);
+            if (Tagged) label.AppendText(" tagged", VerilogColorType.Keyword);
+            if (Packed) label.AppendText(" packed", VerilogColorType.Keyword);
+            if (Signed) label.AppendText(" signed", VerilogColorType.Keyword);
             if (Members.Count != 0)
             {
                 label.AppendText("{\n");
@@ -76,7 +77,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         public static UnionType? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "union") System.Diagnostics.Debugger.Break();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.AddSystemVerilogError();
             word.MoveNext();
 

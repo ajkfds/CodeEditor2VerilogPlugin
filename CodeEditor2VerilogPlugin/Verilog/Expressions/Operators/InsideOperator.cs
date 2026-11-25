@@ -2,6 +2,7 @@ using pluginVerilog.Verilog.DataObjects;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Expressions.Operators
 {
@@ -11,7 +12,7 @@ namespace pluginVerilog.Verilog.Expressions.Operators
         {
             if (word.Text != "inside") throw new Exception();
             Reference = word.GetReference();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             if (word.Eof || word.Text != "{")

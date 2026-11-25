@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Items
 {
@@ -22,7 +23,7 @@ namespace pluginVerilog.Verilog.Items
         {
             if (word.Text != "extern") return false;
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             switch (word.Text)
@@ -36,13 +37,13 @@ namespace pluginVerilog.Verilog.Items
 
                 // extern_tf_declaration ::= "extern" "forkjoin" task_prototype { "," task_prototype } ;
                 case "forkjoin":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     while (!word.Eof)
                     {
                         if (word.Text == "task")
                         {
-                            word.Color(CodeDrawStyle.ColorType.Keyword);
+                            word.Color(VerilogColorType.Keyword);
                             word.MoveNext();
                             Task_.ParsePrototype(word, nameSpace);
                         }
@@ -70,12 +71,12 @@ namespace pluginVerilog.Verilog.Items
             // extern_constraint_declaration ::= [ "static" ] "constraint" constraint_identifier ( [ constraint_port_list ] ) ;
             if (word.Text == "static" && word.NextText == "constraint")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
             if (word.Text == "constraint")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
                 if (!General.IsIdentifier(word.Text))
                 {
@@ -84,7 +85,7 @@ namespace pluginVerilog.Verilog.Items
                     consumeSemicolon(word);
                     return true;
                 }
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
                 // skip optional port list
                 if (word.Text == "(")
@@ -99,7 +100,7 @@ namespace pluginVerilog.Verilog.Items
             // extern method_prototype ;
             if (word.Text == "pure")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
             if (word.Text == "function" || word.Text == "task")
@@ -121,20 +122,20 @@ namespace pluginVerilog.Verilog.Items
         private static bool parseExternBuildingBlock(WordScanner word, NameSpace nameSpace)
         {
             // building block keyword (module / interface / checker)
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             // [ lifetime ]
             if (word.Text == "static" || word.Text == "automatic")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
 
             // "interface class" case
             if (word.Text == "class")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
 
@@ -147,7 +148,7 @@ namespace pluginVerilog.Verilog.Items
                 return true;
             }
             string externName = word.Text;
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
 
             // consume the rest of the header (parameters, ports) up to ";"

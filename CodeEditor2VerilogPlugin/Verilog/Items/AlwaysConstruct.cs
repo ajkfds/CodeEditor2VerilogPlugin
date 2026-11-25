@@ -1,6 +1,7 @@
 
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Items
 {
@@ -38,7 +39,7 @@ namespace pluginVerilog.Verilog.Items
 
             //System.Diagnostics.Debug.Assert(word.Text == "always");
             IndexReference beginIndex = word.CreateIndexReference();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             AlwaysConstruct always = new AlwaysConstruct() { BeginIndexReference = beginIndex };

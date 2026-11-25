@@ -1,5 +1,6 @@
 using pluginVerilog.Verilog.Expressions;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Statements
 {
@@ -38,7 +39,7 @@ namespace pluginVerilog.Verilog.Statements
 
 
             System.Diagnostics.Debug.Assert(word.Text == "#");
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             if (word.Text != "(")
@@ -140,7 +141,7 @@ namespace pluginVerilog.Verilog.Statements
 
             */
             System.Diagnostics.Debug.Assert(word.Text == "@");
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             // A12: "always @|" EOF -> sensitivity list signal candidates
@@ -157,7 +158,7 @@ namespace pluginVerilog.Verilog.Statements
                 word.MoveNext(); // (
                 if (word.GetCharAt(0) == '*')
                 {
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext(); // *
                     if (word.GetCharAt(0) != ')')
                     {
@@ -181,7 +182,7 @@ namespace pluginVerilog.Verilog.Statements
             {
                 if (word.GetCharAt(0) == '*')
                 {
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext(); // *
                 }
                 else
@@ -270,21 +271,21 @@ namespace pluginVerilog.Verilog.Statements
             switch (word.Text)
             {
                 case "posedge":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     eventExpression.EventType = EventTypeEnum.Posedge;
                     eventExpression.Expression = Expressions.Expression.ParseCreate(word, nameSpace);
                     if (clockDomains != null && eventExpression.Expression != null) addClockDomain(eventExpression.Expression, clockDomains);
                     break;
                 case "negedge":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     eventExpression.EventType = EventTypeEnum.Negedge;
                     eventExpression.Expression = Expressions.Expression.ParseCreate(word, nameSpace);
                     if (clockDomains != null && eventExpression.Expression != null) addClockDomain(eventExpression.Expression, clockDomains);
                     break;
                 case "edge":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     eventExpression.EventType = EventTypeEnum.Both;
                     eventExpression.Expression = Expressions.Expression.ParseCreate(word, nameSpace);
@@ -300,7 +301,7 @@ namespace pluginVerilog.Verilog.Statements
             // event_expression ::= [ edge_identifier ] expression [ "iff" expression ]
             if (!word.Eof && word.Text == "iff")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
                 eventExpression.IffExpression = Expressions.Expression.ParseCreate(word, nameSpace);
                 if (eventExpression.IffExpression == null)

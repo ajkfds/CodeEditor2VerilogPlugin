@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Expressions
 {
@@ -70,7 +71,7 @@ namespace pluginVerilog.Verilog.Expressions
             {
                 if (word.NextText != ":") break;
                 var item = new KeyExpressionPair() { Key = word.Text, KeyReference = word.CrateWordReference() };
-                if (word.Text == "default") word.Color(CodeDrawStyle.ColorType.Keyword);
+                if (word.Text == "default") word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
 
                 if (word.Text != ":") throw new Exception();

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
@@ -81,7 +82,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
             // "program"
             if (word.Text != "program") System.Diagnostics.Debugger.Break();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             IndexReference beginReference = word.CreateIndexReference();
             word.MoveNext();
 
@@ -98,12 +99,12 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             {
                 case "static":
                     static_ = true;
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     break;
                 case "automatic":
                     static_ = false;
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     break;
             }
@@ -120,7 +121,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             };
             program.Static = static_;
             program.BuildingBlock = program;
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             if (!General.IsIdentifier(word.Text))
             {
                 word.AddError("illegal program name");
@@ -173,7 +174,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 return program;
             }
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             program.LastIndexReference = word.CreateIndexReference();
 
             if (program.BlockBeginIndexReference != null)
@@ -187,7 +188,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 word.MoveNext();
                 if (word.Text == program.Name)
                 {
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                 }
                 else

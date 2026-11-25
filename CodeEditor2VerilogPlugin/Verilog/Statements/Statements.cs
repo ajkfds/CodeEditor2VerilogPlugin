@@ -2,6 +2,7 @@ using pluginVerilog.Verilog.Expressions;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Statements
 {
@@ -132,7 +133,7 @@ namespace pluginVerilog.Verilog.Statements
             {
                 word.MoveNext();
                 statement_label = word.Text;
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
                 word.MoveNext(); //:
             }
@@ -298,7 +299,7 @@ namespace pluginVerilog.Verilog.Statements
                     if(General.IsSimpleIdentifier(word.Text) && word.NextText == ":" && blockIdentifier == null)
                     {
                         blockIdentifier = word.Text;
-                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.Color(VerilogColorType.Identifier);
                         word.MoveNext();
                         // ;
                         word.MoveNext();
@@ -502,7 +503,7 @@ namespace pluginVerilog.Verilog.Statements
                 case "unique":
                 case "unique0":
                 case "priority":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     break;
                 default:

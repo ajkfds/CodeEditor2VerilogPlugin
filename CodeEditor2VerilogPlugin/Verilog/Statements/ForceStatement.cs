@@ -1,3 +1,4 @@
+using SystemVerilogCore.Documents;
 
 
 namespace pluginVerilog.Verilog.Statements
@@ -16,7 +17,7 @@ namespace pluginVerilog.Verilog.Statements
         public required IndexReference BeginIndexReference { get; init; }
         public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public VerilogColorType ColorType => VerilogColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
 
         public Expressions.Expression? LValue;
@@ -34,7 +35,7 @@ namespace pluginVerilog.Verilog.Statements
             if (word.Text != "force") System.Diagnostics.Debugger.Break();
             IndexReference beginIndexReference = word.CreateIndexReference();
             ForceStatement ret = new ForceStatement() { BeginIndexReference = beginIndexReference };
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             ret.LValue = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace, false);

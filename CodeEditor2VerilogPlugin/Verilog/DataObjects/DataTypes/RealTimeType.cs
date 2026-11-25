@@ -2,6 +2,7 @@
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using System;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
@@ -33,7 +34,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 return null;
             }
         }
-        public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
+        public VerilogColorType ColorType { get { return VerilogColorType.Variable; } }
 
         public virtual List<DataObjects.Arrays.PackedArray> PackedDimensions { get; protected set; } = new List<DataObjects.Arrays.PackedArray>();
         public string CreateString()
@@ -44,7 +45,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         }
         public void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText("realtime", CodeDrawStyle.ColorType.Keyword);
+            label.AppendText("realtime", VerilogColorType.Keyword);
         }
         public IDataType Clone()
         {
@@ -72,7 +73,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         {
             RealTimeType dType = new RealTimeType();
             if (word.Text != "realtime") throw new Exception();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
             return dType;
         }

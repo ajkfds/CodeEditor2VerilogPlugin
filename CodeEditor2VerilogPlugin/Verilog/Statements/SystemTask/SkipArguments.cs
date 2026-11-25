@@ -1,3 +1,4 @@
+using SystemVerilogCore.Documents;
 namespace pluginVerilog.Verilog.Statements.SystemTask
 {
     public class SkipArguments : SystemTask
@@ -6,7 +7,7 @@ namespace pluginVerilog.Verilog.Statements.SystemTask
         {
             SkipArguments taskEnable = new SkipArguments() { BeginIndexReference = word.CreateIndexReference() };
 
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
 
             if (word.Text == "(")

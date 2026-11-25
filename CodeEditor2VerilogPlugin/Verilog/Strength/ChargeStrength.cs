@@ -1,4 +1,5 @@
 using pluginVerilog.Verilog.DataObjects;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.Nets
 {
@@ -49,17 +50,17 @@ namespace pluginVerilog.Verilog.DataObjects.Nets
             {
                 case "small":
                     strength = StrengthValueEnum.Small;
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                     break;
                 case "medium":
                     strength = StrengthValueEnum.Medium;
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                     break;
                 case "large":
                     strength = StrengthValueEnum.Large;
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                     break;
                 default:

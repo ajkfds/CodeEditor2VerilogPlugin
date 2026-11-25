@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
@@ -41,7 +42,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         /// <summary>
         /// Editor中での表示色を示す
         /// </summary>
-        public CodeDrawStyle.ColorType ColorType { get; }
+        public VerilogColorType ColorType { get; }
 
         /// <summary>
         /// DataTypeをDeep Cloneする

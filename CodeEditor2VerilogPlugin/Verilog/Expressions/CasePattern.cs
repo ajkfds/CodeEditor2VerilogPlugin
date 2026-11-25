@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Expressions
 {
@@ -23,8 +24,8 @@ namespace pluginVerilog.Verilog.Expressions
 
         public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText(".", CodeDrawStyle.ColorType.Keyword);
-            if (VariableName != null) label.AppendText(VariableName, CodeDrawStyle.ColorType.Variable);
+            label.AppendText(".", VerilogColorType.Keyword);
+            if (VariableName != null) label.AppendText(VariableName, VerilogColorType.Variable);
         }
 
         public override string CreateString()
@@ -51,7 +52,7 @@ namespace pluginVerilog.Verilog.Expressions
                 VariableName = word.Text,
                 Reference = WordReference.CreateReferenceRange(beginRef, word.GetReference()),
             };
-            word.Color(CodeDrawStyle.ColorType.Variable);
+            word.Color(VerilogColorType.Variable);
             word.MoveNext();
 
             // bind the pattern variable as an implicit variable so that the
@@ -96,8 +97,8 @@ namespace pluginVerilog.Verilog.Expressions
 
         public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText("tagged", CodeDrawStyle.ColorType.Keyword);
-            if (MemberIdentifier != null) label.AppendText(" " + MemberIdentifier, CodeDrawStyle.ColorType.Identifier);
+            label.AppendText("tagged", VerilogColorType.Keyword);
+            if (MemberIdentifier != null) label.AppendText(" " + MemberIdentifier, VerilogColorType.Identifier);
             if (MemberPattern != null)
             {
                 label.AppendText(" ");
@@ -119,14 +120,14 @@ namespace pluginVerilog.Verilog.Expressions
         public static TaggedPattern? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             WordReference beginRef = word.GetReference();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext(); // "tagged"
 
             TaggedPattern taggedPattern = new TaggedPattern();
 
             if (word.Text == "unique")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
 
@@ -137,7 +138,7 @@ namespace pluginVerilog.Verilog.Expressions
             }
 
             taggedPattern.MemberIdentifier = word.Text;
-            word.Color(CodeDrawStyle.ColorType.Variable);
+            word.Color(VerilogColorType.Variable);
             word.MoveNext();
 
             // [ pattern ] : assignment pattern '{...} / pattern variable ".x" / constant expression

@@ -3,6 +3,7 @@ using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.DataObjects.Variables;
 using System;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
@@ -23,7 +24,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         public int? BitWidth { get; } = null;
         public virtual bool PartSelectable { get { return false; } }
         public bool IsValidForNet { get { return false; } }
-        public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
+        public VerilogColorType ColorType { get { return VerilogColorType.Variable; } }
         public virtual List<DataObjects.Arrays.PackedArray> PackedDimensions { get; protected set; } = new List<Arrays.PackedArray>();
         public string CreateString()
         {
@@ -34,7 +35,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
         public void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText("mailbox ", CodeDrawStyle.ColorType.Keyword);
+            label.AppendText("mailbox ", VerilogColorType.Keyword);
         }
         public IDataType Clone()
         {
@@ -56,7 +57,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         {
             MailboxType dType = new MailboxType();
             if (word.Text != "mailbox") throw new Exception();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             // parameter_value_assignment : mailbox #( data_type )
@@ -64,7 +65,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             // message (element) type is given as "#( type )".
             if (word.Text == "#")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext(); // #
                 if (word.Text == "(")
                 {

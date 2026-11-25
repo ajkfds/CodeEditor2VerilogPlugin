@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Items.Generate
 {
@@ -10,7 +11,7 @@ namespace pluginVerilog.Verilog.Items.Generate
         public static async System.Threading.Tasks.Task ParseAsync(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "generate") throw new System.Exception();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             while (!word.Eof)
@@ -22,7 +23,7 @@ namespace pluginVerilog.Verilog.Items.Generate
 
             if (word.Text == "endgenerate")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
             else

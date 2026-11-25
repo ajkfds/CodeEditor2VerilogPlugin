@@ -1,5 +1,6 @@
 using pluginVerilog.Verilog.DataObjects;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Expressions
 {
@@ -16,7 +17,7 @@ namespace pluginVerilog.Verilog.Expressions
 
         public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText("std::randomize()", CodeDrawStyle.ColorType.Identifier);
+            label.AppendText("std::randomize()", VerilogColorType.Identifier);
         }
 
         public override string CreateString()
@@ -30,10 +31,10 @@ namespace pluginVerilog.Verilog.Expressions
 
             WordReference beginRef = word.GetReference();
 
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext(); // std
             word.MoveNext(); // ::
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext(); // randomize
 
             if (word.Text == "(")
@@ -62,7 +63,7 @@ namespace pluginVerilog.Verilog.Expressions
             // [ with { constraint_block } ]
             if (word.Text == "with")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext(); // with
                 if (word.Text == "{")
                 {

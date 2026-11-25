@@ -1,13 +1,14 @@
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using System;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
     public class IntegerAtomVariable : ValueVariable, IPackedDataObject
     {
         //integer_atom_type::= byte | shortint | int | longint | integer | time
-        public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
+        public override VerilogColorType ColorType { get { return VerilogColorType.Variable; } }
         public bool Signed { get; set; }
         public List<DataObjects.Arrays.PackedArray> PackedDimensions
         {
@@ -45,25 +46,25 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             switch (DataType.Type)
             {
                 case DataTypeEnum.Byte:
-                    label.AppendText("byte ", CodeDrawStyle.ColorType.Keyword);
+                    label.AppendText("byte ", VerilogColorType.Keyword);
                     break;
                 case DataTypeEnum.Shortint:
-                    label.AppendText("shortint ", CodeDrawStyle.ColorType.Keyword);
+                    label.AppendText("shortint ", VerilogColorType.Keyword);
                     break;
                 case DataTypeEnum.Int:
-                    label.AppendText("int ", CodeDrawStyle.ColorType.Keyword);
+                    label.AppendText("int ", VerilogColorType.Keyword);
                     break;
                 case DataTypeEnum.Longint:
-                    label.AppendText("longint ", CodeDrawStyle.ColorType.Keyword);
+                    label.AppendText("longint ", VerilogColorType.Keyword);
                     break;
                 case DataTypeEnum.Integer:
-                    label.AppendText("integer ", CodeDrawStyle.ColorType.Keyword);
+                    label.AppendText("integer ", VerilogColorType.Keyword);
                     break;
                 case DataTypeEnum.Time:
-                    label.AppendText("time ", CodeDrawStyle.ColorType.Keyword);
+                    label.AppendText("time ", VerilogColorType.Keyword);
                     break;
                 case DataTypeEnum.Class:
-                    label.AppendText("class ", CodeDrawStyle.ColorType.Identifier);
+                    label.AppendText("class ", VerilogColorType.Identifier);
                     break;
                 default:
                     throw new Exception();
@@ -71,7 +72,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             label.AppendText(" ");
             if (Signed)
             {
-                label.AppendText("signed ", CodeDrawStyle.ColorType.Keyword);
+                label.AppendText("signed ", VerilogColorType.Keyword);
             }
         }
 

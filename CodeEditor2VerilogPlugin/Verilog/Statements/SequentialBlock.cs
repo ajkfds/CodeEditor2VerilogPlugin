@@ -3,6 +3,7 @@ using pluginVerilog.Verilog.BuildingBlocks;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Statements
 {
@@ -11,7 +12,7 @@ namespace pluginVerilog.Verilog.Statements
         protected SequentialBlock() { }
 
         public string Name { get; protected set; }
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public VerilogColorType ColorType => VerilogColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
 
         public required IndexReference BeginIndexReference { get; init; }
@@ -56,7 +57,7 @@ namespace pluginVerilog.Verilog.Statements
         {
             if (word.Text != "begin") throw new Exception();
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             IndexReference beginIndex = word.CreateIndexReference();
             word.MoveNext(); // begin
 
@@ -71,7 +72,7 @@ namespace pluginVerilog.Verilog.Statements
                 else
                 {
                     string name = word.Text;
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                     return parseCreateNamedSequentialBlock(word, nameSpace, beginIndex, name, clockDomains);
                 }
@@ -138,7 +139,7 @@ namespace pluginVerilog.Verilog.Statements
                         return null;
                     }
                     namedBlock.LastIndexReference = word.CreateIndexReference();
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext(); // end
 
                     if (!nameSpace.NamedElements.ContainsKey(namedBlock.Name))
@@ -178,7 +179,7 @@ namespace pluginVerilog.Verilog.Statements
                 word.AddError("'end' required");
                 return null;
             }
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext(); // end
 
             if (!word.Prototype && completionContext == null) nameSpace.DocumentRegions.Add(sequentialBlock);
@@ -220,7 +221,7 @@ namespace pluginVerilog.Verilog.Statements
             { // implementation
                 if (nameSpace.NamedElements.ContainsKey(name) && nameSpace.NamedElements[name] is NamedSequentialBlock)
                 {
-                    //                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    //                    word.Color(VerilogColorType.Identifier);
                     namedBlock = (NamedSequentialBlock)nameSpace.NamedElements[name];
                 }
                 else
@@ -280,7 +281,7 @@ namespace pluginVerilog.Verilog.Statements
                 return null;
             }
             namedBlock.LastIndexReference = word.CreateIndexReference();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext(); // end
 
             if (word.Text == ":")
@@ -296,7 +297,7 @@ namespace pluginVerilog.Verilog.Statements
                 }
                 else
                 {
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                 }
             }

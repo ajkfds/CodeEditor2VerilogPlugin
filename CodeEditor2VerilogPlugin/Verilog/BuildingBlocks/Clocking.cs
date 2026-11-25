@@ -3,6 +3,7 @@ using pluginVerilog.Verilog.DataObjects.Variables;
 using pluginVerilog.Verilog.Expressions;
 using System;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
@@ -72,7 +73,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             if (word.Text != "#" && word.Text != "##") return null;
 
             bool cycleDelay = word.Text == "##";
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             Expression? delayExpr = null;
@@ -80,12 +81,12 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             if (word.Text == "(")
             {
                 // # ( mintypmax_expression )
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
                 delayExpr = Expression.ParseCreate(word, nameSpace);
                 if (word.Text == ")")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                 }
                 else
@@ -111,7 +112,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             if (cycleDelay)
             {
                 // ## cycle delay: value is number of clock cycles
-                word.Color(CodeDrawStyle.ColorType.Number);
+                word.Color(VerilogColorType.Number);
             }
             return delayExpr;
         }
@@ -126,13 +127,13 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             if (word.Text == "default")
             {
                 isDefault = true;
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
             else if (word.Text == "global")
             {
                 isGlobal = true;
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
 
@@ -141,7 +142,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 return null;
             }
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
 
@@ -158,7 +159,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     IsGlobal = isGlobal,
                     Project = word.RootParsedDocument.Project,
                 };
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
             }
             else
@@ -179,7 +180,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             // Handles: @(posedge clk), @(negedge clk), @(clk), etc.
             if (word.Text == "@")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
 
                 if (word.Text == "(")
@@ -191,7 +192,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     if (word.Text == "posedge" || word.Text == "negedge" || word.Text == "edge")
                     {
                         edgeKeyword = word.Text;
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.Color(VerilogColorType.Keyword);
                         word.MoveNext();
                     }
                     
@@ -231,7 +232,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             // Semicolon
             if (word.Text == ";")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
             else
@@ -260,12 +261,12 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 if (word.Text == "##")
                 {
                     // Cycle delay control
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     Expression? delayExpr = Expression.ParseCreate(word, nameSpace);
                     if (word.Text == ";")
                     {
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.Color(VerilogColorType.Keyword);
                         word.MoveNext();
                     }
                     continue;
@@ -273,12 +274,12 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 else if (word.Text == "#")
                 {
                     // Delay control
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     Expression? delayExpr = Expression.ParseCreate(word, nameSpace);
                     if (word.Text == ";")
                     {
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.Color(VerilogColorType.Keyword);
                         word.MoveNext();
                     }
                     continue;
@@ -291,7 +292,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 {
                     case "input":
                         direction = ClockingSignal.DirectionEnum.Input;
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.Color(VerilogColorType.Keyword);
                         word.MoveNext();
 
                         // Check for optional sub-direction (input input, input output, etc.)
@@ -307,7 +308,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                     case "output":
                         direction = ClockingSignal.DirectionEnum.Output;
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.Color(VerilogColorType.Keyword);
                         word.MoveNext();
 
                         // Optional clocking_skew (e.g., output #5ns)
@@ -316,7 +317,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                     case "inout":
                         direction = ClockingSignal.DirectionEnum.Inout;
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.Color(VerilogColorType.Keyword);
                         word.MoveNext();
                         break;
 
@@ -362,13 +363,13 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     }
 
                     signal.Name = word.Text;
-                    word.Color(CodeDrawStyle.ColorType.Variable);
+                    word.Color(VerilogColorType.Variable);
                     word.MoveNext();
 
                     // Optional = expression
                     if (word.Text == "=")
                     {
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.Color(VerilogColorType.Keyword);
                         word.MoveNext();
                         signal.Expression = Expression.ParseCreate(word, nameSpace);
                     }
@@ -376,7 +377,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     // Optional with expression (for queues, etc.)
                     if (word.Text == "with")
                     {
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.Color(VerilogColorType.Keyword);
                         word.MoveNext();
                         // Skip for now - not commonly used in clocking blocks
                         word.MoveNext();
@@ -428,7 +429,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 // Semicolon
                 if (word.Text == ";")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                 }
                 else if (word.Text != "endclocking")
@@ -444,7 +445,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             // endclocking keyword
             if (word.Text == "endclocking")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
 
                 // Optional : clocking_identifier
@@ -453,7 +454,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     word.MoveNext();
                     if (word.Text == clocking.Name || string.IsNullOrEmpty(clocking.Name))
                     {
-                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.Color(VerilogColorType.Identifier);
                         word.MoveNext();
                     }
                     else
@@ -497,7 +498,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 }
             }
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             if (word.Text != "clocking")
@@ -508,7 +509,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 return true;
             }
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             if (!General.IsIdentifier(word.Text))
@@ -520,12 +521,12 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
 
             // Store the default clocking reference
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
 
             if (word.Text == ";")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
             else

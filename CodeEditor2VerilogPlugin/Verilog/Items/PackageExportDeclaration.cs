@@ -1,3 +1,4 @@
+using SystemVerilogCore.Documents;
 namespace pluginVerilog.Verilog.Items
 {
     public class PackageExportDeclaration
@@ -18,19 +19,19 @@ namespace pluginVerilog.Verilog.Items
         public static void ParseExportDeclaration(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "export") System.Diagnostics.Debugger.Break();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             if (word.Text == "*")
             {
                 // export *::* ;
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
                 if (word.Text != "::") System.Diagnostics.Debugger.Break();
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
                 if (word.Text != "*") System.Diagnostics.Debugger.Break();
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
             }
             else
@@ -48,7 +49,7 @@ namespace pluginVerilog.Verilog.Items
                 | import package_identifier :: *
              */
             if (word.Text != "import") System.Diagnostics.Debugger.Break();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             // Parse single item or wildcard import
@@ -62,7 +63,7 @@ namespace pluginVerilog.Verilog.Items
                     break;
                 }
                 string packageName = word.Text;
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
 
                 if (word.Text != "::")
@@ -71,14 +72,14 @@ namespace pluginVerilog.Verilog.Items
                     word.SkipToKeyword(";");
                     break;
                 }
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
 
                 if (word.Text == "*")
                 {
                     // import package_identifier :: * ;
                     // Wildcard import - import all items from the package
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
 
                     // Add to imported packages list
@@ -93,7 +94,7 @@ namespace pluginVerilog.Verilog.Items
                         word.SkipToKeyword(";");
                         break;
                     }
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
 
                     // Add to imported packages list (for specific item imports)
@@ -104,7 +105,7 @@ namespace pluginVerilog.Verilog.Items
                 {
                     break;
                 }
-                word.Color(CodeDrawStyle.ColorType.Normal);
+                word.Color(VerilogColorType.Normal);
                 word.MoveNext();
             }
         }
@@ -126,7 +127,7 @@ namespace pluginVerilog.Verilog.Items
                     break;
                 }
                 string packageName = word.Text;
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
 
                 if (word.Text != "::")
@@ -135,13 +136,13 @@ namespace pluginVerilog.Verilog.Items
                     word.SkipToKeyword(";");
                     break;
                 }
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
 
                 if (word.Text == "*")
                 {
                     // package_identifier :: *
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                 }
                 else
@@ -153,7 +154,7 @@ namespace pluginVerilog.Verilog.Items
                         word.SkipToKeyword(";");
                         break;
                     }
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                 }
 
@@ -161,7 +162,7 @@ namespace pluginVerilog.Verilog.Items
                 {
                     break;
                 }
-                word.Color(CodeDrawStyle.ColorType.Normal);
+                word.Color(VerilogColorType.Normal);
                 word.MoveNext();
             }
         }

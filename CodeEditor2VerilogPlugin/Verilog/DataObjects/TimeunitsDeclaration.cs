@@ -1,6 +1,7 @@
 
 using pluginVerilog.Verilog.Expressions;
 using System;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects
 {
@@ -23,7 +24,7 @@ namespace pluginVerilog.Verilog.DataObjects
     public class TimeunitsDeclaration : INamedElement
     {
         public string Name { get; set; } = "timeunits";
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public VerilogColorType ColorType => VerilogColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
 
         /// <summary>
@@ -77,7 +78,7 @@ namespace pluginVerilog.Verilog.DataObjects
         private static TimeunitsDeclaration ParseTimeunit(WordScanner word, NameSpace nameSpace)
         {
             IndexReference beginReference = word.CreateIndexReference();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext(); // timeunit
 
             TimeunitsDeclaration decl = new TimeunitsDeclaration
@@ -101,7 +102,7 @@ namespace pluginVerilog.Verilog.DataObjects
             // Optional / time_precision
             if (word.Text == "/")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
 
                 if (!ParseTimeValueAndUnit(word, nameSpace, out exp, out unit))
@@ -123,7 +124,7 @@ namespace pluginVerilog.Verilog.DataObjects
                 if (word.Text == ";") word.MoveNext();
                 return decl;
             }
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             decl.LastIndexReference = word.CreateIndexReference();
@@ -133,7 +134,7 @@ namespace pluginVerilog.Verilog.DataObjects
         private static TimeunitsDeclaration ParseTimeprecision(WordScanner word, NameSpace nameSpace)
         {
             IndexReference beginReference = word.CreateIndexReference();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext(); // timeprecision
 
             TimeunitsDeclaration decl = new TimeunitsDeclaration
@@ -163,7 +164,7 @@ namespace pluginVerilog.Verilog.DataObjects
                 if (word.Text == ";") word.MoveNext();
                 return decl;
             }
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             decl.LastIndexReference = word.CreateIndexReference();
@@ -189,7 +190,7 @@ namespace pluginVerilog.Verilog.DataObjects
             }
 
             unit = word.Text;
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
 
             return true;

@@ -1,5 +1,6 @@
 using pluginVerilog.Verilog.Sequence;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Property
 {
@@ -197,7 +198,7 @@ namespace pluginVerilog.Verilog.Property
         {
             if (word.Text != "strong" && word.Text != "weak") return null;
             string op = word.Text;
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             if (word.Text != "(")
@@ -220,7 +221,7 @@ namespace pluginVerilog.Verilog.Property
         private static object? ParseClockingEvent(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "@") return null;
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             if (word.Text == "(")
@@ -236,7 +237,7 @@ namespace pluginVerilog.Verilog.Property
             }
             else
             {
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 string identifier = word.Text;
                 word.MoveNext();
                 return identifier;
@@ -261,7 +262,7 @@ namespace pluginVerilog.Verilog.Property
         private static object? ParseIfElse(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "if") return null;
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             if (word.Text != "(")
@@ -283,7 +284,7 @@ namespace pluginVerilog.Verilog.Property
             object? elseExpr = null;
             if (word.Text == "else")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
                 elseExpr = ParseCreate(word, nameSpace);
             }
@@ -294,7 +295,7 @@ namespace pluginVerilog.Verilog.Property
         private static object? ParseCaseExpr(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "case") return null;
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             if (word.Text != "(")
@@ -328,7 +329,7 @@ namespace pluginVerilog.Verilog.Property
 
             if (word.Text == "endcase")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
 
@@ -367,7 +368,7 @@ namespace pluginVerilog.Verilog.Property
 
             if (word.Text == "default")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
                 if (word.Text == ":")
                 {
@@ -393,7 +394,7 @@ namespace pluginVerilog.Verilog.Property
                 case "sync_accept_on":
                 case "sync_reject_on":
                     string op = word.Text;
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
 
                     if (word.Text != "(")
@@ -422,15 +423,15 @@ namespace pluginVerilog.Verilog.Property
             switch (word.Text)
             {
                 case "and":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return new PropertyOperator("and", 5);
                 case "or":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return new PropertyOperator("or", 4);
                 case "iff":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return new PropertyOperator("iff", 3);
                 case "until":
@@ -439,7 +440,7 @@ namespace pluginVerilog.Verilog.Property
                 case "s_until_with":
                 case "implies":
                     string op = word.Text;
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return new PropertyOperator(op, 2);
             }

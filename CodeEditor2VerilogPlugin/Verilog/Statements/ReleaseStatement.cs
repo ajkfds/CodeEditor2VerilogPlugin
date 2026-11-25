@@ -1,3 +1,4 @@
+using SystemVerilogCore.Documents;
 
 
 namespace pluginVerilog.Verilog.Statements
@@ -16,7 +17,7 @@ namespace pluginVerilog.Verilog.Statements
         public required IndexReference BeginIndexReference { get; init; }
         public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public VerilogColorType ColorType => VerilogColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
 
         public Expressions.Expression Value;
@@ -32,7 +33,7 @@ namespace pluginVerilog.Verilog.Statements
             if (word.Text != "release") System.Diagnostics.Debugger.Break();
             IndexReference beginIndexReference = word.CreateIndexReference();
             ReleaseStatement ret = new ReleaseStatement() { BeginIndexReference = beginIndexReference };
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             ret.Value = Expressions.Expression.ParseCreate(word, nameSpace);

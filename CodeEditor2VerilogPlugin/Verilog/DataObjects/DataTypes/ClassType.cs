@@ -2,6 +2,7 @@
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using System;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
@@ -27,7 +28,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             }
         }
         public virtual bool PartSelectable { get { return false; } }
-        public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
+        public VerilogColorType ColorType { get { return VerilogColorType.Variable; } }
         public virtual List<DataObjects.Arrays.PackedArray> PackedDimensions { get; protected set; } = new List<Arrays.PackedArray>();
 
 
@@ -55,7 +56,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
         public void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText("class", CodeDrawStyle.ColorType.Keyword);
+            label.AppendText("class", VerilogColorType.Keyword);
         }
         public IDataType Clone()
         {
@@ -89,7 +90,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             }
 
             ClassType dType = new ClassType();
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
 
             return dType;

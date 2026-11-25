@@ -1,4 +1,5 @@
 using pluginVerilog.Verilog.DataObjects.DataTypes;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
@@ -6,7 +7,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected Longint() { }
 
-        //        public override CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Variable;
+        //        public override VerilogColorType ColorType => VerilogColorType.Variable;
         public static new Longint Create(string name, IDataType dataType)
         {
             DataTypes.IntegerAtomType dType = (DataTypes.IntegerAtomType)dataType;

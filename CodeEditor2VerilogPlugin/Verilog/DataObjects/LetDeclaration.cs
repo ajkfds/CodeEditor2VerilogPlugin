@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using DataObjects = pluginVerilog.Verilog.DataObjects;
 using DataTypes = pluginVerilog.Verilog.DataObjects.DataTypes;
 using Variables = pluginVerilog.Verilog.DataObjects.Variables;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects
 {
@@ -26,7 +27,7 @@ namespace pluginVerilog.Verilog.DataObjects
     /// </summary>
     public class LetDeclaration : NameSpace, INamedElement, IPortNameSpace
     {
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public VerilogColorType ColorType => VerilogColorType.Identifier;
 
         /// <summary>
         /// Port list for let declaration arguments
@@ -111,7 +112,7 @@ namespace pluginVerilog.Verilog.DataObjects
             }
 
             IndexReference beginReference = word.CreateIndexReference();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext(); // let
 
 
@@ -133,7 +134,7 @@ namespace pluginVerilog.Verilog.DataObjects
                 Parent = nameSpace,
                 Project = word.RootParsedDocument.Project
             };
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
 
             // Optional port list: ( [ let_port_list ] )
@@ -154,14 +155,14 @@ namespace pluginVerilog.Verilog.DataObjects
                     if (word.Text == "const")
                     {
                         portItem.IsConst = true;
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.Color(VerilogColorType.Keyword);
                         word.MoveNext();
                     }
 
                     // Parse data type or void
                     if (word.Text == "void")
                     {
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.Color(VerilogColorType.Keyword);
                         word.MoveNext();
                     }
                     else
@@ -173,7 +174,7 @@ namespace pluginVerilog.Verilog.DataObjects
                     if (General.IsIdentifier(word.Text))
                     {
                         portItem.Identifier = word.Text;
-                        word.Color(CodeDrawStyle.ColorType.Variable);
+                        word.Color(VerilogColorType.Variable);
 
                         // Create a data object for this port and add to letDecl's namespace
                         // This allows the expression parser to recognize x, y as valid identifiers
@@ -233,7 +234,7 @@ namespace pluginVerilog.Verilog.DataObjects
                     // Optional default value: = expression
                     if (word.Text == "=")
                     {
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.Color(VerilogColorType.Keyword);
                         word.MoveNext();
                         portItem.DefaultValue = Expressions.Expression.ParseCreate(word, letDecl);
                     }
@@ -250,7 +251,7 @@ namespace pluginVerilog.Verilog.DataObjects
                 // Closing paren
                 if (word.Text == ")")
                 {
-                //    word.Color(CodeDrawStyle.ColorType.Keyword);
+                //    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                 }
                 else
@@ -270,7 +271,7 @@ namespace pluginVerilog.Verilog.DataObjects
                 if (word.Text == ";") word.MoveNext();
                 return null;
             }
-            //word.Color(CodeDrawStyle.ColorType.Keyword);
+            //word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             // Parse expression using letDecl's namespace (which now contains the port variables)
@@ -291,7 +292,7 @@ namespace pluginVerilog.Verilog.DataObjects
                 if (word.Text == ";") word.MoveNext();
                 return null;
             }
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             letDecl.LastIndexReference = word.CreateIndexReference();

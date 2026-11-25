@@ -1,6 +1,7 @@
 using pluginVerilog.Verilog.DataObjects.Variables;
 using System;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.Arrays
 {
@@ -11,7 +12,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
         public bool Constant { get; protected set; } = false;
         public bool IsValidForNet { get { return false; } }
 
-        public override CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Variable;
+        public override VerilogColorType ColorType => VerilogColorType.Variable;
 
         public static AssociativeArray Create( DataObject dataObject, DataTypes.IDataType? indexDataType )
         {

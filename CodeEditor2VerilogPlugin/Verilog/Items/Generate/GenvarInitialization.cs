@@ -1,4 +1,5 @@
 using pluginVerilog.Verilog.DataObjects.Variables;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Items.Generate
 {
@@ -14,7 +15,7 @@ namespace pluginVerilog.Verilog.Items.Generate
             {
                 // define new genvar
                 if (!word.SystemVerilog) word.AddSystemVerilogError();
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
 
                 if (word.Eof) return true;
@@ -35,7 +36,7 @@ namespace pluginVerilog.Verilog.Items.Generate
                 {
                     nameSpace.NamedElements.Replace(gvar.Name, gvar);
                 }
-                word.Color(CodeDrawStyle.ColorType.Variable);
+                word.Color(VerilogColorType.Variable);
                 word.MoveNext();
                 genvar = Expressions.DataObjectReference.Create(gvar, nameSpace);
                 if (genvar == null) return true;

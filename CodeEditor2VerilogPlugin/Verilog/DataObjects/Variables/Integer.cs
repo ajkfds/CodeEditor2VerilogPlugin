@@ -1,5 +1,6 @@
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using System;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
@@ -7,7 +8,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected Integer() { }
 
-        //        public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
+        //        public override VerilogColorType ColorType { get { return VerilogColorType.Variable; } }
         public static new Integer Create(string name, IDataType dataType)
         {
             System.Diagnostics.Debug.Assert(dataType.Type == DataTypeEnum.Integer);

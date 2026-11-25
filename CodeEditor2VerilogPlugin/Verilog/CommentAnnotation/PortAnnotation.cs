@@ -1,3 +1,4 @@
+using SystemVerilogCore.Documents;
 namespace pluginVerilog.Verilog.CommentAnnotation
 {
     public static class PortAnnotation
@@ -77,31 +78,31 @@ namespace pluginVerilog.Verilog.CommentAnnotation
         }
         private static void pasePortGroup(CommentScanner comment, NameSpace nameSpace, ref string? portGroup, ProjectProperty projectProperty)
         {
-            comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+            comment.Color(VerilogColorType.CommentAnnotation);
 
             if (projectProperty.AnnotationKeyValueDelimiter != "")
             {
                 comment.MoveNext();
                 if (comment.Text != ":") return;
-                comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                comment.Color(VerilogColorType.CommentAnnotation);
             }
 
             comment.MoveNextUntilEol(); // :
-            comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+            comment.Color(VerilogColorType.CommentAnnotation);
 
             portGroup = comment.Text;
         }
 
         private static void parseSyncAnnotation(CommentScanner comment, NameSpace nameSpace, Verilog.DataObjects.Port port, ProjectProperty projectProperty)
         {
-            comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+            comment.Color(VerilogColorType.CommentAnnotation);
             comment.MoveNext();
 
             if (projectProperty.AnnotationKeyValueDelimiter != "")
             {
                 if (comment.Text == ":")
                 {
-                    comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                    comment.Color(VerilogColorType.CommentAnnotation);
                     comment.MoveNext(); // :
                 }
                 else
@@ -118,7 +119,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
                 {
                     port.AppendAnnotation("clock", "");
                     if (port.DataObject != null) port.DataObject.SyncContext.AssignToClock();
-                    comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                    comment.Color(VerilogColorType.CommentAnnotation);
                     comment.MoveNext();
                     return;
                 }
@@ -126,7 +127,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
                 {
                     port.AppendAnnotation("reset", "");
                     if (port.DataObject != null) port.DataObject.SyncContext.AssignToReset();
-                    comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                    comment.Color(VerilogColorType.CommentAnnotation);
                     comment.MoveNext();
                     return;
                 }
@@ -137,7 +138,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
                 }
                 port.AppendAnnotation("sync", syncTarget);
                 if (port.DataObject != null) port.DataObject.SyncContext.AddClockDomain(syncTarget, port.DefinitionReference,nameSpace.BuildingBlock.SameSync);
-                comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                comment.Color(VerilogColorType.CommentAnnotation);
                 comment.MoveNext();
 
                 if (comment.Text != ",") break;
@@ -149,7 +150,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
 
         private static void parseClockAnnotation(CommentScanner comment, NameSpace nameSpace, Verilog.DataObjects.Port port, ProjectProperty projectProperty)
         {
-            comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+            comment.Color(VerilogColorType.CommentAnnotation);
             comment.MoveNext();
             if (port.DataObject != null) port.DataObject.SyncContext.AssignToClock();
 
@@ -157,7 +158,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
             {
                 if (comment.Text == ":")
                 {
-                    comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                    comment.Color(VerilogColorType.CommentAnnotation);
                     comment.MoveNext(); // :
                 }
                 else
@@ -172,7 +173,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
                 if (comment.Text == "posedge" || comment.Text == "negedge")
                 {
                     port.AppendAnnotation("clock", comment.Text);
-                    comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                    comment.Color(VerilogColorType.CommentAnnotation);
                     comment.MoveNext();
                 }
                 else
@@ -189,7 +190,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
 
         private static void parseResetAnnotation(CommentScanner comment, NameSpace nameSpace, Verilog.DataObjects.Port port, ProjectProperty projectProperty)
         {
-            comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+            comment.Color(VerilogColorType.CommentAnnotation);
             if (port.DataObject != null) port.DataObject.SyncContext.AssignToReset();
             comment.MoveNext();
             port.AppendAnnotation("reset", "");

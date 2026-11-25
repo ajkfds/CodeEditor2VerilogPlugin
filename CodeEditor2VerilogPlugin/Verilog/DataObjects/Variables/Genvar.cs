@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
@@ -6,7 +7,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
     {
         protected Genvar() { }
 
-        public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
+        public override VerilogColorType ColorType { get { return VerilogColorType.Variable; } }
 
         [SetsRequiredMembers]
         public Genvar(string Name)
@@ -32,7 +33,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         {
             //            genvar_declaration::= genvar list_of_genvar_identifiers;
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             while (!word.Eof)
@@ -68,7 +69,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                     }
                 }
 
-                word.Color(CodeDrawStyle.ColorType.Variable);
+                word.Color(VerilogColorType.Variable);
                 word.MoveNext();
 
                 if (word.GetCharAt(0) != ',') break;

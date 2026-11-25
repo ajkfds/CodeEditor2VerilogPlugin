@@ -4,6 +4,7 @@ using pluginVerilog.Verilog.DataObjects.Variables;
 using pluginVerilog.Verilog.Expressions;
 using System;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
@@ -38,10 +39,10 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
         public void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText("string", CodeDrawStyle.ColorType.Keyword);
+            label.AppendText("string", VerilogColorType.Keyword);
         }
         public virtual List<DataObjects.Arrays.PackedArray> PackedDimensions { get; protected set; } = new List<DataObjects.Arrays.PackedArray>();
-        public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
+        public VerilogColorType ColorType { get { return VerilogColorType.Variable; } }
         public IDataType Clone()
         {
             List<PackedArray> array = new List<PackedArray>();
@@ -68,7 +69,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         {
             StringType dType = new StringType();
             if (word.Text != "string") throw new Exception();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
             return dType;
         }

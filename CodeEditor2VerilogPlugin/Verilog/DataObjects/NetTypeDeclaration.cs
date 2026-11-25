@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 
 using pluginVerilog.Verilog.DataObjects.DataTypes;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects
 {
@@ -17,7 +18,7 @@ namespace pluginVerilog.Verilog.DataObjects
     public class NetTypeDeclaration : INamedElement
     {
         public string Name { get; set; } = "";
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public VerilogColorType ColorType => VerilogColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
 
         public static bool Parse(WordScanner word, NameSpace nameSpace)
@@ -25,13 +26,13 @@ namespace pluginVerilog.Verilog.DataObjects
             // "typedef" "nettype" is handled here (typedef keyword consumed by caller)
             if (word.Text == "typedef")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
 
             if (word.Text != "nettype") return false;
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             NetTypeDeclaration netTypeDecl = new NetTypeDeclaration();
@@ -52,7 +53,7 @@ namespace pluginVerilog.Verilog.DataObjects
             {
                 dataType = DataTypes.DataTypeFactory.ParseCreate(word, nameSpace, null);
                 netTypeDecl.Name = word.Text;
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
             }
             else
@@ -60,12 +61,12 @@ namespace pluginVerilog.Verilog.DataObjects
                 // [ package_scope ] net_type_identifier net_type_identifier
                 if (word.NextText == "::")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                     word.MoveNext(); // ::
                 }
                 // source net type identifier
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
                 // target net type identifier
                 if (!General.IsIdentifier(word.Text))
@@ -76,24 +77,24 @@ namespace pluginVerilog.Verilog.DataObjects
                     return true;
                 }
                 netTypeDecl.Name = word.Text;
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
             }
 
             // [ "with" [ package_scope ] tf_identifier ]
             if (word.Text == "with")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
                 if (word.NextText == "::")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                     word.MoveNext(); // ::
                 }
                 if (General.IsIdentifier(word.Text))
                 {
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                 }
             }

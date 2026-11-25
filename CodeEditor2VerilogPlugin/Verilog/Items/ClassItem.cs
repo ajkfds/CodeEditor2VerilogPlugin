@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Items
 {
@@ -74,7 +75,7 @@ namespace pluginVerilog.Verilog.Items
             // qualifier and fails with "virtual interface type required" on "function"/"task")
             if (word.Text == "virtual" && (word.NextText == "function" || word.NextText == "task"))
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext(); // virtual
                 if (word.Text == "function")
                 {
@@ -160,7 +161,7 @@ namespace pluginVerilog.Verilog.Items
                 //      | "extern" { method_qualifier } method_prototype ;
                 //      | "extern" { method_qualifier } class_constructor_prototype
                 case "extern":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
 
                     // Handle "extern new (...)" - class constructor prototype
@@ -196,15 +197,15 @@ namespace pluginVerilog.Verilog.Items
                     {
                         if (word.Text == "pure" && word.NextText == "virtual")
                         {
-                            word.Color(CodeDrawStyle.ColorType.Keyword);
+                            word.Color(VerilogColorType.Keyword);
                             word.MoveNext(); // pure
-                            word.Color(CodeDrawStyle.ColorType.Keyword);
+                            word.Color(VerilogColorType.Keyword);
                             word.MoveNext(); // virtual
                             continue;
                         }
                         if (word.Text == "virtual" || word.Text == "static" || word.Text == "protected" || word.Text == "local")
                         {
-                            word.Color(CodeDrawStyle.ColorType.Keyword);
+                            word.Color(VerilogColorType.Keyword);
                             word.MoveNext();
                             continue;
                         }
@@ -275,12 +276,12 @@ namespace pluginVerilog.Verilog.Items
                         // 18.5.10 solve before / 18.5.14 soft) can reject
                         // constraint forms that are not allowed on randc.
                         string randomQualifier = word.Text;
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.Color(VerilogColorType.Keyword);
                         word.MoveNext();
                         // class_item_qualifier may follow (rand static / rand local ...)
                         while (word.Text == "static" || word.Text == "protected" || word.Text == "local")
                         {
-                            word.Color(CodeDrawStyle.ColorType.Keyword);
+                            word.Color(VerilogColorType.Keyword);
                             word.MoveNext();
                         }
                         if (DataObjects.Variables.Variable.ParseDeclaration(word, nameSpace, null, randomQualifier)) return true;
@@ -290,7 +291,7 @@ namespace pluginVerilog.Verilog.Items
                 case "static":
                 case "protected":
                 case "local":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     Parse(word, nameSpace);
                     return true;
@@ -314,7 +315,7 @@ namespace pluginVerilog.Verilog.Items
         private static bool parseConst(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "const") throw new Exception();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             //class_item_qualifier
@@ -323,7 +324,7 @@ namespace pluginVerilog.Verilog.Items
                 case "static":
                 case "protected":
                 case "local":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     break;
             }

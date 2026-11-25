@@ -1,3 +1,4 @@
+using SystemVerilogCore.Documents;
 namespace pluginVerilog.Verilog
 {
     public class CommentScanner
@@ -66,9 +67,9 @@ namespace pluginVerilog.Verilog
             }
         }
 
-        public void Color(CodeDrawStyle.ColorType colorType)
+        public void Color(VerilogColorType colorType)
         {
-            document.SetColorAt(index, CodeDrawStyle.ColorIndex(colorType), indexEnd - index);
+            document.SetColorAt(index, (byte)colorType, indexEnd - index);
         }
         public string Text
         {

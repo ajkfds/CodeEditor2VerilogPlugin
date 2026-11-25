@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Items
 {
@@ -16,29 +17,29 @@ namespace pluginVerilog.Verilog.Items
                 {
                     if (comment.Text == word.ProjectProperty.AnnotationCommands.RefInstance)
                     {
-                        comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                        comment.Color(VerilogColorType.CommentAnnotation);
                         comment.MoveNext();
 
                         if (comment.Text != ":") continue;
-                        comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                        comment.Color(VerilogColorType.CommentAnnotation);
                         comment.MoveNext();
 
                         if (comment.EOC) continue;
                         var buildingBlock = word.ProjectProperty.DefinitionNameSpace.Get(comment.Text);
                         if (buildingBlock == null) continue;
-                        comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                        comment.Color(VerilogColorType.CommentAnnotation);
                         comment.MoveNext();
 
                         if (comment.EOC) continue;
-                        comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                        comment.Color(VerilogColorType.CommentAnnotation);
                         comment.MoveNext();
                     }
                     else if (comment.Text == word.ProjectProperty.AnnotationCommands.Discard)
                     {
-                        comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                        comment.Color(VerilogColorType.CommentAnnotation);
                         comment.MoveNext();
                         if (comment.Text != ":") continue;
-                        comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                        comment.Color(VerilogColorType.CommentAnnotation);
                         comment.MoveNext();
                         while (!comment.EOC)
                         {
@@ -53,23 +54,23 @@ namespace pluginVerilog.Verilog.Items
                                 else
                                 {
                                     dataObject.CommentAnnotation_Discarded = true;
-                                    comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                                    comment.Color(VerilogColorType.CommentAnnotation);
                                     comment.MoveNext();
                                 }
                             }
                             if (comment.Text != ",") break;
-                            comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                            comment.Color(VerilogColorType.CommentAnnotation);
                             comment.MoveNext();
                         }
                     }
                     else if (comment.Text == word.ProjectProperty.AnnotationCommands.Markdown)
                     {
-                        comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                        comment.Color(VerilogColorType.CommentAnnotation);
                         comment.MoveNextUntilEol();
 
                         while (!comment.EOC)
                         {
-                            comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                            comment.Color(VerilogColorType.CommentAnnotation);
                             comment.MoveNextUntilEol();
                         }
                     }
@@ -100,7 +101,7 @@ namespace pluginVerilog.Verilog.Items
 
         private static void parseSameSyncAnnotation(CommentScanner comment, NameSpace nameSpace)
         {
-            comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+            comment.Color(VerilogColorType.CommentAnnotation);
             comment.MoveNext();
 
             if (comment.EOC) return;
@@ -113,19 +114,19 @@ namespace pluginVerilog.Verilog.Items
                 string lhsName = comment.Text;
                 if (!nameSpace.NamedElements.ContainsKey(lhsName)) return;
 
-                comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                comment.Color(VerilogColorType.CommentAnnotation);
                 comment.MoveNext();
 
                 // Expect '='
                 if (comment.EOC || comment.Text != "=") return;
-                comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                comment.Color(VerilogColorType.CommentAnnotation);
                 comment.MoveNext();
 
                 // Expect RHS identifier
                 if (comment.EOC || !General.IsSimpleIdentifier(comment.Text)) return;
                 string rhsName = comment.Text;
                 if (!nameSpace.NamedElements.ContainsKey(rhsName)) return;
-                comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                comment.Color(VerilogColorType.CommentAnnotation);
                 comment.MoveNext();
 
 
@@ -142,7 +143,7 @@ namespace pluginVerilog.Verilog.Items
                 // Optional ',' separator
                 if (!comment.EOC && comment.Text == ",")
                 {
-                    comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                    comment.Color(VerilogColorType.CommentAnnotation);
                     comment.MoveNext();
                 }
                 else
@@ -154,7 +155,7 @@ namespace pluginVerilog.Verilog.Items
 
         private static async System.Threading.Tasks.Task parseScopeAnnotationAsync(CommentScanner comment, WordScanner word, NameSpace nameSpace)
         {
-            comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+            comment.Color(VerilogColorType.CommentAnnotation);
             comment.MoveNext();
 
             if (comment.EOC) return;
@@ -167,7 +168,7 @@ namespace pluginVerilog.Verilog.Items
                 while (!comment.EOC && comment.Text != "@") comment.MoveNext();
                 return;
             }
-            comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+            comment.Color(VerilogColorType.CommentAnnotation);
             comment.MoveNext();
 
             // Create the scope reference
@@ -179,12 +180,12 @@ namespace pluginVerilog.Verilog.Items
             // Check for parameter overrides (#(...))
             if (!comment.EOC && comment.Text == "#")
             {
-                comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                comment.Color(VerilogColorType.CommentAnnotation);
                 comment.MoveNext();
 
                 if (!comment.EOC && comment.Text == "(")
                 {
-                    comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                    comment.Color(VerilogColorType.CommentAnnotation);
                     comment.MoveNext();
 
                     // Parse parameter overrides
@@ -198,12 +199,12 @@ namespace pluginVerilog.Verilog.Items
                             comment.MoveNext();
                             continue;
                         }
-                        comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                        comment.Color(VerilogColorType.CommentAnnotation);
                         comment.MoveNext();
 
                         if (comment.EOC) break;
                         string paramName = comment.Text;
-                        comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                        comment.Color(VerilogColorType.CommentAnnotation);
                         comment.MoveNext();
 
                         if (comment.EOC) break;
@@ -213,7 +214,7 @@ namespace pluginVerilog.Verilog.Items
                             comment.MoveNext();
                             continue;
                         }
-                        comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                        comment.Color(VerilogColorType.CommentAnnotation);
                         comment.MoveNext();
 
                         // Parse the parameter value expression
@@ -225,7 +226,7 @@ namespace pluginVerilog.Verilog.Items
                             paramValueText += comment.Text;
                             if (comment.Text == "(") parenDepth++;
                             else if (comment.Text == ")") parenDepth--;
-                            comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                            comment.Color(VerilogColorType.CommentAnnotation);
                             comment.MoveNext();
                         }
 
@@ -252,7 +253,7 @@ namespace pluginVerilog.Verilog.Items
                         // Skip comma if present
                         if (!comment.EOC && comment.Text == ",")
                         {
-                            comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                            comment.Color(VerilogColorType.CommentAnnotation);
                             comment.MoveNext();
                         }
                     }
@@ -260,7 +261,7 @@ namespace pluginVerilog.Verilog.Items
                     // Move past closing parenthesis
                     if (!comment.EOC && comment.Text == ")")
                     {
-                        comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                        comment.Color(VerilogColorType.CommentAnnotation);
                         comment.MoveNext();
                     }
                 }
@@ -270,7 +271,7 @@ namespace pluginVerilog.Verilog.Items
             if (!comment.EOC && General.IsSimpleIdentifier(comment.Text))
             {
                 scopeRef.InstanceName = comment.Text;
-                comment.Color(CodeDrawStyle.ColorType.CommentAnnotation);
+                comment.Color(VerilogColorType.CommentAnnotation);
                 comment.MoveNext();
             }
 

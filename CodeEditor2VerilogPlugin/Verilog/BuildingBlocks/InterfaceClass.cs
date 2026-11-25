@@ -6,6 +6,7 @@ using pluginVerilog.Verilog.Items;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
@@ -23,7 +24,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         public bool IsValidForNet { get { return false; } }
 
         public int? BitWidth { get; } = null;
-        public new CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
+        public new VerilogColorType ColorType { get { return VerilogColorType.Variable; } }
         public bool IsVector { get { return false; } }
         public virtual bool PartSelectable { get { return false; } }
 
@@ -139,7 +140,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
              */
 
             if (word.Text != "interface") throw new Exception();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             IndexReference beginReference = word.CreateIndexReference();
             word.MoveNext();
 
@@ -148,7 +149,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 word.AddError("class keyword expected");
                 return null;
             }
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             // parse definitions
@@ -159,7 +160,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
 
             // class_identifier
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             if (!General.IsIdentifier(word.Text))
             {
                 word.AddError("illegal interface class name");
@@ -206,7 +207,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
             else
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 interfaceClass.LastIndexReference = word.CreateIndexReference();
 
                 word.AppendBlock(interfaceClass.BeginIndexReference, interfaceClass.LastIndexReference);
@@ -222,7 +223,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                     word.MoveNext();
                     if (interfaceClass != null && word.Text == interfaceClass.Name)
                     {
-                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.Color(VerilogColorType.Identifier);
                         word.MoveNext();
                     }
                     else
@@ -233,7 +234,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         }
                         else
                         {
-                            word.Color(CodeDrawStyle.ColorType.Identifier);
+                            word.Color(VerilogColorType.Identifier);
                             word.AddError("illegal class name");
                             word.MoveNext();
                         }
@@ -416,7 +417,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 // [ "extends" interface_class_type { , interface_class_type } ]  
                 if (word.Text == "extends")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
 
                     // interface_class_type { , interface_class_type }
@@ -429,7 +430,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                         else
                         {
                             InterfaceClass baseInterfaceClass = (InterfaceClass)nameSpace.NamedElements[word.Text];
-                            word.Color(CodeDrawStyle.ColorType.Identifier);
+                            word.Color(VerilogColorType.Identifier);
                             word.MoveNext();
 
                             // parameter_value_assignment (optional)
@@ -466,7 +467,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
                         if (word.Text == ",")
                         {
-                            word.Color(CodeDrawStyle.ColorType.Keyword);
+                            word.Color(VerilogColorType.Keyword);
                             word.MoveNext();
                             continue;
                         }
@@ -566,7 +567,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 | package_identifier :: *
             */
             if (word.Text != "import") throw new Exception();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             while (!word.Eof)
@@ -580,30 +581,30 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 // package_identifier
                 if (General.IsIdentifier(word.Text))
                 {
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                 }
 
                 if (word.Text == "::")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
 
                     if (word.Text == "*")
                     {
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.Color(VerilogColorType.Keyword);
                         word.MoveNext();
                     }
                     else if (General.IsIdentifier(word.Text))
                     {
-                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.Color(VerilogColorType.Identifier);
                         word.MoveNext();
                     }
                 }
 
                 if (word.Text == ",")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     continue;
                 }
@@ -623,7 +624,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 | "typedef" [ class_scope ] class_identifier type_identifier ;
             */
             if (word.Text != "typedef") throw new Exception();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             // "typedef class A;" forward declaration: register nothing (real Class
@@ -631,16 +632,16 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             // to suppress the false "data type expected" error.
             if (word.Text == "class" || (word.Text == "interface" && word.NextText == "class"))
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
                 if (word.Text == "class")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                 }
                 if (General.IsIdentifier(word.Text))
                 {
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                 }
                 if (word.Text == ";")
@@ -674,7 +675,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
                 return true;
             }
 
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             Typedef typeDef = new Typedef() { Name = word.Text, VariableType = iDataType };
             word.MoveNext();
 
@@ -723,8 +724,8 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
         public void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText("interface class ", CodeDrawStyle.ColorType.Keyword);
-            label.AppendText(Name, CodeDrawStyle.ColorType.Identifier);
+            label.AppendText("interface class ", VerilogColorType.Keyword);
+            label.AppendText(Name, VerilogColorType.Identifier);
         }
 
         public static List<string> UniqueKeywords = new List<string> {

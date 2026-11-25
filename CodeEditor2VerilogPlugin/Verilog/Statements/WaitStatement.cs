@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Statements
 {
@@ -16,7 +17,7 @@ namespace pluginVerilog.Verilog.Statements
             ElseStatement?.DisposeSubReference();
         }
         public string Name { get; protected set; }
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public VerilogColorType ColorType => VerilogColorType.Identifier;
         public IStatement? Statement { get; protected set; }
         public IStatement? ElseStatement { get; protected set; }
         public Expressions.Expression? Expression { get; protected set; }
@@ -40,7 +41,7 @@ namespace pluginVerilog.Verilog.Statements
             if (word.Text != "wait") throw new Exception();
 
             IndexReference beginIndexReference = word.CreateIndexReference();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
             if (word.Text == "fork")
             {
@@ -106,7 +107,7 @@ namespace pluginVerilog.Verilog.Statements
             // | "wait fork" ";"
             if (word.Text != "wait_fork") throw new Exception(); ;
             IndexReference beginIndexReference = word.CreateIndexReference();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             if (word.Text != ";")
@@ -124,7 +125,7 @@ namespace pluginVerilog.Verilog.Statements
             // | "wait_order" "(" hierarchical_identifier { "," hierarchical_identifier } ")" action_block
             if (word.Text != "wait_order") throw new Exception();
             IndexReference beginIndexReference = word.CreateIndexReference();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             if (word.Text != "(")
@@ -144,7 +145,7 @@ namespace pluginVerilog.Verilog.Statements
                 return null;
             }
             waitOrderStatement.Identifiers.Add(word.Text);
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
 
             // Parse remaining hierarchical_identifiers (comma separated)
@@ -158,7 +159,7 @@ namespace pluginVerilog.Verilog.Statements
                     return null;
                 }
                 waitOrderStatement.Identifiers.Add(word.Text);
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
             }
 
@@ -176,7 +177,7 @@ namespace pluginVerilog.Verilog.Statements
             // Handle else clause
             if (word.Text == "else")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext(); // else
 
                 IStatement? elseStatement = Statements.ParseCreateStatementOrNull(word, nameSpace);

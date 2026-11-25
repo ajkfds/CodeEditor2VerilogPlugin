@@ -1,6 +1,7 @@
 
 using System;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Statements
 {
@@ -27,7 +28,7 @@ namespace pluginVerilog.Verilog.Statements
                 throw new Exception();
             }
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext(); // expect
 
             ExpectPropertyStatement expectPropertyStatement = new ExpectPropertyStatement() { BeginIndexReference = word.CreateIndexReference() };
@@ -56,7 +57,7 @@ namespace pluginVerilog.Verilog.Statements
 
             if (word.Text == "else")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext(); // else
 
                 expectPropertyStatement.ElseStatement = Statements.ParseCreateStatementOrNull(word, nameSpace);
@@ -85,7 +86,7 @@ namespace pluginVerilog.Verilog.Statements
 
         public string Name { get; set; } = "";
 
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Keyword;
+        public VerilogColorType ColorType => VerilogColorType.Keyword;
 
         public NamedElements NamedElements => new NamedElements();
 

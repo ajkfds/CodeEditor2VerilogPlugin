@@ -5,6 +5,7 @@ using pluginVerilog.Verilog.Expressions;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
@@ -41,7 +42,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
         public int? BitWidth { get { return null; } }
 
-        public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
+        public VerilogColorType ColorType { get { return VerilogColorType.Variable; } }
 
         public List<Arrays.PackedArray> PackedDimensions { get; } = new List<Arrays.PackedArray>();
 
@@ -54,7 +55,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
         public void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText("event", CodeDrawStyle.ColorType.Keyword);
+            label.AppendText("event", VerilogColorType.Keyword);
         }
 
         public IDataType Clone()

@@ -1,4 +1,5 @@
 using System;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.Arrays
 {
@@ -53,7 +54,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
             // associative_dimension    ::= [data_type] | [ * ]
             if (word.Text == "*")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext(); // *
 
                 if (word.Text == "]")

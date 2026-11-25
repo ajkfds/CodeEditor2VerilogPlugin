@@ -1,3 +1,4 @@
+using SystemVerilogCore.Documents;
 namespace pluginVerilog.Verilog.Items.Generate
 {
     public class LoopGenerateConstruct
@@ -23,7 +24,7 @@ namespace pluginVerilog.Verilog.Items.Generate
         {
             // generate_loop_statement::=  for (genvar_assignment; constant_expression; genvar_assignment) begin : generate_block_identifier { generate_item } end
             if (word.Text != "for") throw new System.Exception();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             if (word.Text != "(")

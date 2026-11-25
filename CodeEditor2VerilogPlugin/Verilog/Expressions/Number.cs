@@ -1,6 +1,7 @@
 //using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Text;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Expressions
 {
@@ -153,7 +154,7 @@ namespace pluginVerilog.Verilog.Expressions
 
         public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText(Text, CodeDrawStyle.ColorType.Number);
+            label.AppendText(Text, VerilogColorType.Number);
         }
 
         public override void AppendString(StringBuilder stringBuilder)
@@ -163,7 +164,7 @@ namespace pluginVerilog.Verilog.Expressions
 
         public static Primary? ParseCreateNumberOrCast(WordScanner word, NameSpace nameSpace, bool lValue)
         {
-            word.Color(CodeDrawStyle.ColorType.Number);
+            word.Color(VerilogColorType.Number);
 
 
             Number number = new Number();
@@ -289,7 +290,7 @@ namespace pluginVerilog.Verilog.Expressions
                 index = 0;
                 if (word.GetCharAt(index) != '\'') return number;
 
-                word.Color(CodeDrawStyle.ColorType.Number);
+                word.Color(VerilogColorType.Number);
                 number.Text = number.Text + word.Text;
                 apostropheIndex = 0;
                 return parseAfterApostrophe(word, nameSpace, index, apostropheIndex, number, sb);
@@ -302,7 +303,7 @@ namespace pluginVerilog.Verilog.Expressions
                     // and previously it fell into the cast path below causing an "illegal cast" error.
                     if (word.NextText == "{")
                     {
-                        word.Color(CodeDrawStyle.ColorType.Number);
+                        word.Color(VerilogColorType.Number);
                         word.MoveNext(); // consume '
                         DataObjects.AssignmentPattern? assignmentPattern = DataObjects.AssignmentPattern.ParseCreate(word, nameSpace, lValue);
                         if (assignmentPattern == null) return null;
@@ -333,27 +334,27 @@ namespace pluginVerilog.Verilog.Expressions
         //{
         //    switch(word.Text){
         //        case "'0":
-        //            word.Color(CodeDrawStyle.ColorType.Number);
+        //            word.Color(VerilogColorType.Number);
         //            word.MoveNext();
         //            return new Number() { Value = 0, Constant = true, NumberType = NumberTypeEnum.Decimal };
         //        case "'1":
-        //            word.Color(CodeDrawStyle.ColorType.Number);
+        //            word.Color(VerilogColorType.Number);
         //            word.MoveNext();
         //            return new Number() { Value = 1, Constant = true, NumberType = NumberTypeEnum.Decimal };
         //        case "'z":
-        //            word.Color(CodeDrawStyle.ColorType.Number);
+        //            word.Color(VerilogColorType.Number);
         //            word.MoveNext();
         //            return new Number() { Value = null, Constant = true, NumberType = NumberTypeEnum.Decimal };
         //        case "'Z":
-        //            word.Color(CodeDrawStyle.ColorType.Number);
+        //            word.Color(VerilogColorType.Number);
         //            word.MoveNext();
         //            return new Number() { Value = null, Constant = true, NumberType = NumberTypeEnum.Decimal };
         //        case "'x":
-        //            word.Color(CodeDrawStyle.ColorType.Number);
+        //            word.Color(VerilogColorType.Number);
         //            word.MoveNext();
         //            return new Number() { Value = null, Constant = true, NumberType = NumberTypeEnum.Decimal };
         //        case "'X":
-        //            word.Color(CodeDrawStyle.ColorType.Number);
+        //            word.Color(VerilogColorType.Number);
         //            word.MoveNext();
         //            return new Number() { Value = null, Constant = true, NumberType = NumberTypeEnum.Decimal };
         //        default:
@@ -542,7 +543,7 @@ namespace pluginVerilog.Verilog.Expressions
             {
                 word.MoveNext();
                 number.Text = number.Text + word.Text;
-                word.Color(CodeDrawStyle.ColorType.Number);
+                word.Color(VerilogColorType.Number);
                 index = 0;
             }
 
@@ -604,7 +605,7 @@ namespace pluginVerilog.Verilog.Expressions
             {
                 word.MoveNext();
                 number.Text = number.Text + word.Text;
-                word.Color(CodeDrawStyle.ColorType.Number);
+                word.Color(VerilogColorType.Number);
                 index = 0;
             }
 
@@ -667,7 +668,7 @@ namespace pluginVerilog.Verilog.Expressions
             {
                 word.MoveNext();
                 number.Text = number.Text + word.Text;
-                word.Color(CodeDrawStyle.ColorType.Number);
+                word.Color(VerilogColorType.Number);
                 index = 0;
             }
 
@@ -739,7 +740,7 @@ namespace pluginVerilog.Verilog.Expressions
             {
                 word.MoveNext();
                 number.Text = number.Text + word.Text;
-                word.Color(CodeDrawStyle.ColorType.Number);
+                word.Color(VerilogColorType.Number);
                 index = 0;
             }
 

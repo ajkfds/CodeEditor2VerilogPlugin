@@ -1,5 +1,6 @@
 using pluginVerilog.Verilog.BuildingBlocks;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Items.Generate
 {
@@ -8,7 +9,7 @@ namespace pluginVerilog.Verilog.Items.Generate
         protected GenerateBlock(BuildingBlock buildingBlock, NameSpace parent) : base(buildingBlock, parent)
         {
         }
-        public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Identifier; } }
+        public override VerilogColorType ColorType { get { return VerilogColorType.Identifier; } }
 
         public static async System.Threading.Tasks.Task<bool> ParseAsync(WordScanner word, NameSpace nameSpace, CompletionContext? completionContext = null)
         {
@@ -17,7 +18,7 @@ namespace pluginVerilog.Verilog.Items.Generate
             string name = "";
 
             // generate_block ::= begin[ : generate_block_identifier]  { generate_item } end
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             WordReference beginRef = word.GetReference();
             IndexReference beginIdexRef = word.CreateIndexReference();
             word.MoveNext();
@@ -94,11 +95,11 @@ namespace pluginVerilog.Verilog.Items.Generate
                             nameSpace.NamedElements.Add(name, generateBlock);
                         }
                     }
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                 }
                 else
                 {
-                    word.Color(CodeDrawStyle.ColorType.Inactivated);
+                    word.Color(VerilogColorType.Inactivated);
                 }
                 word.MoveNext();
             }
@@ -138,7 +139,7 @@ namespace pluginVerilog.Verilog.Items.Generate
                         }
                         beginCount--;
                     }
-                    word.Color(CodeDrawStyle.ColorType.Inactivated);
+                    word.Color(VerilogColorType.Inactivated);
                     word.MoveNext();
                 }
             }
@@ -147,7 +148,7 @@ namespace pluginVerilog.Verilog.Items.Generate
 
             if (word.Text == "end")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
 
                 if (word.Text == ":")
@@ -155,7 +156,7 @@ namespace pluginVerilog.Verilog.Items.Generate
                     word.MoveNext();
                     if (name == word.Text)
                     {
-                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.Color(VerilogColorType.Identifier);
                         word.MoveNext();
                     }
                     else

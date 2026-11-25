@@ -1,6 +1,7 @@
 
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using System;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects
 {
@@ -8,15 +9,15 @@ namespace pluginVerilog.Verilog.DataObjects
     {
         public required IDataType VariableType { get; init; }
         public required string Name { get; init; }
-        public virtual CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Identifier; } }
+        public virtual VerilogColorType ColorType { get { return VerilogColorType.Identifier; } }
 
         public NamedElements NamedElements { get; } = new NamedElements();
 
 
         public void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText("typedef ", CodeDrawStyle.ColorType.Keyword);
-            label.AppendText(Name, CodeDrawStyle.ColorType.Identifier);
+            label.AppendText("typedef ", VerilogColorType.Keyword);
+            label.AppendText(Name, VerilogColorType.Identifier);
             label.AppendText("\n");
 
             if (VariableType != null)
@@ -35,7 +36,7 @@ namespace pluginVerilog.Verilog.DataObjects
                 | "typedef" [ "enum" | "struct" | "union" | "class" | "interface class" ] type_identifier ;
              */
             if (word.Text != "typedef") throw new Exception();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             // "typedef class A;" / "typedef interface class A;" forward declaration
@@ -44,16 +45,16 @@ namespace pluginVerilog.Verilog.DataObjects
             // degrade member resolution via UserDefinedType.
             if (word.Text == "class" || (word.Text == "interface" && word.NextText == "class"))
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
                 if (word.Text == "class")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                 }
                 if (General.IsIdentifier(word.Text))
                 {
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                 }
                 if (word.Text == ";")
@@ -77,9 +78,9 @@ namespace pluginVerilog.Verilog.DataObjects
                 probe.MoveNext(); // enum / struct / union
                 if (General.IsSimpleIdentifier(probe.Text) && probe.NextText == ";")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext(); // keyword
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext(); // identifier
                     word.MoveNext(); // ;
                     return true;
@@ -93,7 +94,7 @@ namespace pluginVerilog.Verilog.DataObjects
                 // not resolve to a data type (IEEE 1800-2017 6.18). The check is
                 // deferred until the whole file has been parsed, because a
                 // forward typedef may precede its definition.
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 if (!word.Prototype && word.CompletionContext == null)
                 {
                     word.RootParsedDocument.ForwardTypedefs.Add(
@@ -126,7 +127,7 @@ namespace pluginVerilog.Verilog.DataObjects
                 return true;
             }
 
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             Typedef typeDef = new Typedef() { Name = word.Text, VariableType = iDataType };
             word.MoveNext();
 

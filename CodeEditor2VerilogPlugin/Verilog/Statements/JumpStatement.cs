@@ -1,3 +1,4 @@
+using SystemVerilogCore.Documents;
 
 
 namespace pluginVerilog.Verilog.Statements
@@ -11,7 +12,7 @@ namespace pluginVerilog.Verilog.Statements
         public required IndexReference BeginIndexReference { get; init; }
         public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public VerilogColorType ColorType => VerilogColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
         public void DisposeSubReference()
         {
@@ -32,7 +33,7 @@ namespace pluginVerilog.Verilog.Statements
                 word.AddError("return shall not be used within a fork-join block");
             }
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             if (word.Text == ";")
@@ -71,7 +72,7 @@ namespace pluginVerilog.Verilog.Statements
         public required IndexReference BeginIndexReference { get; init; }
         public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public VerilogColorType ColorType => VerilogColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
 
         public void DisposeSubReference()
@@ -82,7 +83,7 @@ namespace pluginVerilog.Verilog.Statements
         {
             if (word.Text != "break") System.Diagnostics.Debugger.Break();
             BreakStatement jumpStatement = new BreakStatement() { BeginIndexReference = word.CreateIndexReference() };
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             jumpStatement.LastIndexReference = word.CreateIndexReferenceBefore();
@@ -105,7 +106,7 @@ namespace pluginVerilog.Verilog.Statements
         public required IndexReference BeginIndexReference { get; init; }
         public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public VerilogColorType ColorType => VerilogColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
 
         public void DisposeSubReference()
@@ -116,7 +117,7 @@ namespace pluginVerilog.Verilog.Statements
         {
             if (word.Text != "continue") System.Diagnostics.Debugger.Break();
             ContinueStatement jumpStatement = new ContinueStatement() { BeginIndexReference = word.CreateIndexReference() };
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             jumpStatement.LastIndexReference = word.CreateIndexReferenceBefore();

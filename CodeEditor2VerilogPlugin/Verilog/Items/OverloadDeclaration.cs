@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Items
 {
@@ -33,14 +34,14 @@ namespace pluginVerilog.Verilog.Items
         {
             if (word.Text != "function") return false;
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             OverloadDeclaration overload = new OverloadDeclaration();
 
             // binary_operator
             overload.Operator = word.Text;
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             if (word.Text != "with")
@@ -50,7 +51,7 @@ namespace pluginVerilog.Verilog.Items
                 if (word.Text == ";") word.MoveNext();
                 return true;
             }
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             if (!General.IsIdentifier(word.Text))
@@ -61,7 +62,7 @@ namespace pluginVerilog.Verilog.Items
                 return true;
             }
             overload.FunctionIdentifier = word.Text;
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
 
             if (word.Text == ";")

@@ -116,20 +116,33 @@ namespace pluginVerilog
         {
             return colors[(byte)colorType];
         }
+
+        /// <summary>
+        /// Semantic colour categories.
+        ///
+        /// <para>
+        /// This is an alias of the UI-free contract enum
+        /// (<see cref="SystemVerilogCore.Documents.VerilogColorType"/>), not a
+        /// second copy. The parser now produces contract values, and this host
+        /// has to accept them, so the two must be the same type - otherwise
+        /// every call site needs a cast. The numeric values are palette slots
+        /// and are fixed by the contract; this class only owns the colours.
+        /// </para>
+        /// </summary>
         public enum ColorType : byte
         {
-            Normal = 0,
-            Comment = 5,
-            Register = 3,
-            Net = 9,
-            Variable = 11,
-            Parameter = 7,
-            Keyword = 4,
-            Identifier = 6,
-            Number = 8,
-            Inactivated = 1,
-            HighLightedComment = 10,
-            CommentAnnotation = 12
+            Normal = SystemVerilogCore.Documents.VerilogColorType.Normal,
+            Comment = SystemVerilogCore.Documents.VerilogColorType.Comment,
+            Register = SystemVerilogCore.Documents.VerilogColorType.Register,
+            Net = SystemVerilogCore.Documents.VerilogColorType.Net,
+            Variable = SystemVerilogCore.Documents.VerilogColorType.Variable,
+            Parameter = SystemVerilogCore.Documents.VerilogColorType.Parameter,
+            Keyword = SystemVerilogCore.Documents.VerilogColorType.Keyword,
+            Identifier = SystemVerilogCore.Documents.VerilogColorType.Identifier,
+            Number = SystemVerilogCore.Documents.VerilogColorType.Number,
+            Inactivated = SystemVerilogCore.Documents.VerilogColorType.Inactivated,
+            HighLightedComment = SystemVerilogCore.Documents.VerilogColorType.HighLightedComment,
+            CommentAnnotation = SystemVerilogCore.Documents.VerilogColorType.CommentAnnotation
         }
 
 

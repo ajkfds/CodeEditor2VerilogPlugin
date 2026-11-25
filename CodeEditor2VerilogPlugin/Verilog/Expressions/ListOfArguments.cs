@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Expressions
 {
@@ -194,7 +195,7 @@ namespace pluginVerilog.Verilog.Expressions
                 }
 
                 DataObjects.Port port = portNameSpace.Ports[word.Text];
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
 
                 if (connectedPorts.Contains(port.Name))
                 {
@@ -429,7 +430,7 @@ namespace pluginVerilog.Verilog.Expressions
 
             if (General.IsIdentifier(word.Text))
             {
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
             }
             else
@@ -491,8 +492,7 @@ namespace pluginVerilog.Verilog.Expressions
                 Data.VerilogCommon.AutoCompleteItem acItem = new Data.VerilogCommon.AutoCompleteItem(
                     Data.VerilogCommon.AutoCompleteItem.CompleteType.DataObject,
                     port.Name,
-                    CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Variable),
-                    Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Variable),
+                    (byte)VerilogColorType.Variable,
                     "CodeEditor2/Assets/Icons/tag.svg"
                     );
                 completionContext.AutoCompleteItems.Add(acItem);

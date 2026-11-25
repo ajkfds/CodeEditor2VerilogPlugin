@@ -2,6 +2,7 @@
 using pluginVerilog.Verilog.DataObjects.Variables;
 using System;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.Arrays
 {
@@ -11,7 +12,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
         protected Queue() { }
 
         public bool IsValidForNet { get { return false; } }
-        public override CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Variable;
+        public override VerilogColorType ColorType => VerilogColorType.Variable;
         public int? Size { get; protected set; } = null;
         public bool Constant { get; protected set; } = false;
 
@@ -33,7 +34,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
             // queue_dimension          ::= [ $ [ : constant_expression] ]
 
             if (word.Text != "$") throw new Exception();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext(); // $
 
             if (word.Text == "]")

@@ -2,6 +2,7 @@
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.Expressions;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
@@ -48,7 +49,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 return size;
             }
         }
-        public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
+        public VerilogColorType ColorType { get { return VerilogColorType.Variable; } }
         public virtual List<DataObjects.Arrays.PackedArray> PackedDimensions { get; protected set; } = new List<DataObjects.Arrays.PackedArray>();
 
         public bool Tagged = false;
@@ -76,9 +77,9 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
         public virtual void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText(IsUnion ? "union" : "struct", CodeDrawStyle.ColorType.Keyword);
-            if (Packed) label.AppendText(" packed", CodeDrawStyle.ColorType.Keyword);
-            if (Signed) label.AppendText(" signed", CodeDrawStyle.ColorType.Keyword);
+            label.AppendText(IsUnion ? "union" : "struct", VerilogColorType.Keyword);
+            if (Packed) label.AppendText(" packed", VerilogColorType.Keyword);
+            if (Signed) label.AppendText(" signed", VerilogColorType.Keyword);
             if (Members.Count != 0)
             {
                 label.AppendText("{\n");
@@ -110,7 +111,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         public static StructType? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "struct") System.Diagnostics.Debugger.Break();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.AddSystemVerilogError();
             word.MoveNext();
 
@@ -125,24 +126,24 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             if (word.Text == "tagged")
             {
                 type.Tagged = true;
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
 
             if (word.Text == "packed")
             {
                 type.Packed = true;
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
                 switch (word.Text)
                 {
                     case "signed":
                         type.Signed = true;
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.Color(VerilogColorType.Keyword);
                         word.MoveNext();
                         break;
                     case "unsigned":
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.Color(VerilogColorType.Keyword);
                         word.MoveNext();
                         break;
                 }
@@ -231,12 +232,12 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
             if (word.Text == "rand")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
             else if (word.Text == "randc")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
 
@@ -246,7 +247,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             {
                 // data_type_or_void ::= "void" (valid only in tagged union members)
                 isVoid = true;
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
             else
@@ -306,7 +307,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                         // branch and reported "] expected" because "*" is not
                         // an expression. Consume "[", "*", "]" as a dimension.
                         word.MoveNext(); // [
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.Color(VerilogColorType.Keyword);
                         word.MoveNext(); // *
                         if (word.Text == "]") word.MoveNext();
                         else word.AddError("] expected");
@@ -460,7 +461,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     packedArray.AppendLabel(label);
                     label.AppendText(" ");
                 }
-                label.AppendText(Identifier, CodeDrawStyle.ColorType.Identifier);
+                label.AppendText(Identifier, VerilogColorType.Identifier);
             }
         }
 

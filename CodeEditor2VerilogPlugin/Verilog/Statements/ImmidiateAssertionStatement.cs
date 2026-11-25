@@ -1,5 +1,6 @@
 
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Statements
 {
@@ -51,7 +52,7 @@ namespace pluginVerilog.Verilog.Statements
         public required IndexReference BeginIndexReference { get; init; }
         public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public VerilogColorType ColorType => VerilogColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
 
         /// <summary>
@@ -75,7 +76,7 @@ namespace pluginVerilog.Verilog.Statements
         {
             System.Diagnostics.Debug.Assert(word.Text == "assert" || word.Text == "assume" || word.Text == "cover");
             IndexReference beginIndexReference = word.CreateIndexReference();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             ImmidiateAssertionStatement assertion = new ImmidiateAssertionStatement() { Name = "", BeginIndexReference = beginIndexReference };
@@ -84,11 +85,11 @@ namespace pluginVerilog.Verilog.Statements
             // Check for deferred immediate assertion: #0 or final
             if (word.Text == "#")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext(); // #
                 if (word.Text == "0")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Number);
+                    word.Color(VerilogColorType.Number);
                     word.MoveNext(); // 0
                     assertion.Kind = ImmediateAssertionKind.DeferredZero;
                 }
@@ -100,7 +101,7 @@ namespace pluginVerilog.Verilog.Statements
             }
             else if (word.Text == "final")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext(); // final
                 assertion.Kind = ImmediateAssertionKind.Final;
             }
@@ -134,7 +135,7 @@ namespace pluginVerilog.Verilog.Statements
             // Handle else clause (only for assert and assume)
             if (word.Text == "else")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext(); // else
 
                 IStatement? elseStatement = Statements.ParseCreateStatementOrNull(word, nameSpace);

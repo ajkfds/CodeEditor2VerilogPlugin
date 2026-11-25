@@ -1,6 +1,7 @@
 using pluginVerilog.Verilog;
 using pluginVerilog.Verilog.Expressions;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Sequence
 {
@@ -57,14 +58,14 @@ namespace pluginVerilog.Verilog.Sequence
             }
 
             identifier = word.Text;
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
 
             // Check for :: (package scope)
             if (word.Text == "::")
             {
                 packageScope = identifier;
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
 
                 if (!General.IsIdentifier(word.Text) || General.ListOfKeywords.Contains(word.Text))
@@ -74,7 +75,7 @@ namespace pluginVerilog.Verilog.Sequence
                 }
 
                 identifier = word.Text;
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
             }
 
@@ -87,7 +88,7 @@ namespace pluginVerilog.Verilog.Sequence
                 // Empty argument list
                 if (word.Text == ")")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                 }
                 else
@@ -127,7 +128,7 @@ namespace pluginVerilog.Verilog.Sequence
 
                     if (word.Text == ")")
                     {
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.Color(VerilogColorType.Keyword);
                         word.MoveNext();
                     }
                 }

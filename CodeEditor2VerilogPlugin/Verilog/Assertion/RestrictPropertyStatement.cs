@@ -1,6 +1,7 @@
 
 using System;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Assertion
 {
@@ -24,10 +25,10 @@ namespace pluginVerilog.Verilog.Assertion
                 throw new Exception();
             }
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext(); // restrict
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext(); // property
 
             RestrictPropertyStatement restrictPropertyStatement = new RestrictPropertyStatement() { BeginIndexReference = word.CreateIndexReference() };
@@ -74,7 +75,7 @@ namespace pluginVerilog.Verilog.Assertion
 
         public string Name { get; set; } = "";
 
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Keyword;
+        public VerilogColorType ColorType => VerilogColorType.Keyword;
 
         public NamedElements NamedElements => new NamedElements();
 

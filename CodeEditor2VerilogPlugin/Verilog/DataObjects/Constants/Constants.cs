@@ -3,6 +3,7 @@ using pluginVerilog.Verilog.DataObjects.Arrays;
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using pluginVerilog.Verilog.Expressions;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.Constants
 {
@@ -11,7 +12,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
     public class Constants : DataObject, IPartSelectableDataObject
     {
         public Expressions.Expression? Expression { get; set; } = null;
-        public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Parameter; } }
+        public override VerilogColorType ColorType { get { return VerilogColorType.Parameter; } }
 
         // A parameter / localparam may be declared with a struct / union / user
         // defined type (e.g. "parameter my_struct_t p = '{...};"). Its members
@@ -47,16 +48,16 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
             switch (ConstantType)
             {
                 case ConstantTypeEnum.parameter:
-                    label.AppendText("parameter", CodeDrawStyle.ColorType.Keyword);
+                    label.AppendText("parameter", VerilogColorType.Keyword);
                     break;
                 case ConstantTypeEnum.localparam:
-                    label.AppendText("localparam", CodeDrawStyle.ColorType.Keyword);
+                    label.AppendText("localparam", VerilogColorType.Keyword);
                     break;
                 case ConstantTypeEnum.specparam:
-                    label.AppendText("specparam", CodeDrawStyle.ColorType.Keyword);
+                    label.AppendText("specparam", VerilogColorType.Keyword);
                     break;
                 case ConstantTypeEnum.enum_:
-                    label.AppendText("enum", CodeDrawStyle.ColorType.Keyword);
+                    label.AppendText("enum", VerilogColorType.Keyword);
                     break;
             }
         }
@@ -77,7 +78,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
             }
             label.AppendText(" ");
 
-            label.AppendText(Name, CodeDrawStyle.ColorType.Parameter);
+            label.AppendText(Name, VerilogColorType.Parameter);
 
             if (Expression != null)
             {
@@ -177,7 +178,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
             {
                 System.Diagnostics.Debugger.Break();
             }
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             // parameter/localparam type list_of_type_assignments
@@ -197,7 +198,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                 bool? singed = null;
                 if (word.Text == "signed")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                 }
 
@@ -225,7 +226,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                 if (!General.IsIdentifier(word.Text)) break;
                 string identifier = word.Text;
                 nameReference = word.GetReference();
-                word.Color(CodeDrawStyle.ColorType.Parameter);
+                word.Color(VerilogColorType.Parameter);
                 word.MoveNext();
 
                 if (word.Text != "=") break;
@@ -354,7 +355,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                 if (!General.IsIdentifier(word.Text)) break;
                 string identifier = word.Text;
                 WordReference nameReference = word.GetReference();
-                word.Color(CodeDrawStyle.ColorType.Parameter);
+                word.Color(VerilogColorType.Parameter);
                 word.MoveNext();
 
                 Expressions.Expression? expression = null;
@@ -457,7 +458,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
             */
             if (word.Text == "type")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
             while (!word.Eof)
@@ -465,7 +466,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                 if (!General.IsIdentifier(word.Text)) break;
                 string identifier = word.Text;
                 WordReference nameReference = word.GetReference();
-                word.Color(CodeDrawStyle.ColorType.Parameter);
+                word.Color(VerilogColorType.Parameter);
                 word.MoveNext();
 
                 IDataType? typeDataType = null;
@@ -584,7 +585,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
         {
             if (word.Text == "type")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
             while (!word.Eof)
@@ -592,7 +593,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                 if (!General.IsIdentifier(word.Text)) break;
                 string identifier = word.Text;
                 WordReference nameReference = word.GetReference();
-                word.Color(CodeDrawStyle.ColorType.Parameter);
+                word.Color(VerilogColorType.Parameter);
                 word.MoveNext();
 
                 IDataType? typeDataType = null;
@@ -735,7 +736,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                 System.Diagnostics.Debugger.Break();
             }
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             // parameter/localparam type list_of_type_assignments
@@ -760,7 +761,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
                 bool? singed = null;
                 if (word.Text == "signed")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                 }
 
@@ -786,7 +787,7 @@ namespace pluginVerilog.Verilog.DataObjects.Constants
             {
                 if (!General.IsIdentifier(word.Text)) break;
                 string identifier = word.Text;
-                word.Color(CodeDrawStyle.ColorType.Parameter);
+                word.Color(VerilogColorType.Parameter);
                 WordReference nameReference = word.GetReference();
                 word.MoveNext();
 

@@ -1,6 +1,7 @@
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.Items;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Statements
 {
@@ -25,7 +26,7 @@ namespace pluginVerilog.Verilog.Statements
             string name = word.Text;
             if (word.Text == "$root")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
                 if (word.Text != ".")
                 {
@@ -77,7 +78,7 @@ namespace pluginVerilog.Verilog.Statements
 
             if (element is NameSpace)
             {
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 hierarchialIdentifier.Identifiers.Add(word.Text);
                 word.MoveNext();
                 word.MoveNext();// .
@@ -91,7 +92,7 @@ namespace pluginVerilog.Verilog.Statements
 
             if (element is IBuildingBlockInstantiation)
             {
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 hierarchialIdentifier.Identifiers.Add(word.Text);
                 word.MoveNext();
                 IBuildingBlockInstantiation buildingBlockInstantiation = (IBuildingBlockInstantiation)element;

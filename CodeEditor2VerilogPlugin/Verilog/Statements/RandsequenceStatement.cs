@@ -2,6 +2,7 @@
 using pluginVerilog.Verilog.Expressions;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Statements
 {
@@ -61,7 +62,7 @@ namespace pluginVerilog.Verilog.Statements
         public required IndexReference BeginIndexReference { get; init; }
         public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; } = "";
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public VerilogColorType ColorType => VerilogColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
 
         /// <summary>
@@ -288,7 +289,7 @@ namespace pluginVerilog.Verilog.Statements
             if (word.Text != "randsequence") return null;
 
             RandsequenceStatement statement = new RandsequenceStatement() { BeginIndexReference = word.CreateIndexReference() };
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             // pre-register production identifiers so that forward references
@@ -311,7 +312,7 @@ namespace pluginVerilog.Verilog.Statements
                     if (General.IsIdentifier(word.Text))
                     {
                         selector.Identifier = word.Text;
-                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.Color(VerilogColorType.Identifier);
                         word.MoveNext();
                     }
 
@@ -343,7 +344,7 @@ namespace pluginVerilog.Verilog.Statements
                 if (word.Text == "void")
                 {
                     productionIsVoid = true;
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                 }
                 else if (productionTypeKeywords.Contains(word.Text) && General.IsIdentifier(word.NextText))
@@ -358,7 +359,7 @@ namespace pluginVerilog.Verilog.Statements
                 production.Name = word.Text;
                 production.ReturnType = productionReturnType;
                 production.IsVoid = productionIsVoid;
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
 
                 // register the production so that production calls (e.g. add(10))
@@ -393,7 +394,7 @@ namespace pluginVerilog.Verilog.Statements
                 // optional [ : ] before production_body
                 if (word.Text == ":")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                 }
 
@@ -449,7 +450,7 @@ namespace pluginVerilog.Verilog.Statements
                         {
                             production.Name = word.Text;
                         }
-                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.Color(VerilogColorType.Identifier);
                         word.MoveNext();
                     }
                 }
@@ -461,7 +462,7 @@ namespace pluginVerilog.Verilog.Statements
             statement.LastIndexReference = word.CreateIndexReference();
             if (word.Text == "endsequence")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
 
                 // Optional : production_identifier
@@ -470,7 +471,7 @@ namespace pluginVerilog.Verilog.Statements
                     word.MoveNext();
                     if (General.IsIdentifier(word.Text))
                     {
-                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.Color(VerilogColorType.Identifier);
                         word.MoveNext();
                     }
                 }
@@ -488,7 +489,7 @@ namespace pluginVerilog.Verilog.Statements
                 case "rand_join":
                     item.IsRandJoin = true;
                     item.Type = ProductionItem.ItemType.RandJoin;
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
 
                     // Optional expression
@@ -503,7 +504,7 @@ namespace pluginVerilog.Verilog.Statements
                 case "unique":
                     item.IsUnique = true;
                     item.Type = ProductionItem.ItemType.RandSelect;
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     break;
 
@@ -523,7 +524,7 @@ namespace pluginVerilog.Verilog.Statements
                     // repeat production (BNF: repeat production_statement)
                     // "repeat ( expression ) production_item" : the following
                     // production item is parsed by the loop below as usual
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     if (word.Text == "(")
                     {
@@ -547,7 +548,7 @@ namespace pluginVerilog.Verilog.Statements
                 // (e.g. first : { x = x + 20; }; / add(int y) : { x = x + y; };)
                 if (word.Text == "{")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     while (!word.Eof && word.Text != "}")
                     {
@@ -561,7 +562,7 @@ namespace pluginVerilog.Verilog.Statements
                     }
                     if (word.Text == "}")
                     {
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.Color(VerilogColorType.Keyword);
                         word.MoveNext();
                     }
                     // optional trailing ";" after the block
@@ -581,7 +582,7 @@ namespace pluginVerilog.Verilog.Statements
                     (word.NextText == "(" || word.NextText == ";" || word.NextText == "," || word.NextText == "}" ||
                      word.NextText == "endsequence" || General.IsIdentifier(word.NextText)))
                 {
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     if (word.NextText == "(")
                     {
                         // production call with arguments: consume "(" expressions ")".
@@ -617,7 +618,7 @@ namespace pluginVerilog.Verilog.Statements
 
                 if (word.Text == "join")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     break;
                 }
@@ -669,7 +670,7 @@ namespace pluginVerilog.Verilog.Statements
 
         private static ProductionItem ParseIfElseProduction(WordScanner word, NameSpace nameSpace, ProductionItem item)
         {
-            word.Color(CodeDrawStyle.ColorType.Keyword); // if
+            word.Color(VerilogColorType.Keyword); // if
             word.MoveNext();
 
             if (word.Text == "(")
@@ -685,7 +686,7 @@ namespace pluginVerilog.Verilog.Statements
             // Else if / else
             while (word.Text == "else")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
 
                 if (word.Text == "if")
@@ -718,7 +719,7 @@ namespace pluginVerilog.Verilog.Statements
 
         private static ProductionItem ParseCaseProduction(WordScanner word, NameSpace nameSpace, ProductionItem item)
         {
-            word.Color(CodeDrawStyle.ColorType.Keyword); // case
+            word.Color(VerilogColorType.Keyword); // case
             word.MoveNext();
 
             if (word.Text == "(")
@@ -736,7 +737,7 @@ namespace pluginVerilog.Verilog.Statements
                 if (word.Text == "default")
                 {
                     caseItem.IsDefault = true;
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                 }
                 else
@@ -771,7 +772,7 @@ namespace pluginVerilog.Verilog.Statements
 
             if (word.Text == "endcase")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
 
@@ -786,7 +787,7 @@ namespace pluginVerilog.Verilog.Statements
                 CaseExpression = null
             };
 
-            word.Color(CodeDrawStyle.ColorType.Keyword); // randcase
+            word.Color(VerilogColorType.Keyword); // randcase
             word.MoveNext();
 
             // Parse case items
@@ -797,7 +798,7 @@ namespace pluginVerilog.Verilog.Statements
                 if (word.Text == "default")
                 {
                     caseItem.IsDefault = true;
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                 }
                 else
@@ -817,7 +818,7 @@ namespace pluginVerilog.Verilog.Statements
 
             if (word.Text == "endcase")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
 

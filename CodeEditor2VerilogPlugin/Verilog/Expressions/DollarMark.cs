@@ -1,4 +1,5 @@
 using System;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Expressions
 {
@@ -41,7 +42,7 @@ namespace pluginVerilog.Verilog.Expressions
             if (word.Text != "$") throw new Exception();
             DollarMark dollarMark = new DollarMark() { Reference = word.GetReference() };
 
-            word.Color(CodeDrawStyle.ColorType.Variable);
+            word.Color(VerilogColorType.Variable);
             word.MoveNext();
 
             return dollarMark;

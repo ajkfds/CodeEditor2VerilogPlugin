@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog
 {
@@ -186,16 +187,16 @@ namespace pluginVerilog.Verilog
             return ret;
         }
 
-        public void Color(CodeDrawStyle.ColorType colorType)
+        public void Color(VerilogColorType colorType)
         {
             if (InhibitColor) return;
-            Document.SetColorAt(index, CodeDrawStyle.ColorIndex(colorType), length);
+            Document.SetColorAt(index, (byte)colorType, length);
         }
 
-        public void Color(CodeDrawStyle.ColorType colorType, int start, int last)
+        public void Color(VerilogColorType colorType, int start, int last)
         {
             if (InhibitColor) return;
-            Document.SetColorAt(start, CodeDrawStyle.ColorIndex(colorType), last - start);
+            Document.SetColorAt(start, (byte)colorType, last - start);
         }
 
         public void AppendBlock(int startIndex, int lastIndex)
@@ -853,11 +854,11 @@ namespace pluginVerilog.Verilog
                 {
                     if (nextIndex > docLength)
                     {
-                        document.SetColorAt(commentStart, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Comment), docLength - commentStart);
+                        document.SetColorAt(commentStart, (byte)VerilogColorType.Comment, docLength - commentStart);
                     }
                     else
                     {
-                        document.SetColorAt(commentStart, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Comment), nextIndex - commentStart);
+                        document.SetColorAt(commentStart, (byte)VerilogColorType.Comment, nextIndex - commentStart);
                     }
                 }
                 wordType = WordTypeEnum.Comment;
@@ -895,7 +896,7 @@ namespace pluginVerilog.Verilog
                 if (colorComment)
                 {
                     if (commentEnd > docLength) commentEnd = docLength;
-                    document.SetColorAt(commentStart, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Comment), commentEnd - commentStart);
+                    document.SetColorAt(commentStart, (byte)VerilogColorType.Comment, commentEnd - commentStart);
                 }
                 wordType = WordTypeEnum.Comment;
                 return;
@@ -1032,7 +1033,7 @@ namespace pluginVerilog.Verilog
                 ch = document.GetCharAt(nextIndex);
                 if (ch == '\n') return;
                 if (ch != target[i]) return;
-                //                document.TextColors.SetColorAt(nextIndex, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Comment));
+                //                document.TextColors.SetColorAt(nextIndex, CodeDrawStyle.ColorIndex(VerilogColorType.Comment));
                 nextIndex++;
                 i++;
 
@@ -1041,7 +1042,7 @@ namespace pluginVerilog.Verilog
 
             for (int j = nextIndex - i; j < nextIndex; j++)
             {
-                //                document.TextColors.SetColorAt(j, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.HighLightedComment));
+                //                document.TextColors.SetColorAt(j, CodeDrawStyle.ColorIndex(VerilogColorType.HighLightedComment));
             }
             while (docLength > nextIndex)
             {
@@ -1054,7 +1055,7 @@ namespace pluginVerilog.Verilog
             {
                 ch = document.GetCharAt(nextIndex);
                 if (ch == '\n' || ch == '\r') break;
-                //                document.TextColors.SetColorAt(nextIndex, CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.HighLightedComment));
+                //                document.TextColors.SetColorAt(nextIndex, CodeDrawStyle.ColorIndex(VerilogColorType.HighLightedComment));
                 sb.Append(ch);
                 nextIndex++;
             }

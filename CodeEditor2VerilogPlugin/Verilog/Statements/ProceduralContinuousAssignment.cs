@@ -1,3 +1,4 @@
+using SystemVerilogCore.Documents;
 
 
 namespace pluginVerilog.Verilog.Statements
@@ -8,7 +9,7 @@ namespace pluginVerilog.Verilog.Statements
         public required IndexReference BeginIndexReference { get; init; }
         public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public VerilogColorType ColorType => VerilogColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
         /*
         procedural_continuous_assignments ::=
@@ -35,7 +36,7 @@ namespace pluginVerilog.Verilog.Statements
 
             if (word.Text != "assign") System.Diagnostics.Debugger.Break();
             IndexReference beginIndexReference = word.CreateIndexReference();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             Expressions.Expression? lvalue = Expressions.Expression.ParseCreateVariableLValue(word, nameSpace, false);

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Expressions
 {
@@ -143,7 +144,7 @@ namespace pluginVerilog.Verilog.Expressions
                 functionCall.BitWidth = letDecl.Expression.BitWidth;
             }
 
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
 
             /*
@@ -239,7 +240,7 @@ namespace pluginVerilog.Verilog.Expressions
 
             if (General.IsIdentifier(word.Text))
             {
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
             }
             else

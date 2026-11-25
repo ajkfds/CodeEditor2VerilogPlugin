@@ -5,6 +5,7 @@ using pluginVerilog.Verilog.DataObjects.Variables;
 using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects
 {
@@ -90,7 +91,7 @@ namespace pluginVerilog.Verilog.DataObjects
         //              + type_reference
         // 
         [JsonIgnore]
-        public virtual CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Normal; } }
+        public virtual VerilogColorType ColorType { get { return VerilogColorType.Normal; } }
 
         public bool CommentAnnotation_Discarded = false;
 

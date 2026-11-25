@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Expressions
 {
@@ -18,10 +19,10 @@ namespace pluginVerilog.Verilog.Expressions
 
         public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText("$root", CodeDrawStyle.ColorType.Variable);
+            label.AppendText("$root", VerilogColorType.Variable);
             foreach (string p in Path)
             {
-                label.AppendText("." + p, CodeDrawStyle.ColorType.Identifier);
+                label.AppendText("." + p, VerilogColorType.Identifier);
             }
         }
 
@@ -40,7 +41,7 @@ namespace pluginVerilog.Verilog.Expressions
             reference.Reference = word.GetReference();
             reference.Constant = false;
 
-            word.Color(CodeDrawStyle.ColorType.Variable);
+            word.Color(VerilogColorType.Variable);
             word.MoveNext(); // $root
 
             // ".identifier" hierarchical chain
@@ -49,7 +50,7 @@ namespace pluginVerilog.Verilog.Expressions
                 word.MoveNext(); // .
                 if (!General.IsIdentifier(word.Text)) break;
                 reference.Path.Add(word.Text);
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
             }
 

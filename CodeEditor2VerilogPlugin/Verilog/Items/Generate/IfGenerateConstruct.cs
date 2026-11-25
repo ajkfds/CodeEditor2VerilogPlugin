@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Items.Generate
 {
@@ -14,7 +15,7 @@ namespace pluginVerilog.Verilog.Items.Generate
 
             // generate_conditional_statement::= if (constant_expression ) generate_item_or_null[ else generate_item_or_null]
             // true (that is, has a nonzero known value)
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             if (word.Text != "(")
@@ -57,7 +58,7 @@ namespace pluginVerilog.Verilog.Items.Generate
 
             if (word.Text != "else") return true;
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             if (word.Text == "if")

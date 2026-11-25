@@ -2,6 +2,7 @@ using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.Expressions;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Property
 {
@@ -41,7 +42,7 @@ namespace pluginVerilog.Verilog.Property
     public class PropertyDeclaration : INamedElement
     {
         public string Name { get; set; } = "";
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public VerilogColorType ColorType => VerilogColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
 
         /// <summary>
@@ -74,7 +75,7 @@ namespace pluginVerilog.Verilog.Property
                 return null;
             }
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext(); // property
 
             // property_identifier
@@ -90,7 +91,7 @@ namespace pluginVerilog.Verilog.Property
             {
                 Name = word.Text
             };
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
 
             // Parse optional port list
@@ -144,7 +145,7 @@ namespace pluginVerilog.Verilog.Property
 
                 if (word.Text == "var")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                 }
 
@@ -191,7 +192,7 @@ namespace pluginVerilog.Verilog.Property
             // endproperty
             if (word.Text == "endproperty")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
 
                 // Check for optional : property_identifier
@@ -200,7 +201,7 @@ namespace pluginVerilog.Verilog.Property
                     word.MoveNext();
                     if (word.Text == propertyDecl.Name)
                     {
-                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.Color(VerilogColorType.Identifier);
                         propertyDecl.EndLabel = word.Text;
                         word.MoveNext();
                     }
@@ -277,14 +278,14 @@ namespace pluginVerilog.Verilog.Property
             // Parse optional "local" keyword
             if (word.Text == "local")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 portItem.IsLocal = true;
                 word.MoveNext();
 
                 // Parse optional direction (only "input" is valid)
                 if (word.Text == "input")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     portItem.Direction = word.Text;
                     word.MoveNext();
                 }
@@ -294,7 +295,7 @@ namespace pluginVerilog.Verilog.Property
             if (word.Text == "sequence" || word.Text == "property" || word.Text == "untyped")
             {
                 portItem.FormalTypeName = word.Text;
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
             else
@@ -311,7 +312,7 @@ namespace pluginVerilog.Verilog.Property
             }
 
             portItem.Identifier = word.Text;
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
 
             // Parse variable dimensions

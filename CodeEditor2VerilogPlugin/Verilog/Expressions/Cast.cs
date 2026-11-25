@@ -1,6 +1,7 @@
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using System;
 using System.Text;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Expressions
 {
@@ -30,7 +31,7 @@ namespace pluginVerilog.Verilog.Expressions
 
         public override void AppendLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText(Text, CodeDrawStyle.ColorType.Number);
+            label.AppendText(Text, VerilogColorType.Number);
         }
 
         public override void AppendString(StringBuilder stringBuilder)

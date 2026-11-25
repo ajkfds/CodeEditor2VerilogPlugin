@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Statements
 {
@@ -22,7 +23,7 @@ namespace pluginVerilog.Verilog.Statements
             if (word.Text == "$unit")
             {
                 name = word.Text;
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
                 word.MoveNext(); // skip "::"
                 return new PackageScope() { Name = name, projectProperty = word.ProjectProperty };

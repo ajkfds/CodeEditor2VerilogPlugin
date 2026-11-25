@@ -2,6 +2,7 @@ using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.Expressions;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Sequence
 {
@@ -37,7 +38,7 @@ namespace pluginVerilog.Verilog.Sequence
     public class SequenceDeclaration : INamedElement
     {
         public string Name { get; set; } = "";
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public VerilogColorType ColorType => VerilogColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
 
         /// <summary>
@@ -70,7 +71,7 @@ namespace pluginVerilog.Verilog.Sequence
                 return null;
             }
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext(); // sequence
 
             // sequence_identifier
@@ -86,7 +87,7 @@ namespace pluginVerilog.Verilog.Sequence
             {
                 Name = word.Text
             };
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
 
             // Parse optional port list
@@ -140,7 +141,7 @@ namespace pluginVerilog.Verilog.Sequence
 
                 if (word.Text == "var")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                 }
 
@@ -184,7 +185,7 @@ namespace pluginVerilog.Verilog.Sequence
             // endsequence
             if (word.Text == "endsequence")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
 
                 // Check for optional : sequence_identifier
@@ -193,7 +194,7 @@ namespace pluginVerilog.Verilog.Sequence
                     word.MoveNext();
                     if (word.Text == sequenceDecl.Name)
                     {
-                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.Color(VerilogColorType.Identifier);
                         sequenceDecl.EndLabel = word.Text;
                         word.MoveNext();
                     }
@@ -278,14 +279,14 @@ namespace pluginVerilog.Verilog.Sequence
             // Parse optional "local" keyword
             if (word.Text == "local")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 portItem.IsLocal = true;
                 word.MoveNext();
 
                 // Parse optional direction (input, inout, output)
                 if (word.Text == "input" || word.Text == "inout" || word.Text == "output")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     portItem.Direction = word.Text;
                     word.MoveNext();
                 }
@@ -295,7 +296,7 @@ namespace pluginVerilog.Verilog.Sequence
             if (word.Text == "sequence" || word.Text == "property" || word.Text == "untyped")
             {
                 portItem.FormalTypeName = word.Text;
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
             else
@@ -312,7 +313,7 @@ namespace pluginVerilog.Verilog.Sequence
             }
 
             portItem.Identifier = word.Text;
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
 
             // Parse variable dimensions

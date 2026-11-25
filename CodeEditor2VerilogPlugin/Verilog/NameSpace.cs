@@ -3,6 +3,7 @@ using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.Items;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog
 {
@@ -18,7 +19,7 @@ namespace pluginVerilog.Verilog
         protected NameSpace()
         {
         }
-        public virtual CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
+        public virtual VerilogColorType ColorType { get { return VerilogColorType.Variable; } }
 
         [JsonIgnore]
         public virtual NamedElements NamedElements { get; } = new NamedElements();

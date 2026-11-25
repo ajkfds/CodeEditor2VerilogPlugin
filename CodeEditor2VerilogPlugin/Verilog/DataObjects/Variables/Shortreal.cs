@@ -1,4 +1,5 @@
 using pluginVerilog.Verilog.DataObjects.DataTypes;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
@@ -32,7 +33,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public override void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText("shortreal ", CodeDrawStyle.ColorType.Keyword);
+            label.AppendText("shortreal ", VerilogColorType.Keyword);
             label.AppendText(" ");
         }
 

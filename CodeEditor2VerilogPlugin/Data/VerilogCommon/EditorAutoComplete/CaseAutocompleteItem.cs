@@ -10,8 +10,9 @@ namespace pluginVerilog.Data.VerilogCommon.EditorAutoComplete
 {
     public class CaseAutocompleteItem : pluginVerilog.Data.VerilogCommon.AutoCompleteItem
     {
-        public CaseAutocompleteItem() : base(CompleteType.Keyword, "case", CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Plugin.ThemeColor, "CodeEditor2/Assets/Icons/screwdriver.svg")
+        public CaseAutocompleteItem() : base(CompleteType.Keyword, "case", (byte)SystemVerilogCore.Documents.VerilogColorType.Keyword, "CodeEditor2/Assets/Icons/screwdriver.svg")
         {
+            colorOverride = Plugin.ThemeColor;
         }
 
         private string CaseHeader = "P_";

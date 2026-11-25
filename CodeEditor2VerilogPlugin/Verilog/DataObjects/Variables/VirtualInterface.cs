@@ -5,13 +5,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
     public class VirtualInterface : Variable
     {
         protected VirtualInterface() { }
-        public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
+        public override VerilogColorType ColorType { get { return VerilogColorType.Variable; } }
 
         public required Dictionary<string, Expressions.Expression> ParameterOverrides { get; init; }
 
@@ -68,7 +69,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         {
             Interface? @interface = GetSourceInterface();
             if (@interface == null) return;
-            label.AppendText(@interface.Name, CodeDrawStyle.ColorType.Keyword);
+            label.AppendText(@interface.Name, VerilogColorType.Keyword);
             label.AppendText(" ");
         }
         public static new VirtualInterface Create(string name,　DataObjects.DataTypes.IDataType dataType)

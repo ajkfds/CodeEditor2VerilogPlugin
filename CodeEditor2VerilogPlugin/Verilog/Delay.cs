@@ -1,3 +1,4 @@
+using SystemVerilogCore.Documents;
 namespace pluginVerilog.Verilog
 {
     // A.2.2.3 Delays
@@ -13,7 +14,7 @@ namespace pluginVerilog.Verilog
         public static Delay2? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "#") return null;
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             Delay2 delay = new Delay2();
@@ -58,7 +59,7 @@ namespace pluginVerilog.Verilog
         public static Delay3 ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "#") return null;
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             Delay3 delay = new Delay3();

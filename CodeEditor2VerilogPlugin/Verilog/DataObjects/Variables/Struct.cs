@@ -1,12 +1,13 @@
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
     public class Struct : Variable, IPackedDataObject, IPartSelectableDataType
     {
         protected Struct() { }
-        public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
+        public override VerilogColorType ColorType { get { return VerilogColorType.Variable; } }
         public required StructType StructType { get; init; }
         public List<DataObjects.Arrays.PackedArray> PackedDimensions
         {
@@ -66,8 +67,8 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         {
             if (StructType == null) return;
             StructType.AppendTypeLabel(label);
-            //label.AppendText("struct ", CodeDrawStyle.ColorType.Keyword);
-            //label.AppendText( StructType.na, CodeDrawStyle.ColorType.Keyword);
+            //label.AppendText("struct ", VerilogColorType.Keyword);
+            //label.AppendText( StructType.na, VerilogColorType.Keyword);
         }
 
         public override bool PartSelectable

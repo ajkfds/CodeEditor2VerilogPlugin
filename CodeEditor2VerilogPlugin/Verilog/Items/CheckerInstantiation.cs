@@ -1,5 +1,6 @@
 using pluginVerilog.Verilog.BuildingBlocks;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Items
 {
@@ -36,14 +37,14 @@ namespace pluginVerilog.Verilog.Items
 
             // ps_checker_identifier
             instantiation.InstanceItem.Name = word.Text;
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
 
             // name_of_instance : instance identifier
             if (General.IsSimpleIdentifier(word.Text))
             {
                 instantiation.InstanceItem.Name = word.Text;
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
             }
 
@@ -75,7 +76,7 @@ namespace pluginVerilog.Verilog.Items
                         break;
                     }
                     string portName = word.Text;
-                    word.Color(CodeDrawStyle.ColorType.Variable);
+                    word.Color(VerilogColorType.Variable);
                     word.MoveNext();
                     if (word.Text != "(")
                     {

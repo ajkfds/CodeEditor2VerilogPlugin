@@ -3,6 +3,7 @@ using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.Expressions;
 using System;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Statements
 {
@@ -11,7 +12,7 @@ namespace pluginVerilog.Verilog.Statements
     {
         protected NonBlockingAssignment() { }
         public string Name { get; protected set; }
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public VerilogColorType ColorType => VerilogColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
         public Expressions.Expression? LValue { get; protected set; }
         public Expressions.Expression? Expression { get; protected set; }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Expressions
 {
@@ -21,7 +22,7 @@ namespace pluginVerilog.Verilog.Expressions
         public static ProcessClassReference? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "process") throw new Exception();
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             WordReference beginRef = word.GetReference();
             word.MoveNext();
 
@@ -49,7 +50,7 @@ namespace pluginVerilog.Verilog.Expressions
             if (!staticElements.ContainsKey(memberName))
             {
                 word.AddError("unfound object");
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
                 return null;
             }
@@ -61,7 +62,7 @@ namespace pluginVerilog.Verilog.Expressions
             //  called BEFORE consuming the member identifier)
             if (word.NextText == "(")
             {
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 DataObjects.Variables.Process dummyProcess = DataObjects.Variables.Process.Create("process", DataObjects.DataTypes.ProcessType.Create());
                 BuiltinMethodCall? methodCall = BuiltinMethodCall.ParseCreate(word, nameSpace, dummyProcess);
                 if (methodCall == null) return null;
@@ -76,7 +77,7 @@ namespace pluginVerilog.Verilog.Expressions
             }
 
             // member without parentheses (e.g. process::FINISHED, process::status)
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
             if (method.Ports.Count != 0)
             {

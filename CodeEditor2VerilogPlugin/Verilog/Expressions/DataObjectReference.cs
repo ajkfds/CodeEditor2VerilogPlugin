@@ -6,6 +6,7 @@ using pluginVerilog.Verilog.DataObjects.Variables;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Expressions
 {
@@ -48,24 +49,24 @@ namespace pluginVerilog.Verilog.Expressions
         {
             if (!string.IsNullOrEmpty(NameSpacePath))
             {
-                label.AppendText(NameSpacePath, CodeDrawStyle.ColorType.Normal);
+                label.AppendText(NameSpacePath, VerilogColorType.Normal);
             }
 
             if (TargetDataObject is Reg || TargetDataObject is Bit || TargetDataObject is Logic)
             {
-                label.AppendText(DatObjectName, CodeDrawStyle.ColorType.Register);
+                label.AppendText(DatObjectName, VerilogColorType.Register);
             }
             else if (TargetDataObject is Net)
             {
-                label.AppendText(DatObjectName, CodeDrawStyle.ColorType.Net);
+                label.AppendText(DatObjectName, VerilogColorType.Net);
             }
             else if (TargetDataObject is DataObjects.Constants.Constants)
             {
-                label.AppendText(DatObjectName, CodeDrawStyle.ColorType.Parameter);
+                label.AppendText(DatObjectName, VerilogColorType.Parameter);
             }
             else
             {
-                label.AppendText(DatObjectName, CodeDrawStyle.ColorType.Variable);
+                label.AppendText(DatObjectName, VerilogColorType.Variable);
             }
         }
 

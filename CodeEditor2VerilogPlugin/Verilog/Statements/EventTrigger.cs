@@ -1,3 +1,4 @@
+using SystemVerilogCore.Documents;
 
 
 namespace pluginVerilog.Verilog.Statements
@@ -9,7 +10,7 @@ namespace pluginVerilog.Verilog.Statements
         public required IndexReference BeginIndexReference { get; init; }
         public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public VerilogColorType ColorType => VerilogColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
         public void DisposeSubReference()
         {
@@ -24,7 +25,7 @@ namespace pluginVerilog.Verilog.Statements
         public static EventTrigger ParseCreate(WordScanner word, NameSpace nameSpace, string? statement_label)
         {
             EventTrigger eventTrigger = new EventTrigger() { BeginIndexReference = word.CreateIndexReference() };
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             Expressions.Expression ex = Expressions.Expression.ParseCreate(word, nameSpace);

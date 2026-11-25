@@ -2,6 +2,7 @@ using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
 using System.Collections.Generic;
 using System.Linq;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog
 {
@@ -17,7 +18,7 @@ namespace pluginVerilog.Verilog
             )
         {
             if (word.Text != "#") return false;
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             if (word.Text != "(")
@@ -49,7 +50,7 @@ namespace pluginVerilog.Verilog
                         return true;
                     }
 
-                    word.Color(CodeDrawStyle.ColorType.Parameter);
+                    word.Color(VerilogColorType.Parameter);
                     string paramName = word.Text;
                     if (buildingBlock != null && !buildingBlock.PortParameterNameList.Contains(paramName))
                     {
@@ -247,8 +248,7 @@ namespace pluginVerilog.Verilog
                 Data.VerilogCommon.AutoCompleteItem acItem = new Data.VerilogCommon.AutoCompleteItem(
                     Data.VerilogCommon.AutoCompleteItem.CompleteType.DataObject,
                     paramName,
-                    CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Parameter),
-                    Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Parameter),
+                    (byte)VerilogColorType.Parameter,
                     "CodeEditor2/Assets/Icons/tag.svg"
                     );
                 completionContext.AutoCompleteItems.Add(acItem);

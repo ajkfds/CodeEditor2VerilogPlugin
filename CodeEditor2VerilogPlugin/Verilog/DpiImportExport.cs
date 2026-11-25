@@ -1,4 +1,5 @@
 using System;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog
 {
@@ -34,7 +35,7 @@ namespace pluginVerilog.Verilog
             {
                 throw new Exception();
             }
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             if (word.Text == "\"" + "DPI-C" + "\"")
@@ -51,7 +52,7 @@ namespace pluginVerilog.Verilog
                 word.MoveNext();
                 return;
             }
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             if (import)
@@ -68,12 +69,12 @@ namespace pluginVerilog.Verilog
             bool shouldBeFunction = false;
             if (word.Text == "context")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
             else if (word.Text == "pure")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
                 shouldBeFunction = true;
             }
@@ -82,7 +83,7 @@ namespace pluginVerilog.Verilog
             {
                 if (word.NextText == "=")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                     word.MoveNext(); // =
                 }
@@ -117,12 +118,12 @@ namespace pluginVerilog.Verilog
             if (General.IsIdentifier(word.Text))
             {
                 string cIdentifier = word.Text;
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
 
                 if (word.Text == "=")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                 }
                 else
@@ -146,7 +147,7 @@ namespace pluginVerilog.Verilog
             }
 
             bool isFunction = (word.Text == "function");
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             // function_identifier or task_identifier
@@ -159,7 +160,7 @@ namespace pluginVerilog.Verilog
             }
 
             string identifier = word.Text;
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
 
             // Semicolon
@@ -170,7 +171,7 @@ namespace pluginVerilog.Verilog
                 if (word.Text == ";") word.MoveNext();
                 return;
             }
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             // Note: The export declaration registers the identifier in the namespace

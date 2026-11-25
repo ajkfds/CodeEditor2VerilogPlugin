@@ -1,9 +1,10 @@
+using SystemVerilogCore.Documents;
 namespace pluginVerilog.Verilog
 {
     public interface INamedElement
     {
         public string Name { get; }
-        public CodeDrawStyle.ColorType ColorType { get; }
+        public VerilogColorType ColorType { get; }
 
         public NamedElements NamedElements { get; }
 

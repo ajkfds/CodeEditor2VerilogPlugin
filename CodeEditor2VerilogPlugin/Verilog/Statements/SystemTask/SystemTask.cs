@@ -1,3 +1,4 @@
+using SystemVerilogCore.Documents;
 
 
 namespace pluginVerilog.Verilog.Statements.SystemTask
@@ -7,7 +8,7 @@ namespace pluginVerilog.Verilog.Statements.SystemTask
         public required IndexReference BeginIndexReference { get; init; }
         public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public VerilogColorType ColorType => VerilogColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
 
         public void DisposeSubReference()
@@ -18,7 +19,7 @@ namespace pluginVerilog.Verilog.Statements.SystemTask
         {
             SystemTask taskEnable = new SystemTask() { BeginIndexReference = word.CreateIndexReference() };
 
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
 
             if (word.Text == "(")

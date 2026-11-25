@@ -28,6 +28,7 @@ using pluginVerilog.Verilog.Expressions;
 using pluginVerilog.Verilog.Property;
 using System;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Items
 {
@@ -94,7 +95,7 @@ namespace pluginVerilog.Verilog.Items
             }
 
             IndexReference beginReference = word.CreateIndexReference();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             BindDirective bind = new BindDirective()
@@ -143,7 +144,7 @@ namespace pluginVerilog.Verilog.Items
             bind.TargetScope = targetTopName;
             if (targetParts.Length == 1 && word.Text == ":")
             {
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
                 // bind_target_instance_list ::= bind_target_instance { , bind_target_instance }
                 while (true)
@@ -157,7 +158,7 @@ namespace pluginVerilog.Verilog.Items
                     bind.TargetInstances.Add(targetInstance);
                     if (word.Text == ",")
                     {
-                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.Color(VerilogColorType.Identifier);
                         word.MoveNext();
                         continue;
                     }
@@ -190,7 +191,7 @@ namespace pluginVerilog.Verilog.Items
             }
 
             string instantiationName = word.Text;
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
 
             BuildingBlocks.BuildingBlock? instancedBuildingBlock = word.ProjectProperty.DefinitionNameSpace.Get(instantiationName) as BuildingBlocks.BuildingBlock;
@@ -248,7 +249,7 @@ namespace pluginVerilog.Verilog.Items
                 if (General.IsSimpleIdentifier(word.Text))
                 {
                     bindItem.InstanceName = word.Text;
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                     // optional instance array range [ ... ]
                     if (word.Text == "[")
@@ -328,7 +329,7 @@ namespace pluginVerilog.Verilog.Items
                     word.MoveNext();    // .
                     if (word.Text == "*")
                     { // wildcard: no per-port expression
-                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.Color(VerilogColorType.Identifier);
                         word.MoveNext();
                         if (word.Text == ",") word.MoveNext();
                         continue;
@@ -339,7 +340,7 @@ namespace pluginVerilog.Verilog.Items
                         break;
                     }
                     string pinName = word.Text;
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                     if (word.Text == "(")
                     {
@@ -413,7 +414,7 @@ namespace pluginVerilog.Verilog.Items
             }
 
             string identifier = word.Text;
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
             while (word.Text == ".")
             {
@@ -424,7 +425,7 @@ namespace pluginVerilog.Verilog.Items
                     return identifier;
                 }
                 identifier = identifier + "." + word.Text;
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
             }
             return identifier;

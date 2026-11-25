@@ -2,6 +2,7 @@
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using System;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
@@ -21,7 +22,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         public int? BitWidth { get; } = null;
         public virtual bool PartSelectable { get { return false; } }
         public bool IsValidForNet { get { return false; } }
-        public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Variable; } }
+        public VerilogColorType ColorType { get { return VerilogColorType.Variable; } }
         public virtual List<DataObjects.Arrays.PackedArray> PackedDimensions { get; protected set; } = new List<Arrays.PackedArray>();
         public string CreateString()
         {
@@ -32,7 +33,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
         public void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText("chandle ", CodeDrawStyle.ColorType.Keyword);
+            label.AppendText("chandle ", VerilogColorType.Keyword);
         }
         public IDataType Clone()
         {
@@ -60,7 +61,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         {
             Chandle dType = new Chandle();
             if (word.Text != "chandle") throw new Exception();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
             return dType;
         }

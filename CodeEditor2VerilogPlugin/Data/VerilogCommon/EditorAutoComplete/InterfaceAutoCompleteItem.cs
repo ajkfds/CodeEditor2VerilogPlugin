@@ -4,8 +4,9 @@ namespace pluginVerilog.Data.VerilogCommon.EditorAutoComplete
 {
     public class InterfaceAutocompleteItem : pluginVerilog.Data.VerilogCommon.AutoCompleteItem
     {
-        public InterfaceAutocompleteItem() : base(CompleteType.Keyword, "interface", CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword), Plugin.ThemeColor, "CodeEditor2/Assets/Icons/screwdriver.svg")
+        public InterfaceAutocompleteItem() : base(CompleteType.Keyword, "interface", (byte)SystemVerilogCore.Documents.VerilogColorType.Keyword, "CodeEditor2/Assets/Icons/screwdriver.svg")
         {
+            colorOverride = Plugin.ThemeColor;
         }
         public override System.Threading.Tasks.Task ApplyAsync()
         {

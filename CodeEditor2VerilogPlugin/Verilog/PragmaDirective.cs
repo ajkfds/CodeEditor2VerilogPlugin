@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog
 {
@@ -27,7 +28,7 @@ namespace pluginVerilog.Verilog
         public static void Parse(WordPointer wordPointer)
         {
             if (wordPointer.Text != "`pragma") throw new Exception();
-            wordPointer.Color(CodeDrawStyle.ColorType.Keyword);
+            wordPointer.Color(VerilogColorType.Keyword);
             // pragma_name must be on the same line as the `pragma directive.
             // Remember where the line ends before advancing so that the first
             // token of the following line is not mistaken for a pragma_name
@@ -45,7 +46,7 @@ namespace pluginVerilog.Verilog
                 && wordPointer.Index < newlineIndex
                 && General.IsIdentifier(wordPointer.Text))
             {   // pragma_name
-                wordPointer.Color(CodeDrawStyle.ColorType.Identifier);
+                wordPointer.Color(VerilogColorType.Identifier);
                 wordPointer.MoveNext();
             }
             else
@@ -74,7 +75,7 @@ namespace pluginVerilog.Verilog
 
             if (General.IsIdentifier(wordPointer.Text))
             {   // pragma_keyword
-                wordPointer.Color(CodeDrawStyle.ColorType.Identifier);
+                wordPointer.Color(VerilogColorType.Identifier);
                 wordPointer.MoveNext();
 
                 if (wordPointer.Text != "=") return true;
@@ -115,7 +116,7 @@ namespace pluginVerilog.Verilog
                 }
                 return true;
             }
-            wordPointer.Color(CodeDrawStyle.ColorType.Identifier);
+            wordPointer.Color(VerilogColorType.Identifier);
             wordPointer.MoveNext();
             return true;
         }

@@ -4,6 +4,7 @@ using pluginVerilog.Verilog.DataObjects.Nets;
 using pluginVerilog.Verilog.Items;
 using System;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 //using Microsoft.CodeAnalysis.Emit;
 
 namespace pluginVerilog.Verilog
@@ -106,7 +107,7 @@ namespace pluginVerilog.Verilog
             {
                 System.Diagnostics.Debugger.Break();
             }
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             IndexReference beginReference = word.CreateIndexReference();
             word.MoveNext();
 
@@ -114,11 +115,11 @@ namespace pluginVerilog.Verilog
             switch (word.Text)
             {
                 case "static":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     break;
                 case "automatic":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     break;
             }
@@ -142,9 +143,9 @@ namespace pluginVerilog.Verilog
                 var classElement = nameSpace.GetNamedElementUpward(className);
                 if (classElement == null) classElement = word.ProjectProperty.UnitNameSpace.Get(className);
                 BuildingBlocks.Class? outOfBlockClass = classElement as BuildingBlocks.Class;
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();    // class identifier
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();    // "::"
                 if (outOfBlockClass == null)
                 {
@@ -211,7 +212,7 @@ namespace pluginVerilog.Verilog
                 }
             }
 
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
 
 
@@ -303,7 +304,7 @@ namespace pluginVerilog.Verilog
 
             if (word.Text == "endtask")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 task.LastIndexReference = word.CreateIndexReference();
                 word.AppendBlock(task.BeginIndexReference, task.LastIndexReference);
                 word.MoveNext();
@@ -319,7 +320,7 @@ namespace pluginVerilog.Verilog
                 word.MoveNext();
                 if (word.Text == task.Name)
                 {
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                 }
                 else
@@ -339,7 +340,7 @@ namespace pluginVerilog.Verilog
             if (word.Text != "task") throw new Exception();
 
             IndexReference beginReference = word.CreateIndexReference();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             if (!General.IsIdentifier(word.Text))
@@ -378,7 +379,7 @@ namespace pluginVerilog.Verilog
                 }
             }
 
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
 
             if (word.Text != "(") return;

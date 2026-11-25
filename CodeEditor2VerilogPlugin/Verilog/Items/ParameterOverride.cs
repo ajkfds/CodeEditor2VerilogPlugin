@@ -1,3 +1,4 @@
+using SystemVerilogCore.Documents;
 namespace pluginVerilog.Verilog.Items
 {
     public class ParameterOverride : IDocumentRegeion
@@ -12,7 +13,7 @@ namespace pluginVerilog.Verilog.Items
             //  always_construct::= always statement
             System.Diagnostics.Debug.Assert(word.Text == "defparam");
             IndexReference beginIndexReference = word.CreateIndexReference();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             while (!word.Eof)

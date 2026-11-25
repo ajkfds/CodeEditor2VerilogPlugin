@@ -1,3 +1,4 @@
+using SystemVerilogCore.Documents;
 namespace pluginVerilog
 {
     /// <summary>
@@ -8,10 +9,10 @@ namespace pluginVerilog
     /// <para>
     /// <c>VerilogLabel</c> takes <see cref="SystemVerilogCore.Documents.VerilogColorType"/>
     /// so <c>SystemVerilogCore</c> stays free of any UI toolkit. The parser,
-    /// however, expresses colours as <see cref="CodeDrawStyle.ColorType"/>. The
+    /// however, expresses colours as <see cref="VerilogColorType"/>. The
     /// numeric values are identical (the contract's enum was defined from this
     /// one), so these extensions are a pure relabel and let every call site keep
-    /// writing <c>CodeDrawStyle.ColorType.Keyword</c>.
+    /// writing <c>VerilogColorType.Keyword</c>.
     /// </para>
     ///
     /// <para>
@@ -33,7 +34,7 @@ namespace pluginVerilog
         public static void AppendText(
             this SystemVerilogCore.Documents.VerilogLabel label,
             string text,
-            CodeDrawStyle.ColorType colorType)
+            VerilogColorType colorType)
         {
             label.AppendText(
                 text, (SystemVerilogCore.Documents.VerilogColorType)(byte)colorType);

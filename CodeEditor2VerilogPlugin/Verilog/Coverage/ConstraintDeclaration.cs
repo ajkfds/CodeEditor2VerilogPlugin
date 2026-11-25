@@ -2,6 +2,7 @@ using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.Variables;
 using pluginVerilog.Verilog.Expressions;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Coverage
 {
@@ -45,7 +46,7 @@ namespace pluginVerilog.Verilog.Coverage
     public class ConstraintDeclaration : INamedElement
     {
         public string Name { get; set; } = "";
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public VerilogColorType ColorType => VerilogColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
 
         /// <summary>
@@ -168,7 +169,7 @@ namespace pluginVerilog.Verilog.Coverage
             if (word.Text == "static")
             {
                 isStatic = true;
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
 
@@ -177,7 +178,7 @@ namespace pluginVerilog.Verilog.Coverage
                 return null;
             }
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             // extern_constraint_declaration ::=
@@ -190,9 +191,9 @@ namespace pluginVerilog.Verilog.Coverage
             if (General.IsIdentifier(word.Text) && word.NextText == "::")
             {
                 string className = word.Text;
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext(); // class_identifier
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext(); // ::
 
                 INamedElement? classElement = nameSpace.GetNamedElementUpward(className);
@@ -222,7 +223,7 @@ namespace pluginVerilog.Verilog.Coverage
                 IsStatic = isStatic,
                 Reference = word.CrateWordReference()
             };
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
 
             // out-of-block definition: mark the matching extern prototype as
@@ -257,7 +258,7 @@ namespace pluginVerilog.Verilog.Coverage
             if (word.Text == "{")
             {
                 // Multi-line constraint block
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
 
                 // Parse constraint items until closing brace
@@ -278,7 +279,7 @@ namespace pluginVerilog.Verilog.Coverage
                 // Closing brace
                 if (word.Text == "}")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                 }
             }
@@ -294,7 +295,7 @@ namespace pluginVerilog.Verilog.Coverage
                 if (word.Text == "soft")
                 {
                     item.IsSoft = true;
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                 }
 
@@ -320,7 +321,7 @@ namespace pluginVerilog.Verilog.Coverage
                 // Optional semicolon
                 if (word.Text == ";")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                 }
             }
@@ -382,7 +383,7 @@ namespace pluginVerilog.Verilog.Coverage
             {
                 case "soft":
                     item.IsSoft = true;
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     // Soft constraints may only be applied to rand variables;
                     // they shall not be specified for randc variables
@@ -443,7 +444,7 @@ namespace pluginVerilog.Verilog.Coverage
             // Optional semicolon
             if (word.Text == ";")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
 
@@ -452,7 +453,7 @@ namespace pluginVerilog.Verilog.Coverage
 
         private static ConstraintItem ParseUniqueConstraint(WordScanner word, NameSpace nameSpace, ConstraintItem item)
         {
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             // Parse list of expressions
@@ -477,7 +478,7 @@ namespace pluginVerilog.Verilog.Coverage
             // Semicolon
             if (word.Text == ";")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
 
@@ -486,7 +487,7 @@ namespace pluginVerilog.Verilog.Coverage
 
         private static ConstraintItem ParseIfElseConstraint(WordScanner word, NameSpace nameSpace, ConstraintItem item)
         {
-            word.Color(CodeDrawStyle.ColorType.Keyword); // if
+            word.Color(VerilogColorType.Keyword); // if
             word.MoveNext();
 
             if (word.Text == "(")
@@ -519,7 +520,7 @@ namespace pluginVerilog.Verilog.Coverage
             // Else items
             if (word.Text == "else")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
 
                 if (word.Text == "if")
@@ -554,7 +555,7 @@ namespace pluginVerilog.Verilog.Coverage
 
         private static ConstraintItem ParseForEachConstraint(WordScanner word, NameSpace nameSpace, ConstraintItem item)
         {
-            word.Color(CodeDrawStyle.ColorType.Keyword); // foreach
+            word.Color(VerilogColorType.Keyword); // foreach
             word.MoveNext();
 
             if (word.Text == "(")
@@ -565,7 +566,7 @@ namespace pluginVerilog.Verilog.Coverage
                 if (General.IsIdentifier(word.Text))
                 {
                     item.ArrayIdentifier = word.Text;
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                 }
 
@@ -580,7 +581,7 @@ namespace pluginVerilog.Verilog.Coverage
                         {
                             item.LoopVariables.Add(word.Text);
                             bindLoopVariable(nameSpace, word.Text);
-                            word.Color(CodeDrawStyle.ColorType.Identifier);
+                            word.Color(VerilogColorType.Identifier);
                             word.MoveNext();
                         }
                         else
@@ -600,7 +601,7 @@ namespace pluginVerilog.Verilog.Coverage
                     {
                         item.LoopVariables.Add(word.Text);
                         bindLoopVariable(nameSpace, word.Text);
-                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.Color(VerilogColorType.Identifier);
                         word.MoveNext();
                     }
                 }
@@ -639,7 +640,7 @@ namespace pluginVerilog.Verilog.Coverage
         private static void skipDistList(WordScanner word)
         {
             if (word.Text != "dist") return;
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
             if (word.Text != "{") return;
             int depth = 0;
@@ -651,7 +652,7 @@ namespace pluginVerilog.Verilog.Coverage
                     depth--;
                     if (depth == 0)
                     {
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.Color(VerilogColorType.Keyword);
                         word.MoveNext();
                         return;
                     }
@@ -681,12 +682,12 @@ namespace pluginVerilog.Verilog.Coverage
 
         private static ConstraintItem ParseDisableIffConstraint(WordScanner word, NameSpace nameSpace, ConstraintItem item)
         {
-            word.Color(CodeDrawStyle.ColorType.Keyword); // disable
+            word.Color(VerilogColorType.Keyword); // disable
             word.MoveNext();
 
             if (word.Text == "iff")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
 
                 if (word.Text == "(")
@@ -722,14 +723,14 @@ namespace pluginVerilog.Verilog.Coverage
 
         private static ConstraintItem ParseSolveBeforeConstraint(WordScanner word, NameSpace nameSpace, ConstraintItem item)
         {
-            word.Color(CodeDrawStyle.ColorType.Keyword); // solve
+            word.Color(VerilogColorType.Keyword); // solve
             word.MoveNext();
 
             // Parse solve list
             while (General.IsIdentifier(word.Text))
             {
                 item.SolveVariables.Add(word.Text);
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
 
                 if (word.Text == ",")
@@ -745,7 +746,7 @@ namespace pluginVerilog.Verilog.Coverage
             // Optional "before" clause
             if (word.Text == "before")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
 
                 while (General.IsIdentifier(word.Text))
@@ -758,7 +759,7 @@ namespace pluginVerilog.Verilog.Coverage
                         word.AddError("a randc variable shall not be used with solve before");
                     }
                     item.BeforeVariables.Add(word.Text);
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
 
                     if (word.Text == ",")
@@ -775,7 +776,7 @@ namespace pluginVerilog.Verilog.Coverage
             // Semicolon
             if (word.Text == ";")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
 

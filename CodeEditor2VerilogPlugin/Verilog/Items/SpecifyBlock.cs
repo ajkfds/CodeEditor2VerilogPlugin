@@ -1,4 +1,5 @@
 using System;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Items
 {
@@ -9,7 +10,7 @@ namespace pluginVerilog.Verilog.Items
         public static bool Parse(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "specify") throw new Exception();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             while (!word.Eof)
@@ -28,11 +29,11 @@ namespace pluginVerilog.Verilog.Items
                     word.Text == "pulsestyle_onevent" || word.Text == "pulsestyle_ondetect" ||
                     word.Text == "showcancelled" || word.Text == "noshowcancelled")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     while (!word.Eof && word.Text != ";")
                     {
-                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.Color(VerilogColorType.Identifier);
                         word.MoveNext();
                     }
                     if (word.Text == ";") word.MoveNext();
@@ -43,7 +44,7 @@ namespace pluginVerilog.Verilog.Items
                 // $recrem / $skew / $timeskew / $fullskew / $width / $period / $nochange
                 if (word.Text.StartsWith("$"))
                 {
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                     if (word.Text == "(")
                     {
@@ -86,7 +87,7 @@ namespace pluginVerilog.Verilog.Items
 
             if (word.Text == "endspecify")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
             /*

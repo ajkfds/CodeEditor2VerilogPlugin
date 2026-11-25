@@ -1,4 +1,5 @@
 using pluginVerilog.Verilog.BuildingBlocks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Items
 {
@@ -15,7 +16,7 @@ namespace pluginVerilog.Verilog.Items
         public static void Parse(WordScanner word, NameSpace nameSpace)
         {
             if (word.Text != "import" && System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             string packageIdentifier = word.Text;
@@ -31,7 +32,7 @@ namespace pluginVerilog.Verilog.Items
                 if (package == null)
                 {
                     word.AddError("Package not found: " + packageIdentifier);
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                     if (word.Text != "::")
                     {
@@ -41,7 +42,7 @@ namespace pluginVerilog.Verilog.Items
                     word.MoveNext();
                     if (word.Text == "*")
                     {
-                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.Color(VerilogColorType.Identifier);
                         word.MoveNext();
                         return;
                     }
@@ -50,14 +51,14 @@ namespace pluginVerilog.Verilog.Items
                         word.AddError("illegal identifier");
                         return;
                     }
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
 
                     if (word.Text != ",") break;
                     continue;
                 }
 
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
                 if (word.Text != "::")
                 {
@@ -67,7 +68,7 @@ namespace pluginVerilog.Verilog.Items
                 word.MoveNext();
                 if (word.Text == "*")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
 
                     foreach (var namedElement in package.NamedElements)
@@ -97,7 +98,7 @@ namespace pluginVerilog.Verilog.Items
                     word.AddError("illegal identifier");
                     return;
                 }
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 string identifier = word.Text;
                 INamedElement? targetElement = null;
                 if (package.NamedElements.ContainsKey(identifier)) targetElement = package.NamedElements[identifier];

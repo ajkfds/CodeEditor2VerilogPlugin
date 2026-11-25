@@ -2,6 +2,7 @@ using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.Expressions;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Statements
 {
@@ -73,7 +74,7 @@ namespace pluginVerilog.Verilog.Statements
             if (word.Text != "randomize") return null;
 
             IndexReference beginReference = word.CreateIndexReference();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             RandomizeCall call = new RandomizeCall
@@ -99,7 +100,7 @@ namespace pluginVerilog.Verilog.Statements
                     if (word.Text == "null")
                     {
                         call.WithNull = true;
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.Color(VerilogColorType.Keyword);
                         word.MoveNext();
                     }
                     else
@@ -110,7 +111,7 @@ namespace pluginVerilog.Verilog.Statements
                             if (General.IsIdentifier(word.Text))
                             {
                                 call.VariableIdentifiers.Add(word.Text);
-                                word.Color(CodeDrawStyle.ColorType.Variable);
+                                word.Color(VerilogColorType.Variable);
                                 word.MoveNext();
                             }
                             else
@@ -151,7 +152,7 @@ namespace pluginVerilog.Verilog.Statements
             if (word.Text == "with")
             {
                 call.HasWithConstraint = true;
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
 
                 // Optional ( identifier_list )
@@ -167,7 +168,7 @@ namespace pluginVerilog.Verilog.Statements
                             if (General.IsIdentifier(word.Text))
                             {
                                 call.WithIdentifierList.Add(word.Text);
-                                word.Color(CodeDrawStyle.ColorType.Variable);
+                                word.Color(VerilogColorType.Variable);
                                 word.MoveNext();
                             }
                             else
@@ -227,12 +228,12 @@ namespace pluginVerilog.Verilog.Statements
                 // Check for disable iff
                 if (word.Text == "disable")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
 
                     if (word.Text == "iff")
                     {
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.Color(VerilogColorType.Keyword);
                         word.MoveNext();
 
                         if (word.Text == "(")

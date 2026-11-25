@@ -1,13 +1,14 @@
 using pluginVerilog.Verilog.DataObjects.DataTypes;
 using System;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
     public class IntegerVectorValueVariable : ValueVariable, IPackedDataObject
     {
         //integer_vector_type::= bit | logic | reg
-        public override CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Register; } }
+        public override VerilogColorType ColorType { get { return VerilogColorType.Register; } }
         public bool Signed { get; set; }
 
         public List<DataObjects.Arrays.PackedArray> PackedDimensions
@@ -41,13 +42,13 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             switch (DataType.Type)
             {
                 case DataTypeEnum.Bit:
-                    label.AppendText("bit ", CodeDrawStyle.ColorType.Keyword);
+                    label.AppendText("bit ", VerilogColorType.Keyword);
                     break;
                 case DataTypeEnum.Logic:
-                    label.AppendText("logic ", CodeDrawStyle.ColorType.Keyword);
+                    label.AppendText("logic ", VerilogColorType.Keyword);
                     break;
                 case DataTypeEnum.Reg:
-                    label.AppendText("reg ", CodeDrawStyle.ColorType.Keyword);
+                    label.AppendText("reg ", VerilogColorType.Keyword);
                     break;
                 default:
                     System.Diagnostics.Debugger.Break();
@@ -56,7 +57,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             label.AppendText(" ");
             if (Signed)
             {
-                label.AppendText("signed ", CodeDrawStyle.ColorType.Keyword);
+                label.AppendText("signed ", VerilogColorType.Keyword);
             }
 
             foreach (DataObjects.Arrays.PackedArray dimension in PackedDimensions)

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Expressions
 {
@@ -339,7 +340,7 @@ namespace pluginVerilog.Verilog.Expressions
 
             StreamingConcatenation streaming = new StreamingConcatenation();
             streaming.StreamOperator = word.Text;
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             // Parse optional slice_size
@@ -428,7 +429,7 @@ namespace pluginVerilog.Verilog.Expressions
 
             StreamingConcatenation streaming = new StreamingConcatenation();
             streaming.StreamOperator = word.Text;
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             // The first expression becomes the slice_size or first stream expression
@@ -584,7 +585,7 @@ namespace pluginVerilog.Verilog.Expressions
             // Check for "with" clause
             if (word.Text == "with")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
 
                 if (word.GetCharAt(0) != '[')
@@ -687,7 +688,7 @@ namespace pluginVerilog.Verilog.Expressions
             if (word.Text == ":")
             {
                 arrayRange.RangeType = ":";
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
 
                 var second = Expression.ParseCreate(word, nameSpace);
@@ -696,7 +697,7 @@ namespace pluginVerilog.Verilog.Expressions
             else if (word.Text == "+:")
             {
                 arrayRange.RangeType = "+:";
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
 
                 var second = Expression.ParseCreate(word, nameSpace);
@@ -705,7 +706,7 @@ namespace pluginVerilog.Verilog.Expressions
             else if (word.Text == "-:")
             {
                 arrayRange.RangeType = "-:";
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
 
                 var second = Expression.ParseCreate(word, nameSpace);

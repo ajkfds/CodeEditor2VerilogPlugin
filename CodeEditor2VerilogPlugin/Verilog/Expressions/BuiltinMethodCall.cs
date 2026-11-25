@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using SystemVerilogCore.Documents;
 
 
 namespace pluginVerilog.Verilog.Expressions
@@ -81,7 +82,7 @@ namespace pluginVerilog.Verilog.Expressions
             methodCall.BitWidth = method.ReturnVariable?.BitWidth;
             bool returnConstant = true;
 
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
 
             if (word.GetCharAt(0) != '(')
@@ -212,7 +213,7 @@ namespace pluginVerilog.Verilog.Expressions
         {
             if (word.Text != "with") return;
             bool isRandomize = (methodCall.FunctionName == "randomize");
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             // randomize() with { constraint_block }
@@ -285,7 +286,7 @@ namespace pluginVerilog.Verilog.Expressions
                     depth--;
                     if (depth == 0)
                     {
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.Color(VerilogColorType.Keyword);
                         word.MoveNext();
                         return;
                     }

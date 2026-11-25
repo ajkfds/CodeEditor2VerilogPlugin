@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Items
 {
@@ -15,7 +16,7 @@ namespace pluginVerilog.Verilog.Items
         public NamedElements NamedElements { get; } = new NamedElements();
 
 
-        public virtual CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Identifier; } }
+        public virtual VerilogColorType ColorType { get { return VerilogColorType.Identifier; } }
 
         /*
         program_instantiation ::= program_identifier [ parameter_value_assignment ] hierarchical_instance { , hierarchical_instance } ;
@@ -183,7 +184,7 @@ namespace pluginVerilog.Verilog.Items
                 if (word.Text == ";") word.MoveNext();
                 return true;
             }
-            programIdentifier.Color(CodeDrawStyle.ColorType.Keyword);
+            programIdentifier.Color(VerilogColorType.Keyword);
 
             Dictionary<string, Expressions.Expression> parameterOverrides = new Dictionary<string, Expressions.Expression>();
 
@@ -194,7 +195,7 @@ namespace pluginVerilog.Verilog.Items
 
             while (!word.Eof)
             {
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
 
                 if (!General.IsIdentifier(word.Text))
                 {
@@ -437,7 +438,7 @@ namespace pluginVerilog.Verilog.Items
                 if (word.Text == "*") // wildcard named port connection (.*)
                 {
                     wildcardConnection = true;
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     wildcardRef = word.GetReference();
                     word.MoveNext();
                     if (word.Text != ",")
@@ -455,7 +456,7 @@ namespace pluginVerilog.Verilog.Items
                 IndexReference startRef = word.CreateIndexReference();
                 if (notWrittenPortName.Contains(portName)) notWrittenPortName.Remove(portName);
                 WordReference pinReference = word.GetReference();
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
 
                 if (word.Prototype)
                 {

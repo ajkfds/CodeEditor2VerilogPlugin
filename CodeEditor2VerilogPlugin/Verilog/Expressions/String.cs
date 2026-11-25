@@ -1,3 +1,4 @@
+using SystemVerilogCore.Documents;
 namespace pluginVerilog.Verilog.Expressions
 {
     public class ConstantString : Primary
@@ -5,7 +6,7 @@ namespace pluginVerilog.Verilog.Expressions
         protected ConstantString() { }
         public static new ConstantString ParseCreate(WordScanner word, NameSpace nameSpace)
         {
-            word.Color(CodeDrawStyle.ColorType.Number);
+            word.Color(VerilogColorType.Number);
             ConstantString str = new ConstantString();
             str.text = word.Text;
 
@@ -38,7 +39,7 @@ namespace pluginVerilog.Verilog.Expressions
         }
         //public override void AppendLabel(AjkAvaloniaLibs.Contorls.ColorLabel label)
         //{
-        //    label.AppendText(Text, CodeDrawStyle.ColorType.Variable);
+        //    label.AppendText(Text, VerilogColorType.Variable);
         //}
 
         //public override void AppendString(StringBuilder stringBuilder)

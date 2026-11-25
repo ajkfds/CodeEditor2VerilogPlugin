@@ -1,15 +1,25 @@
-using Avalonia.Media;
 using System.Threading.Tasks;
 
 namespace pluginVerilog.Data.VerilogCommon
 {
+    /// <summary>
+    /// A completion candidate produced by the parser.
+    ///
+    /// <para>
+    /// The constructors take only a palette <c>colorIndex</c> (the
+    /// <see cref="SystemVerilogCore.Documents.VerilogColorType"/> value), not a
+    /// concrete colour: the parser is UI-free, so it cannot name
+    /// <c>Avalonia.Media.Color</c>. The base type resolves the palette entry
+    /// when it draws the row, which is the only place a colour is needed.
+    /// </para>
+    /// </summary>
     public class AutoCompleteItem : CodeEditor2.CodeEditor.CodeComplete.AutocompleteItem
     {
-        public AutoCompleteItem(CompleteType type, string text, byte colorIndex, Color color) : base(text, colorIndex, color)
+        public AutoCompleteItem(CompleteType type, string text, byte colorIndex) : base(text, colorIndex)
         {
             Type = type;
         }
-        public AutoCompleteItem(CompleteType type, string text, byte colorIndex, Color color, string svgPath) : base(text, colorIndex, color, svgPath)
+        public AutoCompleteItem(CompleteType type, string text, byte colorIndex, string svgPath) : base(text, colorIndex, svgPath)
         {
             Type = type;
         }

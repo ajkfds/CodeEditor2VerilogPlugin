@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Items
 {
@@ -23,7 +24,7 @@ namespace pluginVerilog.Verilog.Items
         public NamedElements NamedElements { get; } = new NamedElements();
 
 
-        public virtual CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Identifier; } }
+        public virtual VerilogColorType ColorType { get { return VerilogColorType.Identifier; } }
 
         /*
         A.5.4 UDP instantiation
@@ -185,7 +186,7 @@ namespace pluginVerilog.Verilog.Items
             }
             // else: already registered
             
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
             IndexReference blockBeginIndexReference = word.CreateIndexReference();
 
@@ -213,7 +214,7 @@ namespace pluginVerilog.Verilog.Items
                 if (General.IsIdentifier(word.Text))
                 {
                     instanceName = word.Text;
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                 }
                 else if (word.Text == "(")

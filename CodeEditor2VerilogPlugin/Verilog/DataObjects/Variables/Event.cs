@@ -1,3 +1,4 @@
+using SystemVerilogCore.Documents;
 namespace pluginVerilog.Verilog.DataObjects.Variables
 {
     public class Event : Variable
@@ -37,7 +38,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         {
             //            event_declaration::= event list_of_event_identifiers ;
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             while (!word.Eof)
@@ -111,7 +112,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
                 }
 
 
-                word.Color(CodeDrawStyle.ColorType.Variable);
+                word.Color(VerilogColorType.Variable);
                 word.MoveNext();
 
                 if (word.GetCharAt(0) != ',') break;

@@ -147,8 +147,7 @@ namespace pluginVerilog.Data.VerilogCommon
                 Data.VerilogCommon.AutoCompleteItem item = new pluginVerilog.Data.VerilogCommon.AutoCompleteItem(
                     AutoCompleteItem.CompleteType.Keyword,
                     keyword.Item1,
-                    CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
-                    Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword),
+                    (byte)SystemVerilogCore.Documents.VerilogColorType.Keyword,
                     "CodeEditor2/Assets/Icons/bookmark.svg"
                     );
                 if (itemFilter(item)) items.Add(item);
@@ -165,8 +164,7 @@ namespace pluginVerilog.Data.VerilogCommon
                     pluginVerilog.Data.VerilogCommon.AutoCompleteItem item = new pluginVerilog.Data.VerilogCommon.AutoCompleteItem(
                         AutoCompleteItem.CompleteType.Keyword,
                         keyword.Item1,
-                        CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
-                        Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword),
+                        (byte)SystemVerilogCore.Documents.VerilogColorType.Keyword,
                         "CodeEditor2/Assets/Icons/bookmark.svg"
                         );
                     if (itemFilter(item)) items.Add(item);
@@ -189,8 +187,7 @@ namespace pluginVerilog.Data.VerilogCommon
             pluginVerilog.Data.VerilogCommon.AutoCompleteItem item = new pluginVerilog.Data.VerilogCommon.AutoCompleteItem(
                 AutoCompleteItem.CompleteType.Keyword,
                 keyword,
-                CodeDrawStyle.ColorIndex(CodeDrawStyle.ColorType.Keyword),
-                Global.CodeDrawStyle.Color(CodeDrawStyle.ColorType.Keyword),
+                (byte)SystemVerilogCore.Documents.VerilogColorType.Keyword,
                 "CodeEditor2/Assets/Icons/bookmark.svg"
                 );
             if(itemFilter(item)) items.Add(item);

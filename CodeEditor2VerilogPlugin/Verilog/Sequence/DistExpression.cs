@@ -1,5 +1,6 @@
 using pluginVerilog.Verilog.Expressions;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Sequence
 {
@@ -39,7 +40,7 @@ namespace pluginVerilog.Verilog.Sequence
                 return distExpr;
             }
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext(); // dist
 
             if (word.Text != "{")
@@ -84,7 +85,7 @@ namespace pluginVerilog.Verilog.Sequence
 
             if (word.Text == "}")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext(); // }
             }
 

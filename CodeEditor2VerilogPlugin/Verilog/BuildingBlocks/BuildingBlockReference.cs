@@ -1,5 +1,6 @@
 using pluginVerilog.Verilog.Items;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.BuildingBlocks
 {
@@ -29,7 +30,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
             if (word.NextText == "#") // parameter value assignment
             {
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext(); // #
 
                 Dictionary<string, Expressions.Expression> parameterOverrides = new Dictionary<string, Expressions.Expression>();
@@ -38,7 +39,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
             if (word.NextText == "::") // scope identifier
             {
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
                 word.MoveNext(); // ::
 
@@ -48,7 +49,7 @@ namespace pluginVerilog.Verilog.BuildingBlocks
             }
             if (word.NextText == ".") // hierarchy identifier
             {
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
                 word.MoveNext(); // .
                 if (targetBuildingBlock != null && targetBuildingBlock.NamedElements.ContainsKey(word.Text))

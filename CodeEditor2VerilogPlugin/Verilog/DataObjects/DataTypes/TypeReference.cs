@@ -1,6 +1,7 @@
 
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 {
@@ -74,12 +75,12 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             }
         }
 
-        public CodeDrawStyle.ColorType ColorType
+        public VerilogColorType ColorType
         {
             get
             {
                 IDataType? type = GetReferencedType();
-                return type?.ColorType ?? CodeDrawStyle.ColorType.Variable;
+                return type?.ColorType ?? VerilogColorType.Variable;
             }
         }
 
@@ -117,7 +118,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
         public void AppendTypeLabel(SystemVerilogCore.Documents.VerilogLabel label)
         {
-            label.AppendText("type", CodeDrawStyle.ColorType.Keyword);
+            label.AppendText("type", VerilogColorType.Keyword);
             label.AppendText("(");
             if (ReferencedDataType != null)
             {

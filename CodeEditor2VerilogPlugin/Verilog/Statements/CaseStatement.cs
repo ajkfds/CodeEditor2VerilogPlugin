@@ -1,6 +1,7 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Statements
 {
@@ -15,7 +16,7 @@ namespace pluginVerilog.Verilog.Statements
         public required IndexReference BeginIndexReference { get; init; }
         public IndexReference? LastIndexReference { get; set; } = null;
         public string Name { get; protected set; }
-        public CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Identifier;
+        public VerilogColorType ColorType => VerilogColorType.Identifier;
         public NamedElements NamedElements => new NamedElements();
 
 
@@ -73,7 +74,7 @@ namespace pluginVerilog.Verilog.Statements
             }
             IndexReference beginIndex = word.CreateIndexReference();
             CaseStatement caseStatement = new CaseStatement() { BeginIndexReference = beginIndex };
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             // EOF just after case keyword: suggest case expression candidates
@@ -113,14 +114,14 @@ namespace pluginVerilog.Verilog.Statements
             {
                 caseStatement.IsMatchesMode = true;
                 // matches is a valid SystemVerilog keyword (case ... matches pattern matching)
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
             else if (word.Text == "inside")
             {
                 caseStatement.IsInsideMode = true;
                 word.AddSystemVerilogError();
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
 
@@ -166,7 +167,7 @@ namespace pluginVerilog.Verilog.Statements
                 return null;
             }
             caseStatement.LastIndexReference = word.CreateIndexReference();
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             return caseStatement;
@@ -228,7 +229,7 @@ namespace pluginVerilog.Verilog.Statements
 
                 if (word.Text == "default")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     if (word.GetCharAt(0) == ':')
                     {
@@ -311,7 +312,7 @@ namespace pluginVerilog.Verilog.Statements
 
                if (word.Text == "default")
                {
-                   word.Color(CodeDrawStyle.ColorType.Keyword);
+                   word.Color(VerilogColorType.Keyword);
                    word.MoveNext();
                    if (word.GetCharAt(0) == ':')
                    {

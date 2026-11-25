@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.Arrays
 {
@@ -8,7 +9,7 @@ namespace pluginVerilog.Verilog.DataObjects.Arrays
 
         public bool IsValidForNet { get { return false; } }
         public required DataObject DataObject { init; get; }
-        public override CodeDrawStyle.ColorType ColorType => CodeDrawStyle.ColorType.Variable;
+        public override VerilogColorType ColorType => VerilogColorType.Variable;
 
         public int? Size => null;
 

@@ -1,5 +1,6 @@
 using pluginVerilog.Verilog.Statements;
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Assertion
 {
@@ -30,7 +31,7 @@ namespace pluginVerilog.Verilog.Assertion
 
             if (word.Text == "disable")
             {
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
                 if (word.Text != "iff")
                 {
@@ -38,7 +39,7 @@ namespace pluginVerilog.Verilog.Assertion
                 }
                 else
                 {
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     if (word.Text == "(")
                     {

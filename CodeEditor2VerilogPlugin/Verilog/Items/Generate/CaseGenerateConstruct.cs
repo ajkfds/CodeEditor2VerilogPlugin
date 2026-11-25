@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.Items.Generate
 {
@@ -11,7 +12,7 @@ namespace pluginVerilog.Verilog.Items.Generate
             // generate_case_statement::=  case (constant_expression ) genvar_case_item { genvar_case_item } endcase
             // genvar_case_item ::=  constant_expression  { , constant_expression } : generate_item_or_null
             //                      | default [ : ] generate_item_or_null
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext();
 
             if (word.Text != "(")
@@ -45,13 +46,13 @@ namespace pluginVerilog.Verilog.Items.Generate
                 Expressions.Expression expression = null;
                 if (word.Text == "endcase")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     break;
                 }
                 else if (word.Text == "default")
                 {
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
 
                     if (word.Text == ":") word.MoveNext();

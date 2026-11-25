@@ -2,6 +2,7 @@
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.Variables;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog
 {
@@ -29,7 +30,7 @@ namespace pluginVerilog.Verilog
 
         public required string Name { init; get; }
 
-        public CodeDrawStyle.ColorType ColorType { get { return CodeDrawStyle.ColorType.Identifier; } }
+        public VerilogColorType ColorType { get { return VerilogColorType.Identifier; } }
 
         public required DataObjects.Variables.Variable? ReturnVariable { init; get; }
 

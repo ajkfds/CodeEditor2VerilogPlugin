@@ -1,6 +1,7 @@
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects.Arrays;
 using System.Collections.Generic;
+using SystemVerilogCore.Documents;
 
 namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
@@ -202,7 +203,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
 
                 // "event"
                 case "event":
-                    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    word.Color(VerilogColorType.Keyword);
                     word.MoveNext();
                     return EventType.Create();
 
@@ -228,7 +229,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     if (namedElement is BuildingBlocks.Class)
                     {
                         BuildingBlocks.Class classType = (BuildingBlocks.Class)namedElement;
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.Color(VerilogColorType.Keyword);
                         word.MoveNext();
 
                         // parameter_value_assignment : class_identifier # ( ... )
@@ -262,7 +263,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     if (namedElement is BuildingBlocks.InterfaceClass)
                     {
                         BuildingBlocks.InterfaceClass interfaceClassType = (BuildingBlocks.InterfaceClass)namedElement;
-                        word.Color(CodeDrawStyle.ColorType.Keyword);
+                        word.Color(VerilogColorType.Keyword);
                         word.MoveNext();
 
                         // parameter_value_assignment : interface_class_identifier # ( ... )
@@ -281,7 +282,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     //if(namedElement is BuildingBlocks.Interface)
                     //{
                     //    IDataType dType = (BuildingBlocks.Interface)namedElement;
-                    //    word.Color(CodeDrawStyle.ColorType.Keyword);
+                    //    word.Color(VerilogColorType.Keyword);
                     //    word.MoveNext();
                     //    return dType;
                     //}
@@ -290,7 +291,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                     if (namedElement is Typedef)
                     {
                         Typedef defType = (Typedef)namedElement;
-                        word.Color(CodeDrawStyle.ColorType.Identifier);
+                        word.Color(VerilogColorType.Identifier);
                         word.MoveNext();
 
                         // packed_dimension
@@ -317,7 +318,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             Class? @class = word.ProjectProperty.UnitNameSpace.Get(word.Text) as Class;
             if (@class != null)
             {
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
 
                 // parameter_value_assignment : class_identifier # ( ... )
@@ -335,7 +336,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             if (buildingBlock is Interface && virtual_)
             {
                 Interface interface_ = (Interface)buildingBlock;
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
                 return interface_;
             }
@@ -344,7 +345,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             if (buildingBlock is InterfaceClass)
             {
                 InterfaceClass interfaceClass = (InterfaceClass)buildingBlock;
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
 
                 // parameter_value_assignment : interface_class_identifier # ( ... )
@@ -361,7 +362,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             InterfaceClass? unitInterfaceClass = word.ProjectProperty.UnitNameSpace.Get(word.Text) as InterfaceClass;
             if (unitInterfaceClass != null)
             {
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
                 return unitInterfaceClass;
             }
@@ -404,7 +405,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 }
                 if (rootElement is Class rootClass)
                 {
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                     if (word.Text == "#")
                     {
@@ -415,7 +416,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 }
                 if (rootElement is InterfaceClass rootIfaceClass)
                 {
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                     if (word.Text == "#")
                     {
@@ -444,7 +445,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                         if (bb.BuildingBlocks.TryGetValue(word.Text, out BuildingBlock? scoped)
                             && scoped is Class scopedClass)
                         {
-                            word.Color(CodeDrawStyle.ColorType.Identifier);
+                            word.Color(VerilogColorType.Identifier);
                             word.MoveNext();
                             if (word.Text == "#")
                             {
@@ -456,7 +457,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                         if (bb.NamedElements.TryGetValue(word.Text, out INamedElement? namedInner)
                             && namedInner is Class namedClass)
                         {
-                            word.Color(CodeDrawStyle.ColorType.Identifier);
+                            word.Color(VerilogColorType.Identifier);
                             word.MoveNext();
                             if (word.Text == "#")
                             {
@@ -484,7 +485,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             //        IDataType dType = ((Typedef)namedElement).VariableType;
             //        if (dType != null)
             //        {
-            //            word.Color(CodeDrawStyle.ColorType.Keyword);
+            //            word.Color(VerilogColorType.Keyword);
             //            word.MoveNext();
             //            return dType;
             //        }
@@ -501,12 +502,12 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             bool signed = false;
             if (word.Text == "unsigned")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
             }
             else if (word.Text == "signed")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext();
                 signed = true;
             }
@@ -614,9 +615,9 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             }
 
             // consume "pkg" "::"
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext(); // pkg
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext(); // ::
 
             if (!General.IsIdentifier(word.Text)) return null;
@@ -625,7 +626,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             package.NamedElements.TryGetValue(word.Text, out member);
             if (member is Typedef memberTypedef)
             {
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
 
                 // parameter_value_assignment on the package-scope type parameter
@@ -656,7 +657,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             // declaration).
             if (member is BuildingBlocks.Class)
             {
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
 
                 if (word.Text == "#")
@@ -738,9 +739,9 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             if (interfaceClass == null) return null;
 
             // consume "iface" "::"
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext(); // iface
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext(); // ::
 
             if (!General.IsIdentifier(word.Text)) return null;
@@ -749,7 +750,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             interfaceClass.NamedElements.TryGetValue(word.Text, out member);
             if (member is Typedef memberTypedef)
             {
-                word.Color(CodeDrawStyle.ColorType.Identifier);
+                word.Color(VerilogColorType.Identifier);
                 word.MoveNext();
 
                 List<PackedArray> packedArrays = new List<PackedArray>();
@@ -775,12 +776,12 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
         /// </summary>
         private static IDataType? parseVirtualInterfaceType(WordScanner word, NameSpace nameSpace)
         {
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext(); // virtual
 
             if (word.Text == "interface")
             {
-                word.Color(CodeDrawStyle.ColorType.Keyword);
+                word.Color(VerilogColorType.Keyword);
                 word.MoveNext(); // interface
             }
 
@@ -791,7 +792,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             }
 
             string interfaceName = word.Text;
-            word.Color(CodeDrawStyle.ColorType.Identifier);
+            word.Color(VerilogColorType.Identifier);
             word.MoveNext();
 
             // optional parameter_value_assignment ( # ( ... ) )
@@ -807,7 +808,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
                 word.MoveNext();
                 if (General.IsIdentifier(word.Text))
                 {
-                    word.Color(CodeDrawStyle.ColorType.Identifier);
+                    word.Color(VerilogColorType.Identifier);
                     word.MoveNext();
                 }
             }
@@ -834,7 +835,7 @@ namespace pluginVerilog.Verilog.DataObjects.DataTypes
             //type_reference::= type(expression) | type(data_type)
             if (word.Text != "type") System.Diagnostics.Debugger.Break();
 
-            word.Color(CodeDrawStyle.ColorType.Keyword);
+            word.Color(VerilogColorType.Keyword);
             word.MoveNext(); // type
 
             if (word.Text != "(")
