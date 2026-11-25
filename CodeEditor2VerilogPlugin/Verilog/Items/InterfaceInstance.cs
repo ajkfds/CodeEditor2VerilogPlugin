@@ -30,12 +30,12 @@ namespace pluginVerilog.Verilog.Items
 
         public Dictionary<string, string> Properties = new Dictionary<string, string>();
         [JsonIgnore]
-        public ProjectProperty ProjectProperty
+        public IVerilogParserSettings ProjectProperty
         {
             get
             {
-                ProjectProperty? projectProperty =
-                    Project.Settings as ProjectProperty;
+                IVerilogParserSettings? projectProperty =
+                    Project.Settings as IVerilogParserSettings;
                 if (projectProperty == null) throw new Exception();
                 return projectProperty;
             }

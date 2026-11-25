@@ -13,7 +13,7 @@ namespace pluginVerilog.Verilog.Statements
         public string Name { get; set; } = string.Empty;
 
         [JsonIgnore]
-        private ProjectProperty projectProperty { init; get; }
+        private IVerilogParserSettings projectProperty { init; get; }
         public Scope? ParseCreate(WordScanner word, NameSpace nameSpace)
         {
             if (word.NextText != "::") return null;

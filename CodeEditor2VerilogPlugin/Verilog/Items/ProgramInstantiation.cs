@@ -68,7 +68,7 @@ namespace pluginVerilog.Verilog.Items
             // target when specified); the local project's DefinitionNameSpace
             // does not contain a cross-project program.
             SystemVerilogCore.Projects.IVerilogProject sourceProject = GetInstancedBuildingBlockProject();
-            ProjectProperty? sourceProjectProperty = sourceProject.Settings as ProjectProperty;
+            IVerilogParserSettings? sourceProjectProperty = sourceProject.Settings as IVerilogParserSettings;
             if (sourceProjectProperty == null) return;
             Program? originalProgram = sourceProjectProperty.DefinitionNameSpace.Get(SourceName) as Program;
             if (originalProgram == null) return;
@@ -87,7 +87,7 @@ namespace pluginVerilog.Verilog.Items
 
         public BuildingBlock? GetInstancedBuildingBlock()
         {
-            ProjectProperty projectProperty = ProjectProperty;
+            IVerilogParserSettings projectProperty = ProjectProperty;
             SystemVerilogCore.Projects.IVerilogProject sourceProject = Project;
             SystemVerilogCore.Projects.IVerilogProject? resolved = Project.ResolveProject(SourceProjectName);
             if (resolved != null)

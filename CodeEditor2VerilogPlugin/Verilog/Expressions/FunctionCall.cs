@@ -15,7 +15,7 @@ namespace pluginVerilog.Verilog.Expressions
         [JsonIgnore]
         public required NameSpace DefinedNameSpace { init; get; }
         [JsonIgnore]
-        public required ProjectProperty ProjectProperty { init; get; }
+        public required IVerilogParserSettings ProjectProperty { init; get; }
 
         /// <summary>
         /// Get the Function if this call refers to a function

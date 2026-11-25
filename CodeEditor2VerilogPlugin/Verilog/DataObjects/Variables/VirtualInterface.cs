@@ -18,7 +18,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
 
         public BuildingBlocks.Interface? GetSourceInterface()
         {
-            ProjectProperty? projectProperty = Project.Settings as ProjectProperty;
+            IVerilogParserSettings? projectProperty = Project.Settings as IVerilogParserSettings;
             if (projectProperty == null) throw new Exception();
 
             Data.IVerilogRelatedFile? file = projectProperty.DefinitionNameSpace.GetFile(SourceName);

@@ -264,7 +264,7 @@ namespace pluginVerilog.Data
                     if (classVerilogFile == null) continue;
                     Verilog.ParsedDocument? parsedDocument = classVerilogFile.VerilogParsedDocument;
                     if (parsedDocument == null) continue;
-                    ProjectProperty? projectProperty = parsedDocument.ProjectProperty;
+                    Verilog.IVerilogParserSettings? projectProperty = parsedDocument.ProjectProperty;
                     if (projectProperty == null) continue;
                     foreach (string className in parsedDocument.ReferencedUnitNameSpace)
                     {

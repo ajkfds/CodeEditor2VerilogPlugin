@@ -139,7 +139,7 @@ namespace pluginVerilog.Verilog
                 {
                     return new SystemVerilogCore.Verilog.RuleSet();
                 }
-                ProjectProperty? projectProperty = parsedDocument.ProjectProperty;
+                IVerilogParserSettings? projectProperty = parsedDocument.ProjectProperty;
                 if (projectProperty == null) return new SystemVerilogCore.Verilog.RuleSet();
 
                 return projectProperty.GetRuleSet(parsedDocument.TextFile?.RelativePath);

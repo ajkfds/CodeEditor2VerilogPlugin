@@ -425,8 +425,21 @@ namespace pluginVerilog.Verilog
         /// has been collected.
         /// </para>
         /// </summary>
+        /// <summary>
+        /// The settings of the project this result belongs to, as the
+        /// parser-facing contract, or null when the file is not attached to a
+        /// project.
+        ///
+        /// <para>
+        /// Typed as <see cref="IVerilogParserSettings"/> rather than the plugin's
+        /// concrete <c>ProjectProperty</c>: that contract carries everything the
+        /// parser reads, including the system task / function tables and the
+        /// instance resolver. Assigning the concrete object works because it
+        /// implements the contract.
+        /// </para>
+        /// </summary>
         [JsonIgnore]
-        public ProjectProperty? ProjectProperty { get; private set; }
+        public IVerilogParserSettings? ProjectProperty { get; private set; }
 
         public void Dispose()
         {

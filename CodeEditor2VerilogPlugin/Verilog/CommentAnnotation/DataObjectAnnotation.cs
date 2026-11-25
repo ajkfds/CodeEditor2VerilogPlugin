@@ -50,7 +50,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
             }
 
         }
-        private static void parseSyncAnnotation(CommentScanner comment, NameSpace nameSpace, Verilog.DataObjects.DataObject dataObject, ProjectProperty projectProperty)
+        private static void parseSyncAnnotation(CommentScanner comment, NameSpace nameSpace, Verilog.DataObjects.DataObject dataObject, IVerilogParserSettings projectProperty)
         {
             comment.Color(VerilogColorType.CommentAnnotation);
             comment.MoveNext();
@@ -102,7 +102,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
             }
         }
 
-        private static void parseClockAnnotation(CommentScanner comment, NameSpace nameSpace, Verilog.DataObjects.DataObject dataObject, ProjectProperty projectProperty)
+        private static void parseClockAnnotation(CommentScanner comment, NameSpace nameSpace, Verilog.DataObjects.DataObject dataObject, IVerilogParserSettings projectProperty)
         {
             comment.Color(VerilogColorType.CommentAnnotation);
             comment.MoveNext();
@@ -139,7 +139,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
                 if (comment.Text.StartsWith("@")) break;
             }
         }
-        private static void parseResetAnnotation(CommentScanner comment, NameSpace nameSpace, Verilog.DataObjects.DataObject dataObject, ProjectProperty projectProperty)
+        private static void parseResetAnnotation(CommentScanner comment, NameSpace nameSpace, Verilog.DataObjects.DataObject dataObject, IVerilogParserSettings projectProperty)
         {
             comment.Color(VerilogColorType.CommentAnnotation);
             dataObject.SyncContext.AssignToReset();

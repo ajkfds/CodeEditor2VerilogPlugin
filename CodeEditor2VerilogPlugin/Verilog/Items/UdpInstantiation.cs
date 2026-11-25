@@ -88,7 +88,7 @@ namespace pluginVerilog.Verilog.Items
 
         public BuildingBlock? GetInstancedBuildingBlock()
         {
-            ProjectProperty projectProperty = ProjectProperty;
+            IVerilogParserSettings projectProperty = ProjectProperty;
             SystemVerilogCore.Projects.IVerilogProject sourceProject = Project;
             SystemVerilogCore.Projects.IVerilogProject? resolved = Project.ResolveProject(SourceProjectName);
             if (resolved != null)

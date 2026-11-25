@@ -76,7 +76,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
             }
 
         }
-        private static void pasePortGroup(CommentScanner comment, NameSpace nameSpace, ref string? portGroup, ProjectProperty projectProperty)
+        private static void pasePortGroup(CommentScanner comment, NameSpace nameSpace, ref string? portGroup, IVerilogParserSettings projectProperty)
         {
             comment.Color(VerilogColorType.CommentAnnotation);
 
@@ -93,7 +93,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
             portGroup = comment.Text;
         }
 
-        private static void parseSyncAnnotation(CommentScanner comment, NameSpace nameSpace, Verilog.DataObjects.Port port, ProjectProperty projectProperty)
+        private static void parseSyncAnnotation(CommentScanner comment, NameSpace nameSpace, Verilog.DataObjects.Port port, IVerilogParserSettings projectProperty)
         {
             comment.Color(VerilogColorType.CommentAnnotation);
             comment.MoveNext();
@@ -148,7 +148,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
             }
         }
 
-        private static void parseClockAnnotation(CommentScanner comment, NameSpace nameSpace, Verilog.DataObjects.Port port, ProjectProperty projectProperty)
+        private static void parseClockAnnotation(CommentScanner comment, NameSpace nameSpace, Verilog.DataObjects.Port port, IVerilogParserSettings projectProperty)
         {
             comment.Color(VerilogColorType.CommentAnnotation);
             comment.MoveNext();
@@ -188,7 +188,7 @@ namespace pluginVerilog.Verilog.CommentAnnotation
             }
         }
 
-        private static void parseResetAnnotation(CommentScanner comment, NameSpace nameSpace, Verilog.DataObjects.Port port, ProjectProperty projectProperty)
+        private static void parseResetAnnotation(CommentScanner comment, NameSpace nameSpace, Verilog.DataObjects.Port port, IVerilogParserSettings projectProperty)
         {
             comment.Color(VerilogColorType.CommentAnnotation);
             if (port.DataObject != null) port.DataObject.SyncContext.AssignToReset();

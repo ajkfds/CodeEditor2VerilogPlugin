@@ -25,14 +25,22 @@ namespace pluginVerilog.Verilog
 
         public Dictionary<string, string> Properties = new Dictionary<string, string>();
 
+        /// <summary>
+        /// The settings of this item's project, as the parser-facing contract.
+        ///
+        /// <para>
+        /// Typed as <see cref="IVerilogParserSettings"/> rather than the plugin's
+        /// concrete <c>ProjectProperty</c> so parse sites that read it (the
+        /// completion candidates and the comment annotations) do not name the
+        /// plugin type.
+        /// </para>
+        /// </summary>
         [JsonIgnore]
-        public ProjectProperty ProjectProperty
+        public IVerilogParserSettings ProjectProperty
         {
             get
             {
-                // Resolved through the UI-free settings view so this does not
-                // depend on the editor's project type.
-                ProjectProperty? projectProperty = Project.Settings as ProjectProperty;
+                IVerilogParserSettings? projectProperty = Project.Settings as IVerilogParserSettings;
                 if (projectProperty == null) throw new Exception();
                 return projectProperty;
             }

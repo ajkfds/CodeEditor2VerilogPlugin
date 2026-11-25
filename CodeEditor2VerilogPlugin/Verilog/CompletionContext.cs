@@ -471,7 +471,7 @@ namespace pluginVerilog.Verilog
             // of a module-body line. One character is enough to narrow it.
             if (onLineStart && NameSpace != null && NameSpace.BuildingBlock is Module && CandidateWord.Length > 0 && (documentRegion is Module ||documentRegion is GenerateBlock))
             {
-                ProjectProperty? projectProperty = NameSpace.ProjectProperty;
+                IVerilogParserSettings? projectProperty = NameSpace.ProjectProperty;
                 if (projectProperty == null) throw new Exception();
 
                 List<string> moduleNames = projectProperty.DefinitionNameSpace.GetNameList((x) => { return (x is Module); });

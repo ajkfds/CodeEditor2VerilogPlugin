@@ -89,7 +89,7 @@ namespace pluginVerilog.Verilog.Items
             // target when specified); the local project's DefinitionNameSpace
             // does not contain a cross-project module.
             SystemVerilogCore.Projects.IVerilogProject sourceProject = GetInstancedBuildingBlockProject();
-            ProjectProperty? sourceProjectProperty = sourceProject.Settings as ProjectProperty;
+            IVerilogParserSettings? sourceProjectProperty = sourceProject.Settings as IVerilogParserSettings;
             if (sourceProjectProperty == null) return;
             Module? originalModule = sourceProjectProperty.DefinitionNameSpace.Get(SourceName) as Module;
             if (originalModule == null) return;
@@ -120,7 +120,7 @@ namespace pluginVerilog.Verilog.Items
         }
         public BuildingBlock? GetInstancedBuildingBlock()
         {
-            ProjectProperty projectProperty = ProjectProperty;
+            IVerilogParserSettings projectProperty = ProjectProperty;
             SystemVerilogCore.Projects.IVerilogProject sourceProject = Project;
             SystemVerilogCore.Projects.IVerilogProject? resolved = Project.ResolveProject(SourceProjectName);
             if (resolved != null)
@@ -212,7 +212,7 @@ namespace pluginVerilog.Verilog.Items
             // It is swapped to the "@project" target project below, so that all
             // later lookups (parameter-overridden module / its source file) are
             // performed against the project that actually defines the module.
-            ProjectProperty sourceProjectProperty = word.ProjectProperty;
+            IVerilogParserSettings sourceProjectProperty = word.ProjectProperty;
 
             var moduleIdentifier = word.CrateWordReference();
             string moduleName = word.Text;
@@ -270,8 +270,8 @@ namespace pluginVerilog.Verilog.Items
                         // The target project's settings, reached through the
                         // contract (the editor's ProjectProperty and the
                         // server's per-workspace settings both surface here).
-                        ProjectProperty? targetProjectProperty =
-                            resolvedProject.Settings as ProjectProperty;
+                        IVerilogParserSettings? targetProjectProperty =
+                            resolvedProject.Settings as IVerilogParserSettings;
                         if (targetProjectProperty == null) break;
                         sourceProjectProperty = targetProjectProperty;
                         instancedModule = sourceProjectProperty.DefinitionNameSpace.Get(moduleName) as Module;
@@ -586,7 +586,7 @@ namespace pluginVerilog.Verilog.Items
 
 
 
-        private static void SyncCheck(WordScanner word, NameSpace nameSpace, ModuleInstantiation moduleInstantiation, ProjectProperty sourceProjectProperty)
+        private static void SyncCheck(WordScanner word, NameSpace nameSpace, ModuleInstantiation moduleInstantiation, IVerilogParserSettings sourceProjectProperty)
         {
             if (word.Prototype) return;
 
@@ -1111,7 +1111,7 @@ namespace pluginVerilog.Verilog.Items
 
 
 
-        private static void checkPortConnection(ProjectProperty projectProperty, Module? instancedModule, ModuleInstantiation moduleInstantiation, Expressions.Expression? expression, string pinName, bool output)
+        private static void checkPortConnection(IVerilogParserSettings projectProperty, Module? instancedModule, ModuleInstantiation moduleInstantiation, Expressions.Expression? expression, string pinName, bool output)
         {
             if (instancedModule == null) return;
             if (expression == null) return;
@@ -1129,7 +1129,7 @@ namespace pluginVerilog.Verilog.Items
                 string interfaceName = modportInstantiation.InterfaceName;
                 // Resolve the interface through the UI-free settings view: the
                 // instantiated module may live in another project.
-                ProjectProperty? instancedSettings = instancedModule.Project.Settings as ProjectProperty;
+                IVerilogParserSettings? instancedSettings = instancedModule.Project.Settings as IVerilogParserSettings;
                 Interface? interface_ = instancedSettings?.DefinitionNameSpace.Get(interfaceName) as Interface;
                 if (interface_ == null)
                 {
@@ -1144,7 +1144,7 @@ namespace pluginVerilog.Verilog.Items
             {
                 InterfaceInstance? portInterfaceInstantiation = (((instancedModule.Ports[pinName].DataObject as InterfaceInstance)));
                 if (portInterfaceInstantiation == null) throw new Exception();
-                ProjectProperty? instancedSettings2 = instancedModule.Project.Settings as ProjectProperty;
+                IVerilogParserSettings? instancedSettings2 = instancedModule.Project.Settings as IVerilogParserSettings;
                 Interface? interface_ = instancedSettings2?.DefinitionNameSpace.Get(portInterfaceInstantiation.SourceName) as Interface;
                 if (interface_ == null)
                 {
@@ -1172,7 +1172,7 @@ namespace pluginVerilog.Verilog.Items
 
         }
         private static void checkNetPortConnection(
-            ProjectProperty projectProperty,
+            IVerilogParserSettings projectProperty,
             Expressions.Expression expression,
             Port port,
             DataObjects.Nets.Net net,
@@ -1220,7 +1220,7 @@ namespace pluginVerilog.Verilog.Items
             checkDataTypeCompatibility(expression, net.DataType, pinName);
         }
         private static void checkVariablePortConnection(
-            ProjectProperty projectProperty,
+            IVerilogParserSettings projectProperty,
             Expressions.Expression expression,
             Port port,
             Variable variable,
@@ -1268,7 +1268,7 @@ namespace pluginVerilog.Verilog.Items
             checkDataTypeCompatibility(expression, variable.DataType, pinName);
         }
         private static void checkInterfacePortConnection(
-            ProjectProperty projectProperty,
+            IVerilogParserSettings projectProperty,
             Expressions.Expression expression,
             InterfaceInstance portInterfaceInstantiation,
             Interface interface_,
@@ -1298,7 +1298,7 @@ namespace pluginVerilog.Verilog.Items
             // properly connected
         }
         private static void checkModPortConnection(
-            ProjectProperty projectProperty,
+            IVerilogParserSettings projectProperty,
             Expressions.Expression expression,
             ModportInstance modportInstantiation,
             Interface interface_,

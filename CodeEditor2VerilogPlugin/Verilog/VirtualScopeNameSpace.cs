@@ -123,7 +123,7 @@ namespace pluginVerilog.Verilog
                             // per-ProjectProperty routing used by
                             // IVerilogRelatedFile already gives the right one when
                             // available above, so this is only the fallback.
-                            pluginVerilog.ProjectProperty? projectProperty = null;
+                            IVerilogParserSettings? projectProperty = null;
                             if (Parent is BuildingBlock parentBlock
                                 && parentBlock.File is Data.IVerilogRelatedFile parentFile
                                 && parentFile.ProjectProperty != null)
@@ -136,7 +136,7 @@ namespace pluginVerilog.Verilog
                                 // settings object is another plugin's), in which
                                 // case the target simply cannot be late-bound.
                                 projectProperty =
-                                    Project.Settings as pluginVerilog.ProjectProperty;
+                                    Project.Settings as IVerilogParserSettings;
                             }
                             if (projectProperty != null)
                             {

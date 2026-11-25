@@ -23,7 +23,7 @@ namespace pluginVerilog.Verilog.Expressions
 
         public required BuiltInMethod BuiltInMethod { init; get; }
         [JsonIgnore]
-        public required ProjectProperty ProjectProperty { init; get; }
+        public required IVerilogParserSettings ProjectProperty { init; get; }
         //public Function? Function
         //{
         //    get

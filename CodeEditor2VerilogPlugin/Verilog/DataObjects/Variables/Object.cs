@@ -14,7 +14,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
         public required Dictionary<string, Expressions.Expression> ParameterOverrides { get; init; }
         public BuildingBlocks.Class? GetSourceClass() {
 
-            ProjectProperty? projectProperty = Project.Settings as ProjectProperty;
+            IVerilogParserSettings? projectProperty = Project.Settings as IVerilogParserSettings;
             if (projectProperty == null) throw new Exception();
     
             Data.IVerilogRelatedFile? file = projectProperty.UnitNameSpace.GetFile(SourceName);

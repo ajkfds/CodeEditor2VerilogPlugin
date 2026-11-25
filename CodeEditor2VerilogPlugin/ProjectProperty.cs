@@ -23,8 +23,46 @@ using Macro = SystemVerilogCore.Verilog.Macro;
 namespace pluginVerilog
 {
     public class ProjectProperty : CodeEditor2.Data.ProjectProperty,
-        SystemVerilogCore.Projects.IVerilogProjectSettings
+        SystemVerilogCore.Projects.IVerilogProjectSettings,
+        Verilog.IVerilogParserSettings
     {
+        // ---- IVerilogParserSettings: the parts typed with parser types -----
+        // These cannot live on the UI-free settings contract (that assembly
+        // cannot name WordScanner / NameSpace / IBuildingBlockInstantiation),
+        // so they are declared next to the parser and the parser reads them
+        // through this interface instead of this class. The member shapes are
+        // identical to the members below, so no parse site changes.
+        //
+        // Only the members whose concrete type differs from the interface are
+        // forwarded explicitly; the rest match by signature and satisfy the
+        // interface directly.
+
+        IReadOnlyDictionary<string, Func<Verilog.WordScanner, Verilog.NameSpace, Verilog.Statements.SystemTask.SystemTask>?>
+            Verilog.IVerilogParserSettings.SystemTaskParsers => SystemTaskParsers;
+
+        IReadOnlyDictionary<string, Func<Verilog.DataObjects.Variables.Variable, Verilog.WordScanner>?>
+            Verilog.IVerilogParserSettings.SystemFunctions => SystemFunctions;
+
+        // These three are fields on this class, and a field cannot implement an
+        // interface member, so the contract needs an explicit implementation.
+        // The IVerilogProjectSettings members above forward for the same reason.
+        IReadOnlyDictionary<string, Macro>
+            Verilog.IVerilogParserSettings.Macros => Macros;
+
+        RuleSet Verilog.IVerilogParserSettings.RuleSet => RuleSet;
+
+        IReadOnlyDictionary<string, string>
+            Verilog.IVerilogParserSettings.ExtenralModuleLibraryPath =>
+            ExtenralModuleLibraryPath;
+
+        IReadOnlyDictionary<string, string>
+            Verilog.IVerilogParserSettings.ExtenralPrimitiveLibraryPath =>
+            ExtenralPrimitiveLibraryPath;
+
+        // A field on this class, like the three above.
+        string Verilog.IVerilogParserSettings.AnnotationKeyValueDelimiter =>
+            AnnotationKeyValueDelimiter;
+
         // The ID is required by the parser-facing settings contract so a parse
         // site can identify these settings without knowing the editor type.
         string SystemVerilogCore.Projects.IVerilogProjectSettings.ID => Plugin.StaticID;

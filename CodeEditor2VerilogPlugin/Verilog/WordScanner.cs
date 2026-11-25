@@ -213,19 +213,24 @@ namespace pluginVerilog.Verilog
         }
 
         /// <summary>
-        /// The plugin property of the project being parsed.
+        /// The settings of the project being parsed, as the parser-facing
+        /// contract.
         ///
         /// <para>
-        /// Read from the parsed document's cached copy instead of walking
-        /// <c>CodeEditor2.Data.Project.ProjectProperties</c>, so this property
-        /// no longer depends on the editor's project type.
+        /// Typed as <see cref="IVerilogParserSettings"/> rather than the plugin's
+        /// concrete <c>ProjectProperty</c>. Everything the parser reads from the
+        /// settings is on that contract (including the system task / function
+        /// tables and the instance resolver, which cannot move to the UI-free
+        /// assembly because they are typed with parser types). The value still
+        /// comes from the parsed document's cached copy, so this does not walk
+        /// <c>CodeEditor2.Data.Project.ProjectProperties</c>.
         /// </para>
         /// </summary>
-        public ProjectProperty ProjectProperty
+        public IVerilogParserSettings ProjectProperty
         {
             get
             {
-                ProjectProperty? projectProperty = RootParsedDocument.ProjectProperty;
+                IVerilogParserSettings? projectProperty = RootParsedDocument.ProjectProperty;
                 if (projectProperty == null) throw new Exception();
                 return projectProperty;
             }
@@ -246,7 +251,7 @@ namespace pluginVerilog.Verilog
         {
             get
             {
-                ProjectProperty? projectProperty = RootParsedDocument?.ProjectProperty;
+                IVerilogParserSettings? projectProperty = RootParsedDocument?.ProjectProperty;
                 if (projectProperty == null) return fallbackRuleSet;
 
                 // Read the path through the UI-free contract: the rule set is
