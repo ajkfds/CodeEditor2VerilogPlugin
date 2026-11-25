@@ -96,7 +96,8 @@ namespace pluginVerilog.Verilog.Items
                 if (resolved.Settings is ProjectProperty resolvedProperty) projectProperty = resolvedProperty;
             }
 
-            Data.IVerilogRelatedFile? file = projectProperty.DefinitionNameSpace.GetFile(SourceName);
+            SystemVerilogCore.Documents.IVerilogSourceFile? file =
+                projectProperty.DefinitionNameSpace.GetFile(SourceName);
             if (file == null) return null;
 
             // The instance lookup is part of the UI-free source file contract,

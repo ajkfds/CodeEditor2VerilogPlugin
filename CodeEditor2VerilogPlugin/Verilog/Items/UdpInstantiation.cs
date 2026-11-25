@@ -97,7 +97,8 @@ namespace pluginVerilog.Verilog.Items
                 if (resolved.Settings is ProjectProperty resolvedProperty) projectProperty = resolvedProperty;
             }
 
-            Data.IVerilogRelatedFile? file = projectProperty.DefinitionNameSpace.GetFile(SourceName);
+            SystemVerilogCore.Documents.IVerilogSourceFile? file =
+                projectProperty.DefinitionNameSpace.GetFile(SourceName);
             if (file == null) return null;
 
             // The instance lookup is part of the UI-free source file contract,
@@ -108,7 +109,7 @@ namespace pluginVerilog.Verilog.Items
             // UDPs do not have parameter ports, so the base parse result suffices.
             if (parsedDocument == null)
             {
-                parsedDocument = file.VerilogParsedDocument;
+                parsedDocument = file.VerilogParsedResult as ParsedDocument;
             }
             if (parsedDocument == null) return null;
             if (parsedDocument.Root == null) return null;
@@ -139,8 +140,12 @@ namespace pluginVerilog.Verilog.Items
         {
             Func<Data.VerilogCommon.AutoCompleteItem, bool> itemFilter = (Data.VerilogCommon.AutoCompleteItem ac) =>
             {
-                if (ac.Type == Data.VerilogCommon.AutoCompleteItem.CompleteType.Keyword) return false;
-                if (ac.Type == Data.VerilogCommon.AutoCompleteItem.CompleteType.Task) return false;
+                // Read the kind through the UI-free contract so this file does not
+                // depend on the candidate's concrete type.
+                SystemVerilogCore.Documents.SystemVerilogAutocompleteItemKind kind =
+                    ((SystemVerilogCore.Documents.IVerilogAutocompleteItem)ac).Kind;
+                if (kind == SystemVerilogCore.Documents.SystemVerilogAutocompleteItemKind.Keyword) return false;
+                if (kind == SystemVerilogCore.Documents.SystemVerilogAutocompleteItemKind.Task) return false;
                 return true;
             };
 

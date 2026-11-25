@@ -56,6 +56,10 @@ namespace pluginVerilog.Data
         ulong SystemVerilogCore.Documents.IVerilogSourceFile.VerilogTextDocumentVersion =>
             (ulong)(CodeDocument?.Version ?? 0);
 
+        /// <summary>This file's own parse result, as the source file contract.</summary>
+        SystemVerilogCore.Parsing.IParsedDocument?
+            SystemVerilogCore.Documents.IVerilogSourceFile.VerilogParsedResult => VerilogParsedDocument;
+
         SystemVerilogCore.Projects.IVerilogProjectSettings?
             SystemVerilogCore.Documents.IVerilogSourceFile.ProjectSettings => ProjectProperty;
 

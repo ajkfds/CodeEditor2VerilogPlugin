@@ -177,17 +177,27 @@ namespace pluginVerilog.Verilog
         // the file's document into it, so it was dead code carrying a host type.
         // Removed rather than re-typed.
 
+        /// <summary>
+        /// Builds the cache key for a parse result.
+        ///
+        /// <para>
+        /// Takes the UI-free source file contract: the key is just the project
+        /// name plus the project-relative path (plus the module and its parameter
+        /// overrides for an instance), and all three are on the contract. Parse
+        /// sites therefore do not have to name the editor's file type.
+        /// </para>
+        /// </summary>
         public static string KeyGenerator(
-            Data.IVerilogRelatedFile verilogRelatedFile,
+            SystemVerilogCore.Documents.IVerilogSourceFile verilogRelatedFile,
             string? moduleName,
             Dictionary<string, Verilog.Expressions.Expression>? parameterOverrides
             )
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append(verilogRelatedFile.Project.Name);
+            sb.Append(verilogRelatedFile.VerilogProject?.Name ?? "");
             sb.Append(System.IO.Path.DirectorySeparatorChar);
 
-            sb.Append(verilogRelatedFile.RelativePath);
+            sb.Append(verilogRelatedFile.FileRelativePath);
             if (moduleName == null) return sb.ToString(); // base Parse
 
             sb.Append(":");

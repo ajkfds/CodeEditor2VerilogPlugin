@@ -129,7 +129,8 @@ namespace pluginVerilog.Verilog.Items
                 if (resolved.Settings is ProjectProperty resolvedProperty) projectProperty = resolvedProperty;
             }
 
-            Data.IVerilogRelatedFile? file = projectProperty.DefinitionNameSpace.GetFile(SourceName);
+            SystemVerilogCore.Documents.IVerilogSourceFile? file =
+                projectProperty.DefinitionNameSpace.GetFile(SourceName);
             if (file == null) return null;
 
             // The instance lookup used to require casting to the editor's
@@ -140,7 +141,7 @@ namespace pluginVerilog.Verilog.Items
             ParsedDocument? parsedDocument = file.GetInstancedParsedDocument(instanceKey) as ParsedDocument;
             if (parsedDocument == null) // don't have module parse result
             {
-                parsedDocument = file.VerilogParsedDocument;
+                parsedDocument = file.VerilogParsedResult as ParsedDocument;
             }
             if (parsedDocument == null) return null;
             if (parsedDocument.Root == null) return null;
