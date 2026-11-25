@@ -2026,21 +2026,21 @@ namespace pluginVerilog.Verilog
             }
             else
             {
-                Data.VerilogHeaderInstance vhInstance = null;
+                SystemVerilogCore.Documents.IVerilogIncludeFile? vhInstance = null;
                 // When including outside the module, prototype parse is not performed, so only this part is executed.
 
                 // get vhInstance parsed @ prototype
                 IndexReference currentIndex = CreateIndexReference();
-                foreach (Data.VerilogHeaderInstance vh in wordPointer.ParsedDocument.IncludeFiles.Values)
+                foreach (SystemVerilogCore.Documents.IVerilogIncludeFile vh in wordPointer.ParsedDocument.IncludeFiles.Values)
                 {
-                    if (currentIndex.IsSameAs(vh.InstancedReference))
+                    if (vh.InstancedReference is IndexReference reference && currentIndex.IsSameAs(reference))
                     {
                         vhInstance = vh;
                     }
                 }
                 if (vhInstance != null)
                 {
-                    newParsedDocument = vhInstance.VerilogParsedDocument;
+                    newParsedDocument = vhInstance.IncludeParsedDocument as ParsedDocument;
                 }
                 if (newParsedDocument == null)
                 {
@@ -2149,14 +2149,23 @@ namespace pluginVerilog.Verilog
                 return;
             }
 
-            Data.VerilogHeaderInstance? vhInstance = Data.VerilogHeaderInstance.Create(
-                                            relativeFilePath,
-                                            name,
-                                            CreateIndexReference(),
-                                            rootFile,
-                                            project,
-                                            id
-                                            );
+            // The include wrapper is a host concept, so the host makes it when it
+            // can supply a factory. Hosts that do not (the language server has no
+            // item tree) fall back to the editor's factory below, which is still
+            // in this assembly - the fallback keeps both hosts working while the
+            // seam is being moved.
+            SystemVerilogCore.Documents.IVerilogIncludeFileFactory? factory =
+                project.IncludeFileFactory;
+
+            SystemVerilogCore.Documents.IVerilogIncludeFile? vhInstance = factory != null
+                ? factory.Create(relativeFilePath, name, rootFile, CreateIndexReference(), id)
+                : Data.VerilogHeaderInstance.Create(
+                    relativeFilePath,
+                    name,
+                    CreateIndexReference(),
+                    rootFile,
+                    project,
+                    id);
 
             if (vhInstance == null)
             {
@@ -2168,17 +2177,13 @@ namespace pluginVerilog.Verilog
 
 
 
-            if (!wordPointer.ParsedDocument.IncludeFiles.ContainsKey(vhInstance.ID))
+            if (!wordPointer.ParsedDocument.IncludeFiles.ContainsKey(vhInstance.IncludeId))
             {
-                wordPointer.ParsedDocument.IncludeFiles.Add(vhInstance.ID, vhInstance);
+                wordPointer.ParsedDocument.IncludeFiles.Add(vhInstance.IncludeId, vhInstance);
             }
             else
             {
-                // Re-use the existing instance: narrowing back to the editor's
-                // type is safe here because the parser only ever puts that type
-                // into this table (it creates them just above).
-                vhInstance = (Data.VerilogHeaderInstance)
-                    wordPointer.ParsedDocument.IncludeFiles[vhInstance.ID];
+                vhInstance = wordPointer.ParsedDocument.IncludeFiles[vhInstance.IncludeId];
             }
 
             // The item-tree parent is NOT set here: that is the editor's
@@ -2186,16 +2191,21 @@ namespace pluginVerilog.Verilog
             // NavigatePanel nodes). The parser only reached for it to read its
             // ID, which is the root file's ID - available from the contract, so
             // this path no longer needs the editor's Data.Item at all.
-            string key = Verilog.ParsedDocument.KeyGenerator(
-                wordPointer.ParsedDocument.File.ID, vhInstance, null, null);
-            newParsedDocument = new Verilog.ParsedDocument(vhInstance, key, indexReference, RootParsedDocument.ParseMode);
+            // The include instance is itself the file for this parse, so its own
+            // key is what identifies the result.
+            SystemVerilogCore.Documents.IVerilogSourceFile sourceFile =
+                vhInstance.SourceFile ?? throw new Exception();
+
+            string key = Verilog.ParsedDocument.KeyGenerator(sourceFile, null, null);
+            newParsedDocument = new Verilog.ParsedDocument(
+                sourceFile, key, indexReference, RootParsedDocument.ParseMode);
             // Take the snapshot through the UI-free contract: the parser must not
             // name the editor's document type. The host decides how the copy is
             // made (the editor clones its own document; a plain host returns a
             // plain text buffer), which is the whole point of putting this on the
             // contract.
             SystemVerilogCore.Documents.IVerilogTextDocument? originalDocument =
-                ((SystemVerilogCore.Documents.IVerilogSourceFile)vhInstance).VerilogTextDocument;
+                sourceFile.VerilogTextDocument;
             if (originalDocument == null) throw new Exception();
 
             newParsedDocument.VerilogDocument = originalDocument.CreateSnapshot();
@@ -2205,7 +2215,6 @@ namespace pluginVerilog.Verilog
             {
                 newParsedDocument.SystemVerilog = true;
             }
-            vhInstance.ParsedDocument = newParsedDocument;
 
         }
 

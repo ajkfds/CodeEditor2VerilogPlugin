@@ -28,6 +28,19 @@ namespace pluginVerilog.Data
             SystemVerilogCore.Documents.IVerilogIncludeFile.IncludeParsedDocument => VerilogParsedDocument;
 
         /// <summary>
+        /// Where the <c>include</c> appeared, as the include-file contract.
+        /// </summary>
+        object? SystemVerilogCore.Documents.IVerilogIncludeFile.InstancedReference =>
+            InstancedReference;
+
+        /// <summary>
+        /// The included file as a source file. A header instance is itself one
+        /// (it implements the source file contract).
+        /// </summary>
+        SystemVerilogCore.Documents.IVerilogSourceFile?
+            SystemVerilogCore.Documents.IVerilogIncludeFile.SourceFile => this;
+
+        /// <summary>
         /// Releases the include, as the include-file contract. Forwards to
         /// <see cref="Close"/>.
         /// </summary>

@@ -216,9 +216,13 @@ namespace pluginVerilog.Verilog
             }
             return sb.ToString();
         }
+        /// <summary>
+        /// Builds a key by prefixing <paramref name="key"/> onto the file's key.
+        /// Takes the UI-free source file contract, like the 3-argument overload.
+        /// </summary>
         public static string KeyGenerator(
             string key,
-            Data.IVerilogRelatedFile verilogRelatedFile,
+            SystemVerilogCore.Documents.IVerilogSourceFile verilogRelatedFile,
             string? moduleName,
             Dictionary<string, Verilog.Expressions.Expression>? parameterOverrides
             )
@@ -229,6 +233,18 @@ namespace pluginVerilog.Verilog
             sb.Append(KeyGenerator(verilogRelatedFile, moduleName, parameterOverrides));
             return sb.ToString();
         }
+
+        /// <summary>
+        /// Compatibility overload for editor call sites that still hold the
+        /// plugin's file type.
+        /// </summary>
+        public static string KeyGenerator(
+            string key,
+            Data.IVerilogRelatedFile verilogRelatedFile,
+            string? moduleName,
+            Dictionary<string, Verilog.Expressions.Expression>? parameterOverrides
+            )
+            => KeyGenerator(key, (SystemVerilogCore.Documents.IVerilogSourceFile)verilogRelatedFile, moduleName, parameterOverrides);
 
         ~ParsedDocument()
         {
