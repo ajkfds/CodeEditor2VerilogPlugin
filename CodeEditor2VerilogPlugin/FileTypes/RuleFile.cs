@@ -30,7 +30,7 @@ namespace pluginVerilog.FileTypes
         {
             // a new .rule file starts from the built-in defaults so the user
             // only has to change the severities to override
-            RuleSet ruleSet = new RuleSet();
+            SystemVerilogCore.Verilog.RuleSet ruleSet = new SystemVerilogCore.Verilog.RuleSet();
             ruleSet.SaveFile(project.GetAbsolutePath(relativeFilePath));
         }
 

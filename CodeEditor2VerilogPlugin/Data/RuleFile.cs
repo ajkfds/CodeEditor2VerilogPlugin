@@ -51,7 +51,8 @@ namespace pluginVerilog.Data
             // The text is read from the parsed document (not from the file on
             // disk) so that editing a .rule file in the editor updates the rule
             // sets without saving first.
-            RuleSet? ruleSet = RuleSet.ParseYaml(GetRuleText(), out _);
+            SystemVerilogCore.Verilog.RuleSet? ruleSet =
+                SystemVerilogCore.Verilog.RuleSet.ParseYaml(GetRuleText(), out _);
             projectProperty.SetRuleSet(RelativePath, ruleSet);
         }
 

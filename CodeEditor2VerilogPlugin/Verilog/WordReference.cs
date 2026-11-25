@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using SystemVerilogCore.Documents;
 
+// The rule model now lives in the UI-free parser assembly.
+using Rule = SystemVerilogCore.Verilog.Rule;
+
 namespace pluginVerilog.Verilog
 {
     public class WordReference : IDisposable
@@ -126,7 +129,7 @@ namespace pluginVerilog.Verilog
         /// the project property cannot be resolved.
         /// </summary>
         [JsonIgnore]
-        public RuleSet RuleSet
+        public SystemVerilogCore.Verilog.RuleSet RuleSet
         {
             get
             {
@@ -134,10 +137,10 @@ namespace pluginVerilog.Verilog
                 // property and the source file, so no editor project is needed.
                 if (indexReference?.ParsedDocument is not ParsedDocument parsedDocument)
                 {
-                    return new pluginVerilog.RuleSet();
+                    return new SystemVerilogCore.Verilog.RuleSet();
                 }
                 ProjectProperty? projectProperty = parsedDocument.ProjectProperty;
-                if (projectProperty == null) return new pluginVerilog.RuleSet();
+                if (projectProperty == null) return new SystemVerilogCore.Verilog.RuleSet();
 
                 return projectProperty.GetRuleSet(parsedDocument.TextFile?.RelativePath);
             }

@@ -8,6 +8,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using SystemVerilogCore.Documents;
 
+// The rule model now lives in the UI-free parser assembly.
+using Rule = SystemVerilogCore.Verilog.Rule;
+
 namespace pluginVerilog.Verilog
 {
     public class WordScanner : IDisposable
@@ -256,7 +259,7 @@ namespace pluginVerilog.Verilog
         /// <c>.rule.yaml</c> file covers get the built-in defaults.
         /// </para>
         /// </summary>
-        public pluginVerilog.RuleSet RuleSet
+        public SystemVerilogCore.Verilog.RuleSet RuleSet
         {
             get
             {
@@ -270,7 +273,7 @@ namespace pluginVerilog.Verilog
         }
 
         /// <summary>Built-in defaults, used when the project property is unavailable.</summary>
-        private static readonly pluginVerilog.RuleSet fallbackRuleSet = new pluginVerilog.RuleSet();
+        private static readonly SystemVerilogCore.Verilog.RuleSet fallbackRuleSet = new SystemVerilogCore.Verilog.RuleSet();
         public WordPointer RootPointer
         {
             get

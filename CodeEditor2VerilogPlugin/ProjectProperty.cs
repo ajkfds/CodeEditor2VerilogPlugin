@@ -11,6 +11,13 @@ using System.Threading;
 using System.Diagnostics.CodeAnalysis;
 using pluginVerilog.Verilog;
 
+// The rule model moved to the UI-free parser assembly (it depends only on
+// YamlDotNet). These aliases keep the existing `Rule` / `RuleSet` references in
+// this assembly compiling unchanged; the parser itself now uses the
+// SystemVerilogCore.Verilog types directly.
+using Rule = SystemVerilogCore.Verilog.Rule;
+using RuleSet = SystemVerilogCore.Verilog.RuleSet;
+
 namespace pluginVerilog
 {
     public class ProjectProperty : CodeEditor2.Data.ProjectProperty,
@@ -218,7 +225,8 @@ namespace pluginVerilog
                         string relativePath = project.GetRelativePath(filePath);
                         if (IsInSkippedDirectory(relativePath)) continue;
 
-                        pluginVerilog.RuleSet? ruleSet = pluginVerilog.RuleSet.LoadFile(filePath);
+                        SystemVerilogCore.Verilog.RuleSet? ruleSet =
+                            SystemVerilogCore.Verilog.RuleSet.LoadFile(filePath);
                         if (ruleSet == null) continue;
                         loaded[GetDirectoryKey(relativePath)] = ruleSet;
                     }

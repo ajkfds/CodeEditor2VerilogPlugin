@@ -51,7 +51,8 @@ namespace pluginVerilog.Parser
             await Task.CompletedTask;
 
             string text = Document.CreateString();
-            RuleSet? ruleSet = RuleSet.ParseYaml(text, out string? errorMessage);
+            SystemVerilogCore.Verilog.RuleSet? ruleSet =
+                SystemVerilogCore.Verilog.RuleSet.ParseYaml(text, out string? errorMessage);
             if (ruleSet == null)
             {
                 // the YAML itself is broken: mark the whole file
@@ -119,7 +120,7 @@ namespace pluginVerilog.Parser
             if (valueStartInLine >= line.Length) return;
 
             // a severity value is highlighted differently from a rule name
-            bool isSeverity = RuleSet.TryParseSeverity(value, out _);
+            bool isSeverity = SystemVerilogCore.Verilog.RuleSet.TryParseSeverity(value, out _);
             Style.Color color = isSeverity ? Style.Color.Keyword : Style.Color.Identifier;
             for (int i = lineStart + valueStartInLine; i < lineStart + line.Length; i++)
             {
