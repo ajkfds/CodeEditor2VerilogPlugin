@@ -221,7 +221,13 @@ namespace pluginVerilog.Data.VerilogCommon
             int blockEndIndex = 0;
             {
                 // create short document to parse current pretext
-                pluginVerilog.CodeEditor.CodeDocument document = new pluginVerilog.CodeEditor.CodeDocument(lineText);
+                //
+                // A throw-away buffer: the parser only tokenises it, so the
+                // UI-free plain-text document is enough. Using the plugin's
+                // CodeDocument here was what kept the compatibility constructor
+                // (and with it the editor type) inside the parser.
+                SystemVerilogCore.Documents.IVerilogTextDocument document =
+                    new SystemVerilogCore.Documents.PlainTextDocument(lineText);
                 WordScanner word = new WordScanner(document, parsedDocument, parsedDocument.SystemVerilog);
 
                 List<(string, int)> words = new List<(string, int)>();
@@ -292,7 +298,11 @@ namespace pluginVerilog.Data.VerilogCommon
             element = null;
             {
                 // create short document to parse current pretext
-                pluginVerilog.CodeEditor.CodeDocument document = new pluginVerilog.CodeEditor.CodeDocument(elementText);
+                //
+                // A throw-away buffer (see the note above): the UI-free
+                // plain-text document is enough.
+                SystemVerilogCore.Documents.IVerilogTextDocument document =
+                    new SystemVerilogCore.Documents.PlainTextDocument(elementText);
                 WordScanner word = new WordScanner(document, parsedDocument, parsedDocument.SystemVerilog);
 
                 if (nameSpace != null)

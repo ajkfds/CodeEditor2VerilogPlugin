@@ -16,33 +16,37 @@ namespace pluginVerilog.Verilog
 {
     public class WordScanner : IDisposable
     {
+        // NOTE: two constructors used to sit here that took the plugin's
+        // `CodeEditor.CodeDocument`. Their only purpose was to hand the same
+        // object on as the concrete document; they were the last thing keeping
+        // this file bound to the editor assembly. The contract overloads below
+        // replace them.
+
+        /// <summary>
+        /// Short form: the file comes from the parse result, and the document is
+        /// also handed on as the concrete document.
+        ///
+        /// <para>
+        /// The file is read from <paramref name="parsedDocument"/> rather than
+        /// derived from the document. A document does not expose its owning file
+        /// through the contract (only an identity), and include resolution needs
+        /// the real file object, so the parse result - which holds it - is the
+        /// right source.
+        /// </para>
+        /// </summary>
         public WordScanner(
-            CodeEditor.CodeDocument document,
+            SystemVerilogCore.Documents.IVerilogTextDocument document,
             Verilog.ParsedDocument parsedDocument,
             bool systemVerilog,
             int indexReferenceOffset = 0,
-            CompletionContext completionContext = null
-            ) : this(
+            CompletionContext? completionContext = null)
+            : this(
                   document,
-                  document?.VerilogFile,
+                  parsedDocument.TextFile,
                   document,
                   parsedDocument, systemVerilog, false, false, indexReferenceOffset, false)
         {
-            CompletionContext = completionContext;
-        }
-
-        public WordScanner(
-            CodeEditor.CodeDocument document, Verilog.ParsedDocument parsedDocument, 
-            bool systemVerilog, bool supressCompilerDirectiveError,
-            bool prototype, int indexReferenceOffset = 0
-            )
-            : this(
-                  document,
-                  document?.VerilogFile,
-                  document,
-                  parsedDocument, systemVerilog, supressCompilerDirectiveError,
-                   prototype, indexReferenceOffset, false)
-        {
+            CompletionContext = completionContext!;
         }
 
         /// <summary>
@@ -71,27 +75,6 @@ namespace pluginVerilog.Verilog
                   parsedDocument, systemVerilog, supressCompilerDirectiveError,
                    prototype, indexReferenceOffset, false)
         {
-        }
-
-        /// <summary>
-        /// Contract-document overload that also attaches a completion context
-        /// (the autocomplete partial parse).
-        /// </summary>
-        public WordScanner(
-            SystemVerilogCore.Documents.IVerilogTextDocument document,
-            Verilog.ParsedDocument parsedDocument,
-            bool systemVerilog,
-            int indexReferenceOffset,
-            CompletionContext? completionContext
-            )
-            : this(
-                  document,
-                  null,
-                  null,
-                  parsedDocument, systemVerilog, false,
-                   false, indexReferenceOffset, false)
-        {
-            CompletionContext = completionContext;
         }
 
         /// <summary>
