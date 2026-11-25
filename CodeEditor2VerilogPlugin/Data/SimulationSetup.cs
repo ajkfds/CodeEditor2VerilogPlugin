@@ -489,9 +489,11 @@ namespace pluginVerilog.Data
                 }
             }
 
-            foreach (var ifile in parsedDocument.IncludeFiles.Values)
+            foreach (SystemVerilogCore.Documents.IVerilogIncludeFile ifile in parsedDocument.IncludeFiles.Values)
             {
-                appendVerilogHeaderInstance(ifile, setup);
+                // Narrow to the editor's instance type: the simulation setup needs
+                // the item tree and the project, which the contract does not carry.
+                if (ifile is Data.VerilogHeaderInstance header) appendVerilogHeaderInstance(header, setup);
             }
 
             // module / interface / program / udp references are registered to

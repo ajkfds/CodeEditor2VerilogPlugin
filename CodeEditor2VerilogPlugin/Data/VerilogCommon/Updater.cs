@@ -56,9 +56,11 @@ namespace pluginVerilog.Data.VerilogCommon
 
             // Build new sub-items dictionary first (outside the lock)
             // add vh instance
-            foreach (VerilogHeaderInstance newVhInstance in item.VerilogParsedDocument.IncludeFiles.Values)
+            foreach (SystemVerilogCore.Documents.IVerilogIncludeFile newVhInstance in item.VerilogParsedDocument.IncludeFiles.Values)
             {
-                addVhInstance(newSubItems, item, newVhInstance);
+                // Narrow to the editor's instance type: building the item tree is
+                // a data-layer concern and needs the full instance.
+                if (newVhInstance is VerilogHeaderInstance header) addVhInstance(newSubItems, item, header);
             }
 
             // add imported packages as sub-items

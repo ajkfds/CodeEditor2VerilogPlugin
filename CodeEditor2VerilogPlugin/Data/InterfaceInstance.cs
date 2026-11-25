@@ -93,9 +93,10 @@ namespace pluginVerilog.Data
             {
                 if (ParsedDocument != null && ParameterOverrides.Count != 0)
                 {
-                    foreach (var incFile in VerilogParsedDocument.IncludeFiles.Values)
+                    foreach (SystemVerilogCore.Documents.IVerilogIncludeFile incFile in VerilogParsedDocument.IncludeFiles.Values)
                     {
-                        incFile.Dispose();
+                        // Narrow to the editor's instance type (see VerilogFile).
+                        (incFile as Data.VerilogHeaderInstance)?.Dispose();
                     }
                 }
             }

@@ -260,8 +260,20 @@ namespace pluginVerilog.Verilog
         public bool RestrictBaseParse { get; set; } = false;
         public Root Root { set; get; } = null!;
 
+        /// <summary>
+        /// The files this one pulled in with <c>include</c>, keyed by their
+        /// include instance id.
+        ///
+        /// <para>
+        /// Held as the UI-free contract: the parser only records and releases
+        /// them, and re-parses them through their parse results. Editor-only work
+        /// (item-tree nodes, colour-mark copies into the displayed document)
+        /// narrows back to <c>Data.VerilogHeaderInstance</c> in the data layer.
+        /// </para>
+        /// </summary>
         [JsonIgnore]
-        public Dictionary<string, Data.VerilogHeaderInstance> IncludeFiles = new Dictionary<string, Data.VerilogHeaderInstance>();
+        public Dictionary<string, SystemVerilogCore.Documents.IVerilogIncludeFile> IncludeFiles =
+            new Dictionary<string, SystemVerilogCore.Documents.IVerilogIncludeFile>();
         [JsonIgnore]
         public Dictionary<string, Macro> Macros = new Dictionary<string, Macro>();
         
@@ -327,9 +339,9 @@ namespace pluginVerilog.Verilog
 
         public void ReloadIncludeFiles()
         {
-            foreach (var includeFile in IncludeFiles.Values)
+            foreach (SystemVerilogCore.Documents.IVerilogIncludeFile includeFile in IncludeFiles.Values)
             {
-                includeFile.Close();
+                includeFile.CloseInclude();
             }
         }
 

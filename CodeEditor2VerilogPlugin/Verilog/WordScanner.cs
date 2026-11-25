@@ -2174,8 +2174,11 @@ namespace pluginVerilog.Verilog
             }
             else
             {
-                //                wordPointer.ParsedDocument.IncludeFiles[vhInstance.ID] = vhInstance;
-                vhInstance = wordPointer.ParsedDocument.IncludeFiles[vhInstance.ID];
+                // Re-use the existing instance: narrowing back to the editor's
+                // type is safe here because the parser only ever puts that type
+                // into this table (it creates them just above).
+                vhInstance = (Data.VerilogHeaderInstance)
+                    wordPointer.ParsedDocument.IncludeFiles[vhInstance.ID];
             }
 
             // The item-tree parent is NOT set here: that is the editor's

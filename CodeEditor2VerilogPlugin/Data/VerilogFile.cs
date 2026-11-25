@@ -329,24 +329,30 @@ namespace pluginVerilog.Data
                 currentTextFile = await Controller.CodeEditor.GetTextFileAsync();
             }
 
-            foreach (var includeFile in parsedDocument.IncludeFiles.Values)
+            foreach (SystemVerilogCore.Documents.IVerilogIncludeFile includeFile in parsedDocument.IncludeFiles.Values)
             {
-                if (!headerItems.ContainsKey(includeFile.ID)) continue;
-                Data.VerilogHeaderInstance item = headerItems[includeFile.ID];
+                // Narrow back to the editor's instance type: the item-tree node,
+                // the colour-mark copy and the Messages view all need it. This is
+                // the data layer, so the cast belongs here rather than in the
+                // parser.
+                if (includeFile is not Data.VerilogHeaderInstance header) continue;
+
+                if (!headerItems.ContainsKey(header.ID)) continue;
+                Data.VerilogHeaderInstance item = headerItems[header.ID];
                 if (item.CodeDocument == null) continue;
 
-                if (includeFile.VerilogParsedDocument == null) continue;
-                item.CodeDocument.CopyColorMarkFrom(includeFile.VerilogParsedDocument.CodeDocument);
+                if (header.VerilogParsedDocument == null) continue;
+                item.CodeDocument.CopyColorMarkFrom(header.VerilogParsedDocument.CodeDocument);
 
                 // If this include file is selected in the editor, update the editor display.
                 if (item == currentItem && currentTextFile != null)
                 {
                     Controller.CodeEditor.PostRefresh();
-                    Controller.MessageView.Update(includeFile.VerilogParsedDocument);
+                    Controller.MessageView.Update(header.VerilogParsedDocument);
                 }
 
                 // update nested include file
-                await updateIncludeFilesAsync(includeFile.VerilogParsedDocument, item.Items);
+                await updateIncludeFilesAsync(header.VerilogParsedDocument, item.Items);
             }
         }
 
@@ -476,9 +482,12 @@ namespace pluginVerilog.Data
             Verilog.ParsedDocument? vParsedDocument = ParsedDocument as Verilog.ParsedDocument; // no lock is needed. ParsedDocument property is thread safe
             if (vParsedDocument != null)
             {
-                foreach (var incFile in vParsedDocument.IncludeFiles.Values)
+                foreach (SystemVerilogCore.Documents.IVerilogIncludeFile incFile in vParsedDocument.IncludeFiles.Values)
                 {
-                    incFile.Dispose();
+                    // Narrow to the editor's instance type: releasing the buffer
+                    // is a data-layer concern (the contract only offers Close,
+                    // which does not dispose the item).
+                    (incFile as Data.VerilogHeaderInstance)?.Dispose();
                 }
             }
             base.Dispose();

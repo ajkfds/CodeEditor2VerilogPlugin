@@ -13,8 +13,26 @@ using System.Threading;
 
 namespace pluginVerilog.Data
 {
-    public class VerilogHeaderInstance : InstanceTextFile, IVerilogRelatedFile
+    public class VerilogHeaderInstance : InstanceTextFile, IVerilogRelatedFile,
+        SystemVerilogCore.Documents.IVerilogIncludeFile
     {
+        /// <summary>
+        /// Unique id, as the include-file contract.
+        /// </summary>
+        string SystemVerilogCore.Documents.IVerilogIncludeFile.IncludeId => ID;
+
+        /// <summary>
+        /// The include's parse result, as the include-file contract.
+        /// </summary>
+        SystemVerilogCore.Parsing.IParsedDocument?
+            SystemVerilogCore.Documents.IVerilogIncludeFile.IncludeParsedDocument => VerilogParsedDocument;
+
+        /// <summary>
+        /// Releases the include, as the include-file contract. Forwards to
+        /// <see cref="Close"/>.
+        /// </summary>
+        void SystemVerilogCore.Documents.IVerilogIncludeFile.CloseInclude() => Close();
+
         protected VerilogHeaderInstance(CodeEditor2.Data.TextFile sourceTextFile) : base(sourceTextFile)
         {
         }
