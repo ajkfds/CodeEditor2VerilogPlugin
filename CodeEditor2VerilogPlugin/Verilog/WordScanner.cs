@@ -1,4 +1,3 @@
-using pluginVerilog.CodeEditor;
 using pluginVerilog.Data;
 using System;
 using System.Collections.Generic;
@@ -2064,7 +2063,10 @@ namespace pluginVerilog.Verilog
             }
             if (newParsedDocument == null) return;
 
-            WordPointer newPointer = new WordPointer(newParsedDocument.CodeDocument, newParsedDocument,0);
+            // Take the buffer through the UI-free contract: the parser must not
+            // name the editor's document type, and a snapshot may be a plain
+            // text buffer rather than the editor's concrete document.
+            WordPointer newPointer = new WordPointer(newParsedDocument.VerilogDocument, newParsedDocument, 0);
 
             stock.Add(wordPointer);
             wordPointer = newPointer;
@@ -2184,12 +2186,16 @@ namespace pluginVerilog.Verilog
             string key = Verilog.ParsedDocument.KeyGenerator(
                 wordPointer.ParsedDocument.File.ID, vhInstance, null, null);
             newParsedDocument = new Verilog.ParsedDocument(vhInstance, key, indexReference, RootParsedDocument.ParseMode);
-            CodeDocument? originalDocument = vhInstance.CodeDocument as CodeDocument;
+            // Take the snapshot through the UI-free contract: the parser must not
+            // name the editor's document type. The host decides how the copy is
+            // made (the editor clones its own document; a plain host returns a
+            // plain text buffer), which is the whole point of putting this on the
+            // contract.
+            SystemVerilogCore.Documents.IVerilogTextDocument? originalDocument =
+                ((SystemVerilogCore.Documents.IVerilogSourceFile)vhInstance).VerilogTextDocument;
             if (originalDocument == null) throw new Exception();
 
-            // create codeDocument copy
-            CodeDocument document = CodeDocument.SnapShotFrom(originalDocument);
-            newParsedDocument.CodeDocument = document;
+            newParsedDocument.VerilogDocument = originalDocument.CreateSnapshot();
 
             newParsedDocument.SystemVerilog = wordPointer.ParsedDocument.SystemVerilog;
             if (rootFile != null && rootFile.IsSystemVerilog)
