@@ -1,5 +1,3 @@
-using Microsoft.Agents.AI;
-using OpenAI.Realtime;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.DataTypes;

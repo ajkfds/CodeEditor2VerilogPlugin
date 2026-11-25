@@ -1,4 +1,3 @@
-using DynamicData.Aggregation;
 using pluginVerilog.Parser;
 using pluginVerilog.Verilog;
 using pluginVerilog.Verilog.BuildingBlocks;

@@ -1,4 +1,3 @@
-using OpenAI.Realtime;
 using pluginVerilog.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;

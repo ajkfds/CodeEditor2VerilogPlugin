@@ -1,5 +1,3 @@
-using Microsoft.Playwright;
-
 namespace pluginVerilog.Verilog
 {
     // A.2.2.3 Delays
