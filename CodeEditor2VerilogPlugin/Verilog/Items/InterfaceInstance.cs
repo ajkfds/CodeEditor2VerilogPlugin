@@ -135,7 +135,10 @@ namespace pluginVerilog.Verilog.Items
 
             if (instancedInterface.File != null && !word.RootParsedDocument.DefinitionNameSpaceRefs.ContainsKey(instancedInterface.File.ID))
             {
-                word.RootParsedDocument.DefinitionNameSpaceRefs.Add(instancedInterface.File.ID, new Data.VerilogRelatedFileReference(instancedInterface.File));
+                word.RootParsedDocument.DefinitionNameSpaceRefs.Add(
+                    instancedInterface.File.ID,
+                    new SystemVerilogCore.Verilog.VerilogRelatedFileReference(
+                        (SystemVerilogCore.Verilog.IVerilogNameSpaceFile)instancedInterface.File));
             }
 
 

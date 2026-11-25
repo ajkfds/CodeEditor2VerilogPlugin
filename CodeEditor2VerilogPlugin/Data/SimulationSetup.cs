@@ -504,7 +504,7 @@ namespace pluginVerilog.Data
 
             //}
 
-            foreach (VerilogRelatedFileReference verilogRelatedFileReference in parsedDocument.DefinitionNameSpaceRefs.Values)
+            foreach (SystemVerilogCore.Verilog.VerilogRelatedFileReference verilogRelatedFileReference in parsedDocument.DefinitionNameSpaceRefs.Values)
             {
                 string projectName = verilogRelatedFileReference.ProjectName;
 

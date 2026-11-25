@@ -429,7 +429,7 @@ namespace pluginVerilog.Tool
                 // instance tree. Enqueue them explicitly so that changes in
                 // the bound definitions are reflected in this hierarchy pass.
                 
-                foreach (VerilogRelatedFileReference fileRef in verilogFile.VerilogParsedDocument.DefinitionNameSpaceRefs.Values)
+                foreach (SystemVerilogCore.Verilog.VerilogRelatedFileReference fileRef in verilogFile.VerilogParsedDocument.DefinitionNameSpaceRefs.Values)
                 {
 
                     // Resolve in EVERY project that owns the definition. A

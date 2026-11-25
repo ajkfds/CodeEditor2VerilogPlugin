@@ -11,8 +11,10 @@ using System.Reflection.Metadata;
 using System.Text;
 using System.Text.Json.Serialization;
 
-// The macro type now lives in the UI-free parser assembly.
+// The macro type and the file-reference data now live in the UI-free parser
+// assembly.
 using Macro = SystemVerilogCore.Verilog.Macro;
+using VerilogRelatedFileReference = SystemVerilogCore.Verilog.VerilogRelatedFileReference;
 using System.Threading;
 
 namespace pluginVerilog.Verilog

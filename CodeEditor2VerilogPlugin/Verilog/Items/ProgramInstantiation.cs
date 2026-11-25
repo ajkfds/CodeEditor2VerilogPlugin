@@ -160,7 +160,10 @@ namespace pluginVerilog.Verilog.Items
             // the program definition file (missing definition is reported as unfound there).
             if (instancedProgram.File != null && !word.RootParsedDocument.DefinitionNameSpaceRefs.ContainsKey(instancedProgram.File.ID))
             {
-                word.RootParsedDocument.DefinitionNameSpaceRefs.Add(instancedProgram.File.ID, new Data.VerilogRelatedFileReference(instancedProgram.File));
+                word.RootParsedDocument.DefinitionNameSpaceRefs.Add(
+                    instancedProgram.File.ID,
+                    new SystemVerilogCore.Verilog.VerilogRelatedFileReference(
+                        (SystemVerilogCore.Verilog.IVerilogNameSpaceFile)instancedProgram.File));
             }
 
 

@@ -133,7 +133,10 @@ namespace pluginVerilog.Verilog.Items
                     // (module / interface identifier: class never appears)
                     if (targetBuildingBlock.File != null && !word.RootParsedDocument.DefinitionNameSpaceRefs.ContainsKey(targetBuildingBlock.File.ID))
                     {
-                        word.RootParsedDocument.DefinitionNameSpaceRefs.Add(targetBuildingBlock.File.ID, new Data.VerilogRelatedFileReference(targetBuildingBlock.File));
+                        word.RootParsedDocument.DefinitionNameSpaceRefs.Add(
+                            targetBuildingBlock.File.ID,
+                            new SystemVerilogCore.Verilog.VerilogRelatedFileReference(
+                                (SystemVerilogCore.Verilog.IVerilogNameSpaceFile)targetBuildingBlock.File));
                     }
                 }
                 else
@@ -199,7 +202,10 @@ namespace pluginVerilog.Verilog.Items
             {
                 if (instancedBuildingBlock.File != null && !word.RootParsedDocument.DefinitionNameSpaceRefs.ContainsKey(instancedBuildingBlock.File.ID))
                 {
-                    word.RootParsedDocument.DefinitionNameSpaceRefs.Add(instancedBuildingBlock.File.ID, new Data.VerilogRelatedFileReference(instancedBuildingBlock.File));
+                    word.RootParsedDocument.DefinitionNameSpaceRefs.Add(
+                        instancedBuildingBlock.File.ID,
+                        new SystemVerilogCore.Verilog.VerilogRelatedFileReference(
+                            (SystemVerilogCore.Verilog.IVerilogNameSpaceFile)instancedBuildingBlock.File));
                 }
 
                 // bind_instantiation ::= program | module | interface | checker instantiation

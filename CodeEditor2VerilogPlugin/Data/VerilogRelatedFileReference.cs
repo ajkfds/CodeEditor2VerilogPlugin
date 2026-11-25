@@ -1,51 +1,33 @@
 using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Text;
 
 namespace pluginVerilog.Data
 {
-    public class VerilogRelatedFileReference
+    /// <summary>
+    /// Host-side lookup for a <see cref="SystemVerilogCore.Verilog.VerilogRelatedFileReference"/>.
+    ///
+    /// <para>
+    /// The reference itself is plain data (project name + relative path + id) and
+    /// lives in the UI-free parser assembly. Resolving it back to a live file
+    /// needs the editor's project registry (<c>CodeEditor2.Global.Projects</c>),
+    /// which that assembly cannot reach, so the lookup stays here as an extension
+    /// method. The language server has its own registry and does not use this.
+    /// </para>
+    /// </summary>
+    public static class VerilogRelatedFileReferenceExtensions
     {
-        public VerilogRelatedFileReference(IVerilogRelatedFile file)
+        /// <summary>
+        /// The live file this reference points at, or null when its project or
+        /// the file is no longer loaded.
+        /// </summary>
+        public static IVerilogRelatedFile? GetTargetFile(
+            this SystemVerilogCore.Verilog.VerilogRelatedFileReference reference)
         {
-            ID = file.ID;
-            ProjectName = file.Project.Name;
-            RelativeFilePath = file.RelativePath;
+            if (reference == null) return null;
+            if (!CodeEditor2.Global.Projects.TryGetValue(reference.ProjectName, out CodeEditor2.Data.Project? project))
+            {
+                return null;
+            }
+            return project.GetItemHierarchy(reference.RelativeFilePath) as IVerilogRelatedFile;
         }
-        public string ID { set; get; }
-        public string ProjectName { get; set; }
-        public string RelativeFilePath { get; set; }
-
-        public IVerilogRelatedFile? GetTargetFile()
-        {
-            CodeEditor2.Data.Project? project;
-            if (!CodeEditor2.Global.Projects.TryGetValue(ProjectName, out project)) return null;
-
-            Data.IVerilogRelatedFile? file = project.GetItemHierarchy(RelativeFilePath) as IVerilogRelatedFile;
-
-            return file;
-        }
-
-        //public IVerilogRelatedFile? GetVerilogRelatedFile()
-        //{
-        //    CodeEditor2.Data.Project? project;
-        //    if (!CodeEditor2.Global.Projects.TryGetValue(ProjectName, out project)) throw new Exception("Project not found: " + ProjectName);
-        //    Data.IVerilogRelatedFile? file = project.GetItemHierarchy(RelativeFilePath) as IVerilogRelatedFile;
-        //    if (file == null) return null;
-        //    VerilogFile? verilogFile = file as VerilogFile;
-        //    if(verilogFile != null && verilogFile.ID != ID)
-        //    {
-        //        if(verilogFile.TryGetInstanceTextFile(ID,out InstanceTextFile? instanceTextFile))
-        //        {
-        //            return instanceTextFile;
-        //        }
-        //        else
-        //        {
-        //            return null;
-        //        }
-        //    }
-        //    return verilogFile;
-        //}
     }
 }

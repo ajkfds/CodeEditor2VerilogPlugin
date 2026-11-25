@@ -1,4 +1,3 @@
-using pluginVerilog.Parser;
 using pluginVerilog.Verilog;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.Items.Generate;

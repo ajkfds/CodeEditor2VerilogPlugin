@@ -44,6 +44,20 @@ namespace pluginVerilog.Data
             return parsed.Root.NamedElements[name];
         }
 
+        /// <summary>
+        /// Name of the project this file belongs to, as the name-space contract.
+        /// A file reference records it so the host can find the project again.
+        /// </summary>
+        /// <summary>Unique id of the file, as the name-space contract.</summary>
+        string SystemVerilogCore.Verilog.IVerilogNameSpaceFile.Id => ID;
+
+        string SystemVerilogCore.Verilog.IVerilogNameSpaceFile.ProjectName =>
+            Project?.Name ?? "";
+
+        /// <summary>Project-relative path, as the name-space contract.</summary>
+        string SystemVerilogCore.Verilog.IVerilogNameSpaceFile.FileRelativePath =>
+            RelativePath;
+
 
         public new static async Task<VerilogFile> CreateAsync(string relativePath, CodeEditor2.Data.Project project)
         {
