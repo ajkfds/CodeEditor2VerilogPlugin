@@ -1,105 +1,81 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace pluginVerilog.Verilog
 {
+    /// <summary>
+    /// The editor-facing view of a parser name space.
+    ///
+    /// <para>
+    /// The implementation moved to the UI-free parser assembly
+    /// (<see cref="SystemVerilogCore.Verilog.RegisterNameSpace{T}"/>), because the
+    /// parser is its only consumer and it only needs the
+    /// <see cref="SystemVerilogCore.Verilog.IVerilogNameSpaceFile"/> contract from
+    /// a file. This class is a thin adapter so the editor keeps its
+    /// <c>Data.IVerilogRelatedFile</c> / <c>Data.VerilogFile</c> types at the
+    /// call sites:
+    /// </para>
+    ///
+    /// <code>
+    /// projectProperty.DefinitionNameSpace.Register(name, block, this);   // this = VerilogFile
+    /// Data.IVerilogRelatedFile? file = projectProperty.DefinitionNameSpace.GetFile(name);
+    /// </code>
+    ///
+    /// <para>
+    /// <c>Data.VerilogFile</c> implements the name-space file contract by
+    /// delegating to its own parse result, so no cast is needed inside the
+    /// adapter. A file type that cannot provide the contract (an instance
+    /// wrapper, for example) is not registered.
+    /// </para>
+    /// </summary>
     public class RegisterNameSpace<T> where T : class
     {
-        // Thread-safe access using ReaderWriterLockSlim
-        private readonly System.Threading.ReaderWriterLockSlim accessLock = new System.Threading.ReaderWriterLockSlim(System.Threading.LockRecursionPolicy.NoRecursion);
+        private readonly SystemVerilogCore.Verilog.RegisterNameSpace<T> inner = new();
 
-        // BuildingBlock -> File Table
-        //
-        // The weak table moved to the UI-free assembly (it is plain BCL code and
-        // the parser is its only consumer). This type itself cannot follow yet:
-        // it still names the plugin's `Data.VerilogFile` / `Data.IVerilogRelatedFile`,
-        // which is exactly what the parser contract work has to replace first.
-        private SystemVerilogCore.Verilog.WeakReferenceDictionary<string, Data.IVerilogRelatedFile> fileTable = new SystemVerilogCore.Verilog.WeakReferenceDictionary<string, Data.IVerilogRelatedFile>();
-
-
+        /// <summary>
+        /// Records that <paramref name="buildingBlockName"/> is declared in
+        /// <paramref name="file"/>.
+        /// </summary>
         public void Register(string buildingBlockName, T buildingBlock, Data.VerilogFile file)
         {
-            if (file == null)
-            {
-                if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break();
-                return;
-            }
-
-            accessLock.EnterWriteLock();
-            try
-            {
-                fileTable.Register(buildingBlockName, file);
-            }
-            finally
-            {
-                accessLock.ExitWriteLock();
-            }
+            // `Data.VerilogFile` implements the UI-free name-space contract; the
+            // cast is a no-op in practice and keeps the public signature the
+            // editor's call sites already use.
+            inner.Register(
+                buildingBlockName,
+                buildingBlock,
+                file as SystemVerilogCore.Verilog.IVerilogNameSpaceFile);
         }
 
-
+        /// <summary>
+        /// The file that declared <paramref name="name"/>, or null.
+        /// </summary>
+        /// <remarks>
+        /// The name space stores the file as the UI-free contract, but the
+        /// editor's call sites expect its own file type, so the contract is
+        /// narrowed back here. This is the single place where that narrowing
+        /// happens.
+        /// </remarks>
         public Data.IVerilogRelatedFile? GetFile(string name)
         {
-            accessLock.EnterReadLock();
-            try
-            {
-                return _GetFile(name);
-            }
-            finally
-            {
-                accessLock.ExitReadLock();
-            }
-        }
-        private Data.IVerilogRelatedFile? _GetFile(string name)
-        {
-            return fileTable.GetItem(name);
+            return inner.GetFile(name) as Data.IVerilogRelatedFile;
         }
 
-
+        /// <summary>
+        /// Every registered name whose declaration matches
+        /// <paramref name="isMatched"/>.
+        /// </summary>
         public List<string> GetNameList(Func<T, bool> isMatched)
         {
-            List<string> results = new List<string>();
-
-            accessLock.EnterReadLock();
-            try
-            {
-                foreach(var key in fileTable.KeyList())
-                {
-                    T? target = _Get(key);
-                    if (target == null) continue; 
-                    if(isMatched(target)) results.Add(key);
-                }
-                return results;
-            }
-            finally
-            {
-                accessLock.ExitReadLock();
-            }
+            return inner.GetNameList(isMatched);
         }
 
+        /// <summary>
+        /// Resolves <paramref name="name"/> to its declared element, or null.
+        /// </summary>
         public T? Get(string name)
         {
-            Data.IVerilogRelatedFile? file = GetFile(name);
-            if (file == null) return null;
-
-            if (file.VerilogParsedDocument == null) return null;
-            if (file.VerilogParsedDocument.Root == null) return null;
-
-            if (!file.VerilogParsedDocument.Root.NamedElements.ContainsKey(name)) return null;
-            return file.VerilogParsedDocument.Root.NamedElements[name] as T;
-        }
-        private T? _Get(string name)
-        {
-            Data.IVerilogRelatedFile? file = _GetFile(name);
-            if (file == null) return null;
-
-            if (file.VerilogParsedDocument == null) return null;
-            if (file.VerilogParsedDocument.Root == null) return null;
-
-            if (!file.VerilogParsedDocument.Root.NamedElements.ContainsKey(name)) return null;
-            return file.VerilogParsedDocument.Root.NamedElements[name] as T;
+            return inner.Get(name);
         }
     }
 }

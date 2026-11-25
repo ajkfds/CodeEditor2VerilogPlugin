@@ -22,8 +22,28 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Data
 {
-    public class VerilogFile : CodeEditor2.Data.TextFile, IVerilogRelatedFile
+    public class VerilogFile : CodeEditor2.Data.TextFile, IVerilogRelatedFile,
+        SystemVerilogCore.Verilog.IVerilogNameSpaceFile
     {
+        /// <summary>
+        /// The root-level named element called <paramref name="name"/>, as the
+        /// UI-free name-space contract.
+        ///
+        /// <para>
+        /// This is the only thing a
+        /// <see cref="SystemVerilogCore.Verilog.RegisterNameSpace{T}"/> needs from
+        /// a file. Exposing it as a contract member lets the name space live in
+        /// the UI-free assembly while this class keeps its editor base type.
+        /// </para>
+        /// </summary>
+        object? SystemVerilogCore.Verilog.IVerilogNameSpaceFile.FindRootNamedElement(string name)
+        {
+            Verilog.ParsedDocument? parsed = VerilogParsedDocument;
+            if (parsed?.Root == null) return null;
+            if (!parsed.Root.NamedElements.ContainsKey(name)) return null;
+            return parsed.Root.NamedElements[name];
+        }
+
 
         public new static async Task<VerilogFile> CreateAsync(string relativePath, CodeEditor2.Data.Project project)
         {
