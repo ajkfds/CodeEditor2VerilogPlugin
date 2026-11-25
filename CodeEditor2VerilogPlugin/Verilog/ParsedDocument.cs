@@ -88,6 +88,21 @@ namespace pluginVerilog.Verilog
         }
 
         /// <summary>
+        /// The file this result was parsed from, as the UI-free contract.
+        ///
+        /// <para>
+        /// Same object as <see cref="TextFile"/>. Kept as a separate member
+        /// rather than changing <see cref="TextFile"/>'s type because
+        /// editor-facing callers (include resolution, the item tree) need more
+        /// than the contract offers; parse-internal reads go through this one so
+        /// they do not name the editor assembly.
+        /// </para>
+        /// </summary>
+        [JsonIgnore]
+        public SystemVerilogCore.Documents.IVerilogSourceFile? SourceFile =>
+            TextFile;
+
+        /// <summary>
         /// The project this file belongs to, as the UI-free contract.
         ///
         /// <para>

@@ -266,9 +266,13 @@ namespace pluginVerilog.Verilog
                 ProjectProperty? projectProperty = RootParsedDocument?.ProjectProperty;
                 if (projectProperty == null) return fallbackRuleSet;
 
-                Data.IVerilogRelatedFile? file = RootParsedDocument?.File;
+                // Read the path through the UI-free contract: the rule set is
+                // resolved per directory, and that is the only thing needed from
+                // the file here.
+                SystemVerilogCore.Documents.IVerilogSourceFile? file =
+                    RootParsedDocument?.SourceFile;
                 if (file == null) return projectProperty.RuleSet;
-                return projectProperty.GetRuleSet(file.RelativePath);
+                return projectProperty.GetRuleSet(file.FileRelativePath);
             }
         }
 
@@ -1408,7 +1412,11 @@ namespace pluginVerilog.Verilog
             filePath = filePath.Replace('\\', '/');
 
             // search in same folder with original verilog file
-            Data.IVerilogRelatedFile rootFile;
+            //
+            // Read through the UI-free contract: include resolution only needs
+            // the path, and the instance factory narrows back to the editor's
+            // file type itself (in the data layer).
+            SystemVerilogCore.Documents.IVerilogSourceFile? rootFile;
             if (stock.Count == 0)
             {
                 rootFile = wordPointer.VerilogFile;
@@ -1417,7 +1425,6 @@ namespace pluginVerilog.Verilog
             {
                 rootFile = stock[0].VerilogFile;
             }
-            //            Data.IVerilogRelatedFile file = wordPointer.VerilogFile;
 
             if (rootFile == null)
             {
@@ -1425,7 +1432,7 @@ namespace pluginVerilog.Verilog
             }
 
             {
-                string sameFolderPath = (rootFile.RelativePath ?? "").Replace('\\', '/');
+                string sameFolderPath = (rootFile.FileRelativePath ?? "").Replace('\\', '/');
                 int sameFolderLastSlash = sameFolderPath.LastIndexOf('/');
                 if (sameFolderLastSlash >= 0)
                 {
@@ -1738,14 +1745,16 @@ namespace pluginVerilog.Verilog
             // `__FILE__ : predefined macro expanding to the file name string literal
             // (IEEE 1800-2017 22.5.3). Not registered in RootParsedDocument.Macros so
             // the expand-on-the-fly path is always taken.
+            // Read the path through the UI-free contract (the file name is all
+            // `__FILE__` needs), so this does not name the editor's file type.
             string fileName = "";
-            if (stock.Count != 0)
+            Data.IVerilogRelatedFile? source = stock.Count != 0
+                ? stock[0].VerilogFile
+                : wordPointer.VerilogFile;
+            if (source != null)
             {
-                fileName = stock[0].VerilogFile != null ? System.IO.Path.GetFileName(stock[0].VerilogFile.RelativePath ?? "") : "";
-            }
-            else
-            {
-                fileName = wordPointer.VerilogFile != null ? System.IO.Path.GetFileName(wordPointer.VerilogFile.RelativePath ?? "") : "";
+                fileName = System.IO.Path.GetFileName(
+                    ((SystemVerilogCore.Documents.IVerilogSourceFile)source).FileRelativePath ?? "");
             }
             diveIntoText("\"" + fileName + "\"");
         }
@@ -2106,7 +2115,7 @@ namespace pluginVerilog.Verilog
             }
         }
 
-        private void addIncludeFile(string relativeFilePath, IVerilogRelatedFile rootFile, string id, IndexReference indexReference, out ParsedDocument? newParsedDocument, int callIndex)
+        private void addIncludeFile(string relativeFilePath, SystemVerilogCore.Documents.IVerilogSourceFile rootFile, string id, IndexReference indexReference, out ParsedDocument? newParsedDocument, int callIndex)
         {
             string name;
             if (relativeFilePath.Contains(System.IO.Path.DirectorySeparatorChar))
@@ -2199,7 +2208,7 @@ namespace pluginVerilog.Verilog
             newParsedDocument.CodeDocument = document;
 
             newParsedDocument.SystemVerilog = wordPointer.ParsedDocument.SystemVerilog;
-            if (rootFile != null && rootFile.VerilogParsedDocument != null && rootFile.VerilogParsedDocument.SystemVerilog)
+            if (rootFile != null && rootFile.IsSystemVerilog)
             {
                 newParsedDocument.SystemVerilog = true;
             }

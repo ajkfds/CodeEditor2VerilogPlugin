@@ -77,6 +77,25 @@ namespace pluginVerilog.Data
             return Create(relativePath, name, instancedReference, parentFile, editorProject, id);
         }
 
+        /// <summary>
+        /// The parser-facing overload: the parent file arrives as the UI-free
+        /// contract, so <c>WordScanner</c> does not have to name the editor's
+        /// file type. The narrowing to <see cref="IVerilogRelatedFile"/> happens
+        /// here, in the data layer, which is the one place that knows the editor
+        /// types.
+        /// </summary>
+        public static VerilogHeaderInstance? Create(
+            string relativePath,
+            string name,
+            IndexReference instancedReference,
+            SystemVerilogCore.Documents.IVerilogSourceFile parentFile,
+            SystemVerilogCore.Projects.IVerilogProject project,
+            string id)
+        {
+            if (parentFile is not IVerilogRelatedFile editorParentFile) return null;
+            return Create(relativePath, name, instancedReference, editorParentFile, project, id);
+        }
+
         public static VerilogHeaderInstance? Create(
             string relativePath,
             string name,
