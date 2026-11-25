@@ -10,9 +10,34 @@ namespace pluginVerilog.Data
     // CodeEditor2.CodeEditor.CodeDocument's IVerilogTextDocument.File, which
     // wraps the TextFile. Keeping the two hierarchies apart also avoids
     // changing the meaning of any existing member.
-    public interface IVerilogRelatedFile : CodeEditor2.Data.ITextFile
+    /// <summary>
+    /// The editor's Verilog-related file.
+    ///
+    /// <para>
+    /// It also implements the parser-facing
+    /// <see cref="SystemVerilogCore.Documents.IVerilogSourceFile"/>, which is
+    /// additive only (the instance-keyed parse lookup). Parse sites used to
+    /// reach that lookup by casting to the concrete <c>VerilogFile</c>; the
+    /// contract lets them work against any implementation.
+    /// </para>
+    ///
+    /// <para>
+    /// The contract deliberately does not re-declare <c>ID</c> /
+    /// <c>RelativePath</c> / <c>Name</c> / <c>Project</c> / <c>ParsedDocument</c>:
+    /// <see cref="CodeEditor2.Data.ITextFile"/> already declares them, and a
+    /// second declaration would make every call site through this interface
+    /// fail with CS0229 (ambiguous member).
+    /// </para>
+    /// </summary>
+    public interface IVerilogRelatedFile : CodeEditor2.Data.ITextFile,
+        SystemVerilogCore.Documents.IVerilogSourceFile
     {
         Verilog.ParsedDocument? VerilogParsedDocument { get; }
+
+        // NOTE: `IVerilogSourceFile.GetInstancedParsedDocument` is inherited from
+        // the contract and is left abstract here, so each implementation has to
+        // provide it. It is not re-declared: an interface cannot give it a body,
+        // and re-declaring it would only restate the same signature.
 
         ProjectProperty ProjectProperty { get; }
         bool SystemVerilog { get; }

@@ -99,18 +99,16 @@ namespace pluginVerilog.Verilog.Items
 
             Data.IVerilogRelatedFile? file = projectProperty.DefinitionNameSpace.GetFile(SourceName);
             if (file == null) return null;
-            if (file is not Data.VerilogFile) return null;
 
-            Data.VerilogFile source = (Data.VerilogFile)file;
-            if (source == null) return null;
-
+            // The instance lookup is part of the UI-free source file contract,
+            // so no cast to the editor's concrete file type is needed.
             string instanceKey = Verilog.ParsedDocument.KeyGenerator(file, SourceName, ParameterOverrides);
 
-            ParsedDocument? parsedDocument = source.GetInstancedVerilogParsedDocument(instanceKey);
+            ParsedDocument? parsedDocument = file.GetInstancedParsedDocument(instanceKey) as ParsedDocument;
             // UDPs do not have parameter ports, so the base parse result suffices.
             if (parsedDocument == null)
             {
-                parsedDocument = source.VerilogParsedDocument;
+                parsedDocument = file.VerilogParsedDocument;
             }
             if (parsedDocument == null) return null;
             if (parsedDocument.Root == null) return null;

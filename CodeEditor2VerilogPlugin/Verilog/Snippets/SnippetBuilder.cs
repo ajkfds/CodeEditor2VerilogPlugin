@@ -89,8 +89,10 @@ namespace pluginVerilog.Verilog.Snippets
             ProjectProperty projectProperty,
             string moduleName)
         {
-            Data.VerilogFile? targetFile =
-                projectProperty.DefinitionNameSpace.GetFile(moduleName) as Data.VerilogFile;
+            // No cast to the editor's concrete file type: the definition
+            // namespace already returns the parser-facing file contract.
+            Data.IVerilogRelatedFile? targetFile =
+                projectProperty.DefinitionNameSpace.GetFile(moduleName);
             if (targetFile == null) return null;
             if (targetFile.ParsedDocument is not Verilog.ParsedDocument parsed) return null;
             return parsed.Root?.BuildingBlocks.TryGetValue(moduleName, out var block) == true

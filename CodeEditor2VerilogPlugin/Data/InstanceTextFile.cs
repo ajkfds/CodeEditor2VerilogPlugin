@@ -324,6 +324,19 @@ namespace pluginVerilog.Data
             return source.CreateVerilogDocumentParser(parseMode, token);
         }
 
+        /// <summary>
+        /// The parse result for one parameter-overridden instance, as the
+        /// UI-free contract.
+        ///
+        /// <para>
+        /// An instance wrapper is already the parse result of one instance, so
+        /// its own document is the answer; it never owns a table of instances.
+        /// </para>
+        /// </summary>
+        SystemVerilogCore.Parsing.IParsedDocument?
+            SystemVerilogCore.Documents.IVerilogSourceFile.GetInstancedParsedDocument(string instanceKey)
+            => ParsedDocument;
+
         // NOTE: AcceptVerilogParsedDocumentAsync is inherited from
         // CodeEditor2.Data.TextFile (which narrows the contract back to the
         // editor's parser type), so no instance-specific handling is needed.

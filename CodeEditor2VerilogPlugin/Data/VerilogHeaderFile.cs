@@ -14,6 +14,14 @@ namespace pluginVerilog.Data
 
     public class VerilogHeaderFile : CodeEditor2.Data.TextFile, IVerilogRelatedFile
     {
+        /// <summary>
+        /// A header file is never instantiated with parameter overrides, so it
+        /// owns no instance parse results; its own parse result is the answer.
+        /// </summary>
+        SystemVerilogCore.Parsing.IParsedDocument?
+            SystemVerilogCore.Documents.IVerilogSourceFile.GetInstancedParsedDocument(string instanceKey)
+            => ParsedDocument;
+
         public static new async Task<VerilogHeaderFile> CreateAsync(string relativePath, CodeEditor2.Data.Project project)
         {
             string name;

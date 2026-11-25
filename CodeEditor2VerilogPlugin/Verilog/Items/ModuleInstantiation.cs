@@ -131,17 +131,16 @@ namespace pluginVerilog.Verilog.Items
 
             Data.IVerilogRelatedFile? file = projectProperty.DefinitionNameSpace.GetFile(SourceName);
             if (file == null) return null;
-            if (file is not Data.VerilogFile) return null;
 
-            Data.VerilogFile source = (Data.VerilogFile)file;
-            if (source == null) return null;
-
+            // The instance lookup used to require casting to the editor's
+            // concrete VerilogFile. It is now part of the UI-free source file
+            // contract, so any host implementation works.
             string instanceKey = Verilog.ParsedDocument.KeyGenerator(file, SourceName, ParameterOverrides);
 
-            ParsedDocument? parsedDocument = source.GetInstancedVerilogParsedDocument(instanceKey);
+            ParsedDocument? parsedDocument = file.GetInstancedParsedDocument(instanceKey) as ParsedDocument;
             if (parsedDocument == null) // don't have module parse result
             {
-                parsedDocument = source.VerilogParsedDocument;
+                parsedDocument = file.VerilogParsedDocument;
             }
             if (parsedDocument == null) return null;
             if (parsedDocument.Root == null) return null;
