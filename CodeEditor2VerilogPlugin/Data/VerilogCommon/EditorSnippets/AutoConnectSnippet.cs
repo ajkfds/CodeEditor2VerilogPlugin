@@ -4,7 +4,8 @@ using CodeEditor2.Views;
 using pluginVerilog.Verilog;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.Items;
-using pluginVerilog.Verilog.Snippets;
+// SnippetBuilder now lives in the parent namespace
+// (pluginVerilog.Data.VerilogCommon), which is already in scope here.
 using System;
 using System.Collections.Generic;
 using System.Threading;

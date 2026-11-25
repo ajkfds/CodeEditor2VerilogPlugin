@@ -47,7 +47,7 @@ namespace pluginVerilog.Data.VerilogCommon.EditorSnippets
             CoreBridge.SnippetAdapter.SnippetResult result)
         {
             Verilog.Items.ModuleInstantiation? instantiation =
-                Verilog.Snippets.SnippetBuilder.FindInstantiationAt(parsedDocument, index);
+                SnippetBuilder.FindInstantiationAt(parsedDocument, index);
             if (instantiation == null)
             {
                 result.Message = "the caret is not inside a module instantiation";
@@ -59,9 +59,9 @@ namespace pluginVerilog.Data.VerilogCommon.EditorSnippets
                 return;
             }
 
-            int start = Verilog.Snippets.SnippetBuilder.LastIndex(instantiation.BeginIndexReference);
-            int end = Verilog.Snippets.SnippetBuilder.LastIndex(instantiation.LastIndexReference) + 1;
-            string indent = Verilog.Snippets.SnippetBuilder.GetIndent(parsedDocument, start);
+            int start = SnippetBuilder.LastIndex(instantiation.BeginIndexReference);
+            int end = SnippetBuilder.LastIndex(instantiation.LastIndexReference) + 1;
+            string indent = SnippetBuilder.GetIndent(parsedDocument, start);
 
             // CreateString returns the statement without the trailing
             // semicolon; the replaced range covers it, so keep it.

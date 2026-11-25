@@ -1,13 +1,13 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace pluginVerilog.Verilog.Snippets
+namespace pluginVerilog.Data.VerilogCommon
 {
     /// <summary>
-    /// Helpers shared by the snippet implementations in this folder
-    /// (<see cref="AlwaysFFSnippet"/>, <see cref="AutoFormatSnippet"/>,
-    /// <see cref="ModuleInstanceSnippet"/>, <see cref="PortConnectionCreateSnippet"/>,
-    /// <see cref="PortInvertSnippet"/>, <see cref="ModPortSnippet"/>).
+    /// Helpers shared by the snippet implementations
+    /// (<c>AlwaysFFSnippet</c>, <c>AutoFormatSnippet</c>,
+    /// <c>ModuleInstanceSnippet</c>, <c>PortConnectionCreateSnippet</c>,
+    /// <c>PortInvertSnippet</c>, <c>ModPortSnippet</c>).
     ///
     /// <para>
     /// These used to live in <c>CoreBridge.SnippetAdapter</c>, which made the
@@ -15,6 +15,16 @@ namespace pluginVerilog.Verilog.Snippets
     /// implementation, so each one now owns its <c>Build</c> method and only the
     /// genuinely shared parts are here. Everything is UI free (no Avalonia
     /// dispatcher, no editor), so the headless language server can call it.
+    /// </para>
+    ///
+    /// <para>
+    /// <b>Why this is not under <c>Verilog/</c>.</b> The parser folder is being
+    /// moved into <c>SystemVerilogCore</c>, and everything left in it must not
+    /// reach back into the plugin. This file builds a
+    /// <see cref="CoreBridge.SnippetTemplate"/>, which is a plugin-side wire
+    /// shape, so keeping it in <c>Verilog/</c> would have kept the parser folder
+    /// depending on the plugin. It is a consumer of the parse tree (like the
+    /// editor snippets next to it), not part of the parser.
     /// </para>
     /// </summary>
     public static class SnippetBuilder

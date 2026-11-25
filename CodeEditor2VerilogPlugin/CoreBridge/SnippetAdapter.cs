@@ -188,7 +188,7 @@ namespace pluginVerilog.CoreBridge
             Verilog.ParsedDocument parsedDocument,
             int index)
         {
-            return Verilog.Snippets.SnippetBuilder.HasModuleInstantiationAt(parsedDocument, index);
+            return Data.VerilogCommon.SnippetBuilder.HasModuleInstantiationAt(parsedDocument, index);
         }
     }
 }
