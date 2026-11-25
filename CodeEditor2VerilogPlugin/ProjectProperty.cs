@@ -11,12 +11,13 @@ using System.Threading;
 using System.Diagnostics.CodeAnalysis;
 using pluginVerilog.Verilog;
 
-// The rule model moved to the UI-free parser assembly (it depends only on
-// YamlDotNet). These aliases keep the existing `Rule` / `RuleSet` references in
-// this assembly compiling unchanged; the parser itself now uses the
-// SystemVerilogCore.Verilog types directly.
+// The rule model and the annotation command table moved to the UI-free parser
+// assembly. These aliases keep the existing references in this assembly
+// compiling unchanged; the parser itself now uses the SystemVerilogCore.Verilog
+// types directly.
 using Rule = SystemVerilogCore.Verilog.Rule;
 using RuleSet = SystemVerilogCore.Verilog.RuleSet;
+using AnnotationCommands = SystemVerilogCore.Verilog.AnnotationCommands;
 
 namespace pluginVerilog
 {
@@ -352,22 +353,23 @@ namespace pluginVerilog
         public Dictionary<string, string> ExtenralModuleLibraryPath = new Dictionary<string, string>();
         public Dictionary<string, string> ExtenralPrimitiveLibraryPath = new Dictionary<string, string>();
 
-        public AnnotationCommandsClass AnnotationCommands { get; set; } = new AnnotationCommandsClass();
+        public AnnotationCommands AnnotationCommands { get; set; } = new AnnotationCommands();
         public string AnnotationKeyValueDelimiter = ":";
         public string AnnotationSeparator = ",";
-        public class AnnotationCommandsClass
+
+        /// <summary>
+        /// Compatibility alias for the type that used to be nested here.
+        ///
+        /// <para>
+        /// The table moved to the UI-free parser assembly
+        /// (<see cref="SystemVerilogCore.Verilog.AnnotationCommands"/>), because
+        /// the parser is its only consumer. The old name is kept as an alias so
+        /// existing references keep compiling; new code should use the
+        /// contract type.
+        /// </para>
+        /// </summary>
+        public class AnnotationCommandsClass : AnnotationCommands
         {
-            public string Synchronized = "@sync";
-            public string SameSync = "@samesync";
-            public string Clock = "@clock";
-            public string Reset = "@reset";
-            public string PortGroup = "@portgroup";
-            public string Discard = "@discard";
-            public string Unused = "@unused";
-            public string RefInstance = "@ref_instance";
-            public string Markdown = "@markdown";
-            public string ToolOption = "@tool_option";
-            public string Scope = "@scope";
         }
 
         public BuildingBlock? GetInstancedBuildingBlock(IBuildingBlockInstantiation instantiation)
