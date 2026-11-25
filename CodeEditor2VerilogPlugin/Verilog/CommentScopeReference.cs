@@ -1,4 +1,3 @@
-using pluginVerilog.Data;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.Expressions;
 using System.Collections.Generic;
@@ -40,10 +39,12 @@ namespace pluginVerilog.Verilog
         /// </summary>
         public BuildingBlocks.BuildingBlock? ResolvedBuildingBlock { get; set; }
 
-        /// <summary>
-        /// Resolved instance (set when InstanceName is specified)
-        /// </summary>
-        public VerilogModuleInstance? ResolvedInstance { get; set; }
+        // NOTE: `ResolvedInstance` used to sit here, typed as the data layer's
+        // `VerilogModuleInstance`. Nothing ever read or wrote it (it only
+        // appeared in its own declaration), and carrying that concrete type is
+        // what kept this file bound to the data layer. Removed rather than
+        // re-typed: dead data carrying a host type is a dependency with no
+        // consumer.
 
         /// <summary>
         /// Whether this scope reference has been resolved

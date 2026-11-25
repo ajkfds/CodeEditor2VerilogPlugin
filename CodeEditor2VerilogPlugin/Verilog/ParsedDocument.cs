@@ -1,6 +1,5 @@
 using pluginVerilog.CodeEditor;
 using pluginVerilog.Data;
-using pluginVerilog.FileTypes;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.Items;
@@ -362,11 +361,11 @@ namespace pluginVerilog.Verilog
         /// </para>
         /// </summary>
         [JsonIgnore]
-        public CodeDocument? CodeDocument
+        public pluginVerilog.CodeEditor.CodeDocument? CodeDocument
         {
             get
             {
-                return verilogDocument as CodeDocument;
+                return verilogDocument as pluginVerilog.CodeEditor.CodeDocument;
             }
             set
             {
