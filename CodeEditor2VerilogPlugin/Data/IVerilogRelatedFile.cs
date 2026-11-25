@@ -66,6 +66,9 @@ namespace pluginVerilog.Data
         SystemVerilogCore.Projects.IVerilogProject?
             SystemVerilogCore.Documents.IVerilogSourceFile.VerilogProject => Project;
 
+        /// <summary>Unique id, as the source file contract.</summary>
+        string SystemVerilogCore.Documents.IVerilogSourceFile.Id => ID;
+
         string SystemVerilogCore.Documents.IVerilogSourceFile.FileRelativePath => RelativePath;
 
         bool SystemVerilogCore.Documents.IVerilogSourceFile.IsSystemVerilog => SystemVerilog;

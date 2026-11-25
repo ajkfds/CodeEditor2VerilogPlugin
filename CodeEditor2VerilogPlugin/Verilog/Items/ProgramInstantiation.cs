@@ -159,10 +159,10 @@ namespace pluginVerilog.Verilog.Items
             }
             // Register the referenced program name so that SimulationSetup can collect
             // the program definition file (missing definition is reported as unfound there).
-            if (instancedProgram.File != null && !word.RootParsedDocument.DefinitionNameSpaceRefs.ContainsKey(instancedProgram.File.ID))
+            if (instancedProgram.File != null && !word.RootParsedDocument.DefinitionNameSpaceRefs.ContainsKey(instancedProgram.File.Id))
             {
                 word.RootParsedDocument.DefinitionNameSpaceRefs.Add(
-                    instancedProgram.File.ID,
+                    instancedProgram.File.Id,
                     new SystemVerilogCore.Verilog.VerilogRelatedFileReference(
                         (SystemVerilogCore.Verilog.IVerilogNameSpaceFile)instancedProgram.File));
             }

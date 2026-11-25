@@ -131,10 +131,10 @@ namespace pluginVerilog.Verilog.Items
                 {
                     // bind_target_scope refers to DefinitionNameSpace
                     // (module / interface identifier: class never appears)
-                    if (targetBuildingBlock.File != null && !word.RootParsedDocument.DefinitionNameSpaceRefs.ContainsKey(targetBuildingBlock.File.ID))
+                    if (targetBuildingBlock.File != null && !word.RootParsedDocument.DefinitionNameSpaceRefs.ContainsKey(targetBuildingBlock.File.Id))
                     {
                         word.RootParsedDocument.DefinitionNameSpaceRefs.Add(
-                            targetBuildingBlock.File.ID,
+                            targetBuildingBlock.File.Id,
                             new SystemVerilogCore.Verilog.VerilogRelatedFileReference(
                                 (SystemVerilogCore.Verilog.IVerilogNameSpaceFile)targetBuildingBlock.File));
                     }
@@ -200,10 +200,10 @@ namespace pluginVerilog.Verilog.Items
             BuildingBlocks.BuildingBlock? instancedBuildingBlock = word.ProjectProperty.DefinitionNameSpace.Get(instantiationName) as BuildingBlocks.BuildingBlock;
             if (instancedBuildingBlock != null)
             {
-                if (instancedBuildingBlock.File != null && !word.RootParsedDocument.DefinitionNameSpaceRefs.ContainsKey(instancedBuildingBlock.File.ID))
+                if (instancedBuildingBlock.File != null && !word.RootParsedDocument.DefinitionNameSpaceRefs.ContainsKey(instancedBuildingBlock.File.Id))
                 {
                     word.RootParsedDocument.DefinitionNameSpaceRefs.Add(
-                        instancedBuildingBlock.File.ID,
+                        instancedBuildingBlock.File.Id,
                         new SystemVerilogCore.Verilog.VerilogRelatedFileReference(
                             (SystemVerilogCore.Verilog.IVerilogNameSpaceFile)instancedBuildingBlock.File));
                 }

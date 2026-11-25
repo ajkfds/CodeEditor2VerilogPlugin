@@ -65,7 +65,7 @@ namespace pluginVerilog.NavigatePanel
                 }
                 else
                 {
-                    CodeEditor2.Controller.AppendLog("Duplicate BuildingBlock Name ;" + file.RelativePath, Avalonia.Media.Colors.Red);
+                    CodeEditor2.Controller.AppendLog("Duplicate BuildingBlock Name ;" + file.FileRelativePath, Avalonia.Media.Colors.Red);
                 }
                 return;
             }

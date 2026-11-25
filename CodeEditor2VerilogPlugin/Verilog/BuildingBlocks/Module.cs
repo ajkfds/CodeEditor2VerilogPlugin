@@ -45,18 +45,18 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         public Dictionary<string, DataObjects.Port> Ports { get; } = new Dictionary<string, DataObjects.Port>();
         public List<DataObjects.Port> PortsList { get; } = new List<DataObjects.Port>();
 
-        private WeakReference<Data.IVerilogRelatedFile> fileRef;
-        public required override Data.IVerilogRelatedFile File
+        private WeakReference<SystemVerilogCore.Documents.IVerilogSourceFile> fileRef = null!;
+        public required override SystemVerilogCore.Documents.IVerilogSourceFile File
         {
             get
             {
-                Data.IVerilogRelatedFile? ret;
-                if (!fileRef.TryGetTarget(out ret)) return null;
+                SystemVerilogCore.Documents.IVerilogSourceFile? ret;
+                if (!fileRef.TryGetTarget(out ret)) return null!;
                 return ret;
             }
             init
             {
-                fileRef = new WeakReference<Data.IVerilogRelatedFile>(value);
+                fileRef = new WeakReference<SystemVerilogCore.Documents.IVerilogSourceFile>(value);
             }
         }
 

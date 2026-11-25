@@ -20,12 +20,12 @@ namespace pluginVerilog.LLM.Tools
             ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
             if (projectProperty == null) throw new Exception();
             var file = projectProperty.DefinitionNameSpace.Get(moduleName)?.File;
-            if (file == null || file.CodeDocument == null) return "not found";
+            if (file == null || file.VerilogTextDocument == null) return "not found";
 
             StringBuilder sb = new StringBuilder();
-            sb.Append(file.RelativePath);
+            sb.Append(file.FileRelativePath);
             sb.Append("```verilog");
-            sb.Append(file.CodeDocument.CreateString());
+            sb.Append(file.VerilogTextDocument.CreateString());
             sb.Append("```");
 
             await Task.Delay(0);

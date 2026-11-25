@@ -72,8 +72,19 @@ namespace pluginVerilog.Verilog.BuildingBlocks
         public bool AnsiStylePortDefinition { get; set; } = false;
         public Net.NetTypeEnum DefaultNetType = Net.NetTypeEnum.Wire;
 
+        /// <summary>
+        /// The file this declaration was parsed from, as the UI-free source file
+        /// contract.
+        ///
+        /// <para>
+        /// Parse sites read the parse result, the project settings, the identity
+        /// and the SystemVerilog flag from it - all of which the contract carries.
+        /// Only two editor-only operations (the item tree and the editor's project
+        /// type) narrow back to the concrete file, in the data layer.
+        /// </para>
+        /// </summary>
         [JsonIgnore]
-        public virtual Data.IVerilogRelatedFile? File { get; init; }
+        public virtual SystemVerilogCore.Documents.IVerilogSourceFile? File { get; init; }
 
 
 

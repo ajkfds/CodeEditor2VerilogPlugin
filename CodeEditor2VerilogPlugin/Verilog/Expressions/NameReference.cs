@@ -165,7 +165,8 @@ namespace pluginVerilog.Verilog.Expressions
                     // current file's Root.BuildingBlocks and resolved here when the
                     // DefinitionNameSpace (cross-file) lookup misses (e.g. forward
                     // reference / single-file parse where the module is not yet registered).
-                    var localRoot = nameSpace.BuildingBlock?.File?.VerilogParsedDocument?.Root;
+                    var localRoot =
+                        (nameSpace.BuildingBlock?.File?.VerilogParsedResult as ParsedDocument)?.Root;
                     if (localRoot != null && localRoot.BuildingBlocks.TryGetValue(name, out BuildingBlock? localBlock))
                     {
                         baseNameSpace = localBlock;

@@ -17,18 +17,18 @@ namespace pluginVerilog.Verilog.BuildingBlocks
 
         }
 
-        private WeakReference<Data.IVerilogRelatedFile> fileRef;
-        public required override Data.IVerilogRelatedFile? File
+        private WeakReference<SystemVerilogCore.Documents.IVerilogSourceFile> fileRef = null!;
+        public required override SystemVerilogCore.Documents.IVerilogSourceFile? File
         {
             get
             {
-                Data.IVerilogRelatedFile? ret;
+                SystemVerilogCore.Documents.IVerilogSourceFile? ret;
                 if (!fileRef.TryGetTarget(out ret)) return null;
                 return ret;
             }
             init
             {
-                fileRef = new WeakReference<Data.IVerilogRelatedFile>(value);
+                fileRef = new WeakReference<SystemVerilogCore.Documents.IVerilogSourceFile>(value);
             }
         }
 
