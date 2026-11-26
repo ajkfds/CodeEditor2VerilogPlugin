@@ -117,6 +117,38 @@ namespace pluginVerilog
                 _ => null,
             };
 
+        /// <summary>
+        /// Forwards keyword enumeration to
+        /// <see cref="Data.VerilogCommon.AutoCompleteKeyword"/>, passing these
+        /// settings along so the block keywords come back host-expanded.
+        /// </summary>
+        void Verilog.IVerilogParserSettings.AppendKeywordCandidates(
+            List<SystemVerilogCore.Documents.IVerilogAutocompleteItem> items,
+            string candidate,
+            int candidateStartIndex,
+            int lineStartIndex,
+            bool systemVerilog,
+            Func<SystemVerilogCore.Documents.IVerilogAutocompleteItem, bool> itemFilter) =>
+            Data.VerilogCommon.AutoCompleteKeyword.AppendKeywordAutoCompleteItems(
+                items, candidate, candidateStartIndex, lineStartIndex, systemVerilog,
+                itemFilter, this);
+
+        /// <summary>
+        /// Forwards the completion-target walk to
+        /// <see cref="Data.VerilogCommon.AutoComplete"/>.
+        /// </summary>
+        bool Verilog.IVerilogParserSettings.GetAutoCompleteTarget(
+            SystemVerilogCore.Documents.IVerilogSourceFile item,
+            Verilog.ParsedDocument parsedDocument,
+            int index,
+            out Verilog.NameSpace? nameSpace,
+            out Verilog.INamedElement? element,
+            out string candidate,
+            out int candidateStartIndex) =>
+            Data.VerilogCommon.AutoComplete.GetAutoCompleteTarget(
+                item, parsedDocument, index,
+                out nameSpace, out element, out candidate, out candidateStartIndex);
+
         // The ID is required by the parser-facing settings contract so a parse
         // site can identify these settings without knowing the editor type.
         string SystemVerilogCore.Projects.IVerilogProjectSettings.ID => Plugin.StaticID;

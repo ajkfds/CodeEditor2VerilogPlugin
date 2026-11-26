@@ -48,7 +48,12 @@ namespace pluginVerilog.Verilog
             // otherwise the partial parse and the AppendAll fallback
             // (appendItemsUpward -> instance / variable name candidates) never run and
             // only keywords appear (candidates without a dot disappeared).
-            Data.VerilogCommon.AutoComplete.GetAutoCompleteTarget(item, parsedDocument, index, out NameSpace, out NamedElement, out CandidateWord, out CandidateStartIndex);
+            // Through the settings contract: the walk is the parser's own
+            // identifier-chain logic, but the host helper that implements it lives
+            // in the data layer, which the parser must not name.
+            parsedDocument.ProjectProperty?.GetAutoCompleteTarget(
+                item, parsedDocument, index,
+                out NameSpace, out NamedElement, out CandidateWord, out CandidateStartIndex);
             if (NameSpace == null && NamedElement == null)
             {
                 return;
@@ -511,9 +516,9 @@ namespace pluginVerilog.Verilog
             // Keywords, including the block-opening ones whose insertion text is a
             // skeleton: the host builds those (see CreateKeywordCandidate), and the
             // rest are plain candidates the parser makes.
-            Data.VerilogCommon.AutoCompleteKeyword.AppendKeywordAutoCompleteItems(
+            parsedDocument.ProjectProperty?.AppendKeywordCandidates(
                 AutoCompleteItems, CandidateWord, CandidateStartIndex, lineStartIndex,
-                parsedDocument.SystemVerilog, filter, parsedDocument.ProjectProperty);
+                parsedDocument.SystemVerilog, filter);
         }
 
         private void appendNamedElements(Func<IVerilogAutocompleteItem, bool> filter)

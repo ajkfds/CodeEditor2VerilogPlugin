@@ -201,5 +201,46 @@ namespace pluginVerilog.Verilog
         /// </summary>
         SystemVerilogCore.Documents.IVerilogAutocompleteItem? CreateKeywordCandidate(
             string keyword);
+
+        // ---- completion candidate enumeration -----------------------------
+
+        /// <summary>
+        /// Appends every keyword candidate matching the caret's candidate word.
+        ///
+        /// <para>
+        /// Keyword enumeration belongs with the parser (the keyword lists are
+        /// part of the language), but two of the candidates are host-expanded
+        /// (<see cref="CreateKeywordCandidate"/>). Routing the enumeration
+        /// through the settings keeps that split without the parse site naming a
+        /// host type.
+        /// </para>
+        /// </summary>
+        void AppendKeywordCandidates(
+            System.Collections.Generic.List<SystemVerilogCore.Documents.IVerilogAutocompleteItem> items,
+            string candidate,
+            int candidateStartIndex,
+            int lineStartIndex,
+            bool systemVerilog,
+            Func<SystemVerilogCore.Documents.IVerilogAutocompleteItem, bool> itemFilter);
+
+        /// <summary>
+        /// Resolves the completion target at <paramref name="index"/>: the
+        /// enclosing name space, the element the caret's identifier chain ends
+        /// at, and the candidate word being typed.
+        ///
+        /// <para>
+        /// This is the parser's own identifier-chain walk. It lives behind the
+        /// settings so <c>Verilog/CompletionContext.cs</c> does not have to name
+        /// the host helper that implements it.
+        /// </para>
+        /// </summary>
+        bool GetAutoCompleteTarget(
+            SystemVerilogCore.Documents.IVerilogSourceFile item,
+            ParsedDocument parsedDocument,
+            int index,
+            out NameSpace? nameSpace,
+            out INamedElement? element,
+            out string candidate,
+            out int candidateStartIndex);
     }
 }

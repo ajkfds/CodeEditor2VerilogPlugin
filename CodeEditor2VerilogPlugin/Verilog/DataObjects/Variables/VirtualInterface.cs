@@ -21,7 +21,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             IVerilogParserSettings? projectProperty = Project.Settings as IVerilogParserSettings;
             if (projectProperty == null) throw new Exception();
 
-            Data.IVerilogRelatedFile? file = projectProperty.DefinitionNameSpace.GetFile(SourceName);
+            SystemVerilogCore.Documents.IVerilogSourceFile? file = projectProperty.DefinitionNameSpace.GetFile(SourceName);
             if (file == null) return null;
 
             // The instance lookup is part of the UI-free source file contract,
@@ -31,7 +31,7 @@ namespace pluginVerilog.Verilog.DataObjects.Variables
             ParsedDocument? parsedDocument = file.GetInstancedParsedDocument(instanceKey) as ParsedDocument;
             if (parsedDocument == null) // don't have module parse result
             {
-                parsedDocument = file.VerilogParsedDocument;
+                parsedDocument = file.VerilogParsedResult as ParsedDocument;
             }
             if (parsedDocument == null) return null;
             if (parsedDocument.Root == null) return null;

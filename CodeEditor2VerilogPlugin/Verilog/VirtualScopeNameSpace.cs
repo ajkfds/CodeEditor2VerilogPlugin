@@ -44,11 +44,13 @@ namespace pluginVerilog.Verilog
             // Determine proxy values from the target's owning file.
             string relativePath = $"@virtual/{entryName}";
             SystemVerilogCore.Projects.IVerilogProject? owningProject = null;
-            if (target?.File is Data.IVerilogRelatedFile vFile)
+            // Through the source-file contract: the parser does not name the
+            // editor's file type here.
+            if (target?.File is SystemVerilogCore.Documents.IVerilogSourceFile vFile)
             {
-                if (!string.IsNullOrEmpty(vFile.RelativePath))
-                    relativePath = vFile.RelativePath;
-                owningProject = vFile.Project;
+                if (!string.IsNullOrEmpty(vFile.FileRelativePath))
+                    relativePath = vFile.FileRelativePath;
+                owningProject = vFile.VerilogProject;
             }
             if (owningProject == null) owningProject = parent?.Project;
 
@@ -125,10 +127,10 @@ namespace pluginVerilog.Verilog
                             // available above, so this is only the fallback.
                             IVerilogParserSettings? projectProperty = null;
                             if (Parent is BuildingBlock parentBlock
-                                && parentBlock.File is Data.IVerilogRelatedFile parentFile
-                                && parentFile.ProjectProperty != null)
+                                && parentBlock.File is SystemVerilogCore.Documents.IVerilogSourceFile parentFile
+                                && parentFile.ProjectSettings is IVerilogParserSettings parentSettings)
                             {
-                                projectProperty = parentFile.ProjectProperty;
+                                projectProperty = parentSettings;
                             }
                             else
                             {

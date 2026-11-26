@@ -255,10 +255,17 @@ namespace pluginVerilog.Verilog
                         // Search for instance in the building block
                         foreach (var elem in scopeRef.ResolvedBuildingBlock.NamedElements.Values)
                         {
-                            if (elem is Data.VerilogModuleInstance instance && instance.Name == scopeRef.InstanceName)
+                            // Any element that carries its own parse result can be
+                            // searched (the editor's module instance does). Through
+                            // the contract, so this file does not name the editor's
+                            // instance type.
+                            if (elem is INamedElement namedElement
+                                && namedElement.Name == scopeRef.InstanceName
+                                && elem is SystemVerilogCore.Documents.IVerilogSourceFile instanceFile
+                                && instanceFile.VerilogParsedResult != null)
                             {
                                 // Found the instance, now search inside it using ParsedDocument
-                                var found = GetElementFromModuleInstance(instance, name, out NameSpace? foundSpace);
+                                var found = GetElementFromInstance(instanceFile, scopeRef.InstanceName, name, out NameSpace? foundSpace);
                                 if (found != null)
                                 {
                                     nameSpace = foundSpace;
@@ -319,17 +326,28 @@ namespace pluginVerilog.Verilog
         }
 
         /// <summary>
-        /// Gets an element from a VerilogModuleInstance by searching its parsed document.
+        /// Gets an element from an instance by searching the parse result it
+        /// carries.
+        ///
+        /// <para>
+        /// Takes the UI-free source-file contract rather than the editor's
+        /// <c>VerilogModuleInstance</c>: the only things needed are the parse
+        /// result and the instantiated building-block name, both of which the
+        /// contract and the caller already have.
+        /// </para>
         /// </summary>
-        private INamedElement? GetElementFromModuleInstance(Data.VerilogModuleInstance instance, string name, out NameSpace? foundNameSpace)
+        private static INamedElement? GetElementFromInstance(
+            SystemVerilogCore.Documents.IVerilogSourceFile instanceFile,
+            string instanceName,
+            string name,
+            out NameSpace? foundNameSpace)
         {
             foundNameSpace = null;
-            var vParsedDoc = instance.VerilogParsedDocument;
+            Verilog.ParsedDocument? vParsedDoc =
+                instanceFile.VerilogParsedResult as Verilog.ParsedDocument;
             if (vParsedDoc?.Root == null) return null;
 
-            // Get the module's namespace
-            var moduleName = instance.InstanceName;
-            if (vParsedDoc.Root.BuildingBlocks.TryGetValue(moduleName, out var module))
+            if (vParsedDoc.Root.BuildingBlocks.TryGetValue(instanceName, out var module))
             {
                 return module.GetNamedElementUpward(name, out foundNameSpace);
             }
