@@ -1,7 +1,7 @@
 using CodeEditor2.CodeEditor.Parser;
 using pluginVerilog.Data;
 using pluginVerilog.Data.VerilogCommon;
-using pluginVerilog.Verilog.BuildingBlocks;
+using SystemVerilogCore.Verilog.BuildingBlocks;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;

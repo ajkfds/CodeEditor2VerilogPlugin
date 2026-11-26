@@ -1,7 +1,7 @@
-using pluginVerilog.Verilog;
-using pluginVerilog.Verilog.DataObjects;
-using pluginVerilog.Verilog.Expressions;
-using pluginVerilog.Verilog.Items;
+using SystemVerilogCore.Verilog;
+using SystemVerilogCore.Verilog.DataObjects;
+using SystemVerilogCore.Verilog.Expressions;
+using SystemVerilogCore.Verilog.Items;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -15,7 +15,7 @@ namespace pluginVerilog.Data
     /// This is an editor feature (it feeds the connection view), and it is built
     /// entirely on the data layer's concrete instance type
     /// (<see cref="VerilogModuleInstance"/>), so it lives here rather than in the
-    /// parser. It used to sit under <c>pluginVerilog.Verilog</c>, which is what
+    /// parser. It used to sit under <c>SystemVerilogCore.Verilog</c>, which is what
     /// kept that folder bound to the data layer.
     /// </para>
     /// </summary>

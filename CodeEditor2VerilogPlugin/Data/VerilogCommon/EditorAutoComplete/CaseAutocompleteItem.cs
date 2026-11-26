@@ -1,10 +1,10 @@
 using CodeEditor2.CodeEditor.CodeComplete;
 using pluginVerilog.Data;
-// Moved out of pluginVerilog.Verilog (it is an editor-side consumer, never
+// Moved out of SystemVerilogCore.Verilog (it is an editor-side consumer, never
 // used by the parser), so the enclosing namespaces it relied on are now
 // imported explicitly.
-using pluginVerilog.Verilog;
-using pluginVerilog.Verilog.BuildingBlocks;
+using SystemVerilogCore.Verilog;
+using SystemVerilogCore.Verilog.BuildingBlocks;
 
 namespace pluginVerilog.Data.VerilogCommon.EditorAutoComplete
 {
@@ -43,11 +43,11 @@ namespace pluginVerilog.Data.VerilogCommon.EditorAutoComplete
             IVerilogRelatedFile vfile = document.VerilogFile;
 
             {
-                pluginVerilog.Verilog.BuildingBlocks.BuildingBlock? buildingBlock =
+                SystemVerilogCore.Verilog.BuildingBlocks.BuildingBlock? buildingBlock =
                     vfile.VerilogParsedDocument?.GetBuildingBlockAt(prevIndex);
                 if (buildingBlock != null)
                 {
-                    foreach (pluginVerilog.Verilog.INamedElement namedElement in buildingBlock.NamedElements)
+                    foreach (SystemVerilogCore.Verilog.INamedElement namedElement in buildingBlock.NamedElements)
                     {
                         if (namedElement is not Verilog.DataObjects.Constants.Constants) continue;
                         if (namedElement.Name.StartsWith(CaseHeader))

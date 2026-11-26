@@ -5,15 +5,15 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using ExCSS;
-using pluginVerilog.Verilog;
-using pluginVerilog.Verilog.BuildingBlocks;
-using pluginVerilog.Verilog.DataObjects;
-using pluginVerilog.Verilog.Items;
+using SystemVerilogCore.Verilog;
+using SystemVerilogCore.Verilog.BuildingBlocks;
+using SystemVerilogCore.Verilog.DataObjects;
+using SystemVerilogCore.Verilog.Items;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using static pluginVerilog.CodeDrawStyle;
-using static pluginVerilog.Verilog.ModPort;
+using static SystemVerilogCore.Verilog.ModPort;
 
 namespace pluginVerilog.Views
 {
@@ -245,7 +245,7 @@ namespace pluginVerilog.Views
                 UpdateVisual();
             }
 
-            public pluginVerilog.Verilog.DataObjects.Port Port;
+            public SystemVerilogCore.Verilog.DataObjects.Port Port;
             Verilog.Expressions.Expression? Expression;
             BuildingBlock InstanceBuildingBlock;
             BuildingBlock BuildingBlock;

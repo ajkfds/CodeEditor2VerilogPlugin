@@ -2,7 +2,7 @@ using Avalonia.Threading;
 using CodeEditor2.Data;
 using Microsoft.Extensions.AI;
 using pluginVerilog.Data;
-using pluginVerilog.Verilog.BuildingBlocks;
+using SystemVerilogCore.Verilog.BuildingBlocks;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -481,7 +481,7 @@ namespace pluginVerilog.Tool
         /// also parsed.
         /// </summary>
         private static void EnqueueScopeReferencedFiles(
-            IEnumerable<pluginVerilog.Verilog.BuildingBlocks.BuildingBlock> buildingBlocks,
+            IEnumerable<SystemVerilogCore.Verilog.BuildingBlocks.BuildingBlock> buildingBlocks,
             ProjectProperty projectProperty,
             ConcurrentQueue<ParseTask> workQueue,
             ConcurrentDictionary<string, bool> completeIds)
@@ -511,7 +511,7 @@ namespace pluginVerilog.Tool
                     // RegisterBuildingBlock, after which the
                     // VirtualScopeNameSpace's late-binding lookup can find it.
                     Data.IVerilogRelatedFile? targetFile =
-                        projectProperty.DefinitionNameSpace.GetFile(scopeRef.BuildingBlockName);
+                        projectProperty.DefinitionNameSpace.GetEditorFile(scopeRef.BuildingBlockName);
                     if (targetFile == null) continue;
 
                     // The target file must be a TextFile for the parse queue

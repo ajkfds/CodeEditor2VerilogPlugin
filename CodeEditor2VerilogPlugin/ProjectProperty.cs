@@ -2,14 +2,14 @@ using AjkAvaloniaLibs.Libs.Json;
 using CodeEditor2.Data;
 using CodeEditor2.Tools;
 using pluginVerilog.Data;
-using pluginVerilog.Verilog.BuildingBlocks;
-using pluginVerilog.Verilog.Items;
+using SystemVerilogCore.Verilog.BuildingBlocks;
+using SystemVerilogCore.Verilog.Items;
 using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading;
 using System.Diagnostics.CodeAnalysis;
-using pluginVerilog.Verilog;
+using SystemVerilogCore.Verilog;
 
 // The rule model and the annotation command table moved to the UI-free parser
 // assembly. These aliases keep the existing references in this assembly

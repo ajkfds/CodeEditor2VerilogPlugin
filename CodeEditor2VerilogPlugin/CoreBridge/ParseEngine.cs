@@ -3,10 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using pluginVerilog.Verilog;
-using pluginVerilog.Verilog.BuildingBlocks;
-using pluginVerilog.Verilog.Expressions;
-using pluginVerilog.Verilog.BuildingBlocks;
+using SystemVerilogCore.Verilog;
+using SystemVerilogCore.Verilog.BuildingBlocks;
+using SystemVerilogCore.Verilog.Expressions;
+using SystemVerilogCore.Verilog.BuildingBlocks;
 
 namespace pluginVerilog.CoreBridge
 {

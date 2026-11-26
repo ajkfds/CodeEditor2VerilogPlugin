@@ -1,5 +1,5 @@
-using pluginVerilog.Verilog;
-using pluginVerilog.Verilog.BuildingBlocks;
+using SystemVerilogCore.Verilog;
+using SystemVerilogCore.Verilog.BuildingBlocks;
 using System;
 using System.Collections.Generic;
 using System.Linq;

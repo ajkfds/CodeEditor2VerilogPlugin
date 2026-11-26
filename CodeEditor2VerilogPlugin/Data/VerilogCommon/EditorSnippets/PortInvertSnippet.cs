@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-// Moved out of pluginVerilog.Verilog (editor-side consumer), so the parser
+// Moved out of SystemVerilogCore.Verilog (editor-side consumer), so the parser
 // namespace it used to inherit is imported explicitly.
-using pluginVerilog.Verilog;
+using SystemVerilogCore.Verilog;
 // SnippetBuilder now lives in the parent namespace
 // (pluginVerilog.Data.VerilogCommon), which is already in scope here.
 

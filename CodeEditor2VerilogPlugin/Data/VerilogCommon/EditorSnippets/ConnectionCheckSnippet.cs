@@ -1,11 +1,11 @@
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Threading;
-using pluginVerilog.Verilog;
-using pluginVerilog.Verilog.BuildingBlocks;
-using pluginVerilog.Verilog.DataObjects;
-using pluginVerilog.Verilog.Expressions;
-using pluginVerilog.Verilog.Items;
+using SystemVerilogCore.Verilog;
+using SystemVerilogCore.Verilog.BuildingBlocks;
+using SystemVerilogCore.Verilog.DataObjects;
+using SystemVerilogCore.Verilog.Expressions;
+using SystemVerilogCore.Verilog.Items;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

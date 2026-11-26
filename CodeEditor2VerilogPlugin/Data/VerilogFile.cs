@@ -8,9 +8,9 @@ using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
 using pluginVerilog.CodeEditor;
 using pluginVerilog.Data.VerilogCommon;
-using pluginVerilog.Verilog;
-using pluginVerilog.Verilog.BuildingBlocks;
-using pluginVerilog.Verilog.Statements;
+using SystemVerilogCore.Verilog;
+using SystemVerilogCore.Verilog.BuildingBlocks;
+using SystemVerilogCore.Verilog.Statements;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -58,6 +58,15 @@ namespace pluginVerilog.Data
         /// <summary>Project-relative path, as the name-space contract.</summary>
         string SystemVerilogCore.Verilog.IVerilogNameSpaceFile.FileRelativePath =>
             RelativePath;
+
+        /// <summary>
+        /// This file's own parse result, as the name-space contract. Parse sites
+        /// resolve a name to the declaring file and then read the declaration back
+        /// out of it.
+        /// </summary>
+        SystemVerilogCore.Parsing.IParsedDocument?
+            SystemVerilogCore.Verilog.IVerilogNameSpaceFile.ParsedResult =>
+            VerilogParsedDocument;
 
 
         public new static async Task<VerilogFile> CreateAsync(string relativePath, CodeEditor2.Data.Project project)

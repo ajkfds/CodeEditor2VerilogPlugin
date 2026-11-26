@@ -4,13 +4,13 @@ using CodeEditor2.CodeEditor.PopupHint;
 using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
 using pluginVerilog.CodeEditor;
-using pluginVerilog.Verilog.BuildingBlocks;
+using SystemVerilogCore.Verilog.BuildingBlocks;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using VerilogDocument = pluginVerilog.Verilog.ParsedDocument;
+using VerilogDocument = SystemVerilogCore.Verilog.ParsedDocument;
 
 namespace pluginVerilog.Data
 {
@@ -91,7 +91,7 @@ namespace pluginVerilog.Data
             ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
             if (projectProperty == null) throw new Exception();
 
-            Data.IVerilogRelatedFile? file = projectProperty.PackageNameSpace.GetFile(packageName);
+            Data.IVerilogRelatedFile? file = projectProperty.PackageNameSpace.GetEditorFile(packageName);
             if (file == null) return null;
 
             CodeEditor2.Data.TextFile? textFile = file as CodeEditor2.Data.TextFile;

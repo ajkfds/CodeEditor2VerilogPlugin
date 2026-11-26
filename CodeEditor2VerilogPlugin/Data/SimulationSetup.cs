@@ -1,12 +1,12 @@
 using Avalonia;
 using CodeEditor2.Data;
 using pluginVerilog.FileTypes;
-using pluginVerilog.Verilog;
-using pluginVerilog.Verilog.BuildingBlocks;
-using pluginVerilog.Verilog.DataObjects;
-using pluginVerilog.Verilog.DataObjects.DataTypes;
-using pluginVerilog.Verilog.DataObjects.Variables;
-using pluginVerilog.Verilog.Items;
+using SystemVerilogCore.Verilog;
+using SystemVerilogCore.Verilog.BuildingBlocks;
+using SystemVerilogCore.Verilog.DataObjects;
+using SystemVerilogCore.Verilog.DataObjects.DataTypes;
+using SystemVerilogCore.Verilog.DataObjects.Variables;
+using SystemVerilogCore.Verilog.Items;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -268,7 +268,7 @@ namespace pluginVerilog.Data
                     if (projectProperty == null) continue;
                     foreach (string className in parsedDocument.ReferencedUnitNameSpace)
                     {
-                        IVerilogRelatedFile? newfile = projectProperty.UnitNameSpace.GetFile(className);
+                        IVerilogRelatedFile? newfile = projectProperty.UnitNameSpace.GetEditorFile(className);
                         // exclude files already collected (in this batch or in
                         // setup.ClassFiles). Without the setup.ClassFiles check,
                         // circular class references (A -> B -> A) alternate the
@@ -457,7 +457,7 @@ namespace pluginVerilog.Data
                 // the file's parsed document (same rule as RegisterNameSpace.Get).
                 // Casting the file to Class always yielded null and every class
                 // reference (e.g. "Packet") was wrongly reported as unfound.
-                IVerilogRelatedFile? classFile = parsedDocument.ProjectProperty?.UnitNameSpace.GetFile(className);
+                IVerilogRelatedFile? classFile = parsedDocument.ProjectProperty?.UnitNameSpace.GetEditorFile(className);
                 Class? class_ = null;
                 if (classFile != null
                     && classFile.VerilogParsedDocument != null
@@ -985,7 +985,7 @@ namespace pluginVerilog.Data
             string typeName,
             SimulationSetup setup)
         {
-            IVerilogRelatedFile? sourceFile = projectProperty.UnitNameSpace.GetFile(typeName);
+            IVerilogRelatedFile? sourceFile = projectProperty.UnitNameSpace.GetEditorFile(typeName);
             if (sourceFile == null)
             {
                 // the type is declared in a file that has not been parsed yet, or
@@ -1024,7 +1024,7 @@ namespace pluginVerilog.Data
             ProjectProperty? declaringProjectProperty = file.ProjectProperty;
             if (declaringProjectProperty == null) return;
 
-            IVerilogRelatedFile? interfaceFile = declaringProjectProperty.DefinitionNameSpace.GetFile(sourceInterface.Name);
+            IVerilogRelatedFile? interfaceFile = declaringProjectProperty.DefinitionNameSpace.GetEditorFile(sourceInterface.Name);
             if (interfaceFile == null)
             {
                 addUnfoundModule(setup, file, sourceInterface.Name);
@@ -1269,7 +1269,7 @@ namespace pluginVerilog.Data
             if (projectProperty == null) return null;
 
             //            Package? package = projectProperty.PackageNameSpace.Get(packageName) as Package;
-            IVerilogRelatedFile? verilogRelatedFile = projectProperty.PackageNameSpace.GetFile(packageName);
+            IVerilogRelatedFile? verilogRelatedFile = projectProperty.PackageNameSpace.GetEditorFile(packageName);
             return verilogRelatedFile;
         }
         
@@ -1279,7 +1279,7 @@ namespace pluginVerilog.Data
             if (projectProperty == null) return null;
 
             //            Class? class_ = projectProperty.UnitNameSpace.Get(className) as Class;
-            IVerilogRelatedFile? verilogRelatedFile = projectProperty.UnitNameSpace.GetFile(className);
+            IVerilogRelatedFile? verilogRelatedFile = projectProperty.UnitNameSpace.GetEditorFile(className);
             return verilogRelatedFile;
         }
 

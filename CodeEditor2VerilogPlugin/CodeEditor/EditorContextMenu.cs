@@ -1,7 +1,7 @@
 using Avalonia.Controls;
 using CodeEditor2.Data;
 using pluginVerilog.Data;
-using pluginVerilog.Verilog;
+using SystemVerilogCore.Verilog;
 using System;
 using System.Linq;
 

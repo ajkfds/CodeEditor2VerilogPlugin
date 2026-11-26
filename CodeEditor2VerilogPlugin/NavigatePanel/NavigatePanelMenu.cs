@@ -2,7 +2,7 @@ using Avalonia.Controls;
 using CodeEditor2;
 using CodeEditor2.Data;
 using CodeEditor2.NavigatePanel;
-using pluginVerilog.Verilog.BuildingBlocks;
+using SystemVerilogCore.Verilog.BuildingBlocks;
 using System;
 using System.Linq;
 using System.Threading.Tasks;

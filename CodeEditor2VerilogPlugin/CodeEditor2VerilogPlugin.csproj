@@ -62,5 +62,9 @@
     <ProjectReference Include="..\..\AjkAvaloniaLibs\AjkAvaloniaLibs\AjkAvaloniaLibs.csproj" />
     <ProjectReference Include="..\..\CodeEditor2Plugin\CodeEditor2Plugin\CodeEditor2Plugin\CodeEditor2Plugin.csproj" />
     <ProjectReference Include="..\..\CodeEditor2\CodeEditor2\CodeEditor2.csproj" />
+    <!-- The parser itself now lives in the UI-free assembly. This project keeps
+         the editor integration (item tree, colouring, snippets, LSP bridge) and
+         delegates parsing to SystemVerilogCore.Verilog. -->
+    <ProjectReference Include="..\..\SystemVerilogCore\SystemVerilogCore.csproj" />
   </ItemGroup>
 </Project>

@@ -28,7 +28,7 @@ namespace pluginVerilog.Data
         {
             ProjectProperty? projectProperty = project.ProjectProperties[Plugin.StaticID] as ProjectProperty;
             if (projectProperty == null) throw new Exception();
-            Data.IVerilogRelatedFile? file = projectProperty.DefinitionNameSpace.GetFile(moduleInstantiation.SourceName);
+            Data.IVerilogRelatedFile? file = projectProperty.DefinitionNameSpace.GetEditorFile(moduleInstantiation.SourceName);
             if (file == null) return null;
 
             CodeEditor2.Data.TextFile? textFile = file as CodeEditor2.Data.TextFile;

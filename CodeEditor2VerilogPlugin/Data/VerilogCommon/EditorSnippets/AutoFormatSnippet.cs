@@ -18,7 +18,7 @@ namespace pluginVerilog.Data.VerilogCommon.EditorSnippets
     /// </para>
     ///
     /// <para>
-    /// Moved out of <c>pluginVerilog.Verilog.Snippets</c>: the snippet classes
+    /// Moved out of <c>SystemVerilogCore.Verilog.Snippets</c>: the snippet classes
     /// that derive from the editor's <c>InteractiveSnippet</c> are editor-side
     /// consumers, not part of the parser. Only <c>SnippetBuilder</c> (UI-free
     /// text generation, used by <c>CoreBridge.SnippetAdapter</c>) stays under

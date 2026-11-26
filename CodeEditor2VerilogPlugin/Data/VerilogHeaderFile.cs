@@ -3,7 +3,7 @@ using CodeEditor2.CodeEditor.Parser;
 using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
 using pluginVerilog.CodeEditor;
-using pluginVerilog.Verilog;
+using SystemVerilogCore.Verilog;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -121,7 +121,7 @@ namespace pluginVerilog.Data
         }
         public void CheckDirty()
         {
-            pluginVerilog.Verilog.ParsedDocument? vParsedDocument = VerilogParsedDocument;
+            SystemVerilogCore.Verilog.ParsedDocument? vParsedDocument = VerilogParsedDocument;
             if (vParsedDocument == null) return;
             CodeEditor2.CodeEditor.CodeDocument? codeDocument = CodeDocument;
             if (codeDocument == null) return;

@@ -5,7 +5,7 @@ using CodeEditor2.CodeEditor.PopupHint;
 using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
 using pluginVerilog.CodeEditor;
-using pluginVerilog.Verilog;
+using SystemVerilogCore.Verilog;
 using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;

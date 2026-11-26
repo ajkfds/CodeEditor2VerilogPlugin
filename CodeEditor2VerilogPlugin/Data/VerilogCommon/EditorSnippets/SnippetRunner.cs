@@ -1,7 +1,7 @@
 using Avalonia.Input;
 using CodeEditor2.Views;
 using pluginVerilog.CoreBridge;
-using pluginVerilog.Verilog;
+using SystemVerilogCore.Verilog;
 using System;
 using System.Collections.Generic;
 using System.Threading;

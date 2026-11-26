@@ -1,6 +1,6 @@
 using CodeEditor2.LLM.Tools;
 using Microsoft.Extensions.AI;
-using pluginVerilog.Verilog.BuildingBlocks;
+using SystemVerilogCore.Verilog.BuildingBlocks;
 using System;
 using System.ComponentModel;
 using System.Text;
