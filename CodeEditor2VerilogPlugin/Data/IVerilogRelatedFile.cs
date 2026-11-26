@@ -99,6 +99,19 @@ namespace pluginVerilog.Data
                 SystemVerilogCore.Parsing.IVerilogDocumentParser parser) =>
             AcceptVerilogParsedDocumentAsync(parser);
 
+        /// <summary>
+        /// Ensures this file has a buffer to parse, creating an empty one when it
+        /// has none.
+        ///
+        /// <para>
+        /// The editor creates the document while loading the file
+        /// (<c>FileCheckAsync</c>), which a UI-less host never runs. A parse that
+        /// needs the buffer (an instance parse) would otherwise fail; an empty
+        /// document is enough because the parser is handed the text separately.
+        /// </para>
+        /// </summary>
+        void CreateCodeDocumentForParse();
+
         ProjectProperty ProjectProperty { get; }
         bool SystemVerilog { get; }
 

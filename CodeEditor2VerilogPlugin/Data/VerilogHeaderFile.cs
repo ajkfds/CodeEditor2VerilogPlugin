@@ -134,6 +134,16 @@ namespace pluginVerilog.Data
         {
             CodeDocument = new pluginVerilog.CodeEditor.CodeDocument(this);
         }
+
+        /// <summary>
+        /// Creates an empty buffer when this file has none, so a parse that needs
+        /// one can run in a host that never loaded the file.
+        /// </summary>
+        public void CreateCodeDocumentForParse()
+        {
+            if (CodeDocument != null) return;
+            CodeDocument = new pluginVerilog.CodeEditor.CodeDocument(this);
+        }
         public bool SystemVerilog { get { return false; } }
 
         // update sub-items from ParsedDocument

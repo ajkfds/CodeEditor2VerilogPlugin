@@ -42,6 +42,16 @@ namespace pluginVerilog.Data
         void SystemVerilogCore.Documents.IVerilogSourceFileParseCache.SetVerilogParsedResult(
             SystemVerilogCore.Parsing.IParsedDocument parsedDocument) =>
             ParsedDocument = parsedDocument;
+
+        /// <summary>
+        /// Creates an empty buffer when this file has none, so a parse that needs
+        /// one can run in a host that never loaded the file.
+        /// </summary>
+        public void CreateCodeDocumentForParse()
+        {
+            if (CodeDocument != null) return;
+            CodeDocument = new CodeEditor.CodeDocument(this);
+        }
         /// <summary>
         /// Records an instance parse result, as the UI-free cache contract.
         ///

@@ -49,25 +49,10 @@ namespace pluginVerilog.CoreBridge
             if (index < 0) return null;
 
             // The CompletionContext partial parse reads the source text from
-            // file.CodeDocument. In UI-less hosts FileCheckAsync has not run,
-            // so the document is either absent or empty: create it (via the
-            // protected factory) and load the current text. The text comes
-            // from the parse result's own document (ParseEngine filled it
-            // with the same text).
-            if (file.CodeDocument == null)
-            {
-                System.Reflection.MethodInfo? create = file.GetType().GetMethod(
-                    "CreateCodeDocument",
-                    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-                create?.Invoke(file, null);
-            }
-            CodeEditor2.CodeEditor.CodeDocument? codeDocument = file.CodeDocument;
+            // file.CodeDocument, which a UI-less host has not loaded yet.
+            CodeEditor2.CodeEditor.CodeDocument? codeDocument =
+                parsedDocument.PrepareCompletionBuffer(file);
             if (codeDocument == null) return null;
-            pluginVerilog.CodeEditor.CodeDocument? parsedCodeDocument = parsedDocument.EditorCodeDocument();
-            if (parsedCodeDocument != null && codeDocument.Length != parsedCodeDocument.Length)
-            {
-                codeDocument.CopyTextOnlyFrom(parsedCodeDocument);
-            }
             if (index > codeDocument.Length) return null;
 
             // runs the real CompletionContext (partial parse of the region

@@ -46,23 +46,11 @@ namespace pluginVerilog.CoreBridge
             if (file == null || parsedDocument == null) return null;
             if (index < 0) return null;
 
-            // Same document preparation as CompletionAdapter: the partial parse
-            // reads the source text from file.CodeDocument, which is absent in a
-            // UI-less host until we create it and load the parsed text.
-            if (file.CodeDocument == null)
-            {
-                System.Reflection.MethodInfo? create = file.GetType().GetMethod(
-                    "CreateCodeDocument",
-                    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
-                create?.Invoke(file, null);
-            }
-            CodeEditor2.CodeEditor.CodeDocument? codeDocument = file.CodeDocument;
+            // Same document preparation as CompletionAdapter (one implementation,
+            // so the two cannot drift).
+            CodeEditor2.CodeEditor.CodeDocument? codeDocument =
+                parsedDocument.PrepareCompletionBuffer(file);
             if (codeDocument == null) return null;
-            pluginVerilog.CodeEditor.CodeDocument? parsedCodeDocument = parsedDocument.EditorCodeDocument();
-            if (parsedCodeDocument != null && codeDocument.Length != parsedCodeDocument.Length)
-            {
-                codeDocument.CopyTextOnlyFrom(parsedCodeDocument);
-            }
             if (index > codeDocument.Length) return null;
 
             Verilog.CompletionContext? context =

@@ -35,5 +35,49 @@ namespace pluginVerilog.Data.VerilogCommon
         public static CodeEditor.CodeDocument? EditorCodeDocument(
             this Verilog.ParsedDocument parsedDocument) =>
             parsedDocument.VerilogDocument as CodeEditor.CodeDocument;
+
+        /// <summary>
+        /// Prepares the file's working buffer for a partial parse and returns it,
+        /// or null when no buffer could be created.
+        ///
+        /// <para>
+        /// The autocomplete / signature-help adapters drive the parser's partial
+        /// parse, which reads the source text from <c>file.CodeDocument</c>. In a
+        /// host that never ran <c>FileCheckAsync</c> (the language server, the
+        /// tests) that document is absent, and when the host hands the parser its
+        /// own buffer there is no concrete plugin document to copy from either.
+        /// The text therefore comes from the parse result through the UI-free
+        /// contract, so this works for both hosts.
+        /// </para>
+        ///
+        /// <para>
+        /// Shared by <c>CompletionAdapter</c> and <c>SignatureHelpAdapter</c>:
+        /// they used to carry the same preparation code, which is exactly the
+        /// kind of copy that drifts.
+        /// </para>
+        /// </summary>
+        public static CodeEditor2.CodeEditor.CodeDocument? PrepareCompletionBuffer(
+            this Verilog.ParsedDocument parsedDocument,
+            Data.VerilogFile file)
+        {
+            if (parsedDocument == null || file == null) return null;
+
+            if (file.CodeDocument == null)
+            {
+                System.Reflection.MethodInfo? create = file.GetType().GetMethod(
+                    "CreateCodeDocument",
+                    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+                create?.Invoke(file, null);
+            }
+            CodeEditor2.CodeEditor.CodeDocument? codeDocument = file.CodeDocument;
+            if (codeDocument == null) return null;
+
+            string parsedText = parsedDocument.VerilogDocument.CreateString();
+            if (codeDocument.Length != parsedText.Length)
+            {
+                codeDocument.CopyTextOnlyFrom(new CodeEditor.CodeDocument(parsedText));
+            }
+            return codeDocument;
+        }
     }
 }

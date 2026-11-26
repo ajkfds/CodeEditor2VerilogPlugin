@@ -203,6 +203,16 @@ namespace pluginVerilog.Data
                 return SourceVerilogFile?.CodeDocument;
             }
         }
+
+        /// <summary>
+        /// An instance has no buffer of its own: it reads and writes through the
+        /// source file's document, so creating one means asking the source.
+        /// </summary>
+        public void CreateCodeDocumentForParse()
+        {
+            if (CodeDocument != null) return;
+            SourceVerilogFile?.CreateCodeDocumentForParse();
+        }
         internal Dictionary<string, Verilog.Expressions.Expression> _parameterOverrides = new Dictionary<string, Verilog.Expressions.Expression>();
         public required Dictionary<string, Verilog.Expressions.Expression> ParameterOverrides
         {

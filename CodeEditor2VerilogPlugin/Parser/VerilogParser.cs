@@ -102,7 +102,15 @@ namespace pluginVerilog.Parser
         {
 
             if (verilogRelatedFile == null) throw new Exception();
-            if (verilogRelatedFile.CodeDocument == null) throw new Exception();
+
+            // A missing buffer is not fatal: the instance wrapper delegates its
+            // CodeDocument to the source file, and a host that drives the parse
+            // itself (the language server) fills that lazily. An empty document is
+            // enough to start from - the parser is handed the text separately.
+            if (verilogRelatedFile.CodeDocument == null)
+            {
+                verilogRelatedFile.CreateCodeDocumentForParse();
+            }
 
             this.ParseMode = parseMode;
             CodeEditor2.Data.TextFile? textFile = verilogRelatedFile as CodeEditor2.Data.TextFile;
@@ -145,7 +153,7 @@ namespace pluginVerilog.Parser
             this.Document = codeDocument;
 
             parsedDocument.SystemVerilog = systemVerilog;
-            parsedDocument.Version = verilogRelatedFile.CodeDocument.Version;
+            parsedDocument.Version = verilogRelatedFile.CodeDocument?.Version ?? 0;
             parsedDocument.Instance = true;
             parsedDocument.ParameterOverrides = parameterOverrides;
             parsedDocument.TargetBuildingBlockName = moduleName;

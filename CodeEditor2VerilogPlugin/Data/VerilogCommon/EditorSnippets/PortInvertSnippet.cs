@@ -40,7 +40,10 @@ namespace pluginVerilog.Data.VerilogCommon.EditorSnippets
             int selectionEnd,
             CoreBridge.SnippetAdapter.SnippetResult result)
         {
-            pluginVerilog.CodeEditor.CodeDocument? doc = parsedDocument.EditorCodeDocument();
+            // Through the document contract: a host that drives the parse itself
+            // (the language server) has no concrete plugin document, and reading
+            // through the contract is all this needs (length + substring).
+            SystemVerilogCore.Documents.IVerilogTextDocument? doc = parsedDocument.VerilogDocument;
             if (doc == null) return;
             if (selectionStart < 0) selectionStart = 0;
             if (selectionEnd > doc.Length) selectionEnd = doc.Length;
