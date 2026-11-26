@@ -245,10 +245,11 @@ namespace pluginVerilog.Verilog
                 if (parameterOverrides.ContainsKey(paramName)) continue;   // already assigned
                 if (!paramName.StartsWith(completionContext.CandidateWord)) continue;
 
-                Data.VerilogCommon.AutoCompleteItem acItem = new Data.VerilogCommon.AutoCompleteItem(
-                    Data.VerilogCommon.AutoCompleteItem.CompleteType.DataObject,
+                SystemVerilogCore.Documents.VerilogAutocompleteCandidate acItem =
+                    new SystemVerilogCore.Documents.VerilogAutocompleteCandidate(
                     paramName,
                     (byte)VerilogColorType.Parameter,
+                    SystemVerilogCore.Documents.SystemVerilogAutocompleteItemKind.Variable,
                     "CodeEditor2/Assets/Icons/tag.svg"
                     );
                 completionContext.AutoCompleteItems.Add(acItem);

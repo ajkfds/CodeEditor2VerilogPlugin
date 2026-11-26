@@ -170,5 +170,36 @@ namespace pluginVerilog.Verilog
         /// </summary>
         SystemVerilogCore.Projects.IVerilogInstanceSource? CreateInstanceItem(
             IBuildingBlockInstantiation instantiation);
+
+        // ---- completion candidates that expand on insert ------------------
+
+        /// <summary>
+        /// A candidate that inserts a whole module instantiation when accepted
+        /// (<c>leaf u_leaf ( ... );</c>), or null when the host has no such
+        /// expansion.
+        ///
+        /// <para>
+        /// The parser knows which modules exist, but the instantiation text (port
+        /// connections, tab stops, indentation) is a host / editor concern. The
+        /// parser therefore asks for the candidate instead of building it.
+        /// </para>
+        /// </summary>
+        SystemVerilogCore.Documents.IVerilogAutocompleteItem? CreateModuleInstanceCandidate(
+            string moduleName);
+
+        /// <summary>
+        /// The candidate for a block-opening keyword (<c>begin</c> -&gt; the
+        /// <c>begin</c> / <c>end</c> skeleton), or null when the host expands
+        /// keywords.
+        ///
+        /// <para>
+        /// Only the block keywords need this: their insertion text is a skeleton,
+        /// not the keyword itself. Everything else is a plain
+        /// <see cref="SystemVerilogCore.Documents.VerilogAutocompleteCandidate"/>
+        /// the parser builds.
+        /// </para>
+        /// </summary>
+        SystemVerilogCore.Documents.IVerilogAutocompleteItem? CreateKeywordCandidate(
+            string keyword);
     }
 }

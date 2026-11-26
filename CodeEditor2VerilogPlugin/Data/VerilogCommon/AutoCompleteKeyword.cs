@@ -16,18 +16,22 @@ namespace pluginVerilog.Data.VerilogCommon
             int candidateStartIndex,
             int lineStartIndex,
             bool systemVerilog,
-            Func<Data.VerilogCommon.AutoCompleteItem, bool> itemFilter
+            Func<SystemVerilogCore.Documents.IVerilogAutocompleteItem, bool> itemFilter,
+            Verilog.IVerilogParserSettings? parserSettings = null
             )
         {
 
 
-            appendItems(items, candidate, new EditorAutoComplete.BeginAutoCompleteItem(),itemFilter);
-            appendItems(items, candidate, new EditorAutoComplete.CaseAutocompleteItem(), itemFilter);
-            appendItems(items, candidate, new EditorAutoComplete.FunctionAutocompleteItem(), itemFilter);
-            appendItems(items, candidate, new EditorAutoComplete.GenerateAutoCompleteItem(), itemFilter);
-            appendItems(items, candidate, new EditorAutoComplete.ModuleAutocompleteItem(), itemFilter);
-            appendItems(items, candidate, new EditorAutoComplete.TaskAutocompleteItem(), itemFilter);
-            if (candidate == "<=") appendItems(items, candidate, new EditorAutoComplete.NonBlockingAssignmentAutoCompleteItem(), itemFilter);
+            // Block keywords expand to a skeleton when accepted, and only the host
+            // knows that text, so they are requested from the settings instead of
+            // being built here.
+            appendItems(items, candidate, "begin", parserSettings, itemFilter);
+            appendItems(items, candidate, "case", parserSettings, itemFilter);
+            appendItems(items, candidate, "function", parserSettings, itemFilter);
+            appendItems(items, candidate, "generate", parserSettings, itemFilter);
+            appendItems(items, candidate, "module", parserSettings, itemFilter);
+            appendItems(items, candidate, "task", parserSettings, itemFilter);
+            if (candidate == "<=") appendItems(items, candidate, "<=", parserSettings, itemFilter);
 
             appendKeywordItems(items, candidate, "sync",itemFilter); // annotation
             appendKeywordItems(items, candidate, "async", itemFilter); // annotation
@@ -144,16 +148,10 @@ namespace pluginVerilog.Data.VerilogCommon
             {
                 if (!keyword.Item1.StartsWith(candidate)) continue;
                 if (candidate.Length < keyword.Item2) continue;
-                Data.VerilogCommon.AutoCompleteItem item = new pluginVerilog.Data.VerilogCommon.AutoCompleteItem(
-                    AutoCompleteItem.CompleteType.Keyword,
-                    keyword.Item1,
-                    (byte)SystemVerilogCore.Documents.VerilogColorType.Keyword,
-                    "CodeEditor2/Assets/Icons/bookmark.svg"
-                    );
-                if (itemFilter(item)) items.Add(item);
+                appendKeywordItems(items, candidate, keyword.Item1, itemFilter);
             }
 
-            appendItems(items, candidate, new EditorAutoComplete.InterfaceAutocompleteItem(), itemFilter);
+            appendItems(items, candidate, "interface", parserSettings, itemFilter);
 
             if (systemVerilog)
             {
@@ -161,36 +159,51 @@ namespace pluginVerilog.Data.VerilogCommon
                 {
                     if (!keyword.Item1.StartsWith(candidate)) continue;
                     if (candidate.Length < keyword.Item2) continue;
-                    pluginVerilog.Data.VerilogCommon.AutoCompleteItem item = new pluginVerilog.Data.VerilogCommon.AutoCompleteItem(
-                        AutoCompleteItem.CompleteType.Keyword,
-                        keyword.Item1,
-                        (byte)SystemVerilogCore.Documents.VerilogColorType.Keyword,
-                        "CodeEditor2/Assets/Icons/bookmark.svg"
-                        );
-                    if (itemFilter(item)) items.Add(item);
+                    appendKeywordItems(items, candidate, keyword.Item1, itemFilter);
                 }
 
             }
 
         }
 
-        private static void appendItems(List<SystemVerilogCore.Documents.IVerilogAutocompleteItem> items, string cantidate, pluginVerilog.Data.VerilogCommon.AutoCompleteItem item, Func<Data.VerilogCommon.AutoCompleteItem, bool> itemFilter)
+        /// <summary>
+        /// Adds the candidate for a block-opening keyword, which the host builds
+        /// because its insertion text is a skeleton rather than the keyword.
+        /// </summary>
+        private static void appendItems(
+            List<SystemVerilogCore.Documents.IVerilogAutocompleteItem> items,
+            string candidate,
+            string keyword,
+            Verilog.IVerilogParserSettings? parserSettings,
+            Func<SystemVerilogCore.Documents.IVerilogAutocompleteItem, bool> itemFilter)
         {
-            if (!item.Text.StartsWith(cantidate)) return;
+            if (!keyword.StartsWith(candidate)) return;
+            if (parserSettings == null) return;
+            SystemVerilogCore.Documents.IVerilogAutocompleteItem? item =
+                parserSettings.CreateKeywordCandidate(keyword);
+            if (item == null) return;
             if (itemFilter(item)) items.Add(item);
         }
-        private static void appendKeywordItems(List<SystemVerilogCore.Documents.IVerilogAutocompleteItem> items, string cantidate, string keyword, Func<Data.VerilogCommon.AutoCompleteItem, bool> itemFilter)
+
+        /// <summary>
+        /// Adds a plain keyword candidate (label only), which the parser can
+        /// express on its own.
+        /// </summary>
+        private static void appendKeywordItems(
+            List<SystemVerilogCore.Documents.IVerilogAutocompleteItem> items,
+            string candidate,
+            string keyword,
+            Func<SystemVerilogCore.Documents.IVerilogAutocompleteItem, bool> itemFilter)
         {
-            if (!keyword.StartsWith(cantidate)) return;
+            if (!keyword.StartsWith(candidate)) return;
 
-
-            pluginVerilog.Data.VerilogCommon.AutoCompleteItem item = new pluginVerilog.Data.VerilogCommon.AutoCompleteItem(
-                AutoCompleteItem.CompleteType.Keyword,
-                keyword,
-                (byte)SystemVerilogCore.Documents.VerilogColorType.Keyword,
-                "CodeEditor2/Assets/Icons/bookmark.svg"
-                );
-            if(itemFilter(item)) items.Add(item);
+            SystemVerilogCore.Documents.VerilogAutocompleteCandidate item =
+                new SystemVerilogCore.Documents.VerilogAutocompleteCandidate(
+                    keyword,
+                    (byte)SystemVerilogCore.Documents.VerilogColorType.Keyword,
+                    SystemVerilogCore.Documents.SystemVerilogAutocompleteItemKind.Keyword,
+                    "CodeEditor2/Assets/Icons/bookmark.svg");
+            if (itemFilter(item)) items.Add(item);
         }
 
     }

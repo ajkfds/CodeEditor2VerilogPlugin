@@ -489,10 +489,11 @@ namespace pluginVerilog.Verilog.Expressions
                 if (connectedPorts.Contains(port.Name)) continue;   // already connected (positional)
                 if (!port.Name.StartsWith(completionContext.CandidateWord)) continue;
 
-                Data.VerilogCommon.AutoCompleteItem acItem = new Data.VerilogCommon.AutoCompleteItem(
-                    Data.VerilogCommon.AutoCompleteItem.CompleteType.DataObject,
+                SystemVerilogCore.Documents.VerilogAutocompleteCandidate acItem =
+                    new SystemVerilogCore.Documents.VerilogAutocompleteCandidate(
                     port.Name,
                     (byte)VerilogColorType.Variable,
+                    SystemVerilogCore.Documents.SystemVerilogAutocompleteItemKind.Variable,
                     "CodeEditor2/Assets/Icons/tag.svg"
                     );
                 completionContext.AutoCompleteItems.Add(acItem);

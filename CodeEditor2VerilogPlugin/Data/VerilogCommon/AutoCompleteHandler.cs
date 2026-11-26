@@ -172,26 +172,46 @@ namespace pluginVerilog.Data.VerilogCommon
             return completionContextResult;
         }
 
-        public static bool GetAutoCompleteTarget(Data.IVerilogRelatedFile item, Verilog.ParsedDocument parsedDocument, int index, out NameSpace? nameSpace, out INamedElement? element, out string candidate, out int candidateStartIndex)
+        /// <summary>
+        /// Resolves the completion target at <paramref name="index"/> through the
+        /// UI-free source-file / document contracts, so the parser's
+        /// <c>CompletionContext</c> does not have to name the editor's file type.
+        ///
+        /// <para>
+        /// This is the same walk as the editor overload below; only the document
+        /// and parse-result access goes through the contract.
+        /// </para>
+        /// </summary>
+        public static bool GetAutoCompleteTarget(
+            SystemVerilogCore.Documents.IVerilogSourceFile item,
+            Verilog.ParsedDocument parsedDocument,
+            int index,
+            out NameSpace? nameSpace,
+            out INamedElement? element,
+            out string candidate,
+            out int candidateStartIndex)
         {
             candidate = "";
             candidateStartIndex = 0;
             nameSpace = null;
             element = null;
-            if (item.VerilogParsedDocument == null) return false;
-            if (item.CodeDocument == null) return false;
+            SystemVerilogCore.Documents.IVerilogTextDocument? codeDocument = item.VerilogTextDocument;
+            if (item.VerilogParsedResult == null) return false;
+            if (codeDocument == null) return false;
 
-            int line = item.CodeDocument.GetLineAt(index);
-            int lineStartIndex = item.CodeDocument.GetLineStartIndex(line);
+            int line = codeDocument.GetLineAt(index);
+            int lineStartIndex = codeDocument.GetLineStartIndex(line);
 
-            string lineText = item.CodeDocument.CreateLineString(line).Substring(0, index - lineStartIndex);
+            string lineText = codeDocument.CreateString(
+                lineStartIndex, codeDocument.GetLineLength(line));
+            lineText = lineText.Substring(0, index - lineStartIndex);
             candidateStartIndex = lineStartIndex;
 
             bool ret = true;
             { // pre carlet char check
                 if (index != 0)
                 {
-                    char preChar = item.CodeDocument.GetCharAt(index - 1);
+                    char preChar = codeDocument.GetCharAt(index - 1);
                     if (preChar == ' ') ret = false;
                     if (preChar == '\t') ret = false;
                 }
@@ -332,26 +352,26 @@ namespace pluginVerilog.Data.VerilogCommon
 
                 while(wordIndex>0)
                 {
-                    char preChar = item.CodeDocument.GetCharAt(wordIndex - 1);
+                    char preChar = codeDocument.GetCharAt(wordIndex - 1);
                     if (preChar == ' ') break;
                     if (preChar == '\r') break;
                     if (preChar == '\n') break;
                     if (preChar == '\t') break;
                     wordIndex--;
                 }
-                if (item.CodeDocument.GetCharAt(wordIndex) != '`') return ret;
+                if (codeDocument.GetCharAt(wordIndex) != '`') return ret;
 
                 int lastIndex = wordIndex;
-                while (lastIndex+1 < item.CodeDocument.Length)
+                while (lastIndex+1 < codeDocument.Length)
                 {
-                    char nextChar = item.CodeDocument.GetCharAt(lastIndex+1);
+                    char nextChar = codeDocument.GetCharAt(lastIndex+1);
                     if (nextChar == ' ') break;
                     if (nextChar == '\r') break;
                     if (nextChar == '\n') break;
                     if (nextChar == '\t') break;
                     lastIndex++;
                 }
-                candidate = item.CodeDocument.CreateString(wordIndex, lastIndex - wordIndex+1);
+                candidate = codeDocument.CreateString(wordIndex, lastIndex - wordIndex+1);
                 candidateStartIndex = wordIndex;
             }
 

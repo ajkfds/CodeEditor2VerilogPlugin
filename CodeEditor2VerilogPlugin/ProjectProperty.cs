@@ -83,6 +83,40 @@ namespace pluginVerilog
             return Data.VerilogModuleInstance.Create(moduleInstantiation);
         }
 
+        /// <summary>
+        /// The completion candidate that expands a module name to a whole
+        /// instantiation. The expansion text is an editor concern, so the parser
+        /// asks for the candidate rather than building one.
+        /// </summary>
+        SystemVerilogCore.Documents.IVerilogAutocompleteItem?
+            Verilog.IVerilogParserSettings.CreateModuleInstanceCandidate(string moduleName) =>
+            new Data.VerilogCommon.EditorSnippets.ModuleInstanceSnippet(moduleName);
+
+        /// <summary>
+        /// The completion candidate for a block-opening keyword, whose insertion
+        /// text is a skeleton rather than the keyword itself.
+        ///
+        /// <para>
+        /// Only the block keywords have a dedicated editor candidate; every other
+        /// keyword is a plain candidate the parser builds. Returning null for
+        /// those lets the parser fall back to the plain candidate.
+        /// </para>
+        /// </summary>
+        SystemVerilogCore.Documents.IVerilogAutocompleteItem?
+            Verilog.IVerilogParserSettings.CreateKeywordCandidate(string keyword) =>
+            keyword switch
+            {
+                "begin" => new Data.VerilogCommon.EditorAutoComplete.BeginAutoCompleteItem(),
+                "case" => new Data.VerilogCommon.EditorAutoComplete.CaseAutocompleteItem(),
+                "function" => new Data.VerilogCommon.EditorAutoComplete.FunctionAutocompleteItem(),
+                "generate" => new Data.VerilogCommon.EditorAutoComplete.GenerateAutoCompleteItem(),
+                "module" => new Data.VerilogCommon.EditorAutoComplete.ModuleAutocompleteItem(),
+                "task" => new Data.VerilogCommon.EditorAutoComplete.TaskAutocompleteItem(),
+                "interface" => new Data.VerilogCommon.EditorAutoComplete.InterfaceAutocompleteItem(),
+                "<=" => new Data.VerilogCommon.EditorAutoComplete.NonBlockingAssignmentAutoCompleteItem(),
+                _ => null,
+            };
+
         // The ID is required by the parser-facing settings contract so a parse
         // site can identify these settings without knowing the editor type.
         string SystemVerilogCore.Projects.IVerilogProjectSettings.ID => Plugin.StaticID;
