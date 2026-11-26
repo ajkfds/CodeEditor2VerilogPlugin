@@ -171,15 +171,16 @@ namespace pluginVerilog.CoreBridge
         {
             try
             {
-                SnippetAdapter.SnippetResult result = SnippetAdapter.GetSnippets(
-                    file,
-                    parsedDocument,
-                    index,
-                    SnippetAdapter.SnippetName.ModuleInstance,
-                    moduleName,
-                    0,
-                    0);
-                foreach (SnippetAdapter.SnippetEntry entry in result.Snippets)
+                SystemVerilogCore.Snippets.SnippetProvider.SnippetResult result =
+                    SystemVerilogCore.Snippets.SnippetProvider.GetSnippets(
+                        file,
+                        parsedDocument,
+                        index,
+                        SystemVerilogCore.Snippets.SnippetProvider.SnippetName.ModuleInstance,
+                        moduleName,
+                        0,
+                        0);
+                foreach (SystemVerilogCore.Snippets.SnippetProvider.SnippetEntry entry in result.Snippets)
                 {
                     if (!string.IsNullOrEmpty(entry.SnippetText)) return entry.SnippetText;
                 }

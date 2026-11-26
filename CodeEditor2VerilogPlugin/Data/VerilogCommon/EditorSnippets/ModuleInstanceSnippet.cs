@@ -1,10 +1,8 @@
-using System.Collections.Generic;
 using System.Threading.Tasks;
 // Moved out of SystemVerilogCore.Verilog (editor-side consumer), so the parser
 // namespace it used to inherit is imported explicitly.
 using SystemVerilogCore.Verilog;
-// SnippetBuilder now lives in the parent namespace
-// (pluginVerilog.Data.VerilogCommon), which is already in scope here.
+using SystemVerilogCore.Snippets;
 
 namespace pluginVerilog.Data.VerilogCommon.EditorSnippets
 {
@@ -14,16 +12,24 @@ namespace pluginVerilog.Data.VerilogCommon.EditorSnippets
     /// port).
     ///
     /// <para>
-    /// The text is built by <see cref="Build"/> here, which the VS Code
-    /// extension also uses (through <c>rtl/snippet</c> and the completion
-    /// adapter), so the editor and the extension insert the same
-    /// instantiation.
+    /// The text is built by
+    /// <see cref="ModuleInstanceSnippetBuilder.Build"/> in
+    /// <c>SystemVerilogCore</c>, which the VS Code extension also uses (through
+    /// <c>rtl/snippet</c> and the completion adapter), so the editor and the
+    /// extension insert the same instantiation. This class is only the editor's
+    /// entry point.
     /// </para>
     /// </summary>
     public class ModuleInstanceSnippet : CodeEditor2.Snippets.InteractiveSnippet
     {
         private readonly string moduleName;
 
+        /// <remarks>
+        /// The base text is the MODULE NAME, not the tool id: the base
+        /// <c>ToolItem.Text</c> is what the autocomplete contract reports as
+        /// <c>Label</c>, so a candidate listed in the editor's popup reads
+        /// "leaf" (the module), not "moduleInstance".
+        /// </remarks>
         public ModuleInstanceSnippet(string moduleName) : base(moduleName)
         {
             this.moduleName = moduleName;
@@ -55,53 +61,9 @@ namespace pluginVerilog.Data.VerilogCommon.EditorSnippets
             Verilog.ParsedDocument parsedDocument,
             int index,
             string? moduleName,
-            CoreBridge.SnippetAdapter.SnippetResult result)
+            SnippetProvider.SnippetResult result)
         {
-            ProjectProperty? projectProperty = file.ProjectProperty;
-            if (projectProperty == null)
-            {
-                result.Message = "the project has no Verilog property";
-                return;
-            }
-
-            if (string.IsNullOrEmpty(moduleName))
-            {
-                // no module chosen yet: hand the candidates to the host
-                foreach (string name in projectProperty.DefinitionNameSpace.GetNameList(
-                             x => x is Verilog.BuildingBlocks.Module))
-                {
-                    result.Candidates.Add(name);
-                }
-                if (result.Candidates.Count == 0) result.Message = "no module found in the project";
-                return;
-            }
-
-            Verilog.BuildingBlocks.Module? module = SnippetBuilder.ResolveModule(projectProperty, moduleName);
-            if (module == null)
-            {
-                result.Message = "module not found: " + moduleName;
-                return;
-            }
-
-            string instanceName = SnippetBuilder.MakeUniqueInstanceName(parsedDocument, index, moduleName);
-            string indent = SnippetBuilder.GetIndent(parsedDocument, index);
-            CoreBridge.SnippetTemplate template =
-                SnippetBuilder.BuildInstantiationTemplate(module, instanceName, indent, null);
-
-            List<CoreBridge.SnippetField> fields = new();
-            string plainText = template.ToPlainText(fields);
-
-            result.Snippets.Add(new CoreBridge.SnippetAdapter.SnippetEntry
-            {
-                Label = moduleName,
-                Detail = "instantiate " + moduleName,
-                Kind = CoreBridge.SnippetAdapter.SnippetKind.Insert,
-                Start = index,
-                End = index,
-                SnippetText = template.ToVscodeSnippet(),
-                PlainText = plainText,
-                Fields = fields,
-            });
+            ModuleInstanceSnippetBuilder.Build(file, parsedDocument, index, moduleName, result);
         }
     }
 }

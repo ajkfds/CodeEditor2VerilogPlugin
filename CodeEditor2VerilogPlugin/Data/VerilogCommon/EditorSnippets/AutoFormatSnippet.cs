@@ -1,5 +1,5 @@
-using System;
 using System.Threading.Tasks;
+using SystemVerilogCore.Snippets;
 
 namespace pluginVerilog.Data.VerilogCommon.EditorSnippets
 {
@@ -18,11 +18,8 @@ namespace pluginVerilog.Data.VerilogCommon.EditorSnippets
     /// </para>
     ///
     /// <para>
-    /// Moved out of <c>SystemVerilogCore.Verilog.Snippets</c>: the snippet classes
-    /// that derive from the editor's <c>InteractiveSnippet</c> are editor-side
-    /// consumers, not part of the parser. Only <c>SnippetBuilder</c> (UI-free
-    /// text generation, used by <c>CoreBridge.SnippetAdapter</c>) stays under
-    /// <c>Verilog/</c>.
+    /// The text is built by <see cref="AutoFormatSnippetBuilder.Build"/> in
+    /// <c>SystemVerilogCore</c>. This class is only the editor's entry point.
     /// </para>
     /// </summary>
     public class AutoFormatSnippet : CodeEditor2.Snippets.InteractiveSnippet
@@ -44,51 +41,9 @@ namespace pluginVerilog.Data.VerilogCommon.EditorSnippets
         public static void Build(
             Verilog.ParsedDocument parsedDocument,
             int index,
-            CoreBridge.SnippetAdapter.SnippetResult result)
+            SnippetProvider.SnippetResult result)
         {
-            Verilog.Items.ModuleInstantiation? instantiation =
-                SnippetBuilder.FindInstantiationAt(parsedDocument, index);
-            if (instantiation == null)
-            {
-                result.Message = "the caret is not inside a module instantiation";
-                return;
-            }
-            if (instantiation.LastIndexReference == null)
-            {
-                result.Message = "the instantiation has no known extent";
-                return;
-            }
-
-            int start = SnippetBuilder.LastIndex(instantiation.BeginIndexReference);
-            int end = SnippetBuilder.LastIndex(instantiation.LastIndexReference) + 1;
-            string indent = SnippetBuilder.GetIndent(parsedDocument, start);
-
-            // CreateString returns the statement without the trailing
-            // semicolon; the replaced range covers it, so keep it.
-            string? text = instantiation.CreateString(indent);
-            if (string.IsNullOrEmpty(text))
-            {
-                result.Message = "the instantiation could not be reformatted";
-                return;
-            }
-            if (!text.TrimEnd().EndsWith(";", StringComparison.Ordinal))
-            {
-                text = text.TrimEnd() + ";";
-            }
-
-            result.Snippets.Add(new CoreBridge.SnippetAdapter.SnippetEntry
-            {
-                Label = "autoFormat",
-                Detail = "reformat " + instantiation.Name,
-                Kind = CoreBridge.SnippetAdapter.SnippetKind.Replace,
-                Start = start,
-                End = end,
-                SnippetText = text,
-                // No tab stops: the reformatted text is literal (any '$' or
-                // '}' in a port expression must not be read as snippet syntax),
-                // so the plain text is what both hosts insert.
-                PlainText = text,
-            });
+            AutoFormatSnippetBuilder.Build(parsedDocument, index, result);
         }
     }
 }

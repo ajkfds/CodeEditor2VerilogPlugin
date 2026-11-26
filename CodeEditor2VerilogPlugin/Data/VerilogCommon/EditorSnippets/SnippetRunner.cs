@@ -2,6 +2,7 @@ using Avalonia.Input;
 using CodeEditor2.Views;
 using pluginVerilog.CoreBridge;
 using SystemVerilogCore.Verilog;
+using SystemVerilogCore.Snippets;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 namespace pluginVerilog.Data.VerilogCommon.EditorSnippets
 {
     /// <summary>
-    /// Runs a <see cref="SnippetAdapter"/> snippet in the desktop editor.
+    /// Runs a <see cref="SnippetProvider"/> snippet in the desktop editor.
     ///
     /// <para>
     /// The snippet logic lives in the snippet classes of this folder
@@ -41,7 +42,7 @@ namespace pluginVerilog.Data.VerilogCommon.EditorSnippets
         private string? argument;
 
         private CodeEditor2.CodeEditor.CodeDocument? document;
-        private SnippetAdapter.SnippetEntry? entry;
+        private SnippetProvider.SnippetEntry? entry;
         private int? checkLine;
 
         /// <summary>
@@ -83,14 +84,14 @@ namespace pluginVerilog.Data.VerilogCommon.EditorSnippets
             document = file.CodeDocument;
             if (document == null) return;
 
-            SnippetAdapter.SnippetEntry? resolved = await ResolveEntryAsync(file);
+            SnippetProvider.SnippetEntry? resolved = await ResolveEntryAsync(file);
             if (resolved == null) return;
             entry = resolved;
 
             int caret = document.CaretIndex;
-            string indent = GetIndent(document, entry.Kind == SnippetAdapter.SnippetKind.Replace ? entry.Start : caret);
+            string indent = GetIndent(document, entry.Kind == SnippetProvider.SnippetKind.Replace ? entry.Start : caret);
 
-            if (entry.Kind == SnippetAdapter.SnippetKind.Replace)
+            if (entry.Kind == SnippetProvider.SnippetKind.Replace)
             {
                 document.Replace(entry.Start, entry.End - entry.Start, 0, entry.PlainText);
             }
@@ -109,7 +110,7 @@ namespace pluginVerilog.Data.VerilogCommon.EditorSnippets
             // highlight too so their position is tracked, but they are never
             // asked - their text is copied from the field they mirror.
             CodeEditor2.Controller.CodeEditor.PostClearHighlight();
-            int fieldStart = entry.Kind == SnippetAdapter.SnippetKind.Replace ? entry.Start : caret;
+            int fieldStart = entry.Kind == SnippetProvider.SnippetKind.Replace ? entry.Start : caret;
             List<int> askOrder = new();
             for (int i = 0; i < entry.Fields.Count; i++)
             {
@@ -135,7 +136,7 @@ namespace pluginVerilog.Data.VerilogCommon.EditorSnippets
         /// adapter is asked again - the same two step flow the VS Code
         /// extension uses (<c>showQuickPick</c> then re-request).
         /// </summary>
-        private async Task<SnippetAdapter.SnippetEntry?> ResolveEntryAsync(CodeEditor2.Data.TextFile file)
+        private async Task<SnippetProvider.SnippetEntry?> ResolveEntryAsync(CodeEditor2.Data.TextFile file)
         {
             if (document == null) return null;
             if (file is not Data.IVerilogRelatedFile verilogFile) return null;
@@ -146,7 +147,7 @@ namespace pluginVerilog.Data.VerilogCommon.EditorSnippets
             int selectionStart = document.SelectionStart;
             int selectionEnd = document.SelectionLast;
 
-            SnippetAdapter.SnippetResult result = SnippetAdapter.GetSnippets(
+            SnippetProvider.SnippetResult result = SnippetProvider.GetSnippets(
                 verilogFile, parsedDocument, caret, kind, argument, selectionStart, selectionEnd);
 
             if (result.Snippets.Count == 0 && result.Candidates.Count > 0)
@@ -154,7 +155,7 @@ namespace pluginVerilog.Data.VerilogCommon.EditorSnippets
                 string? picked = await PickCandidateAsync(result.Candidates);
                 if (string.IsNullOrEmpty(picked)) return null;
                 argument = picked;
-                result = SnippetAdapter.GetSnippets(
+                result = SnippetProvider.GetSnippets(
                     verilogFile, parsedDocument, caret, kind, argument, selectionStart, selectionEnd);
             }
 

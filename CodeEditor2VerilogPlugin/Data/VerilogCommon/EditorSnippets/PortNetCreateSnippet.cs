@@ -1,21 +1,20 @@
-using System.Collections.Generic;
 using System.Threading.Tasks;
 // Moved out of SystemVerilogCore.Verilog (editor-side consumer), so the parser
 // namespace it used to inherit is imported explicitly.
 using SystemVerilogCore.Verilog;
-// SnippetBuilder now lives in the parent namespace
-// (pluginVerilog.Data.VerilogCommon), which is already in scope here.
+using SystemVerilogCore.Snippets;
 
 namespace pluginVerilog.Data.VerilogCommon.EditorSnippets
 {
     /// <summary>
-    /// The editor's "portConnectionCreate" tool: rewrites the module
-    /// instantiation under the caret, filling every port connection (and
-    /// declaring the nets the connections need).
+    /// The editor's "Fill Port Connections" tool: rewrite the instantiation at
+    /// the caret with one named connection per port, deriving a signal name from
+    /// each unconnected port.
     ///
     /// <para>
-    /// The text is built by <see cref="Build"/> here; <see cref="SnippetRunner"/>
-    /// inserts it and walks the fields.
+    /// The text is built by
+    /// <see cref="PortConnectionCreateSnippetBuilder.Build"/> in
+    /// <c>SystemVerilogCore</c>. This class is only the editor's entry point.
     /// </para>
     /// </summary>
     public class PortConnectionCreateSnippet : CodeEditor2.Snippets.InteractiveSnippet
@@ -37,52 +36,9 @@ namespace pluginVerilog.Data.VerilogCommon.EditorSnippets
         public static void Build(
             Verilog.ParsedDocument parsedDocument,
             int index,
-            CoreBridge.SnippetAdapter.SnippetResult result)
+            SnippetProvider.SnippetResult result)
         {
-            Verilog.Items.ModuleInstantiation? instantiation =
-                SnippetBuilder.FindInstantiationAt(parsedDocument, index);
-            if (instantiation == null)
-            {
-                result.Message = "the caret is not inside a module instantiation";
-                return;
-            }
-            if (instantiation.LastIndexReference == null) return;
-
-            Verilog.BuildingBlocks.Module? module =
-                instantiation.GetInstancedBuildingBlock() as Verilog.BuildingBlocks.Module;
-            if (module == null)
-            {
-                result.Message = "the instantiated module could not be resolved";
-                return;
-            }
-
-            int start = SnippetBuilder.LastIndex(instantiation.BeginIndexReference);
-            int end = SnippetBuilder.LastIndex(instantiation.LastIndexReference) + 1;
-            string indent = SnippetBuilder.GetIndent(parsedDocument, start);
-
-            // The enclosing building block is what decides whether a derived
-            // signal name still has to be declared, so the tool has to know it.
-            // The replacement range starts inside the instance, so looking the
-            // block up at "start" gives the module the instantiation lives in.
-            Verilog.BuildingBlocks.BuildingBlock? enclosing = parsedDocument.GetBuildingBlockAt(start);
-
-            CoreBridge.SnippetTemplate template = SnippetBuilder.BuildInstantiationTemplate(
-                module, instantiation.Name, indent, instantiation, enclosing);
-
-            List<CoreBridge.SnippetField> fields = new();
-            string plainText = template.ToPlainText(fields);
-
-            result.Snippets.Add(new CoreBridge.SnippetAdapter.SnippetEntry
-            {
-                Label = "portConnectionCreate",
-                Detail = "fill the connections of " + instantiation.Name,
-                Kind = CoreBridge.SnippetAdapter.SnippetKind.Replace,
-                Start = start,
-                End = end,
-                SnippetText = template.ToVscodeSnippet(),
-                PlainText = plainText,
-                Fields = fields,
-            });
+            PortConnectionCreateSnippetBuilder.Build(parsedDocument, index, result);
         }
     }
 }

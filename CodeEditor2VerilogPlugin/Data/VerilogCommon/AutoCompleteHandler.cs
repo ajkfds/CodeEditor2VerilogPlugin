@@ -113,7 +113,8 @@ namespace pluginVerilog.Data.VerilogCommon
             // catalog holds no Avalonia types, so the entries map to the
             // editor's ToolItem subclasses here (those do carry icons).
             List<ToolItem> toolItems = new List<ToolItem>();
-            foreach (CoreBridge.ToolMenuCatalog.Entry entry in CoreBridge.ToolMenuCatalog.EditorTools)
+            foreach (SystemVerilogCore.Snippets.ToolMenuCatalog.Entry entry
+                     in CoreBridge.ToolMenuCatalog.EditorTools)
             {
                 ToolItem? toolItem = CreateToolItem(entry.Id);
                 if (toolItem == null) continue;

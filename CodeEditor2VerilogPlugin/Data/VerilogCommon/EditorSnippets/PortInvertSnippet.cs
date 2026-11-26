@@ -1,10 +1,8 @@
-using System.Collections.Generic;
 using System.Threading.Tasks;
 // Moved out of SystemVerilogCore.Verilog (editor-side consumer), so the parser
 // namespace it used to inherit is imported explicitly.
 using SystemVerilogCore.Verilog;
-// SnippetBuilder now lives in the parent namespace
-// (pluginVerilog.Data.VerilogCommon), which is already in scope here.
+using SystemVerilogCore.Snippets;
 
 namespace pluginVerilog.Data.VerilogCommon.EditorSnippets
 {
@@ -14,8 +12,9 @@ namespace pluginVerilog.Data.VerilogCommon.EditorSnippets
     /// declaration, preserving the original whitespace and comments.
     ///
     /// <para>
-    /// The text is built by <see cref="Build"/> here, so the desktop editor and
-    /// the VS Code extension invert identically.
+    /// The text is built by <see cref="PortInvertSnippetBuilder.Build"/> in
+    /// <c>SystemVerilogCore</c>, so the desktop editor and the VS Code extension
+    /// invert identically. This class is only the editor's entry point.
     /// </para>
     /// </summary>
     public class PortInvertSnippet : CodeEditor2.Snippets.InteractiveSnippet
@@ -38,42 +37,9 @@ namespace pluginVerilog.Data.VerilogCommon.EditorSnippets
             Verilog.ParsedDocument parsedDocument,
             int selectionStart,
             int selectionEnd,
-            CoreBridge.SnippetAdapter.SnippetResult result)
+            SnippetProvider.SnippetResult result)
         {
-            // Through the document contract: a host that drives the parse itself
-            // (the language server) has no concrete plugin document, and reading
-            // through the contract is all this needs (length + substring).
-            SystemVerilogCore.Documents.IVerilogTextDocument? doc = parsedDocument.VerilogDocument;
-            if (doc == null) return;
-            if (selectionStart < 0) selectionStart = 0;
-            if (selectionEnd > doc.Length) selectionEnd = doc.Length;
-            if (selectionEnd <= selectionStart)
-            {
-                result.Message = "select the port declarations to invert first";
-                return;
-            }
-
-            string selected = doc.CreateString(selectionStart, selectionEnd - selectionStart);
-            string[] lines = selected.Split('\n');
-            List<string> processed = new List<string>(lines.Length);
-            foreach (string line in lines)
-            {
-                processed.Add(SnippetBuilder.InvertPortLine(line));
-            }
-            string text = string.Join("\n", processed);
-
-            result.Snippets.Add(new CoreBridge.SnippetAdapter.SnippetEntry
-            {
-                Label = "PortInvert",
-                Detail = "invert the selected port declarations",
-                Kind = CoreBridge.SnippetAdapter.SnippetKind.Replace,
-                Start = selectionStart,
-                End = selectionEnd,
-                SnippetText = text,
-                // Literal replacement: the inverted declarations contain no tab
-                // stops, so both hosts insert the same text.
-                PlainText = text,
-            });
+            PortInvertSnippetBuilder.Build(parsedDocument, selectionStart, selectionEnd, result);
         }
     }
 }
