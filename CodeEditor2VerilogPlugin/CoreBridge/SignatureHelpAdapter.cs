@@ -1,6 +1,7 @@
 
 using System;
 using System.Collections.Generic;
+using pluginVerilog.Data.VerilogCommon;
 
 namespace pluginVerilog.CoreBridge
 {
@@ -57,9 +58,10 @@ namespace pluginVerilog.CoreBridge
             }
             CodeEditor2.CodeEditor.CodeDocument? codeDocument = file.CodeDocument;
             if (codeDocument == null) return null;
-            if (parsedDocument.CodeDocument != null && codeDocument.Length != parsedDocument.CodeDocument.Length)
+            pluginVerilog.CodeEditor.CodeDocument? parsedCodeDocument = parsedDocument.EditorCodeDocument();
+            if (parsedCodeDocument != null && codeDocument.Length != parsedCodeDocument.Length)
             {
-                codeDocument.CopyTextOnlyFrom(parsedDocument.CodeDocument);
+                codeDocument.CopyTextOnlyFrom(parsedCodeDocument);
             }
             if (index > codeDocument.Length) return null;
 

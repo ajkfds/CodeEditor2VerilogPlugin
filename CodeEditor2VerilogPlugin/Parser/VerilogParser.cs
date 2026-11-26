@@ -1,5 +1,6 @@
 using CodeEditor2.CodeEditor.Parser;
 using pluginVerilog.Data;
+using pluginVerilog.Data.VerilogCommon;
 using pluginVerilog.Verilog.BuildingBlocks;
 using System;
 using System.Collections.Generic;
@@ -47,12 +48,18 @@ namespace pluginVerilog.Parser
                 verilogRelatedFile, key, null, DocumentParser.ToVerilogParseMode(parseMode));
             parsedDocument.Version = verilogRelatedFile.CodeDocument.Version;
 
-            // swap CodeDocument to new one
-            CodeEditor.CodeDocument originalCodeDocument = parsedDocument.CodeDocument;
+            // swap the buffer to a fresh one owned by this file
+            //
+            // The parse result only exposes the UI-free document contract, so the
+            // editor document is built here and published through it. This used
+            // to read/write a concrete `CodeDocument` property on the parse
+            // result, which kept the parser bound to the editor assembly.
+            CodeEditor.CodeDocument? originalCodeDocument = parsedDocument.EditorCodeDocument();
 
-            parsedDocument.CodeDocument = new CodeEditor.CodeDocument(verilogRelatedFile); // use verilog codeDocument
-            parsedDocument.CodeDocument.CopyTextOnlyFrom(originalCodeDocument);
-            this.Document = parsedDocument.CodeDocument;
+            CodeEditor.CodeDocument codeDocument = new CodeEditor.CodeDocument(verilogRelatedFile);
+            if (originalCodeDocument != null) codeDocument.CopyTextOnlyFrom(originalCodeDocument);
+            parsedDocument.VerilogDocument = codeDocument;
+            this.Document = codeDocument;
 
             if (verilogRelatedFile is Data.VerilogFile)
             {
@@ -128,11 +135,14 @@ namespace pluginVerilog.Parser
             parsedDocument = new Verilog.ParsedDocument(
                 verilogRelatedFile, key, null, DocumentParser.ToVerilogParseMode(parseMode));
 
-            // swap CodeDocument to new one
-            CodeEditor.CodeDocument originalCodeDocument = parsedDocument.CodeDocument;
-            parsedDocument.CodeDocument = new CodeEditor.CodeDocument(verilogRelatedFile); // use verilog codeDocument
-            parsedDocument.CodeDocument.CopyTextOnlyFrom(originalCodeDocument);
-            this.Document = parsedDocument.CodeDocument;
+            // swap the buffer to a fresh one owned by this file
+            // (see the remark in the other constructor: the parse result exposes
+            // only the UI-free document contract now)
+            CodeEditor.CodeDocument? originalCodeDocument = parsedDocument.EditorCodeDocument();
+            CodeEditor.CodeDocument codeDocument = new CodeEditor.CodeDocument(verilogRelatedFile);
+            if (originalCodeDocument != null) codeDocument.CopyTextOnlyFrom(originalCodeDocument);
+            parsedDocument.VerilogDocument = codeDocument;
+            this.Document = codeDocument;
 
             parsedDocument.SystemVerilog = systemVerilog;
             parsedDocument.Version = verilogRelatedFile.CodeDocument.Version;

@@ -6,6 +6,7 @@ using CodeEditor2.CodeEditor.PopupHint;
 using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
 using pluginVerilog.CodeEditor;
+using pluginVerilog.Data.VerilogCommon;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.Items;
 using System;
@@ -298,7 +299,7 @@ namespace pluginVerilog.Data
                 TextFile? textFile = await CodeEditor2.Controller.CodeEditor.GetTextFileAsync();
                 if (textFile == this)
                 {
-                    if(CodeDocument!=null) textFile.CodeDocument?.CopyColorMarkFrom(newParsedDocument.CodeDocument);
+                    if(CodeDocument!=null) textFile.CodeDocument?.CopyColorMarkFrom(newParsedDocument.EditorCodeDocument());
                     if(ParsedDocument != null) CodeEditor2.Controller.MessageView.Update(newParsedDocument);
                     CodeEditor2.Controller.CodeEditor.PostRefresh();
                 }

@@ -40,7 +40,7 @@ namespace pluginVerilog.Data.VerilogCommon.EditorSnippets
             int selectionEnd,
             CoreBridge.SnippetAdapter.SnippetResult result)
         {
-            pluginVerilog.CodeEditor.CodeDocument? doc = parsedDocument.CodeDocument;
+            pluginVerilog.CodeEditor.CodeDocument? doc = parsedDocument.EditorCodeDocument();
             if (doc == null) return;
             if (selectionStart < 0) selectionStart = 0;
             if (selectionEnd > doc.Length) selectionEnd = doc.Length;

@@ -361,28 +361,12 @@ namespace pluginVerilog.Verilog
             }
         }
 
-        /// <summary>
-        /// The same buffer as the plugin's concrete document, or null when the
-        /// parser supplied a contract-only buffer (macro expansion, hint text).
-        ///
-        /// <para>
-        /// Only the data layer needs the concrete type: it copies the colour
-        /// table out of the parse result. Everything the parser does goes
-        /// through <see cref="VerilogDocument"/>.
-        /// </para>
-        /// </summary>
-        [JsonIgnore]
-        public pluginVerilog.CodeEditor.CodeDocument? CodeDocument
-        {
-            get
-            {
-                return verilogDocument as pluginVerilog.CodeEditor.CodeDocument;
-            }
-            set
-            {
-                verilogDocument = value!;
-            }
-        }
+        // NOTE: a `CodeDocument` view used to sit here, casting VerilogDocument
+        // to the plugin's concrete document. It was the last thing keeping this
+        // file bound to the editor assembly. The data-layer consumers now narrow
+        // through Data/VerilogCommon/ParsedDocumentCodeDocumentExtensions
+        // (`EditorCodeDocument()`), and the parser writes through
+        // VerilogDocument only.
 
         /// <summary>
         /// The plugin property of the project this file belongs to, captured

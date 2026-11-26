@@ -1,6 +1,7 @@
 
 using System;
 using System.Collections.Generic;
+using pluginVerilog.Data.VerilogCommon;
 
 namespace pluginVerilog.CoreBridge
 {
@@ -47,7 +48,7 @@ namespace pluginVerilog.CoreBridge
 
             // the plugin's CodeDocument adds GetIndentString on top of the
             // editor's; the parse result carries that concrete type
-            pluginVerilog.CodeEditor.CodeDocument? codeDocument = parsedDocument.CodeDocument;
+            pluginVerilog.CodeEditor.CodeDocument? codeDocument = parsedDocument.EditorCodeDocument();
             if (codeDocument == null) return edits;
 
             foreach (Verilog.BuildingBlocks.BuildingBlock block

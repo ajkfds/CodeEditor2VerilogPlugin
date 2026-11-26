@@ -7,6 +7,7 @@ using CodeEditor2.CodeEditor.PopupHint;
 using CodeEditor2.CodeEditor.PopupMenu;
 using CodeEditor2.Data;
 using pluginVerilog.CodeEditor;
+using pluginVerilog.Data.VerilogCommon;
 using pluginVerilog.Verilog;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.Statements;
@@ -342,7 +343,7 @@ namespace pluginVerilog.Data
                 if (item.CodeDocument == null) continue;
 
                 if (header.VerilogParsedDocument == null) continue;
-                item.CodeDocument.CopyColorMarkFrom(header.VerilogParsedDocument.CodeDocument);
+                item.CodeDocument.CopyColorMarkFrom(header.VerilogParsedDocument.EditorCodeDocument());
 
                 // If this include file is selected in the editor, update the editor display.
                 if (item == currentItem && currentTextFile != null)

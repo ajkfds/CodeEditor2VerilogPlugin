@@ -1,5 +1,6 @@
 
 using System.Collections.Generic;
+using pluginVerilog.Data.VerilogCommon;
 
 namespace pluginVerilog.CoreBridge
 {
@@ -35,7 +36,7 @@ namespace pluginVerilog.CoreBridge
         public static List<Segment> GetSegments(Verilog.ParsedDocument parsedDocument)
         {
             List<Segment> segments = new List<Segment>();
-            CodeEditor.CodeDocument? document = parsedDocument?.CodeDocument;
+            CodeEditor.CodeDocument? document = parsedDocument?.EditorCodeDocument();
             if (document == null) return segments;
 
             CodeEditor2.CodeEditor.CodeDrawStyle drawStyle = document.TextFile?.DrawStyle as CodeEditor2.CodeEditor.CodeDrawStyle
