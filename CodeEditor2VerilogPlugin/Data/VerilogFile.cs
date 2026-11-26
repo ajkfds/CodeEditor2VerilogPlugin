@@ -24,8 +24,26 @@ using System.Threading.Tasks;
 namespace pluginVerilog.Data
 {
     public class VerilogFile : CodeEditor2.Data.TextFile, IVerilogRelatedFile,
-        SystemVerilogCore.Verilog.IVerilogNameSpaceFile
+        SystemVerilogCore.Verilog.IVerilogNameSpaceFile,
+        // The write side of the instance-parse table. A host that drives a parse
+        // itself (SystemVerilogCore.ParseEngine) records the parameter-overridden
+        // result through this contract, the same table the editor fills while
+        // accepting a parse result.
+        SystemVerilogCore.Documents.IVerilogSourceFileInstanceCache
     {
+        /// <summary>
+        /// Records an instance parse result, as the UI-free cache contract.
+        ///
+        /// <para>
+        /// Forwards to <see cref="RegisterInstanceParsedDocument(string,
+        /// SystemVerilogCore.Parsing.IParsedDocument, InstanceTextFile?)"/>; no
+        /// instance object is materialised, which is exactly what a UI-less host
+        /// wants.
+        /// </para>
+        /// </summary>
+        void SystemVerilogCore.Documents.IVerilogSourceFileInstanceCache.RegisterInstanceParsedDocument(
+            string instanceKey, SystemVerilogCore.Parsing.IParsedDocument parsedDocument) =>
+            RegisterInstanceParsedDocument(instanceKey, parsedDocument, null);
         /// <summary>
         /// The root-level named element called <paramref name="name"/>, as the
         /// UI-free name-space contract.
