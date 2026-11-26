@@ -274,12 +274,12 @@ namespace pluginVerilog.Views
 
             private List<ColorLabel> GetCantidates()
             {
-                // The matching rule lives in CoreBridge.AutoConnectAdapter so
+                // The matching rule lives in SystemVerilogCore.AutoConnect so
                 // the desktop editor and the VS Code webview (rtl/autoConnect)
                 // offer exactly the same candidates. Keeping a copy here made
                 // the two drift whenever one side was fixed.
                 List<ColorLabel> colorLabels = new List<ColorLabel>();
-                foreach (string candidate in CoreBridge.AutoConnectAdapter.GetCandidates(Port, BuildingBlock))
+                foreach (string candidate in SystemVerilogCore.AutoConnect.AutoConnectBuilder.GetCandidates(Port, BuildingBlock))
                 {
                     ColorLabel label = new ColorLabel();
                     label.AppendText(candidate, Avalonia.Media.Colors.Red);

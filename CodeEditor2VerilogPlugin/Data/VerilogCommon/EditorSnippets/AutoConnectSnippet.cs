@@ -18,7 +18,7 @@ namespace pluginVerilog.Data.VerilogCommon.EditorSnippets
     ///
     /// <para>
     /// The decision of <b>which signal matches a port</b> lives in
-    /// <see cref="CoreBridge.AutoConnectAdapter.GetCandidates"/>, which the VS
+    /// <see cref="SystemVerilogCore.AutoConnect.AutoConnectBuilder.GetCandidates"/>, which the VS
     /// Code webview (<c>rtl/autoConnect</c>) also calls, so both hosts offer the
     /// same candidates. This class is the desktop renderer: it opens
     /// <see cref="Views.AutoConnectWindow"/> for the instantiation under the
