@@ -150,5 +150,25 @@ namespace pluginVerilog.Verilog
         /// </para>
         /// </summary>
         BuildingBlock? GetInstancedBuildingBlock(IBuildingBlockInstantiation instantiation);
+
+        // ---- instance item creation --------------------------------------
+
+        /// <summary>
+        /// Creates the item-tree instance for an on-demand parse of
+        /// <paramref name="instantiation"/>, or null when this host has no item
+        /// tree.
+        ///
+        /// <para>
+        /// A module instantiated with parameter overrides is parsed again with
+        /// those overrides applied. The parser drives that parse itself, but the
+        /// editor records the result as an item-tree node
+        /// (<c>VerilogModuleInstance</c>), which is a host type. Asking the host
+        /// to build it is what lets the parse site stop naming the editor's
+        /// instance class; a host without an item tree (the language server)
+        /// returns null and the instance is not recorded.
+        /// </para>
+        /// </summary>
+        SystemVerilogCore.Projects.IVerilogInstanceSource? CreateInstanceItem(
+            IBuildingBlockInstantiation instantiation);
     }
 }

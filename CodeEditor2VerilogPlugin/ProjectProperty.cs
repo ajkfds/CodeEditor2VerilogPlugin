@@ -63,6 +63,26 @@ namespace pluginVerilog
         string Verilog.IVerilogParserSettings.AnnotationKeyValueDelimiter =>
             AnnotationKeyValueDelimiter;
 
+        /// <summary>
+        /// Builds the item-tree instance the parser records after it parses a
+        /// parameter-overridden module on demand.
+        ///
+        /// <para>
+        /// The concrete instance (<see cref="Data.VerilogModuleInstance"/>) is an
+        /// editor item, so the parser cannot name it. It asks here instead and
+        /// gets the instance back as the UI-free
+        /// <see cref="SystemVerilogCore.Projects.IVerilogInstanceSource"/>
+        /// contract.
+        /// </para>
+        /// </summary>
+        SystemVerilogCore.Projects.IVerilogInstanceSource?
+            Verilog.IVerilogParserSettings.CreateInstanceItem(
+                Verilog.Items.IBuildingBlockInstantiation instantiation)
+        {
+            if (instantiation is not Verilog.Items.ModuleInstantiation moduleInstantiation) return null;
+            return Data.VerilogModuleInstance.Create(moduleInstantiation);
+        }
+
         // The ID is required by the parser-facing settings contract so a parse
         // site can identify these settings without knowing the editor type.
         string SystemVerilogCore.Projects.IVerilogProjectSettings.ID => Plugin.StaticID;

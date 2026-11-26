@@ -1,5 +1,4 @@
 //using Microsoft.CodeAnalysis.CSharp.Syntax;
-using pluginVerilog.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.Variables;
@@ -444,12 +443,13 @@ namespace pluginVerilog.Verilog.Items
                         && !word.Prototype && !word.IsPartialParse && word.Active
                         && word.CompletionContext == null)
                     {
-                        VerilogModuleInstance? instance = VerilogModuleInstance.Create(moduleInstantiation);
-                        // Go through the UI-free factory: CreateDocumentParser
-                        // belongs to the editor's parser base class, and naming
-                        // it here is what kept this file bound to the editor
-                        // assembly. CreateVerilogDocumentParser returns the
-                        // contract (IVerilogDocumentParser) instead.
+                        // The instance is a host item (the editor's
+                        // VerilogModuleInstance), so the host builds it. Asking
+                        // through the settings contract is what lets this parse
+                        // site stop naming the editor assembly; a host without an
+                        // item tree returns null and nothing is recorded.
+                        SystemVerilogCore.Projects.IVerilogInstanceSource? instance =
+                            sourceProjectProperty.CreateInstanceItem(moduleInstantiation);
                         var baseParser = instance?.CreateVerilogDocumentParser(
                             SystemVerilogCore.Parsing.VerilogParseMode.SingleHierParse,
                             word.CancellationToken);
@@ -463,7 +463,6 @@ namespace pluginVerilog.Verilog.Items
                                 // Through the contract: the parser does not name
                                 // the editor's ItemList.
                                 word.RootParsedDocument.File?.ChildItems?.AddOrUpdate(instance.Name, instance);
-                                Verilog.ParsedDocument vParsedDocument = (Verilog.ParsedDocument)baseParser.ParsedDocument;
                                 await instance.AcceptVerilogParsedDocumentAsync(baseParser);
                             }
                         }

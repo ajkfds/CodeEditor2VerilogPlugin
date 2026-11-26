@@ -18,7 +18,12 @@ using System.Threading.Tasks;
 
 namespace pluginVerilog.Data
 {
-    public class VerilogModuleInstance : InstanceTextFile, IVerilogRelatedFile
+    public class VerilogModuleInstance : InstanceTextFile, IVerilogRelatedFile,
+        // The parser needs to hold an instance it asked the host to create
+        // without naming this class: IVerilogRelatedFile already supplies the
+        // source-file half, and IVerilogItem the item-tree half (Name /
+        // RelativePath / Items), which the base classes satisfy.
+        SystemVerilogCore.Projects.IVerilogInstanceSource
     {
         // locked properties --------------------------------------------------
 
