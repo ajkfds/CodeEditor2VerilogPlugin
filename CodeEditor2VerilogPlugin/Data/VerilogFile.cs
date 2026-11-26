@@ -29,8 +29,19 @@ namespace pluginVerilog.Data
         // itself (SystemVerilogCore.ParseEngine) records the parameter-overridden
         // result through this contract, the same table the editor fills while
         // accepting a parse result.
-        SystemVerilogCore.Documents.IVerilogSourceFileInstanceCache
+        SystemVerilogCore.Documents.IVerilogSourceFileInstanceCache,
+        // The write side of "this file's parse result". A host that drives a
+        // parse itself stores the result here; everything downstream reads it
+        // back through IVerilogSourceFile.VerilogParsedResult.
+        SystemVerilogCore.Documents.IVerilogSourceFileParseCache
     {
+        /// <summary>
+        /// Stores the parse result, as the UI-free cache contract. Same slot as
+        /// the editor's <c>AcceptParsedDocumentAsync</c> fills.
+        /// </summary>
+        void SystemVerilogCore.Documents.IVerilogSourceFileParseCache.SetVerilogParsedResult(
+            SystemVerilogCore.Parsing.IParsedDocument parsedDocument) =>
+            ParsedDocument = parsedDocument;
         /// <summary>
         /// Records an instance parse result, as the UI-free cache contract.
         ///
