@@ -213,6 +213,15 @@ namespace pluginVerilog.Data
             if (CodeDocument != null) return;
             SourceVerilogFile?.CreateCodeDocumentForParse();
         }
+
+        /// <summary>
+        /// An instance has no buffer of its own: it delegates to the source file,
+        /// which is the one the text belongs to.
+        /// </summary>
+        public void CreateCodeDocumentForText(string text)
+        {
+            SourceVerilogFile?.CreateCodeDocumentForText(text);
+        }
         internal Dictionary<string, Verilog.Expressions.Expression> _parameterOverrides = new Dictionary<string, Verilog.Expressions.Expression>();
         public required Dictionary<string, Verilog.Expressions.Expression> ParameterOverrides
         {

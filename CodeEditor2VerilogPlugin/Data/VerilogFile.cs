@@ -52,6 +52,22 @@ namespace pluginVerilog.Data
             if (CodeDocument != null) return;
             CodeDocument = new CodeEditor.CodeDocument(this);
         }
+
+        /// <summary>
+        /// Ensures the buffer holds <paramref name="text"/>, creating it when the
+        /// file was never loaded.
+        /// </summary>
+        public void CreateCodeDocumentForText(string text)
+        {
+            if (CodeDocument == null)
+            {
+                CodeDocument = new CodeEditor.CodeDocument(this);
+            }
+            if (CodeDocument == null) return;
+            if (string.Equals(CodeDocument.CreateString(), text, StringComparison.Ordinal)) return;
+            CodeDocument.CopyTextOnlyFrom(new CodeEditor.CodeDocument(text));
+        }
+
         /// <summary>
         /// Records an instance parse result, as the UI-free cache contract.
         ///

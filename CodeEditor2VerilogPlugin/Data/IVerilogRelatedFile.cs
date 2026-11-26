@@ -81,6 +81,28 @@ namespace pluginVerilog.Data
         bool SystemVerilogCore.Documents.IVerilogSourceFile.IsSystemVerilog => SystemVerilog;
 
         /// <summary>
+        /// Forwards to <see cref="CreateCodeDocumentForText"/>, which makes a
+        /// buffer holding the text the host parsed.
+        /// </summary>
+        void SystemVerilogCore.Documents.IVerilogSourceFile.PrepareVerilogTextDocument(string text) =>
+            CreateCodeDocumentForText(text);
+
+        /// <summary>
+        /// Ensures the buffer holds <paramref name="text"/>.
+        ///
+        /// <para>
+        /// The autocomplete partial parse reads the source text from the file's
+        /// buffer and the identifier-chain walk reads it too. A host that never
+        /// loaded the file (the language server) has no buffer, so one is created
+        /// here over the text that was parsed. An existing buffer whose text
+        /// differs is refilled, because the parse result and the buffer must
+        /// describe the same text.
+        /// </para>
+        /// </summary>
+        /// <param name="text">The text the buffer must hold.</param>
+        void CreateCodeDocumentForText(string text);
+
+        /// <summary>
         /// Forwards to the editor-facing <see cref="CreateVerilogDocumentParser"/>
         /// declared below, so the parser can drive a parse through the contract.
         /// </summary>
