@@ -330,9 +330,12 @@ namespace pluginVerilog.Verilog.Items
                 if (word.RootParsedDocument.ParseMode == SystemVerilogCore.Parsing.VerilogParseMode.EditParse
                     && word.ProjectProperty.DefinitionNameSpace.Get(scopeRef.BuildingBlockName) == null)
                 {
-                    Data.IVerilogRelatedFile? targetFile =
+                    // The name space returns the UI-free source-file contract.
+                    // Only the parse result is needed here, and the contract
+                    // exposes it as VerilogParsedResult.
+                    SystemVerilogCore.Documents.IVerilogSourceFile? targetFile =
                         word.ProjectProperty.DefinitionNameSpace.GetFile(scopeRef.BuildingBlockName);
-                    if (targetFile.VerilogParsedDocument == null)
+                    if (targetFile.VerilogParsedResult == null)
                     {
                         // Go through the UI-free factory: CreateDocumentParser
                         // belongs to the editor's parser base class, and naming

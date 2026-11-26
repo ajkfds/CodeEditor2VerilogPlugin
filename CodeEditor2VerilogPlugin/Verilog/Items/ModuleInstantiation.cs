@@ -414,7 +414,11 @@ namespace pluginVerilog.Verilog.Items
                         effectiveModule = sourceProjectProperty.GetInstancedBuildingBlock(moduleInstantiation) as Module;
                     }
 
-                    VerilogFile? baseFile = sourceProjectProperty.DefinitionNameSpace.GetFile(moduleName) as VerilogFile;
+                    // The name space returns the UI-free source-file contract, so
+                    // no editor file type is needed here (only its presence is
+                    // checked, and the instance is built from the instantiation).
+                    SystemVerilogCore.Documents.IVerilogSourceFile? baseFile =
+                        sourceProjectProperty.DefinitionNameSpace.GetFile(moduleName);
 
                     // Parse the parameter-overridden instance right away when its
                     // parsed document is not available yet.
@@ -458,7 +462,7 @@ namespace pluginVerilog.Verilog.Items
                                 // project's item tree so the editor shows it.
                                 // Through the contract: the parser does not name
                                 // the editor's ItemList.
-                                word.RootParsedDocument.SourceFile?.ChildItems?.AddOrUpdate(instance.Name, instance);
+                                word.RootParsedDocument.File?.ChildItems?.AddOrUpdate(instance.Name, instance);
                                 Verilog.ParsedDocument vParsedDocument = (Verilog.ParsedDocument)baseParser.ParsedDocument;
                                 await instance.AcceptVerilogParsedDocumentAsync(baseParser);
                             }

@@ -1,4 +1,3 @@
-using pluginVerilog.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.DataObjects.Variables;
@@ -136,14 +135,16 @@ namespace pluginVerilog.Verilog.Items
         udp_instantiation ::= udp_identifier [ drive_strength ] [ delay2 ] udp_instance { , udp_instance } ;
         udp_instance ::= [ name_of_instance ] ( output_terminal , input_terminal { , input_terminal } )
         */
-        public static async Task<Func<Data.VerilogCommon.AutoCompleteItem, bool>> ParseAsync(WordScanner word, NameSpace nameSpace)
+        public static async Task<Func<SystemVerilogCore.Documents.IVerilogAutocompleteItem, bool>> ParseAsync(WordScanner word, NameSpace nameSpace)
         {
-            Func<Data.VerilogCommon.AutoCompleteItem, bool> itemFilter = (Data.VerilogCommon.AutoCompleteItem ac) =>
+            // The filter is typed with the UI-free candidate contract: it only
+            // reads the candidate's kind, and the concrete editor candidate type
+            // lives in the data layer. Both call sites ignore the return value,
+            // so nothing else has to change.
+            Func<SystemVerilogCore.Documents.IVerilogAutocompleteItem, bool> itemFilter =
+                (SystemVerilogCore.Documents.IVerilogAutocompleteItem ac) =>
             {
-                // Read the kind through the UI-free contract so this file does not
-                // depend on the candidate's concrete type.
-                SystemVerilogCore.Documents.SystemVerilogAutocompleteItemKind kind =
-                    ((SystemVerilogCore.Documents.IVerilogAutocompleteItem)ac).Kind;
+                SystemVerilogCore.Documents.SystemVerilogAutocompleteItemKind kind = ac.Kind;
                 if (kind == SystemVerilogCore.Documents.SystemVerilogAutocompleteItemKind.Keyword) return false;
                 if (kind == SystemVerilogCore.Documents.SystemVerilogAutocompleteItemKind.Task) return false;
                 return true;

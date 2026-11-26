@@ -109,7 +109,7 @@ namespace pluginVerilog.CodeEditor
             if (wordRef.IndexReference == null) return false;
             if (wordRef.IndexReference.ParsedDocument == null) return false;
 
-            file = wordRef.IndexReference.ParsedDocument.File;
+            file = wordRef.IndexReference.ParsedDocument.File as IVerilogRelatedFile;
             if (file == null) return false;
 
             if (wordRef.Length == 0) return false;
@@ -132,7 +132,7 @@ namespace pluginVerilog.CodeEditor
             if (wordRef.IndexReference == null) return false;
             if (wordRef.IndexReference.ParsedDocument == null) return false;
 
-            file = wordRef.IndexReference.ParsedDocument.File;
+            file = wordRef.IndexReference.ParsedDocument.File as IVerilogRelatedFile;
             if (file == null) return false;
             if (wordRef.Length == 0) return false;
             start = wordRef.Index;

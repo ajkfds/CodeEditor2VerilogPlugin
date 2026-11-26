@@ -45,9 +45,17 @@ namespace pluginVerilog
             // editor's ParsedDocument.Message. Registering a factory keeps the
             // parser's type independent.
             CodeEditor2.Views.MessageNodeFactory.Register<Verilog.ParsedDocument.Message>(
-                message => message.File == null
-                    ? null
-                    : new MessageView.MessageNode(message.File, message));
+                message => message.File as Data.IVerilogRelatedFile is Data.IVerilogRelatedFile file
+                    ? new MessageView.MessageNode(file, message)
+                    : null);
+
+            // Supply the `include wrapper the parser records. The wrapper is an
+            // item-tree node (VerilogHeaderInstance), so the UI-free parser
+            // cannot create one: it asks the project for a factory instead. This
+            // is the editor's only chance to install it - without it every
+            // `include would be reported as an unresolved file.
+            CodeEditor2.Data.Project.IncludeFileFactoryFactory =
+                project => new Data.EditorIncludeFileFactory(project);
 
             // register filetypes
             {

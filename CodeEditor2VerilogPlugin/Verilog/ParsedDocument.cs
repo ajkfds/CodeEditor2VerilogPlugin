@@ -1,5 +1,3 @@
-using pluginVerilog.CodeEditor;
-using pluginVerilog.Data;
 using pluginVerilog.Verilog.BuildingBlocks;
 using pluginVerilog.Verilog.DataObjects;
 using pluginVerilog.Verilog.Items;
@@ -80,31 +78,32 @@ namespace pluginVerilog.Verilog
         // nothing ever read it, so it only served to make the parser reference
         // the editor's document type. Removed from the contract and from here.
 
-        /// <summary>The file this result was parsed from, or null.</summary>
+        /// <summary>
+        /// The file this result was parsed from, as the UI-free contract, or
+        /// null when it has been collected.
+        /// </summary>
         [JsonIgnore]
-        public Data.IVerilogRelatedFile? TextFile
+        public SystemVerilogCore.Documents.IVerilogSourceFile? File
         {
             get
             {
-                if (!fileRef.TryGetTarget(out Data.IVerilogRelatedFile? file)) return null;
+                if (!fileRef.TryGetTarget(out SystemVerilogCore.Documents.IVerilogSourceFile? file)) return null;
                 return file;
             }
         }
 
         /// <summary>
-        /// The file this result was parsed from, as the UI-free contract.
+        /// Same object as <see cref="File"/>.
         ///
         /// <para>
-        /// Same object as <see cref="TextFile"/>. Kept as a separate member
-        /// rather than changing <see cref="TextFile"/>'s type because
-        /// editor-facing callers (include resolution, the item tree) need more
-        /// than the contract offers; parse-internal reads go through this one so
-        /// they do not name the editor assembly.
+        /// The name is kept because editor-facing call sites have always read
+        /// <c>TextFile</c>; the type is the contract now, so those call sites
+        /// narrow back to the editor's file type themselves. Parse-internal
+        /// reads use <see cref="File"/>.
         /// </para>
         /// </summary>
         [JsonIgnore]
-        public SystemVerilogCore.Documents.IVerilogSourceFile? SourceFile =>
-            TextFile;
+        public SystemVerilogCore.Documents.IVerilogSourceFile? TextFile => File;
 
         /// <summary>
         /// The project this file belongs to, as the UI-free contract.
@@ -119,18 +118,16 @@ namespace pluginVerilog.Verilog
         /// </para>
         /// </summary>
         [JsonIgnore]
-        public SystemVerilogCore.Projects.IVerilogProject? Project => TextFile?.Project;
+        public SystemVerilogCore.Projects.IVerilogProject? Project => File?.VerilogProject;
 
         /// <summary>
         /// Builds a parse result for a file.
         ///
         /// <para>
-        /// The constructor takes the UI-free source file contract, so nothing it
-        /// touches names the editor assembly. The file is still stored (weakly)
-        /// as the editor's <c>Data.IVerilogRelatedFile</c> because
-        /// <see cref="File"/> is handed back to editor-facing callers that need
-        /// more than the contract offers (the item tree, for instance); the cast
-        /// is safe because only that type can reach this constructor.
+        /// The constructor takes the UI-free source file contract and stores it
+        /// as the contract, so nothing here names the editor assembly. Editor
+        /// call sites that need more than the contract offers (the item tree)
+        /// narrow <see cref="File"/> back to their own type themselves.
         /// </para>
         /// </summary>
         public ParsedDocument(SystemVerilogCore.Documents.IVerilogSourceFile file, string key, IndexReference? indexReference, SystemVerilogCore.Parsing.VerilogParseMode parseMode)
@@ -145,12 +142,11 @@ namespace pluginVerilog.Verilog
 
             SystemVerilog = file.IsSystemVerilog;
 
-            Data.IVerilogRelatedFile editorFile = (Data.IVerilogRelatedFile)file;
-            fileRef = new WeakReference<Data.IVerilogRelatedFile>(editorFile);
+            fileRef = new WeakReference<SystemVerilogCore.Documents.IVerilogSourceFile>(file);
             // Capture the project property now: parse-time lookups
             // (Macros / SystemFunctions / RuleSet / name spaces) all go through
             // it, and the weak file reference may be collected later.
-            ProjectProperty = file.ProjectSettings as ProjectProperty;
+            ProjectProperty = file.ProjectSettings as IVerilogParserSettings;
             if (indexReference == null)
             {
                 IndexReference = IndexReference.Create(this, document, 0);
@@ -234,35 +230,12 @@ namespace pluginVerilog.Verilog
             return sb.ToString();
         }
 
-        /// <summary>
-        /// Compatibility overload for editor call sites that still hold the
-        /// plugin's file type.
-        /// </summary>
-        public static string KeyGenerator(
-            string key,
-            Data.IVerilogRelatedFile verilogRelatedFile,
-            string? moduleName,
-            Dictionary<string, Verilog.Expressions.Expression>? parameterOverrides
-            )
-            => KeyGenerator(key, (SystemVerilogCore.Documents.IVerilogSourceFile)verilogRelatedFile, moduleName, parameterOverrides);
-
         ~ParsedDocument()
         {
             //            System.Diagnostics.Debug.Print("### pasedDocument.Finalize " + id+"::"+ObjectID);
         }
 
-        private System.WeakReference<Data.IVerilogRelatedFile> fileRef;
-        [JsonIgnore]
-        public Data.IVerilogRelatedFile? File
-        {
-            get
-            {
-                Data.IVerilogRelatedFile? ret;
-                if (!fileRef.TryGetTarget(out ret)) return null;
-                return ret;
-            }
-        }
-
+        private System.WeakReference<SystemVerilogCore.Documents.IVerilogSourceFile> fileRef = null!;
 
         [JsonIgnore]
         public IndexReference IndexReference;
@@ -445,7 +418,9 @@ namespace pluginVerilog.Verilog
         {
             if (Root == null) return;
 
-            Data.IVerilogRelatedFile? file = File;
+            // NOTE: this used to read the file back and do nothing with it. The
+            // read is gone with the editor type: the parse result no longer
+            // names the editor's file.
         }
 
         /// <summary>
@@ -474,10 +449,20 @@ namespace pluginVerilog.Verilog
         {
             if (Project == null) return;
 
-            CodeDocument? document = CodeDocument;
-            if (document == null) return;
-
-            Data.IVerilogRelatedFile? vFile = document.TextFile as Data.IVerilogRelatedFile;
+            // Diagnostics go through the UI-free document contract: the parser
+            // reports a message and asks the host to mark the span. It used to
+            // reach for the editor's concrete CodeDocument and its Marks table,
+            // which is what kept this file bound to the editor assembly.
+            //
+            // The file comes from the DOCUMENT, not from this parse result: a
+            // throw-away buffer (macro expansion body) belongs to no file, and
+            // its diagnostics must be dropped. Reading this result's own file
+            // instead would record them, and the enclosing scanner would then
+            // report "include errors" for an error inside a macro expansion -
+            // measured on sv-tests 22.5.1--define-expansion_26.
+            SystemVerilogCore.Documents.IVerilogTextDocument document = VerilogDocument;
+            if (document.File == null) return; // throw-away buffer: nothing to attach to
+            SystemVerilogCore.Documents.IVerilogSourceFile? vFile = File;
             if (vFile == null) return;
 
             // add message
@@ -495,17 +480,16 @@ namespace pluginVerilog.Verilog
             ErrorCount++;
 
             // add mark
-            document.Marks.SetMarkAt(index, length, 0);
+            document.SetMarkAt(index, length, 0);
         }
 
         public void AddWarning(int index, int length, string message)
         {
             if (Project == null) return;
 
-            CodeDocument? document = CodeDocument;
-            if (document == null) return;
-
-            Data.IVerilogRelatedFile? vFile = document.TextFile as Data.IVerilogRelatedFile;
+            SystemVerilogCore.Documents.IVerilogTextDocument document = VerilogDocument;
+            if (document.File == null) return; // throw-away buffer: nothing to attach to
+            SystemVerilogCore.Documents.IVerilogSourceFile? vFile = File;
             if (vFile == null) return;
 
             // add message
@@ -523,17 +507,16 @@ namespace pluginVerilog.Verilog
             WarningCount++;
 
             // add mark
-            document.Marks.SetMarkAt(index, length, 1);
+            document.SetMarkAt(index, length, 1);
         }
         public void AddNotice(int index, int length, string message)
         {
 
             if (Project == null) return;
 
-            CodeDocument? document = CodeDocument;
-            if (document == null) return;
-
-            Data.IVerilogRelatedFile? vFile = document.TextFile as Data.IVerilogRelatedFile;
+            SystemVerilogCore.Documents.IVerilogTextDocument document = VerilogDocument;
+            if (document.File == null) return; // throw-away buffer: nothing to attach to
+            SystemVerilogCore.Documents.IVerilogSourceFile? vFile = File;
             if (vFile == null) return;
 
             // add message
@@ -551,16 +534,15 @@ namespace pluginVerilog.Verilog
             NoticeCount++;
 
             // add mark
-            document.Marks.SetMarkAt(index, length, 2);
+            document.SetMarkAt(index, length, 2);
         }
         public void AddHint(int index, int length, string message)
         {
             if (Project == null) return;
 
-            CodeDocument? document = CodeDocument;
-            if (document == null) return;
-
-            Data.IVerilogRelatedFile? vFile = document.TextFile as Data.IVerilogRelatedFile;
+            SystemVerilogCore.Documents.IVerilogTextDocument document = VerilogDocument;
+            if (document.File == null) return; // throw-away buffer: nothing to attach to
+            SystemVerilogCore.Documents.IVerilogSourceFile? vFile = File;
             if (vFile == null) return;
 
             // add message
@@ -578,7 +560,7 @@ namespace pluginVerilog.Verilog
             HintCount++;
 
             // add mark
-            document.Marks.SetMarkAt(index, length, 3);
+            document.SetMarkAt(index, length, 3);
         }
 
 
@@ -658,19 +640,45 @@ namespace pluginVerilog.Verilog
             nameSpace = null;
             element = null;
 
-            int line = CodeDocument.GetLineAt(index);
-            int lineStartIndex = CodeDocument.GetLineStartIndex(line);
-            CodeDocument.GetWord(index, out int wordHeadIndex, out int wordLength);
+            // The contract carries line lookup and substring; the token width
+            // comes from the parser's own tokenizer, so nothing here names the
+            // editor's concrete document (which owned GetWord / CreateLineString).
+            SystemVerilogCore.Documents.IVerilogTextDocument document = VerilogDocument;
 
-            string lineText = CodeDocument.CreateLineString(line);
+            int line = document.GetLineAt(index);
+            int lineStartIndex = document.GetLineStartIndex(line);
+
+            // Same walk the editor's GetWord does: fetch the first token of the
+            // line, then advance while the next token starts at or before the
+            // caret. Done through the tokenizer so the parser does not need the
+            // editor's document type for this.
+            int wordHeadIndex = lineStartIndex;
+            int wordLength = 0;
+            {
+                int nextIndex;
+                Verilog.WordPointer.WordTypeEnum wordType;
+                string sectionName = "";
+                Verilog.WordPointer.FetchNext(
+                    document, ref wordHeadIndex, out wordLength, out nextIndex, out wordType, ref sectionName);
+                while (nextIndex <= index && index < document.Length)
+                {
+                    wordHeadIndex = nextIndex;
+                    Verilog.WordPointer.FetchNext(
+                        document, ref wordHeadIndex, out wordLength, out nextIndex, out wordType, ref sectionName);
+                }
+            }
+
+            string lineText = document.CreateString(
+                lineStartIndex, document.GetLineLength(line));
             int lineLength = wordHeadIndex + wordLength - lineStartIndex;
             if (lineLength > lineText.Length) lineLength = lineText.Length;
+            if (lineLength < 0) lineLength = 0;
             lineText = lineText.Substring(0, lineLength);
 
             { // pre carlet char check
                 if (index != 0)
                 {
-                    char preChar = CodeDocument.GetCharAt(index - 1);
+                    char preChar = document.GetCharAt(index - 1);
                     if (preChar == ' ') return false;
                     if (preChar == '\t') return false;
                 }
@@ -680,9 +688,9 @@ namespace pluginVerilog.Verilog
             int blockEndIndex = 0;
             {
                 // create short document to parse current pretext
-                SystemVerilogCore.Documents.IVerilogTextDocument document =
+                SystemVerilogCore.Documents.IVerilogTextDocument probeDocument =
                     new SystemVerilogCore.Documents.PlainTextDocument(lineText);
-                WordScanner word = new WordScanner(document, this, SystemVerilog,true,false);
+                WordScanner word = new WordScanner(probeDocument, this, SystemVerilog,true,false);
 
                 List<(string, int)> words = new List<(string, int)>();
                 while (!word.Eof)
@@ -732,9 +740,9 @@ namespace pluginVerilog.Verilog
             element = null;
             {
                 // create short document to parse current pretext
-                SystemVerilogCore.Documents.IVerilogTextDocument document =
+                SystemVerilogCore.Documents.IVerilogTextDocument elementDocument =
                     new SystemVerilogCore.Documents.PlainTextDocument(elementText);
-                WordScanner word = new WordScanner(document, this, SystemVerilog,true, false );
+                WordScanner word = new WordScanner(elementDocument, this, SystemVerilog,true, false );
 
                 Verilog.Expressions.Expression? expression = null;
                 while (!word.Eof)
@@ -944,9 +952,9 @@ namespace pluginVerilog.Verilog
         /// </summary>
         public class Message
         {
-            public Message(Data.IVerilogRelatedFile file, string text, MessageType type, int index, int lineNo, int length, SystemVerilogCore.Projects.IVerilogProject? project)
+            public Message(SystemVerilogCore.Documents.IVerilogSourceFile file, string text, MessageType type, int index, int lineNo, int length, SystemVerilogCore.Projects.IVerilogProject? project)
             {
-                this.fileRef = new WeakReference<Data.IVerilogRelatedFile>(file);
+                this.fileRef = new WeakReference<SystemVerilogCore.Documents.IVerilogSourceFile>(file);
                 this.Text = text;
                 this.Length = length;
                 this.Index = index;
@@ -971,13 +979,19 @@ namespace pluginVerilog.Verilog
             /// </summary>
             public SystemVerilogCore.Projects.IVerilogProject? Project { get; set; }
 
-            private System.WeakReference<Data.IVerilogRelatedFile> fileRef;
+            private System.WeakReference<SystemVerilogCore.Documents.IVerilogSourceFile> fileRef = null!;
+
+            /// <summary>
+            /// The file this message came from, as the UI-free contract, or null
+            /// when it has been collected. The editor's message pane narrows it
+            /// back to its own file type.
+            /// </summary>
             [JsonIgnore]
-            public Data.IVerilogRelatedFile? File
+            public SystemVerilogCore.Documents.IVerilogSourceFile? File
             {
                 get
                 {
-                    Data.IVerilogRelatedFile? file;
+                    SystemVerilogCore.Documents.IVerilogSourceFile? file;
                     if (!fileRef.TryGetTarget(out file)) return null;
                     return file;
                 }

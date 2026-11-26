@@ -43,21 +43,20 @@ namespace pluginVerilog.Verilog
         /// </summary>
         /// <param name="document">The text to tokenize.</param>
         /// <param name="verilogFile">
-        /// The plugin file the document came from, or null for a throw-away
-        /// buffer (macro expansion). Kept separately because the contract's
-        /// <c>File</c> only carries the identity fields the parser needs, while
-        /// <c>`include</c> resolution still hands the Data-layer file object to
-        /// <c>VerilogHeaderInstance.Create</c>.
+        /// The source file the document came from, as the UI-free contract, or
+        /// null for a throw-away buffer (macro expansion). <c>`include</c>
+        /// resolution and diagnostics only need this contract; the data layer
+        /// narrows it back to its own file type where an item-tree node is
+        /// required.
         /// </param>
         /// <param name="concreteDocument">
-        /// The same document as the plugin's own <c>CodeDocument</c> when it is
-        /// one. The parse result records its locked documents with that type, so
-        /// the two places that publish the buffer back to the parse result need
-        /// it. Null for documents created outside the editor.
+        /// The same document as the host's own concrete type when it is one.
+        /// The parse result records the buffer, so the places that publish it
+        /// back need this. Null for documents created outside the editor.
         /// </param>
         public WordPointer(
             SystemVerilogCore.Documents.IVerilogTextDocument document,
-            Data.IVerilogRelatedFile? verilogFile,
+            SystemVerilogCore.Documents.IVerilogSourceFile? verilogFile,
             SystemVerilogCore.Documents.IVerilogTextDocument? concreteDocument,
             Verilog.ParsedDocument parsedDocument,
             int indexReferenceOffset)
@@ -81,7 +80,7 @@ namespace pluginVerilog.Verilog
         /// </remarks>
         internal WordPointer(
             SystemVerilogCore.Documents.IVerilogTextDocument document,
-            Data.IVerilogRelatedFile? verilogFile,
+            SystemVerilogCore.Documents.IVerilogSourceFile? verilogFile,
             SystemVerilogCore.Documents.IVerilogTextDocument? concreteDocument,
             Verilog.ParsedDocument parsedDocument,
             int indexReferenceOffset, bool suppressInitialFetch)
@@ -133,12 +132,11 @@ namespace pluginVerilog.Verilog
         public bool InhibitColor = false;
 
         /// <summary>
-        /// The plugin file the document came from, or null for a throw-away
-        /// buffer. Held directly rather than read off the document: the
-        /// contract's <c>File</c> is the identity-only view, while `include`
-        /// resolution needs the Data-layer file object itself.
+        /// The source file the document came from, as the UI-free contract, or
+        /// null for a throw-away buffer. Held directly rather than read off the
+        /// document so a snapshot keeps the identity of the file it came from.
         /// </summary>
-        public Data.IVerilogRelatedFile? VerilogFile { get; protected set; }
+        public SystemVerilogCore.Documents.IVerilogSourceFile? VerilogFile { get; protected set; }
 
         public string SectionName { get; protected set; }
 

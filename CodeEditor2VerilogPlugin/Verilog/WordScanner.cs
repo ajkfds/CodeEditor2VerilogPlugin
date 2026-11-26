@@ -1,4 +1,3 @@
-using pluginVerilog.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,7 +40,7 @@ namespace pluginVerilog.Verilog
             CompletionContext? completionContext = null)
             : this(
                   document,
-                  parsedDocument.TextFile,
+                  parsedDocument.File,
                   document,
                   parsedDocument, systemVerilog, false, false, indexReferenceOffset, false)
         {
@@ -86,7 +85,7 @@ namespace pluginVerilog.Verilog
         /// </summary>
         internal WordScanner(
             SystemVerilogCore.Documents.IVerilogTextDocument document,
-            Data.IVerilogRelatedFile? verilogFile,
+            SystemVerilogCore.Documents.IVerilogSourceFile? verilogFile,
             SystemVerilogCore.Documents.IVerilogTextDocument? concreteDocument,
             Verilog.ParsedDocument parsedDocument,
             bool systemVerilog, bool supressCompilerDirectiveError,
@@ -258,7 +257,7 @@ namespace pluginVerilog.Verilog
                 // resolved per directory, and that is the only thing needed from
                 // the file here.
                 SystemVerilogCore.Documents.IVerilogSourceFile? file =
-                    RootParsedDocument?.SourceFile;
+                    RootParsedDocument?.File;
                 if (file == null) return projectProperty.RuleSet;
                 return projectProperty.GetRuleSet(file.FileRelativePath);
             }
@@ -1487,7 +1486,7 @@ namespace pluginVerilog.Verilog
                 new SystemVerilogCore.Documents.PlainTextDocument(macroText);
             string key = "";
             ParsedDocument newParsedDocument = new ParsedDocument(
-                (IVerilogRelatedFile)wordPointer.ParsedDocument.TextFile,
+                wordPointer.ParsedDocument.File!,
                 key,
                 null,
                 wordPointer.ParsedDocument.ParseMode);
@@ -1736,13 +1735,12 @@ namespace pluginVerilog.Verilog
             // Read the path through the UI-free contract (the file name is all
             // `__FILE__` needs), so this does not name the editor's file type.
             string fileName = "";
-            Data.IVerilogRelatedFile? source = stock.Count != 0
+            SystemVerilogCore.Documents.IVerilogSourceFile? source = stock.Count != 0
                 ? stock[0].VerilogFile
                 : wordPointer.VerilogFile;
             if (source != null)
             {
-                fileName = System.IO.Path.GetFileName(
-                    ((SystemVerilogCore.Documents.IVerilogSourceFile)source).FileRelativePath ?? "");
+                fileName = System.IO.Path.GetFileName(source.FileRelativePath ?? "");
             }
             diveIntoText("\"" + fileName + "\"");
         }
@@ -1862,7 +1860,7 @@ namespace pluginVerilog.Verilog
                 new SystemVerilogCore.Documents.PlainTextDocument(macroText);
             string key = "";// Verilog.ParsedDocument.KeyGenerator(wordPointer.VerilogFile,) .KeyGenerator(wordPointer.ParsedDocument, wordPointer.Index);
             ParsedDocument newParsedDocument = new ParsedDocument(
-                (IVerilogRelatedFile)wordPointer.ParsedDocument.TextFile,
+                wordPointer.ParsedDocument.File!,
                 key,
                 null,
                 wordPointer.ParsedDocument.ParseMode);
@@ -2009,10 +2007,12 @@ namespace pluginVerilog.Verilog
 
         private void diveIntoIncludeFile(string relativeFilePath)
         {
-            if (wordPointer.ParsedDocument.File == null) return;
-            string id = wordPointer.ParsedDocument.File.ID + "," + relativeFilePath + "(" + wordPointer.Index + ")";
+            SystemVerilogCore.Documents.IVerilogSourceFile? parsedFile =
+                wordPointer.ParsedDocument.File;
+            if (parsedFile == null) return;
+            string id = parsedFile.Id + "," + relativeFilePath + "(" + wordPointer.Index + ")";
 
-            Data.IVerilogRelatedFile rootFile;
+            SystemVerilogCore.Documents.IVerilogSourceFile? rootFile;
             if (stock.Count == 0)
             {
                 rootFile = wordPointer.VerilogFile;
@@ -2021,6 +2021,7 @@ namespace pluginVerilog.Verilog
             {
                 rootFile = stock[0].VerilogFile;
             }
+            if (rootFile == null) return;
 
             IndexReference indexReference = IndexReference.Create(wordPointer.ParsedDocument.IndexReference, wordPointer.Index);
             ParsedDocument? newParsedDocument = null;
@@ -2154,23 +2155,16 @@ namespace pluginVerilog.Verilog
                 return;
             }
 
-            // The include wrapper is a host concept, so the host makes it when it
-            // can supply a factory. Hosts that do not (the language server has no
-            // item tree) fall back to the editor's factory below, which is still
-            // in this assembly - the fallback keeps both hosts working while the
-            // seam is being moved.
+            // The include wrapper is a host concept, so the host makes it. A host
+            // that cannot supply a factory (the language server has no item
+            // tree) reports the include as unresolved - the parser must not fall
+            // back to a concrete host type here, because that is exactly what
+            // kept this file bound to the editor assembly.
             SystemVerilogCore.Documents.IVerilogIncludeFileFactory? factory =
                 project.IncludeFileFactory;
 
-            SystemVerilogCore.Documents.IVerilogIncludeFile? vhInstance = factory != null
-                ? factory.Create(relativeFilePath, name, rootFile, CreateIndexReference(), id)
-                : Data.VerilogHeaderInstance.Create(
-                    relativeFilePath,
-                    name,
-                    CreateIndexReference(),
-                    rootFile,
-                    project,
-                    id);
+            SystemVerilogCore.Documents.IVerilogIncludeFile? vhInstance = factory?.Create(
+                relativeFilePath, name, rootFile, CreateIndexReference(), id);
 
             if (vhInstance == null)
             {

@@ -80,6 +80,25 @@ namespace pluginVerilog.Data
 
         bool SystemVerilogCore.Documents.IVerilogSourceFile.IsSystemVerilog => SystemVerilog;
 
+        /// <summary>
+        /// Forwards to the editor-facing <see cref="CreateVerilogDocumentParser"/>
+        /// declared below, so the parser can drive a parse through the contract.
+        /// </summary>
+        SystemVerilogCore.Parsing.IVerilogDocumentParser?
+            SystemVerilogCore.Documents.IVerilogSourceFile.CreateVerilogDocumentParser(
+                SystemVerilogCore.Parsing.VerilogParseMode parseMode,
+                System.Threading.CancellationToken? token) =>
+            CreateVerilogDocumentParser(parseMode, token);
+
+        /// <summary>
+        /// Forwards to the editor-facing
+        /// <see cref="AcceptVerilogParsedDocumentAsync"/> declared below.
+        /// </summary>
+        System.Threading.Tasks.Task
+            SystemVerilogCore.Documents.IVerilogSourceFile.AcceptVerilogParsedDocumentAsync(
+                SystemVerilogCore.Parsing.IVerilogDocumentParser parser) =>
+            AcceptVerilogParsedDocumentAsync(parser);
+
         ProjectProperty ProjectProperty { get; }
         bool SystemVerilog { get; }
 
