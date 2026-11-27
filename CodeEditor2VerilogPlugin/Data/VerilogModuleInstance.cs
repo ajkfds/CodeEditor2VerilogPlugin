@@ -59,7 +59,20 @@ namespace pluginVerilog.Data
             SystemVerilogCore.Projects.IVerilogProject project = moduleInstantiation.GetInstancedBuildingBlockProject();
             ProjectProperty? projectProperty = project.Settings as ProjectProperty;
             if (projectProperty == null) throw new Exception();
-            Data.IVerilogRelatedFile? file = projectProperty.DefinitionNameSpace.GetEditorFile(moduleInstantiation.SourceName);
+
+            // Resolve the declaring file through the UI-free contract first, then
+            // narrow. Going straight to GetEditorFile (which narrows to the
+            // editor's file type) made every instance of a module declared by a
+            // contract-only host unresolvable: the name space held that host's
+            // object, the narrowing returned null, and the whole instance tree
+            // collapsed. The narrowing below is still required - the instance is
+            // an editor item and needs a concrete TextFile to wrap.
+            SystemVerilogCore.Documents.IVerilogSourceFile? declaringFile =
+                projectProperty.DefinitionNameSpace.GetFile(moduleInstantiation.SourceName)
+                as SystemVerilogCore.Documents.IVerilogSourceFile;
+            if (declaringFile == null) return null;
+
+            Data.IVerilogRelatedFile? file = declaringFile as Data.IVerilogRelatedFile;
             if (file == null) return null;
 
             CodeEditor2.Data.TextFile? textFile = file as CodeEditor2.Data.TextFile;
