@@ -539,6 +539,14 @@ namespace pluginVerilog.Data
             instancedParsedDocumentRefs.Clear();
         }
 
+        /// <summary>
+        /// The same drop, through the UI-free cache contract, so a host that
+        /// drives its own buffer can invalidate the instances without naming
+        /// this class.
+        /// </summary>
+        void SystemVerilogCore.Documents.IVerilogSourceFileInstanceCache.ClearInstanceParsedDocuments() =>
+            ClearInstancedParsedDocuments();
+
         #endregion
 
 
