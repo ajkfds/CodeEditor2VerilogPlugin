@@ -1,7 +1,11 @@
 using Avalonia.Controls;
 using Avalonia.Media;
 using CodeEditor2.NavigatePanel;
-using pluginVerilog.CoreBridge;
+// The menu's implementation lives in SystemVerilogCore now (the language server
+// walks the same catalog). These aliases keep this renderer's call sites intact.
+using HierarchyMenuCatalog = SystemVerilogCore.Menus.HierarchyMenuCatalog;
+using NavigateNodeMenuAdapter = SystemVerilogCore.Menus.NavigateNodeMenuBuilder;
+using NavigateNodeMenuContext = SystemVerilogCore.Menus.NavigateNodeMenuContext;
 using System;
 using System.Collections.Generic;
 using System.IO;

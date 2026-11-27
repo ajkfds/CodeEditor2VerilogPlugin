@@ -167,7 +167,7 @@ namespace pluginVerilog
             // context menu
             //
             // The navigate-node menu is driven by one catalog shared with VS Code
-            // (CoreBridge.HierarchyMenuCatalog), so this installs the renderer
+            // (SystemVerilogCore.Menus.HierarchyMenuCatalog), so this installs the renderer
             // instead of subscribing to the per-node-type
             // CustomizeNavigateNodeContextMenu event. Rows that only the editor
             // can run declare Hosts.Desktop; VS Code simply never sees them.
@@ -195,16 +195,16 @@ namespace pluginVerilog
         /// </summary>
         private static void RegisterNavigateNodeMenuEntries()
         {
-            CoreBridge.HierarchyMenuCatalog.Register(new CoreBridge.HierarchyMenuCatalog.Entry
+            SystemVerilogCore.Menus.HierarchyMenuCatalog.Register(new SystemVerilogCore.Menus.HierarchyMenuCatalog.Entry
             {
                 Id = "parseAll",
                 Label = "Parse All",
                 Detail = "re-parse every file in the hierarchy",
-                Targets = CoreBridge.HierarchyMenuCatalog.AppliesTo.File
-                        | CoreBridge.HierarchyMenuCatalog.AppliesTo.Instance,
-                Hosts = CoreBridge.HierarchyMenuCatalog.Hosts.Desktop,
+                Targets = SystemVerilogCore.Menus.HierarchyMenuCatalog.AppliesTo.File
+                        | SystemVerilogCore.Menus.HierarchyMenuCatalog.AppliesTo.Instance,
+                Hosts = SystemVerilogCore.Menus.HierarchyMenuCatalog.Hosts.Desktop,
                 Group = 30,
-                Action = CoreBridge.HierarchyMenuCatalog.ActionKind.DesktopHandler,
+                Action = SystemVerilogCore.Menus.HierarchyMenuCatalog.ActionKind.DesktopHandler,
                 IconPath = "CodeEditor2/Assets/Icons/flame.svg",
                 IconColor = PackColor(ThemeColor),
                 Handler = context => MenuItem_ParseHier(context),
@@ -217,7 +217,7 @@ namespace pluginVerilog
             return ((uint)color.A << 24) | ((uint)color.R << 16) | ((uint)color.G << 8) | color.B;
         }
 
-        private static void MenuItem_ParseHier(CoreBridge.NavigateNodeMenuContext context)
+        private static void MenuItem_ParseHier(SystemVerilogCore.Menus.NavigateNodeMenuContext context)
         {
             try
             {
