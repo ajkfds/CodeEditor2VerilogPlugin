@@ -68,6 +68,20 @@ namespace pluginVerilog.Data
             }
         }
 
+        /// <summary>An interface instance, as the hierarchy view sees it.</summary>
+        public override SystemVerilogCore.Documents.VerilogHierarchyNodeKind HierarchyNodeKind =>
+            SystemVerilogCore.Documents.VerilogHierarchyNodeKind.InterfaceInstance;
+
+        /// <summary>The instance name, as the hierarchy view shows it.</summary>
+        public override string HierarchyNodeName => InstanceName;
+
+        /// <summary>
+        /// The interface instantiation behind this node, as the hierarchy
+        /// contract. Same value as <see cref="GetParentInstanciatiation"/>.
+        /// </summary>
+        public override Verilog.Items.IBuildingBlockInstantiation? InstantiatingItem =>
+            GetParentInstanciatiation();
+
         protected WeakReference<Verilog.Items.InterfaceInstance> weakInstantiating;
 
         /// <summary>

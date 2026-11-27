@@ -5,8 +5,38 @@ using System.Collections.Generic;
 
 namespace pluginVerilog.Data
 {
-    public class InstanceTextFile : CodeEditor2.Data.TextFile, IVerilogRelatedFile
+    public class InstanceTextFile : CodeEditor2.Data.TextFile, IVerilogRelatedFile,
+        // What the hierarchy view needs from a node: its kind, its readable
+        // name and the instantiation behind it. Exposing the values instead of
+        // the node types is what lets the language server build the tree
+        // without naming this assembly (see IVerilogHierarchyNode).
+        SystemVerilogCore.Documents.IVerilogHierarchyNode
     {
+        // ---- SystemVerilogCore.Documents.IVerilogHierarchyNode -------------
+        // Defaults for an instance wrapper; the concrete node types override
+        // the parts that differ (kind, name, and the instantiating item).
+
+        /// <summary>What this node represents. Overridden by each node type.</summary>
+        public virtual SystemVerilogCore.Documents.VerilogHierarchyNodeKind HierarchyNodeKind =>
+            SystemVerilogCore.Documents.VerilogHierarchyNodeKind.None;
+
+        /// <summary>The readable node name. Overridden by each node type.</summary>
+        public virtual string HierarchyNodeName => Name;
+
+        /// <summary>
+        /// The instantiation this node was created from, or null. A module /
+        /// interface instance holds it as a weak reference, so this forwards
+        /// through the same accessor the editor uses.
+        /// </summary>
+        public virtual Verilog.Items.IBuildingBlockInstantiation? InstantiatingItem => null;
+
+        /// <summary>
+        /// Parameter overrides written at the instantiation. Same value as
+        /// <see cref="ParameterOverrides"/>; the contract spells it differently
+        /// so a call site through the editor's types stays unambiguous.
+        /// </summary>
+        public Dictionary<string, Verilog.Expressions.Expression> HierarchyParameterOverrides =>
+            ParameterOverrides;
 
         protected InstanceTextFile(CodeEditor2.Data.TextFile sourceTextFile)
         {

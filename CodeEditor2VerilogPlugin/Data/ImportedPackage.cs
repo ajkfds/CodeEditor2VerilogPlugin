@@ -21,6 +21,13 @@ namespace pluginVerilog.Data
     /// </summary>
     public class ImportedPackage : InstanceTextFile, IVerilogRelatedFile
     {
+        /// <summary>An imported package, as the hierarchy view sees it.</summary>
+        public override SystemVerilogCore.Documents.VerilogHierarchyNodeKind HierarchyNodeKind =>
+            SystemVerilogCore.Documents.VerilogHierarchyNodeKind.ImportedPackage;
+
+        /// <summary>The package name, as the hierarchy view shows it.</summary>
+        public override string HierarchyNodeName => PackageName;
+
         // locked properties --------------------------------------------------
 
         private string _packageName = "";

@@ -46,6 +46,13 @@ namespace pluginVerilog.Data
         /// </summary>
         void SystemVerilogCore.Documents.IVerilogIncludeFile.CloseInclude() => Close();
 
+        /// <summary>An include header, as the hierarchy view sees it.</summary>
+        public override SystemVerilogCore.Documents.VerilogHierarchyNodeKind HierarchyNodeKind =>
+            SystemVerilogCore.Documents.VerilogHierarchyNodeKind.IncludeHeader;
+
+        /// <summary>The header's path, as the hierarchy view shows it.</summary>
+        public override string HierarchyNodeName => RelativePath;
+
         protected VerilogHeaderInstance(CodeEditor2.Data.TextFile sourceTextFile) : base(sourceTextFile)
         {
         }
