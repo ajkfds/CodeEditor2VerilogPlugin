@@ -178,8 +178,16 @@ namespace pluginVerilog.Data
         {
             get
             {
-                Data.VerilogFile? source = SourceVerilogFile;
-                SystemVerilogCore.Parsing.IParsedDocument? parsedDocument = source?.GetInstancedParsedDocument(_getKey());
+                // Through the source-file contract, not the concrete VerilogFile:
+                // a host that drives its own buffer registers itself as the
+                // declaring file, so the instance cache has to be reachable from
+                // that object too. Narrowing to the concrete type here made every
+                // parameter-overridden instance read back null for such a host
+                // (the click then showed the declared parameter values).
+                SystemVerilogCore.Documents.IVerilogSourceFile? source =
+                    SourceTextFile as SystemVerilogCore.Documents.IVerilogSourceFile;
+                SystemVerilogCore.Parsing.IParsedDocument? parsedDocument =
+                    source?.GetInstancedParsedDocument(_getKey());
 
                 // 取得するたびに保持しているparsedDocumentを最新のものに置き換える。
                 // 不要なparsedDocumentのGC回収を促進するため。

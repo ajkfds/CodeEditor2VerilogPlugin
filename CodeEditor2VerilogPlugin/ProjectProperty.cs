@@ -538,11 +538,21 @@ namespace pluginVerilog
             }
             else
             {
-                Data.VerilogFile? file = DefinitionNameSpace.GetFile(instantiation.SourceName) as Data.VerilogFile;
+                // Through the UI-free source-file contract: the parameter-
+                // overridden result is looked up by the same key the contract
+                // defines, so a host that registers itself as the declaring file
+                // (the language server) resolves exactly like the editor does.
+                // Narrowing to the concrete VerilogFile here made every
+                // parameter-overridden instance unresolvable for such a host.
+                SystemVerilogCore.Documents.IVerilogSourceFile? file =
+                    DefinitionNameSpace.GetFile(instantiation.SourceName)
+                    as SystemVerilogCore.Documents.IVerilogSourceFile;
                 if (file == null) return null;
-                string InstanceKey = Verilog.ParsedDocument.KeyGenerator(file, instantiation.SourceName, instantiation.ParameterOverrides);
+                string InstanceKey = Verilog.ParsedDocument.KeyGenerator(
+                    file, instantiation.SourceName, instantiation.ParameterOverrides);
 
-                Verilog.ParsedDocument? parsedDocument = file.GetInstancedParsedDocument(InstanceKey) as Verilog.ParsedDocument;
+                Verilog.ParsedDocument? parsedDocument =
+                    file.GetInstancedParsedDocument(InstanceKey) as Verilog.ParsedDocument;
                 if (parsedDocument == null) return null;
                 if (parsedDocument.Root == null) return null;
                 if(parsedDocument.Root.BuildingBlocks.TryGetValue(instantiation.SourceName, out BuildingBlock? buildingBlock))
