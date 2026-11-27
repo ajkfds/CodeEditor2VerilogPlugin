@@ -1,466 +1,111 @@
-using Avalonia.Input;
 using Avalonia.Threading;
 using CodeEditor2.Data;
-using SystemVerilogCore.Verilog.BuildingBlocks;
-using SystemVerilogCore.Verilog.Items;
+using SystemVerilogCore.Tree;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 
 namespace pluginVerilog.Data.VerilogCommon
 {
+    /// <summary>
+    /// Refreshes an editor item's children from its parse result.
+    ///
+    /// <para>
+    /// <b>The content is not decided here.</b> Which children a file has, which
+    /// instantiation becomes which node, when an existing node can be reused - all
+    /// of that lives in <see cref="SystemVerilogCore.Tree.VerilogTreeBuilder"/>,
+    /// so the language server walks the same rules without an item tree. This class
+    /// only applies the result to the editor's own collection: it builds the nodes
+    /// through <see cref="EditorTreeNodeFactory"/>, swaps them into
+    /// <c>Item.Items</c> atomically, and disposes the ones that were replaced.
+    /// </para>
+    ///
+    /// <para>
+    /// Before, the rules lived here too (they were this file), and the language
+    /// server had its own copy - which drifted. Splitting them means the editor's
+    /// NavigatePanel and the VS Code RTL Hierarchy cannot disagree.
+    /// </para>
+    /// </summary>
     public static class Updater
     {
-
-
         /// <summary>
-        /// Update the Items member of this object according to the rootItem.ParsedDocument.
+        /// Update the Items member of this object according to the parse result.
         /// </summary>
-        /// <param name="item"></param>
-        /// <summary>
-        /// Lock for atomic items update to prevent partial updates during reads
-        /// </summary>
-
-        public static async System.Threading.Tasks.Task UpdateAsync(IVerilogRelatedFile item, SemaphoreSlim _semaphore)
+        /// <param name="item">The item to refresh.</param>
+        /// <param name="semaphore">Serialises the swap against concurrent updates.</param>
+        public static async System.Threading.Tasks.Task UpdateAsync(IVerilogRelatedFile item, SemaphoreSlim semaphore)
         {
             // run on background thread to avoid blocking UI
             if (Dispatcher.UIThread.CheckAccess())
             {
-                await System.Threading.Tasks.Task.Run(async ()=>await UpdateAsync(item, _semaphore));
+                await System.Threading.Tasks.Task.Run(async () => await UpdateAsync(item, semaphore));
                 return;
             }
 
-            // Update the Items member of this object according to the rootItem.ParsedDocument.
-            Project project = item.Project;
-            CodeEditor2.Data.Item? parent = item as CodeEditor2.Data.Item;
+            Item? parent = item as Item;
 
-            // doesn't have appropriate pased data for this item
-            if (
-                parent == null ||
-                item.VerilogParsedDocument == null ||
-                item.VerilogParsedDocument.Root == null
-                )
+            // doesn't have appropriate parsed data for this item
+            if (parent == null || item.VerilogParsedDocument == null || item.VerilogParsedDocument.Root == null)
             {
                 // dispose all sub items - use atomic update to prevent partial state
                 item.Items.Clear(out List<Item> clearedItems);
                 // Dispose after clearing to avoid deadlock
-                foreach (var subItem in clearedItems)
+                foreach (Item subItem in clearedItems)
                 {
                     subItem.Dispose();
                 }
                 return;
             }
 
-            // create new items list
-            Dictionary<string, CodeEditor2.Data.Item> newSubItems = new Dictionary<string, CodeEditor2.Data.Item>();
+            // The builder decides the children; this host supplies the nodes.
+            IReadOnlyList<IVerilogTreeNode> nodes = VerilogTreeBuilder.BuildChildren(
+                new EditorTreeNode(parent),
+                new EditorTreeNodeFactory(item),
+                BuildingBlockNameOf(item));
 
-            // Build new sub-items dictionary first (outside the lock)
-            // add vh instance
-            foreach (SystemVerilogCore.Documents.IVerilogIncludeFile newVhInstance in item.VerilogParsedDocument.IncludeFiles.Values)
-            {
-                // Narrow to the editor's instance type: building the item tree is
-                // a data-layer concern and needs the full instance.
-                if (newVhInstance is VerilogHeaderInstance header) addVhInstance(newSubItems, item, header);
-            }
-
-            // add imported packages as sub-items
-            foreach (string importedPackageName in item.VerilogParsedDocument.ImportedPackages)
-            {
-                addImportedPackage(newSubItems, item, importedPackageName, project);
-            }
-
-            if(item is InterfaceInstance)
-            {
-                string? moduleName = null;
-                InterfaceInstance? verilogModuleInstance = item as InterfaceInstance;
-                moduleName = verilogModuleInstance?.InstanceName;
-                addSubItemsSingleBuldingBlock(item, moduleName, newSubItems, parent, project);
-            }
-            else if (item is VerilogModuleInstance)
-            {
-                string? moduleName = null;
-                VerilogModuleInstance? verilogModuleInstance = item as VerilogModuleInstance;
-                moduleName = verilogModuleInstance?.InstanceName;
-                addSubItemsSingleBuldingBlock(item, moduleName, newSubItems, parent, project);
-            }
-            else if (item is ImportedPackage)
-            {
-                // Packages don't have child module/interface instantiations to enumerate;
-                // they are leaves in the navigate-panel hierarchy.
-            }
-            else if (item is VerilogFile)
-            {
-                // 複数のmoduleを含むroot itemは子として各moduleのinstanceを生成させる
-                VerilogFile verilogFile = (VerilogFile)item;
-                if (item.VerilogParsedDocument.Root.BuildingBlocks.Count == 1)
-                {
-                    addSubItemsSingleBuldingBlock(item, null, newSubItems, parent, project);
-                }
-                else
-                {
-                    addSubItemsMultiBuildingBlock(verilogFile, newSubItems, parent, project);
-                }
-            }
-
-            // Atomic swap: dispose old items and replace with new ones in a single operation
-
-            var oldItems = new List<CodeEditor2.Data.Item>();
-
-            await _semaphore.WaitAsync();
+            // Atomic swap: dispose old items and replace with new ones in a single
+            // operation.
+            List<Item> oldItems = new();
+            await semaphore.WaitAsync();
             try
             {
-
-                // Atomically swap items: clear old and add new in one locked operation
-                // Capture old items for disposal
                 oldItems = item.Items.GetSnapShot();
-                foreach (Item newItem in newSubItems.Values)
+
+                Dictionary<string, Item> newSubItems = new();
+                foreach (IVerilogTreeNode node in nodes)
                 {
-                    if (oldItems.Contains(newItem)) oldItems.Remove(newItem);
+                    if (node is not EditorTreeNode editorNode) continue;
+                    Item child = editorNode.Item;
+                    newSubItems[child.Name] = child;
+                    oldItems.Remove(child);
                 }
 
-                // Clear and populate in a single atomic operation
                 item.Items.ReplaceTo(newSubItems);
-                // Dispose old items after the atomic swap is complete
             }
             finally
             {
-                _semaphore.Release();
+                semaphore.Release();
             }
 
-            foreach (var oldItem in oldItems)
+            // Dispose the items that were replaced.
+            foreach (Item oldItem in oldItems)
             {
                 oldItem.Dispose();
             }
         }
 
-        private static void addVhInstance(Dictionary<string, CodeEditor2.Data.Item> newSubItems, IVerilogRelatedFile item, VerilogHeaderInstance newVhInstance)
-        {
-            string keyName = newVhInstance.Name;
-
-            // update external project
-            if (item is VerilogHeaderInstance && ((VerilogHeaderInstance)item).ExternalProject)
-            {
-                newVhInstance.ExternalProject = true;
-            }
-            VerilogHeaderInstance? oldInstanceTextFile = null;
-            if (item.Items.TryGetValue(keyName, out CodeEditor2.Data.Item? gotItem))
-            {
-                if (gotItem == null) throw new Exception();
-                oldInstanceTextFile = gotItem as VerilogHeaderInstance;
-            }
-
-            if (
-                oldInstanceTextFile != null &&
-                oldInstanceTextFile.ExternalProject == newVhInstance.ExternalProject &&
-                oldInstanceTextFile.ID == newVhInstance.ID
-                )
-            {
-                oldInstanceTextFile.ReplaceBy(newVhInstance);
-                newSubItems.Add(keyName, oldInstanceTextFile);
-                return;
-            }
-
-            // add new one
-            newSubItems.Add(keyName, newVhInstance);
-            newVhInstance.Parent = item as CodeEditor2.Data.Item;
-        }
-
         /// <summary>
-        /// Add or reuse a <see cref="ImportedPackage"/> sub-item for the given package name.
-        /// The package file is resolved via <c>ProjectProperty.PackageNameSpace</c>; if the
-        /// package cannot be resolved, no sub-item is added.
+        /// The building block an instance item was parsed as, or null for a file
+        /// (a file lists its own blocks).
         /// </summary>
-        private static void addImportedPackage(Dictionary<string, CodeEditor2.Data.Item> newSubItems, IVerilogRelatedFile item, string importedPackageName, Project project)
+        private static string? BuildingBlockNameOf(IVerilogRelatedFile item)
         {
-            // Use the package name as the key within the parent.
-            string keyName = importedPackageName;
-
-            // Try to reuse an existing ImportedPackage sub-item if it already represents
-            // the same package in the same project.
-            ImportedPackage? oldImportedPackage = null;
-            if (item.Items.TryGetValue(keyName, out CodeEditor2.Data.Item? gotItem))
+            return item switch
             {
-                if (gotItem == null) throw new Exception();
-                oldImportedPackage = gotItem as ImportedPackage;
-            }
-
-            if (
-                oldImportedPackage != null &&
-                oldImportedPackage.PackageName == importedPackageName &&
-                oldImportedPackage.Project == project
-                )
-            {
-                if (newSubItems.ContainsKey(keyName))
-                {
-                    System.Diagnostics.Debugger.Break();
-                    return;
-                }
-                newSubItems.Add(keyName, oldImportedPackage);
-                return;
-            }
-
-            // Create a new ImportedPackage sub-item. If the package is not registered in
-            // the project, silently skip it (the imported name may refer to an unresolved
-            // or external package that the user has not added to the project).
-            ImportedPackage? newImportedPackage = ImportedPackage.Create(importedPackageName, project);
-            if (newImportedPackage == null) return;
-
-            // Propagate external project flag to child sub-items.
-            if (item is InstanceTextFile inst && inst.ExternalProject)
-            {
-                newImportedPackage.ExternalProject = true;
-            }
-
-            newSubItems.Add(keyName, newImportedPackage);
-            newImportedPackage.Parent = item as CodeEditor2.Data.Item;
+                VerilogModuleInstance module => module.InstanceName,
+                InterfaceInstance iface => iface.InstanceName,
+                _ => null,
+            };
         }
-
-        private static void addSubItemsMultiBuildingBlock(VerilogFile verilogFile, Dictionary<string, CodeEditor2.Data.Item> newSubItems, CodeEditor2.Data.Item? parent, Project project)
-        {
-            if (verilogFile.VerilogParsedDocument?.Root == null) throw new Exception();
-
-            // add building block instance
-            foreach (var buldingBlockKvp in verilogFile.VerilogParsedDocument.Root.BuildingBlocks)
-            {
-                bool alreadyExist = false;
-
-                if (verilogFile.Items.TryGetValue(buldingBlockKvp.Value.Name, out CodeEditor2.Data.Item? gotItem))
-                {   // has same name item
-                    if (gotItem == null) throw new Exception();
-                    CodeEditor2.Data.Item subItem = gotItem;
-
-                    if (buldingBlockKvp.Value is Module)
-                    {
-                        VerilogModuleInstance? oldItem = subItem as VerilogModuleInstance;
-                        Module module = (Module)buldingBlockKvp.Value;
-
-                        if (oldItem != null && module != null && oldItem.Name == module.Name && oldItem.InstanceName == module.Name)
-                        {
-                            alreadyExist = true;
-                            newSubItems.Add(oldItem.Name, oldItem);
-                        }
-                    }
-                    else if (buldingBlockKvp.Value is Interface)
-                    {
-                        InterfaceInstance? oldItem = subItem as InterfaceInstance;
-                        Interface iface = (Interface)buldingBlockKvp.Value;
-
-                        if (oldItem != null && iface != null && oldItem.Name == iface.Name && oldItem.InstanceName == iface.Name)
-                        {
-                            alreadyExist = true;
-                            newSubItems.Add(oldItem.Name, oldItem);
-                        }
-                    }
-
-                }
-
-                if (!alreadyExist)
-                {
-                    if (buldingBlockKvp.Value is Module)
-                    {
-                        Module module = (Module)buldingBlockKvp.Value;
-
-                        ModuleInstantiation moduleInstantiation = new ModuleInstantiation()
-                        {
-                            BeginIndexReference = module.BeginIndexReference,
-                            DefinitionReference = module.DefinitionReference,
-                            Name = module.Name,
-                            ParameterOverrides = new Dictionary<string, Verilog.Expressions.Expression>(),
-                            Project = project,
-                            SourceName = module.Name,
-                            SourceProjectName = module.Project.Name
-                        };
-
-                        VerilogModuleInstance? instance = VerilogModuleInstance.Create(moduleInstantiation);
-                        if (instance == null) throw new Exception();
-                        instance.InstanceName = module.Name;
-
-                        // Handle instance arrays
-                        if (moduleInstantiation.InstanceRange != null)
-                        {
-                            var arrayInstances = VerilogModuleInstance.CreateArray(moduleInstantiation);
-                            if (arrayInstances != null)
-                            {
-                                foreach (var arrInstance in arrayInstances)
-                                {
-                                    arrInstance.Parent = parent;
-                                    newSubItems.Add(arrInstance.Name, arrInstance);
-                                }
-                            }
-                        }
-                        //                        instance.SourceTextFile = module.File;
-                        newSubItems.Add(instance.Name, instance);
-
-                    }
-                    else if (buldingBlockKvp.Value is Interface)
-                    {
-                        Interface iface = (Interface)buldingBlockKvp.Value;
-
-                        // Use the Interface as the source directly (same pattern as Module)
-                        Verilog.Items.InterfaceInstance interfaceInstantiation = new Verilog.Items.InterfaceInstance()
-                        {
-                            BeginIndexReference = iface.BeginIndexReference,
-                            DefinitionReference = iface.DefinitionReference,
-                            Name = iface.Name,
-                            ParameterOverrides = new Dictionary<string, Verilog.Expressions.Expression>(),
-                            Project = project,
-                            SourceName = iface.Name,
-                            InstancedNameSpace = iface,
-                            BlockBeginIndexReference = iface.BeginIndexReference
-                        };
-
-                        InterfaceInstance? instance = InterfaceInstance.Create(interfaceInstantiation, project);
-                        if (instance == null) continue;
-
-                        newSubItems.Add(instance.Name, instance);
-                    }
-                }
-
-            }
-        }
-
-        private static void addSubItemsSingleBuldingBlock(IVerilogRelatedFile item, string? moduleName, Dictionary<string, CodeEditor2.Data.Item> newSubItems, CodeEditor2.Data.Item? parent, Project project)
-        {
-            if (item.VerilogParsedDocument?.Root == null) throw new Exception();
-
-            // add building block instance
-            foreach (BuildingBlock newModule in item.VerilogParsedDocument.Root.BuildingBlocks.Values)
-            {
-                if (moduleName != null && moduleName != newModule.Name)
-                {
-                    // parsed document can have multiple modules, but update only matched module to this item
-                    continue;
-                }
-
-                // get instanciations on this module
-                List<IBuildingBlockInstantiation> newInstantiations = newModule.GetBuildingBlockInstantiations();
-                //List<INamedElement> newInstantiations = newModule.NamedElements.Values.FindAll(x => x is IBuildingBlockInstantiation);
-
-                foreach (IBuildingBlockInstantiation instantiation in newInstantiations)
-                {
-                    bool alreadyExist = false;
-
-                    if (item.Items.TryGetValue(instantiation.Name, out CodeEditor2.Data.Item? gotItem))
-                    {   // has same name item
-                        if (gotItem == null) throw new Exception();
-                        CodeEditor2.Data.Item subItem = gotItem;
-
-                        if (instantiation is ModuleInstantiation)
-                        {
-                            ModuleInstantiation moduleInstantiation = (ModuleInstantiation)instantiation;
-                            SystemVerilogCore.Projects.IVerilogProject sourceProject =
-                                moduleInstantiation.GetInstancedBuildingBlockProject();
-
-                            VerilogModuleInstance? moduleInstance = subItem as VerilogModuleInstance;
-
-                            ProjectProperty? projectProperty = sourceProject.Settings as ProjectProperty;
-                            if (projectProperty == null) throw new Exception();
-
-                            Data.IVerilogRelatedFile? ivFile = projectProperty.DefinitionNameSpace.GetEditorFile(moduleInstantiation.SourceName);
-                            if (ivFile != null)
-                            {
-                                string instanceKey = Verilog.ParsedDocument.KeyGenerator(ivFile, moduleInstantiation.SourceName, moduleInstantiation.ParameterOverrides);
-
-                                if (
-                                    moduleInstantiation != null &&
-                                    moduleInstance != null &&
-                                    moduleInstantiation.SourceName == moduleInstance.InstanceName &&
-                                    instanceKey == moduleInstance.Key
-                                    )
-                                {
-                                    alreadyExist = true;
-
-                                    if (!newSubItems.ContainsKey(subItem.Name))
-                                    {
-                                        newSubItems.Add(subItem.Name, subItem);
-                                    }
-                                    continue;
-                                }
-                            }
-                        }
-                        else if ((instantiation is Verilog.Items.InterfaceInstance))
-                        {
-                            Verilog.Items.InterfaceInstance interfaceInstantiation = (Verilog.Items.InterfaceInstance)instantiation;
-                            InterfaceInstance? interfaceInstance = subItem as InterfaceInstance;
-
-                            // Compare using source name and parameter overrides
-                            string instanceKey = interfaceInstantiation.OverrideParameterID;
-
-                            if (
-                                interfaceInstantiation != null &&
-                                interfaceInstance != null &&
-                                interfaceInstantiation.SourceName == interfaceInstance.InstanceName &&
-                                instanceKey == interfaceInstance.Key
-                                )
-                            {
-                                alreadyExist = true;
-
-                                if (!newSubItems.ContainsKey(subItem.Name))
-                                {
-                                    newSubItems.Add(subItem.Name, subItem);
-                                }
-                                continue;
-                            }
-                        }
-                    }
-
-                    if (!alreadyExist)
-                    {
-                        if (instantiation is ModuleInstantiation)
-                        {
-                            ModuleInstantiation moduleInstantiation = (ModuleInstantiation)instantiation;
-
-                            // Handle instance arrays
-                            if (moduleInstantiation.InstanceRange != null)
-                            {
-                                var arrayInstances = VerilogModuleInstance.CreateArray(moduleInstantiation);
-                                if (arrayInstances != null)
-                                {
-                                    foreach (var arrInstance in arrayInstances)
-                                    {
-                                        arrInstance.Parent = parent;
-                                        if (parent is VerilogModuleInstance && ((VerilogModuleInstance)parent).ExternalProject)
-                                        {
-                                            arrInstance.ExternalProject = true;
-                                        }
-                                        newSubItems.Add(arrInstance.Name, arrInstance);
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                VerilogModuleInstance? newVerilogModuleInstance = VerilogModuleInstance.Create(moduleInstantiation);
-                                if (newSubItems.ContainsKey(instantiation.Name) || newVerilogModuleInstance == null) continue;
-                                newVerilogModuleInstance.Parent = parent;
-                                if (parent is VerilogModuleInstance && ((VerilogModuleInstance)parent).ExternalProject)
-                                {
-                                    newVerilogModuleInstance.ExternalProject = true;
-                                }
-                                newSubItems.Add(instantiation.Name, newVerilogModuleInstance);
-                            }
-                        }
-                        else if((instantiation is Verilog.Items.InterfaceInstance))
-                        {
-                            Verilog.Items.InterfaceInstance moduleInstantiation = (Verilog.Items.InterfaceInstance)instantiation;
-
-                            InterfaceInstance? newVerilogModuleInstance = InterfaceInstance.Create(moduleInstantiation,project);
-                            if (newSubItems.ContainsKey(instantiation.Name) || newVerilogModuleInstance == null) continue;
-                            newVerilogModuleInstance.Parent = parent;
-                            if (parent is InterfaceInstance && ((InterfaceInstance)parent).ExternalProject)
-                            {
-                                newVerilogModuleInstance.ExternalProject = true;
-                            }
-                            newSubItems.Add(instantiation.Name, newVerilogModuleInstance);
-                        }
-                        else if (instantiation is IBuildingBlockInstantiation)
-                        {
-
-                        }
-                    }
-                }
-            }
-        }
-
-
     }
 }
