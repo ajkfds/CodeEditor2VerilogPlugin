@@ -713,11 +713,11 @@ namespace pluginVerilog.Data
                     // file.Items only holds the internal instantiations when the
                     // source file declares exactly one building block, so fall back
                     // to resolving the interface definition file directly.
-                    InterfaceInstance? interfaceInstance = null;
-                    if (file.Items.TryGetValue(moduleInstantiation.Name, out CodeEditor2.Data.Item? item))
-                    {
-                        interfaceInstance = item as InterfaceInstance;
-                    }
+                    // Through the instance-item contract, so a host without the
+                    // editor's item tree can still answer (it derives the nodes).
+                    InterfaceInstance? interfaceInstance =
+                        (file as SystemVerilogCore.Documents.IVerilogInstanceItemSource)
+                            ?.FindInstanceItem(moduleInstantiation.Name) as InterfaceInstance;
 
                     // The simulator compiles the definition FILE, never the
                     // instance wrapper, so setup.Files always receives the
@@ -1079,19 +1079,26 @@ namespace pluginVerilog.Data
             VerilogModuleInstance? moduleInstance = null;
             try
             {
-                if (file.Items.TryGetValue(moduleInstantiation.Name, out CodeEditor2.Data.Item? item))
+                // Through the instance-item contract (see the interface branch):
+                // the host answers with whatever it registered, and one that has
+                // no item tree returns null so the caller falls back to the
+                // definition file.
+                SystemVerilogCore.Documents.IVerilogInstanceItemSource? items =
+                    file as SystemVerilogCore.Documents.IVerilogInstanceItemSource;
+                if (items != null)
                 {
-                    moduleInstance = item as VerilogModuleInstance;
-                }
-                if (moduleInstance == null && moduleInstantiation.InstanceRange != null)
-                {
-                    int count = moduleInstantiation.InstanceCount;
-                    for (int i = 0; i < count; i++)
+                    moduleInstance = items.FindInstanceItem(moduleInstantiation.Name)
+                        as VerilogModuleInstance;
+                    if (moduleInstance == null && moduleInstantiation.InstanceRange != null)
                     {
-                        string elementName = moduleInstantiation.Name + "[" + i.ToString() + "]";
-                        if (!file.Items.TryGetValue(elementName, out CodeEditor2.Data.Item? arrayItem)) continue;
-                        moduleInstance = arrayItem as VerilogModuleInstance;
-                        if (moduleInstance != null) break;
+                        int count = moduleInstantiation.InstanceCount;
+                        for (int i = 0; i < count; i++)
+                        {
+                            string elementName = moduleInstantiation.Name + "[" + i.ToString() + "]";
+                            moduleInstance = items.FindInstanceItem(elementName)
+                                as VerilogModuleInstance;
+                            if (moduleInstance != null) break;
+                        }
                     }
                 }
             }

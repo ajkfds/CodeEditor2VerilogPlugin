@@ -33,7 +33,10 @@ namespace pluginVerilog.Data
         // The write side of "this file's parse result". A host that drives a
         // parse itself stores the result here; everything downstream reads it
         // back through IVerilogSourceFile.VerilogParsedResult.
-        SystemVerilogCore.Documents.IVerilogSourceFileParseCache
+        SystemVerilogCore.Documents.IVerilogSourceFileParseCache,
+        // Hands out the instance items this file registered, so the simulation
+        // setup can read an instance's parse result without naming this class.
+        SystemVerilogCore.Documents.IVerilogInstanceItemSource
     {
         /// <summary>
         /// Stores the parse result, as the UI-free cache contract. Same slot as
@@ -546,6 +549,13 @@ namespace pluginVerilog.Data
         /// </summary>
         void SystemVerilogCore.Documents.IVerilogSourceFileInstanceCache.ClearInstanceParsedDocuments() =>
             ClearInstancedParsedDocuments();
+
+        /// <summary>
+        /// The instance item registered under <paramref name="name"/>, as the
+        /// instance-item contract. Same table the editor's item tree holds.
+        /// </summary>
+        object? SystemVerilogCore.Documents.IVerilogInstanceItemSource.FindInstanceItem(string name)
+            => Items.TryGetValue(name, out CodeEditor2.Data.Item? item) ? item : null;
 
         #endregion
 
